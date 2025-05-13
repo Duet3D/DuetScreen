@@ -10,8 +10,19 @@ namespace UI
 	void SettingsPresenter::setUsbMode(UsbMode mode)
 	{
 		LOG_DBG("Setting USB mode to {:d}", static_cast<int>(mode));
+		GpioHelper::stopMonitoring(GPIO_USB_DEVICE_DETECT);
 		switch (mode)
 		{
+		case UsbMode::UsbAuto:
+			setUsbHost(GpioHelper::getPinValue(GPIO_USB_DEVICE_DETECT) == 1);
+			setUsbMux(true);
+			GpioHelper::monitorPin(GPIO_USB_DEVICE_DETECT,
+								   [this](int pin, int value)
+								   {
+									   LOG_DBG("USB device detect changed to {:d}", value);
+									   setUsbHost(value == 1);
+								   });
+			break;
 		case UsbMode::Host:
 			setUsbHost(true);
 			setUsbMux(true);
@@ -31,11 +42,13 @@ namespace UI
 
 	void SettingsPresenter::setUsbHost(bool host)
 	{
+		LOG_DBG("Setting USB host to {:d}", host);
 		GpioHelper::setPinValue(GPIO_USB_STATE, host ? 0 : 1);
 	}
 
 	void SettingsPresenter::setUsbMux(bool usbc)
 	{
+		LOG_DBG("Setting USB mux to {:d}", usbc);
 		GpioHelper::setPinValue(GPIO_USB_SELECT, usbc ? 1 : 0);
 	}
 

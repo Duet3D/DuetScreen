@@ -173,6 +173,7 @@ static lv_i18n_phrase_t en_gb_singulars[] = {
     {"settings_theme", "Theme"},
     {"settings_theme_light", "Light"},
     {"settings_usb_mode", "USB-C Mode"},
+    {"settings_usb_mode_auto_detect", "USB-C Auto Detect (not implemented)"},
     {"settings_usb_mode_host", "USB-C Host"},
     {"settings_usb_mode_device", "USB-C Device"},
     {"settings_usb_mode_internal_wifi", "Internal WiFi"},

@@ -9,6 +9,7 @@ namespace UI
 
 	enum class UsbMode
 	{
+		UsbAuto,
 		Host,
 		Device,
 		InternalWiFi

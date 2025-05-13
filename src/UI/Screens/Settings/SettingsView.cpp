@@ -307,8 +307,10 @@ namespace UI
 		m_theme.setOptions(_("settings_theme_light"));
 
 		m_usbMode.setLabel(_("settings_usb_mode"));
-		m_usbMode.setOptions(
-			{_("settings_usb_mode_host"), _("settings_usb_mode_device"), _("settings_usb_mode_internal_wifi")});
+		m_usbMode.setOptions({_("settings_usb_mode_auto_detect"),
+							  _("settings_usb_mode_host"),
+							  _("settings_usb_mode_device"),
+							  _("settings_usb_mode_internal_wifi")});
 		m_usbMode.addEventCallback(
 			[](lv_event_t* e)
 			{
