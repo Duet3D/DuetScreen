@@ -10,14 +10,14 @@
 
 namespace UI
 {
-	LvLabel::LvLabel(const std::string& name, lv_obj_t* parent)
+	LvLabel::LvLabel(const std::string& name, LvObj& parent)
 		: LvObj(lv_label_create, name, parent)
 	{
 		UI_LOCK();
 		init();
 	}
 
-	LvLabel::LvLabel(const std::string& name, lv_obj_t* parent, const std::string& text)
+	LvLabel::LvLabel(const std::string& name, LvObj& parent, const std::string& text)
 		: LvObj(lv_label_create, name, parent)
 	{
 		UI_LOCK();

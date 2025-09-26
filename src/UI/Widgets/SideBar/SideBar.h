@@ -20,7 +20,7 @@ namespace UI
 	class SideBar : public View<SideBarPresenter>
 	{
 	  public:
-		SideBar(const std::string& name, lv_obj_t* parent);
+		SideBar(const std::string& name, LvObj& parent);
 
 		void enableHomeButton(bool enable);
 		void enableBackButton(bool enable);

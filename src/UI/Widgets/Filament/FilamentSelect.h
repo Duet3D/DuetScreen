@@ -19,7 +19,7 @@ namespace UI
 	class FilamentSelect : public View<FilamentSelectPresenter>
 	{
 	  public:
-		FilamentSelect(const std::string& name, lv_obj_t* parent, lv_obj_t* messageBoxParent = nullptr);
+		FilamentSelect(const std::string& name, LvObj& parent, lv_obj_t* messageBoxParent = nullptr);
 
 		void setToolCount(size_t count);
 		void setToolData(size_t index, std::string_view toolName, std::string_view filamentName);

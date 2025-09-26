@@ -14,7 +14,7 @@ namespace UI
 	class LvArc : public LvObj
 	{
 	  public:
-		LvArc(const std::string& name, lv_obj_t* parent);
+		LvArc(const std::string& name, LvObj& parent);
 
 		// Setters
 		void setStartAngle(lv_value_precise_t start);

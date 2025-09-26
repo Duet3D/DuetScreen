@@ -14,7 +14,7 @@ namespace UI
 	class LvList : public LvObj
 	{
 	  public:
-		LvList(const std::string& name, lv_obj_t* parent);
+		LvList(const std::string& name, LvObj& parent);
 
 		// Factory helpers
 		lv_obj_t* addText(std::string_view txt);

@@ -27,7 +27,7 @@ namespace UI
 		class AxisJog : public LvObj
 		{
 		  public:
-			AxisJog(const size_t index, lv_obj_t* parent, AlertMessageBox& msgBox);
+			AxisJog(const size_t index, LvObj& parent, AlertMessageBox& msgBox);
 			void setAxisLetter(char letter);
 			const char* getAxisLetter() const { return m_axisLetter; }
 			void setPosition(float position);
@@ -48,7 +48,7 @@ namespace UI
 
 		friend class AxisJog;
 
-		AlertMessageBox(const std::string& name, lv_obj_t* parent, layout_t layout);
+		AlertMessageBox(const std::string& name, LvObj& parent, layout_t layout);
 		virtual ~AlertMessageBox() = default;
 
 		void setMode(OM::Alert::Mode mode);

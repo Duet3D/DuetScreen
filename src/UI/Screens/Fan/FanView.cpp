@@ -6,7 +6,7 @@
 
 namespace UI
 {
-	FanView::FanView(lv_obj_t* parent)
+	FanView::FanView(LvObj& parent)
 		: View("fan_view", parent, layout_t(0, 0, 100, 100))
 		, m_fans("list", getRoot())
 	{
@@ -50,7 +50,7 @@ namespace UI
 		fan->setValue(value);
 	}
 
-	FanView::FanItem::FanItem(size_t index, lv_obj_t* parent, FanView& view)
+	FanView::FanItem::FanItem(size_t index, LvObj& parent, FanView& view)
 		: ListItem(index, parent)
 		, m_view(view)
 		, m_off(utils::format("fan_off_%d", index).c_str(), getRoot(), _("off"))

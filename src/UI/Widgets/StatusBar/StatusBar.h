@@ -9,7 +9,7 @@ namespace UI
 	class StatusBar : public View<StatusBarPresenter>
 	{
 	  public:
-		StatusBar(lv_obj_t* parent);
+		StatusBar(LvObj& parent);
 
 		void setDuetName(std::string_view name);
 		void setDuetStatus(std::string_view status);

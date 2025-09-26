@@ -20,7 +20,7 @@ namespace UI
 			HIDDEN
 		};
 
-		StatusView(lv_obj_t* parent);
+		StatusView(LvObj& parent);
 
 		void setFilename(std::string_view filename);
 		void updateProgress(uint32_t percent);

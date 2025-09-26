@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	Row::Row(const std::string& name, lv_obj_t* parent)
+	Row::Row(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
 		setFlexFlow(LV_FLEX_FLOW_ROW);

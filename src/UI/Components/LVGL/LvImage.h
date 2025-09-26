@@ -21,7 +21,7 @@ namespace UI
 	class LvImage : public LvObj
 	{
 	  public:
-		LvImage(const std::string& name, lv_obj_t* parent);
+		LvImage(const std::string& name, LvObj& parent);
 
 		// Setters
 		void setSrc(const void* src);

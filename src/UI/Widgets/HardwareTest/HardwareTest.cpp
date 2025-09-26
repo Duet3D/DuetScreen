@@ -449,7 +449,7 @@ namespace UI
 		item->setPassed(passed);
 	}
 
-	HardwareTest::TestResults::TestResult::TestResult(size_t index, lv_obj_t* parent)
+	HardwareTest::TestResults::TestResult::TestResult(size_t index, LvObj& parent)
 		: ListItem(index, parent)
 	{
 		setHeight(LV_PCT(100));

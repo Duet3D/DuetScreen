@@ -12,7 +12,7 @@
 namespace UI
 {
 
-	GenericAxisControl::GenericAxisControl(const std::string& name, lv_obj_t* parent)
+	GenericAxisControl::GenericAxisControl(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 		, m_label("label", getRoot())
 		, m_incrementButton("increment", getRoot(), LV_SYMBOL_PLUS)

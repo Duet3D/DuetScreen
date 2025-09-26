@@ -15,7 +15,7 @@ namespace UI
 	class LvXml : public LvObj
 	{
 	  public:
-		LvXml(const std::string& name, const std::string& component_id, lv_obj_t* parent, const char** attrs = nullptr);
+		LvXml(const std::string& name, const std::string& component_id, LvObj& parent, const char** attrs = nullptr);
 
 		static void registerComponentFromFile(std::string_view path);
 

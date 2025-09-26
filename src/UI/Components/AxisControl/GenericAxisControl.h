@@ -20,7 +20,7 @@ namespace UI
 		using label_cb_t = std::function<void(char axis_letter, float position)>;
 
 	  public:
-		GenericAxisControl(const std::string& name, lv_obj_t* parent);
+		GenericAxisControl(const std::string& name, LvObj& parent);
 
 		char getAxisLetter() const { return m_axisLetter; }
 		void setAxisLetter(const char letter);

@@ -14,8 +14,8 @@ namespace UI
 	class LvLabel : public LvObj
 	{
 	  public:
-		LvLabel(const std::string& name, lv_obj_t* parent);
-		LvLabel(const std::string& name, lv_obj_t* parent, const std::string& text);
+		LvLabel(const std::string& name, LvObj& parent);
+		LvLabel(const std::string& name, LvObj& parent, const std::string& text);
 
 		void setText(const std::string_view text);
 		void setTextF(const char* fmt, ...);

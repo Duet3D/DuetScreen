@@ -18,7 +18,7 @@ namespace UI
 	class PrintInfo : public LvContainer
 	{
 	  public:
-		PrintInfo(const std::string& name, lv_obj_t* parent);
+		PrintInfo(const std::string& name, LvObj& parent);
 
 		void setAxisCount(size_t count);
 		void setPosition(size_t index, char axis_letter, float value);
@@ -41,7 +41,7 @@ namespace UI
 		class SpeedInfo : public LvObj
 		{
 		  public:
-			SpeedInfo(const std::string& name, lv_obj_t* parent);
+			SpeedInfo(const std::string& name, LvObj& parent);
 
 			void updateSpeed(float topSpeed, float requestedSpeed);
 			void updateSpeedMultiplier(uint32_t multiplier);

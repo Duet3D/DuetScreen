@@ -17,7 +17,7 @@ namespace UI
 	class EStop : public View<EStopPresenter, DraggableButton>
 	{
 	  public:
-		EStop(const std::string& name, lv_obj_t* parent);
+		EStop(const std::string& name, LvObj& parent);
 
 	  private:
 		static void eStopDraggedEvent(float pct, void* user_data);

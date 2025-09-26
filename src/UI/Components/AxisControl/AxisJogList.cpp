@@ -11,7 +11,7 @@
 
 namespace UI
 {
-	AxisItem::AxisItem(const size_t index, lv_obj_t* parent)
+	AxisItem::AxisItem(const size_t index, LvObj& parent)
 		: ListItem(index, parent)
 		, m_home("home", getRoot(), "", layout_t(0, 0, 0, 100))
 		, m_relMove("rel_move", getRoot())
@@ -77,7 +77,7 @@ namespace UI
 		}
 
 		m_relMove.setItemCount(count,
-							   [&distances, this](size_t i, lv_obj_t* parent)
+							   [&distances, this](size_t i, LvObj& parent)
 							   {
 								   auto btn = std::make_shared<Button>(
 									   fmt::format("{}", i), parent, fmt::format("{:.1f}", distances[i]));
@@ -164,8 +164,8 @@ namespace UI
 		}
 	}
 
-	AxisJogList::AxisJogList(const std::string& name, lv_obj_t* parent)
-		: LvObj(lv_obj_create, name, parent)
+	AxisJogList::AxisJogList(const std::string& name, LvObj& parent)
+		: LvContainer(name, parent)
 		, m_axisItems("axis_jog_list_item", getRoot())
 		, m_listHeaderPadding("axis_jog_list_header_padding", m_axisItems.getHeader())
 		, m_toolPositionLabel("tool_position_label", m_axisItems.getHeader())

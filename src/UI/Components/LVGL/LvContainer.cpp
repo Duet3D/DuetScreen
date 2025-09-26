@@ -10,12 +10,12 @@
 
 namespace UI
 {
-	LvContainer::LvContainer(const std::string& name, lv_obj_t* parent)
+	LvContainer::LvContainer(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 	{
 	}
 
-	LvContainer::LvContainer(const std::string& name, lv_obj_t* parent, layout_t layout)
+	LvContainer::LvContainer(const std::string& name, LvObj& parent, layout_t layout)
 		: LvObj(lv_obj_create, name, parent, layout)
 	{
 	}

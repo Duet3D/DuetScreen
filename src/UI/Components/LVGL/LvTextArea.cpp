@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	LvTextArea::LvTextArea(const std::string& name, lv_obj_t* parent)
+	LvTextArea::LvTextArea(const std::string& name, LvObj& parent)
 		: LvObj(lv_textarea_create, name, parent)
 	{
 		UI_LOCK();

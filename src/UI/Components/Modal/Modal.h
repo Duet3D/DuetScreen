@@ -18,7 +18,7 @@ namespace UI
 	class Modal : public T
 	{
 	  public:
-		Modal(const std::string& name, lv_obj_t* parent, layout_t layout)
+		Modal(const std::string& name, LvObj& parent, layout_t layout)
 			: T(name, parent, layout)
 			, m_modalBg("modal_bg", parent, layout_t(0, 0, 100, 100))
 		{

@@ -14,7 +14,7 @@ namespace UI
 	class HeightmapRenderMode : public LvContainer
 	{
 	  public:
-		HeightmapRenderMode(lv_obj_t* parent, HeightmapPresenter& presenter);
+		HeightmapRenderMode(LvObj& parent, HeightmapPresenter& presenter);
 		void setRenderMode(HeightmapPresenter::HeightmapRenderMode mode);
 
 	  private:
@@ -30,7 +30,7 @@ namespace UI
 	class HeightmapStatistics : public LvContainer
 	{
 	  public:
-		HeightmapStatistics(const std::string& name, lv_obj_t* parent);
+		HeightmapStatistics(const std::string& name, LvObj& parent);
 		void setStatistics(
 			size_t numPoints, double area, double minError, double maxError, double meanError, double stdDev);
 
@@ -49,7 +49,7 @@ namespace UI
 		using range_t = Heatmap::range_t;
 		using range_float_t = Heatmap::range_float_t;
 
-		HeightmapView(lv_obj_t* parent);
+		HeightmapView(LvObj& parent);
 
 		/* Heightmap list methods */
 

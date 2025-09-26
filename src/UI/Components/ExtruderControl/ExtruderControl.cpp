@@ -17,7 +17,7 @@ namespace UI
 	static const std::vector<float> s_defaultDistanceValues = {1.0f, 5.0f, 10.0f};
 	static const std::vector<float> s_defaultFeedrateValues = {1.0f, 5.0f, 20.0f};
 
-	ExtruderControl::ExtruderControl(const std::string& name, lv_obj_t* parent)
+	ExtruderControl::ExtruderControl(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
 		UI_LOCK();
@@ -462,7 +462,7 @@ namespace UI
 		setFilamentSelected(filament);
 	}
 
-	std::shared_ptr<Button> ExtruderControl::createBaseListButton(size_t index, lv_obj_t* parent)
+	std::shared_ptr<Button> ExtruderControl::createBaseListButton(size_t index, LvObj& parent)
 	{
 		UI_LOCK();
 		LOG_DBG("Creating base list button {} for {}", index, lv_obj_get_name(parent));
@@ -473,7 +473,7 @@ namespace UI
 		return btn;
 	}
 
-	std::shared_ptr<Button> ExtruderControl::createToolButton(size_t index, lv_obj_t* parent)
+	std::shared_ptr<Button> ExtruderControl::createToolButton(size_t index, LvObj& parent)
 	{
 		LOG_DBG("Creating tool button {} for {}", index, getName());
 		auto btn = createBaseListButton(index, parent);
@@ -482,7 +482,7 @@ namespace UI
 		return btn;
 	}
 
-	std::shared_ptr<Button> ExtruderControl::createDistanceButton(size_t index, lv_obj_t* parent)
+	std::shared_ptr<Button> ExtruderControl::createDistanceButton(size_t index, LvObj& parent)
 	{
 		LOG_DBG("Creating distance button {} for {}", index, getName());
 		auto btn = createBaseListButton(index, parent);
@@ -502,7 +502,7 @@ namespace UI
 		return btn;
 	}
 
-	std::shared_ptr<Button> ExtruderControl::createFeedrateButton(size_t index, lv_obj_t* parent)
+	std::shared_ptr<Button> ExtruderControl::createFeedrateButton(size_t index, LvObj& parent)
 	{
 		LOG_DBG("Creating feedrate button {} for {}", index, getName());
 		auto btn = createBaseListButton(index, parent);

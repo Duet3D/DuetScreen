@@ -14,7 +14,7 @@ namespace UI
 	class LvArcLabel : public LvObj
 	{
 	  public:
-		LvArcLabel(const std::string& name, lv_obj_t* parent);
+		LvArcLabel(const std::string& name, LvObj& parent);
 
 		// Setters
 		void setText(std::string_view text);

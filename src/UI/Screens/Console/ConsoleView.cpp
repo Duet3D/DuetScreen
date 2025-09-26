@@ -13,7 +13,7 @@ namespace UI
 #define TABLE_GCODE_WIDTH 100
 #define TABLE_DESCRIPTION_WIDTH 500
 
-	ConsoleView::ConsoleView(lv_obj_t* parent)
+	ConsoleView::ConsoleView(LvObj& parent)
 		: View("console_view", parent, layout_t(0, 0, 100, 100))
 	{
 		UI_LOCK();

@@ -11,7 +11,7 @@
 
 namespace UI
 {
-	DropdownMenu::DropdownMenu(const std::string& name, lv_obj_t* parent)
+	DropdownMenu::DropdownMenu(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 		, m_label("label", getRoot())
 		, m_dropdown("dropdown", getRoot())
@@ -19,7 +19,7 @@ namespace UI
 		init();
 	}
 
-	DropdownMenu::DropdownMenu(const std::string& name, lv_obj_t* parent, layout_t layout)
+	DropdownMenu::DropdownMenu(const std::string& name, LvObj& parent, layout_t layout)
 		: LvObj(lv_obj_create, name, parent, layout)
 		, m_label("label", getRoot())
 		, m_dropdown("dropdown", getRoot())

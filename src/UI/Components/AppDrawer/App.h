@@ -15,9 +15,9 @@ namespace UI
     class App : public ListItem
     {
       public:
-        App(size_t index, lv_obj_t* parent);
+		App(size_t index, LvObj& parent);
 
-        void setName(std::string_view name) { m_button.setText(name); }
+		void setName(std::string_view name) { m_button.setText(name); }
       private:
         static void appClickedEvent(lv_event_t* e);
 

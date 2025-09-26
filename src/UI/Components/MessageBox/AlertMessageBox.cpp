@@ -15,7 +15,7 @@ namespace UI
 {
 	static const float s_jogAmounts[6] = {-2.0f, -0.2f, -0.02f, 0.02f, 0.2f, 2.0f};
 
-	AlertMessageBox::AlertMessageBox(const std::string& name, lv_obj_t* parent, layout_t layout)
+	AlertMessageBox::AlertMessageBox(const std::string& name, LvObj& parent, layout_t layout)
 		: MessageBox(name, parent, layout)
 		, m_inputCont("input_cont", getBody())
 		, m_axisJogList("axis_jog_list", getBody())
@@ -314,7 +314,7 @@ namespace UI
 	void AlertMessageBox::setChoiceCount(size_t count)
 	{
 		m_choicesList.setItemCount(count,
-								   [this](size_t i, lv_obj_t* parent)
+								   [this](size_t i, LvObj& parent)
 								   {
 									   auto btn =
 										   std::make_shared<Button>(fmt::format("msgbox_choice_{:d}", i), parent, "");
@@ -420,7 +420,7 @@ namespace UI
 		}
 	}
 
-	AlertMessageBox::AxisJog::AxisJog(const size_t index, lv_obj_t* parent, AlertMessageBox& msgBox)
+	AlertMessageBox::AxisJog::AxisJog(const size_t index, LvObj& parent, AlertMessageBox& msgBox)
 		: LvObj(lv_obj_create, utils::format("msgbox_axis_jog_%u", index), parent)
 		, m_index(index)
 		, m_msgBox(msgBox)

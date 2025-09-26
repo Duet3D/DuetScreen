@@ -11,9 +11,9 @@
 #if LV_USE_XML
 namespace UI
 {
-	LvXml::LvXml(const std::string& name, const std::string& component_id, lv_obj_t* parent, const char** attrs)
+	LvXml::LvXml(const std::string& name, const std::string& component_id, LvObj& parent, const char** attrs)
 		: LvObj(
-			  [component_id, attrs](lv_obj_t* parent)
+			  [component_id, attrs](LvObj& parent)
 			  {
 				  void* obj = lv_xml_create(parent, component_id.c_str(), attrs);
 				  assert(obj != nullptr);

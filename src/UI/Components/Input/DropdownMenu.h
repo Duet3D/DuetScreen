@@ -16,8 +16,8 @@ namespace UI
 	class DropdownMenu : public LvObj
 	{
 	  public:
-		DropdownMenu(const std::string& name, lv_obj_t* parent);
-		DropdownMenu(const std::string& name, lv_obj_t* parent, layout_t layout);
+		DropdownMenu(const std::string& name, LvObj& parent);
+		DropdownMenu(const std::string& name, LvObj& parent, layout_t layout);
 
 		void setLabel(const std::string& label);
 		void setText(const std::string& text);

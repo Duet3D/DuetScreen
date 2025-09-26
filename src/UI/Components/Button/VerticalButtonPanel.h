@@ -15,7 +15,7 @@ namespace UI
 	class VerticalButtonPanel : public LvObj
 	{
       public:
-		VerticalButtonPanel(const std::string& name, lv_obj_t* parent);
+		VerticalButtonPanel(const std::string& name, LvObj& parent);
 		void setIncrementLabel(std::string_view label);
 		void setDecrementLabel(std::string_view label);
 		void setResetLabel(std::string_view label);

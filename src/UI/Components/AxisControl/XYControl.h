@@ -20,7 +20,7 @@ namespace UI
 		using label_cb_t = std::function<void(float position)>;
 
 	  public:
-		XYControl(const std::string& name, lv_obj_t* parent);
+		XYControl(const std::string& name, LvObj& parent);
 
 		void setXPosition(float position);
 		void setYPosition(float position);

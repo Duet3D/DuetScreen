@@ -9,7 +9,7 @@
  */
 namespace UI
 {
-	StatusView::StatusView(lv_obj_t* parent)
+	StatusView::StatusView(LvObj& parent)
 		: View("print_view", parent, layout_t(0, 0, 100, 100))
 	{
 		UI_LOCK();

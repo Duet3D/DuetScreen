@@ -25,7 +25,7 @@ namespace UI
 		using feedrate_cb_t = std::function<void(size_t index, float feedrate)>;
 
 	  public:
-		ExtruderControl(const std::string& name, lv_obj_t* parent);
+		ExtruderControl(const std::string& name, LvObj& parent);
 
 		void clear();
 
@@ -61,10 +61,10 @@ namespace UI
 
 		void onShow() override;
 
-		std::shared_ptr<Button> createBaseListButton(size_t index, lv_obj_t* parent);
-		std::shared_ptr<Button> createToolButton(size_t index, lv_obj_t* parent);
-		std::shared_ptr<Button> createDistanceButton(size_t index, lv_obj_t* parent);
-		std::shared_ptr<Button> createFeedrateButton(size_t index, lv_obj_t* parent);
+		std::shared_ptr<Button> createBaseListButton(size_t index, LvObj& parent);
+		std::shared_ptr<Button> createToolButton(size_t index, LvObj& parent);
+		std::shared_ptr<Button> createDistanceButton(size_t index, LvObj& parent);
+		std::shared_ptr<Button> createFeedrateButton(size_t index, LvObj& parent);
 
 		List<Button> m_toolSelect{"tool_select", getRoot()};
 

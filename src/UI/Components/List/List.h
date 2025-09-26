@@ -19,7 +19,7 @@ namespace UI
 	class ListItem : public LvObj
 	{
 	  public:
-		ListItem(size_t index, lv_obj_t* parent)
+		ListItem(size_t index, LvObj& parent)
 			: LvObj(lv_obj_create, fmt::format("{}", index), parent)
 			, m_index(index)
 		{
@@ -40,7 +40,7 @@ namespace UI
 		using TPtr = std::shared_ptr<T>;
 
 	  public:
-		List(const std::string& name, lv_obj_t* parent)
+		List(const std::string& name, LvObj& parent)
 			: LvObj(lv_obj_create, name, parent)
 			, m_header("header", getRoot())
 			, m_title("title", m_header)
@@ -170,7 +170,7 @@ namespace UI
 			return item;
 		}
 
-		TPtr addItem(std::function<TPtr(size_t, lv_obj_t*)> constructor)
+		TPtr addItem(std::function<TPtr(size_t, LvObj&)> constructor)
 		{
 			UI_LOCK();
 			auto item = constructor(getItemCount(), m_listCont);
@@ -178,7 +178,7 @@ namespace UI
 			return item;
 		}
 
-		void setItemCount(const size_t count, std::function<TPtr(size_t, lv_obj_t*)> constructor)
+		void setItemCount(const size_t count, std::function<TPtr(size_t, LvObj&)> constructor)
 		{
 			UI_LOCK();
 			const size_t currentCount = getItemCount();
@@ -199,16 +199,16 @@ namespace UI
 			}
 		}
 
-		template <typename F, typename = std::enable_if_t<std::is_invocable_r_v<TPtr, F, size_t, lv_obj_t*>>>
+		template <typename F, typename = std::enable_if_t<std::is_invocable_r_v<TPtr, F, size_t, LvObj&>>>
 		void setItemCount(const size_t count, F&& constructor)
 		{
-			setItemCount(count, std::function<TPtr(size_t, lv_obj_t*)>(std::forward<F>(constructor)));
+			setItemCount(count, std::function<TPtr(size_t, LvObj&)>(std::forward<F>(constructor)));
 		}
 
 		template <typename Class, typename... Args>
 		void setItemCount(size_t count,
 						  Class* instance,
-						  TPtr (Class::*constructor)(const size_t index, lv_obj_t* parent, Args...),
+						  TPtr (Class::*constructor)(const size_t index, LvObj& parent, Args...),
 						  Args&&... args)
 		{
 			UI_LOCK();
@@ -232,7 +232,7 @@ namespace UI
 
 		template <typename... Args,
 				  typename = std::enable_if_t<sizeof...(Args) != 1 ||
-											  !std::is_invocable_r_v<TPtr, std::decay_t<Args>..., size_t, lv_obj_t*>>>
+											  !std::is_invocable_r_v<TPtr, std::decay_t<Args>..., size_t, LvObj&>>>
 		void setItemCount(const size_t count, Args&&... args)
 		{
 			UI_LOCK();

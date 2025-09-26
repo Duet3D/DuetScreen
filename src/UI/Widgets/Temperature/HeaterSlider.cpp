@@ -7,7 +7,7 @@
 
 namespace UI
 {
-	HeaterSlider::HeaterSlider(const std::string& name, lv_obj_t* parent)
+	HeaterSlider::HeaterSlider(const std::string& name, LvObj& parent)
 		: View(name, parent)
 		, m_heaterInfoCont("heater_info_cont", getRoot())
 		, m_heaterName("heater_name", m_heaterInfoCont)

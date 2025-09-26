@@ -8,7 +8,7 @@
 
 namespace UI
 {
-	TemperatureView::TemperatureView(lv_obj_t* parent)
+	TemperatureView::TemperatureView(LvObj& parent)
 		: View("temperature_view", parent, layout_t(0, 0, 100, 100))
 		, m_temperatureCont("temperature_cont", getRoot())
 		, m_tools("tools", m_temperatureCont)

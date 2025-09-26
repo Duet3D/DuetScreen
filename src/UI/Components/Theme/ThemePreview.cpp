@@ -16,7 +16,7 @@ namespace UI
 	class Swatch : public LvContainer
 	{
 	  public:
-		Swatch(const std::string& name, lv_obj_t* parent)
+		Swatch(const std::string& name, LvObj& parent)
 			: LvContainer(name, parent)
 			, m_colorBox("color_box", getRoot())
 			, m_label("label", getRoot())
@@ -52,7 +52,7 @@ namespace UI
 		lv_style_prop_t color_prop;
 	};
 
-	ThemePreview::ThemePreview(const std::string& name, lv_obj_t* parent)
+	ThemePreview::ThemePreview(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 		, m_swatches("swatches", getRoot())
 		, m_primaryHueSlider("primary_hue_slider", getRoot())
@@ -118,7 +118,7 @@ namespace UI
 
 		m_swatches.clear();
 		m_swatches.setItemCount(std::size(swatch_styles),
-								[this, &swatch_styles](size_t index, lv_obj_t* parent)
+								[this, &swatch_styles](size_t index, LvObj& parent)
 								{
 									auto swatch = std::make_shared<Swatch>(fmt::format("{:d}", index), parent);
 									swatch->setSize(180, LV_SIZE_CONTENT);

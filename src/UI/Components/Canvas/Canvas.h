@@ -29,8 +29,8 @@ namespace UI
 			float max;
 		};
 
-		Canvas(const std::string& name, lv_obj_t* parent);
-		Canvas(const std::string& name, lv_obj_t* parent, layout_t layout);
+		Canvas(const std::string& name, LvObj& parent);
+		Canvas(const std::string& name, LvObj& parent, layout_t layout);
 		virtual ~Canvas();
 
 		range_t getXRange() const;

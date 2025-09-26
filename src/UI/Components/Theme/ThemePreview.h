@@ -19,7 +19,7 @@ namespace UI
 	class ThemePreview : public LvContainer
 	{
 	  public:
-		ThemePreview(const std::string& name, lv_obj_t* parent);
+		ThemePreview(const std::string& name, LvObj& parent);
 
 		void updateSwatches();
 		void setPrimaryHue(size_t hue);

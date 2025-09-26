@@ -16,7 +16,7 @@ namespace UI
     class BabyStep : public View<BabyStepPresenter>
     {
       public:
-        BabyStep(const std::string& name, lv_obj_t* parent);
+		BabyStep(const std::string& name, LvObj& parent);
 
 		void setBabyStepValue(float value);
 

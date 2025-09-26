@@ -11,7 +11,7 @@
 
 namespace UI
 {
-	Slider::Slider(const std::string& name, lv_obj_t* parent)
+	Slider::Slider(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 		, m_label("label", getRoot())
 		, m_sliderCont("slider_cont", getRoot())

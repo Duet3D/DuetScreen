@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	LvButtonMatrix::LvButtonMatrix(const std::string& name, lv_obj_t* parent)
+	LvButtonMatrix::LvButtonMatrix(const std::string& name, LvObj& parent)
 		: LvObj(lv_buttonmatrix_create, name, parent)
 	{
 		UI_LOCK();

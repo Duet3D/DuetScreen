@@ -16,7 +16,7 @@ namespace UI
 
 	static constexpr lv_coord_t s_scaleSize = 30;
 
-	Canvas::Canvas(const std::string& name, lv_obj_t* parent)
+	Canvas::Canvas(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 		, m_columnDsc{s_scaleSize, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST}
 		, m_rowDsc{LV_GRID_CONTENT, LV_GRID_FR(1), s_scaleSize, LV_GRID_TEMPLATE_LAST}
@@ -28,7 +28,7 @@ namespace UI
 		init();
 	}
 
-	Canvas::Canvas(const std::string& name, lv_obj_t* parent, layout_t layout)
+	Canvas::Canvas(const std::string& name, LvObj& parent, layout_t layout)
 		: LvObj(lv_obj_create, name, parent, layout)
 		, m_columnDsc{s_scaleSize, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST}
 		, m_rowDsc{LV_GRID_CONTENT, LV_GRID_FR(1), s_scaleSize, LV_GRID_TEMPLATE_LAST}

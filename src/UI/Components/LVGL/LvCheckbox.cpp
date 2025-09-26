@@ -15,7 +15,7 @@ namespace UI
 	 * - Creates the underlying LVGL object via lv_checkbox_create
 	 * - Locks UI mutex during creation
 	 */
-	LvCheckbox::LvCheckbox(const std::string& name, lv_obj_t* parent)
+	LvCheckbox::LvCheckbox(const std::string& name, LvObj& parent)
 		: LvObj(lv_checkbox_create, name, parent)
 	{
 		UI_LOCK();

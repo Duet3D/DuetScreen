@@ -18,7 +18,7 @@ namespace UI
 	class SettingsSubView : public Card
 	{
 	  public:
-		SettingsSubView(const std::string& name, lv_obj_t* parent, SettingsView& mainSettingsView);
+		SettingsSubView(const std::string& name, LvObj& parent, SettingsView& mainSettingsView);
 
 		SettingsView& getMainSettingsView() const { return m_mainSettingsView; }
 		std::shared_ptr<SettingsPresenter> getMainSettingsPresenter() const;
@@ -31,7 +31,7 @@ namespace UI
 	class DuetSettingsView : public SettingsSubView
 	{
 	  public:
-		DuetSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView);
+		DuetSettingsView(LvObj& parent, SettingsView& mainSettingsView);
 
 		class UsbSettings : public LvContainer
 		{
@@ -76,7 +76,7 @@ namespace UI
 	class ScreenSettingsView : public SettingsSubView
 	{
 	  public:
-		ScreenSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView);
+		ScreenSettingsView(LvObj& parent, SettingsView& mainSettingsView);
 
 	  private:
 		void onShow() override;
@@ -94,7 +94,7 @@ namespace UI
 	class ThemeSettingsView : public SettingsSubView
 	{
 	  public:
-		ThemeSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView);
+		ThemeSettingsView(LvObj& parent, SettingsView& mainSettingsView);
 
 	  private:
 		DropdownMenu m_theme;
@@ -104,7 +104,7 @@ namespace UI
 	class NetworkSettingsView : public View<NetworkSettingsPresenter, SettingsSubView>
 	{
 	  public:
-		NetworkSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView);
+		NetworkSettingsView(LvObj& parent, SettingsView& mainSettingsView);
 
 		void setIpAddress(const std::string& ipAddress);
 		void setEnabled(bool enabled);
@@ -133,7 +133,7 @@ namespace UI
 	class DeveloperSettingsView : public SettingsSubView
 	{
 	  public:
-		DeveloperSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView);
+		DeveloperSettingsView(LvObj& parent, SettingsView& mainSettingsView);
 
 	  private:
 		static void onDebugLevelEvent(lv_event_t* e);
@@ -183,7 +183,7 @@ namespace UI
 		friend class ThemeSettingsView;
 
 	  public:
-		SettingsView(lv_obj_t* parent);
+		SettingsView(LvObj& parent);
 
 		void showKeyboard(bool show,
 						  lv_keyboard_mode_t mode = LV_KEYBOARD_MODE_TEXT_LOWER,

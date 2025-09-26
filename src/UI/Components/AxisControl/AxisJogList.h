@@ -21,7 +21,7 @@ namespace UI
 		using home_cb_t = std::function<void(size_t axis_index, void* user_data)>;
 
 	  public:
-		AxisItem(const size_t index, lv_obj_t* parent);
+		AxisItem(const size_t index, LvObj& parent);
 		virtual ~AxisItem();
 
 		void setAxisLetter(const char* letter);
@@ -51,10 +51,10 @@ namespace UI
 		void* m_homeUserData = nullptr;
 	};
 
-	class AxisJogList : public LvObj
+	class AxisJogList : public LvContainer
 	{
 	  public:
-		AxisJogList(const std::string& name, lv_obj_t* parent);
+		AxisJogList(const std::string& name, LvObj& parent);
 
 		size_t getItemCount() const { return m_axisItems.getItemCount(); }
 		void setItemCount(const size_t count) { m_axisItems.setItemCount(count); }

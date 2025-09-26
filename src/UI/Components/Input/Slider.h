@@ -34,7 +34,7 @@ namespace UI
 			LOWER, // Allow the value to go out of range in the -ve direction
 		};
 
-		Slider(const std::string& name, lv_obj_t* parent);
+		Slider(const std::string& name, LvObj& parent);
 
 		float getValue() const { return m_value; }
 		float getMin() const { return m_min; }

@@ -16,7 +16,7 @@ namespace UI
 	class LvKeyboard : public LvObj
 	{
 	  public:
-		LvKeyboard(const std::string& name, lv_obj_t* parent);
+		LvKeyboard(const std::string& name, LvObj& parent);
 
 		void setTextArea(LvTextArea* textArea);
 		void setMode(lv_keyboard_mode_t mode);

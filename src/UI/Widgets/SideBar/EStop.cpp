@@ -12,7 +12,7 @@
 
 namespace UI
 {
-	EStop::EStop(const std::string& name, lv_obj_t* parent)
+	EStop::EStop(const std::string& name, LvObj& parent)
 		: View(name, parent, _("estop"))
 	{
 		UI_LOCK();

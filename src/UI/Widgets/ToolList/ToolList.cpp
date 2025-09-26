@@ -14,7 +14,7 @@
 
 namespace UI
 {
-	ToolListItem::ToolListItem(size_t index, lv_obj_t* parent, ToolList& toolList)
+	ToolListItem::ToolListItem(size_t index, LvObj& parent, ToolList& toolList)
 		: View(fmt::format("{:d}", index), parent)
 		, m_toolList(toolList)
 		, m_toolName("name", getRoot())
@@ -163,7 +163,7 @@ namespace UI
 		view->getToolList().showNumberPad();
 	}
 
-	ToolList::ToolList(const std::string& name, lv_obj_t* parent, lv_obj_t* numberPadParent)
+	ToolList::ToolList(const std::string& name, LvObj& parent, lv_obj_t* numberPadParent)
 		: View(name, parent)
 		, m_header("header", getRoot())
 		, m_headerTool("tool", m_header)

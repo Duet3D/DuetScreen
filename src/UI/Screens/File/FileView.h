@@ -19,7 +19,7 @@ namespace UI
 		class FileItem : public ListItem
 		{
 		  public:
-			FileItem(const size_t index, lv_obj_t* parent, FileView& view);
+			FileItem(const size_t index, LvObj& parent, FileView& view);
 			void setFileLabel(const char* name);
 			void setFileDate(const char* date);
 			void setFileSize(const char* size);
@@ -49,7 +49,7 @@ namespace UI
 			bool m_isFolder;
 		};
 
-		FileView(lv_obj_t* parent, lv_obj_t* msgBoxParent = nullptr);
+		FileView(LvObj& parent, lv_obj_t* msgBoxParent = nullptr);
 
 		const size_t getFileCount() const { return m_fileList.getItemCount(); }
 		void setFileCount(const size_t count);

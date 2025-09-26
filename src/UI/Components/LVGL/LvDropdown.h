@@ -16,7 +16,7 @@ namespace UI
 	class LvDropdown : public LvObj
 	{
 	  public:
-		LvDropdown(const std::string& name, lv_obj_t* parent);
+		LvDropdown(const std::string& name, LvObj& parent);
 
 		void setText(const std::string& text);
 		const std::string& getText() const;

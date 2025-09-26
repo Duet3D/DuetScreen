@@ -14,8 +14,8 @@ namespace UI
     class Card : public LvContainer
     {
       public:
-		Card(const std::string& name, lv_obj_t* parent);
-		Card(const std::string& name, lv_obj_t* parent, layout_t layout);
+		Card(const std::string& name, LvObj& parent);
+		Card(const std::string& name, LvObj& parent, layout_t layout);
 
 	  private:
         void init();

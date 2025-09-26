@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	LvBar::LvBar(const std::string& name, lv_obj_t* parent)
+	LvBar::LvBar(const std::string& name, LvObj& parent)
 		: LvObj(lv_bar_create, name, parent)
 	{
 		UI_LOCK();

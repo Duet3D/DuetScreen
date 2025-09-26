@@ -16,9 +16,9 @@ namespace UI
     class LvSlider : public LvObj
     {
       public:
-        LvSlider(const std::string& name, lv_obj_t* parent);
+		LvSlider(const std::string& name, LvObj& parent);
 
-        void setValue(int32_t value, lv_anim_enable_t anim = LV_SLIDER_DEFAULT_ANIM);
+		void setValue(int32_t value, lv_anim_enable_t anim = LV_SLIDER_DEFAULT_ANIM);
         void setStartValue(int32_t value, lv_anim_enable_t anim = LV_SLIDER_DEFAULT_ANIM);
         void setRange(int32_t min, int32_t max);
         void setMinValue(int32_t min);

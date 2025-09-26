@@ -79,10 +79,10 @@ namespace UI
 			}
 		};
 
-		LvObj(lv_create_t initFunc, const std::string& name, lv_obj_t* parent);
-		LvObj(lv_create_t initFunc, const std::string& name, lv_obj_t* parent, layout_t layout);
-		LvObj(lv_create_t initFunc, const std::string& name, layout_t layout)
-			: LvObj(initFunc, name, lv_screen_active(), layout)
+		LvObj(lv_create_t initFunc, const std::string& name, LvObj& parent);
+		LvObj(lv_create_t initFunc, const std::string& name, LvObj& parent, layout_t layout);
+		LvObj(lv_create_t initFunc, const std::string& name)
+			: LvObj(initFunc, name, lv_screen_active())
 		{
 		}
 
@@ -93,11 +93,15 @@ namespace UI
 		virtual ~LvObj();
 
 		std::string_view getName() const;
+
+		inline LvObj& getRoot() { return *this; }
+		inline const LvObj& getRoot() const { return *this; }
+
 		/**
 		 * @return Get the base container for the view
 		 */
-		inline lv_obj_t* getRoot() const { return m_root; }
-		operator lv_obj_t*() const { return getRoot(); }
+		inline lv_obj_t* getRootPtr() const { return m_root; }
+		operator lv_obj_t*() const { return getRootPtr(); }
 
 		/* XML */
 		static void registerWidgetXml();
@@ -128,7 +132,7 @@ namespace UI
 		bool hasState(lv_state_t state) const;
 		bool hasStyleProp(lv_style_prop_t prop, lv_style_selector_t selector = LV_PART_MAIN) const;
 
-		void setParent(lv_obj_t* parent);
+		void setParent(LvObj& parent);
 		void setLayoutStyle(lv_layout_t style);
 		void setFlexGrow(uint8_t grow);
 		void setFlexFlow(lv_flex_flow_t flow);
@@ -214,6 +218,8 @@ namespace UI
 		virtual bool back();
 
 	  protected:
+		LvObj(lv_create_t initFunc, const std::string& name, lv_obj_t* parent);
+
 		virtual void onShow() {}
 		virtual void onHide() {}
 		virtual void refresh() {}

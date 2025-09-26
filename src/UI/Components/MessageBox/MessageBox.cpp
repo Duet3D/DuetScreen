@@ -16,7 +16,7 @@
 namespace UI
 {
 
-	MessageBox::MessageBox(const std::string& name, lv_obj_t* parent, layout_t layout)
+	MessageBox::MessageBox(const std::string& name, LvObj& parent, layout_t layout)
 		: LvContainer(name, parent, layout)
 	{
 		UI_LOCK();

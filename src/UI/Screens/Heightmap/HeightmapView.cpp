@@ -11,7 +11,7 @@ namespace UI
 	class HeightmapItem : public ListItem
 	{
 	  public:
-		HeightmapItem(size_t index, lv_obj_t* parent, HeightmapView& view)
+		HeightmapItem(size_t index, LvObj& parent, HeightmapView& view)
 			: ListItem(index, parent)
 			, m_view(view)
 			, m_label("label", getRoot())
@@ -83,7 +83,7 @@ namespace UI
 		Button m_load;
 	};
 
-	HeightmapRenderMode::HeightmapRenderMode(lv_obj_t* parent, HeightmapPresenter& presenter)
+	HeightmapRenderMode::HeightmapRenderMode(LvObj& parent, HeightmapPresenter& presenter)
 		: LvContainer("heightmap_render_mode", parent)
 		, m_presenter(presenter)
 		, m_title("label", getRoot())
@@ -157,7 +157,7 @@ namespace UI
 		}
 	}
 
-	HeightmapStatistics::HeightmapStatistics(const std::string& name, lv_obj_t* parent)
+	HeightmapStatistics::HeightmapStatistics(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 		, m_numPoints("num_points", getRoot())
 		, m_area("area", getRoot())
@@ -188,7 +188,7 @@ namespace UI
 		m_stdDev.setText(fmt::format(fmt::runtime(_("heightmap_std_dev")), stdDev));
 	}
 
-	HeightmapView::HeightmapView(lv_obj_t* parent)
+	HeightmapView::HeightmapView(LvObj& parent)
 		: View("HeightmapView", parent, layout_t(0, 0, 100, 100))
 		, m_layoutColDsc{LV_GRID_FR(2), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST}
 		, m_layoutRowDsc{LV_GRID_FR(1), LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST}

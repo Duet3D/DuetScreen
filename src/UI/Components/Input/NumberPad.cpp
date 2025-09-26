@@ -34,7 +34,7 @@ namespace UI
 	};
 	// clang-format on
 
-	NumberPad::NumberPad(const std::string& name, lv_obj_t* parent, layout_t layout)
+	NumberPad::NumberPad(const std::string& name, LvObj& parent, layout_t layout)
 		: LvObj(lv_obj_create, name, parent, layout)
 		, m_header("header", getRoot())
 		, m_textCont("textcont", getRoot())
@@ -89,7 +89,7 @@ namespace UI
 		validateInput();
 	}
 
-	NumberPad::NumberPad(const std::string& name, lv_obj_t* parent, layout_t layout, const NumberPadConfig& config)
+	NumberPad::NumberPad(const std::string& name, LvObj& parent, layout_t layout, const NumberPadConfig& config)
 		: NumberPad(name, parent, layout)
 	{
 		// Configure

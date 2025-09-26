@@ -17,7 +17,7 @@ namespace UI
 	 * @param name   Debug/name tag for this wrapper instance
 	 * @param parent Pointer to an object, it will be the parent of the new arc label
 	 */
-	LvArcLabel::LvArcLabel(const std::string& name, lv_obj_t* parent)
+	LvArcLabel::LvArcLabel(const std::string& name, LvObj& parent)
 		: LvObj(lv_arclabel_create, name, parent)
 	{
 		UI_LOCK();

@@ -16,7 +16,7 @@ namespace UI
 		using drag_cb_t = std::function<void(float pct, void* user_data)>;
 
 	  public:
-		DraggableButton(const std::string& name, lv_obj_t* parent, const std::string& text);
+		DraggableButton(const std::string& name, LvObj& parent, const std::string& text);
 
 		void setDragCallback(drag_cb_t drag_cb, void* user_data);
 		void setDragThreshold(lv_coord_t threshold);

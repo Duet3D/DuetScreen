@@ -14,7 +14,7 @@ namespace UI
 	const char XYControl::sm_xAxisLetter = 'X';
 	const char XYControl::sm_yAxisLetter = 'Y';
 
-	XYControl::XYControl(const std::string& name, lv_obj_t* parent)
+	XYControl::XYControl(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 		, m_xLabel("x_label", getRoot())
 		, m_yLabel("y_label", getRoot())

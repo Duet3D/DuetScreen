@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	LvSlider::LvSlider(const std::string& name, lv_obj_t* parent)
+	LvSlider::LvSlider(const std::string& name, LvObj& parent)
 		: LvObj(lv_slider_create, name, parent)
 	{
 		UI_LOCK();

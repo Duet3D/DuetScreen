@@ -27,8 +27,8 @@ namespace UI
 	  public:
 		using confirm_cb_t = std::function<void(float value)>;
 
-		NumberPad(const std::string& name, lv_obj_t* parent, layout_t layout);
-		NumberPad(const std::string& name, lv_obj_t* parent, layout_t layout, const NumberPadConfig& config);
+		NumberPad(const std::string& name, LvObj& parent, layout_t layout);
+		NumberPad(const std::string& name, LvObj& parent, layout_t layout, const NumberPadConfig& config);
 
 		virtual bool back();
 		void clear();

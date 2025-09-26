@@ -11,7 +11,7 @@
 
 namespace UI
 {
-	Icon::Icon(const std::string& name, lv_obj_t* parent)
+	Icon::Icon(const std::string& name, LvObj& parent)
 		: LvImage(name, parent)
 	{
 		UI_LOCK();

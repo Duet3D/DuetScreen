@@ -3,7 +3,7 @@
 
 namespace UI
 {
-	Button::Button(const std::string& name, lv_obj_t* parent)
+	Button::Button(const std::string& name, LvObj& parent)
 		: LvObj(lv_button_create, name, parent)
 		, m_icon("icon", getRoot())
 		, m_label("label", getRoot())
@@ -11,7 +11,7 @@ namespace UI
 		init("");
 	}
 
-	Button::Button(const std::string& name, lv_obj_t* parent, std::string_view text)
+	Button::Button(const std::string& name, LvObj& parent, std::string_view text)
 		: LvObj(lv_button_create, name, parent)
 		, m_icon("icon", getRoot())
 		, m_label("label", getRoot())
@@ -19,7 +19,7 @@ namespace UI
 		init(text);
 	}
 
-	Button::Button(const std::string& name, lv_obj_t* parent, std::string_view text, layout_t layout)
+	Button::Button(const std::string& name, LvObj& parent, std::string_view text, layout_t layout)
 		: LvObj(lv_button_create, name, parent, layout)
 		, m_icon("icon", getRoot())
 		, m_label("label", getRoot())
@@ -57,7 +57,7 @@ namespace UI
 			{
 				// Update the label width
 				auto& btn = *static_cast<Button*>(lv_event_get_user_data(e));
-				lv_obj_t* parent = btn.getParent();
+				LvObj& parent = btn.getParent();
 
 				// while (parent != nullptr)
 				// {

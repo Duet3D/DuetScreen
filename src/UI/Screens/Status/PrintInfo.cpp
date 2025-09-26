@@ -13,7 +13,7 @@
 
 namespace UI
 {
-	PrintInfo::PrintInfo(const std::string& name, lv_obj_t* parent)
+	PrintInfo::PrintInfo(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent, layout_t(0, 0, 100, 100))
 	{
 		UI_LOCK();
@@ -98,7 +98,7 @@ namespace UI
 	void PrintInfo::setAxisCount(size_t count)
 	{
 		m_positions.setItemCount(count,
-								 [this](size_t index, lv_obj_t* parent)
+								 [this](size_t index, LvObj& parent)
 								 {
 									 auto btn = std::make_shared<Button>(fmt::format("axis_{}", index), parent);
 									 btn->setHeight(LV_SIZE_CONTENT);
@@ -200,7 +200,7 @@ namespace UI
 		m_speedInfo.updateLayerNumber(layer);
 	}
 
-	PrintInfo::SpeedInfo::SpeedInfo(const std::string& name, lv_obj_t* parent)
+	PrintInfo::SpeedInfo::SpeedInfo(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent, layout_t(0, 0, 100, 100))
 	{
 		UI_LOCK();

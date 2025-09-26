@@ -18,7 +18,7 @@ namespace UI
 		friend class ToolItem;
 		friend class TemperaturePresenter;
 
-		TemperatureView(lv_obj_t* parent);
+		TemperatureView(LvObj& parent);
 
 		auto& getTools() { return m_tools; }
 		auto& getBeds() { return m_beds; }

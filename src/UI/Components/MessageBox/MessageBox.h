@@ -21,7 +21,7 @@ namespace UI
 	{
 
 	  public:
-		MessageBox(const std::string& name, lv_obj_t* parent, layout_t layout);
+		MessageBox(const std::string& name, LvObj& parent, layout_t layout);
 		virtual ~MessageBox();
 
 		LvContainer& getHeader() { return m_header; }

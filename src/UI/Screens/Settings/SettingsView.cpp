@@ -12,7 +12,7 @@
 
 namespace UI
 {
-	SettingsView::SettingsView(lv_obj_t* parent)
+	SettingsView::SettingsView(LvObj& parent)
 		: View("settings_view", parent, layout_t(0, 0, 100, 100))
 		, m_settingsList(lv_list_create(getRoot()))
 		, m_subWindow(lv_obj_create(getRoot()))
@@ -131,7 +131,7 @@ namespace UI
 		m_currentSubView->show(true);
 	}
 
-	SettingsSubView::SettingsSubView(const std::string& name, lv_obj_t* parent, SettingsView& mainSettingsView)
+	SettingsSubView::SettingsSubView(const std::string& name, LvObj& parent, SettingsView& mainSettingsView)
 		: Card(name, parent, layout_t(0, 0, 100, 100))
 		, m_mainSettingsView(mainSettingsView)
 	{
@@ -171,7 +171,7 @@ namespace UI
 		}
 	}
 
-	DuetSettingsView::DuetSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView)
+	DuetSettingsView::DuetSettingsView(LvObj& parent, SettingsView& mainSettingsView)
 		: SettingsSubView("duet_settings_view", parent, mainSettingsView)
 		, m_connectionMethod("duet_settings_connection_method", getRoot(), layout_t(0, 0, 100, LV_SIZE_CONTENT))
 		, m_usbSettings(*this)
@@ -311,7 +311,7 @@ namespace UI
 		showConnectionMethodSettings(Comm::DUET.GetCommunicationType());
 	}
 
-	ScreenSettingsView::ScreenSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView)
+	ScreenSettingsView::ScreenSettingsView(LvObj& parent, SettingsView& mainSettingsView)
 		: SettingsSubView("screen", parent, mainSettingsView)
 		, m_firmwareVersion(lv_label_create(getRoot()))
 		, m_buildTime(lv_label_create(getRoot()))
@@ -411,7 +411,7 @@ namespace UI
 		m_screensaverTimeout.setValue(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT, DEFAULT_SCREEN_TIMEOUT) / 1000);
 	}
 
-	ThemeSettingsView::ThemeSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView)
+	ThemeSettingsView::ThemeSettingsView(LvObj& parent, SettingsView& mainSettingsView)
 		: SettingsSubView("screen", parent, mainSettingsView)
 		, m_theme("theme", getRoot(), layout_t(0, 0, 100, LV_SIZE_CONTENT))
 		, m_themePreview("theme_demo", getRoot())
@@ -446,7 +446,7 @@ namespace UI
 		m_themePreview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 	}
 
-	NetworkSettingsView::NetworkSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView)
+	NetworkSettingsView::NetworkSettingsView(LvObj& parent, SettingsView& mainSettingsView)
 		: View("network_settings_view", parent, mainSettingsView)
 		, m_topBar(lv_obj_create(getRoot()))
 		, m_ipAddress(lv_label_create(m_topBar))
@@ -623,7 +623,7 @@ namespace UI
 		lv_obj_add_flag(m_passwordWindow, LV_OBJ_FLAG_HIDDEN);
 	}
 
-	DeveloperSettingsView::DeveloperSettingsView(lv_obj_t* parent, SettingsView& mainSettingsView)
+	DeveloperSettingsView::DeveloperSettingsView(LvObj& parent, SettingsView& mainSettingsView)
 		: SettingsSubView("developer_settings_view", parent, mainSettingsView)
 		, m_debugLevelCont(lv_obj_create(getRoot()))
 		, m_debugLevelLabel(lv_label_create(m_debugLevelCont))

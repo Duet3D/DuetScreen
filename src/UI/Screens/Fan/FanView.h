@@ -14,7 +14,7 @@ namespace UI
 		class FanItem : ListItem
 		{
 		  public:
-			FanItem(size_t index, lv_obj_t* parent, FanView& view);
+			FanItem(size_t index, LvObj& parent, FanView& view);
 
 			void setLabel(std::string_view label);
 			void setValue(uint32_t value);
@@ -30,7 +30,7 @@ namespace UI
 			Button m_max;
 		};
 
-		FanView(lv_obj_t* parent);
+		FanView(LvObj& parent);
 
 		size_t getFanCount() const { return m_fans.getItemCount(); }
 		void setFanCount(size_t count);

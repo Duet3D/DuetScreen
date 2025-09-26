@@ -11,7 +11,7 @@
 
 namespace UI
 {
-	DraggableButton::DraggableButton(const std::string& name, lv_obj_t* parent, const std::string& text)
+	DraggableButton::DraggableButton(const std::string& name, LvObj& parent, const std::string& text)
 		: Button(name, parent, text)
 	{
 		// lv_obj_add_flag(getCont(), LV_OBJ_FLAG_OVERFLOW_VISIBLE);

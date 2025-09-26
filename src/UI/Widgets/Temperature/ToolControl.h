@@ -20,7 +20,7 @@ namespace UI
 	class ToolControl : public View<ToolControlPresenter>
 	{
 	  public:
-		ToolControl(const std::string& name, lv_obj_t* parent);
+		ToolControl(const std::string& name, LvObj& parent);
 
 		void setToolName(std::string_view name);
         void setToolState(ToolControlPresenter::tool_state_t state, std::string_view str);

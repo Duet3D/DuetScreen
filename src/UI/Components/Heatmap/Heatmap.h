@@ -27,8 +27,8 @@ namespace UI
 			float value;
 		};
 
-		Heatmap(const std::string& name, lv_obj_t* parent);
-		Heatmap(const std::string& name, lv_obj_t* parent, layout_t layout);
+		Heatmap(const std::string& name, LvObj& parent);
+		Heatmap(const std::string& name, LvObj& parent, layout_t layout);
 		virtual ~Heatmap();
 
 		range_t getXRange() const;

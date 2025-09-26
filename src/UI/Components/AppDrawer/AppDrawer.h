@@ -16,7 +16,7 @@ namespace UI
 	class AppDrawer : public Card
 	{
 	  public:
-		AppDrawer(const std::string& name, lv_obj_t* parent);
+		AppDrawer(const std::string& name, LvObj& parent);
 		void init();
 
 	  private:

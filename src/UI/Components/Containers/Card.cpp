@@ -11,14 +11,14 @@
 
 namespace UI
 {
-	Card::Card(const std::string& name, lv_obj_t* parent)
+	Card::Card(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
 
 		init();
 	}
 
-	Card::Card(const std::string& name, lv_obj_t* parent, layout_t layout)
+	Card::Card(const std::string& name, LvObj& parent, layout_t layout)
 		: LvContainer(name, parent, layout)
 	{
 		init();

@@ -12,7 +12,7 @@
 
 namespace UI
 {
-	App::App(size_t index, lv_obj_t* parent)
+	App::App(size_t index, LvObj& parent)
 		: ListItem(index, parent)
 		, m_button("app_button", getRoot())
 	{

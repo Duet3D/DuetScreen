@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	Column::Column(const std::string& name, lv_obj_t* parent)
+	Column::Column(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
 		setFlexFlow(LV_FLEX_FLOW_COLUMN);

@@ -12,16 +12,16 @@
 
 namespace UI
 {
-	TextBox::TextBox(const std::string& name, lv_obj_t* parent)
+	TextBox::TextBox(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
-		, m_label("label", getRoot())
-		, m_textArea("textarea", getRoot())
+		, m_label("label", *this)
+		, m_textArea("textarea", *this)
 		, m_showPassword("show_password", m_textArea, LV_SYMBOL_EYE_OPEN)
 	{
 		init();
 	}
 
-	TextBox::TextBox(const std::string& name, lv_obj_t* parent, layout_t layout)
+	TextBox::TextBox(const std::string& name, LvObj& parent, layout_t layout)
 		: LvObj(lv_obj_create, name, parent, layout)
 		, m_label("label", getRoot())
 		, m_textArea("textarea", getRoot())

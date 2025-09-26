@@ -14,9 +14,9 @@ namespace UI
     class LvButtonMatrix : public LvObj
     {
       public:
-        LvButtonMatrix(const std::string& name, lv_obj_t* parent);
+		LvButtonMatrix(const std::string& name, LvObj& parent);
 
-        void setMap(const char* map[]);
+		void setMap(const char* map[]);
         void setCtrlMap(const lv_buttonmatrix_ctrl_t ctrl_map[]);
         void setSelectedButton(uint32_t btn_id);
         void setButtonCtrl(uint32_t btn_id, lv_buttonmatrix_ctrl_t ctrl);

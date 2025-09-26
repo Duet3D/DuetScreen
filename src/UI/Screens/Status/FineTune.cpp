@@ -13,7 +13,7 @@
 
 namespace UI
 {
-	FineTune::FineTune(lv_obj_t* parent, lv_obj_t* numberpad_parent)
+	FineTune::FineTune(LvObj& parent, lv_obj_t* numberpad_parent)
 		: View("fine_tune", parent, layout_t(0, 0, 100, 100))
 		, m_babystep("babystep", getRoot())
 		, m_sliderCont("sliders", getRoot())
@@ -99,7 +99,7 @@ namespace UI
 	void FineTune::setExtruderCount(size_t count)
 	{
 		m_extruders.setItemCount(count,
-								 [this](size_t index, lv_obj_t* parent)
+								 [this](size_t index, LvObj& parent)
 								 {
 									 auto slider = std::make_shared<Slider>(fmt::format("{:d}", index), parent);
 									 slider->setSize(LV_PCT(100), LV_SIZE_CONTENT);
@@ -116,7 +116,7 @@ namespace UI
 	void FineTune::setFanCount(size_t count)
 	{
 		m_fans.setItemCount(count,
-							[this](size_t index, lv_obj_t* parent)
+							[this](size_t index, LvObj& parent)
 							{
 								auto slider = std::make_shared<Slider>(fmt::format("{:d}", index), parent);
 

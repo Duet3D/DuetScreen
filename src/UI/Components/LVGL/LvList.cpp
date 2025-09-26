@@ -15,7 +15,7 @@ namespace UI
 	 * @param name     Debug/name tag for this wrapper instance
 	 * @param parent   pointer to an object, it will be the parent of the new list
 	 */
-	LvList::LvList(const std::string& name, lv_obj_t* parent)
+	LvList::LvList(const std::string& name, LvObj& parent)
 		: LvObj(lv_list_create, name, parent)
 	{
 		UI_LOCK();

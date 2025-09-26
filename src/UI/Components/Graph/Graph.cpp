@@ -15,7 +15,7 @@ namespace UI
 	static constexpr lv_coord_t s_legendSize = 100;
 	static lv_color_t s_hiddenColor = lv_color_darken(lv_color_white(), 50);
 
-	Graph::Graph(const std::string& name, lv_obj_t* parent)
+	Graph::Graph(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
 		, m_chart(lv_chart_create(getRoot()))
 		, m_vScale(lv_scale_create(getRoot()))
@@ -25,7 +25,7 @@ namespace UI
 		init();
 	}
 
-	Graph::Graph(const std::string& name, lv_obj_t* parent, layout_t layout)
+	Graph::Graph(const std::string& name, LvObj& parent, layout_t layout)
 		: LvObj(lv_obj_create, name, parent, layout)
 		, m_chart(lv_chart_create(getRoot()))
 		, m_vScale(lv_scale_create(getRoot()))

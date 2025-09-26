@@ -12,7 +12,7 @@
 
 namespace UI
 {
-	FileView::FileItem::FileItem(const size_t index, lv_obj_t* parent, FileView& view)
+	FileView::FileItem::FileItem(const size_t index, LvObj& parent, FileView& view)
 		: ListItem(index, parent)
 		, m_list(view)
 		, m_layoutColDsc{LV_GRID_FR(4), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST}
@@ -99,7 +99,7 @@ namespace UI
 		item->getList().onItemClicked(item->getIndex(), item->m_isFolder);
 	}
 
-	FileView::FileView(lv_obj_t* parent, lv_obj_t* msgBoxParent)
+	FileView::FileView(LvObj& parent, lv_obj_t* msgBoxParent)
 		: View("file_view", parent, layout_t(0, 0, 100, 100))
 		, m_startPrint("messageBox", msgBoxParent ? msgBoxParent : getRoot(), layout_t(0, 0, 70, LV_SIZE_CONTENT))
 	{

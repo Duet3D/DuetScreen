@@ -3,7 +3,7 @@
 
 namespace UI
 {
-	LvImage::LvImage(const std::string& name, lv_obj_t* parent)
+	LvImage::LvImage(const std::string& name, LvObj& parent)
 		: LvObj(lv_image_create, name, parent)
 	{
 		setInnerAlign(LV_IMAGE_ALIGN_CONTAIN);

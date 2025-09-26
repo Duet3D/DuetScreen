@@ -18,7 +18,7 @@ namespace UI
 		LvContainer* screen;
 	};
 
-	AppDrawer::AppDrawer(const std::string& name, lv_obj_t* parent)
+	AppDrawer::AppDrawer(const std::string& name, LvObj& parent)
 		: Card(name, parent)
 		, m_apps("apps", getRoot())
 	{
@@ -52,7 +52,7 @@ namespace UI
 		};
 
 		m_apps.setItemCount(std::size(apps),
-							[](size_t index, lv_obj_t* parent)
+							[](size_t index, LvObj& parent)
 							{
 								auto app = std::make_shared<App>(index, parent);
 								const auto& appInfo = apps[index];

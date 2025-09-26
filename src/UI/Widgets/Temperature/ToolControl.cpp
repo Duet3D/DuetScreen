@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	ToolControl::ToolControl(const std::string& name, lv_obj_t* parent)
+	ToolControl::ToolControl(const std::string& name, LvObj& parent)
 		: View(name, parent)
 		, m_toolInfoCont("tool_info", getRoot())
 		, m_name("tool_name", m_toolInfoCont)

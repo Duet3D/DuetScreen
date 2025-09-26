@@ -148,7 +148,7 @@ namespace UI
 			class TestResult : public ListItem
 			{
 			  public:
-				TestResult(size_t index, lv_obj_t* parent);
+				TestResult(size_t index, LvObj& parent);
 
 				void setName(std::string_view name);
 				void setOutput(std::string_view output);

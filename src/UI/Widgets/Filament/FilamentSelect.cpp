@@ -14,7 +14,7 @@ namespace UI
 	class FilamentSelect::ToolItem : public ListItem
 	{
 	  public:
-		ToolItem(const size_t index, lv_obj_t* parent, FilamentSelect& widget)
+		ToolItem(const size_t index, LvObj& parent, FilamentSelect& widget)
 			: ListItem(index, parent)
 			, m_toolName("tool", getRoot())
 			, m_filament("filament", getRoot())
@@ -56,7 +56,7 @@ namespace UI
 		FilamentSelect& m_widget;
 	};
 
-	FilamentSelect::FilamentSelect(const std::string& name, lv_obj_t* parent, lv_obj_t* messageBoxParent)
+	FilamentSelect::FilamentSelect(const std::string& name, LvObj& parent, lv_obj_t* messageBoxParent)
 		: View(name, parent)
 		, m_header("header", getRoot())
 		, m_cont("cont", getRoot())
@@ -148,7 +148,7 @@ namespace UI
 		LOG_DBG("Setting filament options for {}", getName());
 		m_filamentOptions.clear();
 		m_filamentOptions.setItemCount(options.size(),
-									   [this, &options](size_t index, lv_obj_t* parent) -> std::shared_ptr<Button>
+									   [this, &options](size_t index, LvObj& parent) -> std::shared_ptr<Button>
 									   {
 										   auto btn = std::make_shared<Button>(fmt::format("{}", index), parent);
 										   btn->setText(options[index]);

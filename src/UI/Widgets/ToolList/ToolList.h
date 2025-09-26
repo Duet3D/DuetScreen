@@ -21,7 +21,7 @@ namespace UI
 	class ToolListItem : public View<ToolListItemPresenter>
 	{
 	  public:
-		ToolListItem(size_t index, lv_obj_t* parent, ToolList& toolList);
+		ToolListItem(size_t index, LvObj& parent, ToolList& toolList);
 
 		uint8_t getSlotIndex() const;
 		void setSlotIndex(uint8_t index);
@@ -60,7 +60,7 @@ namespace UI
 		friend class ToolListPresenter;
 		friend class ToolListItemPresenter;
 
-		ToolList(const std::string& name, lv_obj_t* parent, lv_obj_t* numberPadParent = nullptr);
+		ToolList(const std::string& name, LvObj& parent, lv_obj_t* numberPadParent = nullptr);
 
 		void setItemCnt(size_t cnt);
 		size_t getItemCnt() const { return m_list.getItemCount(); }

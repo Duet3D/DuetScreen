@@ -14,7 +14,8 @@ namespace UI
     class Column : public LvContainer
     {
       public:
-        Column(const std::string& name, lv_obj_t* parent);
-      private:
+		Column(const std::string& name, LvObj& parent);
+
+	  private:
     };
 } // namespace UI

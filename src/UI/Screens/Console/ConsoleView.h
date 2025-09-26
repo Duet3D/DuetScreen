@@ -15,7 +15,7 @@ namespace UI
 		friend class ConsoleItem;
 		friend class ConsolePresenter;
 
-		ConsoleView(lv_obj_t* parent);
+		ConsoleView(LvObj& parent);
 
 		void clear();
 		void addCommand(const char* resp);

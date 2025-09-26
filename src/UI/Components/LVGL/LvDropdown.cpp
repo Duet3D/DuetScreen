@@ -10,7 +10,7 @@
 
 namespace UI
 {
-	LvDropdown::LvDropdown(const std::string& name, lv_obj_t* parent)
+	LvDropdown::LvDropdown(const std::string& name, LvObj& parent)
 		: LvObj(lv_dropdown_create, name, parent)
 	{
 	}

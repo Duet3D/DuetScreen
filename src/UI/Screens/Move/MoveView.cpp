@@ -14,7 +14,7 @@ namespace UI
 	static uint32_t s_currentDistanceIndex = 4;
 	static uint32_t s_currentFeedRate = 50;
 
-	MoveView::MoveView(lv_obj_t* parent)
+	MoveView::MoveView(LvObj& parent)
 		: View("move_view", parent, layout_t(0, 0, 100, 100))
 		, m_layoutColDsc{LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST}
 		, m_layoutRowDsc{LV_GRID_CONTENT, LV_GRID_FR(3), LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST}
@@ -176,7 +176,7 @@ namespace UI
 		m_distances.setListFlow(LV_FLEX_FLOW_ROW);
 		m_distances.setListPad(0);
 		m_distances.setItemCount(ARRAY_SIZE(s_distances),
-								 [this](size_t i, lv_obj_t* parent)
+								 [this](size_t i, LvObj& parent)
 								 {
 									 auto btn = std::make_shared<Button>(
 										 fmt::format("{}", i), parent, fmt::format("{}", s_distances[i]));
@@ -311,7 +311,7 @@ namespace UI
 
 		m_genericAxisControls.setItemCount(
 			axis_data_excluding_xyz.size(),
-			[this](size_t i, lv_obj_t* parent)
+			[this](size_t i, LvObj& parent)
 			{
 				auto control = std::make_shared<GenericAxisControl>(fmt::format("{}", i), parent);
 				lv_coord_t width = m_zControl.getWidth();
@@ -483,7 +483,7 @@ namespace UI
 		List<AxisItem>& list = m_axisList.getAxisItems();
 		list.setItemCount(
 			count,
-			[this](size_t i, lv_obj_t* parent)
+			[this](size_t i, LvObj& parent)
 			{
 				auto item = std::make_shared<AxisItem>(i, parent);
 				item->setJogAmounts(s_relMoveValues, ARRAY_SIZE(s_relMoveValues));

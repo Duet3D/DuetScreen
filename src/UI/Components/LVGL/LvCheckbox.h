@@ -17,7 +17,7 @@ namespace UI
 		using checked_callback_t = std::function<void(bool)>;
 
 		// Constructors
-		LvCheckbox(const std::string& name, lv_obj_t* parent);
+		LvCheckbox(const std::string& name, LvObj& parent);
 
 		// Setters
 		void setText(std::string_view txt);

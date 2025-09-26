@@ -8,7 +8,7 @@ namespace UI
 	class CustomView : public View<CustomPresenter>
 	{
 	  public:
-		CustomView(const std::string& name, lv_obj_t* parent);
+		CustomView(const std::string& name, LvObj& parent);
 
 	  private:
 	};

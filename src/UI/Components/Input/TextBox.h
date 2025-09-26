@@ -17,10 +17,10 @@ namespace UI
 	class TextBox : public LvObj
 	{
 	  public:
-		TextBox(const std::string& name, lv_obj_t* parent);
-		TextBox(const std::string& name, lv_obj_t* parent, layout_t layout);
+		TextBox(const std::string& name, LvObj& parent);
+		TextBox(const std::string& name, LvObj& parent, layout_t layout);
 
-        void setLabel(const std::string& label);
+		void setLabel(const std::string& label);
 		void setText(std::string_view text);
 		std::string_view getText() const;
 		LvTextArea& getTextArea() { return m_textArea; }

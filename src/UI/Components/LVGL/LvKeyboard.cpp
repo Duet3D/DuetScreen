@@ -38,7 +38,7 @@ namespace UI
     };
 	// clang-format on
 
-	LvKeyboard::LvKeyboard(const std::string& name, lv_obj_t* parent)
+	LvKeyboard::LvKeyboard(const std::string& name, LvObj& parent)
 		: LvObj(lv_keyboard_create, name, parent)
 	{
 		UI_LOCK();

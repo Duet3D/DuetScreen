@@ -13,7 +13,7 @@ namespace UI
 	class HeaterSlider : public View<HeaterSliderPresenter>
 	{
 	  public:
-		HeaterSlider(const std::string& name, lv_obj_t* parent);
+		HeaterSlider(const std::string& name, LvObj& parent);
 
 		void setHeaterName(const std::string_view name);
 		void setHeaterState(HeaterSliderPresenter::heater_state_t state, const std::string_view str);

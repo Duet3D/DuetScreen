@@ -18,7 +18,7 @@
 
 namespace UI
 {
-	SideBar::SideBar(const std::string& name, lv_obj_t* parent)
+	SideBar::SideBar(const std::string& name, LvObj& parent)
 		: View(name, parent)
 		, m_btns("buttons", getRoot())
 		, m_homeBtn("home", m_btns, _("home"))

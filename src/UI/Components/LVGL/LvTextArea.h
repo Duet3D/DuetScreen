@@ -14,7 +14,7 @@ namespace UI
     class LvTextArea : public LvObj
     {
       public:
-        LvTextArea(const std::string& name, lv_obj_t* parent);
+		LvTextArea(const std::string& name, LvObj& parent);
 
 		void setText(std::string_view text);
 		std::string_view getText() const;

@@ -260,7 +260,7 @@ namespace UI::Themes
 		UI_LOCK();
 		LV_UNUSED(th);
 
-		lv_obj_t* parent = lv_obj_get_parent(obj);
+		LvObj& parent = lv_obj_get_parent(obj);
 
 		const LvglStyles& lvgl = getLvglStyles();
 		const ComponentStyles& components = getComponentStyles();

@@ -32,8 +32,8 @@ namespace UI
 			int32_t max;
 		};
 
-		Graph(const std::string& name, lv_obj_t* parent);
-		Graph(const std::string& name, lv_obj_t* parent, layout_t layout);
+		Graph(const std::string& name, LvObj& parent);
+		Graph(const std::string& name, LvObj& parent, layout_t layout);
 
 		void showLegend(const bool show);
 

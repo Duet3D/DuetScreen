@@ -10,9 +10,9 @@ namespace UI
 	class Button : public LvObj
 	{
 	  public:
-		Button(const std::string& name, lv_obj_t* parent);
-		Button(const std::string& name, lv_obj_t* parent, std::string_view text);
-		Button(const std::string& name, lv_obj_t* parent, std::string_view text, layout_t layout);
+		Button(const std::string& name, LvObj& parent);
+		Button(const std::string& name, LvObj& parent, std::string_view text);
+		Button(const std::string& name, LvObj& parent, std::string_view text, layout_t layout);
 
 		void setText(std::string_view text);
 		std::string_view getText() const { return m_label.getText(); }
@@ -24,7 +24,7 @@ namespace UI
 		void setDisabled(bool disabled);
 
 		LvLabel& getLabel() { return m_label; }
-		lv_obj_t* getButton() const { return getRoot(); }
+		lv_obj_t* getButton() const { return getRootPtr(); }
 		Icon& getIcon() { return m_icon; }
 
 	  private:
