@@ -17,20 +17,20 @@ class TestButton : public UiTestSuite
 
 TEST_F(TestButton, Basic)
 {
-	UI::Button btn("btn", lv_screen_active());
+	UI::Button btn("btn", screen);
 	EXPECT_EQUAL_SCREENSHOT("button_basic.png");
 }
 
 TEST_F(TestButton, WithText)
 {
-	UI::Button btn("btn", lv_screen_active());
+	UI::Button btn("btn", screen);
 	btn.setText("Click Me");
 	EXPECT_EQUAL_SCREENSHOT("button_with_text.png");
 }
 
 TEST_F(TestButton, LongText)
 {
-	UI::LvContainer cont("cont", lv_screen_active());
+	UI::LvContainer cont("cont", screen);
 	cont.setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 	cont.setFlexFlow(LV_FLEX_FLOW_ROW_WRAP);
 
@@ -54,7 +54,7 @@ TEST_F(TestButton, LongText)
 	button_ver_list.setSize(100, LV_SIZE_CONTENT);
 	button_ver_list.setFlag(LV_OBJ_FLAG_FLEX_IN_NEW_TRACK, true);
 	button_ver_list.setItemCount(5,
-								 [](size_t index, lv_obj_t* parent)
+								 [](size_t index, UI::LvObj& parent)
 								 {
 									 auto btn = std::make_shared<UI::Button>(fmt::format("{}", index), parent);
 									 btn->setText("Truncate should this text");
@@ -66,7 +66,7 @@ TEST_F(TestButton, LongText)
 	UI::List<UI::Button> button_ver_list_no_grow("button_ver_list_no_grow", cont);
 	button_ver_list_no_grow.setSize(100, LV_SIZE_CONTENT);
 	button_ver_list_no_grow.setItemCount(2,
-										 [](size_t index, lv_obj_t* parent)
+										 [](size_t index, UI::LvObj& parent)
 										 {
 											 auto btn = std::make_shared<UI::Button>(fmt::format("{}", index), parent);
 											 btn->setText("Wrap should this text");
@@ -79,7 +79,7 @@ TEST_F(TestButton, LongText)
 	button_hor_list.setSize(300, LV_SIZE_CONTENT);
 	button_hor_list.setListFlow(LV_FLEX_FLOW_ROW);
 	button_hor_list.setItemCount(5,
-								 [](size_t index, lv_obj_t* parent)
+								 [](size_t index, UI::LvObj& parent)
 								 {
 									 auto btn = std::make_shared<UI::Button>(fmt::format("{}", index), parent);
 									 btn->setText("Wrap should this text"); // since the list height is LV_SIZE_CONTENT
@@ -93,7 +93,7 @@ TEST_F(TestButton, LongText)
 	button_hor_list_fixed_height.setListGrow(1);
 	button_hor_list_fixed_height.setItemCount(
 		5,
-		[](size_t index, lv_obj_t* parent)
+		[](size_t index, UI::LvObj& parent)
 		{
 			auto btn = std::make_shared<UI::Button>(fmt::format("{}", index), parent);
 			btn->setText("Truncate should this text"); // Since list height is smaller
@@ -108,7 +108,7 @@ TEST_F(TestButton, LongText)
 
 TEST_F(TestButton, SetIconBmp)
 {
-	UI::Button btn("btn", lv_screen_active());
+	UI::Button btn("btn", screen);
 	btn.setIcon(IMAGE_ASSET("examples/example.bmp"));
 	btn.getIcon().enableRecolor(false);
 	EXPECT_EQUAL_SCREENSHOT("button_with_bmp.png");
@@ -116,14 +116,14 @@ TEST_F(TestButton, SetIconBmp)
 
 TEST_F(TestButton, SetIconPng)
 {
-	UI::Button btn("btn", lv_screen_active());
+	UI::Button btn("btn", screen);
 	btn.setIcon(IMAGE_ASSET("examples/example.png"));
 	EXPECT_EQUAL_SCREENSHOT("button_with_png.png");
 }
 
 TEST_F(TestButton, IconScaling)
 {
-	UI::LvContainer cont("cont", lv_screen_active());
+	UI::LvContainer cont("cont", screen);
 	cont.setSize(LV_PCT(100), LV_PCT(100));
 	cont.setFlexFlow(LV_FLEX_FLOW_ROW_WRAP);
 
@@ -163,7 +163,7 @@ TEST_F(TestButton, IconScaling)
 
 TEST_F(TestButton, SetIconBadPath)
 {
-	UI::Button btn("btn", lv_screen_active());
+	UI::Button btn("btn", screen);
 	btn.setIcon(IMAGE_ASSET("bad_path.bmp"));
 	EXPECT_EQUAL_SCREENSHOT("button_with_bad_path_icon.png");
 }

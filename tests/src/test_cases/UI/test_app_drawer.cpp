@@ -15,7 +15,7 @@ class TestAppDrawer : public UiTestSuite
 {
   public:
 	TestAppDrawer()
-		: app_drawer("app_drawer", lv_screen_active())
+		: app_drawer("app_drawer", screen)
 	{
 		UI::HomeView::setInstance(&home);
 		home.hide();

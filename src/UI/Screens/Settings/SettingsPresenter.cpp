@@ -75,19 +75,19 @@ namespace UI
 		scanWifi();
 	}
 
-	void NetworkSettingsPresenter::connectToNetwork(const std::string& ssid)
+	void NetworkSettingsPresenter::connectToNetwork(std::string_view ssid)
 	{
 		NetworkHelper::connect(ssid);
 		scanWifi();
 	}
 
-	void NetworkSettingsPresenter::connectToNetwork(const std::string& ssid, std::string_view password)
+	void NetworkSettingsPresenter::connectToNetwork(std::string_view ssid, std::string_view password)
 	{
 		NetworkHelper::connect(ssid, password);
 		scanWifi();
 	}
 
-	void NetworkSettingsPresenter::forgetNetwork(const std::string& ssid)
+	void NetworkSettingsPresenter::forgetNetwork(std::string_view ssid)
 	{
 		NetworkHelper::forgetNetwork(ssid);
 		scanWifi();

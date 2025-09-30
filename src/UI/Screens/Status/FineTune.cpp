@@ -13,7 +13,7 @@
 
 namespace UI
 {
-	FineTune::FineTune(LvObj& parent, lv_obj_t* numberpad_parent)
+	FineTune::FineTune(LvObj& parent, LvObj* numberpad_parent)
 		: View("fine_tune", parent, layout_t(0, 0, 100, 100))
 		, m_babystep("babystep", getRoot())
 		, m_sliderCont("sliders", getRoot())
@@ -21,7 +21,7 @@ namespace UI
 		, m_extruders("extruders", m_sliderCont)
 		, m_fans("fans", m_sliderCont)
 		, m_keyboard("kb", getRoot())
-		, m_numberPad("numberpad", numberpad_parent ? numberpad_parent : parent, layout_t(0, 0, 50, 70))
+		, m_numberPad("numberpad", numberpad_parent ? *numberpad_parent : parent, layout_t(0, 0, 50, 70))
 	{
 		UI_LOCK();
 

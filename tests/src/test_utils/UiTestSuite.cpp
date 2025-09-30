@@ -23,7 +23,9 @@ UiTestSuite::UiTestSuite()
 	OM::RemoveAll();
 	std::filesystem::create_directories("/tmp/thumbnails");
 
-	lv_obj_set_flex_flow(lv_screen_active(), LV_FLEX_FLOW_COLUMN_WRAP);
+	lv_obj_set_style_pad_all(lv_screen_active(), 0, 0);
+	screen.setStylePad(0);
+	screen.setFlexFlow(LV_FLEX_FLOW_COLUMN_WRAP);
 }
 
 UiTestSuite::~UiTestSuite()

@@ -56,13 +56,13 @@ namespace UI
 		FilamentSelect& m_widget;
 	};
 
-	FilamentSelect::FilamentSelect(const std::string& name, LvObj& parent, lv_obj_t* messageBoxParent)
+	FilamentSelect::FilamentSelect(const std::string& name, LvObj& parent, LvObj* messageBoxParent)
 		: View(name, parent)
 		, m_header("header", getRoot())
 		, m_cont("cont", getRoot())
 		, m_toolList("tool_list", m_cont)
 		, m_confirmation(
-			  "confirmation", messageBoxParent ? messageBoxParent : getRoot(), layout_t(0, 0, 50, LV_SIZE_CONTENT))
+			  "confirmation", messageBoxParent ? *messageBoxParent : getRoot(), layout_t(0, 0, 50, LV_SIZE_CONTENT))
 		, m_filamentOptions("filament_options", m_confirmation.getBody())
 		, m_unload("unload", m_confirmation.getFooter(), _("unload"))
 	{

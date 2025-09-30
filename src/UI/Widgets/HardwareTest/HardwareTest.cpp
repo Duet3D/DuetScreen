@@ -11,7 +11,7 @@
 namespace UI
 {
 	HardwareTest::HardwareTest()
-		: View<HardwareTestPresenter>("hardware_test", lv_screen_active())
+		: View("hardware_test")
 	{
 		setStylePad(0, LV_PART_MAIN, Padding::ALL);
 		setSize(LV_PCT(100), LV_PCT(100));

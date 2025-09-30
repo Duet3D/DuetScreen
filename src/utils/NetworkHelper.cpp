@@ -271,16 +271,16 @@ namespace NetworkHelper
 		return networks;
 	}
 
-	bool isNetworkKnown(const std::string& ssid)
+	bool isNetworkKnown(std::string_view ssid)
 	{
 		std::vector<WiFiNetwork> networks = getKnownWiFiNetworks();
 		return std::any_of(
 			networks.begin(), networks.end(), [&ssid](const WiFiNetwork& network) { return network.ssid == ssid; });
 	}
 
-	void connect(const std::string& ssid)
+	void connect(std::string_view ssid)
 	{
-		LOG_INFO("Connecting to WiFi network \"{:s}\"", ssid.c_str());
+		LOG_INFO("Connecting to WiFi network \"{:s}\"", ssid);
 		std::vector<WiFiNetwork> networks = getKnownWiFiNetworks();
 		for (const WiFiNetwork& network : networks)
 		{
@@ -291,12 +291,12 @@ namespace NetworkHelper
 				return;
 			}
 		}
-		LOG_ERROR("Network \"{:s}\" not found in known networks", ssid.c_str());
+		LOG_ERROR("Network \"{:s}\" not found in known networks", ssid);
 	}
 
-	void connect(const std::string& ssid, std::string_view password)
+	void connect(std::string_view ssid, std::string_view password)
 	{
-		LOG_INFO("Connecting to WiFi network \"{:s}\"", ssid.c_str());
+		LOG_INFO("Connecting to WiFi network \"{:s}\"", ssid);
 		if (!isNetworkKnown(ssid))
 		{
 			std::string cmd = "ADD_NETWORK";
@@ -329,9 +329,9 @@ namespace NetworkHelper
 		sendCommand("RECONNECT");
 	}
 
-	void forgetNetwork(const std::string& ssid)
+	void forgetNetwork(std::string_view ssid)
 	{
-		LOG_INFO("Forgetting network \"{:s}\"", ssid.c_str());
+		LOG_INFO("Forgetting network \"{:s}\"", ssid);
 		std::vector<WiFiNetwork> networks = getKnownWiFiNetworks();
 		for (const WiFiNetwork& network : networks)
 		{
@@ -343,6 +343,6 @@ namespace NetworkHelper
 				return;
 			}
 		}
-		LOG_ERROR("Network \"{:s}\" not found in known networks", ssid.c_str());
+		LOG_ERROR("Network \"{:s}\" not found in known networks", ssid);
 	}
 } // namespace NetworkHelper

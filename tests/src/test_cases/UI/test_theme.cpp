@@ -68,7 +68,7 @@ TEST_F(TestTheme, DefaultTheme)
 	theme.init();
 	theme.setThemeActive();
 
-	ThemePreview themePreview("theme_preview", lv_screen_active());
+	ThemePreview themePreview("theme_preview", screen);
 	themePreview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 
 	EXPECT_TRUE(Themes::getCurrentTheme() == &theme);
@@ -91,7 +91,7 @@ TEST_F(TestTheme, DefaultTheme)
 	EXPECT_EQUAL_SCREENSHOT("theme_3.png");
 }
 
-static std::unique_ptr<LvLabel> createLabel(const std::string& text, lv_obj_t* parent)
+static std::unique_ptr<LvLabel> createLabel(const std::string& text, LvObj& parent)
 {
 	auto label = std::make_unique<LvLabel>("label", parent);
 	label->setText(text);
@@ -103,13 +103,13 @@ static std::unique_ptr<LvLabel> createLabel(const std::string& text, lv_obj_t* p
 
 TEST_F(TestTheme, Widgets)
 {
-	lv_obj_set_flex_flow(lv_screen_active(), LV_FLEX_FLOW_COLUMN);
+	lv_obj_set_flex_flow(screen, LV_FLEX_FLOW_COLUMN);
 
-	ThemePreview preview("theme_preview", lv_screen_active());
+	ThemePreview preview("theme_preview", screen);
 	preview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 	preview.showControls(false);
 
-	LvContainer cont("container", lv_screen_active());
+	LvContainer cont("container", screen);
 	cont.setWidth(LV_PCT(100));
 	cont.setFlexGrow(1);
 	cont.setFlexFlow(LV_FLEX_FLOW_COLUMN_WRAP);
@@ -274,7 +274,7 @@ TEST_F(TestTheme, Widgets)
 
 	/* Page 2 */
 
-	LvContainer cont2("container", lv_screen_active());
+	LvContainer cont2("container", screen);
 	cont2.setWidth(LV_PCT(100));
 	cont2.setFlexGrow(1);
 	int32_t cont2_cols[11];

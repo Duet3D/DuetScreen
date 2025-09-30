@@ -64,7 +64,7 @@ namespace UI
 		lv_obj_t* m_chart;
 		lv_obj_t* m_vScale;
 		lv_obj_t* m_hScale;
-		lv_obj_t* m_legend;
+		LvContainer m_legend;
 
 		int32_t m_columnDsc[4];
 		int32_t m_rowDsc[3];

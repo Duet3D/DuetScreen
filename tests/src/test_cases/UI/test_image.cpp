@@ -16,9 +16,9 @@ class TestImage : public UiTestSuite
 {
   public:
 	TestImage()
-		: img("image", lv_screen_active())
+		: img("image", screen)
 	{
-		lv_obj_set_flex_flow(lv_screen_active(), LV_FLEX_FLOW_ROW_WRAP);
+		screen.setFlexFlow(LV_FLEX_FLOW_ROW_WRAP);
 	}
 
 	UI::LvImage img;
@@ -40,18 +40,18 @@ TEST_F(TestImage, Png)
 
 TEST_F(TestImage, PngRecolor)
 {
-	lv_obj_set_style_bg_color(lv_screen_active(), lv_palette_main(LV_PALETTE_GREY), 0);
-	lv_obj_set_style_bg_opa(lv_screen_active(), LV_OPA_COVER, 0);
+	lv_obj_set_style_bg_color(screen, lv_palette_main(LV_PALETTE_GREY), 0);
+	lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
 
 	img.setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 	img.setSrc(IMAGE_ASSET("examples/example.png"));
 
-	UI::LvImage img_white("recolor_white", lv_screen_active());
+	UI::LvImage img_white("recolor_white", screen);
 	img_white.setSrc(IMAGE_ASSET("examples/example.png"));
 	img_white.setStyleRecolor(lv_color_white(), 0);
 	img_white.setStyleRecolorOpa(LV_OPA_COVER, 0);
 
-	UI::LvImage img_blue("recolor_blue", lv_screen_active());
+	UI::LvImage img_blue("recolor_blue", screen);
 	img_blue.setSrc(IMAGE_ASSET("examples/example.png"));
 	img_blue.setStyleRecolor(lv_palette_main(LV_PALETTE_BLUE), 0);
 	img_blue.setStyleRecolorOpa(LV_OPA_COVER, 0);

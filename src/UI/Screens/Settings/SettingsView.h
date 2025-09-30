@@ -7,6 +7,7 @@
 #include "UI/Components/Input/NumberPad.h"
 #include "UI/Components/Input/Slider.h"
 #include "UI/Components/Input/TextBox.h"
+#include "UI/Components/Modal/Modal.h"
 #include "UI/Components/Theme/ThemePreview.h"
 #include "UI/Core/View.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
@@ -113,21 +114,20 @@ namespace UI
 
 	  private:
 		static void onNetworkSelectionEvent(lv_event_t* e);
-		static void onPasswordCloseEvent(lv_event_t* e);
-		static void onPasswordConfirmEvent(lv_event_t* e);
 		static void onRefreshEvent(lv_event_t* e);
+		void onPasswordCloseEvent();
+		void onPasswordConfirmEvent();
 
 		void onShow() override;
 		void onHide() override;
 
-		lv_obj_t* m_topBar;
-		lv_obj_t* m_ipAddress;
+		LvContainer m_topBar;
+		LvLabel m_ipAddress;
 		Button m_refresh;
 
 		lv_obj_t* m_networkList;
-		lv_obj_t* m_passwordWindow;
+		Modal<MessageBox> m_passwordWindow;
 		TextBox m_passwordInput;
-		lv_obj_t* m_passwordSsid;
 	};
 
 	class DeveloperSettingsView : public SettingsSubView
@@ -210,8 +210,8 @@ namespace UI
 		int32_t m_layoutRowDsc[3] = {LV_GRID_FR(2), 0, LV_GRID_TEMPLATE_LAST};
 
 		lv_obj_t* m_settingsList;
-		lv_obj_t* m_subWindow;
-		lv_obj_t* m_keyboard;
+		LvContainer m_subWindow;
+		LvKeyboard m_keyboard;
 
 		lv_obj_t* m_screenHeader;
 		lv_obj_t* m_screenSettings;

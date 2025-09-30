@@ -17,7 +17,7 @@ class TestMoveView : public UiTestSuite
   public:
 	TestMoveView() {}
 
-	MoveView move_view{lv_screen_active()};
+	MoveView move_view{screen};
 };
 
 TEST_F(TestMoveView, Basic)

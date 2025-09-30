@@ -17,7 +17,7 @@ class TestStatus : public UiTestSuite
 {
   public:
 	TestStatus()
-		: view(lv_screen_active())
+		: view(screen)
 	{
 		HomeView::setInstance(&home);
 		view.setSize(LV_PCT(36), LV_PCT(90));

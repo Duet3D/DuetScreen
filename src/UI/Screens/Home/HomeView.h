@@ -8,6 +8,7 @@
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Components/MessageBox/AlertMessageBox.h"
 #include "UI/Components/MessageBox/MessageBox.h"
+#include "UI/Components/Screen/Screen.h"
 #include "UI/Core/View.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Fan/FanView.h"
@@ -27,7 +28,7 @@
 
 namespace UI
 {
-	class HomeView : public View<HomePresenter>
+	class HomeView : public View<HomePresenter, Screen>
 	{
 	  public:
 		friend class HomePresenter;

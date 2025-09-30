@@ -20,7 +20,7 @@ namespace UI
 		, m_chart(lv_chart_create(getRoot()))
 		, m_vScale(lv_scale_create(getRoot()))
 		, m_hScale(lv_scale_create(getRoot()))
-		, m_legend(lv_obj_create(getRoot()))
+		, m_legend("legend", getRoot())
 	{
 		init();
 	}
@@ -30,7 +30,7 @@ namespace UI
 		, m_chart(lv_chart_create(getRoot()))
 		, m_vScale(lv_scale_create(getRoot()))
 		, m_hScale(lv_scale_create(getRoot()))
-		, m_legend(lv_obj_create(getRoot()))
+		, m_legend("legend", getRoot())
 	{
 		init();
 	}
@@ -283,7 +283,7 @@ namespace UI
 		lv_chart_set_series_color(m_chart, series.series, color);
 		series.color = color;
 
-		auto legendObj = series.legendObj->getRoot();
+		auto legendObj = series.legendObj->getRootPtr();
 		lv_obj_set_style_bg_color(legendObj, color, LV_STATE_CHECKED);
 		lv_obj_set_style_bg_color(legendObj, s_hiddenColor, LV_STATE_DEFAULT);
 	}

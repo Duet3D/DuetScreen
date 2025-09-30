@@ -60,7 +60,7 @@ namespace UI
 		friend class ToolListPresenter;
 		friend class ToolListItemPresenter;
 
-		ToolList(const std::string& name, LvObj& parent, lv_obj_t* numberPadParent = nullptr);
+		ToolList(const std::string& name, LvObj& parent, LvObj* numberPadParent = nullptr);
 
 		void setItemCnt(size_t cnt);
 		size_t getItemCnt() const { return m_list.getItemCount(); }

@@ -13,11 +13,12 @@
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Components/List/List.h"
 #include "UI/Components/MessageBox/MessageBox.h"
+#include "UI/Components/Screen/Screen.h"
 #include "UI/Core/View.h"
 
 namespace UI
 {
-	class HardwareTest : public View<HardwareTestPresenter>
+	class HardwareTest : public View<HardwareTestPresenter, Screen>
 	{
 	  public:
 		HardwareTest();

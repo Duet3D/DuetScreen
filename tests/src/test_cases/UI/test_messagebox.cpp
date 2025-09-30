@@ -20,7 +20,7 @@ class TestMessagebox : public UiTestSuite
   public:
 	TestMessagebox() {}
 
-	MessageBox message_box{"message_box", lv_screen_active(), layout_t(0, 0, 50, 50)};
+	MessageBox message_box{"message_box", screen, layout_t(0, 0, 50, 50)};
 };
 
 TEST_F(TestMessagebox, Basic)

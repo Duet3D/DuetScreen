@@ -18,7 +18,7 @@ class TestList : public UiTestSuite
 
 TEST_F(TestList, VerticalWrap)
 {
-	UI::List<UI::LvContainer> list("list", lv_screen_active());
+	UI::List<UI::LvContainer> list("list", screen);
 	list.addStyle(UI::Themes::getLvglStyles().border);
 	list.getListContainer().addStyle(UI::Themes::getLvglStyles().border);
 	list.setSize(LV_PCT(100), LV_PCT(100));
@@ -28,7 +28,7 @@ TEST_F(TestList, VerticalWrap)
 
 	list.setTitle("list vertical wrap");
 	list.setItemCount(10,
-					  [](size_t index, lv_obj_t* parent)
+					  [](size_t index, UI::LvObj& parent)
 					  {
 						  auto item = std::make_shared<UI::LvContainer>(fmt::format("", index), parent);
 						  item->setSize(100, 100);

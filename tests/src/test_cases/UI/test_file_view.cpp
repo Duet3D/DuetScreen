@@ -17,7 +17,7 @@ class TestFileView : public UiTestSuite
   public:
 	TestFileView() {}
 
-	FileView file_view{lv_screen_active()};
+	FileView file_view{screen};
 };
 
 TEST_F(TestFileView, Basic)

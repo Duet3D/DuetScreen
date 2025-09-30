@@ -200,6 +200,7 @@ namespace UI
 		}
 
 		template <typename F, typename = std::enable_if_t<std::is_invocable_r_v<TPtr, F, size_t, LvObj&>>>
+			requires std::is_constructible_v<std::function<TPtr(size_t, LvObj&)>, F>
 		void setItemCount(const size_t count, F&& constructor)
 		{
 			setItemCount(count, std::function<TPtr(size_t, LvObj&)>(std::forward<F>(constructor)));
@@ -233,6 +234,7 @@ namespace UI
 		template <typename... Args,
 				  typename = std::enable_if_t<sizeof...(Args) != 1 ||
 											  !std::is_invocable_r_v<TPtr, std::decay_t<Args>..., size_t, LvObj&>>>
+			requires std::is_constructible_v<T, size_t, LvObj&, Args...>
 		void setItemCount(const size_t count, Args&&... args)
 		{
 			UI_LOCK();

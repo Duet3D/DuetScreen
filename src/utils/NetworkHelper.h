@@ -35,10 +35,10 @@ namespace NetworkHelper
 	std::string getIpAddress();
 	std::vector<WiFiNetwork> getKnownWiFiNetworks();
 	std::vector<WiFiNetwork> scanWiFiNetworks();
-	void connect(const std::string& ssid);
-	void connect(const std::string& ssid, std::string_view password);
-	bool isNetworkKnown(const std::string& ssid);
+	void connect(std::string_view ssid);
+	void connect(std::string_view ssid, std::string_view password);
+	bool isNetworkKnown(std::string_view ssid);
 	void disconnect();
 	void reconnect();
-	void forgetNetwork(const std::string& ssid);
+	void forgetNetwork(std::string_view ssid);
 } // namespace NetworkHelper

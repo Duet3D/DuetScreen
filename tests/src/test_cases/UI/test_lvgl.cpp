@@ -19,7 +19,7 @@ class TestLvgl : public UiTestSuite
 
 TEST_F(TestLvgl, FlexSizeContentGrow)
 {
-	lv_obj_t* cont = lv_obj_create(lv_screen_active());
+	lv_obj_t* cont = lv_obj_create(screen);
 	lv_obj_set_name(cont, "cont");
 	lv_obj_set_size(cont, LV_PCT(100), LV_SIZE_CONTENT);
 	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
@@ -96,7 +96,7 @@ TEST_F(TestLvgl, FlexSizeContentGrow)
 
 TEST_F(TestLvgl, FlexFixedSize)
 {
-	lv_obj_t* cont = lv_obj_create(lv_screen_active());
+	lv_obj_t* cont = lv_obj_create(screen);
 	lv_obj_set_name(cont, "cont");
 	lv_obj_set_size(cont, LV_PCT(100), 200);
 	lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
@@ -125,7 +125,7 @@ TEST_F(TestLvgl, FlexFixedSize)
 
 TEST_F(TestLvgl, FlexSizeContentGrow2)
 {
-	lv_obj_t* cont = lv_obj_create(lv_screen_active());
+	lv_obj_t* cont = lv_obj_create(screen);
 	lv_obj_set_name(cont, "cont");
 	lv_obj_set_style_min_width(cont, LV_SIZE_CONTENT, LV_PART_MAIN);
 	lv_obj_set_size(cont, LV_PCT(100), LV_SIZE_CONTENT);
@@ -197,7 +197,7 @@ static lv_obj_t* create_item(std::string_view name, lv_obj_t* parent)
 
 TEST_F(TestLvgl, FlexPadding)
 {
-	lv_obj_t* parent = lv_obj_create(lv_screen_active());
+	lv_obj_t* parent = lv_obj_create(screen);
 	lv_obj_set_size(parent, LV_PCT(100), LV_PCT(100));
 	lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_COLUMN_WRAP);
 	lv_obj_set_style_pad_all(parent, 10, 0);
@@ -281,7 +281,7 @@ TEST_F(TestLvgl, FlexPadding)
 
 TEST_F(TestLvgl, GridSizeContent)
 {
-	lv_obj_t* cont = lv_obj_create(lv_screen_active());
+	lv_obj_t* cont = lv_obj_create(screen);
 	lv_obj_set_name(cont, "cont");
 
 	int32_t col_dsc[3] = {LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};

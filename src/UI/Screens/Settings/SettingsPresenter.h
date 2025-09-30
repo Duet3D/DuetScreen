@@ -39,9 +39,9 @@ namespace UI
 		// Actions
 		void setWifiEnabled(bool enabled);
 		void scanWifi();
-		void connectToNetwork(const std::string& ssid);
-		void connectToNetwork(const std::string& ssid, std::string_view password);
-		void forgetNetwork(const std::string& ssid);
+		void connectToNetwork(std::string_view ssid);
+		void connectToNetwork(std::string_view ssid, std::string_view password);
+		void forgetNetwork(std::string_view ssid);
 		void refresh();
 
 	  private:

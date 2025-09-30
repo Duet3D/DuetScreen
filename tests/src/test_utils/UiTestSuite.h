@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "UI/Components/Screen/Screen.h"
 #include "test_utils/utils.h"
 #include <gtest/gtest.h>
 
@@ -23,4 +24,6 @@ class UiTestSuite : public ::testing::Test
 
 	static bool load_model_data_from_file(std::string_view filename);
 	static bool load_model_data(std::string_view data);
+
+	UI::Screen screen{"test_screen"};
 };

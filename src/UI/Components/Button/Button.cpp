@@ -57,7 +57,7 @@ namespace UI
 			{
 				// Update the label width
 				auto& btn = *static_cast<Button*>(lv_event_get_user_data(e));
-				LvObj& parent = btn.getParent();
+				lv_obj_t* parent = btn.getParent();
 
 				// while (parent != nullptr)
 				// {
