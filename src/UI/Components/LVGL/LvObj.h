@@ -11,6 +11,7 @@
 #include "lvgl/lvgl.h"
 #include "lvgl/src/lv_conf_internal.h"
 #include <functional>
+#include <list>
 
 namespace UI
 {
@@ -220,6 +221,9 @@ namespace UI
 	  protected:
 		LvObj(lv_create_t initFunc, const std::string& name, lv_obj_t* parent);
 
+		void addChild(LvObj* child);
+		void removeChild(LvObj* child);
+
 		virtual void onShow() {}
 		virtual void onHide() {}
 		virtual void refresh() {}
@@ -227,6 +231,9 @@ namespace UI
 	  private:
 		lv_obj_t* m_root;
 		std::string m_name;
+
+		LvObj* m_parent = nullptr;
+		std::list<LvObj*> m_children;
 	};
 } // namespace UI
 
