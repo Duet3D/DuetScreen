@@ -34,6 +34,7 @@ There are a few methods to connect the Duet3D screen to a WiFi network. The reco
 2. Alternatively, you can connect to a network using the GUI.
     - This method is useful if you are setting up a single screen and you do not know the WiFi credentials in advance.
     - The GUI is currently placeholder and has some known issues.
+    - You need to power cycle the screen after selecting network mode in the GUI
 
 
 ## Powering the Duet3D screen
@@ -61,14 +62,15 @@ Multiple methods are available to connect the Duet3D screen to a mainboard. The 
 ### WiFi
 > [!NOTE]
 > The screen has a built-in WiFi module, it also supports external WiFi modules with the `RTL8188FU` chipset.
-> - If using the built-in WiFi module, the USB-C port must be set to USB host mode.
+> - If using the built-in WiFi module, the USB-C port must be set to USB host mode, this is done in the setting GUI.
 > - If using an external WiFi module, connect it to the USB-A port on the screen, or use the USB-C port and set it to USB host mode.
 > - There are multiple variants of the `RTL8188` chipset. Currently the screen only supports `RTL8188FU`. Other variants are unlikely to work.
 
 1. Ensure the Duet3D screen is connected to the same WiFi network as the mainboard.
     - See the [Connecting the Duet3D screen to a WiFi network](#connecting-the-duet3d-screen-to-a-wifi-network) section above.
 2. In the GUI, select the WiFi connection method.
-3. Enter the IP address of the mainboard.
+3. Power cycle the screen.
+4. Once rebooted, enter the IP address of the mainboard.
 
 ### UART
 
@@ -108,11 +110,11 @@ The Duet3D screen has two USB ports:
     - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives.
 - USB-C: This port can be a host or device port.
     - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives in host mode.
-    - It can be used to connect to a PC in device mode.
+    - It can be used to connect to a PC in device mode for debugging.
     - It can be used to power the screen in either mode (assuming the attached device/host is able to supply power).
 
 > [!WARNING]
-> A Duet3D mainboard **CANNOT** provide power to the screen via the USB-C. If connecting to a Duet3D mainboard this 
+> A Duet3D mainboard **CANNOT** provide power to the screen via the USB-C. If connecting to a Duet3D mainboard over USB the screen needs a seperate source of 5V power
 
 USB hubs are supported **if they are NOT smart**. A smart hub is one that requires a driver to work. This includes most USB-C hubs. If you are using a USB-C hub, make sure it is a dumb hub. A dumb hub is one that does not require a driver to work. This includes most USB-A hubs. If in doubt, use a USB-A hub.
 
