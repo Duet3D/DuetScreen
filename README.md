@@ -5,12 +5,12 @@ This project is a GUI for the Duet3D screen. It is based on the LittlevGL (LVGL)
 ## Getting started
 
 ### Flashing a new Duet3D screen
-1. Download the latest sdcard image from the release page.
+1. Download the latest `sdcard.img` from the release page.
 2. Flash a microSD card with the image
     - use [balenaEtcher](https://www.balena.io/etcher/) on Windows
     - use `dd` on Linux
         - ```bash
-            sudo dd if=duet-screen-*.img of=/dev/sdX bs=4M
+            sudo dd if=sdcard.img of=/dev/sdX bs=4M
             ```
 3. Insert the microSD card into the Duet3D screen and power it on.
 
@@ -101,7 +101,11 @@ Several methods are available to update the Duet3D screen.
 3. **Fallback**
     - If the screen is still not working, you will have to reflash the microSD card with the latest image.
 
-Occasionally, an update may require the whole microSD card to be reflashed. This will be indicated in the release notes. In this case, follow the instructions in the [Flashing a new Duet3D screen](#flashing-a-new-duet3d-screen) section above.
+> [!warning]
+> Occasionally, an update may require the whole microSD card to be reflashed. This will be indicated in the release notes.
+> ![Buildroot Version](docs/buildroot_version.png)
+>
+> In this case, follow the instructions in the [Flashing a new Duet3D screen](#flashing-a-new-duet3d-screen) section above.
 
 
 ## USB Ports
@@ -110,13 +114,13 @@ The Duet3D screen has two USB ports:
     - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives.
 - USB-C: This port can be a host or device port.
     - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives in host mode.
-    - It can be used to connect to a PC in device mode for debugging.
+    - It can be used to connect to a PC in device mode for software debugging.
     - It can be used to power the screen in either mode (assuming the attached device/host is able to supply power).
 
 > [!WARNING]
-> A Duet3D mainboard **CANNOT** provide power to the screen via the USB-C. If connecting to a Duet3D mainboard over USB the screen needs a seperate source of 5V power
+> A Duet3D mainboard **CANNOT** provide power to the screen via the USB-C. If connecting to a Duet3D mainboard this will likely damage either the screen, the mainboard, or both. Always power the screen via the `5V_IN` port when connecting to a Duet3D mainboard.
 
 USB hubs are supported **if they are NOT smart**. A smart hub is one that requires a driver to work. This includes most USB-C hubs. If you are using a USB-C hub, make sure it is a dumb hub. A dumb hub is one that does not require a driver to work. This includes most USB-A hubs. If in doubt, use a USB-A hub.
 
 ## Building the project
-Notes on how to build the project are found in [DEVELOPMENT.md](DEVELOPMENT.md).
+Notes on how to build the project are found in [DEVELOPMENT.md](docs/DEVELOPMENT.md).
