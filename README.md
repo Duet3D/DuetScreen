@@ -31,9 +31,9 @@ There are a few methods to connect the Duet3D screen to a WiFi network. The reco
     }
     ```
     - This method is the easiest if you are setting up multiple screens, or you know the WiFi credentials in advance.
-2. Alternatively, you can connect to a network using the GUI.
+2. Alternatively, you can connect to a network using the “Settings” page in the GUI.
     - This method is useful if you are setting up a single screen and you do not know the WiFi credentials in advance.
-    - The GUI is currently placeholder and has some known issues.
+    - The GUI is currently a placeholder and has some known issues.
     - You need to power cycle the screen after selecting network mode in the GUI
 
 
@@ -62,7 +62,7 @@ Multiple methods are available to connect the Duet3D screen to a mainboard. The 
 ### WiFi
 > [!NOTE]
 > The screen has a built-in WiFi module, it also supports external WiFi modules with the `RTL8188FU` chipset.
-> - If using the built-in WiFi module, the USB-C port must be set to USB host mode, this is done in the setting GUI.
+> - If using the built-in WiFi module, the USB-C port must be set to USB host mode, this is done in the “Settings” page in the GUI.
 > - If using an external WiFi module, connect it to the USB-A port on the screen, or use the USB-C port and set it to USB host mode.
 > - There are multiple variants of the `RTL8188` chipset. Currently the screen only supports `RTL8188FU`. Other variants are unlikely to work.
 
