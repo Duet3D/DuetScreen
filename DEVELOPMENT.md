@@ -8,7 +8,7 @@ Clone the project and the related sub modules:
 git clone --recursive https://github.com/Duet3D/DuetScreen.git
 ```
 
-note if you are a member of the Duet3D organisation andd want to close with ssh use:
+note if you are a member of the Duet3D organisation and want to clone with ssh use:
 ```bash
 git clone --recursive git@github.com:Duet3D/DuetScreen.git
 ```
