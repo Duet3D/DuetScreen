@@ -33,13 +33,14 @@ sudo apt-get update && sudo apt-get install -y build-essential libsdl2-dev cmake
 ```
 
 ### Setup udev rules for USB communications
+This is only required if you are going to use USB to attach the simulation to the Duet hardware. If you plan to use network you do not need this step.
 ```bash
 sudo bash -c 'cat ./config/99-usb.rules > /etc/udev/rules.d/99-usb.rules'
 sudo service udev restart
 sudo usermod -aG plugdev $USER
 ```
 
-### *WSL2 only* Setup USBIPD:
+#### *WSL2 only* Setup USBIPD:
 - Attach the Duet as a USB device using usbipd
 
 
