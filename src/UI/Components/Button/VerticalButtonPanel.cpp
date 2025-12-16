@@ -28,6 +28,8 @@ namespace UI
 		m_reset.setMinHeight(LV_SIZE_CONTENT);
 		m_increment.setFlexGrow(3);
 		m_decrement.setFlexGrow(3);
+		m_increment.setMinHeight(LV_SIZE_CONTENT);
+		m_decrement.setMinHeight(LV_SIZE_CONTENT);
 
 		m_values.setFlexGrow(2);
 		m_values.setMinHeight(LV_SIZE_CONTENT);
@@ -37,6 +39,9 @@ namespace UI
 		// m_values.getListContainer().setHeight(LV_PCT(100));
 		m_values.getListContainer().setMinHeight(LV_SIZE_CONTENT);
 		m_values.setStylePad(0);
+		m_values.getListContainer().setStylePad(0);
+		m_values.setStyleBgColor(lv_palette_main(LV_PALETTE_RED));
+		m_values.setStyleBgOpa(LV_OPA_COVER);
 
 		m_increment.setIcon("increment.png");
 		m_decrement.setIcon("decrement.png");
@@ -125,7 +130,7 @@ namespace UI
 		auto btn = std::make_unique<Button>(fmt::format("value_btn_{}", index), parent);
 		btn->getLabel().setLongMode(LV_LABEL_LONG_MODE_WRAP);
 		btn->setHeight(LV_PCT(100));
-		// btn->setMinHeight(LV_SIZE_CONTENT); // FIXME: this seems to cause a lvgl layout bug
+		btn->setMinHeight(LV_SIZE_CONTENT);
 		btn->setFlexGrow(1);
 		btn->setCheckable(true);
 		btn->setChecked(index == m_selectedValueIndex);

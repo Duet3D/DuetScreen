@@ -67,6 +67,9 @@ namespace UI
 		/* Time */
 		m_timeCont.setHeight(LV_SIZE_CONTENT);
 		m_timeCont.setFlexFlow(LV_FLEX_FLOW_COLUMN);
+
+		/* Babystep */
+		m_babyStep.setStylePad(0);
 	}
 
 	void PrintInfo::openSubView(lv_event_t* e)

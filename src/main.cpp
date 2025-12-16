@@ -119,9 +119,15 @@ int main(int argc, char** argv)
 	UI::Themes::init(display);
 
 	// lv_display_set_rotation(display, LV_DISP_ROTATION_180);
+#if 1
+	UI::Screen screen("screen");
+	UI::BabyStep obj("print_info", screen);
 
+	obj.setSize(LV_PCT(30), LV_PCT(40));
+#else
 	UI::HomeView& home = UI::HomeView::instance();
 	home.show();
+#endif
 
 #if HARDWARE_TEST
 	UI::HardwareTest hw_test;
