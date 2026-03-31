@@ -80,6 +80,7 @@ TEST_F(TestFonts, FontStyle)
 		for (auto& dsc : label_dscs)
 		{
 			dsc.font = *FontManager::createFont(fontName, dsc.fontConfig.size, dsc.fontConfig.style).get();
+			lv_obj_report_style_change(NULL);
 		}
 		EXPECT_EQUAL_SCREENSHOT(fmt::format("fonts/{:s}.png", fontName).c_str());
 	}
