@@ -136,6 +136,7 @@ namespace OM
 
 	bool UpdateToolFan(const size_t toolIndex, const size_t toolFanIndex, const size_t fanIndex);
 	bool RemoveToolFans(const size_t toolIndex, const size_t firstIndexToDelete = 0);
+	bool UpdateToolOffset(const size_t toolIndex, const size_t axisIndex, const float offset);
 
 	bool UpdateToolFilamentExtruder(const size_t toolIndex, const int8_t extruderIndex);
 
@@ -148,4 +149,5 @@ namespace OM
 
 	void SetCurrentTool(const int32_t toolIndex);
 	ToolPtr GetCurrentTool();
+	float GetCurrentToolAxisOffset(const Move::AxisPtr& axis);
 } // namespace OM
