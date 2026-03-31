@@ -10,12 +10,38 @@
 #include "ObjectCancelView.h"
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/Job.h"
+#include "ObjectModel/Tool.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
 #include <cmath>
 
 namespace UI
 {
+	namespace
+	{
+		float getToolOffsetForAxis(const OM::Move::AxisPtr& axis)
+		{
+			if (axis == nullptr)
+			{
+				return 0.0f;
+			}
+
+			const char axisLetter = axis->letter[0];
+			if (axisLetter != 'X' && axisLetter != 'Y')
+			{
+				return 0.0f;
+			}
+
+			auto tool = OM::GetCurrentTool();
+			if (tool == nullptr || axis->index >= MAX_TOTAL_AXES)
+			{
+				return 0.0f;
+			}
+
+			return tool->offsets[axis->index];
+		}
+	} // namespace
+
 	void ObjectCancelPresenter::onActivate()
 	{
 		ZoneScoped;
@@ -68,6 +94,19 @@ namespace UI
 		float xMax = axisX ? axisX->maxPosition : 300.0f;
 		float yMin = axisY ? axisY->minPosition : 0.0f;
 		float yMax = axisY ? axisY->maxPosition : 300.0f;
+
+		if (axisX)
+		{
+			const float xOffset = getToolOffsetForAxis(axisX);
+			xMin += xOffset;
+			xMax += xOffset;
+		}
+		if (axisY)
+		{
+			const float yOffset = getToolOffsetForAxis(axisY);
+			yMin += yOffset;
+			yMax += yOffset;
+		}
 
 		// If no axis data, derive range from object bounds (with small margin)
 		if (!axisX || !axisY)

@@ -136,6 +136,19 @@ bool ToolSubscribers::toolMix(Comm::JsonDecoder* decoder, const float& data, con
 	return true;
 }
 
+bool ToolSubscribers::toolOffset(Comm::JsonDecoder* decoder, const float& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::UpdateToolOffset(indices[0], indices[1], data))
+	{
+		LOG_ERROR("Failed to update tool {:d} offset {:d} to {:g}", indices[0], indices[1], data);
+		return false;
+	}
+	Model::get().post<EventType::AxesData>();
+	return true;
+}
+
 bool ToolSubscribers::toolState(Comm::JsonDecoder* decoder, const char* data, const size_t indices[])
 {
 	ZoneScoped;

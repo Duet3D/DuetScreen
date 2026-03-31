@@ -18,6 +18,7 @@ class ToolSubscribers : public SubscriberMap
 		addSubscriber("tools^:spindleRpm", toolSpindleRpm);
 		addSubscriber("tools^:name", toolName);
 		addSubscriber("tools^:mix^", toolMix);
+		addSubscriber("tools^:offsets^", toolOffset);
 		addSubscriber("tools^:state", toolState);
 
 		addArrayEndSubscriber("tools^", toolArrayEnd);
@@ -38,6 +39,7 @@ class ToolSubscribers : public SubscriberMap
 	static bool toolSpindleRpm(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[]);
 	static bool toolName(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 	static bool toolMix(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool toolOffset(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
 	static bool toolState(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 
 	static bool toolArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);

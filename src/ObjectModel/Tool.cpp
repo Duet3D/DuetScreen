@@ -646,6 +646,23 @@ namespace OM
 		return tool->RemoveFansFrom(firstIndexToDelete) > 0;
 	}
 
+	bool UpdateToolOffset(const size_t toolIndex, const size_t axisIndex, const float offset)
+	{
+		if (axisIndex >= MAX_TOTAL_AXES)
+		{
+			return false;
+		}
+
+		auto tool = OM::GetOrCreateTool(toolIndex);
+		if (tool == nullptr)
+		{
+			return false;
+		}
+
+		tool->offsets[axisIndex] = offset;
+		return true;
+	}
+
 	bool UpdateToolTemp(const size_t toolIndex, const size_t toolHeaterIndex, const int32_t temp, const bool active)
 	{
 		auto tool = OM::GetOrCreateTool(toolIndex);

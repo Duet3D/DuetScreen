@@ -3,6 +3,7 @@
 #include "Hardware/Duet.h"
 #include "HeightmapView.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tool.h"
 #include "i18n/i18n.h"
 #include <cmath>
 #include <span>
@@ -11,6 +12,42 @@
 
 namespace UI
 {
+	namespace
+	{
+		float getToolOffsetForAxis(const OM::Move::AxisPtr& axis)
+		{
+			if (axis == nullptr)
+			{
+				return 0.0f;
+			}
+
+			const char axisLetter = axis->letter[0];
+			if (axisLetter != 'X' && axisLetter != 'Y')
+			{
+				return 0.0f;
+			}
+
+			auto tool = OM::GetCurrentTool();
+			if (tool == nullptr || axis->index >= MAX_TOTAL_AXES)
+			{
+				return 0.0f;
+			}
+
+			return tool->offsets[axis->index];
+		}
+
+		HeightmapPresenter::AxisRange getAdjustedAxisRange(const OM::Move::AxisPtr& axis)
+		{
+			if (axis == nullptr)
+			{
+				return {};
+			}
+
+			const float toolOffset = getToolOffsetForAxis(axis);
+			return {axis->minPosition + toolOffset, axis->maxPosition + toolOffset};
+		}
+	} // namespace
+
 	void HeightmapPresenter::setRenderMode(HeightmapRenderMode mode)
 	{
 		ZoneScoped;
@@ -65,12 +102,15 @@ namespace UI
 
 		LOG_DBG("Rendering heightmap {:s}", heightmap->GetFileName());
 
-		getView()->setShownHeightmapName(heightmap->GetFileName());
-		getView()->setXRange({static_cast<int32_t>(axis0->minPosition), static_cast<int32_t>(axis0->maxPosition)});
-		getView()->setYRange({static_cast<int32_t>(axis1->minPosition), static_cast<int32_t>(axis1->maxPosition)});
+		const auto axis0Range = getAdjustedAxisRange(axis0);
+		const auto axis1Range = getAdjustedAxisRange(axis1);
 
-		m_axis0Range = {axis0->minPosition, axis0->maxPosition};
-		m_axis1Range = {axis1->minPosition, axis1->maxPosition};
+		getView()->setShownHeightmapName(heightmap->GetFileName());
+		getView()->setXRange({static_cast<int32_t>(axis0Range.min), static_cast<int32_t>(axis0Range.max)});
+		getView()->setYRange({static_cast<int32_t>(axis1Range.min), static_cast<int32_t>(axis1Range.max)});
+
+		m_axis0Range = axis0Range;
+		m_axis1Range = axis1Range;
 
 		switch (m_mode)
 		{
@@ -238,8 +278,10 @@ namespace UI
 			return;
 		}
 
-		if (m_axis0Range == AxisRange(axis0->minPosition, axis0->maxPosition) &&
-			m_axis1Range == AxisRange(axis1->minPosition, axis1->maxPosition))
+		const auto axis0Range = getAdjustedAxisRange(axis0);
+		const auto axis1Range = getAdjustedAxisRange(axis1);
+
+		if (m_axis0Range == axis0Range && m_axis1Range == axis1Range)
 		{
 			LOG_VERBOSE("No change in axis range");
 			return;
