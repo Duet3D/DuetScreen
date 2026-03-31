@@ -753,4 +753,20 @@ namespace OM
 		}
 		return GetTool(s_currentTool);
 	}
+
+	float GetCurrentToolAxisOffset(const Move::AxisPtr& axis)
+	{
+		if (axis == nullptr)
+		{
+			return 0.0f;
+		}
+
+		auto tool = GetCurrentTool();
+		if (tool == nullptr || axis->index >= MAX_TOTAL_AXES)
+		{
+			return 0.0f;
+		}
+
+		return tool->offsets[axis->index];
+	}
 } // namespace OM

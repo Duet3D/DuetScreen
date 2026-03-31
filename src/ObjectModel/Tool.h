@@ -149,4 +149,5 @@ namespace OM
 
 	void SetCurrentTool(const int32_t toolIndex);
 	ToolPtr GetCurrentTool();
+	float GetCurrentToolAxisOffset(const Move::AxisPtr& axis);
 } // namespace OM

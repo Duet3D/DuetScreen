@@ -14,28 +14,6 @@ namespace UI
 {
 	namespace
 	{
-		float getToolOffsetForAxis(const OM::Move::AxisPtr& axis)
-		{
-			if (axis == nullptr)
-			{
-				return 0.0f;
-			}
-
-			const char axisLetter = axis->letter[0];
-			if (axisLetter != 'X' && axisLetter != 'Y')
-			{
-				return 0.0f;
-			}
-
-			auto tool = OM::GetCurrentTool();
-			if (tool == nullptr || axis->index >= MAX_TOTAL_AXES)
-			{
-				return 0.0f;
-			}
-
-			return tool->offsets[axis->index];
-		}
-
 		HeightmapPresenter::AxisRange getAdjustedAxisRange(const OM::Move::AxisPtr& axis)
 		{
 			if (axis == nullptr)
@@ -43,7 +21,7 @@ namespace UI
 				return {};
 			}
 
-			const float toolOffset = getToolOffsetForAxis(axis);
+			const float toolOffset = OM::GetCurrentToolAxisOffset(axis);
 			return {axis->minPosition + toolOffset, axis->maxPosition + toolOffset};
 		}
 	} // namespace

@@ -17,31 +17,6 @@
 
 namespace UI
 {
-	namespace
-	{
-		float getToolOffsetForAxis(const OM::Move::AxisPtr& axis)
-		{
-			if (axis == nullptr)
-			{
-				return 0.0f;
-			}
-
-			const char axisLetter = axis->letter[0];
-			if (axisLetter != 'X' && axisLetter != 'Y')
-			{
-				return 0.0f;
-			}
-
-			auto tool = OM::GetCurrentTool();
-			if (tool == nullptr || axis->index >= MAX_TOTAL_AXES)
-			{
-				return 0.0f;
-			}
-
-			return tool->offsets[axis->index];
-		}
-	} // namespace
-
 	void ObjectCancelPresenter::onActivate()
 	{
 		ZoneScoped;
@@ -97,13 +72,13 @@ namespace UI
 
 		if (axisX)
 		{
-			const float xOffset = getToolOffsetForAxis(axisX);
+			const float xOffset = OM::GetCurrentToolAxisOffset(axisX);
 			xMin += xOffset;
 			xMax += xOffset;
 		}
 		if (axisY)
 		{
-			const float yOffset = getToolOffsetForAxis(axisY);
+			const float yOffset = OM::GetCurrentToolAxisOffset(axisY);
 			yMin += yOffset;
 			yMax += yOffset;
 		}
