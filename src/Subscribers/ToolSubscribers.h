@@ -25,6 +25,7 @@ class ToolSubscribers : public SubscriberMap
 		addArrayEndSubscriber("tools^:heaters^", toolHeaterArrayEnd);
 		addArrayEndSubscriber("tools^:extruders^", toolExtruderArrayEnd);
 		addArrayEndSubscriber("tools^:fans^", toolFanArrayEnd);
+		addArrayEndSubscriber("tools^:offsets^", toolOffsetArrayEnd);
 	}
 
   private:
@@ -46,4 +47,5 @@ class ToolSubscribers : public SubscriberMap
 	static bool toolHeaterArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
 	static bool toolExtruderArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
 	static bool toolFanArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
+	static bool toolOffsetArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
 };

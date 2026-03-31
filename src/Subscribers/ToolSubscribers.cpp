@@ -145,7 +145,6 @@ bool ToolSubscribers::toolOffset(Comm::JsonDecoder* decoder, const float& data, 
 		LOG_ERROR("Failed to update tool {:d} offset {:d} to {:g}", indices[0], indices[1], data);
 		return false;
 	}
-	Model::get().post<EventType::AxesData>();
 	return true;
 }
 
@@ -200,5 +199,20 @@ bool ToolSubscribers::toolFanArrayEnd(Comm::JsonDecoder* decoder, const size_t i
 	if (OM::RemoveToolFans(indices[0], indices[1]))
 	{
 	}
+	return true;
+}
+
+bool ToolSubscribers::toolOffsetArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	for (size_t axisIndex = indices[1]; axisIndex < MAX_TOTAL_AXES; ++axisIndex)
+	{
+		if (!OM::UpdateToolOffset(indices[0], axisIndex, 0.0f))
+		{
+			LOG_ERROR("Failed to reset tool {:d} offset {:d} to 0", indices[0], axisIndex);
+		}
+	}
+	Model::get().post<EventType::AxesData>();
 	return true;
 }
