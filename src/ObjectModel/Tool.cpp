@@ -658,7 +658,7 @@ namespace OM
 		{
 			return false;
 		}
-
+		LOG_DBG("Updated tool offset: tool={:d} axis={:d} offset={:g}", toolIndex, axisIndex, offset);
 		tool->offsets[axisIndex] = offset;
 		return true;
 	}
