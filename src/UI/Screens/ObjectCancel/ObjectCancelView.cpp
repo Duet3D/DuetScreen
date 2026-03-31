@@ -95,6 +95,7 @@ namespace UI
 		addStyle(Themes::getLvglStyles().bg_dark);
 		m_canvas.addStyle(Themes::getLvglStyles().card);
 		m_canvas.addStyle(Themes::getLvglStyles().pad_base);
+		m_canvas.setStylePad(20, LV_PART_MAIN, Padding::RIGHT);
 		m_objectList.addStyle(Themes::getLvglStyles().card);
 		m_cancelCurrentBtn.addStyle(Themes::getLvglStyles().actionBtn);
 
