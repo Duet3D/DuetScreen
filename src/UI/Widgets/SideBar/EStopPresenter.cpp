@@ -17,10 +17,8 @@ namespace UI
 	{
 		ZoneScoped;
 		LOG_WARN("EStop Pressed!");
-		Comm::DUET.SendGcode("M112 M999\n");
-		LOG_WARN("Emergency Stop sent to Duet");
-		Comm::DUET.Disconnect();
-		Model::get().post<EventType::Response>(ResponseType::WARNING, _("estop.message"));
+		Comm::DUET.Estop();
+		Model::get().post<EventType::Response>(ResponseType::ERROR, _("estop.message"));
 	}
 
 } // namespace UI

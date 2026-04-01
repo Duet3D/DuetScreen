@@ -319,6 +319,16 @@ namespace Comm
 		return true;
 	}
 
+	void Duet::Estop()
+	{
+		SendGcode("M112 M999\n", true);
+		LOG_WARN("Emergency Stop sent to Duet");
+		if (GetCommunicationType() == Comm::CommunicationType::network)
+		{
+			Disconnect();
+		}
+	}
+
 	void Duet::SendGcode(std::string_view gcode, bool force)
 	{
 		ZoneScoped;
