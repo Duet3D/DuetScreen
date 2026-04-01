@@ -73,7 +73,8 @@
     "estop": { /* Estop widget */
       "label": "\uF071", /* Warning symbol */
       "prompt": "Drag to E-Stop!",
-      "message": "Emergency Stop, trying to reconnect..."
+      "message": "Emergency Stop, trying to reconnect...",
+      "reset_message": "Printer is halted. Sending M999 to reset. Please wait..."
     },
     "extrude": { /* Extrude control widget */
       "tool_select": "Select Tool",

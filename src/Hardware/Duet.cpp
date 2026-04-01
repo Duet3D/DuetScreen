@@ -332,36 +332,11 @@ namespace Comm
 		switch (m_config.communicationType)
 		{
 		case CommunicationType::uart:
-		case CommunicationType::usb:
 		{
 			std::lock_guard<LockableBase(std::mutex)> lock(m_sendLock);
-			std::size_t usbChannel = 0;
-#if ENABLE_SECOND_USB_CHANNEL
-			if (m_config.communicationType == CommunicationType::usb)
-			{
-				std::string_view command = gcode;
-				if (const std::size_t first = command.find_first_not_of(" \t\r\n"); first != std::string_view::npos)
-				{
-					command.remove_prefix(first);
-				}
-				static constexpr std::string_view channelOneCommands[] = {
-					"M409", "M112", "M999", "M111", "M122", "M108", "M25"};
-				for (const std::string_view channelOneCommand : channelOneCommands)
-				{
-					if (command.starts_with(channelOneCommand))
-					{
-						usbChannel = 1;
-						break;
-					}
-				}
-			}
-#endif
 			CRC16 crc;
 			size_t len = 0;
 			std::string_view line;
-			const bool useUart = m_config.communicationType == CommunicationType::uart;
-			auto send_cb = [useUart, usbChannel](std::string_view payload)
-			{ return useUart ? SerialIo::Send(payload) : sendUsbData(payload, usbChannel); };
 
 			for (size_t i = 0; i < gcode.length(); i++)
 			{
@@ -369,8 +344,8 @@ namespace Comm
 				if (c == '\n')
 				{
 					line = gcode.substr(i - len, len);
-					send_cb(line);
-					send_cb(fmt::format("*{:05d}\n", crc.Get()));
+					SerialIo::Send(line);
+					SerialIo::Send(fmt::format("*{:05d}\n", crc.Get()));
 					len = 0;
 					crc.Reset(0);
 					continue;
@@ -383,7 +358,7 @@ namespace Comm
 					{
 						crc.Update(line_c);
 					}
-					send_cb(lineNumberStr);
+					SerialIo::Send(lineNumberStr);
 				}
 				len++;
 				crc.Update(c);
@@ -391,8 +366,60 @@ namespace Comm
 			if (len > 0)
 			{
 				line = gcode.substr(gcode.length() - len, len);
+				SerialIo::Send(line);
+				SerialIo::Send(fmt::format("*{:05d}\n", crc.Get()));
+			}
+			break;
+		}
+		case CommunicationType::usb:
+		{
+			std::lock_guard<LockableBase(std::mutex)> lock(m_sendLock);
+			std::size_t usbChannel = 0;
+			size_t len = 0;
+			std::string_view line;
+#if ENABLE_SECOND_USB_CHANNEL
+			std::string_view command = gcode;
+			if (const std::size_t first = command.find_first_not_of(" \t\r\n"); first != std::string_view::npos)
+			{
+				command.remove_prefix(first);
+			}
+			static constexpr std::string_view channelOneCommands[] = {
+				"M409", "M112", "M999", "M111", "M122", "M108", "M25"};
+			for (const std::string_view channelOneCommand : channelOneCommands)
+			{
+				if (command.starts_with(channelOneCommand))
+				{
+					usbChannel = 1;
+					break;
+				}
+			}
+#endif
+
+			auto send_cb = [usbChannel](std::string_view payload) { return sendUsbData(payload, usbChannel); };
+			for (size_t i = 0; i < gcode.length(); i++)
+			{
+				char c = gcode[i];
+				if (c == '\n')
+				{
+					line = gcode.substr(i - len, len);
+					send_cb(line);
+					send_cb("\n");
+					len = 0;
+					continue;
+				}
+				if (len == 0)
+				{
+					uint32_t lineNumber = GetNextLineNumber();
+					std::string lineNumberStr = fmt::format("N{:d} ", lineNumber);
+					send_cb(lineNumberStr);
+				}
+				len++;
+			}
+			if (len > 0)
+			{
+				line = gcode.substr(gcode.length() - len, len);
 				send_cb(line);
-				send_cb(fmt::format("*{:05d}\n", crc.Get()));
+				send_cb("\n");
 			}
 			break;
 		}
@@ -1108,8 +1135,10 @@ namespace Comm
 			{
 				LOG_DBG("Connected to USB device");
 				m_connectionState = ConnectionState::CONNECTED; // set connected state so SendGcode actually works
-				SendGcode("M575 P0 S4\n",
-						  true); // set serial comm parameters for USB port to use JSON responses and CRC
+				SendGcode("M575 P0 S0\n",
+						  true); // set serial comm parameters for USB port to use JSON responses (no CRC as USB already
+								 // has error checking), this also serves as a test command to verify that the
+								 // connection is working
 			}
 			else
 			{
