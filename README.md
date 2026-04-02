@@ -92,6 +92,9 @@ There are a few methods to connect the Duet3D screen to a WiFi network:
     - This method is useful if you are setting up a single screen and you do not know the WiFi credentials in advance.
     - This method can be used after first boot if you do not want to pre-seed `wpa_supplicant.conf`.
 
+> [!NOTE]
+> The screen can be given a static IP address on first boot
+> [Documentation](https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#static-ip-address)
 
 ## Powering the Duet3D screen
 The Duet3D screen can be powered in the following ways:
@@ -125,7 +128,14 @@ Multiple methods are available to connect the Duet3D screen to a mainboard. The 
 
 1. Ensure the Duet3D screen is connected to the same WiFi network as the mainboard.
     - See the [Connecting the Duet3D screen to a WiFi network](#connecting-the-duet3d-screen-to-a-wifi-network) section above.
-2. In the GUI, select the WiFi connection method.
+2. In the GUI, select the `Network` connection method.
+4. Enter the IP address of the mainboard.
+
+### Ethernet
+1. Connect a supported USB-Ethernet adapter to the USB-A or USB-C port on the screen.
+    - If using the USB-C port then set it to `USB-C Host` in the GUI.
+2. Connect the Ethernet adapter to the same network as the mainboard using an Ethernet cable.
+3. In the GUI, select the `Network` connection method.
 4. Enter the IP address of the mainboard.
 
 ### UART
