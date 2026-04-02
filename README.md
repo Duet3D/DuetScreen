@@ -184,12 +184,13 @@ After updating the screen, it will show an update success or update failed messa
 
 ## USB Ports
 The Duet3D screen has two USB ports:
-- USB-A: This port is also a host port. 
-    - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives.
+- USB-A: This port is always a host port. 
+    - It can be used to connect to a Duet3D mainboard, wifi modules, USB-ethernet adapters, or USB flash drives.
 - USB-C: This port can be a host or device port.
-    - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives in host mode.
+    - It can be used to connect to a Duet3D mainboard, wifi modules, USB-ethernet adapters, or USB flash drives in host mode.
     - It can be used to connect to a PC in device mode for software debugging.
     - It can be used to power the screen in either mode (assuming the attached device/host is able to supply power).
+        - Some smart chargers will not power the screen if it is a USB host
 
 > [!WARNING]
 > A Duet3D mainboard CANNOT provide power to the screen via the USB-C. Always power the screen via the 5V_IN port when using USB
