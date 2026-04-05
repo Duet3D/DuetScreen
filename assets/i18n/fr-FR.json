@@ -421,7 +421,8 @@
         "industrial": "Industriel",
         "soft": "Doux",
         "neon": "Néon",
-        "retro": "Rétro"
+        "retro": "Rétro",
+        "3d": "3D"
       },
       "icon_sets": {
         "material": "Material"

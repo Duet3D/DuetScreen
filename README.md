@@ -48,14 +48,20 @@ The screenshots below are taken from the repository test references in [tests/re
 
 ### Themes
 
-| Theme | Screenshot |
-| --- | --- |
-| DuetScreen | ![DuetScreen](tests/ref_imgs/home_view/dashboard/theme_duetscreen.png) |
-| Flat | ![Flat](tests/ref_imgs/home_view/dashboard/theme_flat.png) |
-| Industrial | ![Industrial](tests/ref_imgs/home_view/dashboard/theme_industrial.png) |
-| Neon | ![Neon](tests/ref_imgs/home_view/dashboard/theme_neon.png) |
-| Retro | ![Retro](tests/ref_imgs/home_view/dashboard/theme_retro.png) |
-| Soft | ![Soft](tests/ref_imgs/home_view/dashboard/theme_soft.png) |
+Themes allow the UI styling to be changed. This includes colours, fonts, and other styling options.
+
+Customisable themes allow the user to change the colours for a given theme to their liking, while non-customisable themes have fixed colours that cannot be changed by the user.
+
+| Theme | Screenshot | Customisable |
+| --- | --- | --- |
+| DuetScreen | ![DuetScreen](tests/ref_imgs/home_view/dashboard/theme_duetscreen.png) | ✅ |
+| Flat | ![Flat](tests/ref_imgs/home_view/dashboard/theme_flat.png) | ✅ |
+| Industrial | ![Industrial](tests/ref_imgs/home_view/dashboard/theme_industrial.png) | ✅ |
+| Neon | ![Neon](tests/ref_imgs/home_view/dashboard/theme_neon.png) | ✅ |
+| Retro | ![Retro](tests/ref_imgs/home_view/dashboard/theme_retro.png) | ✅ |
+| Soft | ![Soft](tests/ref_imgs/home_view/dashboard/theme_soft.png) | ✅ |
+| 3D | ![3D](tests/ref_imgs/home_view/dashboard/theme_3d.png) | ✅ |
+| Greyscale | ![Greyscale](tests/ref_imgs/home_view/dashboard/theme_grey.png) | ❌ |
 
 ## Getting started
 

@@ -171,6 +171,7 @@ namespace UI
 		legendObj->setSize(LV_PCT(100), LV_SIZE_CONTENT);
 		legendObj->setText(displayName);
 		legendObj->setStyleBgColor(color, LV_STATE_CHECKED);
+		lv_obj_set_style_bg_grad_dir(legendObj->getRootPtr(), LV_GRAD_DIR_NONE, LV_STATE_CHECKED);
 		legendObj->addStyle(Themes::getLvglStyles().border);
 		legendObj->addStyle(Themes::getLvglStyles().bg_light, LV_STATE_DEFAULT);
 		legendObj->addStyle(Themes::getLvglStyles().text, LV_STATE_CHECKED);
