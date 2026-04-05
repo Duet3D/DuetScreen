@@ -307,6 +307,7 @@
       "screen_header": "Bildschirmeinstellungen",
       "screensaver_timeout": "Bildschirmschoner-Timeout (s):",
       "show_confirmation_dialogs": "Bestätigungsdialoge anzeigen:",
+      "enable_animations": "UI-Animationen aktivieren:",
       "storage_info": "Belegter Speicher: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "clear_duetscreen_cache": "Cache leeren",

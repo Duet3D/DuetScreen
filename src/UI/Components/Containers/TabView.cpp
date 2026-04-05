@@ -7,9 +7,48 @@
 
 #include "TabView.h"
 #include "Debug.h"
+#include "UI/Components/LVGL/LvAnim.h"
+#include "UI/Components/LVGL/Transitions.h"
+#include "utils/StorageHelper.h"
 
 namespace UI
 {
+	namespace
+	{
+		static void tabSetXAnimCb(void* var, int32_t value)
+		{
+			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(var));
+			if (obj == nullptr)
+			{
+				return;
+			}
+			obj->setX(static_cast<lv_coord_t>(value));
+		}
+
+		static void outgoingTabDeletedCb(lv_anim_t* anim)
+		{
+			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(anim->var));
+			if (obj == nullptr)
+			{
+				return;
+			}
+
+			obj->setX(0);
+			obj->hide();
+		}
+
+		static void incomingTabDeletedCb(lv_anim_t* anim)
+		{
+			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(anim->var));
+			if (obj == nullptr)
+			{
+				return;
+			}
+
+			obj->setX(0);
+		}
+	} // namespace
+
 	TabView::TabView(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
@@ -137,17 +176,61 @@ namespace UI
 			return;
 		}
 
-		// Hide current tab
-		if (m_currentTabIndex < m_tabs.size())
+		m_tabContent.updateLayout();
+
+		const size_t previous_index = m_currentTabIndex;
+		LvContainer* previous_tab = (previous_index < m_tabs.size()) ? m_tabs.at(previous_index).get() : nullptr;
+		LvContainer& next_tab = *m_tabs.at(index);
+
+		m_currentTabIndex = index;
+		m_tabButtons.iterateListItems([&](size_t i, TabButton& button) { button.setChecked(i == index); });
+
+		const bool animate = StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) && previous_tab != nullptr;
+		if (!animate)
 		{
-			m_tabs.at(m_currentTabIndex)->hide();
+			if (previous_tab != nullptr)
+			{
+				previous_tab->setX(0);
+				previous_tab->hide();
+			}
+
+			next_tab.setX(0);
+			next_tab.show(true);
+			return;
 		}
 
-		// Show new tab
-		m_currentTabIndex = index;
-		m_tabs.at(index)->show(true);
+		const lv_coord_t width = m_tabContent.getWidth();
+		const int32_t direction = (index > previous_index) ? 1 : -1;
+		const lv_coord_t start_x = static_cast<lv_coord_t>(direction * width);
+		const lv_coord_t end_x = static_cast<lv_coord_t>(-direction * width);
 
-		m_tabButtons.iterateListItems([&](size_t i, TabButton& button) { button.setChecked(i == index); });
+		/* Cancel any in-flight position animations before starting a new transition. */
+		lv_anim_delete(previous_tab->getRootPtr(), tabSetXAnimCb);
+		lv_anim_delete(next_tab.getRootPtr(), tabSetXAnimCb);
+
+		previous_tab->setX(0);
+		next_tab.setX(start_x);
+		next_tab.show(true);
+
+		const uint32_t slideDurationMs = Transitions::animDurationMs();
+
+		LvAnim outgoing_anim;
+		outgoing_anim.setVar(previous_tab->getRootPtr());
+		outgoing_anim.setValues(0, end_x);
+		outgoing_anim.setExecCb(tabSetXAnimCb);
+		outgoing_anim.setDuration(slideDurationMs);
+		outgoing_anim.setPathCb(lv_anim_path_ease_in_out);
+		outgoing_anim.setDeletedCb(outgoingTabDeletedCb);
+		outgoing_anim.start();
+
+		LvAnim incoming_anim;
+		incoming_anim.setVar(next_tab.getRootPtr());
+		incoming_anim.setValues(start_x, 0);
+		incoming_anim.setExecCb(tabSetXAnimCb);
+		incoming_anim.setDuration(slideDurationMs);
+		incoming_anim.setPathCb(lv_anim_path_ease_in_out);
+		incoming_anim.setDeletedCb(incomingTabDeletedCb);
+		incoming_anim.start();
 	}
 
 	void TabView::setTabBarPosition(lv_dir_t dir)

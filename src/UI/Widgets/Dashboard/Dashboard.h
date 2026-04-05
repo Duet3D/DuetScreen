@@ -36,6 +36,9 @@ namespace UI
 
 		void clear();
 
+	  protected:
+		void onHide() override;
+
 	  private:
 		ToolList m_toolList{"tool_list", getRoot(), this};
 		TemperatureGraph m_graph{"graph", getRoot()};

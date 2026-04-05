@@ -1,5 +1,6 @@
 #include "Navigation.h"
 #include "Debug.h"
+#include "UI/Components/LVGL/Transitions.h"
 #include <algorithm>
 #include <vector>
 
@@ -271,6 +272,14 @@ namespace UI
 				return;
 			}
 
+			if (closePrevious && !s_openScreens.empty() && s_openScreens.back() == view && view->isVisible())
+			{
+				LOG_DBG("Screen '{:s}' is already the current screen", view->getName());
+				closeAllModals();
+				notifySideBar();
+				return;
+			}
+
 			closeAllModals();
 
 			if (closePrevious)
@@ -282,9 +291,17 @@ namespace UI
 			removeFromVector(s_returnableScreens, view);
 			if (!inVector(s_homeScreens, view))
 			{
+				for (auto& home : s_homeScreens)
+				{
+					if (home->isVisible())
+					{
+						home->hide();
+					}
+				}
 				addToVector(s_openScreens, view);
 			}
 			view->show(true);
+			Transitions::fadeIn(*view);
 			notifySideBar();
 		}
 
@@ -325,6 +342,7 @@ namespace UI
 				for (auto& home : s_homeScreens)
 				{
 					home->show();
+					Transitions::fadeIn(*home);
 				}
 			}
 			notifySideBar();

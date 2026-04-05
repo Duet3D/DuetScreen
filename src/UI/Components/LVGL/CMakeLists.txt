@@ -5,6 +5,7 @@ target_sources(
   PRIVATE 
   ${CMAKE_CURRENT_SOURCE_DIR}/LvAnim.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LvCheckbox.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Transitions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LvContainer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LvDropdown.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LvImage.cpp

@@ -10,6 +10,7 @@
 #include "UI/Components/Button/Button.h"
 #include "UI/Components/LVGL/LvContainer.h"
 #include "UI/Components/LVGL/LvObj.h"
+#include "UI/Components/LVGL/Transitions.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
@@ -114,12 +115,17 @@ namespace UI
 			ZoneScoped;
 			m_modalBg.show(true);
 			T::onShow();
+			/* Fade in the backdrop and pop the card in with a subtle scale+fade */
+			Transitions::fadeIn(m_modalBg, Transitions::animFastDurationMs());
+			Transitions::fadeIn(*this);
+			Transitions::scaleIn(*this);
 		}
 		void onHide() override
 		{
 			ZoneScoped;
 			T::onHide();
-			m_modalBg.hide();
+			/* Fade out the backdrop instead of hiding it instantly */
+			Transitions::fadeOutAndHide(m_modalBg, Transitions::animFastDurationMs());
 		}
 
 	  private:

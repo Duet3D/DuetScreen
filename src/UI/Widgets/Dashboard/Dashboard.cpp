@@ -70,4 +70,11 @@ namespace UI
 		m_graph.clear();
 	}
 
+	void Dashboard::onHide()
+	{
+		ZoneScoped;
+		// Keep only the temperature graph subscriptions active while hidden.
+		m_graph.activate();
+	}
+
 } // namespace UI

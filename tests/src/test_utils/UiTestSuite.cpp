@@ -11,6 +11,7 @@
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 #include "test_utils/utils.h"
+#include "utils/StorageHelper.h"
 
 UiTestSuiteInner::UiTestSuiteInner()
 	: TestSuite()
@@ -47,6 +48,8 @@ UiTestSuiteInner::UiTestSuiteInner()
 
 	i18n::init();
 	i18n::setLanguage(DEFAULT_LANGUAGE_CODE);
+
+	StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, false);
 
 	UI::Themes::init(display);
 #if DEBUG_BORDERS
