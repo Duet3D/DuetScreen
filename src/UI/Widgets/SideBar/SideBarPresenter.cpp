@@ -28,6 +28,12 @@ namespace UI
 		m_view->enableHomeButton(enable);
 	}
 
+	void SideBarPresenter::setSelectedView(LvObj* view)
+	{
+		ZoneScoped;
+		m_view->setSelectedView(view);
+	}
+
 	void SideBarPresenter::newResponse(const ResponseType type, const std::string& /* message */)
 	{
 		ZoneScoped;
@@ -45,6 +51,7 @@ namespace UI
 #else
 		enableHomeButton(true);
 #endif
+		registerEventListener<EventType::NavigationCurrentScreen>(this, &SideBarPresenter::setSelectedView);
 		registerEventListener<EventType::Response>(this, &SideBarPresenter::newResponse);
 	}
 

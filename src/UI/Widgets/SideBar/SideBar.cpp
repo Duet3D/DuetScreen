@@ -150,6 +150,32 @@ namespace UI
 		m_homeBtn.setDisabled(!enable);
 	}
 
+	void SideBar::setSelectedView(LvObj* view)
+	{
+		ZoneScoped;
+		auto& homeView = HomeView::instance();
+
+		const bool isHomeSelected = (view == nullptr);
+		const bool isControlSelected = (view == &homeView.getControlView());
+		const bool isFilesSelected = (view == &homeView.getFileView());
+#if SIDE_BAR_CONSOLE_BUTTON
+		const bool isConsoleSelected = (view == &homeView.getConsoleView());
+#endif
+#if SIDE_BAR_SETTINGS_BUTTON
+		const bool isSettingsSelected = (view == &homeView.getSettingsView());
+#endif
+
+		m_homeBtn.setChecked(isHomeSelected);
+		m_controlBtn.setChecked(isControlSelected);
+		m_filesBtn.setChecked(isFilesSelected);
+#if SIDE_BAR_CONSOLE_BUTTON
+		m_consoleBtn.setChecked(isConsoleSelected);
+#endif
+#if SIDE_BAR_SETTINGS_BUTTON
+		m_settingsBtn.setChecked(isSettingsSelected);
+#endif
+	}
+
 #if SIDE_BAR_BACK_BUTTON
 	void SideBar::enableBackButton(bool enable)
 	{

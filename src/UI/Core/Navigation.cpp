@@ -47,6 +47,8 @@ namespace UI
 		ZoneScoped;
 		Model::get().post<EventType::NavigationHomeEnable>(s_openScreens.size() > 0);
 		Model::get().post<EventType::NavigationBackEnable>(s_openScreens.size() > 0 || s_openModals.size() > 0);
+		LvObj* currentScreen = s_openScreens.empty() ? nullptr : s_openScreens.back();
+		Model::get().post<EventType::NavigationCurrentScreen>(currentScreen);
 	}
 
 	/**

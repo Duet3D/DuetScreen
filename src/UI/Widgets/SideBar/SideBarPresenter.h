@@ -21,6 +21,7 @@ namespace UI
 	  protected:
 		void enableBackButton(bool enable);
 		void enableHomeButton(bool enable);
+		void setSelectedView(LvObj* view);
 		void newResponse(const ResponseType type, const std::string& message);
 
 		void onInit() override;
