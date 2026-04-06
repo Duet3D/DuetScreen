@@ -1,0 +1,11 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    init: true
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: ..
+        target: /workspaces/DuetScreen

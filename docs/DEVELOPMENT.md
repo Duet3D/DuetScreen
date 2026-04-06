@@ -2,7 +2,9 @@
 
 ## Get started
 
-This project is tested on developed on Ubuntu 24.04 LTS. It might be possible to develop on other Linux distributions or operating systems but this is not officially supported.
+This project is developed and tested in the included devcontainer on Ubuntu 24.04 LTS. The supported setup is VS Code + Docker via the files in `.devcontainer/`.
+
+It might be possible to develop on other Linux distributions or operating systems, or to work outside the devcontainer, but that is not the primary workflow documented here.
 
 Clone the project and the related sub modules:
 
@@ -17,48 +19,62 @@ git clone --recursive git@github.com:Duet3D/DuetScreen.git
 > [!WARNING]
 > The project uses Git Submodules. When cloning the project or checking out a branch/commit, make sure to run `git submodule update --init --recursive` to ensure that the submodules are checked out to the correct commit.
 
-The recommended compiler is `gcc-15`. The toolchain is entirely managed by buildroot if you are building for the T113 so you only need to worry about it if you are building the simulation. It might be possible to use other compilers but this is not officially supported.
-
-There is an install script to install `gcc-15`. On Ubuntu 24.04 LTS it will try the `ubuntu-toolchain-r/test` PPA first; on Debian-based systems such as Raspberry Pi OS it falls back to building GCC from source when `gcc-15` is not available from apt. Run the following command to install `gcc-15`:
-```bash
-./scripts/install_gcc15.sh
-```
+The devcontainer installs the required build tools, Python dependencies, and `gcc-15` automatically. You only need to install `gcc-15` yourself if you deliberately build the simulation outside the devcontainer.
 
 ## Setting up VSCode
 
-The project is setup to use VSCode as the development environment. The project uses CMake and is possible to build entirely from a CLI. However, using VSCode makes it easier to debug and develop the code.
+The project is set up to use VS Code as the development environment. The project uses CMake and can be built entirely from a CLI, but the intended workflow is to do that from inside the devcontainer.
 
- The following extensions are required:
+The following host tools are required:
+- Docker Engine or Docker Desktop
+- VS Code
+
+The following VS Code extensions are required on the host:
 - [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 - [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
+- [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
 These extensions are recommended but not required:
 - [Smart File Templates](https://marketplace.visualstudio.com/items?itemName=TrevorNesbitt.smart-file-templates)
 - [LLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)
 
-The following steps are required to setup VSCode as the development environment for the project.
-- Copy `.vscode/settings.json.default` to `.vscode/settings.json`
-- If you want to upload/debug code running on the physical screen then you will need to:
-  - Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) repository.
-  - Build the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project.
-  - Set the `buildroot_path` and `duetscreen_ip` settings in `.vscode/settings.json` to the appropriate values:
-    - `buildroot_path`: The absolute path to the cloned `buildroot-duetscreen` repository.
-    - `duetscreen_ip`: The IP address of the Duet3D screen on the network.
+If you want to upload or debug code running on the physical screen, clone [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) as a sibling of this repository before opening the devcontainer:
+
+```text
+parent-folder/
+├── DuetScreen/
+└── buildroot-duetscreen/
+```
+
+When the folder layout matches this structure, the devcontainer automatically bind mounts `../buildroot-duetscreen` to `/workspaces/buildroot-duetscreen` and the existing T113 tasks work without extra VS Code settings.
+
+## Devcontainer
+
+This repository includes a devcontainer under `.devcontainer/` for Linux development in Docker.
+
+1. Clone this repository with submodules.
+2. Optionally clone `buildroot-duetscreen` next to it if you need T113 build, deploy, or remote debug tasks.
+3. Open the `DuetScreen` folder in VS Code.
+4. Run `Dev Containers: Reopen in Container`.
+5. Wait for the post-create setup to finish.
+
+The post-create step creates `env/` if needed and installs the Python requirements automatically.
+
+If a folder named `buildroot-duetscreen` exists in the parent directory of this repository, the devcontainer setup automatically bind mounts it at `/workspaces/buildroot-duetscreen`.
+
+This allows the existing T113 tasks that use `${config:buildroot_path}` to work from inside the container with `buildroot_path` set to `/workspaces/buildroot-duetscreen`.
+
+You do not need to run `scripts/install_prerequisites.sh` or `scripts/install_gcc15.sh` when using the devcontainer.
 
 ## Simulating
 
 It is possible to simulate the GUI on PC without access to the physical hardware. This can be beneficial for testing and development purposes as it allows for debugging using gdb. 
 
-The easiest way to setup the simulation environment is to use VSCode with the provided configurations
+The easiest way to set up the simulation environment is to use VS Code inside the devcontainer with the provided configurations.
 
 The simulation is only setup to run on Linux or WSL2 on Windows.
 
-The following steps are required to run the GUI on PC:
-
-### Install the required dependencies:
-```bash
-./scripts/install_prerequisites.sh
-```
+After reopening in the devcontainer, the following steps are required to run the GUI on PC:
 
 ### Setup udev rules for USB communications
 > [!NOTE]
@@ -111,16 +127,25 @@ or
 ./out/build/Simulation-Release/DuetScreen
 ```
 
+If you are intentionally building outside the devcontainer, install the native dependencies first:
+
+```bash
+./scripts/install_prerequisites.sh
+./scripts/install_gcc15.sh
+```
+
 ## Building for the Duet3D screen
-1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project
-2. Checkout the `master` branch
-3. Enable SSH on the Duet3D screen
+1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project next to this repository.
+2. Checkout the `master` branch.
+3. Reopen `DuetScreen` in the devcontainer so the sibling buildroot checkout is mounted automatically.
+4. Enable SSH on the Duet3D screen.
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-4. In vscode, run the `Push DuetScreen - SSH - Release` task.
+5. In VS Code, run the `Push DuetScreen - SSH - Release` task.
   - This will build the project and push the binary to the Duet3D screen.
   - Use the `Push DuetScreen - SSH - Debug` task to push the debug version of the binary.
-5. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
-6. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+6. Enter the screen IP address when prompted by the task or debug configuration.
+7. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
+8. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
 ## Debugging / Running Simulation
 > [!NOTE]

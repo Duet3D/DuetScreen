@@ -88,7 +88,7 @@
 			"command": "rm -rf output/build/duetscreen-HEAD; rm -rf dl/duetscreen",
 			"args": [],
 			"options": {
-				"cwd": "${config:buildroot_path}"
+				"cwd": "${workspaceFolder}/${config:buildroot_path}"
 			},
 			"group": {
 				"kind": "build",
@@ -103,7 +103,7 @@
 			"command": "make duetscreen-reconfigure",
 			"args": [],
 			"options": {
-				"cwd": "${config:buildroot_path}",
+				"cwd": "${workspaceFolder}/${config:buildroot_path}",
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					"DUETSCREEN_PRESET": "T113-Debug",
@@ -125,7 +125,7 @@
 			"command": "make duetscreen-reconfigure",
 			"args": [],
 			"options": {
-				"cwd": "${config:buildroot_path}",
+				"cwd": "${workspaceFolder}/${config:buildroot_path}",
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER=\"AD-04-01_\"",
@@ -146,7 +146,7 @@
 			"label": "Push DuetScreen - SSH - Debug",
 			"type": "shell",
 			"options": {
-				"cwd": "${config:buildroot_path}",
+				"cwd": "${workspaceFolder}/${config:buildroot_path}",
 				"shell": {
 					"executable": "/bin/bash",
 					"args": [
@@ -173,7 +173,7 @@
 			"label": "Push DuetScreen - SSH - Release",
 			"type": "shell",
 			"options": {
-				"cwd": "${config:buildroot_path}",
+				"cwd": "${workspaceFolder}/${config:buildroot_path}",
 				"shell": {
 					"executable": "/bin/bash",
 					"args": [
@@ -224,7 +224,7 @@
 			"label": "Push Libraries - SSH",
 			"type": "shell",
 			"options": {
-				"cwd": "${config:buildroot_path}",
+				"cwd": "${workspaceFolder}/${config:buildroot_path}",
 				"shell": {
 					"executable": "/bin/bash",
 					"args": [
