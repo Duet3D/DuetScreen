@@ -347,7 +347,7 @@ bool ThumbnailSubscribers::generatedBy(Comm::JsonDecoder* decoder, const char* d
 		LOG_WARN("FileInfo not found");
 		return false;
 	}
-	fileInfo->generatedBy.copy(data);
+	fileInfo->generatedBy.copy(data == nullptr ? "" : data);
 	FILEINFO_CACHE->FileInfoRequestComplete(fileInfo->filename.c_str());
 	return true;
 }

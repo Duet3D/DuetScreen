@@ -17,11 +17,8 @@ namespace UI
 	  public:
 		PRESENTER_CONSTRUCTOR(MotionSystemsPresenter, MotionSystemsView)
 
-		void newCurrentTool();
-		void newSpeedFactor();
-		void newCurrentMoveRequestedSpeed();
-		void newCurrentMoveTopSpeed();
-		void tick();
+		void newMotionSystemData();
+		void newAxesData();
 
 	  protected:
 		void onInit() override;

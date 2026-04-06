@@ -26,9 +26,16 @@ namespace UI
 		setFlexFlow(LV_FLEX_FLOW_COLUMN);
 		setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
+		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(7), LV_GRID_FR(2), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST},
+				   {LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
+		setGridCell(m_headerCont, LV_GRID_ALIGN_STRETCH, 0, 4, LV_GRID_ALIGN_START, 0, 1);
+		setGridCell(m_speedCont, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+		setGridCell(m_positionCont, LV_GRID_ALIGN_START, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+
 		m_headerCont.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 		m_speedCont.setWidth(LV_PCT(70));
-		m_speedCont.setFlexGrow(1);
+		m_positionCont.setWidth(LV_PCT(20));
+		m_positionCont.setMinWidth(LV_SIZE_CONTENT);
 
 		m_headerCont.setFlexFlow(LV_FLEX_FLOW_COLUMN);
 		m_headerCont.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -122,6 +129,13 @@ namespace UI
 		m_speedBar.setValues(0, 0, LV_ANIM_OFF);
 		m_speedBar.setLabel(_("status.speed_label", 0.0f, 0.0f));
 		setSpeedFactor(100);
+
+		m_positions.setListFlow(LV_FLEX_FLOW_COLUMN);
+		m_positions.setSize(LV_PCT(100), LV_PCT(100));
+		m_positions.getListContainer().setHeight(LV_PCT(100));
+		m_positions.setListPad(0);
+		m_positions.setStylePad(0);
+		m_positions.setItemCount(2);
 	}
 
 	void MotionSystemPanel::setTitle(std::string_view title)
@@ -178,6 +192,20 @@ namespace UI
 		m_speedBar.setLabel(_("status.speed_label", currentSpeed, targetSpeed));
 	}
 
+	void MotionSystemPanel::setPosition(size_t index, char axis_letter, float position)
+	{
+		ZoneScoped;
+
+		if (index >= m_positions.getItemCount())
+		{
+			return;
+		}
+
+		auto& item = *m_positions.getItem(index);
+		item.setAxisLetter(axis_letter);
+		item.setPosition(position);
+	}
+
 	int32_t MotionSystemPanel::sanitizeBarValue(float value)
 	{
 		if (!std::isfinite(value))
@@ -205,5 +233,20 @@ namespace UI
 		m_label.setText("Tool");
 
 		addStyle(Themes::getLvglStyles().outline_primary, LV_STATE_CHECKED);
+	}
+
+	MotionSystemPanel::PositionListItem::PositionListItem(size_t index, LvObj& parent)
+		: ListItem(index, parent)
+	{
+		ZoneScoped;
+		setFlexFlow(LV_FLEX_FLOW_COLUMN);
+		setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+		setSize(LV_PCT(100), LV_SIZE_CONTENT);
+		setMinWidth(LV_SIZE_CONTENT);
+		addStyle(Themes::getLvglStyles().bg_light);
+		addStyle(raisedShadowStyle);
+		m_axisLabel.addStyle(Themes::getLvglStyles().text_emphasis);
+		m_positionLabel.addStyle(Themes::getLvglStyles().text);
 	}
 } // namespace UI

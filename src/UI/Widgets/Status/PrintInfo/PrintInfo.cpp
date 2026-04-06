@@ -142,13 +142,13 @@ namespace UI
 		m_positions.setItemCount(count,
 								 [this](size_t index, LvObj& parent)
 								 {
-									 auto btn = std::make_unique<LvLabel>(fmt::format("axis_{}", index), parent);
-									 btn->setHeight(LV_SIZE_CONTENT);
-									 btn->setFlexGrow(1);
-									 btn->setMinWidth(LV_SIZE_CONTENT);
-									 btn->setStyleTextAlign(LV_TEXT_ALIGN_CENTER);
-									 btn->addStyle(Themes::getLvglStyles().bg_light);
-									 return btn;
+									 auto label = std::make_unique<LvLabel>(fmt::format("axis_{}", index), parent);
+									 label->setHeight(LV_SIZE_CONTENT);
+									 label->setFlexGrow(1);
+									 label->setMinWidth(LV_SIZE_CONTENT);
+									 label->setStyleTextAlign(LV_TEXT_ALIGN_CENTER);
+									 label->addStyle(Themes::getLvglStyles().bg_light);
+									 return label;
 								 });
 	}
 

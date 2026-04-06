@@ -17,8 +17,6 @@ These instructions guide Copilot (and AI agents) when proposing code or edits in
 - **Utils/Infrastructure**: `Debug.*` (logging), `DeadlockDetector.*`, `LockWrapper.*`, `BuildDate.*`. Avoid allocations in render/ISR paths.
 
 ## Developer Workflows (VS Code + CLI)
-- **Simulation Presets**: Configure with `cmake --preset Simulation` (or `Simulation-Release`); build with `cmake --build --preset Simulation`; run `./out/build/Simulation/DuetScreen`.
-- **VS Code Tasks**: Do not use the tasks to configure and build the project, use `cmake` directly in the terminal.
 - **Remote Deploy**: Requires `buildroot-duetscreen` and SSH.
 	- Build + push: `Push DuetScreen - SSH - Release` (or `Debug`).
 	- Start service: `Start DuetScreen on remote`; start gdb: `Start gdbserver on DuetScreen`.

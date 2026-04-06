@@ -12,6 +12,7 @@
 #include "UI/Components/LVGL/LvImage.h"
 #include "UI/Components/LVGL/LvLabel.h"
 #include "UI/Components/LVGL/LvScale.h"
+#include "UI/Components/LVGL/LvSpan.h"
 #include "UI/Components/List/List.h"
 
 namespace UI
@@ -35,6 +36,19 @@ namespace UI
 			LvLabel m_label{"label", getRoot()};
 		};
 
+		class PositionListItem : public ListItem
+		{
+		  public:
+			PositionListItem(size_t index, LvObj& parent);
+
+			void setAxisLetter(char axis_letter) { m_axisLabel.setText(fmt::format("{}:", axis_letter)); }
+			void setPosition(float position) { m_positionLabel.setText(fmt::format("{:.2f}", position)); }
+
+		  private:
+			LvLabel m_axisLabel{"axis_label", getRoot()};
+			LvLabel m_positionLabel{"position_label", getRoot()};
+		};
+
 		MotionSystemPanel(const std::string& name, LvObj& parent);
 
 		void setTitle(std::string_view title);
@@ -45,6 +59,8 @@ namespace UI
 
 		void setSpeedFactor(uint32_t speedFactorPercent);
 		void setSpeeds(float currentSpeed, float targetSpeed);
+
+		void setPosition(size_t index, char axis_letter, float position);
 
 		auto& getToolList() { return m_tools; }
 
@@ -66,5 +82,8 @@ namespace UI
 
 		LvLabel m_speedBarLabel{"speed_bar_label", m_speedCont};
 		CurrentTargetBar m_speedBar{"speed_bar", m_speedCont};
+
+		LvContainer m_positionCont{"position_cont", getRoot()};
+		List<PositionListItem> m_positions{"positions", m_positionCont};
 	};
 } // namespace UI

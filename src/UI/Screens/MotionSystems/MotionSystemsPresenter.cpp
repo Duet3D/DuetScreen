@@ -7,54 +7,19 @@
 #include "MotionSystemsPresenter.h"
 #include "Debug.h"
 #include "MotionSystemsView.h"
-#include "ObjectModel/Axis.h"
+#include "ObjectModel/MotionSystem.h"
 #include "ObjectModel/Tool.h"
+#include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 #include <cmath>
 
 namespace UI
 {
-	static std::array<size_t, 2> motionSystemTools{
-		-1u,
-		-1u,
-	};
-	static std::array<uint32_t, 2> speedFactors{100, 100};
-	static std::array<float, 2> currentSpeeds{0.0f, 0.0f};
-
-	void MotionSystemsPresenter::tick()
-	{
-		/* Populate with random data for testing */
-		for (auto& panel : m_view->getMotionSystemPanels())
-		{
-			const size_t idx = &panel - m_view->getMotionSystemPanels().data();
-			auto& sf = speedFactors[idx];
-			sf += rand() % 5 - 2;
-			sf = std::clamp(sf, 1u, 100u);
-			panel.setSpeedFactor(sf);
-
-			float targetSpeed = static_cast<float>(rand() % 500);
-			float& currentSpeed = currentSpeeds[idx];
-			currentSpeed += std::min(targetSpeed - currentSpeed, 50.0f);
-			panel.setSpeeds(currentSpeed, targetSpeed);
-
-			if (rand() % 20 == 0)
-			{
-				size_t& toolIdx = motionSystemTools[idx];
-				toolIdx = rand() % (panel.getToolList().getItemCount() + 1u) - 1u;
-				panel.setTool(toolIdx);
-			}
-		}
-	}
-
 	void MotionSystemsPresenter::onInit()
 	{
 		ZoneScoped;
-		registerEventListener<EventType::Tick>(this, &MotionSystemsPresenter::tick);
-		registerEventListener<EventType::CurrentTool>(this, &MotionSystemsPresenter::newCurrentTool);
-		registerEventListener<EventType::SpeedFactor>(this, &MotionSystemsPresenter::newSpeedFactor);
-		registerEventListener<EventType::CurrentMoveRequestedSpeed>(
-			this, &MotionSystemsPresenter::newCurrentMoveRequestedSpeed);
-		registerEventListener<EventType::CurrentMoveTopSpeed>(this, &MotionSystemsPresenter::newCurrentMoveTopSpeed);
+		registerEventListener<EventType::MotionSystemData>(this, &MotionSystemsPresenter::newMotionSystemData);
+		registerEventListener<EventType::AxesData>(this, &MotionSystemsPresenter::newAxesData);
 	}
 
 	void MotionSystemsPresenter::onActivate()
@@ -70,42 +35,95 @@ namespace UI
 		ZoneScoped;
 	}
 
-	void MotionSystemsPresenter::newCurrentTool()
+	void MotionSystemsPresenter::newMotionSystemData()
 	{
 		ZoneScoped;
 		refreshTool();
-	}
-
-	void MotionSystemsPresenter::newSpeedFactor()
-	{
-		ZoneScoped;
 		refreshSpeedFactor();
-	}
-
-	void MotionSystemsPresenter::newCurrentMoveRequestedSpeed()
-	{
-		ZoneScoped;
 		refreshSpeeds();
 	}
 
-	void MotionSystemsPresenter::newCurrentMoveTopSpeed()
+	void MotionSystemsPresenter::newAxesData()
 	{
 		ZoneScoped;
-		refreshSpeeds();
+		{
+			auto& panel1 = m_view->getMotionSystemPanel(0);
+			const auto x = OM::Move::GetAxisByLetter('X');
+			const auto y = OM::Move::GetAxisByLetter('Y');
+			panel1.setPosition(0, 'X', x == nullptr ? 0.0f : x->machinePosition);
+			panel1.setPosition(1, 'Y', y == nullptr ? 0.0f : y->machinePosition);
+		}
+		{
+			auto& panel2 = m_view->getMotionSystemPanel(1);
+			const auto x = OM::Move::GetAxisByLetter('U');
+			const auto y = OM::Move::GetAxisByLetter('V');
+			panel2.setPosition(0, 'U', x == nullptr ? 0.0f : x->machinePosition);
+			panel2.setPosition(1, 'V', y == nullptr ? 0.0f : y->machinePosition);
+		}
 	}
 
 	void MotionSystemsPresenter::refreshTool()
 	{
 		ZoneScoped;
+		MODEL_LOCK();
+
+		const size_t toolCount = OM::GetToolCount();
+
+		OM::Move::IterateMotionSystemsWhile(
+			[this, toolCount](OM::Move::MotionSystemPtr ms, size_t idx)
+			{
+				if (idx >= m_view->getMotionSystemPanels().size())
+					return false;
+
+				auto& panel = m_view->getMotionSystemPanel(idx);
+
+				const int32_t currentTool = ms->currentTool;
+				if (currentTool < 0)
+				{
+					panel.setTool(static_cast<size_t>(-1));
+				}
+				else
+				{
+					// Map tool index to slot index in the tool list
+					const size_t slot = idx == 0 ? ms->currentTool : ms->currentTool - getView()->MS_TOOL_COUNT[0];
+					panel.setTool(slot);
+				}
+
+				return true;
+			});
 	}
 
 	void MotionSystemsPresenter::refreshSpeedFactor()
 	{
 		ZoneScoped;
+		MODEL_LOCK();
+
+		OM::Move::IterateMotionSystemsWhile(
+			[this](OM::Move::MotionSystemPtr ms, size_t idx)
+			{
+				if (idx >= m_view->getMotionSystemPanels().size())
+					return false;
+
+				auto& panel = m_view->getMotionSystemPanel(idx);
+				panel.setSpeedFactor(static_cast<uint32_t>(std::lround(100 * ms->speedFactor)));
+				return true;
+			});
 	}
 
 	void MotionSystemsPresenter::refreshSpeeds()
 	{
 		ZoneScoped;
+		MODEL_LOCK();
+
+		OM::Move::IterateMotionSystemsWhile(
+			[this](OM::Move::MotionSystemPtr ms, size_t idx)
+			{
+				if (idx >= m_view->getMotionSystemPanels().size())
+					return false;
+
+				auto& panel = m_view->getMotionSystemPanel(idx);
+				panel.setSpeeds(ms->currentMove.topSpeed, ms->currentMove.requestedSpeed);
+				return true;
+			});
 	}
 } // namespace UI

@@ -18,6 +18,8 @@ namespace UI
 	class MotionSystemsView : public View<MotionSystemsPresenter>
 	{
 	  public:
+		constexpr static std::array<size_t, 2> MS_TOOL_COUNT{3, 2};
+
 		MotionSystemsView(const std::string& name, LvObj& parent);
 
 		MotionSystemPanel& getMotionSystemPanel(size_t motion_system)
