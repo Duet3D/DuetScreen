@@ -9,6 +9,7 @@
 
 #include "Configuration.h"
 #include "Hardware/Duet.h"
+#include "ObjectModel/MotionSystem.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "ObjectModel/Tool.h"
 #include "utils/UnitSystem.h"
@@ -291,6 +292,7 @@ namespace OM::Move
 	{
 		RemoveAxis(0, true);
 		RemoveExtruderAxis(0, true);
+		RemoveMotionSystem(0, true);
 		s_currentWorkplaceNumber = OM::Move::Workplaces::MaxTotalWorkplaces;
 		s_kinematics.Reset();
 		SetSpeedFactor(1.0f);

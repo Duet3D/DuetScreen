@@ -61,6 +61,7 @@ namespace Log
 	XX(CurrentMoveRequestedSpeed)                                                                                      \
 	XX(CurrentMoveTopSpeed)                                                                                            \
 	XX(CurrentMoveExtrusionSpeed)                                                                                      \
+	XX(MotionSystemData)                                                                                               \
 	XX(CompensationFile)                                                                                               \
 	XX(Response, ResponseType, std::string)                                                                            \
 	XX(LogMessage, Log::DebugLevel, Log::log_time_t, std::string)                                                      \

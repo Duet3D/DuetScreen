@@ -37,8 +37,30 @@ class MoveSubscribers : public SubscriberMap
 		addSubscriber("move:compensation:file", compensationFile);
 		addSubscriber("inputs^:distanceUnit", distanceUnit);
 
+		addSubscriber("move:motionSystems^:currentMove:extrusionRate", motionSystemCurrentMoveExtrusionRate);
+		addSubscriber("move:motionSystems^:currentMove:acceleration", motionSystemCurrentMoveAcceleration);
+		addSubscriber("move:motionSystems^:currentMove:deceleration", motionSystemCurrentMoveDeceleration);
+		addSubscriber("move:motionSystems^:currentMove:distance", motionSystemCurrentMoveDistance);
+		addSubscriber("move:motionSystems^:currentMove:duration", motionSystemCurrentMoveDuration);
+		addSubscriber("move:motionSystems^:currentMove:laserPwm", motionSystemCurrentMoveLaserPwm);
+		addSubscriber("move:motionSystems^:currentMove:requestedSpeed", motionSystemCurrentMoveRequestedSpeed);
+		addSubscriber("move:motionSystems^:currentMove:topSpeed", motionSystemCurrentMoveTopSpeed);
+		addSubscriber("move:motionSystems^:currentObject", motionSystemCurrentObject);
+		addSubscriber("move:motionSystems^:currentTool", motionSystemCurrentTool);
+		addSubscriber("move:motionSystems^:nextTool", motionSystemNextTool);
+		addSubscriber("move:motionSystems^:previousTool", motionSystemPreviousTool);
+		addSubscriber("move:motionSystems^:printingAcceleration", motionSystemPrintingAcceleration);
+		addSubscriber("move:motionSystems^:rotation:angle", motionSystemRotationAngle);
+		addSubscriber("move:motionSystems^:rotation:centre^", motionSystemRotationCentre);
+		addSubscriber("move:motionSystems^:speedFactor", motionSystemSpeedFactor);
+		addSubscriber("move:motionSystems^:travelAcceleration", motionSystemTravelAcceleration);
+		addSubscriber("move:motionSystems^:userPosition^", motionSystemUserPosition);
+		addSubscriber("move:motionSystems^:virtualEPos", motionSystemVirtualEPos);
+		addSubscriber("move:motionSystems^:workplaceNumber", motionSystemWorkplaceNumber);
+
 		addArrayEndSubscriber("move:axes^", axesArrayEnd);
 		addArrayEndSubscriber("move:extruders^", extrudersArrayEnd);
+		addArrayEndSubscriber("move:motionSystems^", motionSystemsArrayEnd);
 	}
 
   private:
@@ -74,4 +96,34 @@ class MoveSubscribers : public SubscriberMap
 
 	static bool axesArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
 	static bool extrudersArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
+
+	static bool motionSystemCurrentMoveExtrusionRate(Comm::JsonDecoder* decoder,
+													 const float& data,
+													 const size_t indices[]);
+	static bool motionSystemCurrentMoveAcceleration(Comm::JsonDecoder* decoder,
+													const float& data,
+													const size_t indices[]);
+	static bool motionSystemCurrentMoveDeceleration(Comm::JsonDecoder* decoder,
+													const float& data,
+													const size_t indices[]);
+	static bool motionSystemCurrentMoveDistance(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemCurrentMoveDuration(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemCurrentMoveLaserPwm(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
+	static bool motionSystemCurrentMoveRequestedSpeed(Comm::JsonDecoder* decoder,
+													  const float& data,
+													  const size_t indices[]);
+	static bool motionSystemCurrentMoveTopSpeed(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemCurrentObject(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
+	static bool motionSystemCurrentTool(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[]);
+	static bool motionSystemNextTool(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[]);
+	static bool motionSystemPreviousTool(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[]);
+	static bool motionSystemPrintingAcceleration(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemRotationAngle(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemRotationCentre(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemSpeedFactor(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemTravelAcceleration(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemUserPosition(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemVirtualEPos(Comm::JsonDecoder* decoder, const float& data, const size_t indices[]);
+	static bool motionSystemWorkplaceNumber(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[]);
+	static bool motionSystemsArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[]);
 };

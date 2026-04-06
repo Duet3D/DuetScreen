@@ -78,6 +78,7 @@ constexpr uint16_t HTTP_TIMEOUT = 5; // seconds
 
 /* Object Model */
 constexpr size_t MAX_TOTAL_AXES = 15; // This needs to be kept in sync with the maximum in RRF
+constexpr size_t MAX_MOTION_SYSTEMS = 2;
 constexpr size_t MAX_EXTRUDERS_PER_TOOL = 8;
 constexpr size_t MAX_HEATERS_PER_TOOL = 8;
 constexpr unsigned int MAX_TOOL_NAME_LENGTH = 50;

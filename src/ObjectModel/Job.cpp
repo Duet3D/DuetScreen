@@ -108,7 +108,7 @@ namespace OM
 
 	void SetJobName(const char* name)
 	{
-		s_jobName = name;
+		s_jobName = name != nullptr ? name : "";
 	}
 
 	const std::string& GetJobName()
@@ -118,7 +118,7 @@ namespace OM
 
 	void SetLastJobName(const char* name)
 	{
-		s_lastJobName = name;
+		s_lastJobName = name != nullptr ? name : "";
 	}
 
 	const std::string& GetLastJobName()

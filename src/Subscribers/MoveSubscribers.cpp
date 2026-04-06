@@ -4,6 +4,7 @@
 #include "MoveSubscribers.h"
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/Heightmap.h"
+#include "ObjectModel/MotionSystem.h"
 #include "UI/Core/Model.h"
 
 static size_t getAxisIndex(Comm::JsonDecoder* decoder, const size_t indices[])
@@ -317,7 +318,7 @@ bool MoveSubscribers::compensationFile(Comm::JsonDecoder* decoder, const char* d
 	ZoneScoped;
 	UNUSED(decoder);
 	UNUSED(indices);
-	OM::SetCurrentHeightmap(data);
+	OM::SetCurrentHeightmap(data == nullptr ? "" : data);
 	Model::get().post<EventType::CompensationFile>();
 	return true;
 }
@@ -385,5 +386,312 @@ bool MoveSubscribers::extrudersArrayEnd(Comm::JsonDecoder* decoder, const size_t
 	UNUSED(decoder);
 	OM::Move::RemoveExtruderAxis(indices[0], true);
 	Model::get().post<EventType::ExtruderData>();
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentTool(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentTool(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentTool = {:d}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentObject(Comm::JsonDecoder* decoder, const char* data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+
+	if (data == nullptr)
+	{
+		if (!OM::Move::ClearMotionSystemCurrentObject(indices[0]))
+		{
+			LOG_ERROR("Failed to clear motionSystem[{:d}]->currentObject", indices[0]);
+			return false;
+		}
+		return true;
+	}
+
+	int32_t currentObject = -1;
+	if (!Comm::GetInteger(data, currentObject))
+	{
+		LOG_ERROR("Failed to parse motionSystem[{:d}]->currentObject = {:s}", indices[0], data);
+		return false;
+	}
+
+	if (!OM::Move::SetMotionSystemCurrentObject(indices[0], currentObject))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentObject = {:d}", indices[0], currentObject);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemNextTool(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemNextTool(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->nextTool = {:d}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemPreviousTool(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemPreviousTool(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->previousTool = {:d}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemPrintingAcceleration(Comm::JsonDecoder* decoder,
+													   const float& data,
+													   const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemPrintingAcceleration(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->printingAcceleration = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemTravelAcceleration(Comm::JsonDecoder* decoder,
+													 const float& data,
+													 const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemTravelAcceleration(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->travelAcceleration = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemRotationAngle(Comm::JsonDecoder* decoder, const float& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemRotationAngle(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->rotation.angle = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemRotationCentre(Comm::JsonDecoder* decoder, const float& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemRotationCentre(indices[0], indices[1], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->rotation.centre[{:d}] = {:g}", indices[0], indices[1], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemSpeedFactor(Comm::JsonDecoder* decoder, const float& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemSpeedFactor(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->speedFactor = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemWorkplaceNumber(Comm::JsonDecoder* decoder,
+												  const int32_t& data,
+												  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemWorkplaceNumber(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->workplaceNumber = {:d}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemUserPosition(Comm::JsonDecoder* decoder, const float& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemUserPosition(indices[0], indices[1], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->userPosition[{:d}] = {:g}", indices[0], indices[1], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveAcceleration(Comm::JsonDecoder* decoder,
+														  const float& data,
+														  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveAcceleration(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.acceleration = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveDeceleration(Comm::JsonDecoder* decoder,
+														  const float& data,
+														  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveDeceleration(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.deceleration = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveDistance(Comm::JsonDecoder* decoder,
+													  const float& data,
+													  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveDistance(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.distance = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveDuration(Comm::JsonDecoder* decoder,
+													  const float& data,
+													  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveDuration(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.duration = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveLaserPwm(Comm::JsonDecoder* decoder,
+													  const char* data,
+													  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+
+	if (data == nullptr)
+	{
+		if (!OM::Move::ClearMotionSystemCurrentMoveLaserPwm(indices[0]))
+		{
+			LOG_ERROR("Failed to clear motionSystem[{:d}]->currentMove.laserPwm", indices[0]);
+			return false;
+		}
+		return true;
+	}
+
+	float laserPwm = 0.0f;
+	if (!Comm::GetFloat(data, laserPwm))
+	{
+		LOG_ERROR("Failed to parse motionSystem[{:d}]->currentMove.laserPwm = {:s}", indices[0], data);
+		return false;
+	}
+
+	if (!OM::Move::SetMotionSystemCurrentMoveLaserPwm(indices[0], laserPwm))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.laserPwm = {:g}", indices[0], laserPwm);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemVirtualEPos(Comm::JsonDecoder* decoder, const float& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemVirtualEPos(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->virtualEPos = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveRequestedSpeed(Comm::JsonDecoder* decoder,
+															const float& data,
+															const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveRequestedSpeed(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.requestedSpeed = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveTopSpeed(Comm::JsonDecoder* decoder,
+													  const float& data,
+													  const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveTopSpeed(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.topSpeed = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemCurrentMoveExtrusionRate(Comm::JsonDecoder* decoder,
+														   const float& data,
+														   const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (!OM::Move::SetMotionSystemCurrentMoveExtrusionRate(indices[0], data))
+	{
+		LOG_ERROR("Failed to set motionSystem[{:d}]->currentMove.extrusionRate = {:g}", indices[0], data);
+		return false;
+	}
+	return true;
+}
+
+bool MoveSubscribers::motionSystemsArrayEnd(Comm::JsonDecoder* decoder, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	OM::Move::RemoveMotionSystem(indices[0], true);
+	Model::get().post<EventType::MotionSystemData>();
 	return true;
 }

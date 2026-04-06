@@ -260,7 +260,7 @@ namespace Comm
 					indices[1],
 					indices[2],
 					indices[3],
-					data);
+					data == nullptr ? "null" : data);
 		if (StringStartsWith(id.c_str(), "result"))
 		{
 			// We might either get something like:
@@ -432,14 +432,15 @@ namespace Comm
 	void JsonDecoder::ProcessField()
 	{
 		ZoneScoped;
+		const char* val = m_fieldVal.c_str();
 		if (m_state == jsCharsVal)
 		{
 			if (m_fieldVal.Equals("null"))
 			{
-				m_fieldVal.Clear(); // so that we can distinguish null from an empty string
+				val = nullptr; // so that we can distinguish null from an empty string
 			}
 		}
-		ProcessReceivedValue(m_fieldId.GetRef(), m_fieldVal.c_str(), m_arrayIndices);
+		ProcessReceivedValue(m_fieldId.GetRef(), val, m_arrayIndices);
 		m_fieldVal.Clear();
 	}
 

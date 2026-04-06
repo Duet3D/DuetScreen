@@ -51,7 +51,7 @@ bool StateSubscribers::nullMessageBox(Comm::JsonDecoder* decoder, const char* da
 	ZoneScoped;
 	UNUSED(decoder);
 	UNUSED(indices);
-	if (data[0] != 0)
+	if (data != nullptr)
 		return true;
 	OM::g_currentAlert.Reset();
 
@@ -131,7 +131,7 @@ bool StateSubscribers::messageBoxMin(Comm::JsonDecoder* decoder, const char* dat
 	ZoneScoped;
 	UNUSED(decoder);
 	UNUSED(indices);
-	if (data[0] == 0)
+	if (data == nullptr)
 	{
 		OM::g_currentAlert.limits.numberInt.min = std::numeric_limits<int32_t>::min();
 		OM::g_currentAlert.limits.numberFloat.min = std::numeric_limits<float>::lowest();
@@ -149,7 +149,7 @@ bool StateSubscribers::messageBoxMax(Comm::JsonDecoder* decoder, const char* dat
 	ZoneScoped;
 	UNUSED(decoder);
 	UNUSED(indices);
-	if (data[0] == 0)
+	if (data == nullptr)
 	{
 		OM::g_currentAlert.limits.numberInt.max = std::numeric_limits<int32_t>::max();
 		OM::g_currentAlert.limits.numberFloat.max = std::numeric_limits<float>::max();
@@ -167,7 +167,7 @@ bool StateSubscribers::messageBoxDefault(Comm::JsonDecoder* decoder, const char*
 	ZoneScoped;
 	UNUSED(decoder);
 	UNUSED(indices);
-	if (data[0] == 0)
+	if (data == nullptr)
 	{
 		OM::g_currentAlert.limits.numberInt.valueDefault = 0;
 		OM::g_currentAlert.limits.numberFloat.valueDefault = 0.0;
@@ -210,7 +210,7 @@ bool StateSubscribers::time(Comm::JsonDecoder* decoder, const char* data, const 
 	UNUSED(indices);
 	static std::chrono::milliseconds lastUpdated = 0ms;
 
-	if (data[0] == 0)
+	if (data == nullptr)
 	{
 		return true;
 	}

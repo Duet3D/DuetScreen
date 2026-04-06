@@ -9,6 +9,7 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/Heat.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Heightmap.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Job.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/MotionSystem.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/PrinterStatus.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Sensor.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Spindle.cpp
