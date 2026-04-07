@@ -7,11 +7,21 @@
 
 #include "JobSelectPresenter.h"
 #include "Debug.h"
+#include "Hardware/Duet.h"
 #include "JobSelectView.h"
 #include "ObjectModel/MACH.h"
+#include <regex>
 
 namespace UI
 {
+	void JobSelectPresenter::selectNextJob(std::string_view jobName)
+	{
+		std::string escapedJobName(jobName);
+		escapedJobName = std::regex_replace(escapedJobName, std::regex("\""), "\"\"");
+		escapedJobName = std::regex_replace(escapedJobName, std::regex("\'"), "\'\'");
+		Comm::DUET.SendGcodef("set global.next_job[0] = \"{:s}\"\n", escapedJobName);
+	}
+
 	void JobSelectPresenter::onInit()
 	{
 		registerEventListener<EventType::MachJobs>(this, &JobSelectPresenter::newJobs);

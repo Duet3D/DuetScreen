@@ -23,6 +23,7 @@ namespace UI
 		// Getters
 
 		// Actions
+		void selectNextJob(std::string_view jobName);
 
 		// Observers
 		void newJobs();

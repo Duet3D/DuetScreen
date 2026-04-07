@@ -18,6 +18,7 @@
 #include "UI/Core/View.h"
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -60,8 +61,15 @@ namespace UI
 
 			void setJobCount(size_t count);
 			void setJobName(size_t index, std::string_view jobName);
+			void setJobSelectedCallback(std::function<void(size_t index, std::string_view jobName)> callback)
+			{
+				m_jobSelectedCallback = std::move(callback);
+			}
 
 			List<Button> m_nextJobsList{"jobList", getRoot()};
+
+		  private:
+			std::function<void(size_t index, std::string_view jobName)> m_jobSelectedCallback;
 		};
 
 		class JobHistory : public LvContainer

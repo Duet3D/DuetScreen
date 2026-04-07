@@ -37,6 +37,16 @@ namespace UI
 	{
 		addStyle(Themes::getLvglStyles().bg_dark);
 
+		m_nextJob.setJobSelectedCallback(
+			[this](size_t /* index */, std::string_view jobName)
+			{
+				if (getPresenter() == nullptr)
+				{
+					return;
+				}
+				getPresenter()->selectNextJob(jobName);
+			});
+
 		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST},
 				   {LV_GRID_FR(2), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
 
@@ -52,6 +62,7 @@ namespace UI
 	{
 		setFlexFlow(LV_FLEX_FLOW_COLUMN);
 		setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+		setExtDrawSize(20);
 
 		for (auto& job : m_motionSystemJobs)
 		{
@@ -268,15 +279,28 @@ namespace UI
 	void JobSelectView::NextJob::setJobCount(size_t count)
 	{
 		m_nextJobsList.setItemCount(count,
-									[](size_t index, LvObj& parent)
+									[this](size_t index, LvObj& parent)
 									{
 										auto btn = std::make_unique<Button>(fmt::format("jobButton{}", index), parent);
 										btn->setText(fmt::format("Job {}", index + 1));
-										btn->setCheckable(true);
+										btn->setCheckable(false);
 										btn->addStyle(Themes::getLvglStyles().bg_light);
 										btn->addStyle(Themes::getLvglStyles().shadow_raised);
 										btn->addStyle(Themes::getLvglStyles().outline_primary, LV_STATE_CHECKED);
 										btn->setSize(LV_PCT(30), LV_PCT(45));
+										btn->addClickedCallback(
+											[this, index](lv_event_t*)
+											{
+												m_nextJobsList.iterateListItems([index](size_t i, Button& btn)
+																				{ btn.setChecked(i == index); });
+												if (m_jobSelectedCallback)
+												{
+													if (auto selectedBtn = m_nextJobsList.getItem(index))
+													{
+														m_jobSelectedCallback(index, selectedBtn->getText());
+													}
+												}
+											});
 										return btn;
 									});
 	}
