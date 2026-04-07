@@ -285,6 +285,9 @@ add_dependencies(DuetScreen.lib update_version_h)
 # Find clang-format-19
 include(${LIBRARIES_DIR}/clang-format.cmake)
 add_dependencies(DuetScreen.lib clang-format)
+
+# Optional clang-tidy static analysis (set -DENABLE_CLANG_TIDY=ON to activate)
+include(${LIBRARIES_DIR}/clang-tidy.cmake)
   
   # Touch BuildDate.cpp to ensure it is always compiled
   if(CMAKE_BUILD_TYPE STREQUAL "Release")

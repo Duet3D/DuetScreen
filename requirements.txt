@@ -1,3 +1,4 @@
 pillow
 astyle
 cmake==4.2.3
+clang-tidy
