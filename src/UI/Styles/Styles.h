@@ -110,6 +110,10 @@ namespace UI::Themes
 		Style btn;
 		Style btn_checked;
 
+		/* Shadow */
+		Style shadow_raised;
+		Style shadow_lowered;
+
 		/* Icons */
 		Style icon;
 		Style icon_recolor;

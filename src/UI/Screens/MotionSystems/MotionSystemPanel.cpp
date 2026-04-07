@@ -14,8 +14,6 @@
 
 namespace UI
 {
-	static Themes::Style raisedShadowStyle;
-	static Themes::Style loweredShadowStyle;
 
 	MotionSystemPanel::MotionSystemPanel(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
@@ -43,32 +41,17 @@ namespace UI
 		m_speedCont.setFlexFlow(LV_FLEX_FLOW_COLUMN);
 		m_speedCont.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-		lv_style_set_radius(raisedShadowStyle, 3);
-		lv_style_set_border_width(raisedShadowStyle, 5);
-		lv_style_set_border_color(raisedShadowStyle, lv_color_white());
-		lv_style_set_border_opa(raisedShadowStyle, LV_OPA_30);
-		lv_style_set_border_side(raisedShadowStyle, LV_BORDER_SIDE_TOP);
-		lv_style_set_shadow_color(raisedShadowStyle, lv_color_black());
-		lv_style_set_shadow_offset_y(raisedShadowStyle, 5);
-		lv_style_set_shadow_opa(raisedShadowStyle, LV_OPA_30);
-		lv_style_set_shadow_width(raisedShadowStyle, 10);
-
-		lv_style_set_shadow_width(loweredShadowStyle, 6);
-		lv_style_set_shadow_color(loweredShadowStyle, lv_color_black());
-		lv_style_set_shadow_opa(loweredShadowStyle, LV_OPA_30);
-		lv_style_set_shadow_offset_y(loweredShadowStyle, -3);
-
 		m_headerCont.addStyle(Themes::getLvglStyles().bg_light);
 		m_speedCont.addStyle(Themes::getLvglStyles().bg_light);
-		m_headerCont.addStyle(raisedShadowStyle);
-		m_speedCont.addStyle(raisedShadowStyle);
+		m_headerCont.addStyle(Themes::getLvglStyles().shadow_raised);
+		m_speedCont.addStyle(Themes::getLvglStyles().shadow_raised);
 		m_title.addStyle(Themes::getLvglStyles().text_emphasis);
 
 		m_tools.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 		m_tools.setListFlow(LV_FLEX_FLOW_ROW);
 		m_tools.getListContainer().setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 		m_tools.addStyle(Themes::getLvglStyles().bg);
-		m_tools.addStyle(loweredShadowStyle);
+		m_tools.addStyle(Themes::getLvglStyles().shadow_lowered);
 
 		m_tool.hide();
 
@@ -97,7 +80,7 @@ namespace UI
 		m_speedFactorArc.setFlag(LV_OBJ_FLAG_CLICK_FOCUSABLE, false);
 		m_speedFactorArc.setStyleBgOpa(LV_OPA_0, LV_PART_KNOB);
 		m_speedFactorArc.addStyle(Themes::getLvglStyles().bg);
-		m_speedFactorArc.addStyle(loweredShadowStyle);
+		m_speedFactorArc.addStyle(Themes::getLvglStyles().shadow_lowered);
 		{
 			lv_obj_t* obj = m_speedFactorArc.getRootPtr();
 			lv_obj_set_style_drop_shadow_color(obj, lv_color_black(), LV_PART_INDICATOR);
@@ -123,7 +106,7 @@ namespace UI
 		m_speedFactorValue.addStyle(Themes::getLvglStyles().text_emphasis);
 
 		m_speedBarLabel.setText("Speed:");
-		m_speedBar.addStyle(raisedShadowStyle);
+		m_speedBar.addStyle(Themes::getLvglStyles().shadow_raised);
 		m_speedBar.setSize(LV_PCT(100), 50);
 		m_speedBar.setRange(0, 600);
 		m_speedBar.setValues(0, 0, LV_ANIM_OFF);
@@ -225,7 +208,7 @@ namespace UI
 
 		setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		addStyle(Themes::getLvglStyles().bg_light);
-		addStyle(raisedShadowStyle);
+		addStyle(Themes::getLvglStyles().shadow_raised);
 
 		m_icon.setSize(LV_PCT(100), 32);
 		m_icon.setMinWidth(32);
@@ -245,7 +228,7 @@ namespace UI
 		setSize(LV_PCT(100), LV_SIZE_CONTENT);
 		setMinWidth(LV_SIZE_CONTENT);
 		addStyle(Themes::getLvglStyles().bg_light);
-		addStyle(raisedShadowStyle);
+		addStyle(Themes::getLvglStyles().shadow_raised);
 		m_axisLabel.addStyle(Themes::getLvglStyles().text_emphasis);
 		m_positionLabel.addStyle(Themes::getLvglStyles().text);
 	}

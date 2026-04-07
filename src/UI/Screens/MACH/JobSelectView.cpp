@@ -35,12 +35,16 @@ namespace UI
 	JobSelectView::JobSelectView(const std::string& name, LvObj& parent)
 		: View(name, parent, layout_t{0, 0, 100, 100})
 	{
+		addStyle(Themes::getLvglStyles().bg_dark);
+
 		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST},
 				   {LV_GRID_FR(2), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
 
 		setGridCell(m_currentJobs, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 2);
 		setGridCell(m_nextJob, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 		setGridCell(m_jobHistory, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+
+		m_currentJobs.setStylePad(0);
 	}
 
 	JobSelectView::CurrentJobs::CurrentJobs(const std::string& name, LvObj& parent)
@@ -63,19 +67,32 @@ namespace UI
 	JobSelectView::CurrentJobs::MotionSystemJob::MotionSystemJob(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
+		addStyle(Themes::getLvglStyles().bg_light);
+		addStyle(Themes::getLvglStyles().shadow_raised);
+
 		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST},
 				   {LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
 
 		setGridCell(m_header, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 0, 1);
 		setGridCell(m_jobName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 1, 1);
 		setGridCell(m_thumbnail, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 2);
+
+		m_header.addStyle(Themes::getLvglStyles().text_emphasis);
+		m_thumbnail.addStyle(Themes::getLvglStyles().bg);
+		m_thumbnail.addStyle(Themes::getLvglStyles().shadow_lowered);
 	}
 
 	JobSelectView::NextJob::NextJob(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
+		addStyle(Themes::getLvglStyles().bg_light);
+		addStyle(Themes::getLvglStyles().shadow_raised);
+
+		m_nextJobsList.setStylePad(0);
 		m_nextJobsList.setSize(LV_PCT(100), LV_PCT(100));
 		m_nextJobsList.setTitle("Scheduled Next Job");
+		m_nextJobsList.getListContainer().addStyle(Themes::getLvglStyles().bg);
+		m_nextJobsList.getListContainer().addStyle(Themes::getLvglStyles().shadow_lowered);
 
 		m_nextJobsList.getListContainer().setSize(LV_PCT(100), LV_PCT(100));
 		m_nextJobsList.getListContainer().setFlexGrow(1);
@@ -87,8 +104,18 @@ namespace UI
 	JobSelectView::JobHistory::JobHistory(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
-		m_graph.setSize(LV_PCT(100), LV_PCT(100));
-		m_graph.addStyle(Themes::getLvglStyles().card);
+		addStyle(Themes::getLvglStyles().bg_light);
+		addStyle(Themes::getLvglStyles().shadow_raised);
+
+		setFlexFlow(LV_FLEX_FLOW_COLUMN);
+
+		m_header.setText("Completed Jobs");
+		m_header.addStyle(Themes::getLvglStyles().text_emphasis);
+
+		m_graph.setFlexGrow(1);
+		m_graph.setWidth(LV_PCT(100));
+		m_graph.addStyle(Themes::getLvglStyles().bg);
+		m_graph.addStyle(Themes::getLvglStyles().shadow_lowered);
 		m_graph.showLegend(true);
 		m_graph.setXRange({.min = 0, .max = MAX_SAMPLES - 1});
 		m_graph.setYRange({.min = 0, .max = 1});
@@ -245,6 +272,10 @@ namespace UI
 									{
 										auto btn = std::make_unique<Button>(fmt::format("jobButton{}", index), parent);
 										btn->setText(fmt::format("Job {}", index + 1));
+										btn->setCheckable(true);
+										btn->addStyle(Themes::getLvglStyles().bg_light);
+										btn->addStyle(Themes::getLvglStyles().shadow_raised);
+										btn->addStyle(Themes::getLvglStyles().outline_primary, LV_STATE_CHECKED);
 										btn->setSize(LV_PCT(30), LV_PCT(45));
 										return btn;
 									});

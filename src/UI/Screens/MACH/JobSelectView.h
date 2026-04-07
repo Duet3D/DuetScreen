@@ -69,6 +69,7 @@ namespace UI
 		  public:
 			JobHistory(const std::string& name, LvObj& parent);
 
+			LvLabel m_header{"header", getRoot()};
 			Graph m_graph{"chart", getRoot()};
 
 			std::unordered_map<std::string, size_t> m_seriesByName;

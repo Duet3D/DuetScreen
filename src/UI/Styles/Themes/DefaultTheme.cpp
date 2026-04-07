@@ -233,6 +233,22 @@ namespace UI::Themes
 		lv_style_set_border_opa(lvgl.card, LV_OPA_COVER);
 		lv_style_set_border_side(lvgl.card, LV_BORDER_SIDE_FULL);
 
+		/* Shadow */
+		lv_style_set_radius(lvgl.shadow_raised, 3);
+		lv_style_set_border_width(lvgl.shadow_raised, 5);
+		lv_style_set_border_color(lvgl.shadow_raised, lv_color_white());
+		lv_style_set_border_opa(lvgl.shadow_raised, LV_OPA_30);
+		lv_style_set_border_side(lvgl.shadow_raised, LV_BORDER_SIDE_TOP);
+		lv_style_set_shadow_color(lvgl.shadow_raised, lv_color_black());
+		lv_style_set_shadow_offset_y(lvgl.shadow_raised, 5);
+		lv_style_set_shadow_opa(lvgl.shadow_raised, LV_OPA_30);
+		lv_style_set_shadow_width(lvgl.shadow_raised, 10);
+
+		lv_style_set_shadow_width(lvgl.shadow_lowered, 6);
+		lv_style_set_shadow_color(lvgl.shadow_lowered, lv_color_black());
+		lv_style_set_shadow_opa(lvgl.shadow_lowered, LV_OPA_30);
+		lv_style_set_shadow_offset_y(lvgl.shadow_lowered, -3);
+
 		/* Button */
 
 		lv_style_set_radius(lvgl.btn, RADIUS_DEFAULT);
