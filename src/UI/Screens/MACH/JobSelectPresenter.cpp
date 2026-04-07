@@ -27,6 +27,7 @@ namespace UI
 		registerEventListener<EventType::MachJobs>(this, &JobSelectPresenter::newJobs);
 		registerEventListener<EventType::MachCurrentJob>(this, &JobSelectPresenter::newCurrentJob);
 		registerEventListener<EventType::MachNextJob>(this, &JobSelectPresenter::newNextJob);
+		registerEventListener<EventType::MachJobState>(this, &JobSelectPresenter::newJobState);
 		registerEventListener<EventType::MachJobHistory>(this, &JobSelectPresenter::newJobHistory);
 	}
 
@@ -51,6 +52,15 @@ namespace UI
 		LOG_DBG("Received new MachNextJob event");
 		auto jobName = OM::MACH::GetNextJob(0).value_or("");
 		getView()->setNextJob(jobName);
+	}
+
+	void JobSelectPresenter::newJobState()
+	{
+		LOG_DBG("Received new MachJobState event");
+		for (size_t i = 0; i < 2; i++)
+		{
+			getView()->setCurrentJobState(i, OM::MACH::GetJobState(i));
+		}
 	}
 
 	void JobSelectPresenter::newJobHistory()

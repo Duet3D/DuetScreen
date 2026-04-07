@@ -18,6 +18,7 @@ namespace OM::MACH
 	// global.currentJob / global.nextJob storage — nullopt means the JSON element was null
 	static std::array<std::optional<std::string>, 2> s_currentJob;
 	static std::array<std::optional<std::string>, 2> s_nextJob;
+	static std::array<std::string, 2> s_jobState;
 
 	// global.jobHistory storage — nullopt means the outer JSON element was null
 	static std::vector<std::optional<JobHistoryEntry>> s_jobHistory;
@@ -113,6 +114,30 @@ namespace OM::MACH
 			return std::string_view{*s_nextJob[index]};
 		}
 		return std::nullopt;
+	}
+
+	// ── global.jobState ──────────────────────────────────────────────────────
+
+	void SetJobState(size_t index, std::string_view value)
+	{
+		if (index < s_jobState.size())
+		{
+			s_jobState[index] = value;
+		}
+	}
+
+	void ClearJobState()
+	{
+		s_jobState.fill(std::string{});
+	}
+
+	std::string_view GetJobState(size_t index)
+	{
+		if (index < s_jobState.size())
+		{
+			return std::string_view{s_jobState[index]};
+		}
+		return {};
 	}
 
 	// ── global.jobHistory ────────────────────────────────────────────────────

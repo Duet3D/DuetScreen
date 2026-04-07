@@ -37,12 +37,14 @@ namespace UI
 			  public:
 				MotionSystemJob(const std::string& name, LvObj& parent);
 
-                void setHeader(std::string_view header) { m_header.setText(header); }
-                void setJobName(std::string_view jobName) { m_jobName.setText(jobName); }
-                void setThumbnail(const void* src) { m_thumbnail.setSrc(src); }
+				void setHeader(std::string_view header) { m_header.setText(header); }
+				void setJobName(std::string_view jobName) { m_jobName.setText(jobName); }
+				void setJobState(std::string_view jobState) { m_jobState.setText(jobState); }
+				void setThumbnail(const void* src) { m_thumbnail.setSrc(src); }
 
 				LvLabel m_header{"header", getRoot()};
 				LvLabel m_jobName{"jobName", getRoot()};
+				LvLabel m_jobState{"jobState", getRoot()};
 				LvImage m_thumbnail{"thumbnail", getRoot()};
 			};
 
@@ -83,12 +85,14 @@ namespace UI
 			std::unordered_map<std::string, size_t> m_seriesByName;
 			size_t m_sampleCount = 0;
 			static constexpr int32_t MAX_SAMPLES = 120;
+			std::vector<OM::MACH::JobHistoryEntry> m_lastHistory;
 		};
 
 		JobSelectView(const std::string& name, LvObj& parent);
 
 		void setJobs(const std::vector<std::optional<std::string>>& jobs);
 		void setCurrentJob(size_t index, std::string_view jobName);
+		void setCurrentJobState(size_t index, std::string_view jobState);
 		void setCurrentJobThumbnail(size_t index, const void* thumbnailSrc);
 		void setNextJob(std::string_view jobName);
 		void updateJobHistory(const std::vector<OM::MACH::JobHistoryEntry>& history);

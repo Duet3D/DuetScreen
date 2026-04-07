@@ -29,6 +29,7 @@ namespace UI
 		void newJobs();
 		void newCurrentJob();
 		void newNextJob();
+		void newJobState();
 		void newJobHistory();
 
 	  protected:

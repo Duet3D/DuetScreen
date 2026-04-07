@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <limits>
+#include <ranges>
 #include <unordered_set>
 
 namespace UI
@@ -48,7 +49,7 @@ namespace UI
 			});
 
 		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST},
-				   {LV_GRID_FR(2), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
+				   {LV_GRID_FR(3), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST});
 
 		setGridCell(m_currentJobs, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 2);
 		setGridCell(m_nextJob, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
@@ -69,6 +70,7 @@ namespace UI
 			job.setWidth(LV_PCT(100));
 			job.setFlexGrow(1);
 			job.setJobName("Job Name");
+			job.setJobState("");
 		}
 
 		m_motionSystemJobs[0].setHeader("Motion System Job 1");
@@ -82,11 +84,12 @@ namespace UI
 		addStyle(Themes::getLvglStyles().shadow_raised);
 
 		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST},
-				   {LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
+				   {LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
 
 		setGridCell(m_header, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 0, 1);
 		setGridCell(m_jobName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 1, 1);
-		setGridCell(m_thumbnail, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 2);
+		setGridCell(m_jobState, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 2, 1);
+		setGridCell(m_thumbnail, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 3);
 
 		m_header.addStyle(Themes::getLvglStyles().text_emphasis);
 		m_thumbnail.addStyle(Themes::getLvglStyles().bg);
@@ -158,6 +161,14 @@ namespace UI
 		}
 	}
 
+	void JobSelectView::setCurrentJobState(size_t index, std::string_view jobState)
+	{
+		if (index < m_currentJobs.m_motionSystemJobs.size())
+		{
+			m_currentJobs.m_motionSystemJobs[index].setJobState(jobState);
+		}
+	}
+
 	void JobSelectView::setCurrentJobThumbnail(size_t index, const void* thumbnailSrc)
 	{
 		if (index < m_currentJobs.m_motionSystemJobs.size())
@@ -174,6 +185,18 @@ namespace UI
 
 	void JobSelectView::updateJobHistory(const std::vector<OM::MACH::JobHistoryEntry>& history)
 	{
+		auto& lastHistory = m_jobHistory.m_lastHistory;
+		const bool changed =
+			history.size() != lastHistory.size() ||
+			!std::ranges::equal(history,
+								lastHistory,
+								[](const auto& a, const auto& b) { return a.name == b.name && a.count == b.count; });
+		if (!changed)
+		{
+			return;
+		}
+		lastHistory = history;
+
 		auto& graph = m_jobHistory.m_graph;
 		auto& seriesByName = m_jobHistory.m_seriesByName;
 

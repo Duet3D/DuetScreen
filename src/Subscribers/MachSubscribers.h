@@ -24,6 +24,9 @@ class MachSubscribers : public SubscriberMap
 		// global.nextJob — nullable string[2]
 		addSubscriber("global:next_job^", nextJob);
 
+		// global.job_state — non-nullable string[2]
+		addSubscriber("global:job_state^", jobState);
+
 		// global.jobHistory — [[name, count], ...] with null slots
 		// global:job_history^  fires when an outer element is null
 		// global:job_history^^ fires for each inner element (string name or int count)
@@ -39,6 +42,7 @@ class MachSubscribers : public SubscriberMap
 
 	static bool currentJob(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 	static bool nextJob(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
+	static bool jobState(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 
 	static bool jobHistoryNull(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 	static bool jobHistoryName(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);

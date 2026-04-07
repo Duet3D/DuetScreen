@@ -39,6 +39,11 @@ namespace OM::MACH
 	// Returns std::nullopt if the slot was null or index is out of range.
 	[[nodiscard]] std::optional<std::string_view> GetNextJob(size_t index);
 
+	// global.jobState — non-nullable string[2]
+	void SetJobState(size_t index, std::string_view value);
+	void ClearJobState();
+	[[nodiscard]] std::string_view GetJobState(size_t index);
+
 	// global.jobHistory — array of nullable [name, count] pairs
 	struct JobHistoryEntry
 	{

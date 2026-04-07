@@ -64,6 +64,28 @@ bool MachSubscribers::nextJob(Comm::JsonDecoder* decoder, const char* data, cons
 	return true;
 }
 
+// ── global.job_state ─────────────────────────────────────────────────────────
+
+bool MachSubscribers::jobState(Comm::JsonDecoder* decoder, const char* data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	if (indices[0] >= 2)
+	{
+		LOG_WARN("global.job_state index {:d} out of range", indices[0]);
+		return false;
+	}
+	if (data == nullptr)
+	{
+		LOG_WARN("global.job_state[{:d}] is null but expected non-null string", indices[0]);
+		return false;
+	}
+	OM::MACH::SetJobState(indices[0], data);
+	LOG_DBG("global.job_state[{:d}] = {:s}", indices[0], data);
+	Model::get().post<EventType::MachJobState>();
+	return true;
+}
+
 // ── global.jobHistory ────────────────────────────────────────────────────────
 
 // Fires when an outer entry global.jobHistory[i] is null.

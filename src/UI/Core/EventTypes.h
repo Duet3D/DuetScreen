@@ -84,6 +84,7 @@ namespace Log
 	XX(MachJobs)                                                                                                       \
 	XX(MachCurrentJob)                                                                                                 \
 	XX(MachNextJob)                                                                                                    \
+	XX(MachJobState)                                                                                                   \
 	XX(MachJobHistory)
 
 enum class EventType
