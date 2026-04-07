@@ -13,4 +13,6 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/StateSubscribers.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Subscribers.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/ThumbnailSubscribers.cpp
-          ${CMAKE_CURRENT_SOURCE_DIR}/ToolSubscribers.cpp)
+          ${CMAKE_CURRENT_SOURCE_DIR}/ToolSubscribers.cpp
+          MachSubscribers.cpp
+)

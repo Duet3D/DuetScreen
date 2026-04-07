@@ -13,6 +13,7 @@
 #include "UI/Core/View.h"
 #include <map>
 #include <memory>
+#include <span>
 
 namespace UI
 {
@@ -44,6 +45,8 @@ namespace UI
 		void setXRange(range_t range);
 		void setYRange(range_t range);
 		void setXCount(int32_t count);
+		void showXRange(bool show) { m_hScale.setVisible(show); }
+		void showYRange(bool show) { m_vScale.setVisible(show); }
 
 		void setSeriesCount(size_t count);
 		size_t getSeriesCount() const { return m_series.size(); }
@@ -56,6 +59,8 @@ namespace UI
 		void clear();
 		void clear(const size_t index);
 		void addData(const size_t index, int32_t value);
+		uint32_t getPointCount() const;
+		std::span<const int32_t> getSeriesYArray(const size_t index) const;
 
 	  private:
 		static void legendEvent(lv_event_t* e);

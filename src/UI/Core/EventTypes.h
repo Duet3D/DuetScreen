@@ -80,7 +80,11 @@ namespace Log
 	XX(Directories)                                                                                                    \
 	XX(NavigationHomeEnable, bool)                                                                                     \
 	XX(NavigationBackEnable, bool)                                                                                     \
-	XX(Filaments, std::vector<std::string>)
+	XX(Filaments, std::vector<std::string>)                                                                            \
+	XX(MachJobs)                                                                                                       \
+	XX(MachCurrentJob)                                                                                                 \
+	XX(MachNextJob)                                                                                                    \
+	XX(MachJobHistory)
 
 enum class EventType
 {

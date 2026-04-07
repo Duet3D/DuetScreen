@@ -14,4 +14,5 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/Sensor.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Spindle.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tool.cpp
-          ${CMAKE_CURRENT_SOURCE_DIR}/Utils.cpp)
+          ${CMAKE_CURRENT_SOURCE_DIR}/Utils.cpp
+          MACH.cpp)

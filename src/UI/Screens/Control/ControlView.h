@@ -5,6 +5,7 @@
 #include "UI/Core/View.h"
 #include "UI/Screens/Fan/FanView.h"
 #include "UI/Screens/Heightmap/HeightmapView.h"
+#include "UI/Screens/MACH/JobSelectView.h"
 #include "UI/Screens/MotionSystems/MotionSystemsView.h"
 #include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"
@@ -40,5 +41,6 @@ namespace UI
 		ObjectCancelView m_objectCancelView{"object_cancel", m_tabs.addTab(_("control.object_cancel_tab"))};
 		FanView m_fanView{"fan", m_tabs.addTab(_("control.fan_tab"))};
 		MotionSystemsView m_motionSystemsView{"motion_systems", m_tabs.addTab(_("control.motion_systems_tab"))};
+		JobSelectView m_jobSelectView{"job_select", m_tabs.addTab(_("control.job_select_tab"))};
 	};
 } // namespace UI

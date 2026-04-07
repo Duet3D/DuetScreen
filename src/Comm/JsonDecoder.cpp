@@ -333,6 +333,7 @@ namespace Comm
 		case rcvSeqsState:
 		case rcvSeqsTools:
 		case rcvSeqsVolumes:
+		case rcvSeqsGlobal:
 		{
 			int32_t ival;
 

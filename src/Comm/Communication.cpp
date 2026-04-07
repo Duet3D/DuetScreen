@@ -97,6 +97,7 @@ namespace Comm
 #if FETCH_VOLUMES
 		{.seqid = rcvSeqsVolumes, .lastSeq = 0, .state = SeqStateInit, .key = "volumes", .flags = "v"},
 #endif
+		{.seqid = rcvSeqsGlobal, .lastSeq = 0, .state = SeqStateInit, .key = "global", .flags = "v"},
 		{.seqid = rcvSeqsFreq, .lastSeq = 0, .state = SeqStateInit, .key = "", .flags = "d99f"}};
 
 	Seq* g_currentReqSeq = nullptr;

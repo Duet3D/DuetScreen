@@ -8,6 +8,7 @@
 #include "Subscribers/FileSubscribers.h"
 #include "Subscribers/HeatSubscribers.h"
 #include "Subscribers/JobSubscribers.h"
+#include "Subscribers/MachSubscribers.h"
 #include "Subscribers/MoveSubscribers.h"
 #include "Subscribers/ResponseSubscribers.h"
 #include "Subscribers/SensorSubscribers.h"
@@ -174,6 +175,7 @@ class Model
 	FileSubscribers m_fileSubscribers;
 	HeatSubscribers m_heatSubscribers;
 	JobSubscribers m_jobSubscribers;
+	MachSubscribers m_machSubscribers;
 	MoveSubscribers m_moveSubscribers;
 	ResponseSubscribers m_responseSubscribers;
 	SensorSubscribers m_sensorSubscribers;

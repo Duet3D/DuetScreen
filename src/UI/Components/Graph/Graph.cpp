@@ -265,6 +265,30 @@ namespace UI
 		m_chart.setNextValue(series->series, value);
 	}
 
+	uint32_t Graph::getPointCount() const
+	{
+		ZoneScoped;
+		UI_LOCK();
+		return m_chart.getPointCount();
+	}
+
+	std::span<const int32_t> Graph::getSeriesYArray(const size_t index) const
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (index >= m_series.size())
+		{
+			LOG_WARN("Cannot get series data, series not found");
+			return {};
+		}
+		const auto* values = m_chart.getSeriesYArray(m_series[index].series);
+		if (values == nullptr)
+		{
+			return {};
+		}
+		return std::span<const int32_t>(values, m_chart.getPointCount());
+	}
+
 	void Graph::legendEvent(lv_event_t* e)
 	{
 		ZoneScoped;

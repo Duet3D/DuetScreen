@@ -44,6 +44,7 @@ namespace Comm
 		{rcvSeqsState, "seqs:state"},
 		{rcvSeqsTools, "seqs:tools"},
 		{rcvSeqsVolumes, "seqs:volumes"},
+		{rcvSeqsGlobal, "seqs:global"},
 
 		// Control Command message
 		{rcvControlCommand, "controlCommand"},

@@ -39,6 +39,7 @@ namespace Comm
 		rcvSeqsState,
 		rcvSeqsTools,
 		rcvSeqsVolumes,
+		rcvSeqsGlobal,
 		rcvSeqsFreq,
 	};
 
