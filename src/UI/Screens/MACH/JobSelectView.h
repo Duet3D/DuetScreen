@@ -63,6 +63,8 @@ namespace UI
 
 			void setJobCount(size_t count);
 			void setJobName(size_t index, std::string_view jobName);
+			bool selectByKey(uint32_t key);
+			bool focusFirstJob();
 			void setJobSelectedCallback(std::function<void(size_t index, std::string_view jobName)> callback)
 			{
 				m_jobSelectedCallback = std::move(callback);
@@ -71,6 +73,7 @@ namespace UI
 			List<Button> m_nextJobsList{"jobList", getRoot()};
 
 		  private:
+			bool selectByIndex(size_t index);
 			std::function<void(size_t index, std::string_view jobName)> m_jobSelectedCallback;
 		};
 
@@ -101,5 +104,7 @@ namespace UI
 		CurrentJobs m_currentJobs{"currentJobs", getRoot()};
 		NextJob m_nextJob{"nextJob", getRoot()};
 		JobHistory m_jobHistory{"jobHistory", getRoot()};
+
+		void onShow() override;
 	};
 } // namespace UI

@@ -38,6 +38,14 @@ namespace UI
 	{
 		addStyle(Themes::getLvglStyles().bg_dark);
 
+		addEventCallback(
+			[this](lv_event_t* e)
+			{
+				const auto key = lv_event_get_key(e);
+				m_nextJob.selectByKey(key);
+			},
+			LV_EVENT_KEY);
+
 		m_nextJob.setJobSelectedCallback(
 			[this](size_t /* index */, std::string_view jobName)
 			{
@@ -56,6 +64,11 @@ namespace UI
 		setGridCell(m_jobHistory, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
 		m_currentJobs.setStylePad(0);
+	}
+
+	void JobSelectView::onShow()
+	{
+		m_nextJob.focusFirstJob();
 	}
 
 	JobSelectView::CurrentJobs::CurrentJobs(const std::string& name, LvObj& parent)
@@ -112,7 +125,7 @@ namespace UI
 		m_nextJobsList.getListContainer().setFlexGrow(1);
 		m_nextJobsList.getListContainer().setFlexAlign(
 			LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_SPACE_EVENLY);
-		m_nextJobsList.getListContainer().setFlexFlow(LV_FLEX_FLOW_COLUMN_WRAP);
+		m_nextJobsList.getListContainer().setFlexFlow(LV_FLEX_FLOW_ROW_WRAP);
 	}
 
 	JobSelectView::JobHistory::JobHistory(const std::string& name, LvObj& parent)
@@ -311,21 +324,56 @@ namespace UI
 										btn->addStyle(Themes::getLvglStyles().shadow_raised);
 										btn->addStyle(Themes::getLvglStyles().outline_primary, LV_STATE_CHECKED);
 										btn->setSize(LV_PCT(30), LV_PCT(45));
-										btn->addClickedCallback(
-											[this, index](lv_event_t*)
+										btn->addClickedCallback([this, index](lv_event_t*) { selectByIndex(index); });
+										btn->addEventCallback(
+											[this](lv_event_t* e)
 											{
-												m_nextJobsList.iterateListItems([index](size_t i, Button& btn)
-																				{ btn.setChecked(i == index); });
-												if (m_jobSelectedCallback)
-												{
-													if (auto selectedBtn = m_nextJobsList.getItem(index))
-													{
-														m_jobSelectedCallback(index, selectedBtn->getText());
-													}
-												}
-											});
+												const auto key = lv_event_get_key(e);
+												selectByKey(key);
+											},
+											LV_EVENT_KEY);
 										return btn;
 									});
+
+		focusFirstJob();
+	}
+
+	bool JobSelectView::NextJob::focusFirstJob()
+	{
+		if (auto firstBtn = m_nextJobsList.getItem(0))
+		{
+			lv_group_focus_obj(firstBtn->getRootPtr());
+			return true;
+		}
+
+		return false;
+	}
+
+	bool JobSelectView::NextJob::selectByIndex(size_t index)
+	{
+		if (auto selectedBtn = m_nextJobsList.getItem(index))
+		{
+			m_nextJobsList.iterateListItems([index](size_t i, Button& btn) { btn.setChecked(i == index); });
+
+			if (m_jobSelectedCallback)
+			{
+				m_jobSelectedCallback(index, selectedBtn->getText());
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	bool JobSelectView::NextJob::selectByKey(uint32_t key)
+	{
+		if (key < '1' || key > '9')
+		{
+			return false;
+		}
+
+		const auto index = static_cast<size_t>(key - '1');
+		return selectByIndex(index);
 	}
 
 	void JobSelectView::NextJob::setJobName(size_t index, std::string_view jobName)
