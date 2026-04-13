@@ -50,8 +50,11 @@ namespace UI
 	void JobSelectPresenter::newNextJob()
 	{
 		LOG_DBG("Received new MachNextJob event");
-		auto jobName = OM::MACH::GetNextJob(0).value_or("");
-		getView()->setNextJob(jobName);
+		for (size_t i = 0; i < 2; i++)
+		{
+			auto jobName = OM::MACH::GetNextJob(i).value_or("");
+			getView()->setNextJob(i, jobName);
+		}
 	}
 
 	void JobSelectPresenter::newJobState()

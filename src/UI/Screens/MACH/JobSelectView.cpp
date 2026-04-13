@@ -10,9 +10,12 @@
 #include "UI/Styles/Styles.h"
 #include <algorithm>
 #include <cstdint>
+#include <filesystem>
 #include <limits>
 #include <ranges>
 #include <unordered_set>
+
+namespace fs = std::filesystem;
 
 namespace UI
 {
@@ -96,17 +99,30 @@ namespace UI
 		addStyle(Themes::getLvglStyles().bg_light);
 		addStyle(Themes::getLvglStyles().shadow_raised);
 
-		setGridDsc({LV_GRID_FR(1), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST},
-				   {LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
+		setGridDsc(
+			{LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST},
+			{LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST});
 
-		setGridCell(m_header, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 0, 1);
-		setGridCell(m_jobName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 1, 1);
-		setGridCell(m_jobState, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 2, 1);
-		setGridCell(m_thumbnail, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 3);
+		setGridCell(m_header, LV_GRID_ALIGN_START, 0, 3, LV_GRID_ALIGN_START, 0, 1);
+		setGridCell(m_jobPrefix, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+		setGridCell(m_jobStatePrefix, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+		setGridCell(m_queuedJobPrefix, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 3, 1);
+		setGridCell(m_jobName, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+		setGridCell(m_jobState, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 2, 1);
+		setGridCell(m_queuedJobName, LV_GRID_ALIGN_START, 1, 1, LV_GRID_ALIGN_CENTER, 3, 1);
+		setGridCell(m_thumbnail, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 4, 1);
 
 		m_header.addStyle(Themes::getLvglStyles().text_emphasis);
 		m_thumbnail.addStyle(Themes::getLvglStyles().bg);
 		m_thumbnail.addStyle(Themes::getLvglStyles().shadow_lowered);
+
+		m_jobPrefix.addStyle(Themes::getLvglStyles().text_muted);
+		m_jobStatePrefix.addStyle(Themes::getLvglStyles().text_muted);
+		m_queuedJobPrefix.addStyle(Themes::getLvglStyles().text_muted);
+
+		m_jobPrefix.setText("Job:");
+		m_jobStatePrefix.setText("State:");
+		m_queuedJobPrefix.setText("Queued:");
 	}
 
 	JobSelectView::NextJob::NextJob(const std::string& name, LvObj& parent)
@@ -116,6 +132,7 @@ namespace UI
 		addStyle(Themes::getLvglStyles().shadow_raised);
 
 		m_nextJobsList.setStylePad(0);
+		m_nextJobsList.getHeader().setStylePad(0);
 		m_nextJobsList.setSize(LV_PCT(100), LV_PCT(100));
 		m_nextJobsList.setTitle("Scheduled Next Job");
 		m_nextJobsList.getListContainer().addStyle(Themes::getLvglStyles().bg);
@@ -155,14 +172,11 @@ namespace UI
 		m_nextJob.setJobCount(jobs.size());
 		for (size_t i = 0; i < jobs.size(); ++i)
 		{
-			if (jobs[i].has_value())
-			{
-				m_nextJob.setJobName(i, *jobs[i]);
-			}
-			else
-			{
-				m_nextJob.setJobName(i, "null");
-			}
+			const std::string& jobName = jobs[i].value_or("null");
+			m_nextJob.setJobName(i, jobName);
+
+			auto thumbnailPath = fmt::format(ASSETS_FOLDER "thumbnails/{}.png", fs::path(jobName).stem().string());
+			m_nextJob.setThumbnail(i, fs::exists(thumbnailPath) ? thumbnailPath.c_str() : nullptr);
 		}
 	}
 
@@ -170,7 +184,11 @@ namespace UI
 	{
 		if (index < m_currentJobs.m_motionSystemJobs.size())
 		{
+			const std::string thumbnailPath =
+				fmt::format(ASSETS_FOLDER "thumbnails/{}.png", fs::path(jobName).stem().string());
+			const char* thumbnail = fs::exists(thumbnailPath) ? thumbnailPath.c_str() : nullptr;
 			m_currentJobs.m_motionSystemJobs[index].setJobName(jobName);
+			m_currentJobs.m_motionSystemJobs[index].setThumbnail(thumbnail);
 		}
 	}
 
@@ -190,10 +208,17 @@ namespace UI
 		}
 	}
 
-	void JobSelectView::setNextJob(std::string_view jobName)
+	void JobSelectView::setNextJob(size_t index, std::string_view jobName)
 	{
-		m_nextJob.m_nextJobsList.iterateListItems([&](size_t /* index */, Button& btn)
-												  { btn.setChecked(btn.getText() == jobName); });
+		if (index < m_currentJobs.m_motionSystemJobs.size())
+		{
+			m_currentJobs.m_motionSystemJobs[index].setQueuedJobName(jobName);
+		}
+		if (index == 0)
+		{
+			m_nextJob.m_nextJobsList.iterateListItems([&](size_t /* index */, Button& btn)
+													  { btn.setChecked(btn.getText() == jobName); });
+		}
 	}
 
 	void JobSelectView::updateJobHistory(const std::vector<OM::MACH::JobHistoryEntry>& history)
@@ -325,6 +350,7 @@ namespace UI
 										btn->addStyle(Themes::getLvglStyles().outline_primary, LV_STATE_CHECKED);
 										btn->setSize(LV_PCT(30), LV_PCT(45));
 										btn->addClickedCallback([this, index](lv_event_t*) { selectByIndex(index); });
+										btn->getIcon().enableRecolor(false);
 										btn->addEventCallback(
 											[this](lv_event_t* e)
 											{
@@ -381,6 +407,19 @@ namespace UI
 		if (auto btn = m_nextJobsList.getItem(index))
 		{
 			btn->setText(jobName);
+		}
+	}
+
+	void JobSelectView::NextJob::setThumbnail(size_t index, const char* src)
+	{
+		if (auto btn = m_nextJobsList.getItem(index))
+		{
+			if (src == nullptr)
+			{
+				btn->clearIcon();
+				return;
+			}
+			btn->setFixedIcon(src);
 		}
 	}
 } // namespace UI

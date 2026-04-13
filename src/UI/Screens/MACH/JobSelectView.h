@@ -40,11 +40,16 @@ namespace UI
 				void setHeader(std::string_view header) { m_header.setText(header); }
 				void setJobName(std::string_view jobName) { m_jobName.setText(jobName); }
 				void setJobState(std::string_view jobState) { m_jobState.setText(jobState); }
+				void setQueuedJobName(std::string_view jobName) { m_queuedJobName.setText(jobName); }
 				void setThumbnail(const void* src) { m_thumbnail.setSrc(src); }
 
 				LvLabel m_header{"header", getRoot()};
+				LvLabel m_jobPrefix{"jobPrefix", getRoot()};
+				LvLabel m_jobStatePrefix{"jobStatePrefix", getRoot()};
+				LvLabel m_queuedJobPrefix{"queuedJobPrefix", getRoot()};
 				LvLabel m_jobName{"jobName", getRoot()};
 				LvLabel m_jobState{"jobState", getRoot()};
+				LvLabel m_queuedJobName{"queuedJobName", getRoot()};
 				LvImage m_thumbnail{"thumbnail", getRoot()};
 			};
 
@@ -63,6 +68,7 @@ namespace UI
 
 			void setJobCount(size_t count);
 			void setJobName(size_t index, std::string_view jobName);
+			void setThumbnail(size_t index, const char* src);
 			bool selectByKey(uint32_t key);
 			bool focusFirstJob();
 			void setJobSelectedCallback(std::function<void(size_t index, std::string_view jobName)> callback)
@@ -97,7 +103,7 @@ namespace UI
 		void setCurrentJob(size_t index, std::string_view jobName);
 		void setCurrentJobState(size_t index, std::string_view jobState);
 		void setCurrentJobThumbnail(size_t index, const void* thumbnailSrc);
-		void setNextJob(std::string_view jobName);
+		void setNextJob(size_t index, std::string_view jobName);
 		void updateJobHistory(const std::vector<OM::MACH::JobHistoryEntry>& history);
 
 	  private:
