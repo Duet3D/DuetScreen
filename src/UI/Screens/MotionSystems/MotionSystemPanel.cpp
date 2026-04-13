@@ -34,6 +34,9 @@ namespace UI
 		m_speedCont.setWidth(LV_PCT(70));
 		m_positionCont.setWidth(LV_PCT(20));
 		m_positionCont.setMinWidth(LV_SIZE_CONTENT);
+		m_positionCont.setExtDrawSize(20);				   // For shadow
+		m_positions.setExtDrawSize(20);					   // For shadow
+		m_positions.getListContainer().setExtDrawSize(20); // For shadow
 
 		m_headerCont.setFlexFlow(LV_FLEX_FLOW_COLUMN);
 		m_headerCont.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -59,6 +62,7 @@ namespace UI
 		m_speedFactorArc.setWidth(LV_PCT(100));
 		m_speedFactorArc.setFlexGrow(1);
 		m_speedFactorArc.setRange(0, SpeedFactorArcMax);
+		m_scale.setRange(0, SpeedFactorArcMax);
 		{
 			constexpr int32_t arcGap = 60;
 			constexpr int32_t arcEnd = 360 - arcGap;

@@ -22,6 +22,15 @@ namespace UI
 		Comm::DUET.SendGcodef("set global.next_job[0] = \"{:s}\"\n", escapedJobName);
 	}
 
+	void JobSelectPresenter::onActivate()
+	{
+		newJobs();
+		newCurrentJob();
+		newNextJob();
+		newJobState();
+		newJobHistory();
+	}
+
 	void JobSelectPresenter::onInit()
 	{
 		registerEventListener<EventType::MachJobs>(this, &JobSelectPresenter::newJobs);

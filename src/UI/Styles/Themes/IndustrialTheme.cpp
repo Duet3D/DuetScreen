@@ -77,6 +77,9 @@ namespace UI::Themes
 								   lv_style_set_radius(lvgl.bar, 0);
 								   lv_style_set_radius(lvgl.bar_indic, 0);
 #endif
+#if LV_USE_ARC
+								   lv_style_set_arc_rounded(lvgl.arc_indic, false);
+#endif
 
 #if LV_USE_SLIDER
 								   lv_style_set_radius(lvgl.slider, 0);

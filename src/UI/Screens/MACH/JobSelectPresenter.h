@@ -34,7 +34,7 @@ namespace UI
 
 	  protected:
 		void onInit() override;
-		void onActivate() override {}
+		void onActivate() override;
 		void onDeactivate() override {}
 
 		void onConnect() override {}

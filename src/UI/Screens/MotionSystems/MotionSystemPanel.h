@@ -65,7 +65,7 @@ namespace UI
 		auto& getToolList() { return m_tools; }
 
 	  private:
-		static constexpr int32_t SpeedFactorArcMax = 100;
+		static constexpr int32_t SpeedFactorArcMax = 200;
 
 		static int32_t sanitizeBarValue(float value);
 
