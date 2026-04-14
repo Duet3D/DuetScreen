@@ -31,4 +31,6 @@ set(CMAKE_CXX_CLANG_TIDY
   "${CLANG_TIDY}"
   "--header-filter=src/.*"
   "--extra-arg=-Wno-unknown-warning-option"
+  "-fix"
+  "-fix-errors"
 )
