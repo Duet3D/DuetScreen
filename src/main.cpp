@@ -47,6 +47,7 @@
  *      DEFINES
  *********************/
 #define SET_THREAD_PRIORITY 0
+#define MACH_SCREEN 1
 
 /**********************
  *      TYPEDEFS
@@ -130,8 +131,17 @@ int main(int argc, char** argv)
 
 	// lv_display_set_rotation(display, LV_DISP_ROTATION_180);
 
+#if MACH_SCREEN == 1
+	UI::Screen screen("screen");
+	UI::MotionSystemsView m_motionSystemsView{"motion_systems", screen};
+#elif MACH_SCREEN == 2
+	UI::Screen screen("screen");
+	UI::JobSelectView m_jobSelectView{"job_select", screen};
+
+#else
 	UI::HomeView& home = UI::HomeView::instance();
 	home.show();
+#endif
 
 #if HARDWARE_TEST
 	UI::HardwareTest hw_test;

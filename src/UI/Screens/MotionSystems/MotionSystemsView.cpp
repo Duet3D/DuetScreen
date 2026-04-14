@@ -35,15 +35,15 @@ namespace UI
 
 		m_systems[0].setTitle(_("motion_system.system_1"));
 		m_systems[0].setToolCount(MS_TOOL_COUNT[0]);
-		m_systems[0].setToolInfo(0, "Tool 1", nullptr);
-		m_systems[0].setToolInfo(1, "Tool 2", nullptr);
-		m_systems[0].setToolInfo(2, "Tool 3", nullptr);
+		m_systems[0].setToolInfo(0, "Tool 1", "mach_tool1.png");
+		m_systems[0].setToolInfo(1, "Tool 2", "mach_tool2.png");
+		m_systems[0].setToolInfo(2, "Tool 3", "mach_tool3.png");
 		m_systems[0].setTool(-1);
 
 		m_systems[1].setTitle(_("motion_system.system_2"));
 		m_systems[1].setToolCount(MS_TOOL_COUNT[1]);
-		m_systems[1].setToolInfo(0, "Tool 4", nullptr);
-		m_systems[1].setToolInfo(1, "Tool 5", nullptr);
+		m_systems[1].setToolInfo(0, "Tool 4", "mach_tool4.png");
+		m_systems[1].setToolInfo(1, "Tool 5", "mach_tool5.png");
 		m_systems[1].setTool(-1);
 		m_systems[1].setSpeedFactor(75);
 		m_systems[1].setSpeeds(75.0f, 100.0f);

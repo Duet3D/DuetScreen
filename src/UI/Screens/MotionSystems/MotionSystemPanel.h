@@ -7,13 +7,14 @@
 #pragma once
 
 #include "UI/Components/Bar/CurrentTargetBar.h"
+#include "UI/Components/Icon/Icon.h"
 #include "UI/Components/LVGL/LvArc.h"
 #include "UI/Components/LVGL/LvContainer.h"
-#include "UI/Components/LVGL/LvImage.h"
 #include "UI/Components/LVGL/LvLabel.h"
 #include "UI/Components/LVGL/LvScale.h"
 #include "UI/Components/LVGL/LvSpan.h"
 #include "UI/Components/List/List.h"
+#include <optional>
 
 namespace UI
 {
@@ -26,13 +27,13 @@ namespace UI
 			ToolIcon(size_t index, LvObj& parent);
 
 			void setName(std::string_view name) { m_label.setText(name); }
-			void setIcon(const void* src) { m_icon.setSrc(src); }
+			void setIcon(std::string_view src) { m_icon.setIcon(src); }
 
 			auto& getIcon() { return m_icon; }
 			auto& getLabel() { return m_label; }
 
 		  private:
-			LvImage m_icon{"icon", getRoot()};
+			Icon m_icon{"icon", getRoot()};
 			LvLabel m_label{"label", getRoot()};
 		};
 
@@ -55,7 +56,7 @@ namespace UI
 
 		void setTool(size_t toolIdx);
 		void setToolCount(size_t count);
-		void setToolInfo(size_t toolIdx, std::string_view name, const void* iconSrc);
+		void setToolInfo(size_t toolIdx, std::string_view name, std::string_view iconSrc);
 
 		void setSpeedFactor(uint32_t speedFactorPercent);
 		void setSpeeds(float currentSpeed, float targetSpeed);

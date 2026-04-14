@@ -16,10 +16,10 @@ namespace UI::Themes
 {
 	static ColorCtx s_colors = {.primaryHue = 245, .secondaryHue = 50, .chroma = 0.02f, .darkMode = false};
 	static FontConfigSet s_fontConfigs = {
-		.header = {.size = 18, .style = LV_FREETYPE_FONT_STYLE_BOLD | LV_FREETYPE_FONT_STYLE_WEIGHT(800)},
-		.normal = {.size = 14, .style = LV_FREETYPE_FONT_STYLE_NORMAL | LV_FREETYPE_FONT_STYLE_WEIGHT(500)},
-		.emphasis = {.size = 14, .style = LV_FREETYPE_FONT_STYLE_BOLD | LV_FREETYPE_FONT_STYLE_WEIGHT(700)},
-		.subdued = {.size = 12, .style = LV_FREETYPE_FONT_STYLE_NORMAL | LV_FREETYPE_FONT_STYLE_WEIGHT(300)},
+		.header = {.size = 22, .style = LV_FREETYPE_FONT_STYLE_BOLD | LV_FREETYPE_FONT_STYLE_WEIGHT(800)},
+		.normal = {.size = 18, .style = LV_FREETYPE_FONT_STYLE_NORMAL | LV_FREETYPE_FONT_STYLE_WEIGHT(500)},
+		.emphasis = {.size = 20, .style = LV_FREETYPE_FONT_STYLE_BOLD | LV_FREETYPE_FONT_STYLE_WEIGHT(700)},
+		.subdued = {.size = 16, .style = LV_FREETYPE_FONT_STYLE_NORMAL | LV_FREETYPE_FONT_STYLE_WEIGHT(300)},
 	};
 
 	static CustomTheme s_theme("industrial",
@@ -36,6 +36,9 @@ namespace UI::Themes
 								   lv_style_set_radius(lvgl.card, 0);
 								   lv_style_set_radius(lvgl.btn, 0);
 								   lv_style_set_radius(lvgl.knob, 2);
+
+								   lv_style_set_bg_color(lvgl.btn_checked, colors.primary);
+								   lv_style_set_text_color(lvgl.btn_checked, colors.text);
 
 								   /* Thick, prominent borders */
 								   lv_style_set_border_width(lvgl.card, 3);

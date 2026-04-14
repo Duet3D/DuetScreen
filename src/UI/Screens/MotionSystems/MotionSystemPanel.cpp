@@ -148,7 +148,7 @@ namespace UI
 		m_tools.setItemCount(count);
 	}
 
-	void MotionSystemPanel::setToolInfo(size_t toolIdx, std::string_view name, const void* iconSrc)
+	void MotionSystemPanel::setToolInfo(size_t toolIdx, std::string_view name, std::string_view iconSrc)
 	{
 		ZoneScoped;
 		if (toolIdx >= m_tools.getItemCount())
