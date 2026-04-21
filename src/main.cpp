@@ -47,7 +47,7 @@
  *      DEFINES
  *********************/
 #define SET_THREAD_PRIORITY 0
-#define MACH_SCREEN 1
+#define MACH_SCREEN 0
 
 /**********************
  *      TYPEDEFS

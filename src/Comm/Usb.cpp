@@ -417,6 +417,8 @@ namespace Comm
 		receiveContext->device = this;
 		receiveContext->channelIndex = channelIndex;
 
+		LOG_DBG("Starting receive transfer");
+
 		libusb_fill_bulk_transfer(transfer,
 								  m_handle,
 								  m_channels[channelIndex].inEndpoint,
@@ -751,6 +753,8 @@ namespace Comm
 		auto* receiveContext = static_cast<ReceiveTransferContext*>(transfer->user_data);
 		auto* device = receiveContext->device;
 		const std::size_t channelIndex = receiveContext->channelIndex;
+
+		LOG_DBG("Transfer received");
 
 		// Notify completion for any pending transfers
 		std::unique_lock<LockableBase(std::mutex)> lock(s_transferMutex);

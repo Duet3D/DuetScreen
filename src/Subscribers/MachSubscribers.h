@@ -30,9 +30,7 @@ class MachSubscribers : public SubscriberMap
 		// global.jobHistory — [[name, count], ...] with null slots
 		// global:job_history^  fires when an outer element is null
 		// global:job_history^^ fires for each inner element (string name or int count)
-		addSubscriber("global:job_history^", jobHistoryNull);
-		addSubscriber("global:job_history^^", jobHistoryName);	// const char*  → indices[1] == 0
-		addSubscriber("global:job_history^^", jobHistoryCount); // const int32_t& → indices[1] == 1
+		addSubscriber("global:job_history^", jobHistoryCount); // const int32_t& → indices[1] == 1
 		addArrayEndSubscriber("global:job_history^", jobHistoryArrayEnd);
 	}
 

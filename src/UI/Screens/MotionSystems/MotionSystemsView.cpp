@@ -6,6 +6,7 @@
 
 #include "MotionSystemsView.h"
 #include "Debug.h"
+#include "Hardware/Reset.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 
@@ -50,5 +51,11 @@ namespace UI
 
 		m_hint.setText("Turn encoders to adjust the speed factor for each motion system.");
 		m_hint.addStyle(Themes::getLvglStyles().text_muted);
+
+		m_rebootBtn.setSize(10, 10);
+		m_rebootBtn.setFlag(LV_OBJ_FLAG_FLOATING, true);
+		m_rebootBtn.setFlag(LV_OBJ_FLAG_CLICKABLE, true);
+		m_rebootBtn.setAlign(LV_ALIGN_BOTTOM_RIGHT, -8, 8);
+		m_rebootBtn.addEventCallback([this](lv_event_t*) { Reboot(); }, LV_EVENT_CLICKED);
 	}
 } // namespace UI

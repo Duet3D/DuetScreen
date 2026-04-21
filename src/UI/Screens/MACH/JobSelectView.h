@@ -10,6 +10,7 @@
 #include "JobSelectPresenter.h"
 #include "ObjectModel/MACH.h"
 #include "UI/Components/Button/Button.h"
+#include "UI/Components/Button/FullScreenButton.h"
 #include "UI/Components/Graph/Graph.h"
 #include "UI/Components/LVGL/LvContainer.h"
 #include "UI/Components/LVGL/LvImage.h"
@@ -110,6 +111,7 @@ namespace UI
 		CurrentJobs m_currentJobs{"currentJobs", getRoot()};
 		NextJob m_nextJob{"nextJob", getRoot()};
 		JobHistory m_jobHistory{"jobHistory", getRoot()};
+		FullScreenButton m_fullScreenBtn{"fullscreen_btn", getRoot()};
 
 		void onShow() override;
 	};

@@ -8,6 +8,7 @@
 
 #include "MotionSystemPanel.h"
 #include "MotionSystemsPresenter.h"
+#include "UI/Components/Button/FullScreenButton.h"
 #include "UI/Components/LVGL/LvContainer.h"
 #include "UI/Core/View.h"
 #include <array>
@@ -36,5 +37,7 @@ namespace UI
 			{"system_2", getRoot()},
 		}};
 		LvLabel m_hint{"hint", getRoot()};
+		FullScreenButton m_fullScreenBtn{"fullscreen_btn", getRoot()};
+		LvContainer m_rebootBtn{"reboot_btn", getRoot()};
 	};
 } // namespace UI

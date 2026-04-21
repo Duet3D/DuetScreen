@@ -1,1 +1,37 @@
-{}
+{
+    "debug": {
+        "borders": true,
+        "level": 1,
+        "system_monitor_enabled": false,
+        "ui_logging": false
+    },
+    "duet": {
+        "baud_rate": 4098,
+        "communication_type": 1,
+        "hostname": "192.168.20.200",
+        "password": "",
+        "poll_interval": 250
+    },
+    "sys": {
+        "brightness": 100,
+        "display_connected_message": false,
+        "enable_advanced_settings": false,
+        "usb_mode": 0
+    },
+    "themes": {
+        "industrial": {
+            "chroma": 0.019999999552965164,
+            "dark_mode": false,
+            "primary_hue": 245,
+            "secondary_hue": 50
+        }
+    },
+    "ui": {
+        "font": "Montserrat",
+        "info_timeout": 348,
+        "notification_auto_close_error": true,
+        "notification_level": 3,
+        "screensaver_timeout": 0,
+        "theme": "industrial"
+    }
+}

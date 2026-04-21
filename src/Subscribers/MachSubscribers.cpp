@@ -88,40 +88,11 @@ bool MachSubscribers::jobState(Comm::JsonDecoder* decoder, const char* data, con
 
 // ── global.jobHistory ────────────────────────────────────────────────────────
 
-// Fires when an outer entry global.jobHistory[i] is null.
-bool MachSubscribers::jobHistoryNull(Comm::JsonDecoder* decoder, const char* data, const size_t indices[])
-{
-	ZoneScoped;
-	UNUSED(decoder);
-	UNUSED(data);
-	OM::MACH::ClearJobHistoryEntry(indices[0]);
-	LOG_DBG("global.jobHistory[{:d}] = null", indices[0]);
-	return true;
-}
-
-// Fires for inner string elements (indices[1] == 0 → name).
-bool MachSubscribers::jobHistoryName(Comm::JsonDecoder* decoder, const char* data, const size_t indices[])
-{
-	ZoneScoped;
-	UNUSED(decoder);
-	if (indices[1] != 0)
-	{
-		return false;
-	}
-	OM::MACH::SetJobHistoryName(indices[0], data);
-	LOG_DBG("global.jobHistory[{:d}].name = {:s}", indices[0], data ? data : "null");
-	return true;
-}
-
 // Fires for inner integer elements (indices[1] == 1 → counter).
 bool MachSubscribers::jobHistoryCount(Comm::JsonDecoder* decoder, const int32_t& data, const size_t indices[])
 {
 	ZoneScoped;
 	UNUSED(decoder);
-	if (indices[1] != 1)
-	{
-		return false;
-	}
 	OM::MACH::SetJobHistoryCount(indices[0], data);
 	LOG_DBG("global.jobHistory[{:d}].count = {:d}", indices[0], data);
 	return true;

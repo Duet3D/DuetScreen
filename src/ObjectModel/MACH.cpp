@@ -20,8 +20,8 @@ namespace OM::MACH
 	static std::array<std::optional<std::string>, 2> s_nextJob;
 	static std::array<std::string, 2> s_jobState;
 
-	// global.jobHistory storage — nullopt means the outer JSON element was null
-	static std::vector<std::optional<JobHistoryEntry>> s_jobHistory;
+	// global.jobHistory storage - maps to s_jobs
+	static std::vector<int32_t> s_jobHistory;
 
 	// ── global.jobs ──────────────────────────────────────────────────────────
 
@@ -142,45 +142,13 @@ namespace OM::MACH
 
 	// ── global.jobHistory ────────────────────────────────────────────────────
 
-	void SetJobHistoryName(size_t index, const char* name)
-	{
-		if (index >= s_jobHistory.size())
-		{
-			s_jobHistory.resize(index + 1);
-		}
-		if (name != nullptr)
-		{
-			if (!s_jobHistory[index].has_value())
-			{
-				s_jobHistory[index].emplace();
-			}
-			s_jobHistory[index]->name = name;
-		}
-		else
-		{
-			s_jobHistory[index] = std::nullopt;
-		}
-	}
-
 	void SetJobHistoryCount(size_t index, int32_t count)
 	{
 		if (index >= s_jobHistory.size())
 		{
 			s_jobHistory.resize(index + 1);
 		}
-		if (!s_jobHistory[index].has_value())
-		{
-			s_jobHistory[index].emplace();
-		}
-		s_jobHistory[index]->count = count;
-	}
-
-	void ClearJobHistoryEntry(size_t index)
-	{
-		if (index < s_jobHistory.size())
-		{
-			s_jobHistory[index] = std::nullopt;
-		}
+		s_jobHistory[index] = count;
 	}
 
 	void ClearJobHistoryFrom(size_t firstIndex)
@@ -199,24 +167,21 @@ namespace OM::MACH
 	std::vector<JobHistoryEntry> GetJobHistory()
 	{
 		std::vector<JobHistoryEntry> history;
-		history.reserve(s_jobHistory.size());
-		for (const auto& entry : s_jobHistory)
+		history.reserve(s_jobs.size());
+		for (size_t i = 0; i < s_jobs.size(); i++)
 		{
-			if (entry.has_value())
+			std::optional<std::string>& job = s_jobs[i];
+			if (job.has_value())
 			{
-				history.push_back(*entry);
+				JobHistoryEntry entry;
+				entry.name = *job;
+
+				entry.count = i < s_jobHistory.size() ? s_jobHistory[i] : 0;
+
+				history.push_back(entry);
 			}
 		}
 		return history;
-	}
-
-	std::optional<JobHistoryEntry> GetJobHistoryEntry(size_t index)
-	{
-		if (index < s_jobHistory.size() && s_jobHistory[index].has_value())
-		{
-			return s_jobHistory[index];
-		}
-		return std::nullopt;
 	}
 
 } // namespace OM::MACH
