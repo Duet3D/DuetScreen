@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Sleep voor noodstop!",
-      "message": "Noodstop, probeer opnieuw te verbinden..."
+      "message": "Noodstop, probeer opnieuw te verbinden...",
+      "reset_message": "Printer is gestopt. Stuur M999 voor reset. Wacht alstublieft..."
     },
     "extrude": {
       "tool_select": "Gereedschap selecteren",

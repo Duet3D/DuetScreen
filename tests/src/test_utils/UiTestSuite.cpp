@@ -70,6 +70,7 @@ UiTestSuite::UiTestSuite()
 	: UiTestSuiteInner()
 {
 	ZoneScoped;
+	screen.setSize(LV_PCT(100), LV_PCT(100));
 	screen.setStylePad(0);
 	screen.setFlexFlow(LV_FLEX_FLOW_COLUMN_WRAP);
 }

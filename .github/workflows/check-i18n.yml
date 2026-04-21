@@ -9,9 +9,6 @@ name: Verify i18n Translations
 
 on:
   pull_request:
-    paths:
-      - 'assets/i18n/*.json'
-      - 'scripts/manage_translations.py'
   push:
     paths:
       - 'assets/i18n/*.json'

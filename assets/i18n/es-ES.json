@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "¡Deslizar para parada de emergencia!",
-      "message": "Parada de emergencia, intentando reconectar..."
+      "message": "Parada de emergencia, intentando reconectar...",
+      "reset_message": "La impresora se ha detenido. Enviando M999 para reiniciar. Por favor espere..."
     },
     "extrude": {
       "tool_select": "Seleccionar herramienta",

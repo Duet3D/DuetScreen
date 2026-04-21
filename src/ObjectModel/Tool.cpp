@@ -646,6 +646,23 @@ namespace OM
 		return tool->RemoveFansFrom(firstIndexToDelete) > 0;
 	}
 
+	bool UpdateToolOffset(const size_t toolIndex, const size_t axisIndex, const float offset)
+	{
+		if (axisIndex >= MAX_TOTAL_AXES)
+		{
+			return false;
+		}
+
+		auto tool = OM::GetOrCreateTool(toolIndex);
+		if (tool == nullptr)
+		{
+			return false;
+		}
+		LOG_DBG("Updated tool offset: tool={:d} axis={:d} offset={:g}", toolIndex, axisIndex, offset);
+		tool->offsets[axisIndex] = offset;
+		return true;
+	}
+
 	bool UpdateToolTemp(const size_t toolIndex, const size_t toolHeaterIndex, const int32_t temp, const bool active)
 	{
 		auto tool = OM::GetOrCreateTool(toolIndex);
@@ -735,5 +752,21 @@ namespace OM
 			return nullptr;
 		}
 		return GetTool(s_currentTool);
+	}
+
+	float GetCurrentToolAxisOffset(const Move::AxisPtr& axis)
+	{
+		if (axis == nullptr)
+		{
+			return 0.0f;
+		}
+
+		auto tool = GetCurrentTool();
+		if (tool == nullptr || axis->index >= MAX_TOTAL_AXES)
+		{
+			return 0.0f;
+		}
+
+		return tool->offsets[axis->index];
 	}
 } // namespace OM

@@ -30,7 +30,7 @@ namespace UI
 		m_controlsContainer.setFlexGrow(1);
 
 		static int32_t col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-		static int32_t row_dsc[] = {LV_GRID_FR(2), LV_GRID_FR(3), LV_GRID_FR(3), LV_GRID_TEMPLATE_LAST};
+		static int32_t row_dsc[] = {LV_GRID_FR(3), LV_GRID_FR(5), LV_GRID_FR(5), LV_GRID_TEMPLATE_LAST};
 		m_controlsContainer.setGridDsc(col_dsc, row_dsc);
 		m_controlsContainer.setGridCell(m_retractBtn, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 		m_controlsContainer.setGridCell(m_extrudeBtn, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);

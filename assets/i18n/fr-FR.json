@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Glisser pour arrêt d'urgence !",
-      "message": "Arrêt d'urgence, tentative de reconnexion..."
+      "message": "Arrêt d'urgence, tentative de reconnexion...",
+      "reset_message": "L'imprimante est arrêtée. Envoi de M999 pour réinitialiser. Veuillez patienter..."
     },
     "extrude": {
       "tool_select": "Sélectionner l'outil",

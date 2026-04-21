@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Trascinare per arresto di emergenza!",
-      "message": "Arresto di emergenza, tentativo di riconnessione..."
+      "message": "Arresto di emergenza, tentativo di riconnessione...",
+      "reset_message": "La stampante è ferma. Invio di M999 per ripristinare. Attendere prego..."
     },
     "extrude": {
       "tool_select": "Seleziona utensile",

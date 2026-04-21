@@ -10,6 +10,7 @@
 #include "ObjectCancelView.h"
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/Job.h"
+#include "ObjectModel/Tool.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
 #include <cmath>
@@ -68,6 +69,19 @@ namespace UI
 		float xMax = axisX ? axisX->maxPosition : 300.0f;
 		float yMin = axisY ? axisY->minPosition : 0.0f;
 		float yMax = axisY ? axisY->maxPosition : 300.0f;
+
+		if (axisX)
+		{
+			const float xOffset = OM::GetCurrentToolAxisOffset(axisX);
+			xMin += xOffset;
+			xMax += xOffset;
+		}
+		if (axisY)
+		{
+			const float yOffset = OM::GetCurrentToolAxisOffset(axisY);
+			yMin += yOffset;
+			yMax += yOffset;
+		}
 
 		// If no axis data, derive range from object bounds (with small margin)
 		if (!axisX || !axisY)

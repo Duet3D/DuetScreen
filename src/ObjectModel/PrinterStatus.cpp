@@ -11,6 +11,7 @@
 #include "ObjectModel/Utils.h"
 #include "PrinterStatus.h"
 #include "UI/Core/Model.h"
+#include "i18n/i18n.h"
 #include "nameof.hpp"
 #include <string>
 
@@ -89,7 +90,8 @@ namespace OM
 			s_status = newStatus;
 			if (s_status == OM::PrinterStatus::halted)
 			{
-				Comm::DUET.SendGcode("M999\n");
+				Comm::DUET.SendGcode("M999");
+				Model::get().post<EventType::Response>(ResponseType::INFO, _("estop.reset_message"));
 			}
 		}
 		if (sendEvent)
