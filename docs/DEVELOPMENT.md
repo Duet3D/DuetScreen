@@ -114,13 +114,19 @@ or
 ## Building for the Duet3D screen
 1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project
 2. Checkout the `master` branch
-3. Enable SSH on the Duet3D screen
+3. The [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project needs to have been built at least once to download the toolchain and setup the build environment. If you haven't done this yet, you can build the project using the following commands:
+    ```
+    cd buildroot-duetscreen
+    make duet3d_duetscreen_defconfig
+    make -j$(nproc)
+    ```
+4. Enable SSH on the Duet3D screen
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-4. In vscode, run the `Push DuetScreen - SSH - Release` task.
-  - This will build the project and push the binary to the Duet3D screen.
+5. In vscode, run the `Push DuetScreen - SSH - Release` task.
+ ` - This will build the project and push the binary to the Duet3D screen.
   - Use the `Push DuetScreen - SSH - Debug` task to push the debug version of the binary.
-5. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
-6. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+6. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
+7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
 ## Debugging / Running Simulation
 > [!NOTE]
