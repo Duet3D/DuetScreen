@@ -15,6 +15,17 @@
 			"id": "duetscreen_ip_address",
 			"type": "promptString",
 			"description": "IP address for DuetScreen"
+		},
+		{
+			"id": "build_type",
+			"type": "pickString",
+			"description": "Build type for DuetScreen",
+			"options": [
+				"Release",
+				"Release_with_profiling",
+				"Debug",
+			],
+			"default": "Release"
 		}
 	],
 	"tasks": [
@@ -106,13 +117,13 @@
 				"cwd": "${config:buildroot_path}",
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
-					"DUETSCREEN_PRESET": "T113-Debug",
+					"DUETSCREEN_PRESET": "T113-${input:build_type}",
 					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 				}
 			},
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			},
 			"problemMatcher": [
 				"$gcc"
@@ -120,30 +131,7 @@
 			"detail": "Builds DuetScreen for remote debugging"
 		},
 		{
-			"label": "Build DuetScreen for Remote - Release",
-			"type": "shell",
-			"command": "make duetscreen-reconfigure",
-			"args": [],
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"env": {
-					"DUETSCREEN_SRC": "${workspaceFolder}",
-					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER=\"AD-04-01_\"",
-					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_BURNIN_TEST=ON",
-					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-				}
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"detail": "Builds DuetScreen for remote debugging"
-		},
-		{
-			"label": "Push DuetScreen - SSH - Debug",
+			"label": "Push DuetScreen - SSH",
 			"type": "shell",
 			"options": {
 				"cwd": "${config:buildroot_path}",
@@ -155,42 +143,15 @@
 					]
 				}
 			},
-			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen'; cp output/target/usr/bin/DuetScreen output/target/usr/bin/DuetScreen.stripped && output/host/bin/arm-buildroot-linux-gnueabihf-strip output/target/usr/bin/DuetScreen.stripped && scp output/target/usr/bin/DuetScreen.stripped root@${input:duetscreen_ip_address}:/usr/bin/DuetScreen && rm output/target/usr/bin/DuetScreen.stripped",
+			"command": "./scripts/push_duetscreen_ssh.sh ${input:duetscreen_ip_address}",
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			},
 			"problemMatcher": [],
-			"detail": "Push the DuetScreen binary to the screen and restart the service",
+			"detail": "Push the DuetScreen binary to the screen",
 			"dependsOn": [
 				"Build DuetScreen for Remote"
-			],
-			"runOptions": {
-				"instanceLimit": 1
-			}
-		},
-		{
-			"label": "Push DuetScreen - SSH - Release",
-			"type": "shell",
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen';scp output/target/usr/bin/DuetScreen root@${input:duetscreen_ip_address}:/usr/bin/DuetScreen",
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [],
-			"detail": "Push the DuetScreen binary to the screen and restart the service",
-			"dependsOn": [
-				"Build DuetScreen for Remote - Release"
 			],
 			"runOptions": {
 				"instanceLimit": 1

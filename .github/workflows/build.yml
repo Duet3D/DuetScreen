@@ -203,14 +203,14 @@ jobs:
             make clean || true
           fi
           make duet3d_duetscreen_defconfig
-          DUETSCREEN_SRC="../DuetScreen" make duetscreen-rebuild
+          DUETSCREEN_SRC="../DuetScreen" DUETSCREEN_PRESET="T113-Release" make duetscreen-rebuild
 
       - name: Build sdcard.img
         working-directory: buildroot-duetscreen
         run: |
           # Ensure config is applied (idempotent) & build full image; cached objects accelerate this
           make duet3d_duetscreen_defconfig
-          DUETSCREEN_SRC="../DuetScreen" make
+          DUETSCREEN_SRC="../DuetScreen" DUETSCREEN_PRESET="T113-Release" make
 
       - name: Prepare artifacts
         shell: bash
