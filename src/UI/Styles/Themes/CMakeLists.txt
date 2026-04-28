@@ -20,6 +20,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/SoftTheme.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NeonTheme.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/RetroTheme.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ThreeDTheme.cpp
 )
 
 target_link_libraries(DuetScreen.themes PRIVATE DuetScreen.lib)

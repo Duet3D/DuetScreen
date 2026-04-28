@@ -114,13 +114,18 @@ or
 ## Building for the Duet3D screen
 1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project
 2. Checkout the `master` branch
-3. Enable SSH on the Duet3D screen
+3. The [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project needs to have been built at least once to download the toolchain and setup the build environment. If you haven't done this yet, you can build the project using the following commands:
+    ```
+    cd buildroot-duetscreen
+    make duet3d_duetscreen_defconfig
+    make -j$(nproc)
+    ```
+4. Enable SSH on the Duet3D screen
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-4. In vscode, run the `Push DuetScreen - SSH - Release` task.
-  - This will build the project and push the binary to the Duet3D screen.
-  - Use the `Push DuetScreen - SSH - Debug` task to push the debug version of the binary.
-5. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
-6. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+5. In vscode, run the `Push DuetScreen - SSH` task.
+  - This will prompt for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address, then build the project and push the binary to the Duet3D screen.
+6. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
+7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
 ## Debugging / Running Simulation
 > [!NOTE]
@@ -132,7 +137,7 @@ VSCode has been configured for both of these scenarios.
 - To debug the simulation, select the `Debug DuetScreen` configuration in VSCode and start debugging.
 - To debug the code running on the physical hardware, select the `Remote Debug DuetScreen` configuration in VSCode and start debugging.
   - This will start the code and attach gdb to it.
-  - If the code is already running, you need to kill it first. This can be done by pushing a new build to the Duet3D screen with the `Push DuetScreen - SSH - Debug` task.
+  - If the code is already running, you need to kill it first. This can be done by pushing a new build to the Duet3D screen with the `Push DuetScreen - SSH` task (select the `Debug` build type).
 
 ## Commit messages
 Commit messages should be in the following format:
@@ -413,7 +418,7 @@ Tracy can be used when simulating on PC or when running on the physical Duet3D s
 > The screen must be connected to the same network as the machine running the tracy server.
 
 > [!NOTE]
-> Tracy support is only enabled in `Debug` builds by default. To enable tracy support in `Release` builds, set the cmake cache variable `DUETSCREEN_ENABLE_PROFILING` to `ON`. To enable lvgl profiling, set the cmake cache variable `DUETSCREEN_ENABLE_LV_PROFILING` to `ON`.
+> Tracy support is only enabled in `Debug` builds by default. For remote deployment, use the `Release_with_profiling` build type in the `Push DuetScreen - SSH` task — this uses the `T113-Release_with_profiling` preset which enables both `DUETSCREEN_ENABLE_PROFILING` and `DUETSCREEN_ENABLE_LV_PROFILING`. To enable profiling manually in any other build, set those cmake cache variables to `ON`.
 
 #### Building tracy server
 A prebuilt tracy server binary for Windows can be downloaded from the [tracy releases page](https://github.com/wolfpld/tracy/releases), the version must match the tracy version used in this project. For simplicity a copy of the compatible tracy server binary for Windows is included in the [tools/win32/](../tools/win32/tracy-profiler.exe) directory.

@@ -48,14 +48,20 @@ The screenshots below are taken from the repository test references in [tests/re
 
 ### Themes
 
-| Theme | Screenshot |
-| --- | --- |
-| DuetScreen | ![DuetScreen](tests/ref_imgs/home_view/dashboard/theme_duetscreen.png) |
-| Flat | ![Flat](tests/ref_imgs/home_view/dashboard/theme_flat.png) |
-| Industrial | ![Industrial](tests/ref_imgs/home_view/dashboard/theme_industrial.png) |
-| Neon | ![Neon](tests/ref_imgs/home_view/dashboard/theme_neon.png) |
-| Retro | ![Retro](tests/ref_imgs/home_view/dashboard/theme_retro.png) |
-| Soft | ![Soft](tests/ref_imgs/home_view/dashboard/theme_soft.png) |
+Themes allow the UI styling to be changed. This includes colours, fonts, and other styling options.
+
+Customisable themes allow the user to change the colours for a given theme to their liking, while non-customisable themes have fixed colours that cannot be changed by the user.
+
+| Theme | Screenshot | Customisable |
+| --- | --- | --- |
+| DuetScreen | ![DuetScreen](tests/ref_imgs/home_view/dashboard/theme_duetscreen.png) | ✅ |
+| Flat | ![Flat](tests/ref_imgs/home_view/dashboard/theme_flat.png) | ✅ |
+| Industrial | ![Industrial](tests/ref_imgs/home_view/dashboard/theme_industrial.png) | ✅ |
+| Neon | ![Neon](tests/ref_imgs/home_view/dashboard/theme_neon.png) | ✅ |
+| Retro | ![Retro](tests/ref_imgs/home_view/dashboard/theme_retro.png) | ✅ |
+| Soft | ![Soft](tests/ref_imgs/home_view/dashboard/theme_soft.png) | ✅ |
+| 3D | ![3D](tests/ref_imgs/home_view/dashboard/theme_3d.png) | ✅ |
+| Greyscale | ![Greyscale](tests/ref_imgs/home_view/dashboard/theme_grey.png) | ❌ |
 
 ## Getting started
 
@@ -92,6 +98,9 @@ There are a few methods to connect the Duet3D screen to a WiFi network:
     - This method is useful if you are setting up a single screen and you do not know the WiFi credentials in advance.
     - This method can be used after first boot if you do not want to pre-seed `wpa_supplicant.conf`.
 
+> [!NOTE]
+> The screen can be given a static IP address on first boot
+> [Documentation](https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#static-ip-address)
 
 ## Powering the Duet3D screen
 The Duet3D screen can be powered in the following ways:
@@ -125,7 +134,14 @@ Multiple methods are available to connect the Duet3D screen to a mainboard. The 
 
 1. Ensure the Duet3D screen is connected to the same WiFi network as the mainboard.
     - See the [Connecting the Duet3D screen to a WiFi network](#connecting-the-duet3d-screen-to-a-wifi-network) section above.
-2. In the GUI, select the WiFi connection method.
+2. In the GUI, select the `Network` connection method.
+4. Enter the IP address of the mainboard.
+
+### Ethernet
+1. Connect a supported USB-Ethernet adapter to the USB-A or USB-C port on the screen.
+    - If using the USB-C port then set it to `USB-C Host` in the GUI.
+2. Connect the Ethernet adapter to the same network as the mainboard using an Ethernet cable.
+3. In the GUI, select the `Network` connection method.
 4. Enter the IP address of the mainboard.
 
 ### UART
@@ -184,12 +200,13 @@ After updating the screen, it will show an update success or update failed messa
 
 ## USB Ports
 The Duet3D screen has two USB ports:
-- USB-A: This port is also a host port. 
-    - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives.
+- USB-A: This port is always a host port. 
+    - It can be used to connect to a Duet3D mainboard, wifi modules, USB-ethernet adapters, or USB flash drives.
 - USB-C: This port can be a host or device port.
-    - It can be used to connect to a Duet3D mainboard, wifi modules, or USB flash drives in host mode.
+    - It can be used to connect to a Duet3D mainboard, wifi modules, USB-ethernet adapters, or USB flash drives in host mode.
     - It can be used to connect to a PC in device mode for software debugging.
     - It can be used to power the screen in either mode (assuming the attached device/host is able to supply power).
+        - Some smart chargers will not power the screen if it is a USB host
 
 > [!WARNING]
 > A Duet3D mainboard CANNOT provide power to the screen via the USB-C. Always power the screen via the 5V_IN port when using USB

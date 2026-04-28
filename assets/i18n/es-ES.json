@@ -309,6 +309,7 @@
       "screensaver_timeout": "Tiempo de espera del salvapantallas (s):",
       "show_confirmation_dialogs": "Mostrar diálogos de confirmación:",
       "storage_info": "Almacenamiento usado: ",
+      "enable_animations": "Activar animaciones de la interfaz:",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "clear_duetscreen_cache": "Limpiar caché",
       "duetscreen_cache_size": "Tamaño de caché: ",
@@ -421,7 +422,8 @@
         "industrial": "Industrial",
         "soft": "Suave",
         "neon": "Neón",
-        "retro": "Retro"
+        "retro": "Retro",
+        "3d": "3D"
       },
       "icon_sets": {
         "material": "Material"

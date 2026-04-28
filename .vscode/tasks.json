@@ -11,6 +11,22 @@
 			"type": "promptString",
 			"description": "Test filters"
 		},
+		{
+			"id": "duetscreen_ip_address",
+			"type": "promptString",
+			"description": "IP address for DuetScreen"
+		},
+		{
+			"id": "build_type",
+			"type": "pickString",
+			"description": "Build type for DuetScreen",
+			"options": [
+				"Release",
+				"Release_with_profiling",
+				"Debug",
+			],
+			"default": "Release"
+		}
 	],
 	"tasks": [
 		{
@@ -95,19 +111,19 @@
 		{
 			"label": "Build DuetScreen for Remote",
 			"type": "shell",
-			"command": "make duetscreen-reconfigure",
+			"command": "echo \"Building ${input:build_type}...\"; make duetscreen-reconfigure",
 			"args": [],
 			"options": {
 				"cwd": "${config:buildroot_path}",
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
-					"DUETSCREEN_PRESET": "T113-Debug",
+					"DUETSCREEN_PRESET": "T113-${input:build_type}",
 					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 				}
 			},
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			},
 			"problemMatcher": [
 				"$gcc"
@@ -115,30 +131,7 @@
 			"detail": "Builds DuetScreen for remote debugging"
 		},
 		{
-			"label": "Build DuetScreen for Remote - Release",
-			"type": "shell",
-			"command": "make duetscreen-reconfigure",
-			"args": [],
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"env": {
-					"DUETSCREEN_SRC": "${workspaceFolder}",
-					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER=\"AD-04-01_\"",
-					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_BURNIN_TEST=ON",
-					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-				}
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"detail": "Builds DuetScreen for remote debugging"
-		},
-		{
-			"label": "Push DuetScreen - SSH - Debug",
+			"label": "Push DuetScreen - SSH",
 			"type": "shell",
 			"options": {
 				"cwd": "${config:buildroot_path}",
@@ -150,13 +143,13 @@
 					]
 				}
 			},
-			"command": "ssh root@${config:duetscreen_ip} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen'; cp output/target/usr/bin/DuetScreen output/target/usr/bin/DuetScreen.stripped && output/host/bin/arm-buildroot-linux-gnueabihf-strip output/target/usr/bin/DuetScreen.stripped && scp output/target/usr/bin/DuetScreen.stripped root@${config:duetscreen_ip}:/usr/bin/DuetScreen && rm output/target/usr/bin/DuetScreen.stripped",
+			"command": "./scripts/push_duetscreen_ssh.sh ${input:duetscreen_ip_address}",
 			"group": {
 				"kind": "build",
-				"isDefault": false
+				"isDefault": true
 			},
 			"problemMatcher": [],
-			"detail": "Push the DuetScreen binary to the screen and restart the service",
+			"detail": "Push the DuetScreen binary to the screen",
 			"dependsOn": [
 				"Build DuetScreen for Remote"
 			],
@@ -165,36 +158,9 @@
 			}
 		},
 		{
-			"label": "Push DuetScreen - SSH - Release",
-			"type": "shell",
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"command": "ssh root@${config:duetscreen_ip} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen';scp output/target/usr/bin/DuetScreen root@${config:duetscreen_ip}:/usr/bin/DuetScreen",
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [],
-			"detail": "Push the DuetScreen binary to the screen and restart the service",
-			"dependsOn": [
-				"Build DuetScreen for Remote - Release"
-			],
-			"runOptions": {
-				"instanceLimit": 1
-			}
-		},
-		{
 			"label": "Push Assets - SSH",
 			"type": "shell",
-			"command": "ssh root@${config:duetscreen_ip} 'rm -rf /etc/assets; mkdir -p /etc/assets'; scp -r assets root@${config:duetscreen_ip}:/etc/",
+			"command": "ssh root@${input:duetscreen_ip_address} 'rm -rf /etc/assets; mkdir -p /etc/assets'; scp -r assets root@${input:duetscreen_ip_address}:/etc/",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",
@@ -228,7 +194,7 @@
 					]
 				}
 			},
-			"command": "scp output/target/usr/lib/*lvgl* root@${config:duetscreen_ip}:/usr/lib",
+			"command": "scp output/target/usr/lib/*lvgl* root@${input:duetscreen_ip_address}:/usr/lib",
 			"group": {
 				"kind": "build",
 				"isDefault": false
@@ -243,7 +209,7 @@
 		{
 			"label": "Start DuetScreen on remote",
 			"type": "shell",
-			"command": "ssh root@${config:duetscreen_ip} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen; /etc/init.d/20DuetScreen start'",
+			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen; /etc/init.d/20DuetScreen start'",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",
@@ -259,7 +225,7 @@
 		{
 			"label": "Start DuetScreenMonitor on remote",
 			"type": "shell",
-			"command": "ssh root@${config:duetscreen_ip} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen; /etc/init.d/S21DuetScreenMonitor start'",
+			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen; /etc/init.d/S21DuetScreenMonitor start'",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",
@@ -275,7 +241,7 @@
 		{
 			"label": "Stop DuetScreen on remote",
 			"type": "shell",
-			"command": "ssh root@${config:duetscreen_ip} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen'",
+			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen'",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",
@@ -291,7 +257,7 @@
 		{
 			"label": "Start gdbserver on DuetScreen",
 			"type": "shell",
-			"command": "ssh root@${config:duetscreen_ip} 'gdbserver :3000 DuetScreen'",
+			"command": "ssh root@${input:duetscreen_ip_address} 'gdbserver :3000 DuetScreen'",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",
@@ -307,7 +273,7 @@
 		{
 			"label": "Upload config.json",
 			"type": "shell",
-			"command": "scp config.json root@${config:duetscreen_ip}:/etc/duetscreen.json",
+			"command": "scp config.json root@${input:duetscreen_ip_address}:/etc/duetscreen.json",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",

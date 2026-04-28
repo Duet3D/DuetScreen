@@ -28,6 +28,11 @@ namespace Log
 	using log_time_t = std::chrono::system_clock::time_point;
 } // namespace Log
 
+namespace UI
+{
+	class LvObj;
+} // namespace UI
+
 // Central event registry. Add events here with optional payload types.
 #define EVENTS(XX)                                                                                                     \
 	XX(Tick)                                                                                                           \
@@ -79,6 +84,7 @@ namespace Log
 	XX(Directories)                                                                                                    \
 	XX(NavigationHomeEnable, bool)                                                                                     \
 	XX(NavigationBackEnable, bool)                                                                                     \
+	XX(NavigationCurrentScreen, UI::LvObj*)                                                                            \
 	XX(Filaments, std::vector<std::string>)
 
 enum class EventType

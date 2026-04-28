@@ -619,6 +619,11 @@ namespace UI
 				Themes::setIconFolder(Themes::getIconSets().at(index));
 			});
 
+		/* UI animations */
+		createRow(_("settings.enable_animations"), m_enableAnimations);
+		m_enableAnimations.setCheckedCallback([](bool checked)
+											  { StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, checked); });
+
 		/* Theme preview */
 		createSpanRow(m_themePreview);
 		m_themePreview.setHeight(LV_SIZE_CONTENT);
@@ -658,6 +663,7 @@ namespace UI
 		updateThemePreview();
 		m_font.setSelected(FontManager::getActiveTypefaceName());
 		m_icons.setSelected(_(fmt::format("theme.icon_sets.{:s}", Themes::getIconFolder())));
+		m_enableAnimations.setChecked(StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED));
 	}
 
 	DeveloperSettings::DeveloperSettings(const std::string& name, LvObj& parent)

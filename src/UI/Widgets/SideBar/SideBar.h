@@ -28,6 +28,7 @@ namespace UI
 		SideBar(const std::string& name, LvObj& parent);
 
 		void enableHomeButton(bool enable);
+		void setSelectedView(LvObj* view);
 #if SIDE_BAR_BACK_BUTTON
 		void enableBackButton(bool enable);
 #endif

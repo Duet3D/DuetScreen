@@ -308,6 +308,7 @@
       "screen_header": "Paramètres de l'écran",
       "screensaver_timeout": "Délai de l'écran de veille (s) :",
       "show_confirmation_dialogs": "Afficher les dialogues de confirmation :",
+      "enable_animations": "Activer les animations de l'interface :",
       "storage_info": "Stockage utilisé : ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "clear_duetscreen_cache": "Vider le cache",
@@ -421,7 +422,8 @@
         "industrial": "Industriel",
         "soft": "Doux",
         "neon": "Néon",
-        "retro": "Rétro"
+        "retro": "Rétro",
+        "3d": "3D"
       },
       "icon_sets": {
         "material": "Material"

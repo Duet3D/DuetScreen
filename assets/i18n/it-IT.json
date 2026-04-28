@@ -308,6 +308,7 @@
       "screen_header": "Impostazioni schermo",
       "screensaver_timeout": "Timeout salvaschermo (s):",
       "show_confirmation_dialogs": "Mostra dialoghi di conferma:",
+        "enable_animations": "Abilita animazioni dell'interfaccia:",
       "storage_info": "Spazio utilizzato: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "clear_duetscreen_cache": "Svuota cache",
@@ -421,7 +422,8 @@
         "industrial": "Industriale",
         "soft": "Morbido",
         "neon": "Neon",
-        "retro": "Retrò"
+        "retro": "Retrò",
+        "3d": "3D"
       },
       "icon_sets": {
         "material": "Material"

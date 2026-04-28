@@ -308,6 +308,7 @@
       "screen_header": "Scherminstellingen",
       "screensaver_timeout": "Schermbeveiliging time-out (s):",
       "show_confirmation_dialogs": "Bevestigingsdialogen weergeven:",
+      "enable_animations": "UI-animaties inschakelen:",
       "storage_info": "Gebruikt opslaggeheugen: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "clear_duetscreen_cache": "Cache wissen",
@@ -421,7 +422,8 @@
         "industrial": "Industrieel",
         "soft": "Zacht",
         "neon": "Neon",
-        "retro": "Retro"
+        "retro": "Retro",
+        "3d": "3D"
       },
       "icon_sets": {
         "material": "Material"

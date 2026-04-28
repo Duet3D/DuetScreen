@@ -311,6 +311,7 @@
       "show_confirmation_dialogs": "Show Confirmation Dialogs:",
       "storage_info": "Used Storage: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
+      "enable_animations": "Enable UI Animations:",
       "clear_duetscreen_cache": "Clear Cache",
       "duetscreen_cache_size": "Cache Size: ",
       "duetscreen_cache_size_format": "{:s} ({:d} files)",
@@ -422,7 +423,8 @@
         "industrial": "Industrial",
         "soft": "Soft",
         "neon": "Neon",
-        "retro": "Retro"
+        "retro": "Retro",
+        "3d": "3D"
       },
       "icon_sets": {
         "material": "Material"

@@ -513,6 +513,10 @@ else()
   )
 endif()
 
+# Link Tracy client at the final executable level so its symbols are available
+# when resolving references from static archives like lvgl.
+target_link_libraries(DuetScreen PRIVATE Tracy::TracyClient)
+
 # Custom target to show binary size (GNU vs macOS compatibility)
 if(APPLE)
   add_custom_target(

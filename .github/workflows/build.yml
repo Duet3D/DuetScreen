@@ -203,14 +203,14 @@ jobs:
             make clean || true
           fi
           make duet3d_duetscreen_defconfig
-          DUETSCREEN_SRC="../DuetScreen" make duetscreen-rebuild
+          DUETSCREEN_SRC="../DuetScreen" DUETSCREEN_PRESET="T113-Release" make duetscreen-reconfigure
 
       - name: Build sdcard.img
         working-directory: buildroot-duetscreen
         run: |
           # Ensure config is applied (idempotent) & build full image; cached objects accelerate this
           make duet3d_duetscreen_defconfig
-          DUETSCREEN_SRC="../DuetScreen" make
+          DUETSCREEN_SRC="../DuetScreen" DUETSCREEN_PRESET="T113-Release" make
 
       - name: Prepare artifacts
         shell: bash
@@ -221,6 +221,19 @@ jobs:
           cd DuetScreen
           ./scripts/create_upgrade.sh
           cp ./out/DuetScreen.tar.gz ../artifacts/
+
+      - name: Build DuetScreen with profiling
+        working-directory: buildroot-duetscreen
+        run: |
+          make duet3d_duetscreen_defconfig
+          DUETSCREEN_SRC="../DuetScreen" DUETSCREEN_PRESET="T113-Release_with_profiling" make duetscreen-reconfigure
+
+      - name: Add profiling artifact
+        shell: bash
+        run: |
+          cd DuetScreen
+          ./scripts/create_upgrade.sh
+          cp ./out/DuetScreen.tar.gz ../artifacts/DuetScreen-T113-Release_with_profiling.tar.gz
 
       - name: Upload artifacts
         if : false # DISABLE FOR NOW - artifact storage quota issues
