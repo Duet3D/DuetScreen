@@ -122,9 +122,8 @@ or
     ```
 4. Enable SSH on the Duet3D screen
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-5. In vscode, run the `Push DuetScreen - SSH - Release` task.
- ` - This will build the project and push the binary to the Duet3D screen.
-  - Use the `Push DuetScreen - SSH - Debug` task to push the debug version of the binary.
+5. In vscode, run the `Push DuetScreen - SSH` task.
+  - This will prompt for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address, then build the project and push the binary to the Duet3D screen.
 6. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
 7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
@@ -138,7 +137,7 @@ VSCode has been configured for both of these scenarios.
 - To debug the simulation, select the `Debug DuetScreen` configuration in VSCode and start debugging.
 - To debug the code running on the physical hardware, select the `Remote Debug DuetScreen` configuration in VSCode and start debugging.
   - This will start the code and attach gdb to it.
-  - If the code is already running, you need to kill it first. This can be done by pushing a new build to the Duet3D screen with the `Push DuetScreen - SSH - Debug` task.
+  - If the code is already running, you need to kill it first. This can be done by pushing a new build to the Duet3D screen with the `Push DuetScreen - SSH` task (select the `Debug` build type).
 
 ## Commit messages
 Commit messages should be in the following format:
