@@ -111,7 +111,7 @@
 		{
 			"label": "Build DuetScreen for Remote",
 			"type": "shell",
-			"command": "make duetscreen-reconfigure",
+			"command": "echo \"Building ${input:build_type}...\"; make duetscreen-reconfigure",
 			"args": [],
 			"options": {
 				"cwd": "${config:buildroot_path}",
