@@ -418,7 +418,7 @@ Tracy can be used when simulating on PC or when running on the physical Duet3D s
 > The screen must be connected to the same network as the machine running the tracy server.
 
 > [!NOTE]
-> Tracy support is only enabled in `Debug` builds by default. To enable tracy support in `Release` builds, set the cmake cache variable `DUETSCREEN_ENABLE_PROFILING` to `ON`. To enable lvgl profiling, set the cmake cache variable `DUETSCREEN_ENABLE_LV_PROFILING` to `ON`.
+> Tracy support is only enabled in `Debug` builds by default. For remote deployment, use the `Release_with_profiling` build type in the `Push DuetScreen - SSH` task — this uses the `T113-Release_with_profiling` preset which enables both `DUETSCREEN_ENABLE_PROFILING` and `DUETSCREEN_ENABLE_LV_PROFILING`. To enable profiling manually in any other build, set those cmake cache variables to `ON`.
 
 #### Building tracy server
 A prebuilt tracy server binary for Windows can be downloaded from the [tracy releases page](https://github.com/wolfpld/tracy/releases), the version must match the tracy version used in this project. For simplicity a copy of the compatible tracy server binary for Windows is included in the [tools/win32/](../tools/win32/tracy-profiler.exe) directory.
