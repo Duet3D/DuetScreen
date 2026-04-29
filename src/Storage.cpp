@@ -93,6 +93,7 @@ constexpr StorageKey<bool> ID_ENABLE_UI_LOGGING = {"debug:ui_logging", false};
 constexpr StorageKey<std::chrono::milliseconds> ID_BURNIN_FREQUENCY = {"debug:burnin_frequency",
 																	   std::chrono::milliseconds(2000)};
 constexpr StorageKey<bool> ID_SYSTEM_MONITOR_ENABLED = {"debug:system_monitor_enabled", false};
+constexpr StorageKey<bool> ID_ENABLE_SECOND_USB_CHANNEL = {"developer:enable_second_usb_channel", false};
 
 #if DEBUG_BORDERS
 constexpr StorageKey<bool> ID_DEBUG_BORDERS = {"debug:borders", false};

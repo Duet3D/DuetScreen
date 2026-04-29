@@ -130,7 +130,6 @@ option(DUETSCREEN_ENABLE_LV_PROFILING "Enable lvgl profiling" ${DUETSCREEN_ENABL
 option(DUETSCREEN_USE_FIXED_TEST_STRINGS "Use fixed strings for UI labels like build date/time for unit tests" OFF)
 option(DUETSCREEN_USE_LV_ANIMATION "Enable LVGL animations" ON)
 option(DUETSCREEN_CONSOLE_SIDE_PANEL "Show console in side panel next to main window" OFF)
-option(DUETSCREEN_ENABLE_SECOND_USB_CHANNEL "Enable support for the second USB channel used by RRF3.7+ firmware" OFF)
 
 set(_dev_default OFF)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

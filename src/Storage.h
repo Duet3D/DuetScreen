@@ -188,6 +188,7 @@ extern const StorageKey<std::string_view> ID_LOG_FILE;
 extern const StorageKey<bool> ID_ENABLE_UI_LOGGING;
 extern const StorageKey<std::chrono::milliseconds> ID_BURNIN_FREQUENCY;
 extern const StorageKey<bool> ID_SYSTEM_MONITOR_ENABLED;
+extern const StorageKey<bool> ID_ENABLE_SECOND_USB_CHANNEL;
 
 #if DEBUG_BORDERS
 extern const StorageKey<bool> ID_DEBUG_BORDERS;

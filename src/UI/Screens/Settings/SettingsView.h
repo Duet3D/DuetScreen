@@ -144,6 +144,7 @@ namespace UI
 
 		DropdownMenu m_debugLevel{"debug_level", getRoot()};
 		LvSettingsToggle m_enableAdvancedSettings{"enable_advanced_settings", getRoot()};
+		LvSettingsToggle m_enableSecondUsbChannel{"enable_second_usb_channel", getRoot()};
 #if DEBUG_BORDERS
 		LvSettingsToggle m_debugBorders{"debug_borders", getRoot()};
 #endif

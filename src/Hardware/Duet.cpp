@@ -387,23 +387,36 @@ namespace Comm
 			std::size_t usbChannel = 0;
 			size_t len = 0;
 			std::string_view line;
-#if ENABLE_SECOND_USB_CHANNEL
-			std::string_view command = gcode;
-			if (const std::size_t first = command.find_first_not_of(" \t\r\n"); first != std::string_view::npos)
+			if (StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL))
 			{
-				command.remove_prefix(first);
-			}
-			static constexpr std::string_view channelOneCommands[] = {
-				"M409", "M112", "M999", "M111", "M122", "M108", "M25"};
-			for (const std::string_view channelOneCommand : channelOneCommands)
-			{
-				if (command.starts_with(channelOneCommand))
+				std::string_view command = gcode;
+				if (const size_t first = command.find_first_not_of(" \t\r\n"); first != std::string_view::npos)
 				{
-					usbChannel = 1;
-					break;
+					command.remove_prefix(first);
+				}
+				if (const size_t commandEnd = command.find_first_of(" \t\r\n"); commandEnd != std::string_view::npos)
+				{
+					command = command.substr(0, commandEnd);
+				}
+
+				static constexpr std::string_view channelOneCommands[] = {
+					"M409",
+					"M112",
+					"M999",
+					"M111",
+					"M122",
+					"M108",
+					"M25",
+				};
+				for (const std::string_view channelOneCommand : channelOneCommands)
+				{
+					if (command == channelOneCommand)
+					{
+						usbChannel = 1;
+						break;
+					}
 				}
 			}
-#endif
 
 			auto send_cb = [usbChannel](std::string_view payload) { return sendUsbData(payload, usbChannel); };
 			for (size_t i = 0; i < gcode.length(); i++)
@@ -1149,6 +1162,10 @@ namespace Comm
 						  true); // set serial comm parameters for USB port to use JSON responses (no CRC as USB already
 								 // has error checking), this also serves as a test command to verify that the
 								 // connection is working
+				if (StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL))
+				{
+					SendGcode("M575 P1 S0\n", true); // set second USB channel parameters
+				}
 			}
 			else
 			{

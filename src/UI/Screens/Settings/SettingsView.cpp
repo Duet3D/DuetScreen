@@ -685,6 +685,19 @@ namespace UI
 		m_enableAdvancedSettings.setCheckedCallback([](bool checked)
 													{ StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, checked); });
 
+		/* USB second channel */
+		createRow(_("settings.enable_second_usb_channel"), m_enableSecondUsbChannel);
+		m_enableSecondUsbChannel.setCheckedCallback(
+			[](bool checked)
+			{
+				StorageHelper::setData(ID_ENABLE_SECOND_USB_CHANNEL, checked);
+				if (checked && Comm::DUET.GetCommunicationType() == Comm::CommunicationType::usb &&
+					Comm::DUET.IsConnected())
+				{
+					Comm::DUET.SendGcode("M575 P1 S0\n", true);
+				}
+			});
+
 #if DEBUG_BORDERS
 		/* Debug borders */
 		createRow(_("settings.debug_borders"), m_debugBorders);
@@ -855,6 +868,7 @@ namespace UI
 		ZoneScoped;
 		m_debugLevel.setSelected(static_cast<uint32_t>(Log::GetDebugLevel()));
 		m_enableAdvancedSettings.setChecked(StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS));
+		m_enableSecondUsbChannel.setChecked(StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL));
 #if DEBUG_BORDERS
 		m_debugBorders.setChecked(Themes::isdebugBorderVisible(lv_screen_active()));
 #endif
