@@ -285,6 +285,7 @@
       "duet_password_prompt": "Introduzir palavra-passe",
       "duet_poll_interval": "Intervalo de sondagem (ms):",
       "enable_advanced_settings": "Ativar definições avançadas",
+      "enable_second_usb_channel": "Ativar segundo canal USB",
       "enable_adb": "Ativar ADB",
       "enable_ssh": "Ativar SSH",
       "enable_system_monitor": "Ativar monitor do sistema",
