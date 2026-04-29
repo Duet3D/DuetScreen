@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Arrastar para paragem de emergência!",
-      "message": "Paragem de emergência, a tentar reconectar..."
+      "message": "Paragem de emergência enviada...",
+      "reset_message": "Impressora parada. Enviando M999 para reposição. Por favor aguarde..."
     },
     "extrude": {
       "tool_select": "Selecionar ferramenta",
@@ -284,6 +285,7 @@
       "duet_password_prompt": "Introduzir palavra-passe",
       "duet_poll_interval": "Intervalo de sondagem (ms):",
       "enable_advanced_settings": "Ativar definições avançadas",
+      "enable_second_usb_channel": "Ativar segundo canal USB",
       "enable_adb": "Ativar ADB",
       "enable_ssh": "Ativar SSH",
       "enable_system_monitor": "Ativar monitor do sistema",

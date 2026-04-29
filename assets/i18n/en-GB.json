@@ -73,7 +73,8 @@
     "estop": { /* Estop widget */
       "label": "\uF071", /* Warning symbol */
       "prompt": "Drag to E-Stop!",
-      "message": "Emergency Stop, trying to reconnect..."
+      "message": "Emergency stop sent...",
+      "reset_message": "Printer is halted. Sending M999 to reset. Please wait..."
     },
     "extrude": { /* Extrude control widget */
       "tool_select": "Select Tool",
@@ -283,6 +284,7 @@
       "duet_password_prompt": "Enter Password",
       "duet_poll_interval": "Poll Interval (ms):",
       "enable_advanced_settings": "Enable Advanced Settings",
+      "enable_second_usb_channel": "Enable Second USB Channel",
       "enable_adb": "Enable ADB",
       "enable_ssh": "Enable SSH",
       "enable_system_monitor": "Enable System Monitor",

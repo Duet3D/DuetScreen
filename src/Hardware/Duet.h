@@ -89,6 +89,8 @@ namespace Comm
 		std::chrono::milliseconds GetScaledPollInterval() const;
 		uint32_t GetNextLineNumber() { return m_nextLineNumber++; }
 
+		void Estop();
+
 		void SendGcode(std::string_view gcode, bool force = false);
 
 		template <typename... Args>

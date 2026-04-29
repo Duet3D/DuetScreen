@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Zum Not-Stopp ziehen!",
-      "message": "Not-Stopp, versuche wiederzuverbinden..."
+      "message": "Not-Stopp gesendet...",
+      "reset_message": "Drucker ist angehalten. Sende M999 zum Zurücksetzen. Bitte warten..."
     },
     "extrude": {
       "tool_select": "Werkzeug wählen",
@@ -284,6 +285,7 @@
       "duet_password_prompt": "Passwort eingeben",
       "duet_poll_interval": "Abfrageintervall (ms):",
       "enable_advanced_settings": "Erweiterte Einstellungen aktivieren",
+      "enable_second_usb_channel": "Zweiten USB-Kanal aktivieren",
       "enable_adb": "ADB aktivieren",
       "enable_ssh": "SSH aktivieren",
       "enable_system_monitor": "Systemmonitor aktivieren",

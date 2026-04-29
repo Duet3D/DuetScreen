@@ -130,11 +130,11 @@ namespace Comm
 			return false;
 		}
 
-		libusb_open(m_device, &m_handle);
+		r = libusb_open(m_device, &m_handle);
 
 		if (!m_handle)
 		{
-			LOG_ERROR("Cannot open device");
+			LOG_ERROR("Cannot open device: {:s} [{:s}]", libusb_strerror(r), libusb_error_name(r));
 			return false;
 		}
 
@@ -712,7 +712,7 @@ namespace Comm
 			return false;
 		}
 
-		LOG_INFO("Configured {} USB data channel(s)", m_channelCount);
+		LOG_INFO("Configured {} USB data channel{:s}", m_channelCount, m_channelCount > 1 ? "s" : "");
 		libusb_free_config_descriptor(config_desc);
 		return true;
 	}

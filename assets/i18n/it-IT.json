@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Trascinare per arresto di emergenza!",
-      "message": "Arresto di emergenza, tentativo di riconnessione..."
+      "message": "Arresto di emergenza inviato...",
+      "reset_message": "La stampante è ferma. Invio di M999 per ripristinare. Attendere prego..."
     },
     "extrude": {
       "tool_select": "Seleziona utensile",
@@ -284,6 +285,7 @@
       "duet_password_prompt": "Inserire password",
       "duet_poll_interval": "Intervallo di sondaggio (ms):",
       "enable_advanced_settings": "Attiva impostazioni avanzate",
+      "enable_second_usb_channel": "Attiva secondo canale USB",
       "enable_adb": "Attiva ADB",
       "enable_ssh": "Attiva SSH",
       "enable_system_monitor": "Attiva monitor di sistema",
