@@ -591,8 +591,8 @@ TEST_F(TestHomeViewWithData, ControlView)
 	load_model_data_from_file("tests/object_model/test_bench/model_10_axes.json");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
 	{
-		auto btn =
-			control.getMoveView().getChildByName("central_row.babystep.button_panel.value_list.list.value_btn_1");
+		auto btn = control.getMoveView().getChildByName(
+			"central_row.babystep_cont.babystep.button_panel.value_list.list.value_btn_1");
 		ASSERT_NE(btn, nullptr);
 
 		btn->sendEvent(LV_EVENT_LONG_PRESSED);

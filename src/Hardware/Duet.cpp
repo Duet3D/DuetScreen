@@ -165,8 +165,7 @@ namespace Comm
 		req.headers["Content-Type"] = "application/json";
 		if (m_sessionKey != sm_noSessionKey)
 		{
-			// TODO: Determine why session key isn't working
-			// req.headers["X-Session-Key"] = fmt::format("{:d}", m_sessionKey).c_str();
+			req.headers["X-Session-Key"] = fmt::format("{:d}", m_sessionKey);
 		}
 		req.query_params = queryParameters;
 		req.timeout = HTTP_TIMEOUT;
@@ -296,7 +295,7 @@ namespace Comm
 		req.headers["Content-Type"] = "application/json";
 		if (m_sessionKey != sm_noSessionKey)
 		{
-			// req.headers["X-Session-Key"] = fmt::format("{:d}", m_sessionKey).c_str();
+			req.headers["X-Session-Key"] = fmt::format("{:d}", m_sessionKey);
 		}
 		req.query_params = queryParameters;
 		req.timeout = HTTP_TIMEOUT;
@@ -1091,7 +1090,7 @@ namespace Comm
 			LOG_INFO("Connecting to Duet at {:s}", GetBaseUrl());
 
 			hv::QueryParams query;
-			query["password"] = std::string("\"") + m_config.password + "\"";
+			query["password"] = m_config.password;
 			if (useSessionKey)
 				query["sessionKey"] = "yes";
 
@@ -1329,6 +1328,10 @@ namespace Comm
 		LOG_INFO("Setting Duet password");
 		m_config.password = password;
 		StorageHelper::setData(ID_DUET_PASSWORD, password);
+		if (m_config.communicationType == CommunicationType::network)
+		{
+			Connect();
+		}
 	}
 
 	const std::string& Duet::GetPassword() const
