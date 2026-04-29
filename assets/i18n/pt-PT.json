@@ -72,7 +72,7 @@
     "estop": {
       "label": "",
       "prompt": "Arrastar para paragem de emergência!",
-      "message": "Paragem de emergência, a tentar reconectar...",
+      "message": "Paragem de emergência enviada...",
       "reset_message": "Impressora parada. Enviando M999 para reposição. Por favor aguarde..."
     },
     "extrude": {
