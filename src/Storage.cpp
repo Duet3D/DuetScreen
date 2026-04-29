@@ -68,6 +68,7 @@ constexpr StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTA
 	"ui:move:distances", +[]() -> std::vector<float> { return {0.1f, 0.5f, 1, 5, 10, 25, 50}; }};
 constexpr StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES = {
 	"ui:move:feedrates", +[]() -> std::vector<uint32_t> { return {5, 10, 25, 50, 100, 200, 300}; }};
+constexpr StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE = {"ui:move:machine_position_mode", false};
 
 constexpr StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS = {"ui:show_confirmation_dialogs", true};
 

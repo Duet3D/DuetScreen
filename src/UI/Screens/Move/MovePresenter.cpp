@@ -8,6 +8,7 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Home/HomeView.h"
 #include "i18n/i18n.h"
+#include "utils/StorageHelper.h"
 
 namespace UI
 {
@@ -91,13 +92,14 @@ namespace UI
 	{
 		ZoneScoped;
 		MODEL_LOCK();
+		const bool useMachineCoordinates = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
 		auto axis = OM::Move::GetAxisByLetter(axis_letter);
 		if (axis == nullptr)
 		{
 			LOG_WARN("Axis '{}' not found", axis_letter);
 			return;
 		}
-		axis->MoveAbsolute(position, feedrate);
+		axis->MoveAbsolute(position, feedrate, useMachineCoordinates);
 	}
 
 	void MovePresenter::moveAxisRelative(char axis_letter, float distance, uint32_t feedrate)
@@ -129,6 +131,7 @@ namespace UI
 	void MovePresenter::newAxesData()
 	{
 		ZoneScoped;
+		const bool useMachineCoordinates = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
 		std::vector<OM::Move::AxisPtr> axes = OM::Move::GetAxes(false);
 		{
 			/*
@@ -139,9 +142,10 @@ namespace UI
 			for (size_t i = 0; i < axes.size(); i++)
 			{
 				auto& axis = axes[i];
+				const float position = useMachineCoordinates ? axis->machinePosition : axis->userPosition;
 				m_axisData[i] = {.letter = axis->letter[0],
 								 .homed = axis->homed != 0,
-								 .position = axis->userPosition,
+								 .position = position,
 								 .min = axis->minPosition,
 								 .max = axis->maxPosition,
 								 .home_disabled = !canHome(),

@@ -35,7 +35,7 @@ namespace UI
 		UI_LOCK();
 
 		addStyle(Themes::getLvglStyles().bg_dark);
-		m_babystep.addStyle(Themes::getLvglStyles().card);
+		m_babyStepCont.addStyle(Themes::getLvglStyles().card);
 
 		/* Layout */
 		setFlexFlow(LV_FLEX_FLOW_COLUMN);
@@ -186,7 +186,12 @@ namespace UI
 		m_genericAxisControls.getListContainer().addStyle(Themes::getLvglStyles().pad_zero);
 
 		/* Babystepping */
-		m_babystep.setSize(LV_PCT(22), LV_PCT(100));
+		m_babyStepCont.setSize(LV_PCT(22), LV_PCT(100));
+		m_babyStepCont.setFlexFlow(LV_FLEX_FLOW_COLUMN);
+		m_babyStepCont.setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+		m_babystep.setSize(LV_PCT(100), LV_PCT(100));
+		m_babystep.setFlexGrow(1);
 		m_babystep.setNumberPad(&m_numberpad);
 
 		/* Bottom Bar */
@@ -488,8 +493,6 @@ namespace UI
 
 		m_axisDataListPtr = &axis_data;
 	}
-
-	void MoveView::setPositionType(const MovePresenter::PositionType /* type */) {}
 
 	void MoveView::setAxisPosition(char axis_letter, float position)
 	{

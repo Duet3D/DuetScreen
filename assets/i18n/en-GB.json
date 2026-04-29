@@ -310,6 +310,7 @@
       "screensaver_timeout": "Screensaver Timeout (s):",
       "send_config_to_duet": "Upload config to Duet",
       "show_confirmation_dialogs": "Show Confirmation Dialogs:",
+      "move_machine_position_mode": "Use machine coordinates for absolute move (G53):",
       "storage_info": "Used Storage: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "enable_animations": "Enable UI Animations:",

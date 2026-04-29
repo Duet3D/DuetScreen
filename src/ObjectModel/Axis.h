@@ -52,7 +52,7 @@ namespace OM::Move
 
 		void Reset();
 		void Home();
-		void MoveAbsolute(float position, uint32_t feedrate);
+		void MoveAbsolute(float position, uint32_t feedrate, bool machineCoordinates = false);
 		void MoveRelative(float distance, uint32_t feedrate);
 	};
 

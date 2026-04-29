@@ -60,6 +60,7 @@ namespace UI
 		Slider m_brightness{"brightness", getRoot()};
 		Slider m_screensaverTimeout{"screensaver_timeout", getRoot()};
 		LvSettingsToggle m_showConfirmationDialogs{"show_confirmation_dialogs", getRoot()};
+		LvSettingsToggle m_moveMachinePositionMode{"move_machine_position_mode", getRoot()};
 
 		/* Notifications */
 		LvSettingsToggle m_displayConnectedMessage{"display_connected_message", getRoot()};

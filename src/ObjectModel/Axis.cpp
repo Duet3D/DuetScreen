@@ -74,9 +74,10 @@ namespace OM::Move
 	 *
 	 * @note M120 and M121 are used to ensure the movement state is restored after this command
 	 */
-	void Axis::MoveAbsolute(float position, uint32_t feedrate)
+	void Axis::MoveAbsolute(float position, uint32_t feedrate, bool machineCoordinates)
 	{
-		Comm::DUET.SendGcodef("M120\nG90\nG1 {:s}{:g} F{:g}\nM121\n",
+		Comm::DUET.SendGcodef("M120\nG90\n{:s}G1 {:s}{:g} F{:g}\nM121\n",
+							  machineCoordinates ? "G53 " : "",
 							  convertAxisLetterToGcode(letter[0]),
 							  Units::convertDisplayedDistanceToDuetUnits(position),
 							  Units::convertDisplayedSpeedToDuetUnits(static_cast<float>(feedrate)));

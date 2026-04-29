@@ -164,6 +164,7 @@ extern const StorageKey<bool> ID_UI_CONSOLE_COMMAND_LIST_COLLAPSED;
 extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_BABYSTEP_AMOUNT;
 extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTANCES;
 extern const StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES;
+extern const StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE;
 
 extern const StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS;
 

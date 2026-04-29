@@ -20,7 +20,6 @@ namespace UI
 		MoveView(const std::string& name, LvObj& parent);
 
 		void setAxisData(const std::vector<MovePresenter::AxisData>& axis_data);
-		void setPositionType(const MovePresenter::PositionType type);
 		void setCanJogUnhomed(bool enable);
 		void setAxisPosition(char axis_letter, float position);
 		void setAxisHomed(char axis_letter, bool homed);
@@ -47,8 +46,8 @@ namespace UI
 		XYControl m_xyControl{"xy_control", m_axisControlCont};
 		GenericAxisControl m_zControl{"z_control", m_axisControlCont};
 		List<GenericAxisControl> m_genericAxisControls{"generic_axis_controls", m_axisControlCont};
-
-		BabyStep m_babystep{"babystep", m_centralRow};
+		Card m_babyStepCont{"babystep_cont", m_centralRow};
+		BabyStep m_babystep{"babystep", m_babyStepCont};
 
 		// Bottom Bar
 		Card m_bottomBarCont{"bottombar", getRoot()};

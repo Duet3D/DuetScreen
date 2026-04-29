@@ -309,6 +309,7 @@
       "screen_header": "Impostazioni schermo",
       "screensaver_timeout": "Timeout salvaschermo (s):",
       "show_confirmation_dialogs": "Mostra dialoghi di conferma:",
+      "move_machine_position_mode": "Usa coordinate macchina per il movimento assoluto (G53):",
         "enable_animations": "Abilita animazioni dell'interfaccia:",
       "storage_info": "Spazio utilizzato: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

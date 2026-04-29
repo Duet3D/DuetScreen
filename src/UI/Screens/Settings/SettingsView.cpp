@@ -322,6 +322,12 @@ namespace UI
 			[](bool checked) { StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, checked); });
 		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
 
+		/* Move Position Mode */
+		createRow(_("settings.move_machine_position_mode"), m_moveMachinePositionMode);
+		m_moveMachinePositionMode.setCheckedCallback(
+			[](bool checked) { StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, checked); });
+		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+
 		/* Notifications */
 		createHeader(_("settings.headers.notifications"));
 
@@ -380,6 +386,8 @@ namespace UI
 		}
 		m_brightness.setValue(static_cast<float>(DisplayHelper::getBrightness()));
 		m_screensaverTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT).count()));
+		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
+		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
 		m_notificationLevel.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_NOTIFICATION_LEVEL)));
 		m_notificationTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_NOTIFICATION_TIMEOUT).count()));
 		m_notificationAutoCloseError.setChecked(!StorageHelper::getData(ID_NOTIFICATION_AUTO_CLOSE_ERROR));
