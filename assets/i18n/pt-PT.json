@@ -310,6 +310,11 @@
       "screensaver_timeout": "Tempo de espera do protetor de ecrã (s):",
       "show_confirmation_dialogs": "Mostrar diálogos de confirmação:",
       "move_machine_position_mode": "Usar coordenadas da máquina para movimento absoluto (G53):",
+      "job_progress_source": "Fonte de progresso do trabalho:",
+      "job_progress_source_options": {
+        "duration": "Duração",
+        "file": "Posição no ficheiro"
+      },
       "enable_animations": "Ativar animações da interface:",
       "storage_info": "Armazenamento usado: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

@@ -310,6 +310,11 @@
       "screensaver_timeout": "Schermbeveiliging time-out (s):",
       "show_confirmation_dialogs": "Bevestigingsdialogen weergeven:",
       "move_machine_position_mode": "Machinecoordinaten gebruiken voor absolute verplaatsing (G53):",
+      "job_progress_source": "Bron voor taakvoortgang:",
+      "job_progress_source_options": {
+        "duration": "Duur",
+        "file": "Bestandspositie"
+      },
       "enable_animations": "UI-animaties inschakelen:",
       "storage_info": "Gebruikt opslaggeheugen: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

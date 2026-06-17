@@ -108,6 +108,26 @@ bool JobSubscribers::slicerTimeLeft(Comm::JsonDecoder* decoder, const char* data
 	return true;
 }
 
+bool JobSubscribers::filePosition(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	UNUSED(indices);
+	OM::SetFilePosition(data);
+	Model::get().post<EventType::JobFileProgress>();
+	return true;
+}
+
+bool JobSubscribers::fileSize(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[])
+{
+	ZoneScoped;
+	UNUSED(decoder);
+	UNUSED(indices);
+	OM::SetFileSize(data);
+	Model::get().post<EventType::JobFileProgress>();
+	return true;
+}
+
 bool JobSubscribers::warmUpDuration(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[])
 {
 	ZoneScoped;

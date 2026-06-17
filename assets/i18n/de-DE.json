@@ -310,6 +310,11 @@
       "screensaver_timeout": "Bildschirmschoner-Timeout (s):",
       "show_confirmation_dialogs": "Bestätigungsdialoge anzeigen:",
       "move_machine_position_mode": "Maschinenkoordinaten für absolute Bewegung verwenden (G53):",
+      "job_progress_source": "Quelle für Druckfortschritt:",
+      "job_progress_source_options": {
+        "duration": "Dauer",
+        "file": "Dateiposition"
+      },
       "enable_animations": "UI-Animationen aktivieren:",
       "storage_info": "Belegter Speicher: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

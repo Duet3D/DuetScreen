@@ -4,6 +4,7 @@
 #include "Debug.h"
 #include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
+#include "ObjectModel/Job.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
@@ -20,6 +21,11 @@
 
 namespace UI
 {
+	constexpr std::string_view JOB_PROGRESS_SOURCE_STRINGS[] = {
+		"settings.job_progress_source_options.duration",
+		"settings.job_progress_source_options.file",
+	};
+
 	struct KeyboardLayout
 	{
 		std::string_view name;
@@ -328,6 +334,17 @@ namespace UI
 			[](bool checked) { StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, checked); });
 		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
 
+		/* Job Progress Source */
+		createRow(_("settings.job_progress_source"), m_jobProgressSource);
+		m_jobProgressSource.setHeight(LV_SIZE_CONTENT);
+		for (auto& source : JOB_PROGRESS_SOURCE_STRINGS)
+		{
+			m_jobProgressSource.addOption(_(source));
+		}
+		m_jobProgressSource.setSelectedCallback(
+			[](uint32_t index, std::string_view /* option */)
+			{ StorageHelper::setData(ID_JOB_PROGRESS_SOURCE, OM::JobProgressSource(index)); });
+
 		/* Notifications */
 		createHeader(_("settings.headers.notifications"));
 
@@ -388,6 +405,7 @@ namespace UI
 		m_screensaverTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT).count()));
 		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
 		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+		m_jobProgressSource.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_JOB_PROGRESS_SOURCE)));
 		m_notificationLevel.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_NOTIFICATION_LEVEL)));
 		m_notificationTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_NOTIFICATION_TIMEOUT).count()));
 		m_notificationAutoCloseError.setChecked(!StorageHelper::getData(ID_NOTIFICATION_AUTO_CLOSE_ERROR));

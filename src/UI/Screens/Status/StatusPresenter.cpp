@@ -11,6 +11,7 @@
 #include "StatusView.h"
 #include "UI/Core/Navigation.h"
 #include "i18n/i18n.h"
+#include "utils/StorageHelper.h"
 
 namespace UI
 {
@@ -98,15 +99,22 @@ namespace UI
 		uint32_t progress = 0;
 		{
 			MODEL_LOCK();
-			uint32_t elapsed = OM::GetPrintDuration();
-
-			// Progress
-			uint32_t warmupTime = OM::GetWarmUpDuration();
-			uint32_t totalDuration = std::max<uint32_t>(OM::GetPrintTime(), OM::GetSimulatedTime());
-			progress =
-				totalDuration == 0
-					? 0
-					: std::min<uint32_t>((100 * std::max<uint32_t>(0, elapsed - warmupTime)) / totalDuration, 100);
+			if (StorageHelper::getData(ID_JOB_PROGRESS_SOURCE) == OM::JobProgressSource::FILE)
+			{
+				uint32_t fileSize = OM::GetFileSize();
+				uint32_t filePosition = OM::GetFilePosition();
+				progress = fileSize == 0 ? 0 : std::min<uint32_t>((100 * filePosition) / fileSize, 100);
+			}
+			else
+			{
+				uint32_t elapsed = OM::GetPrintDuration();
+				uint32_t warmupTime = OM::GetWarmUpDuration();
+				uint32_t totalDuration = std::max<uint32_t>(OM::GetPrintTime(), OM::GetSimulatedTime());
+				progress =
+					totalDuration == 0
+						? 0
+						: std::min<uint32_t>((100 * std::max<uint32_t>(0, elapsed - warmupTime)) / totalDuration, 100);
+			}
 		}
 
 		m_view->updateProgress(progress);

@@ -118,6 +118,7 @@ namespace OM
 	{
 		enum class SortBy;
 	}
+	enum class JobProgressSource;
 } // namespace OM
 namespace Log
 {
@@ -167,6 +168,7 @@ extern const StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_M
 extern const StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE;
 
 extern const StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS;
+extern const StorageKey<OM::JobProgressSource> ID_JOB_PROGRESS_SOURCE;
 
 /* Multi value selectors */
 // these will have the following sub keys {"values", "selected"}

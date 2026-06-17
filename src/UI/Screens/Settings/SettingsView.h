@@ -61,6 +61,7 @@ namespace UI
 		Slider m_screensaverTimeout{"screensaver_timeout", getRoot()};
 		LvSettingsToggle m_showConfirmationDialogs{"show_confirmation_dialogs", getRoot()};
 		LvSettingsToggle m_moveMachinePositionMode{"move_machine_position_mode", getRoot()};
+		DropdownMenu m_jobProgressSource{"job_progress_source", getRoot()};
 
 		/* Notifications */
 		LvSettingsToggle m_displayConnectedMessage{"display_connected_message", getRoot()};

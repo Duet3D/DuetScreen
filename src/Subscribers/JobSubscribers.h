@@ -12,6 +12,8 @@ class JobSubscribers : public SubscriberMap
 		addSubscriber("job:file:printTime", printTime);
 		addSubscriber("job:file:simulatedTime", simulatedTime);
 		addSubscriber("job:file:height", height);
+		addSubscriber("job:filePosition", filePosition);
+		addSubscriber("job:file:size", fileSize);
 		addSubscriber("job:timesLeft:filament", filamentTimeLeft);
 		addSubscriber("job:timesLeft:file", fileTimeLeft);
 		addSubscriber("job:timesLeft:slicer", slicerTimeLeft);
@@ -37,6 +39,8 @@ class JobSubscribers : public SubscriberMap
 	static bool filamentTimeLeft(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 	static bool fileTimeLeft(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
 	static bool slicerTimeLeft(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
+	static bool filePosition(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[]);
+	static bool fileSize(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[]);
 	static bool warmUpDuration(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[]);
 	static bool duration(Comm::JsonDecoder* decoder, const uint32_t& data, const size_t indices[]);
 	static bool nullBuild(Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);

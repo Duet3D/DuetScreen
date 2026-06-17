@@ -13,6 +13,7 @@
 #include "Debug.h"							 // Log::DebugLevel
 #include "Hardware/Duet.h"					 // Comm::CommunicationType
 #include "ObjectModel/Files.h"				 // OM::FileSystem::SortBy
+#include "ObjectModel/Job.h"				 // OM::JobProgressSource
 #include "Subscribers/ResponseSubscribers.h" // ResponseType
 #include "utils/SystemHelper.h"				 // SystemHelper::Services
 #include "utils/UnitSystem.h"				 // Units::UnitSystem
@@ -71,6 +72,8 @@ constexpr StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE
 constexpr StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE = {"ui:move:machine_position_mode", false};
 
 constexpr StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS = {"ui:show_confirmation_dialogs", true};
+constexpr StorageKey<OM::JobProgressSource> ID_JOB_PROGRESS_SOURCE = {"ui:job_progress_source",
+																	  OM::JobProgressSource::DURATION};
 
 /* Multi value selectors */
 // these will have the following sub keys {"values", "selected"}

@@ -38,6 +38,8 @@ namespace OM
 	static uint32_t s_printDuration = 0;
 	static uint32_t s_warmUpDuration = 0;
 	static float s_printHeight = 0.0f;
+	static uint32_t s_filePosition = 0;
+	static uint32_t s_fileSize = 0;
 	static struct
 	{
 		uint32_t filament = 0;
@@ -51,6 +53,8 @@ namespace OM
 	ATTR_SETTR_GETTR(PrintDuration, uint32_t, s_printDuration)
 	ATTR_SETTR_GETTR(WarmUpDuration, uint32_t, s_warmUpDuration)
 	ATTR_SETTR_GETTR(PrintHeight, float, s_printHeight)
+	ATTR_SETTR_GETTR(FilePosition, uint32_t, s_filePosition)
+	ATTR_SETTR_GETTR(FileSize, uint32_t, s_fileSize)
 
 	void SetPrintRemaining(RemainingTimeType type, const uint32_t printRemaining)
 	{

@@ -310,6 +310,11 @@
       "screensaver_timeout": "Délai de l'écran de veille (s) :",
       "show_confirmation_dialogs": "Afficher les dialogues de confirmation :",
       "move_machine_position_mode": "Utiliser les coordonnées machine pour le déplacement absolu (G53) :",
+      "job_progress_source": "Source de progression du travail :",
+      "job_progress_source_options": {
+        "duration": "Durée",
+        "file": "Position dans le fichier"
+      },
       "enable_animations": "Activer les animations de l'interface :",
       "storage_info": "Stockage utilisé : ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
