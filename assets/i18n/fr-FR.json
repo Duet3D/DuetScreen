@@ -307,6 +307,13 @@
       "run_buildroot_setup": "Exécuter la configuration Buildroot",
       "screen": "Écran",
       "screen_header": "Paramètres de l'écran",
+      "screen_rotation": "Rotation de l'écran :",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Délai de l'écran de veille (s) :",
       "show_confirmation_dialogs": "Afficher les dialogues de confirmation :",
       "move_machine_position_mode": "Utiliser les coordonnées machine pour le déplacement absolu (G53) :",

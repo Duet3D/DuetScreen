@@ -117,8 +117,9 @@ namespace UI
 		DropdownMenu m_theme{"theme", getRoot()};
 		DropdownMenu m_font{"font", getRoot()};
 		DropdownMenu m_icons{"icons", getRoot()};
-		LvSettingsToggle m_enableAnimations{"enable_animations", getRoot()};
 		ThemePreview m_themePreview{"theme_preview", getRoot()};
+		LvSettingsToggle m_enableAnimations{"enable_animations", getRoot()};
+		DropdownMenu m_screenRotation{"screen_rotation", getRoot()};
 	};
 
 	class DeveloperSettings : public View<DeveloperSettingsPresenter, SettingsTab>

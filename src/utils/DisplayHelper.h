@@ -7,6 +7,14 @@
 
 #pragma once
 
+enum class DisplayRotation
+{
+	ROTATION_0 = 0,
+	ROTATION_90,
+	ROTATION_180,
+	ROTATION_270,
+};
+
 class DisplayHelper
 {
   public:
@@ -20,6 +28,12 @@ class DisplayHelper
 	// Gets the current display brightness.
 	// Returns a brightness value in the range [0, 100].
 	static unsigned int getBrightness();
+
+	// Rotates the display and persists the setting.
+	static void setRotation(DisplayRotation rotation);
+
+	// Gets the currently stored display rotation.
+	static DisplayRotation getRotation();
 
   private:
 	DisplayHelper(const char* device = "/dev/disp", unsigned int screen = 0);

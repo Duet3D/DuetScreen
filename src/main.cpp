@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 		UI::Themes::init(display);
 	}
 
-	// lv_display_set_rotation(display, LV_DISP_ROTATION_180);
+	DisplayHelper::setRotation(StorageHelper::getData(ID_DISPLAY_ROTATION));
 
 	UI::HomeView& home = UI::HomeView::instance();
 	home.show();

@@ -18,12 +18,30 @@
 #include <ranges>
 
 #define USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS 1
+#define ENABLE_90_ROTATION 0
 
 namespace UI
 {
 	constexpr std::string_view JOB_PROGRESS_SOURCE_STRINGS[] = {
 		"settings.job_progress_source_options.duration",
 		"settings.job_progress_source_options.file",
+	};
+
+	struct ScreenRotationOption
+	{
+		std::string_view name;
+		DisplayRotation rotation;
+	};
+
+	static constexpr std::array s_screenRotations = {
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_0", DisplayRotation::ROTATION_0},
+#if ENABLE_90_ROTATION
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_90", DisplayRotation::ROTATION_90},
+#endif
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_180", DisplayRotation::ROTATION_180},
+#if ENABLE_90_ROTATION
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_270", DisplayRotation::ROTATION_270},
+#endif
 	};
 
 	struct KeyboardLayout
@@ -645,14 +663,32 @@ namespace UI
 				Themes::setIconFolder(Themes::getIconSets().at(index));
 			});
 
+		/* Theme preview */
+		createSpanRow(m_themePreview);
+		m_themePreview.setHeight(LV_SIZE_CONTENT);
+
 		/* UI animations */
 		createRow(_("settings.enable_animations"), m_enableAnimations);
 		m_enableAnimations.setCheckedCallback([](bool checked)
 											  { StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, checked); });
 
-		/* Theme preview */
-		createSpanRow(m_themePreview);
-		m_themePreview.setHeight(LV_SIZE_CONTENT);
+		/* Screen rotation */
+		createRow(_("settings.screen_rotation"), m_screenRotation);
+		m_screenRotation.setHeight(LV_SIZE_CONTENT);
+		for (auto& option : s_screenRotations)
+		{
+			m_screenRotation.addOption(_(option.name));
+		}
+		m_screenRotation.setSelectedCallback(
+			[](uint32_t index, std::string_view /* option */)
+			{
+				if (index >= s_screenRotations.size())
+				{
+					LOG_ERROR("Invalid screen rotation index: {:d}", index);
+					return;
+				}
+				DisplayHelper::setRotation(s_screenRotations[index].rotation);
+			});
 	}
 
 	void DisplaySettings::updateThemePreview()
@@ -690,6 +726,20 @@ namespace UI
 		m_font.setSelected(FontManager::getActiveTypefaceName());
 		m_icons.setSelected(_(fmt::format("theme.icon_sets.{:s}", Themes::getIconFolder())));
 		m_enableAnimations.setChecked(StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED));
+
+		const uint32_t rotationIndex = []()
+		{
+			const auto rotation = DisplayHelper::getRotation();
+			for (uint32_t i = 0; i < s_screenRotations.size(); ++i)
+			{
+				if (s_screenRotations[i].rotation == rotation)
+				{
+					return i;
+				}
+			}
+			return 0u;
+		}();
+		m_screenRotation.setSelected(rotationIndex);
 	}
 
 	DeveloperSettings::DeveloperSettings(const std::string& name, LvObj& parent)

@@ -307,6 +307,13 @@
       "run_buildroot_setup": "Run Buildroot Setup",
       "screen": "Screen",
       "screen_header": "Screen Settings",
+      "screen_rotation": "Screen Rotation:",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Screensaver Timeout (s):",
       "send_config_to_duet": "Upload config to Duet",
       "show_confirmation_dialogs": "Show Confirmation Dialogs:",

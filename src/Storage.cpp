@@ -15,6 +15,7 @@
 #include "ObjectModel/Files.h"				 // OM::FileSystem::SortBy
 #include "ObjectModel/Job.h"				 // OM::JobProgressSource
 #include "Subscribers/ResponseSubscribers.h" // ResponseType
+#include "utils/DisplayHelper.h"			 // DisplayRotation
 #include "utils/SystemHelper.h"				 // SystemHelper::Services
 #include "utils/UnitSystem.h"				 // Units::UnitSystem
 
@@ -54,6 +55,7 @@ constexpr StorageKey<std::string_view> ID_FONT = {"ui:font", "OpenSans"};
 constexpr StorageKey<std::string_view> ID_ICON_FOLDER = {"ui:icon_folder", DEFAULT_ICON_SET};
 constexpr StorageKey<std::string_view> ID_KEYBOARD_LAYOUT = {"ui:keyboard_layout", "us"};
 constexpr StorageKey<bool> ID_UI_ANIMATIONS_ENABLED = {"ui:animations_enabled", true};
+constexpr StorageKey<DisplayRotation> ID_DISPLAY_ROTATION = {"ui:display_rotation", DisplayRotation::ROTATION_0};
 
 constexpr StorageKey<bool> ID_SCREENSAVER_ENABLE = {"ui:screensaver_enable", true};
 constexpr StorageKey<std::chrono::seconds> ID_SCREENSAVER_TIMEOUT = {"ui:screensaver_timeout", DEFAULT_SCREEN_TIMEOUT};

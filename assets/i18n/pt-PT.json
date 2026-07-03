@@ -307,6 +307,13 @@
       "run_buildroot_setup": "Executar configuração Buildroot",
       "screen": "Ecrã",
       "screen_header": "Definições do ecrã",
+      "screen_rotation": "Rotação do ecrã:",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Tempo de espera do protetor de ecrã (s):",
       "show_confirmation_dialogs": "Mostrar diálogos de confirmação:",
       "move_machine_position_mode": "Usar coordenadas da máquina para movimento absoluto (G53):",
