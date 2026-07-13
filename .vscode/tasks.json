@@ -99,7 +99,7 @@
 			"command": "rm -rf output/build/duetscreen-HEAD; rm -rf dl/duetscreen",
 			"args": [],
 			"options": {
-				"cwd": "${workspaceFolder}/${config:buildroot_path}"
+				"cwd": "${config:buildroot_path}"
 			},
 			"group": {
 				"kind": "build",
@@ -114,7 +114,7 @@
 			"command": "echo \"Building ${input:build_type}...\"; make duetscreen-reconfigure",
 			"args": [],
 			"options": {
-				"cwd": "${workspaceFolder}/${config:buildroot_path}",
+				"cwd": "${config:buildroot_path}",
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					"DUETSCREEN_PRESET": "T113-${input:build_type}",
@@ -134,7 +134,7 @@
 			"label": "Push DuetScreen - SSH",
 			"type": "shell",
 			"options": {
-				"cwd": "${workspaceFolder}/${config:buildroot_path}",
+				"cwd": "${config:buildroot_path}",
 				"shell": {
 					"executable": "/bin/bash",
 					"args": [
@@ -185,7 +185,7 @@
 			"label": "Push Libraries - SSH",
 			"type": "shell",
 			"options": {
-				"cwd": "${workspaceFolder}/${config:buildroot_path}",
+				"cwd": "${config:buildroot_path}",
 				"shell": {
 					"executable": "/bin/bash",
 					"args": [
