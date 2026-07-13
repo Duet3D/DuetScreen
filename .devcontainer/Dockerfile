@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+FROM mcr.microsoft.com/devcontainers/cpp:2-ubuntu24.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     DUETSCREEN_WORKSPACE=/workspaces/DuetScreen \
