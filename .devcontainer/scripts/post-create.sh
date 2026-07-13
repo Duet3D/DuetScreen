@@ -16,6 +16,8 @@ pip install -r requirements.txt
 
 if [[ -d "${buildroot_workspace}" ]]; then
     echo "Optional buildroot mount detected at ${buildroot_workspace}"
+    cd "${buildroot_workspace}"
+    make duet3d_duetscreen_defconfig
 else
     echo "Optional buildroot mount not detected. T113 build tasks will require ../buildroot-duetscreen on the host."
 fi
