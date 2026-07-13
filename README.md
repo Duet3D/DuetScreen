@@ -122,7 +122,7 @@ Multiple methods are available to connect the Duet3D screen to a mainboard. The 
 2. In the GUI, select the USB connection method.
 
 > [!NOTE]
-> When the Duet3D screen detects a USB connection to a Duet3D mainboard, it will automatically send `M575 P0 S4` to configure the mainboard for USB communication.
+> When the Duet3D screen detects a USB connection to a Duet3D mainboard, it will automatically send `M575 P0 S0` to configure the mainboard for USB communication.
 
 ### WiFi
 > [!NOTE]
