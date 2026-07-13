@@ -27,6 +27,7 @@
 #include "ObjectModel/Spindle.h"
 #include "ObjectModel/Tool.h"
 #include "ObjectModel/Utils.h"
+#include "nameof.hpp"
 #include "tracy/Tracy.hpp"
 #include "utils/TimeHelper.h"
 #include <filesystem>
@@ -53,90 +54,140 @@ namespace Comm
 {
 
 	static std::chrono::milliseconds s_lastResponseTime(0);
+	static bool s_sendFreqNext = true;
 
-	Seq seqs[] = {
+	static std::array s_seqs = {
 #if FETCH_NETWORK
-		{.seqid = rcvSeqsNetwork, .lastSeq = 0, .state = SeqStateInit, .key = "network", .flags = "v"},
+		Seq{.seqid = rcvSeqsNetwork, .lastSeq = 0, .state = SeqStateInit, .key = "network", .flags = "v"},
 #endif
 #if FETCH_BOARDS
-		{.seqid = rcvSeqsBoards, .lastSeq = 0, .state = SeqStateInit, .key = "boards", .flags = "v"},
+		Seq{.seqid = rcvSeqsBoards, .lastSeq = 0, .state = SeqStateInit, .key = "boards", .flags = "v"},
 #endif
 #if FETCH_MOVE
-		{.seqid = rcvSeqsMove, .lastSeq = 0, .state = SeqStateInit, .key = "move", .flags = "vn"},
+		Seq{.seqid = rcvSeqsMove, .lastSeq = 0, .state = SeqStateInit, .key = "move", .flags = "vn"},
 #endif
 #if FETCH_HEAT
-		{.seqid = rcvSeqsHeat, .lastSeq = 0, .state = SeqStateInit, .key = "heat", .flags = "v"},
+		// TODO 'o' needed as we still use the 'bedHeaters' and 'chamberHeaters' fields
+		Seq{.seqid = rcvSeqsHeat, .lastSeq = 0, .state = SeqStateInit, .key = "heat", .flags = "vo"},
 #endif
 #if FETCH_TOOLS
-		{.seqid = rcvSeqsTools, .lastSeq = 0, .state = SeqStateInit, .key = "tools", .flags = "v"},
+		Seq{.seqid = rcvSeqsTools, .lastSeq = 0, .state = SeqStateInit, .key = "tools", .flags = "v"},
 #endif
 #if FETCH_SPINDLES
-		{.seqid = rcvSeqsSpindles, .lastSeq = 0, .state = SeqStateInit, .key = "spindles", .flags = "v"},
+		Seq{.seqid = rcvSeqsSpindles, .lastSeq = 0, .state = SeqStateInit, .key = "spindles", .flags = "v"},
 #endif
 #if FETCH_DIRECTORIES
-		{.seqid = rcvSeqsDirectories, .lastSeq = 0, .state = SeqStateInit, .key = "directories", .flags = "v"},
+		Seq{.seqid = rcvSeqsDirectories, .lastSeq = 0, .state = SeqStateInit, .key = "directories", .flags = "v"},
 #endif
 #if FETCH_FANS
-		{.seqid = rcvSeqsFans, .lastSeq = 0, .state = SeqStateInit, .key = "fans", .flags = "v"},
+		Seq{.seqid = rcvSeqsFans, .lastSeq = 0, .state = SeqStateInit, .key = "fans", .flags = "v"},
 #endif
 #if FETCH_INPUTS
-		{.seqid = rcvSeqsInputs, .lastSeq = 0, .state = SeqStateInit, .key = "inputs", .flags = "v"},
+		Seq{.seqid = rcvSeqsInputs, .lastSeq = 0, .state = SeqStateInit, .key = "inputs", .flags = "v"},
 #endif
 #if FETCH_JOB
-		{.seqid = rcvSeqsJob, .lastSeq = 0, .state = SeqStateInit, .key = "job", .flags = "vn"},
+		Seq{.seqid = rcvSeqsJob, .lastSeq = 0, .state = SeqStateInit, .key = "job", .flags = "vn"},
 #endif
 #if FETCH_SCANNER
-		{.seqid = rcvSeqsScanner, .lastSeq = 0, .state = SeqStateInit, .key = "scanner", .flags = "v"},
+		Seq{.seqid = rcvSeqsScanner, .lastSeq = 0, .state = SeqStateInit, .key = "scanner", .flags = "v"},
 #endif
 #if FETCH_SENSORS
-		{.seqid = rcvSeqsSensors, .lastSeq = 0, .state = SeqStateInit, .key = "sensors", .flags = "v"},
+		Seq{.seqid = rcvSeqsSensors, .lastSeq = 0, .state = SeqStateInit, .key = "sensors", .flags = "v"},
 #endif
 #if FETCH_STATE
-		{.seqid = rcvSeqsState, .lastSeq = 0, .state = SeqStateInit, .key = "state", .flags = "vn"},
+		Seq{.seqid = rcvSeqsState, .lastSeq = 0, .state = SeqStateInit, .key = "state", .flags = "vn"},
 #endif
 #if FETCH_VOLUMES
-		{.seqid = rcvSeqsVolumes, .lastSeq = 0, .state = SeqStateInit, .key = "volumes", .flags = "v"},
+		Seq{.seqid = rcvSeqsVolumes, .lastSeq = 0, .state = SeqStateInit, .key = "volumes", .flags = "v"},
 #endif
-		{.seqid = rcvSeqsFreq, .lastSeq = 0, .state = SeqStateInit, .key = "", .flags = "d99f"}};
+	};
+
+	static Seq s_freqSeq = {.seqid = rcvSeqsFreq, .lastSeq = 0, .state = SeqStateInit, .key = "", .flags = "d99f"};
 
 	Seq* g_currentReqSeq = nullptr;
+
+	enum class CheckSeqResult
+	{
+		Ready,
+		InProgress,
+		Ok,
+		Error
+	};
+
+	CheckSeqResult CheckSeq(Seq* seq)
+	{
+
+		LOG_VERBOSE("Checking seq '{:s}' state '{:s}'", seq->key, nameof::nameof_enum(seq->state));
+		if (seq->state == SeqStateError)
+		{
+			LOG_WARN("seq '{:s}' had an error", seq->key);
+			// skip and re-init if last request had an error
+			seq->state = SeqStateInit;
+			return CheckSeqResult::Error;
+		}
+		if (seq->state == SeqStateInit || seq->state == SeqStateUpdate)
+		{
+			LOG_DBG("seq '{:s}' is ready to be requested", seq->key);
+			return CheckSeqResult::Ready;
+		}
+		if (seq->state == SeqStateRequested)
+		{
+			if (seq->lastRequestTime + std::max(500ms, DUET.GetPollInterval()) < TimeHelper::getRunningTime())
+			{
+				LOG_DBG("seq '{:s}' was requested but not updated, re-requesting", seq->key);
+				seq->state = SeqStateUpdate;
+				return CheckSeqResult::Ready;
+			}
+			else
+			{
+				LOG_DBG("seq '{:s}' was requested and is still within the expected response time, not re-requesting",
+						seq->key);
+				return CheckSeqResult::InProgress;
+			}
+		}
+		return CheckSeqResult::Ok;
+	}
 
 	struct Seq* GetNextSeq(struct Seq* current)
 	{
 		ZoneScoped;
-		if (current == nullptr)
+		if (s_sendFreqNext)
 		{
-			current = seqs;
+			return CheckSeq(&s_freqSeq) != CheckSeqResult::InProgress ? &s_freqSeq : nullptr;
 		}
 
-		if (current == &seqs[ARRAY_SIZE(seqs) - 1])
+		static Seq* lastSeq = &s_seqs.at(0);
+
+		if (current == nullptr || current == &s_freqSeq)
 		{
-			current = seqs;
+			current = lastSeq;
 		}
 
-		for (size_t i = current - seqs; i < ARRAY_SIZE(seqs); ++i)
+		if (current >= &s_seqs[s_seqs.size() - 1])
 		{
-			current = &seqs[i];
-			if (current->state == SeqStateError)
+			current = &s_seqs.at(0);
+		}
+
+		for (auto& seq : s_seqs)
+		{
+			current = &seq;
+			const CheckSeqResult result = CheckSeq(current);
+			switch (result)
 			{
-				LOG_WARN("seq '{:s}' had an error", current->key);
-				// skip and re-init if last request had an error
-				current->state = SeqStateInit;
-				continue;
-			}
-			if (current->state == SeqStateInit || current->state == SeqStateUpdate)
-			{
-				LOG_DBG("seq '{:s}'", current->key);
+				using enum CheckSeqResult;
+			case Ready:
+				lastSeq = current;
 				return current;
-			}
-			if (current->state == SeqStateRequested && current->lastRequestTime + 500ms < TimeHelper::getRunningTime())
-			{
-				LOG_DBG("seq '{:s}' was requested but not updated, re-requesting", current->key);
-				current->state = SeqStateUpdate;
-				return current;
+			case InProgress:
+				return nullptr;
+			case Error:
+			case Ok:
+				// continue checking the next seq
+				break;
 			}
 		}
-		return nullptr;
+
+		return CheckSeq(&s_freqSeq) != CheckSeqResult::InProgress ? &s_freqSeq : nullptr;
 	}
 
 	Seq* FindSeqByKey(const char* key)
@@ -144,11 +195,16 @@ namespace Comm
 		ZoneScoped;
 		LOG_VERBOSE("key {:s}\n", key);
 
-		for (size_t i = 0; i < ARRAY_SIZE(seqs); ++i)
+		if (key == nullptr || key[0] == 0)
 		{
-			if (strcasecmp(seqs[i].key, key) == 0)
+			return &s_freqSeq;
+		}
+
+		for (size_t i = 0; i < s_seqs.size(); ++i)
+		{
+			if (strcasecmp(s_seqs[i].key, key) == 0)
 			{
-				return &seqs[i];
+				return &s_seqs[i];
 			}
 		}
 
@@ -159,15 +215,15 @@ namespace Comm
 	void UpdateSeq(const ReceivedDataEvent seqid, int32_t val)
 	{
 		ZoneScoped;
-		for (size_t i = 0; i < ARRAY_SIZE(seqs); ++i)
+		for (size_t i = 0; i < s_seqs.size(); ++i)
 		{
-			if (seqs[i].seqid == seqid)
+			if (s_seqs[i].seqid == seqid)
 			{
-				if (seqs[i].lastSeq != val)
+				if (s_seqs[i].lastSeq != val)
 				{
-					LOG_DBG("Seq {:s} {:d} -> {:d}\n", seqs[i].key, seqs[i].lastSeq, val);
-					seqs[i].lastSeq = val;
-					seqs[i].state = SeqStateUpdate;
+					LOG_DBG("Seq {:s} needs updating {:d} -> {:d}\n", s_seqs[i].key, s_seqs[i].lastSeq, val);
+					s_seqs[i].lastSeq = val;
+					s_seqs[i].state = SeqStateUpdate;
 				}
 			}
 		}
@@ -176,12 +232,13 @@ namespace Comm
 	void ResetSeqs()
 	{
 		ZoneScoped;
-		for (size_t i = 0; i < ARRAY_SIZE(seqs); ++i)
+		for (size_t i = 0; i < s_seqs.size(); ++i)
 		{
-			seqs[i].lastSeq = 0;
-			seqs[i].state = SeqStateInit;
+			s_seqs[i].lastSeq = 0;
+			s_seqs[i].state = SeqStateInit;
 		}
 		g_currentReqSeq = nullptr;
+		s_sendFreqNext = true;
 	}
 
 	static void RequestSeq(Seq* seq)
@@ -202,6 +259,7 @@ namespace Comm
 		LOG_DBG("Requesting seq '{:s}'", seq->key);
 		seq->lastRequestTime = TimeHelper::getRunningTime();
 		seq->state = SeqStateRequested;
+		g_currentReqSeq = seq;
 
 		Comm::DUET.RequestModel(g_currentReqSeq->key, g_currentReqSeq->flags);
 	}
@@ -357,10 +415,12 @@ namespace Comm
 	 * This function handles the communication sequence with the Duet printer by:
 	 * 1. Checking if the printer has timed out based on the last response time
 	 * 2. Initiating a reconnection if a timeout is detected
-	 * 3. Sending the next request in sequence or falling back to frequently changing data
+	 * 3. Waiting for the current seq to be received before advancing
+	 * 4. Interleaving rcvSeqsFreq after every regular seq
+	 * 5. Falling back to rcvSeqsFreq when no regular seq needs work
 	 *
 	 * @return true if a regular sequence request was sent
-	 * @return false if falling back to requesting frequently changing data
+	 * @return false if still waiting, sending freq, or no seqs need work
 	 *
 	 * @note Manages printer timeout detection and automatic reconnection
 	 */
@@ -386,14 +446,19 @@ namespace Comm
 			Reconnect();
 		}
 
-		g_currentReqSeq = GetNextSeq(g_currentReqSeq);
-		if (g_currentReqSeq == nullptr)
+		// After every regular seq, interleave a freq request
+		Seq* seq = GetNextSeq(g_currentReqSeq);
+
+		s_sendFreqNext = seq == &s_freqSeq ? false : true;
+
+		if (seq == nullptr)
 		{
 			LOG_DBG("No more seqs to request");
 			return false;
 		}
 
-		RequestSeq(g_currentReqSeq);
+		RequestSeq(seq);
+
 		return true;
 	}
 

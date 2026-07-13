@@ -34,6 +34,7 @@ namespace UI
 			registerEventListener<EventType::JobLastFileName>(this, &StatusPresenter::newJobLastFileName);
 			registerEventListener<EventType::ThumbnailData>(this, &StatusPresenter::newThumbnailData);
 			registerEventListener<EventType::JobDuration>(this, &StatusPresenter::newJobDuration);
+			registerEventListener<EventType::JobFileProgress>(this, &StatusPresenter::newJobDuration);
 			registerEventListener<EventType::Status>(this, &StatusPresenter::newStatus);
 		}
 

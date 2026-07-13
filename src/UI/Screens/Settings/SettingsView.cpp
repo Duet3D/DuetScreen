@@ -4,6 +4,7 @@
 #include "Debug.h"
 #include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
+#include "ObjectModel/Job.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
@@ -17,9 +18,32 @@
 #include <ranges>
 
 #define USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS 1
+#define ENABLE_90_ROTATION 0
 
 namespace UI
 {
+	constexpr std::string_view JOB_PROGRESS_SOURCE_STRINGS[] = {
+		"settings.job_progress_source_options.duration",
+		"settings.job_progress_source_options.file",
+	};
+
+	struct ScreenRotationOption
+	{
+		std::string_view name;
+		DisplayRotation rotation;
+	};
+
+	static constexpr std::array s_screenRotations = {
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_0", DisplayRotation::ROTATION_0},
+#if ENABLE_90_ROTATION
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_90", DisplayRotation::ROTATION_90},
+#endif
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_180", DisplayRotation::ROTATION_180},
+#if ENABLE_90_ROTATION
+		ScreenRotationOption{"settings.screen_rotation_options.rotation_270", DisplayRotation::ROTATION_270},
+#endif
+	};
+
 	struct KeyboardLayout
 	{
 		std::string_view name;
@@ -322,6 +346,23 @@ namespace UI
 			[](bool checked) { StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, checked); });
 		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
 
+		/* Move Position Mode */
+		createRow(_("settings.move_machine_position_mode"), m_moveMachinePositionMode);
+		m_moveMachinePositionMode.setCheckedCallback(
+			[](bool checked) { StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, checked); });
+		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+
+		/* Job Progress Source */
+		createRow(_("settings.job_progress_source"), m_jobProgressSource);
+		m_jobProgressSource.setHeight(LV_SIZE_CONTENT);
+		for (auto& source : JOB_PROGRESS_SOURCE_STRINGS)
+		{
+			m_jobProgressSource.addOption(_(source));
+		}
+		m_jobProgressSource.setSelectedCallback(
+			[](uint32_t index, std::string_view /* option */)
+			{ StorageHelper::setData(ID_JOB_PROGRESS_SOURCE, OM::JobProgressSource(index)); });
+
 		/* Notifications */
 		createHeader(_("settings.headers.notifications"));
 
@@ -380,6 +421,9 @@ namespace UI
 		}
 		m_brightness.setValue(static_cast<float>(DisplayHelper::getBrightness()));
 		m_screensaverTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT).count()));
+		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
+		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+		m_jobProgressSource.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_JOB_PROGRESS_SOURCE)));
 		m_notificationLevel.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_NOTIFICATION_LEVEL)));
 		m_notificationTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_NOTIFICATION_TIMEOUT).count()));
 		m_notificationAutoCloseError.setChecked(!StorageHelper::getData(ID_NOTIFICATION_AUTO_CLOSE_ERROR));
@@ -619,14 +663,32 @@ namespace UI
 				Themes::setIconFolder(Themes::getIconSets().at(index));
 			});
 
+		/* Theme preview */
+		createSpanRow(m_themePreview);
+		m_themePreview.setHeight(LV_SIZE_CONTENT);
+
 		/* UI animations */
 		createRow(_("settings.enable_animations"), m_enableAnimations);
 		m_enableAnimations.setCheckedCallback([](bool checked)
 											  { StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, checked); });
 
-		/* Theme preview */
-		createSpanRow(m_themePreview);
-		m_themePreview.setHeight(LV_SIZE_CONTENT);
+		/* Screen rotation */
+		createRow(_("settings.screen_rotation"), m_screenRotation);
+		m_screenRotation.setHeight(LV_SIZE_CONTENT);
+		for (auto& option : s_screenRotations)
+		{
+			m_screenRotation.addOption(_(option.name));
+		}
+		m_screenRotation.setSelectedCallback(
+			[](uint32_t index, std::string_view /* option */)
+			{
+				if (index >= s_screenRotations.size())
+				{
+					LOG_ERROR("Invalid screen rotation index: {:d}", index);
+					return;
+				}
+				DisplayHelper::setRotation(s_screenRotations[index].rotation);
+			});
 	}
 
 	void DisplaySettings::updateThemePreview()
@@ -664,6 +726,20 @@ namespace UI
 		m_font.setSelected(FontManager::getActiveTypefaceName());
 		m_icons.setSelected(_(fmt::format("theme.icon_sets.{:s}", Themes::getIconFolder())));
 		m_enableAnimations.setChecked(StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED));
+
+		const uint32_t rotationIndex = []()
+		{
+			const auto rotation = DisplayHelper::getRotation();
+			for (uint32_t i = 0; i < s_screenRotations.size(); ++i)
+			{
+				if (s_screenRotations[i].rotation == rotation)
+				{
+					return i;
+				}
+			}
+			return 0u;
+		}();
+		m_screenRotation.setSelected(rotationIndex);
 	}
 
 	DeveloperSettings::DeveloperSettings(const std::string& name, LvObj& parent)
@@ -684,6 +760,19 @@ namespace UI
 		createRow(_("settings.enable_advanced_settings"), m_enableAdvancedSettings);
 		m_enableAdvancedSettings.setCheckedCallback([](bool checked)
 													{ StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, checked); });
+
+		/* USB second channel */
+		createRow(_("settings.enable_second_usb_channel"), m_enableSecondUsbChannel);
+		m_enableSecondUsbChannel.setCheckedCallback(
+			[](bool checked)
+			{
+				StorageHelper::setData(ID_ENABLE_SECOND_USB_CHANNEL, checked);
+				if (checked && Comm::DUET.GetCommunicationType() == Comm::CommunicationType::usb &&
+					Comm::DUET.IsConnected())
+				{
+					Comm::DUET.SendGcode("M575 P1 S0\n", true);
+				}
+			});
 
 #if DEBUG_BORDERS
 		/* Debug borders */
@@ -855,6 +944,7 @@ namespace UI
 		ZoneScoped;
 		m_debugLevel.setSelected(static_cast<uint32_t>(Log::GetDebugLevel()));
 		m_enableAdvancedSettings.setChecked(StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS));
+		m_enableSecondUsbChannel.setChecked(StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL));
 #if DEBUG_BORDERS
 		m_debugBorders.setChecked(Themes::isdebugBorderVisible(lv_screen_active()));
 #endif

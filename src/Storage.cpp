@@ -13,7 +13,9 @@
 #include "Debug.h"							 // Log::DebugLevel
 #include "Hardware/Duet.h"					 // Comm::CommunicationType
 #include "ObjectModel/Files.h"				 // OM::FileSystem::SortBy
+#include "ObjectModel/Job.h"				 // OM::JobProgressSource
 #include "Subscribers/ResponseSubscribers.h" // ResponseType
+#include "utils/DisplayHelper.h"			 // DisplayRotation
 #include "utils/SystemHelper.h"				 // SystemHelper::Services
 #include "utils/UnitSystem.h"				 // Units::UnitSystem
 
@@ -53,6 +55,7 @@ constexpr StorageKey<std::string_view> ID_FONT = {"ui:font", "OpenSans"};
 constexpr StorageKey<std::string_view> ID_ICON_FOLDER = {"ui:icon_folder", DEFAULT_ICON_SET};
 constexpr StorageKey<std::string_view> ID_KEYBOARD_LAYOUT = {"ui:keyboard_layout", "us"};
 constexpr StorageKey<bool> ID_UI_ANIMATIONS_ENABLED = {"ui:animations_enabled", true};
+constexpr StorageKey<DisplayRotation> ID_DISPLAY_ROTATION = {"ui:display_rotation", DisplayRotation::ROTATION_0};
 
 constexpr StorageKey<bool> ID_SCREENSAVER_ENABLE = {"ui:screensaver_enable", true};
 constexpr StorageKey<std::chrono::seconds> ID_SCREENSAVER_TIMEOUT = {"ui:screensaver_timeout", DEFAULT_SCREEN_TIMEOUT};
@@ -68,8 +71,11 @@ constexpr StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTA
 	"ui:move:distances", +[]() -> std::vector<float> { return {0.1f, 0.5f, 1, 5, 10, 25, 50}; }};
 constexpr StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES = {
 	"ui:move:feedrates", +[]() -> std::vector<uint32_t> { return {5, 10, 25, 50, 100, 200, 300}; }};
+constexpr StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE = {"ui:move:machine_position_mode", false};
 
 constexpr StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS = {"ui:show_confirmation_dialogs", true};
+constexpr StorageKey<OM::JobProgressSource> ID_JOB_PROGRESS_SOURCE = {"ui:job_progress_source",
+																	  OM::JobProgressSource::DURATION};
 
 /* Multi value selectors */
 // these will have the following sub keys {"values", "selected"}
@@ -93,6 +99,7 @@ constexpr StorageKey<bool> ID_ENABLE_UI_LOGGING = {"debug:ui_logging", false};
 constexpr StorageKey<std::chrono::milliseconds> ID_BURNIN_FREQUENCY = {"debug:burnin_frequency",
 																	   std::chrono::milliseconds(2000)};
 constexpr StorageKey<bool> ID_SYSTEM_MONITOR_ENABLED = {"debug:system_monitor_enabled", false};
+constexpr StorageKey<bool> ID_ENABLE_SECOND_USB_CHANNEL = {"developer:enable_second_usb_channel", false};
 
 #if DEBUG_BORDERS
 constexpr StorageKey<bool> ID_DEBUG_BORDERS = {"debug:borders", false};

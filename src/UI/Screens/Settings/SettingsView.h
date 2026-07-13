@@ -60,6 +60,8 @@ namespace UI
 		Slider m_brightness{"brightness", getRoot()};
 		Slider m_screensaverTimeout{"screensaver_timeout", getRoot()};
 		LvSettingsToggle m_showConfirmationDialogs{"show_confirmation_dialogs", getRoot()};
+		LvSettingsToggle m_moveMachinePositionMode{"move_machine_position_mode", getRoot()};
+		DropdownMenu m_jobProgressSource{"job_progress_source", getRoot()};
 
 		/* Notifications */
 		LvSettingsToggle m_displayConnectedMessage{"display_connected_message", getRoot()};
@@ -115,8 +117,9 @@ namespace UI
 		DropdownMenu m_theme{"theme", getRoot()};
 		DropdownMenu m_font{"font", getRoot()};
 		DropdownMenu m_icons{"icons", getRoot()};
-		LvSettingsToggle m_enableAnimations{"enable_animations", getRoot()};
 		ThemePreview m_themePreview{"theme_preview", getRoot()};
+		LvSettingsToggle m_enableAnimations{"enable_animations", getRoot()};
+		DropdownMenu m_screenRotation{"screen_rotation", getRoot()};
 	};
 
 	class DeveloperSettings : public View<DeveloperSettingsPresenter, SettingsTab>
@@ -144,6 +147,7 @@ namespace UI
 
 		DropdownMenu m_debugLevel{"debug_level", getRoot()};
 		LvSettingsToggle m_enableAdvancedSettings{"enable_advanced_settings", getRoot()};
+		LvSettingsToggle m_enableSecondUsbChannel{"enable_second_usb_channel", getRoot()};
 #if DEBUG_BORDERS
 		LvSettingsToggle m_debugBorders{"debug_borders", getRoot()};
 #endif

@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Sleep voor noodstop!",
-      "message": "Noodstop, probeer opnieuw te verbinden..."
+      "message": "Noodstop verzonden...",
+      "reset_message": "Printer is gestopt. Stuur M999 voor reset. Wacht alstublieft..."
     },
     "extrude": {
       "tool_select": "Gereedschap selecteren",
@@ -284,6 +285,7 @@
       "duet_password_prompt": "Wachtwoord invoeren",
       "duet_poll_interval": "Polling-interval (ms):",
       "enable_advanced_settings": "Geavanceerde instellingen inschakelen",
+      "enable_second_usb_channel": "Tweede USB-kanaal inschakelen",
       "enable_adb": "ADB inschakelen",
       "enable_ssh": "SSH inschakelen",
       "enable_system_monitor": "Systeemmonitor inschakelen",
@@ -305,8 +307,21 @@
       "run_buildroot_setup": "Buildroot-setup uitvoeren",
       "screen": "Scherm",
       "screen_header": "Scherminstellingen",
+      "screen_rotation": "Schermrotatie:",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Schermbeveiliging time-out (s):",
       "show_confirmation_dialogs": "Bevestigingsdialogen weergeven:",
+      "move_machine_position_mode": "Machinecoordinaten gebruiken voor absolute verplaatsing (G53):",
+      "job_progress_source": "Bron voor taakvoortgang:",
+      "job_progress_source_options": {
+        "duration": "Duur",
+        "file": "Bestandspositie"
+      },
       "enable_animations": "UI-animaties inschakelen:",
       "storage_info": "Gebruikt opslaggeheugen: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

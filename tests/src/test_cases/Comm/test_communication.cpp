@@ -10,6 +10,7 @@
 #include "Hardware/Duet.h"
 #include "test_utils/TestSuite.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 class TestCommunication : public TestSuite
 {
@@ -31,79 +32,88 @@ TEST_F(TestCommunication, SendNext)
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
-	auto seq = Comm::GetNextSeq(Comm::g_currentReqSeq);
-	EXPECT_STREQ(seq->key, "network");
+	std::vector<const char*> expectedOrder = {
+		"", "network", "", "boards", "", "move", "", "heat",	"", "tools", "", "spindles", "", "directories",
+		"", "fans",	   "", "inputs", "", "job",	 "", "sensors", "", "state", "", "volumes"};
 
-	/* Test that the sequence doesn't advance if current one not sent */
-	seq = Comm::GetNextSeq(Comm::g_currentReqSeq);
-	EXPECT_STREQ(seq->key, "network");
-	EXPECT_EQ(seq->state, Comm::SeqState::SeqStateInit);
+	// Verify strict ordering by simulating completion after each sent request.
+	for (const char* expectedKey : expectedOrder)
+	{
+		EXPECT_TRUE(Comm::sendNext());
+		ASSERT_NE(Comm::g_currentReqSeq, nullptr);
+		EXPECT_EQ(Comm::g_currentReqSeq->state, Comm::SeqState::SeqStateRequested);
+		EXPECT_STREQ(Comm::g_currentReqSeq->key, expectedKey);
 
+		// Simulate that this request has started/finished receiving so the scheduler can move on.
+		Comm::g_currentReqSeq->state = Comm::SeqState::SeqStateOk;
+	}
+
+	// If the previous request has not started receiving yet (still requested), don't advance.
 	EXPECT_TRUE(Comm::sendNext());
 	ASSERT_NE(Comm::g_currentReqSeq, nullptr);
 	EXPECT_EQ(Comm::g_currentReqSeq->state, Comm::SeqState::SeqStateRequested);
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "network");
+	const char* inProgressKey = Comm::g_currentReqSeq->key;
 
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "boards");
-	auto boards_seq = Comm::g_currentReqSeq;
+	EXPECT_FALSE(Comm::sendNext());
+	ASSERT_NE(Comm::g_currentReqSeq, nullptr);
+	EXPECT_STREQ(Comm::g_currentReqSeq->key, inProgressKey);
 
+	// Release the in-progress seq so we can validate update/error scheduling behavior.
+	Comm::g_currentReqSeq->state = Comm::SeqState::SeqStateOk;
+
+	auto setSeqState = [](const char* key, Comm::SeqState state)
+	{
+		auto* seq = Comm::FindSeqByKey(key);
+		ASSERT_NE(seq, nullptr);
+		seq->state = state;
+	};
+
+	// Normalize all known seqs to Ok so the following checks are deterministic.
+	setSeqState("", Comm::SeqState::SeqStateOk);
+	setSeqState("network", Comm::SeqState::SeqStateOk);
+	setSeqState("boards", Comm::SeqState::SeqStateOk);
+	setSeqState("move", Comm::SeqState::SeqStateOk);
+	setSeqState("heat", Comm::SeqState::SeqStateOk);
+	setSeqState("tools", Comm::SeqState::SeqStateOk);
+	setSeqState("spindles", Comm::SeqState::SeqStateOk);
+	setSeqState("directories", Comm::SeqState::SeqStateOk);
+	setSeqState("fans", Comm::SeqState::SeqStateOk);
+	setSeqState("inputs", Comm::SeqState::SeqStateOk);
+	setSeqState("job", Comm::SeqState::SeqStateOk);
+	setSeqState("sensors", Comm::SeqState::SeqStateOk);
+	setSeqState("state", Comm::SeqState::SeqStateOk);
+	setSeqState("volumes", Comm::SeqState::SeqStateOk);
+
+	// SeqStateUpdate: updated seq should be the next regular seq chosen.
+	setSeqState("move", Comm::SeqState::SeqStateUpdate);
 	EXPECT_TRUE(Comm::sendNext());
+	ASSERT_NE(Comm::g_currentReqSeq, nullptr);
+	if (Comm::g_currentReqSeq->key[0] == '\0')
+	{
+		Comm::g_currentReqSeq->state = Comm::SeqState::SeqStateOk;
+		EXPECT_TRUE(Comm::sendNext());
+		ASSERT_NE(Comm::g_currentReqSeq, nullptr);
+	}
 	EXPECT_STREQ(Comm::g_currentReqSeq->key, "move");
+	Comm::g_currentReqSeq->state = Comm::SeqState::SeqStateOk;
+
+	// SeqStateError: errored seq should be reset to Init and skipped this cycle.
+	auto* boardsSeq = Comm::FindSeqByKey("boards");
+	ASSERT_NE(boardsSeq, nullptr);
+	setSeqState("boards", Comm::SeqState::SeqStateError);
+	setSeqState("tools", Comm::SeqState::SeqStateUpdate);
 
 	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "heat");
+	ASSERT_NE(Comm::g_currentReqSeq, nullptr);
+	if (Comm::g_currentReqSeq->key[0] == '\0')
+	{
+		Comm::g_currentReqSeq->state = Comm::SeqState::SeqStateOk;
+		EXPECT_TRUE(Comm::sendNext());
+		ASSERT_NE(Comm::g_currentReqSeq, nullptr);
+	}
 
-	EXPECT_TRUE(Comm::sendNext());
 	EXPECT_STREQ(Comm::g_currentReqSeq->key, "tools");
-	auto tools_seq = Comm::g_currentReqSeq;
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "spindles");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "directories");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "fans");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "inputs");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "job");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "sensors");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "state");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "volumes");
-
-	EXPECT_TRUE(Comm::sendNext());
-	EXPECT_STREQ(Comm::g_currentReqSeq->key, "");
-
-	/* Test that sendNext returns false when there are no more sequences */
-	EXPECT_FALSE(Comm::sendNext());
-	EXPECT_EQ(Comm::g_currentReqSeq, nullptr);
-
-	EXPECT_FALSE(Comm::sendNext());
-
-	/* boards state should be set to init and skip a go so next seq should be tools */
-	boards_seq->state = Comm::SeqState::SeqStateError;
-	tools_seq->state = Comm::SeqState::SeqStateUpdate;
-	seq = Comm::GetNextSeq(Comm::g_currentReqSeq);
-	EXPECT_STREQ(seq->key, "tools");
-	EXPECT_EQ(boards_seq->state, Comm::SeqState::SeqStateInit);
-
-	seq = Comm::GetNextSeq(Comm::g_currentReqSeq);
-	EXPECT_STREQ(seq->key, "boards");
-	EXPECT_TRUE(Comm::sendNext()); // this will send `boards` because the error state was cleared when we manually
-								   // called GetNextSeq()
-	seq = Comm::GetNextSeq(Comm::g_currentReqSeq);
-	EXPECT_STREQ(seq->key, "tools");
+	EXPECT_EQ(boardsSeq->state, Comm::SeqState::SeqStateInit);
 }
 
 TEST_F(TestCommunication, GetInteger)

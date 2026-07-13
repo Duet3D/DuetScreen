@@ -30,9 +30,16 @@
                 "DUETSCREEN_LOG_THREAD": "ON",
                 "DUETSCREEN_DEBUG_BORDERS": "ON",
                 "DUETSCREEN_ENABLE_CONSOLE_SHELL": "ON",
-                "DUETSCREEN_ENABLE_PROFILING": "ON",
                 "DUETSCREEN_USE_PCH": "ON",
                 "DUETSCREEN_SPLIT_DWARF": "OFF"
+            }
+        },
+        {
+            "name": "Profiling",
+            "hidden": true,
+            "cacheVariables": {
+                "DUETSCREEN_ENABLE_PROFILING": "ON",
+                "DUETSCREEN_ENABLE_LV_PROFILING": "ON"
             }
         },
         {
@@ -61,7 +68,8 @@
             "description": "Configure the project to be run locally on the host machine",
             "inherits": [
                 "Simulation-Base",
-                "Debug"
+                "Debug",
+                "Profiling"
             ]
         },
         {
@@ -100,16 +108,26 @@
             "description": "Configure the project to be run on T113 with debug symbols",
             "inherits": [
                 "T113-Base",
-                "Debug"
+                "Debug",
+                "Profiling"
             ]
         },
         {
-            "name": "T113",
+            "name": "T113-Release",
             "displayName": "T113 Release",
             "description": "Configure the project to be run on T113 without debug symbols",
             "inherits": [
                 "T113-Base",
                 "Release"
+            ]
+        },
+        {
+            "name": "T113-Release_with_profiling",
+            "displayName": "T113 Release with Profiling",
+            "description": "Configure the project to be run on T113 without debug symbols but with profiling enabled",
+            "inherits": [
+                "T113-Release",
+                "Profiling"
             ]
         }
     ],
@@ -121,10 +139,16 @@
             "configurePreset": "T113-Debug"
         },
         {
-            "name": "T113",
+            "name": "T113-Release",
             "description": "",
             "displayName": "",
-            "configurePreset": "T113"
+            "configurePreset": "T113-Release"
+        },
+        {
+            "name": "T113-Release_with_profiling",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "T113-Release_with_profiling"
         },
         {
             "name": "Simulation",

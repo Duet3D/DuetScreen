@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "¡Deslizar para parada de emergencia!",
-      "message": "Parada de emergencia, intentando reconectar..."
+      "message": "Parada de emergencia enviada...",
+      "reset_message": "La impresora se ha detenido. Enviando M999 para reiniciar. Por favor espere..."
     },
     "extrude": {
       "tool_select": "Seleccionar herramienta",
@@ -284,6 +285,7 @@
       "duet_password_prompt": "Introducir contraseña",
       "duet_poll_interval": "Intervalo de sondeo (ms):",
       "enable_advanced_settings": "Activar ajustes avanzados",
+      "enable_second_usb_channel": "Activar segundo canal USB",
       "enable_adb": "Activar ADB",
       "enable_ssh": "Activar SSH",
       "enable_system_monitor": "Activar monitor del sistema",
@@ -305,8 +307,21 @@
       "run_buildroot_setup": "Ejecutar configuración Buildroot",
       "screen": "Pantalla",
       "screen_header": "Ajustes de pantalla",
+      "screen_rotation": "Rotación de pantalla:",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Tiempo de espera del salvapantallas (s):",
       "show_confirmation_dialogs": "Mostrar diálogos de confirmación:",
+      "move_machine_position_mode": "Usar coordenadas de máquina para movimiento absoluto (G53):",
+      "job_progress_source": "Fuente de progreso del trabajo:",
+      "job_progress_source_options": {
+        "duration": "Duración",
+        "file": "Posición en el archivo"
+      },
       "storage_info": "Almacenamiento usado: ",
       "enable_animations": "Activar animaciones de la interfaz:",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

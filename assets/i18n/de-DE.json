@@ -72,7 +72,8 @@
     "estop": {
       "label": "",
       "prompt": "Zum Not-Stopp ziehen!",
-      "message": "Not-Stopp, versuche wiederzuverbinden..."
+      "message": "Not-Stopp gesendet...",
+      "reset_message": "Drucker ist angehalten. Sende M999 zum Zurücksetzen. Bitte warten..."
     },
     "extrude": {
       "tool_select": "Werkzeug wählen",
@@ -284,6 +285,7 @@
       "duet_password_prompt": "Passwort eingeben",
       "duet_poll_interval": "Abfrageintervall (ms):",
       "enable_advanced_settings": "Erweiterte Einstellungen aktivieren",
+      "enable_second_usb_channel": "Zweiten USB-Kanal aktivieren",
       "enable_adb": "ADB aktivieren",
       "enable_ssh": "SSH aktivieren",
       "enable_system_monitor": "Systemmonitor aktivieren",
@@ -305,8 +307,21 @@
       "run_buildroot_setup": "Buildroot-Setup ausführen",
       "screen": "Bildschirm",
       "screen_header": "Bildschirmeinstellungen",
+      "screen_rotation": "Bildschirmdrehung:",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Bildschirmschoner-Timeout (s):",
       "show_confirmation_dialogs": "Bestätigungsdialoge anzeigen:",
+      "move_machine_position_mode": "Maschinenkoordinaten für absolute Bewegung verwenden (G53):",
+      "job_progress_source": "Quelle für Druckfortschritt:",
+      "job_progress_source_options": {
+        "duration": "Dauer",
+        "file": "Dateiposition"
+      },
       "enable_animations": "UI-Animationen aktivieren:",
       "storage_info": "Belegter Speicher: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",

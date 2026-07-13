@@ -235,11 +235,6 @@ namespace Comm
 		{
 			m_seq->state = SeqStateOk;
 			LOG_DBG("seq '{:s}' DONE", m_seq->key);
-
-			if (m_seq->seqid == rcvSeqsFreq)
-			{
-				m_seq->state = SeqStateUpdate;
-			}
 			m_seq = nullptr;
 		}
 

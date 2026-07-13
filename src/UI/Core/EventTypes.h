@@ -49,6 +49,7 @@ namespace UI
 	XX(JobLastFileName, std::string)                                                                                   \
 	XX(JobPrintTime)                                                                                                   \
 	XX(JobDuration)                                                                                                    \
+	XX(JobFileProgress)                                                                                                \
 	XX(JobTimeLeft)                                                                                                    \
 	XX(JobWarmupDuration)                                                                                              \
 	XX(JobHeight)                                                                                                      \

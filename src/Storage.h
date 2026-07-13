@@ -118,6 +118,7 @@ namespace OM
 	{
 		enum class SortBy;
 	}
+	enum class JobProgressSource;
 } // namespace OM
 namespace Log
 {
@@ -128,6 +129,7 @@ namespace Units
 	enum class UnitSystem;
 }
 enum class ResponseType;
+enum class DisplayRotation;
 
 /* Convertors */
 
@@ -152,6 +154,7 @@ extern const StorageKey<std::string_view> ID_FONT;
 extern const StorageKey<std::string_view> ID_ICON_FOLDER;
 extern const StorageKey<std::string_view> ID_KEYBOARD_LAYOUT;
 extern const StorageKey<bool> ID_UI_ANIMATIONS_ENABLED;
+extern const StorageKey<DisplayRotation> ID_DISPLAY_ROTATION;
 
 extern const StorageKey<bool> ID_SCREENSAVER_ENABLE;
 extern const StorageKey<std::chrono::seconds> ID_SCREENSAVER_TIMEOUT;
@@ -164,8 +167,10 @@ extern const StorageKey<bool> ID_UI_CONSOLE_COMMAND_LIST_COLLAPSED;
 extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_BABYSTEP_AMOUNT;
 extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTANCES;
 extern const StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES;
+extern const StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE;
 
 extern const StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS;
+extern const StorageKey<OM::JobProgressSource> ID_JOB_PROGRESS_SOURCE;
 
 /* Multi value selectors */
 // these will have the following sub keys {"values", "selected"}
@@ -188,6 +193,7 @@ extern const StorageKey<std::string_view> ID_LOG_FILE;
 extern const StorageKey<bool> ID_ENABLE_UI_LOGGING;
 extern const StorageKey<std::chrono::milliseconds> ID_BURNIN_FREQUENCY;
 extern const StorageKey<bool> ID_SYSTEM_MONITOR_ENABLED;
+extern const StorageKey<bool> ID_ENABLE_SECOND_USB_CHANNEL;
 
 #if DEBUG_BORDERS
 extern const StorageKey<bool> ID_DEBUG_BORDERS;

@@ -45,6 +45,12 @@ namespace OM
 		AUTO
 	};
 
+	enum class JobProgressSource
+	{
+		DURATION = 0,
+		FILE = 1
+	};
+
 	void SetJobName(const char* name);
 	const std::string& GetJobName();
 
@@ -65,6 +71,12 @@ namespace OM
 
 	void SetPrintHeight(const float height);
 	float GetPrintHeight();
+
+	void SetFilePosition(const uint32_t filePosition);
+	uint32_t GetFilePosition();
+
+	void SetFileSize(const uint32_t fileSize);
+	uint32_t GetFileSize();
 
 	void SetPrintRemaining(RemainingTimeType type, const uint32_t printRemaining);
 	uint32_t GetPrintRemaining(RemainingTimeType type);

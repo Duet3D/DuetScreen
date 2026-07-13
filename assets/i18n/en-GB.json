@@ -73,7 +73,8 @@
     "estop": { /* Estop widget */
       "label": "\uF071", /* Warning symbol */
       "prompt": "Drag to E-Stop!",
-      "message": "Emergency Stop, trying to reconnect..."
+      "message": "Emergency stop sent...",
+      "reset_message": "Printer is halted. Sending M999 to reset. Please wait..."
     },
     "extrude": { /* Extrude control widget */
       "tool_select": "Select Tool",
@@ -283,6 +284,7 @@
       "duet_password_prompt": "Enter Password",
       "duet_poll_interval": "Poll Interval (ms):",
       "enable_advanced_settings": "Enable Advanced Settings",
+      "enable_second_usb_channel": "Enable Second USB Channel",
       "enable_adb": "Enable ADB",
       "enable_ssh": "Enable SSH",
       "enable_system_monitor": "Enable System Monitor",
@@ -305,9 +307,22 @@
       "run_buildroot_setup": "Run Buildroot Setup",
       "screen": "Screen",
       "screen_header": "Screen Settings",
+      "screen_rotation": "Screen Rotation:",
+      "screen_rotation_options": {
+        "rotation_0": "0°",
+        "rotation_90": "90°",
+        "rotation_180": "180°",
+        "rotation_270": "270°"
+      },
       "screensaver_timeout": "Screensaver Timeout (s):",
       "send_config_to_duet": "Upload config to Duet",
       "show_confirmation_dialogs": "Show Confirmation Dialogs:",
+      "move_machine_position_mode": "Use machine coordinates for absolute move (G53):",
+      "job_progress_source": "Job Progress Source:",
+      "job_progress_source_options": {
+        "duration": "Duration",
+        "file": "File position"
+      },
       "storage_info": "Used Storage: ",
       "storage_info_format": "{:s} / {:s} ({:d}%)",
       "enable_animations": "Enable UI Animations:",
