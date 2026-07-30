@@ -238,6 +238,12 @@ namespace UI::Themes
 		UI_LOCK();
 		m_lvgl.reset();
 		m_components.reset();
+
+		// Release these fonts now, while the FontManager that owns them is still the one that
+		// created them - FontManager::init() unconditionally replaces s_fontManager on its next
+		// call, and Font's cleanup deletes against whatever s_fontManager is current at the time,
+		// not the one a given Font was created from.
+		m_fonts = ThemeFonts{};
 	}
 
 	void Theme::setThemeActive()
