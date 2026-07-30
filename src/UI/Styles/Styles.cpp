@@ -232,6 +232,14 @@ namespace UI::Themes
 		}
 	}
 
+	void Theme::deinit()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		m_lvgl.reset();
+		m_components.reset();
+	}
+
 	void Theme::setThemeActive()
 	{
 		ZoneScoped;
@@ -1064,6 +1072,22 @@ namespace UI::Themes
 		bool debugBordersEnabeled = StorageHelper::getData(ID_DEBUG_BORDERS);
 		showDebugBorders(lv_screen_active(), debugBordersEnabeled);
 #endif
+	}
+
+	void deinit()
+	{
+		ZoneScoped;
+		UI_LOCK();
+
+		s_lvglStyles.reset();
+		s_componentStyles.reset();
+
+		for (auto& [name, theme] : themes())
+		{
+			theme->deinit();
+		}
+
+		s_currentTheme = nullptr;
 	}
 
 	const std::map<std::string_view, Theme*>& getThemes()

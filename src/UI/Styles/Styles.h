@@ -364,6 +364,17 @@ namespace UI::Themes
 
 		void init();
 
+		/**
+		 * @brief Releases this theme's LVGL-heap-backed styles, so the next call to init() (via
+		 * setThemeActive()'s lazy-init check) rebuilds them from scratch.
+		 *
+		 * @note Must be called while the LVGL heap that backed the current styles is still valid -
+		 * i.e. before lv_deinit(). Calling it afterwards is too late: the styles' internal buffers
+		 * already reference memory lv_deinit() has invalidated, and freeing them then is undefined
+		 * behaviour instead of a clean release.
+		 */
+		void deinit();
+
 		void setThemeActive();
 		const LvglStyles& getLvglStyles() const;
 		const ComponentStyles& getComponentStyles() const;
@@ -403,6 +414,18 @@ namespace UI::Themes
 	};
 
 	void init(lv_display_t* display);
+
+	/**
+	 * @brief Mirror image of init(): releases every theme's LVGL-heap-backed styles (see
+	 * Theme::deinit()) plus the free-standing s_lvglStyles/s_componentStyles copies.
+	 *
+	 * @note Must be called before lv_deinit(), while the current LVGL heap is still valid. The next
+	 * init() call will lazily rebuild everything fresh against the new heap. Only relevant where
+	 * lv_init()/lv_deinit() cycle more than once per process, e.g. the test harness - production
+	 * calls lv_init() exactly once and never lv_deinit()s, so this is otherwise a no-op there.
+	 */
+	void deinit();
+
 	const std::map<std::string_view, Theme*>& getThemes();
 	Theme* getCurrentTheme();
 	Theme* getTheme(const size_t index);
