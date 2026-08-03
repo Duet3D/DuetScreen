@@ -26,7 +26,9 @@ The devcontainer installs the required build tools, Python dependencies, and `gc
 The project is set up to use VS Code as the development environment. The project uses CMake and can be built entirely from a CLI, but the intended workflow is to do that from inside the devcontainer.
 
 The following host tools are required:
-- Docker Engine or Docker Desktop
+- A Linux host, or Windows with WSL2
+  - On Windows, use Docker Desktop with the WSL2 backend and open this repository from inside the WSL2 filesystem. The devcontainer setup runs a `bash` script on the host before the container is created, and the GUI simulation needs the host X11 socket, neither of which are available when opening the folder from Windows directly.
+- Docker Engine (Linux) or Docker Desktop with the WSL2 backend (Windows)
 - VS Code
 
 The following VS Code extensions are required on the host:
@@ -64,7 +66,21 @@ If a folder named `buildroot-duetscreen` exists in the parent directory of this 
 
 This allows the existing T113 tasks that use `${config:buildroot_path}` to work from inside the container with `buildroot_path` set to `/workspaces/buildroot-duetscreen`.
 
+If the sibling checkout is missing, `buildroot_path` still points at `/workspaces/buildroot-duetscreen`, which will not exist. The T113 build, deploy and remote debug tasks then fail with an error about a missing working directory. The post-create step prints a warning when this happens — clone `buildroot-duetscreen` next to this repository and rebuild the devcontainer to fix it.
+
 You do not need to run `scripts/install_prerequisites.sh` or `scripts/install_gcc15.sh` when using the devcontainer.
+
+### Working outside the devcontainer
+
+The VS Code tasks and launch configurations that target the physical screen reference `${config:buildroot_path}`. The devcontainer sets this automatically; outside the container you must set it yourself or the tasks abort with an unresolvable-variable error. Create `.vscode/settings.json` with at least:
+
+```json
+{
+    "buildroot_path": "/absolute/path/to/buildroot-duetscreen"
+}
+```
+
+The screen's IP address is no longer a setting — the tasks and launch configurations prompt for it when they run.
 
 ## Simulating
 
@@ -74,18 +90,44 @@ The easiest way to set up the simulation environment is to use VS Code inside th
 
 The simulation is only setup to run on Linux or WSL2 on Windows.
 
-After reopening in the devcontainer, the following steps are required to run the GUI on PC:
+The following steps are required to run the GUI on PC:
+
+### Allow the container to use the host display
+
+The devcontainer passes the host `DISPLAY` through and bind mounts `/tmp/.X11-unix`, so the SDL window opens on the host desktop. X11 still refuses connections from the container's user unless the host grants them, so run this **on the host** once per login session before starting the simulation:
+
+```bash
+xhost +local:
+```
+
+Without it, `lv_sdl_window_create()` fails to initialise SDL video and the simulation exits at startup.
+
+Under WSL2, WSLg provides the X11 socket and `DISPLAY`, so this works the same way as on a native Linux host.
 
 ### Setup udev rules for USB communications
 > [!NOTE]
 > This step is only required if you want to communicate between the PC and the Duet3D mainboard via USB. This is not required for simulating the GUI on PC.
 > If you want to skip this step, you can communicate with the Duet3D mainboard via WiFi instead.
 
+> [!IMPORTANT]
+> These commands must be run **on the host**, not inside the devcontainer. udev does not run in the container, and the container is not given access to `/dev/ttyACM*` by default.
+
 ```bash
 sudo bash -c 'cat ./config/99-usb.rules > /etc/udev/rules.d/99-usb.rules'
 sudo service udev restart
 sudo usermod -aG plugdev $USER
 ```
+
+To then use the serial device from inside the devcontainer, add the device to `.devcontainer/docker-compose.yml` before rebuilding the container:
+
+```yaml
+services:
+  dev:
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+```
+
+The device must exist on the host when the container starts; devices plugged in afterwards are not visible to the running container. Alternatively, run the simulation on the host rather than in the container when you need USB access.
 
 #### *WSL2 only* Setup USBIPD:
 - Attach the Duet as a USB device using usbipd
@@ -138,12 +180,18 @@ If you are intentionally building outside the devcontainer, install the native d
 1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project next to this repository.
 2. Checkout the `master` branch.
 3. Reopen `DuetScreen` in the devcontainer so the sibling buildroot checkout is mounted automatically.
-4. Enable SSH on the Duet3D screen.
+4. Build buildroot at least once. The post-create step only runs `make duet3d_duetscreen_defconfig`; the cross toolchain itself (including `output/host/bin/arm-none-linux-gnueabihf-gdb`, which the `Remote Debug DuetScreen` configuration uses) does not exist until buildroot has been built.
+    - From a terminal in the container:
+      ```bash
+      make -C /workspaces/buildroot-duetscreen
+      ```
+    - This takes a long time on the first run.
+5. Enable SSH on the Duet3D screen.
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-5. In vscode, run the `Push DuetScreen - SSH` task.
+6. In vscode, run the `Push DuetScreen - SSH` task.
   - This will prompt for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address, then build the project and push the binary to the Duet3D screen.
-6. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
-7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+7. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
+8. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
 ## Debugging / Running Simulation
 > [!NOTE]

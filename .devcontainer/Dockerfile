@@ -1,8 +1,11 @@
 FROM mcr.microsoft.com/devcontainers/cpp:2-ubuntu24.04
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    DUETSCREEN_WORKSPACE=/workspaces/DuetScreen \
+ENV DUETSCREEN_WORKSPACE=/workspaces/DuetScreen \
     BUILDROOT_WORKSPACE=/workspaces/buildroot-duetscreen
+
+# Build-time only: keeps apt quiet while building the image without suppressing
+# debconf prompts for anyone running apt interactively inside the container.
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     autoconf \
