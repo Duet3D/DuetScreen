@@ -2,10 +2,13 @@
 
 #include <array>
 #include <atomic>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <functional>
 #include <libusb-1.0/libusb.h>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -31,19 +34,6 @@ namespace Comm
 		static constexpr std::size_t s_maxChannelCount = 2;
 		static constexpr std::size_t s_maxClaimedInterfaceCount = s_maxChannelCount * 2;
 
-		enum class receive_err_t
-		{
-			NONE = 0,
-			FAILED_TO_ALLOCATE_TRANSFER = -1,
-			FAILED_TO_SUBMIT_TRANSFER = -2,
-			BUFFER_TOO_SMALL = -3,
-			BUFFER_OVERFLOW = -4,
-			TIMEOUT = -5,
-			BUSY = -6,
-			NO_DEVICE = -7,
-			OTHER_ERROR = -8
-		};
-
 		UsbDevice();
 		~UsbDevice();
 
@@ -64,10 +54,15 @@ namespace Comm
 
 		bool getDeviceInterface();
 
+		struct ReceiveTransfer;
+
 		static void LIBUSB_CALL sendTransferCallback(struct libusb_transfer* transfer);
 		static void LIBUSB_CALL receiveTransferCallback(struct libusb_transfer* transfer);
 		void eventLoop();
-		receive_err_t receive(std::size_t channelIndex, unsigned int timeoutMs = 0);
+		void decodeLoop();
+		bool startReceiving();
+		void stopReceiving();
+		bool submitReceive(ReceiveTransfer& receiveTransfer);
 
 		struct ChannelConfig
 		{
@@ -78,10 +73,22 @@ namespace Comm
 			uint8_t controlInterfaceNumber = 0xFF;
 		};
 
-		struct ReceiveTransferContext
+		static constexpr std::size_t s_receiveBufferSize = 4096;
+		// Bulk IN transfers kept queued per channel so the device always has a URB to fill
+		static constexpr std::size_t s_receiveTransferCount = 4;
+
+		struct ReceiveTransfer
 		{
 			UsbDevice* device = nullptr;
 			std::size_t channelIndex = 0;
+			libusb_transfer* transfer = nullptr;
+			unsigned char buffer[s_receiveBufferSize];
+		};
+
+		struct ReceivedChunk
+		{
+			std::size_t channelIndex;
+			std::vector<unsigned char> data;
 		};
 
 		const char* m_name;
@@ -96,10 +103,15 @@ namespace Comm
 		std::atomic<bool> m_eventThreadRunning;
 		std::thread m_eventLoopThread;
 
-		std::array<ReceiveTransferContext, s_maxChannelCount> m_receiveContexts;
 		receive_cb_t m_receiveCallback;
-		static constexpr size_t s_receiveBufferSize = 4096;
-		unsigned char m_receiveBuffers[s_maxChannelCount][s_receiveBufferSize];
+		std::array<std::array<ReceiveTransfer, s_receiveTransferCount>, s_maxChannelCount> m_receiveTransfers;
+		std::atomic<std::size_t> m_pendingReceiveCount;
+
+		std::atomic<bool> m_decodeThreadRunning;
+		std::thread m_decodeThread;
+		std::mutex m_receiveQueueMutex;
+		std::condition_variable m_receiveQueueCondition;
+		std::deque<ReceivedChunk> m_receiveQueue;
 	};
 
 	int usbInit();
