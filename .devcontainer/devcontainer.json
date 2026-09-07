@@ -1,0 +1,34 @@
+{
+  "name": "DuetScreen",
+  "dockerComposeFile": [
+    "docker-compose.yml",
+    "docker-compose.buildroot.yml"
+  ],
+  "service": "dev",
+  "workspaceFolder": "/workspaces/DuetScreen",
+  "initializeCommand": "bash \"${localWorkspaceFolder}/.devcontainer/scripts/generate-buildroot-compose.sh\" \"${localWorkspaceFolder}\"",
+  "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "TrevorNesbitt.smart-file-templates",
+        "vadimcn.vscode-lldb"
+      ],
+      "settings": {
+        "buildroot_path": "/workspaces/buildroot-duetscreen",
+        "files.associations": {
+          "**/assets/i18n/*.json": "jsonc"
+        },
+        "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+        "C_Cpp.clang_format_fallbackStyle": "",
+        "cmake.ctest.parallelJobs": 1,
+        "cmake.ctest.testSuiteDelimiter": "\\.",
+        "cmake.ctest.testExplorerIntegrationEnabled": true,
+        "cmake.ctest.debugLaunchTarget": "Debug GTest - CMake Tools",
+        "smartTemplates.jsonConfigurationFile": ".vscode/file_templates.json",
+      }
+    }
+  }
+}

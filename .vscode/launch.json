@@ -14,6 +14,11 @@
             "type": "promptString",
             "description": "GoogleTest filter (e.g. SuiteName.TestName or pattern like SuiteName.*)",
             "default": "*"
+        },
+        {
+            "id": "duetscreen_ip_address",
+            "type": "promptString",
+            "description": "IP address for DuetScreen"
         }
     ],
     "configurations": [
@@ -173,7 +178,7 @@
                 "target create ${config:buildroot_path}/output/build/duetscreen-HEAD/out/build/T113-Debug/DuetScreen"
             ],
             "processCreateCommands": [
-                "gdb-remote ${config:duetscreen_ip}:3000",
+                "gdb-remote ${input:duetscreen_ip_address}:3000",
                 "settings set target.source-map ${config:buildroot_path}/output/build/duetscreen-HEAD ${workspaceFolder}"
             ],
             // "sourceMap": {
@@ -192,7 +197,7 @@
             "stopAtEntry": false,
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb-multiarch",
-            "miDebuggerServerAddress": "${config:duetscreen_ip}:3000",
+            "miDebuggerServerAddress": "${input:duetscreen_ip_address}:3000",
             "miDebuggerArgs": "-x '${workspaceFolder}/.vscode/gdb.conf'",
             "setupCommands": [
                 {
@@ -218,7 +223,7 @@
             "preLaunchTask": "Start gdbserver on DuetScreen",
             "stopAtEntry": false,
             "MIMode": "gdb",
-            "miDebuggerServerAddress": "${config:duetscreen_ip}:3000",
+            "miDebuggerServerAddress": "${input:duetscreen_ip_address}:3000",
             "miDebuggerPath": "${config:buildroot_path}/output/host/bin/arm-none-linux-gnueabihf-gdb",
             "setupCommands": [
                 {
@@ -250,7 +255,7 @@
             "name": "Python: Filter Remote Logs",
             "type": "debugpy",
             "request": "launch",
-            "program": "scripts/filter_logs.py --remote ${config:duetscreen_ip}",
+            "program": "scripts/filter_logs.py --remote ${input:duetscreen_ip_address}",
             "console": "integratedTerminal",
             "args": "${input:log_filters}"
         },
@@ -262,7 +267,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--ip",
-                "${config:duetscreen_ip}"
+                "${input:duetscreen_ip_address}"
             ]
         },
         {
