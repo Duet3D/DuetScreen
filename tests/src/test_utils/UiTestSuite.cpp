@@ -66,6 +66,7 @@ UiTestSuiteInner::~UiTestSuiteInner()
 	/* Run at end of each test */
 	// Cleanup
 	LOG_INFO("Tearing down UI test");
+	UI::Themes::deinit();
 	lv_deinit();
 }
 

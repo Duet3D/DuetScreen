@@ -232,6 +232,20 @@ namespace UI::Themes
 		}
 	}
 
+	void Theme::deinit()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		m_lvgl.reset();
+		m_components.reset();
+
+		// Release these fonts now, while the FontManager that owns them is still the one that
+		// created them - FontManager::init() unconditionally replaces s_fontManager on its next
+		// call, and Font's cleanup deletes against whatever s_fontManager is current at the time,
+		// not the one a given Font was created from.
+		m_fonts = ThemeFonts{};
+	}
+
 	void Theme::setThemeActive()
 	{
 		ZoneScoped;
@@ -1064,6 +1078,22 @@ namespace UI::Themes
 		bool debugBordersEnabeled = StorageHelper::getData(ID_DEBUG_BORDERS);
 		showDebugBorders(lv_screen_active(), debugBordersEnabeled);
 #endif
+	}
+
+	void deinit()
+	{
+		ZoneScoped;
+		UI_LOCK();
+
+		s_lvglStyles.reset();
+		s_componentStyles.reset();
+
+		for (auto& [name, theme] : themes())
+		{
+			theme->deinit();
+		}
+
+		s_currentTheme = nullptr;
 	}
 
 	const std::map<std::string_view, Theme*>& getThemes()
