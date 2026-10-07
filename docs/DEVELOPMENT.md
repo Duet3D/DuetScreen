@@ -193,6 +193,67 @@ If you are intentionally building outside the devcontainer, install the native d
 7. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
 8. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
+## Software Bill of Materials (SBOM)
+
+CMake can emit an [SPDX 3.0.1](https://spdx.dev/) Software Bill of Materials describing the
+executable and every library linked into it. It is off by default; turn it on with
+`DUETSCREEN_GENERATE_SBOM`:
+
+```bash
+cmake --preset Simulation-Release -DDUETSCREEN_GENERATE_SBOM=ON
+cmake --build --preset Simulation-Release
+cmake --install out/build/Simulation-Release
+```
+
+The documents land in `<install-prefix>/share/DuetScreen/sbom/`, which for the presets means
+`out/install/<preset>/share/DuetScreen/sbom/`:
+
+```
+DuetScreen.spdx.json      # DuetScreen, DuetScreen.lib, DuetScreen.themes
+lvgl.spdx.json            # one document per third-party library,
+spdlog.spdx.json          # each with its own version, licence and origin
+...
+```
+
+`DuetScreen.spdx.json` is the root document; it records a `dependsOn` relationship for every
+library the executable links, including system libraries found through `pkg-config` and
+`find_package`.
+
+Notes:
+
+- This needs CMake 4.3 or newer. The pinned version is in [requirements.txt](../requirements.txt)
+  and the presets use `env/bin/cmake` from the virtualenv created by
+  [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh). On CMake 4.3 and 4.4
+  the commands sit behind an experimental feature gate, so configuring prints a
+  `CMake Warning (experimental)` per document; `-Wno-experimental` silences them.
+- Only dependency **licences** are stated by hand, in
+  [cmake/DuetScreenSbom.cmake](../cmake/DuetScreenSbom.cmake) — nothing upstream publishes them in
+  a machine-readable form. Versions and origins are always derived, so they cannot go stale:
+  fetched libraries read the `DUETSCREEN_<NAME>_GIT_TAG` / `_URL` variables set next to their
+  `FetchContent_Declare` in [libraries/](../libraries/), and the `lvgl` and `tracy` submodules use
+  `git describe` and the remote URL of the checkout. Bumping a dependency therefore updates the
+  SBOM on the same line. Linking a new library without declaring its licence fails the configure
+  step rather than putting wrong metadata in the SBOM.
+- `lvgl` reports the version of its nearest tag, currently `9.3.0`, because the submodule tracks a
+  fork that runs ahead of upstream releases — its own `lv_version.h` says `9.5.0`. The exact
+  checkout (`v9.3.0-1183-ga2d39cecd`) is recorded in the document's `description` so the
+  provenance is not lost to that rounding.
+- Enabling the option also adds install rules for the static archives, in an `EXCLUDE_FROM_ALL`
+  component, because `install(SBOM)` needs an export set to describe. A plain `cmake --install`
+  still installs only the executable and the SBOM; use
+  `cmake --install <build-dir> --component sbom-deps` if you want the archives laid out too.
+- Two rough edges in the experimental feature, both cosmetic rather than wrong:
+  `DuetScreen.spdx.json` refers to each dependency by its export namespace as a metadata-free stub
+  (`urn:lvgl:lvgl#Package`), while the dependency's own document ids the same package as
+  `urn:lvgl#Package`, so a consumer has to match the two up by name. And `libhv` exports itself
+  without a namespace, so configuring warns that it will be "recorded by its bare target name
+  without provenance"; its `hv_static.spdx.json` is complete regardless.
+- The T113 build runs through buildroot, which uses its own CMake rather than `env/bin/cmake`,
+  and its install step copies the binary directly instead of running `cmake --install`. Producing
+  an on-device SBOM through that path needs buildroot's CMake to be 4.3+ and
+  [duetscreen.mk](https://github.com/Duet3D/buildroot-duetscreen/blob/master/package/duetscreen/duetscreen.mk)
+  taught to copy the documents.
+
 ## Debugging / Running Simulation
 > [!NOTE]
 > Debugging can be used as an easy way to configure and build the program even if you don't want to use the breakpoint debugging.
