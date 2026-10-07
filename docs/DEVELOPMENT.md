@@ -2,7 +2,9 @@
 
 ## Get started
 
-This project is tested on developed on Ubuntu 24.04 LTS. It might be possible to develop on other Linux distributions or operating systems but this is not officially supported.
+This project is developed and tested in the included devcontainer on Ubuntu 24.04 LTS. The supported setup is VS Code + Docker via the files in `.devcontainer/`.
+
+It might be possible to develop on other Linux distributions or operating systems, or to work outside the devcontainer, but that is not the primary workflow documented here.
 
 Clone the project and the related sub modules:
 
@@ -17,59 +19,115 @@ git clone --recursive git@github.com:Duet3D/DuetScreen.git
 > [!WARNING]
 > The project uses Git Submodules. When cloning the project or checking out a branch/commit, make sure to run `git submodule update --init --recursive` to ensure that the submodules are checked out to the correct commit.
 
-The recommended compiler is `gcc-15`. The toolchain is entirely managed by buildroot if you are building for the T113 so you only need to worry about it if you are building the simulation. It might be possible to use other compilers but this is not officially supported.
-
-There is an install script to install `gcc-15`. On Ubuntu 24.04 LTS it will try the `ubuntu-toolchain-r/test` PPA first; on Debian-based systems such as Raspberry Pi OS it falls back to building GCC from source when `gcc-15` is not available from apt. Run the following command to install `gcc-15`:
-```bash
-./scripts/install_gcc15.sh
-```
+The devcontainer installs the required build tools, Python dependencies, and `gcc-15` automatically. You only need to install `gcc-15` yourself if you deliberately build the simulation outside the devcontainer.
 
 ## Setting up VSCode
 
-The project is setup to use VSCode as the development environment. The project uses CMake and is possible to build entirely from a CLI. However, using VSCode makes it easier to debug and develop the code.
+The project is set up to use VS Code as the development environment. The project uses CMake and can be built entirely from a CLI, but the intended workflow is to do that from inside the devcontainer.
 
- The following extensions are required:
+The following host tools are required:
+- A Linux host, or Windows with WSL2
+  - On Windows, use Docker Desktop with the WSL2 backend and open this repository from inside the WSL2 filesystem. The devcontainer setup runs a `bash` script on the host before the container is created, and the GUI simulation needs the host X11 socket, neither of which are available when opening the folder from Windows directly.
+- Docker Engine (Linux) or Docker Desktop with the WSL2 backend (Windows)
+- VS Code
+
+The following VS Code extensions are required on the host:
 - [C/C++](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 - [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools)
+- [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
 These extensions are recommended but not required:
 - [Smart File Templates](https://marketplace.visualstudio.com/items?itemName=TrevorNesbitt.smart-file-templates)
 - [LLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb)
 
-The following steps are required to setup VSCode as the development environment for the project.
-- Copy `.vscode/settings.json.default` to `.vscode/settings.json`
-- If you want to upload/debug code running on the physical screen then you will need to:
-  - Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) repository.
-  - Build the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project.
-  - Set the `buildroot_path` and `duetscreen_ip` settings in `.vscode/settings.json` to the appropriate values:
-    - `buildroot_path`: The absolute path to the cloned `buildroot-duetscreen` repository.
-    - `duetscreen_ip`: The IP address of the Duet3D screen on the network.
+If you want to upload or debug code running on the physical screen, clone [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) as a sibling of this repository before opening the devcontainer:
+
+```text
+parent-folder/
+├── DuetScreen/
+└── buildroot-duetscreen/
+```
+
+When the folder layout matches this structure, the devcontainer automatically bind mounts `../buildroot-duetscreen` to `/workspaces/buildroot-duetscreen` and the existing T113 tasks work without extra VS Code settings.
+
+## Devcontainer
+
+This repository includes a devcontainer under `.devcontainer/` for Linux development in Docker.
+
+1. Clone this repository with submodules.
+2. Optionally clone `buildroot-duetscreen` next to it if you need T113 build, deploy, or remote debug tasks.
+3. Open the `DuetScreen` folder in VS Code.
+4. Run `Dev Containers: Reopen in Container`.
+5. Wait for the post-create setup to finish.
+
+The post-create step creates `env/` if needed and installs the Python requirements automatically.
+
+If a folder named `buildroot-duetscreen` exists in the parent directory of this repository, the devcontainer setup automatically bind mounts it at `/workspaces/buildroot-duetscreen`.
+
+This allows the existing T113 tasks that use `${config:buildroot_path}` to work from inside the container with `buildroot_path` set to `/workspaces/buildroot-duetscreen`.
+
+If the sibling checkout is missing, `buildroot_path` still points at `/workspaces/buildroot-duetscreen`, which will not exist. The T113 build, deploy and remote debug tasks then fail with an error about a missing working directory. The post-create step prints a warning when this happens — clone `buildroot-duetscreen` next to this repository and rebuild the devcontainer to fix it.
+
+You do not need to run `scripts/install_prerequisites.sh` or `scripts/install_gcc15.sh` when using the devcontainer.
+
+### Working outside the devcontainer
+
+The VS Code tasks and launch configurations that target the physical screen reference `${config:buildroot_path}`. The devcontainer sets this automatically; outside the container you must set it yourself or the tasks abort with an unresolvable-variable error. Create `.vscode/settings.json` with at least:
+
+```json
+{
+    "buildroot_path": "/absolute/path/to/buildroot-duetscreen"
+}
+```
+
+The screen's IP address is no longer a setting — the tasks and launch configurations prompt for it when they run.
 
 ## Simulating
 
 It is possible to simulate the GUI on PC without access to the physical hardware. This can be beneficial for testing and development purposes as it allows for debugging using gdb. 
 
-The easiest way to setup the simulation environment is to use VSCode with the provided configurations
+The easiest way to set up the simulation environment is to use VS Code inside the devcontainer with the provided configurations.
 
 The simulation is only setup to run on Linux or WSL2 on Windows.
 
 The following steps are required to run the GUI on PC:
 
-### Install the required dependencies:
+### Allow the container to use the host display
+
+The devcontainer passes the host `DISPLAY` through and bind mounts `/tmp/.X11-unix`, so the SDL window opens on the host desktop. X11 still refuses connections from the container's user unless the host grants them, so run this **on the host** once per login session before starting the simulation:
+
 ```bash
-./scripts/install_prerequisites.sh
+xhost +local:
 ```
+
+Without it, `lv_sdl_window_create()` fails to initialise SDL video and the simulation exits at startup.
+
+Under WSL2, WSLg provides the X11 socket and `DISPLAY`, so this works the same way as on a native Linux host.
 
 ### Setup udev rules for USB communications
 > [!NOTE]
 > This step is only required if you want to communicate between the PC and the Duet3D mainboard via USB. This is not required for simulating the GUI on PC.
 > If you want to skip this step, you can communicate with the Duet3D mainboard via WiFi instead.
 
+> [!IMPORTANT]
+> These commands must be run **on the host**, not inside the devcontainer. udev does not run in the container, and the container is not given access to `/dev/ttyACM*` by default.
+
 ```bash
 sudo bash -c 'cat ./config/99-usb.rules > /etc/udev/rules.d/99-usb.rules'
 sudo service udev restart
 sudo usermod -aG plugdev $USER
 ```
+
+To then use the serial device from inside the devcontainer, add the device to `.devcontainer/docker-compose.yml` before rebuilding the container:
+
+```yaml
+services:
+  dev:
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+```
+
+The device must exist on the host when the container starts; devices plugged in afterwards are not visible to the running container. Alternatively, run the simulation on the host rather than in the container when you need USB access.
 
 #### *WSL2 only* Setup USBIPD:
 - Attach the Duet as a USB device using usbipd
@@ -111,21 +169,90 @@ or
 ./out/build/Simulation-Release/DuetScreen
 ```
 
+If you are intentionally building outside the devcontainer, install the native dependencies first:
+
+```bash
+./scripts/install_prerequisites.sh
+./scripts/install_gcc15.sh
+```
+
 ## Building for the Duet3D screen
-1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project
-2. Checkout the `master` branch
-3. The [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project needs to have been built at least once to download the toolchain and setup the build environment. If you haven't done this yet, you can build the project using the following commands:
-    ```
-    cd buildroot-duetscreen
-    make duet3d_duetscreen_defconfig
-    make -j$(nproc)
-    ```
-4. Enable SSH on the Duet3D screen
+1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project next to this repository.
+2. Checkout the `master` branch.
+3. Reopen `DuetScreen` in the devcontainer so the sibling buildroot checkout is mounted automatically.
+4. Build buildroot at least once. The post-create step only runs `make duet3d_duetscreen_defconfig`; the cross toolchain itself (including `output/host/bin/arm-none-linux-gnueabihf-gdb`, which the `Remote Debug DuetScreen` configuration uses) does not exist until buildroot has been built.
+    - From a terminal in the container:
+      ```bash
+      make -C /workspaces/buildroot-duetscreen
+      ```
+    - This takes a long time on the first run.
+5. Enable SSH on the Duet3D screen.
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-5. In vscode, run the `Push DuetScreen - SSH` task.
+6. In vscode, run the `Push DuetScreen - SSH` task.
   - This will prompt for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address, then build the project and push the binary to the Duet3D screen.
-6. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
-7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+7. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
+8. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+
+## Software Bill of Materials (SBOM)
+
+CMake can emit an [SPDX 3.0.1](https://spdx.dev/) Software Bill of Materials describing the
+executable and every library linked into it. It is off by default; turn it on with
+`DUETSCREEN_GENERATE_SBOM`:
+
+```bash
+cmake --preset Simulation-Release -DDUETSCREEN_GENERATE_SBOM=ON
+cmake --build --preset Simulation-Release
+cmake --install out/build/Simulation-Release
+```
+
+The documents land in `<install-prefix>/share/DuetScreen/sbom/`, which for the presets means
+`out/install/<preset>/share/DuetScreen/sbom/`:
+
+```
+DuetScreen.spdx.json      # DuetScreen, DuetScreen.lib, DuetScreen.themes
+lvgl.spdx.json            # one document per third-party library,
+spdlog.spdx.json          # each with its own version, licence and origin
+...
+```
+
+`DuetScreen.spdx.json` is the root document; it records a `dependsOn` relationship for every
+library the executable links, including system libraries found through `pkg-config` and
+`find_package`.
+
+Notes:
+
+- This needs CMake 4.3 or newer. The pinned version is in [requirements.txt](../requirements.txt)
+  and the presets use `env/bin/cmake` from the virtualenv created by
+  [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh). On CMake 4.3 and 4.4
+  the commands sit behind an experimental feature gate, so configuring prints a
+  `CMake Warning (experimental)` per document; `-Wno-experimental` silences them.
+- Only dependency **licences** are stated by hand, in
+  [cmake/DuetScreenSbom.cmake](../cmake/DuetScreenSbom.cmake) — nothing upstream publishes them in
+  a machine-readable form. Versions and origins are always derived, so they cannot go stale:
+  fetched libraries read the `DUETSCREEN_<NAME>_GIT_TAG` / `_URL` variables set next to their
+  `FetchContent_Declare` in [libraries/](../libraries/), and the `lvgl` and `tracy` submodules use
+  `git describe` and the remote URL of the checkout. Bumping a dependency therefore updates the
+  SBOM on the same line. Linking a new library without declaring its licence fails the configure
+  step rather than putting wrong metadata in the SBOM.
+- `lvgl` reports the version of its nearest tag, currently `9.3.0`, because the submodule tracks a
+  fork that runs ahead of upstream releases — its own `lv_version.h` says `9.5.0`. The exact
+  checkout (`v9.3.0-1183-ga2d39cecd`) is recorded in the document's `description` so the
+  provenance is not lost to that rounding.
+- Enabling the option also adds install rules for the static archives, in an `EXCLUDE_FROM_ALL`
+  component, because `install(SBOM)` needs an export set to describe. A plain `cmake --install`
+  still installs only the executable and the SBOM; use
+  `cmake --install <build-dir> --component sbom-deps` if you want the archives laid out too.
+- Two rough edges in the experimental feature, both cosmetic rather than wrong:
+  `DuetScreen.spdx.json` refers to each dependency by its export namespace as a metadata-free stub
+  (`urn:lvgl:lvgl#Package`), while the dependency's own document ids the same package as
+  `urn:lvgl#Package`, so a consumer has to match the two up by name. And `libhv` exports itself
+  without a namespace, so configuring warns that it will be "recorded by its bare target name
+  without provenance"; its `hv_static.spdx.json` is complete regardless.
+- The T113 build runs through buildroot, which uses its own CMake rather than `env/bin/cmake`,
+  and its install step copies the binary directly instead of running `cmake --install`. Producing
+  an on-device SBOM through that path needs buildroot's CMake to be 4.3+ and
+  [duetscreen.mk](https://github.com/Duet3D/buildroot-duetscreen/blob/master/package/duetscreen/duetscreen.mk)
+  taught to copy the documents.
 
 ## Debugging / Running Simulation
 > [!NOTE]

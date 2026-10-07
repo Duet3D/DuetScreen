@@ -1,0 +1,21 @@
+services:
+  dev:
+    build:
+      # The Dockerfile has no COPY steps, so keep the build context to
+      # .devcontainer/ rather than shipping the whole repository to the daemon.
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    command: sleep infinity
+    environment:
+      # X11 passthrough so the SDL simulation can open a window on the host
+      # display. Works on a Linux host and under WSLg on WSL2.
+      DISPLAY: "${DISPLAY:-:0}"
+    volumes:
+      - type: bind
+        source: ..
+        target: /workspaces/DuetScreen
+      # Host X11 socket. See docs/DEVELOPMENT.md for the one-off `xhost` step.
+      - type: bind
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
