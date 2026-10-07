@@ -39,8 +39,6 @@ namespace Comm
 	static TracyLockable(std::mutex, s_transferMutex);
 	static std::condition_variable s_completionCondition;
 
-	static constexpr int32_t s_usbTimeoutMs = 1000;
-
 	UsbDevice::UsbDevice()
 		: m_name("")
 		, m_device(nullptr)
@@ -49,7 +47,10 @@ namespace Comm
 		, m_channelCount(0)
 		, m_claimedInterfaceCount(0)
 		, m_claimedInterfaces{}
-		, m_receiveContexts{}
+		, m_eventThreadRunning(false)
+		, m_receiveTransfers{}
+		, m_pendingReceiveCount(0)
+		, m_decodeThreadRunning(false)
 	{
 		ZoneScoped;
 		m_claimedInterfaces.fill(0xFF);
@@ -83,12 +84,7 @@ namespace Comm
 		LOG_DBG("Resetting USB device {:s}", m_name);
 		if (m_handle)
 		{
-			// Stop event handling thread before releasing resources
-			m_eventThreadRunning = false;
-			if (m_eventLoopThread.joinable())
-			{
-				m_eventLoopThread.join();
-			}
+			stopReceiving();
 
 			for (std::size_t i = 0; i < m_claimedInterfaceCount; ++i)
 			{
@@ -207,21 +203,16 @@ namespace Comm
 			goto close_handle;
 		}
 
-		m_eventThreadRunning = true;
-		m_eventLoopThread = std::thread(&UsbDevice::eventLoop, this);
-		for (std::size_t channelIndex = 0; channelIndex < m_channelCount; ++channelIndex)
+		if (!startReceiving())
 		{
-			if (receive(channelIndex, s_usbTimeoutMs) != receive_err_t::NONE)
-			{
-				LOG_ERROR("Failed to start receive transfer for channel {}", channelIndex);
-				goto close_handle;
-			}
+			goto close_handle;
 		}
 
 		return true;
 
 	close_handle:
 		LOG_DBG("Closing device");
+		stopReceiving();
 		libusb_close(m_handle);
 		m_handle = nullptr;
 		return false;
@@ -390,51 +381,113 @@ namespace Comm
 		return success;
 	}
 
-	UsbDevice::receive_err_t UsbDevice::receive(std::size_t channelIndex, unsigned int timeoutMs)
+	bool UsbDevice::submitReceive(ReceiveTransfer& receiveTransfer)
 	{
 		ZoneScoped;
-		if (!m_handle)
+		if (receiveTransfer.transfer == nullptr)
 		{
-			LOG_WARN("No USB device handle");
-			return receive_err_t::NO_DEVICE;
+			receiveTransfer.transfer = libusb_alloc_transfer(0);
+			if (receiveTransfer.transfer == nullptr)
+			{
+				LOG_ERROR("Failed to allocate receive transfer");
+				return false;
+			}
 		}
 
-		struct libusb_transfer* transfer = libusb_alloc_transfer(0);
-		if (!transfer)
-		{
-			LOG_ERROR("Failed to allocate transfer");
-			return receive_err_t::FAILED_TO_ALLOCATE_TRANSFER;
-		}
-
-		if (m_channelCount == 0 || channelIndex >= m_channelCount)
-		{
-			libusb_free_transfer(transfer);
-			LOG_ERROR("Invalid USB receive channel {}", channelIndex);
-			return receive_err_t::OTHER_ERROR;
-		}
-
-		ReceiveTransferContext* receiveContext = &m_receiveContexts[channelIndex];
-		receiveContext->device = this;
-		receiveContext->channelIndex = channelIndex;
-
-		libusb_fill_bulk_transfer(transfer,
+		libusb_fill_bulk_transfer(receiveTransfer.transfer,
 								  m_handle,
-								  m_channels[channelIndex].inEndpoint,
-								  m_receiveBuffers[channelIndex],
+								  m_channels[receiveTransfer.channelIndex].inEndpoint,
+								  receiveTransfer.buffer,
 								  s_receiveBufferSize,
 								  receiveTransferCallback,
-								  receiveContext,
-								  timeoutMs);
+								  &receiveTransfer,
+								  0);
 
-		int r = libusb_submit_transfer(transfer);
+		const int r = libusb_submit_transfer(receiveTransfer.transfer);
 		if (r < 0)
 		{
-			LOG_ERROR("Failed to submit transfer: {:s}", libusb_error_name(r));
-			libusb_free_transfer(transfer);
-			return receive_err_t::FAILED_TO_SUBMIT_TRANSFER;
+			LOG_ERROR("Failed to submit receive transfer on channel {}: {:s}", receiveTransfer.channelIndex, libusb_error_name(r));
+			libusb_free_transfer(receiveTransfer.transfer);
+			receiveTransfer.transfer = nullptr;
+			return false;
 		}
 
-		return receive_err_t::NONE;
+		m_pendingReceiveCount++;
+		return true;
+	}
+
+	bool UsbDevice::startReceiving()
+	{
+		ZoneScoped;
+		m_decodeThreadRunning = true;
+		m_decodeThread = std::thread(&UsbDevice::decodeLoop, this);
+		m_eventThreadRunning = true;
+		m_eventLoopThread = std::thread(&UsbDevice::eventLoop, this);
+
+		for (std::size_t channelIndex = 0; channelIndex < m_channelCount; channelIndex++)
+		{
+			for (ReceiveTransfer& receiveTransfer : m_receiveTransfers[channelIndex])
+			{
+				receiveTransfer.device = this;
+				receiveTransfer.channelIndex = channelIndex;
+				if (!submitReceive(receiveTransfer))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	void UsbDevice::stopReceiving()
+	{
+		ZoneScoped;
+		m_eventThreadRunning = false;
+		if (m_eventLoopThread.joinable())
+		{
+			m_eventLoopThread.join();
+		}
+
+		for (auto& channelTransfers : m_receiveTransfers)
+		{
+			for (ReceiveTransfer& receiveTransfer : channelTransfers)
+			{
+				if (receiveTransfer.transfer != nullptr)
+				{
+					libusb_cancel_transfer(receiveTransfer.transfer);
+				}
+			}
+		}
+
+		// A pending transfer must not be freed, so reap the cancellations here now that the event thread is gone
+		timeval tv = {0, 100'000};
+		for (int attempt = 0; m_pendingReceiveCount != 0 && attempt < 20; attempt++)
+		{
+			libusb_handle_events_timeout(s_context, &tv);
+		}
+		if (m_pendingReceiveCount != 0)
+		{
+			LOG_ERROR("{} USB receive transfers did not complete, leaking them", m_pendingReceiveCount.load());
+			m_pendingReceiveCount = 0;
+		}
+		for (auto& channelTransfers : m_receiveTransfers)
+		{
+			for (ReceiveTransfer& receiveTransfer : channelTransfers)
+			{
+				receiveTransfer.transfer = nullptr;
+			}
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(m_receiveQueueMutex);
+			m_decodeThreadRunning = false;
+		}
+		m_receiveQueueCondition.notify_all();
+		if (m_decodeThread.joinable())
+		{
+			m_decodeThread.join();
+		}
+		m_receiveQueue.clear();
 	}
 
 	int UsbDevice::setDtr(bool state)
@@ -745,27 +798,25 @@ namespace Comm
 		s_completionCondition.notify_all(); // Notify event loop about completion
 	}
 
+	// Runs on the event thread: queue the data and resubmit right away so the endpoint never runs out of URBs while the JSON is parsed
 	void LIBUSB_CALL UsbDevice::receiveTransferCallback(struct libusb_transfer* transfer)
 	{
 		ZoneScoped;
-		auto* receiveContext = static_cast<ReceiveTransferContext*>(transfer->user_data);
-		auto* device = receiveContext->device;
-		const std::size_t channelIndex = receiveContext->channelIndex;
-
-		// Notify completion for any pending transfers
-		std::unique_lock<LockableBase(std::mutex)> lock(s_transferMutex);
+		ReceiveTransfer* receiveTransfer = static_cast<ReceiveTransfer*>(transfer->user_data);
+		UsbDevice* device = receiveTransfer->device;
 
 		if (transfer->status == LIBUSB_TRANSFER_COMPLETED)
 		{
-			// Data successfully transferred, invoke the callback
-			if (device->m_receiveCallback)
+			if (transfer->actual_length > 0)
 			{
-				device->m_receiveCallback(transfer->buffer, transfer->actual_length, channelIndex);
+				std::lock_guard<std::mutex> lock(device->m_receiveQueueMutex);
+				device->m_receiveQueue.push_back({receiveTransfer->channelIndex, std::vector<unsigned char>(transfer->buffer, transfer->buffer + transfer->actual_length)});
 			}
+			device->m_receiveQueueCondition.notify_one();
 		}
-		else if (transfer->status == LIBUSB_TRANSFER_TIMED_OUT)
+		else if (transfer->status == LIBUSB_TRANSFER_CANCELLED)
 		{
-			LOG_DBG("Transfer timed out");
+			LOG_DBG("Receive transfer cancelled");
 		}
 		else if (transfer->status == LIBUSB_TRANSFER_OVERFLOW)
 		{
@@ -776,13 +827,21 @@ namespace Comm
 			LOG_ERROR("Transfer failed: {}", libusb_error_name(transfer->status));
 		}
 
-		if (device->m_eventThreadRunning.load(std::memory_order_relaxed) && device->m_handle)
+		device->m_pendingReceiveCount--;
+		// Resubmitting after an error spins at bus speed while the Duet reboots; leave the channel idle and let the response watchdog reconnect
+		if (device->m_eventThreadRunning.load(std::memory_order_relaxed) && device->m_handle && (transfer->status == LIBUSB_TRANSFER_COMPLETED || transfer->status == LIBUSB_TRANSFER_TIMED_OUT))
 		{
-			device->receive(channelIndex, s_usbTimeoutMs);
+			const int r = libusb_submit_transfer(transfer);
+			if (r == 0)
+			{
+				device->m_pendingReceiveCount++;
+				return;
+			}
+			LOG_ERROR("Failed to resubmit receive transfer: {:s}", libusb_error_name(r));
 		}
 
-		libusb_free_transfer(transfer);		// Free the transfer after processing
-		s_completionCondition.notify_all(); // Notify event loop about completion
+		libusb_free_transfer(transfer);
+		receiveTransfer->transfer = nullptr;
 	}
 
 	void UsbDevice::eventLoop()
@@ -791,15 +850,33 @@ namespace Comm
 		timeval tv = {0, 50'000}; // 50 ms
 		while (m_eventThreadRunning)
 		{
+			ZoneScoped;
+			libusb_handle_events_timeout(s_context, &tv);
+		}
+	}
+
+	void UsbDevice::decodeLoop()
+	{
+		tracy::SetThreadName("USB Decode");
+		while (true)
+		{
+			ReceivedChunk chunk;
 			{
-				ZoneScoped;
-				int r = libusb_handle_events_timeout(s_context, &tv); // blocking call
-				if (r == LIBUSB_ERROR_INTERRUPTED)
+				std::unique_lock<std::mutex> lock(m_receiveQueueMutex);
+				m_receiveQueueCondition.wait(lock, [this] { return !m_receiveQueue.empty() || !m_decodeThreadRunning; });
+				if (!m_decodeThreadRunning)
 				{
-					continue;
+					return;
 				}
+				chunk = std::move(m_receiveQueue.front());
+				m_receiveQueue.pop_front();
 			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Prevent busy-waiting
+
+			if (m_receiveCallback)
+			{
+				ZoneScopedN("USB Receive Callback");
+				m_receiveCallback(chunk.data.data(), chunk.data.size(), chunk.channelIndex);
+			}
 		}
 	}
 
