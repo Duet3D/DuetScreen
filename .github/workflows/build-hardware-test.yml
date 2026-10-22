@@ -1,0 +1,94 @@
+name: Build Hardware Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: 'DuetScreen CMake preset'
+        type: choice
+        options:
+          - T113-Release
+          - T113-Debug
+        default: T113-Release
+      buildroot_ref:
+        description: 'buildroot-duetscreen ref (branch/tag/SHA), or "latest" for the most recent tag on master'
+        type: string
+        default: latest
+
+jobs:
+  build:
+    name: Build Hardware Test Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout DuetScreen
+        uses: actions/checkout@v4
+        with:
+          path: DuetScreen
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Buildroot
+        uses: actions/checkout@v4
+        with:
+          repository: Duet3D/buildroot-duetscreen
+          ref: master
+          path: buildroot-duetscreen
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+
+      - name: Select Buildroot ref
+        working-directory: buildroot-duetscreen
+        env:
+          BUILDROOT_REF: ${{ inputs.buildroot_ref }}
+        run: |
+          set -euo pipefail
+          if [ "${BUILDROOT_REF}" = "latest" ]; then
+            BUILDROOT_REF=$(git tag --merged origin/master --sort=-creatordate | head -n1)
+            if [ -z "${BUILDROOT_REF}" ]; then
+              echo "No tag found on master; using master" >&2
+              BUILDROOT_REF=master
+            fi
+          fi
+          git checkout "${BUILDROOT_REF}"
+          git submodule update --init --recursive
+          echo "Using buildroot ${BUILDROOT_REF} ($(git rev-parse --short HEAD))"
+
+      - name: Install Linux Dependencies
+        run: |
+          cd DuetScreen
+          ./scripts/install_prerequisites.sh
+          cd ../buildroot-duetscreen
+          ./scripts/install_prerequisites.sh
+
+      - name: Build sdcard.img
+        working-directory: buildroot-duetscreen
+        env:
+          DUETSCREEN_SRC: ../DuetScreen
+          DUETSCREEN_PRESET: ${{ inputs.preset }}
+          DUETSCREEN_EXTRA_CONF_OPTS: -DDUETSCREEN_HARDWARE_TEST=ON
+        run: |
+          make duet3d_duetscreen_defconfig
+          make
+
+      - name: Prepare artifacts
+        id: artifacts
+        run: |
+          set -euo pipefail
+          VERSION=$(git -C DuetScreen describe --tags --dirty --always --match="v*")
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          mkdir artifacts
+          cp ./buildroot-duetscreen/output/images/sdcard.img ./artifacts/
+          cd DuetScreen
+          ./scripts/create_upgrade.sh
+          cp ./out/DuetScreen.tar.gz ../artifacts/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuetScreen-HardwareTest-${{ steps.artifacts.outputs.VERSION }}-${{ inputs.preset }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 7

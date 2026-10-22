@@ -563,3 +563,6 @@ cmake_test_discovery*
 
 # Assets
 assets/splash.png
+
+# CI
+.devcontainer/docker-compose.buildroot.yml

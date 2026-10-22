@@ -391,7 +391,11 @@ namespace UI
 #endif
 								  FILE* pipe = ::popen(cmd.c_str(), "r");
 								  if (!pipe)
+								  {
+									  commandTest.appendOutput("Failed to run `ip link`!\n");
+									  testFinished(TestId::WifiTest);
 									  return;
+								  }
 								  char buffer[256];
 								  while (fgets(buffer, sizeof(buffer), pipe))
 								  {
@@ -1006,7 +1010,8 @@ namespace UI
 			[this](TestProcedure& /* test */) { testWifi(); },
 			[this](TestProcedure& test)
 			{
-				std::string mac_addr = test.output["mac_address"].get<std::string>();
+				// `mac_address` is missing if enabling WiFi failed
+				std::string mac_addr = test.output.value("mac_address", "");
 
 				// Check `result` for `Finished pass 1 successfully`
 				return !mac_addr.empty();
