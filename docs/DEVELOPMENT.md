@@ -472,11 +472,14 @@ The hardware tests can be started from the developer settings screen.
 
 #### Building
 
-A version of the UI which boots straight into the hardware tests can be created by setting the cmake cache variable `HARDWARE_TEST` to `ON`.
+A version of the UI which boots straight into the hardware tests can be created by setting the cmake cache variable `DUETSCREEN_HARDWARE_TEST` to `ON`. This also enables `DUETSCREEN_DEVELOPER_MODE` (required for ADB). The default serial number shown in the test can be set with `DUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER`.
 
 > [!NOTE]
 > `ccmake <path_to_build_dir>` can be used to change the CMake cache variables.
-> Or `cmake -DHARDWARE_TEST=ON --preset <preset_name>` can be used to set the variable.
+> Or `cmake -DDUETSCREEN_HARDWARE_TEST=ON --preset <preset_name>` can be used to set the variable.
+> When building through buildroot, pass it via `DUETSCREEN_EXTRA_CONF_OPTS="-DDUETSCREEN_HARDWARE_TEST=ON"`.
+
+A hardware test `sdcard.img` and `DuetScreen.tar.gz` can also be built in CI by manually running the **Build Hardware Test** GitHub Action (`.github/workflows/build-hardware-test.yml`).
 
 ## Logs
 The code generates logs that are output to 3 places:

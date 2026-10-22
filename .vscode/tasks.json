@@ -118,6 +118,7 @@
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					"DUETSCREEN_PRESET": "T113-${input:build_type}",
+					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON",
 					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 				}
 			},
