@@ -67,6 +67,8 @@ namespace NetworkHelper
 	/// wpa_supplicant, polling for readiness) runs on an internal thread so
 	/// the caller is never blocked.  The optional @p callback is invoked from
 	/// the worker thread once the operation completes (`true` on success).
+	/// If an enable is already in progress, no new attempt is started and
+	/// @p callback is invoked when the in-progress attempt completes.
 	/// Disabling is fast and runs synchronously; the callback (if any) is
 	/// still invoked before returning.
 	void enable(bool enable, std::function<void(bool /*success*/)> callback = nullptr);

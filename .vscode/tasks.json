@@ -26,6 +26,16 @@
 				"Debug",
 			],
 			"default": "Release"
+		},
+		{
+			"id": "hardware_test",
+			"type": "pickString",
+			"description": "Build DuetScreen as a hardware test image?",
+			"options": [
+				"OFF",
+				"ON"
+			],
+			"default": "OFF"
 		}
 	],
 	"tasks": [
@@ -130,6 +140,29 @@
 				"$gcc"
 			],
 			"detail": "Builds DuetScreen for remote debugging"
+		},
+		{
+			"label": "Build Buildroot sdcard.img",
+			"type": "shell",
+			"command": "echo \"Building sdcard.img (${input:build_type}, hardware test ${input:hardware_test})...\"; [ -f .config ] || make duet3d_duetscreen_defconfig; make duetscreen-reconfigure && make && echo \"Image: ${config:buildroot_path}/output/images/sdcard.img\"",
+			"args": [],
+			"options": {
+				"cwd": "${config:buildroot_path}",
+				"env": {
+					"DUETSCREEN_SRC": "${workspaceFolder}",
+					"DUETSCREEN_PRESET": "T113-${input:build_type}",
+					"DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=${input:hardware_test}",
+					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"detail": "Builds the full buildroot image (output/images/sdcard.img) with the local DuetScreen source"
 		},
 		{
 			"label": "Push DuetScreen - SSH",
