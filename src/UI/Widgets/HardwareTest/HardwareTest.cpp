@@ -17,14 +17,18 @@
 
 namespace UI
 {
+	static const lv_color_t BG_COLOR = lv_color_make(0x11, 0x11, 0x11);
+
 	HardwareTest::HardwareTest()
 		: View("hardware_test")
 	{
 		ZoneScoped;
 		setStylePad(0, LV_PART_MAIN, Padding::ALL);
 		setSize(LV_PCT(100), LV_PCT(100));
-		// Don't use plain black to prevent content from fading away (bug in the SUNXI display or DMA/MMU driver)
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		// Don't use plain black to prevent content from fading away (bug in the SUNXI display or DMA/MMU driver).
+		// The panel is RGB666, so the lower 2 bits of each channel are dropped: 0x04 is the smallest value that is
+		// not output as black (0x01 is truncated to 0 and only occasionally toggled by FRM dithering).
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 	}
 
@@ -33,7 +37,7 @@ namespace UI
 		, m_parent(parent)
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 
 		setSize(LV_PCT(100), LV_PCT(100));
@@ -153,7 +157,7 @@ namespace UI
 		, m_parent(parent)
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 
 		setSize(LV_PCT(100), LV_PCT(100));
@@ -225,7 +229,7 @@ namespace UI
 	void HardwareTest::DeadPixelTest::onShow()
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		m_hint.show();
 		m_pass.show();
 		m_fail.show();
@@ -247,7 +251,7 @@ namespace UI
 		, m_parent(parent)
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 
 		setSize(LV_PCT(100), LV_PCT(100));
@@ -305,7 +309,7 @@ namespace UI
 		, m_parent(parent)
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 
 		setSize(LV_PCT(100), LV_PCT(100));
@@ -357,7 +361,7 @@ namespace UI
 		: CommandTest(parent)
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 
 		setSize(LV_PCT(100), LV_PCT(100));
@@ -412,7 +416,7 @@ namespace UI
 		, m_parent(parent)
 	{
 		ZoneScoped;
-		setStyleBgColor(lv_color_make(0x01, 0x01, 0x01));
+		setStyleBgColor(BG_COLOR);
 		setStyleBgOpa(LV_OPA_COVER);
 
 		setSize(LV_PCT(100), LV_PCT(100));
