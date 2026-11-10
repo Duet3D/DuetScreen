@@ -14,7 +14,8 @@
         "ms-vscode.cpptools",
         "ms-vscode.cmake-tools",
         "TrevorNesbitt.smart-file-templates",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "rioj7.command-variable"
       ],
       "settings": {
         "buildroot_path": "/workspaces/buildroot-duetscreen",

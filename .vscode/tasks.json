@@ -28,14 +28,25 @@
 			"default": "Release"
 		},
 		{
+			// Resolves to the CMake options; the serial number is only prompted for when ON is picked
 			"id": "hardware_test",
-			"type": "pickString",
-			"description": "Build DuetScreen as a hardware test image?",
-			"options": [
-				"OFF",
-				"ON"
-			],
-			"default": "OFF"
+			"type": "command",
+			"command": "extension.commandvariable.pickStringRemember",
+			"args": {
+				"description": "Build DuetScreen as a hardware test image?",
+				"options": [
+					["OFF", "-DDUETSCREEN_HARDWARE_TEST=OFF"],
+					["ON", "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER='\"${promptStringRemember:serial}\"'"]
+				],
+				"default": "-DDUETSCREEN_HARDWARE_TEST=OFF",
+				"promptStringRemember": {
+					"serial": {
+						"key": "hardware_test_serial",
+						"description": "Hardware test serial number prefix",
+						"default": "AD-04-01_"
+					}
+				}
+			}
 		}
 	],
 	"tasks": [
@@ -128,7 +139,7 @@
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					"DUETSCREEN_PRESET": "T113-${input:build_type}",
-					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON",
+					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER=\"AC-04-01_\"",
 					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 				}
 			},
@@ -144,14 +155,14 @@
 		{
 			"label": "Build Buildroot sdcard.img",
 			"type": "shell",
-			"command": "echo \"Building sdcard.img (${input:build_type}, hardware test ${input:hardware_test})...\"; [ -f .config ] || make duet3d_duetscreen_defconfig; make duetscreen-reconfigure && make && echo \"Image: ${config:buildroot_path}/output/images/sdcard.img\"",
+			"command": "echo \"Building sdcard.img (${input:build_type}, $DUETSCREEN_EXTRA_CONF_OPTS)...\"; [ -f .config ] || make duet3d_duetscreen_defconfig; make duetscreen-reconfigure && make && echo \"Image: ${config:buildroot_path}/output/images/sdcard.img\"",
 			"args": [],
 			"options": {
 				"cwd": "${config:buildroot_path}",
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					"DUETSCREEN_PRESET": "T113-${input:build_type}",
-					"DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=${input:hardware_test}",
+					"DUETSCREEN_EXTRA_CONF_OPTS": "${input:hardware_test}",
 					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 				}
 			},
