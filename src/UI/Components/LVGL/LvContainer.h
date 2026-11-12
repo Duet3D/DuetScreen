@@ -16,6 +16,8 @@ namespace UI
 	  public:
 		LvContainer(const std::string& name, LvObj& parent);
 		LvContainer(const std::string& name, LvObj& parent, layout_t layout);
+		/** For widgets built by the XML engine, whose parent has no C++ wrapper */
+		LvContainer(const std::string& name, lv_obj_t* parent);
 
 	  private:
 	};

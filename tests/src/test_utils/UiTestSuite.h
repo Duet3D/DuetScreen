@@ -8,6 +8,7 @@
 #pragma once
 
 #include "UI/Components/Screen/Screen.h"
+#include "UI/Xml/XmlUi.h"
 #include "test_utils/TestSuite.h"
 #include "test_utils/utils.h"
 #include <gtest/gtest.h>
@@ -17,6 +18,8 @@ class UiTestSuiteInner : public TestSuite
   protected:
 	UiTestSuiteInner();
 	virtual ~UiTestSuiteInner();
+
+	static UI::Xml::Paths xmlPaths();
 };
 
 class UiTestSuite : public UiTestSuiteInner

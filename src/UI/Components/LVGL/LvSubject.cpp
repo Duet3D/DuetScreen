@@ -104,7 +104,12 @@ namespace UI
 		lv_subject_set_min_value_float(&m_subject, min_value);
 	}
 
-	void LvSubject::setMaxFloat(float max_value) {}
+	void LvSubject::setMaxFloat(float max_value)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		lv_subject_set_max_value_float(&m_subject, max_value);
+	}
 
 #  endif
 

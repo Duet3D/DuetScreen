@@ -19,4 +19,9 @@ namespace UI
 		: LvObj(lv_obj_create, name, parent, layout)
 	{
 	}
+
+	LvContainer::LvContainer(const std::string& name, lv_obj_t* parent)
+		: LvObj(lv_obj_create, name, parent)
+	{
+	}
 } // namespace UI

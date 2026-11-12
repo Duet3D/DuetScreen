@@ -21,6 +21,15 @@ namespace UI
 		init(text);
 	}
 
+	Button::Button(const std::string& name, lv_obj_t* parent, std::string_view text)
+		: LvObj(lv_button_create, name, parent)
+		, m_icon("icon", getRoot())
+		, m_label("label", getRoot())
+	{
+		ZoneScoped;
+		init(text);
+	}
+
 	Button::Button(const std::string& name, LvObj& parent, std::string_view text, layout_t layout)
 		: LvObj(lv_button_create, name, parent, layout)
 		, m_icon("icon", getRoot())

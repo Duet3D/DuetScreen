@@ -1,0 +1,363 @@
+/*
+ * test_xml_ui.cpp
+ *
+ * The runtime-loaded XML UI (src/UI/Xml): bundles, per-item list subjects, presenters and actions, overrides and
+ * their fallbacks, reload, theme styles and translations. The Fan screen is the vertical slice; its screenshots are
+ * covered by test_home_view.cpp (control_view/fan.png), these tests check behaviour and structure.
+ */
+
+#include "ObjectModel/Fan.h"
+#include "UI/Components/Button/Button.h"
+#include "UI/Components/Input/Slider.h"
+#include "UI/Styles/Styles.h"
+#include "UI/Xml/OmPublisher.h"
+#include "UI/Xml/XmlUi.h"
+#include "UI/Xml/XmlView.h"
+#include "i18n/i18n.h"
+#include "test_utils/UiTestSuite.h"
+#include <filesystem>
+#include <fstream>
+#include <gtest/gtest.h>
+#include <unistd.h>
+
+namespace fs = std::filesystem;
+
+namespace
+{
+	// Fan 0 is thermostatic; fans 1 and 2 can be set by hand.
+	// One line each: the decoder treats a newline as the end of a message.
+	constexpr std::string_view THREE_FANS =
+		R"({"key":"fans","flags":"v","result":[{"actualValue":0.3,"requestedValue":0.3,"rpm":1200,"thermostatic":{"lowTemperature":45,"sensors":[1]}},{"actualValue":0.5,"requestedValue":0.5,"rpm":-1,"thermostatic":{"sensors":[]}},{"actualValue":0,"requestedValue":0,"rpm":-1,"thermostatic":{"sensors":[]}}]})";
+
+	constexpr std::string_view ONE_FAN =
+		R"({"key":"fans","flags":"v","result":[{"actualValue":0.3,"requestedValue":0.3,"rpm":1200,"thermostatic":{"lowTemperature":45,"sensors":[1]}}]})";
+
+	constexpr std::string_view FAN_1_AT_80 =
+		R"({"key":"fans","flags":"v","result":[{"actualValue":0.3,"requestedValue":0.3,"rpm":1200,"thermostatic":{"lowTemperature":45,"sensors":[1]}},{"actualValue":0.8,"requestedValue":0.8,"rpm":-1,"thermostatic":{"sensors":[]}},{"actualValue":0,"requestedValue":0,"rpm":-1,"thermostatic":{"sensors":[]}}]})";
+
+	void writeFile(const fs::path& path, std::string_view text)
+	{
+		fs::create_directories(path.parent_path());
+		std::ofstream(path) << text;
+	}
+
+	std::string manifest(std::string_view api = "1.0")
+	{
+		return fmt::format(R"({{"id": "test", "ui_api": "{:s}", "components": ["components/*.xml"]}})", api);
+	}
+} // namespace
+
+class TestXmlUi : public UiTestSuite
+{
+  protected:
+	TestXmlUi()
+	{
+		m_userDir = fs::temp_directory_path() / fmt::format("duetscreen-xml-ui-{:d}", getpid());
+		fs::remove_all(m_userDir);
+		UI::Xml::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
+	}
+
+	~TestXmlUi() override
+	{
+		m_views.clear();
+		fs::remove_all(m_userDir);
+	}
+
+	/** Restart the XML UI with a user bundle folder */
+	void restartWithUserBundles()
+	{
+		m_views.clear();
+		UI::Xml::deinit();
+		UI::Xml::init(UI::Xml::Paths{.builtin = "assets/ui", .user = m_userDir});
+		UI::Xml::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
+	}
+
+	fs::path bundleFile(std::string_view relative) const { return m_userDir / "test" / relative; }
+
+	UI::Xml::XmlView& makeView(const std::string& component = "fan_screen")
+	{
+		m_views.push_back(
+			std::make_unique<UI::Xml::XmlView>(fmt::format("view{:d}", m_views.size()), screen, component));
+		return *m_views.back();
+	}
+
+	/** Deliver queued model events, as the event loop would */
+	static void pump()
+	{
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	}
+
+	static lv_obj_t* find(UI::LvObj& root, const char* name) { return lv_obj_find_by_name(root.getRootPtr(), name); }
+	static lv_obj_t* find(lv_obj_t* root, const char* name) { return lv_obj_find_by_name(root, name); }
+
+	static lv_obj_t* fanList(UI::LvObj& view) { return find(view, "list"); }
+	static lv_obj_t* fanCard(UI::LvObj& view, int32_t index) { return lv_obj_get_child(fanList(view), index); }
+
+	static UI::Slider& slider(lv_obj_t* card)
+	{
+		return static_cast<UI::Slider&>(*UI::LvObj::fromPtr(find(card, "slider")));
+	}
+
+	fs::path m_userDir;
+	std::vector<std::string> m_sent;
+	std::vector<std::unique_ptr<UI::Xml::XmlView>> m_views;
+};
+
+TEST_F(TestXmlUi, BuiltinBundleLoadsCleanly)
+{
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	const auto* screen = UI::Xml::findComponent("fan_screen");
+	ASSERT_NE(screen, nullptr);
+	EXPECT_EQ(screen->presenter, "fans");
+	EXPECT_EQ(screen->bundle, "duetscreen");
+
+	const auto* card = UI::Xml::findComponent("fan_card");
+	ASSERT_NE(card, nullptr);
+	EXPECT_TRUE(card->presenter.empty());
+}
+
+TEST_F(TestXmlUi, ViewHasItsPresenterAndTranslatedText)
+{
+	auto& view = makeView();
+	ASSERT_NE(view.getPresenter(), nullptr);
+	EXPECT_EQ(view.getPresenter()->getName(), "fans");
+
+	lv_obj_t* title = find(view, "title");
+	ASSERT_NE(title, nullptr);
+	EXPECT_STREQ(lv_label_get_text(title), _("fan.title").c_str());
+}
+
+TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
+{
+	auto& view = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+
+	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
+
+	// Attributes the engine doesn't know are only logged, and LVGL logging is off in this build, so check that the
+	// layout attributes in the bundle actually reached the widgets
+	EXPECT_EQ(lv_obj_get_style_flex_flow(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_FLOW_ROW);
+	EXPECT_EQ(lv_obj_get_style_flex_cross_place(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
+	EXPECT_EQ(lv_obj_get_style_flex_track_place(view.getRootPtr(), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
+	EXPECT_EQ(lv_obj_get_style_flex_cross_place(find(view, "header"), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
+
+	// Thermostatic fans are hidden by a binding in fan_card.xml, not filtered in C++
+	EXPECT_TRUE(lv_obj_has_flag(fanCard(view, 0), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(fanCard(view, 1), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(fanCard(view, 2), LV_OBJ_FLAG_HIDDEN));
+
+	EXPECT_EQ(slider(fanCard(view, 1)).getLabelText(), _("fine_tune.fan", 1));
+	EXPECT_EQ(slider(fanCard(view, 2)).getLabelText(), _("fine_tune.fan", 2));
+	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 50.0f);
+	EXPECT_FLOAT_EQ(slider(fanCard(view, 2)).getValue(), 0.0f);
+
+	// Updating the model updates only that card
+	load_model_data(FAN_1_AT_80);
+	pump();
+	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
+	EXPECT_FLOAT_EQ(slider(fanCard(view, 2)).getValue(), 0.0f);
+}
+
+TEST_F(TestXmlUi, TwoViewsShareOneModel)
+{
+	auto& a = makeView();
+	auto& b = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+
+	ASSERT_EQ(lv_obj_get_child_count(fanList(a)), 3u);
+	ASSERT_EQ(lv_obj_get_child_count(fanList(b)), 3u);
+	EXPECT_EQ(slider(fanCard(a, 2)).getLabelText(), _("fine_tune.fan", 2));
+	EXPECT_EQ(slider(fanCard(b, 2)).getLabelText(), _("fine_tune.fan", 2));
+}
+
+TEST_F(TestXmlUi, ListGrowsAndShrinksAtTheEnd)
+{
+	auto& view = makeView();
+	load_model_data(ONE_FAN);
+	pump();
+	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
+	lv_obj_t* first = fanCard(view, 0);
+
+	load_model_data(THREE_FANS);
+	pump();
+	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
+	EXPECT_EQ(fanCard(view, 0), first) << "existing cards are kept when the list grows";
+
+	load_model_data(ONE_FAN);
+	pump();
+	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
+	EXPECT_EQ(fanCard(view, 0), first);
+
+	// Disconnecting empties the list
+	Model::get().post<EventType::Disconnected>();
+	pump();
+	EXPECT_EQ(lv_obj_get_child_count(fanList(view)), 0u);
+}
+
+TEST_F(TestXmlUi, ButtonsReachThePresenterWithTheirFan)
+{
+	auto& view = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+
+	lv_obj_send_event(find(fanCard(view, 1), "max"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(fanCard(view, 2), "max"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(fanCard(view, 1), "off"), LV_EVENT_CLICKED, nullptr);
+	// Already off: nothing to send
+	lv_obj_send_event(find(fanCard(view, 2), "off"), LV_EVENT_CLICKED, nullptr);
+
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"M106 P1 S255\n", "M106 P2 S255\n", "M106 P1 S0\n"}));
+}
+
+TEST_F(TestXmlUi, SliderEditsSendButBindingUpdatesDont)
+{
+	auto& view = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+	EXPECT_TRUE(m_sent.empty()) << "showing the model's values is not an edit";
+
+	slider(fanCard(view, 2)).setValue(40.0f);
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"M106 P2 S102\n"}));
+
+	m_sent.clear();
+	load_model_data(FAN_1_AT_80);
+	pump();
+	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
+	EXPECT_TRUE(m_sent.empty());
+}
+
+TEST_F(TestXmlUi, UserBundleOverridesAComponent)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/fan_card.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="custom" bind_text="name"/>
+				<ds_button name="home" text="Home">
+					<action trigger="clicked" name="gcode" arg="G28 ; from fan {index}"/>
+				</ds_button>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "test");
+
+	auto& view = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+
+	// The built-in screen now uses the user's card, and thermostatic fans are no longer hidden
+	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
+	lv_obj_t* label = find(fanCard(view, 0), "custom");
+	ASSERT_NE(label, nullptr);
+	EXPECT_STREQ(lv_label_get_text(label), _("fine_tune.fan", 0).c_str());
+	EXPECT_EQ(find(fanCard(view, 0), "slider"), nullptr);
+
+	// A global action with the item's index
+	lv_obj_send_event(find(fanCard(view, 2), "home"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"G28 ; from fan 2\n"}));
+}
+
+TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/fan_card.xml"), "<component>\n<view>\n<lv_label>\n</view>\n</component>\n");
+	restartWithUserBundles();
+
+	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
+	EXPECT_EQ(UI::Xml::getIssues()[0].file.filename(), "fan_card.xml");
+	EXPECT_NE(UI::Xml::getIssues()[0].message.find("line 4"), std::string::npos) << UI::Xml::getIssues()[0].message;
+	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
+
+	auto& view = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+	EXPECT_NE(find(fanCard(view, 1), "slider"), nullptr);
+}
+
+TEST_F(TestXmlUi, OverrideNamingAnUnknownPresenterIsRejected)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/fan_screen.xml"),
+			  R"(<component presenter="nope"><view extends="lv_obj"/></component>)");
+	restartWithUserBundles();
+
+	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
+	EXPECT_NE(UI::Xml::getIssues()[0].message.find("unknown presenter 'nope'"), std::string::npos);
+	EXPECT_EQ(UI::Xml::findComponent("fan_screen")->presenter, "fans");
+}
+
+TEST_F(TestXmlUi, BundleForAnotherUiApiIsNotLoaded)
+{
+	writeFile(bundleFile("manifest.json"), manifest("2.0"));
+	writeFile(bundleFile("components/fan_card.xml"), R"(<component><view extends="lv_obj"/></component>)");
+	restartWithUserBundles();
+
+	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
+	EXPECT_NE(UI::Xml::getIssues()[0].message.find("needs UI API 2.0"), std::string::npos);
+	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
+}
+
+TEST_F(TestXmlUi, ReloadRebuildsLiveViewsAndKeepsThePresenter)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/fan_card.xml"),
+			  R"(<component><view extends="lv_obj" height="content"><lv_label name="v1"/></view></component>)");
+	restartWithUserBundles();
+
+	auto& view = makeView();
+	load_model_data(THREE_FANS);
+	pump();
+	ASSERT_NE(find(fanCard(view, 0), "v1"), nullptr);
+	auto* presenter = view.getPresenter();
+	const int32_t index = lv_obj_get_index(view.getRootPtr());
+
+	writeFile(bundleFile("components/fan_card.xml"),
+			  R"(<component><view extends="lv_obj" height="content"><lv_label name="v2"/></view></component>)");
+	UI::Xml::reload();
+
+	EXPECT_EQ(view.getPresenter(), presenter);
+	EXPECT_EQ(lv_obj_get_index(view.getRootPtr()), index);
+	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u) << "the rebuilt list starts populated from the model";
+	EXPECT_EQ(find(fanCard(view, 0), "v1"), nullptr);
+	EXPECT_NE(find(fanCard(view, 0), "v2"), nullptr);
+}
+
+TEST_F(TestXmlUi, ThemeStylesAreSharedNotCopied)
+{
+	auto& view = makeView();
+	auto& card = const_cast<UI::Themes::Style&>(UI::Themes::getLvglStyles().card);
+
+	lv_style_value_t original{};
+	const bool hadColor = card.getProp(LV_STYLE_BG_COLOR, &original) == LV_STYLE_RES_FOUND;
+
+	// What a theme switch does: rewrite the shared style in place and report it
+	card.setProp(LV_STYLE_BG_COLOR, lv_style_value_t{.color = lv_color_hex(0x123456)});
+	lv_obj_report_style_change(card);
+	EXPECT_EQ(lv_color_to_u32(lv_obj_get_style_bg_color(view.getRootPtr(), LV_PART_MAIN)),
+			  lv_color_to_u32(lv_color_hex(0x123456)));
+
+	if (hadColor)
+	{
+		card.setProp(LV_STYLE_BG_COLOR, original);
+	}
+	else
+	{
+		lv_style_remove_prop(card, LV_STYLE_BG_COLOR);
+	}
+	lv_obj_report_style_change(card);
+}
+
+TEST_F(TestXmlUi, MissingComponentShowsAPlaceholder)
+{
+	auto& view = makeView("no_such_component");
+	EXPECT_EQ(view.getPresenter(), nullptr);
+	ASSERT_EQ(lv_obj_get_child_count(view.getRootPtr()), 1u);
+	EXPECT_NE(std::string_view(lv_label_get_text(lv_obj_get_child(view.getRootPtr(), 0))).find("no_such_component"),
+			  std::string_view::npos);
+}

@@ -41,6 +41,8 @@ namespace UI
 		};
 
 		Slider(const std::string& name, LvObj& parent);
+		/** For widgets built by the XML engine, whose parent has no C++ wrapper */
+		Slider(const std::string& name, lv_obj_t* parent);
 
 		LvLabel& getLabel() { return m_label; }
 		std::string_view getLabelText() const { return m_label.getText(); }
@@ -80,6 +82,7 @@ namespace UI
 		bool hasDefaultValue() const { return !std::isnan(m_defaultValue); }
 
 	  private:
+		void init();
 		void onShow() override;
 
 		LvContainer m_header{"header", getRoot()};

@@ -13,6 +13,8 @@ namespace UI
 		Button(const std::string& name, LvObj& parent);
 		Button(const std::string& name, LvObj& parent, std::string_view text);
 		Button(const std::string& name, LvObj& parent, std::string_view text, layout_t layout);
+		/** For widgets built by the XML engine, whose parent has no C++ wrapper */
+		Button(const std::string& name, lv_obj_t* parent, std::string_view text);
 
 		void setText(std::string_view text);
 		std::string_view getText() const { return m_label.getText(); }

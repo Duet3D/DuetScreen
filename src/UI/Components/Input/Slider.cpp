@@ -18,6 +18,17 @@ namespace UI
 	Slider::Slider(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
+		init();
+	}
+
+	Slider::Slider(const std::string& name, lv_obj_t* parent)
+		: LvContainer(name, parent)
+	{
+		init();
+	}
+
+	void Slider::init()
+	{
 		ZoneScoped;
 		UI_LOCK();
 		setFlexFlow(LV_FLEX_FLOW_COLUMN);

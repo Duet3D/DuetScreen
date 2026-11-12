@@ -43,6 +43,7 @@ namespace i18n
 	using translation_table_t =
 		std::unordered_map<translation_key_t, translation_value_t, string_hash, std::equal_to<>>;
 	static translation_table_t s_translationTable;
+	static std::function<void()> s_languageChangedCallback;
 
 	static bool loadLanguageFile(const std::filesystem::path& filepath);
 	static nlohmann::json parseLanguageFile(const std::filesystem::path& filepath);
@@ -132,7 +133,25 @@ namespace i18n
 		}
 
 		s_currentLanguage = lang;
+		if (s_languageChangedCallback)
+		{
+			s_languageChangedCallback();
+		}
 		return true;
+	}
+
+	void forEachTranslation(const std::function<void(std::string_view key, std::string_view value)>& func)
+	{
+		ZoneScoped;
+		for (const auto& [key, value] : s_translationTable)
+		{
+			func(key, value);
+		}
+	}
+
+	void setLanguageChangedCallback(std::function<void()> callback)
+	{
+		s_languageChangedCallback = std::move(callback);
 	}
 
 	const std::string& translate(std::string_view tag)

@@ -1,0 +1,13 @@
+target_sources(
+  DuetScreen.lib
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/OmPublisher.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/XmlActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/XmlListModel.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/XmlPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/XmlUi.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/XmlView.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/XmlWidgets.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Presenters/FansPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Presenters/Presenters.cpp
+)

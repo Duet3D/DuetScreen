@@ -1,0 +1,27 @@
+<!--
+  Fan screen: one card per fan in the object model.
+
+  Data:     om.fans (see src/UI/Xml/OmPublisher.h). Each fan_card binds to its own fan's subjects.
+  Actions:  fans.set_speed, from the `fans` presenter (src/UI/Xml/Presenters/FansPresenter.h).
+-->
+<component presenter="fans">
+	<view extends="lv_obj" width="100%" height="100%"
+		  flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="center">
+		<style name="bg_dark"/>
+		<style name="card"/>
+
+		<lv_obj name="controllable_fans" width="100%" height="content" flex_flow="column">
+			<lv_obj name="header" width="100%" height="content" style_min_width="content"
+					flex_flow="row" style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="bg_color_header"/>
+				<style name="list_header"/>
+				<lv_label name="title" width="content" height="content" translation_tag="fan.title">
+					<style name="list_title"/>
+				</lv_label>
+			</lv_obj>
+
+			<model_list name="list" model="om.fans" item="fan_card" width="100%" height="content"
+						flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+	</view>
+</component>

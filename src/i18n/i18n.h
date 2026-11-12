@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <fmt/format.h>
+#include <functional>
 #include <map>
 #include <string_view>
 #include <vector>
@@ -26,6 +27,12 @@ namespace i18n
 	bool setLanguage(const std::string_view lang);
 
 	const std::string& translate(std::string_view tag);
+
+	/** Visit every key/value of the current language's translation table */
+	void forEachTranslation(const std::function<void(std::string_view key, std::string_view value)>& func);
+
+	/** Called after `setLanguage()` loads a new language. Only one listener is kept; pass `nullptr` to clear it. */
+	void setLanguageChangedCallback(std::function<void()> callback);
 
 	const std::vector<std::string>& getSupportedFonts();
 } // namespace i18n

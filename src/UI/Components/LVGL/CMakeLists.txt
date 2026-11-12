@@ -16,5 +16,4 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/LvSubject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LvSwitch.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/LvTextarea.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/LvXml.cpp
 )

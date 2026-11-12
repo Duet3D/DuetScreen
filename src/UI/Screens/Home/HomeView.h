@@ -11,7 +11,7 @@
 #include "UI/Core/View.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
-#include "UI/Screens/Fan/FanView.h"
+#include "UI/Xml/XmlView.h"
 #include "UI/Screens/Heightmap/HeightmapView.h"
 #include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"
@@ -60,7 +60,7 @@ namespace UI
 #if SIDE_BAR_APP_DRAWER
 		MoveView& getMoveView() { return m_moveView; }
 		TemperatureView& getTemperatureView() { return m_temperatureView; }
-		FanView& getFanView() { return m_fanView; }
+		Xml::XmlView& getFanView() { return m_fanView; }
 		FineTune& getFineTuneView() { return m_fineTuneView; }
 		HeightmapView& getHeightmapView() { return m_heightmapView; }
 		ObjectCancelView& getObjectCancelView() { return m_objectCancelView; }
@@ -112,7 +112,7 @@ namespace UI
 #if SIDE_BAR_APP_DRAWER
 		MoveView m_moveView{"move", m_mainWindow};
 		TemperatureView m_temperatureView{"temperature", m_mainWindow};
-		FanView m_fanView{"fan", m_mainWindow};
+		Xml::XmlView m_fanView{"fan", m_mainWindow, "fan_screen"};
 		FineTune m_fineTuneView{"fine_tune", m_mainWindow};
 		HeightmapView m_heightmapView{"heightmap", m_mainWindow};
 		ObjectCancelView m_objectCancelView{"object_cancel", m_mainWindow};

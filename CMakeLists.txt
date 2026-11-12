@@ -257,6 +257,9 @@ include(${LIBRARIES_DIR}/tracy.cmake)
 # LVGL
 include(${LIBRARIES_DIR}/lvgl.cmake)
 
+# XML UI engine
+include(${LIBRARIES_DIR}/helix-xml.cmake)
+
 # Include libusb headers
 target_include_directories(DuetScreen.lib SYSTEM PUBLIC ${LIBUSB_INCLUDE_DIRS})
 if(LIBUSB_LIBRARY_DIRS)
@@ -470,6 +473,7 @@ target_compile_definitions(DuetScreen.lib PUBLIC LV_CONF_INCLUDE_SIMPLE)
 target_link_libraries(
   DuetScreen.lib
   PUBLIC lvgl
+          helix_xml
           ${SDL2_LIBRARIES}
           ${LIBUSB_LIBRARIES} # Link libusb library
           m

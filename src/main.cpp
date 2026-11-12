@@ -16,6 +16,7 @@
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
+#include "UI/Xml/XmlUi.h"
 #include "glob.h"
 #include "hv/requests.h"
 #include "i18n/i18n.h"
@@ -126,6 +127,14 @@ int main(int argc, char** argv)
 	{
 		ZoneScopedN("Themes::init");
 		UI::Themes::init(display);
+	}
+	{
+		ZoneScopedN("Xml::init");
+		UI::Xml::init();
+#if SIMULATION
+		// Edit assets/ui/ or var/ui/ and the running UI rebuilds
+		UI::Xml::setHotReload(1000);
+#endif
 	}
 
 	DisplayHelper::setRotation(StorageHelper::getData(ID_DISPLAY_ROTATION));

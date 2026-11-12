@@ -3,11 +3,11 @@
 #include "ControlPresenter.h"
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Core/View.h"
-#include "UI/Screens/Fan/FanView.h"
 #include "UI/Screens/Heightmap/HeightmapView.h"
 #include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"
 #include "UI/Screens/Temperature/TemperatureView.h"
+#include "UI/Xml/XmlView.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -27,7 +27,7 @@ namespace UI
 		TemperatureView& getTemperatureView() { return m_temperatureView; }
 		HeightmapView& getHeightmapView() { return m_heightmapView; }
 		ObjectCancelView& getObjectCancelView() { return m_objectCancelView; }
-		FanView& getFanView() { return m_fanView; }
+		Xml::XmlView& getFanView() { return m_fanView; }
 
 	  private:
 		TabView m_tabs{"tabs", getRoot()};
@@ -35,6 +35,6 @@ namespace UI
 		TemperatureView m_temperatureView{"temperature", m_tabs.addTab(_("control.temperature_tab"))};
 		HeightmapView m_heightmapView{"heightmap", m_tabs.addTab(_("control.heightmap_tab"))};
 		ObjectCancelView m_objectCancelView{"object_cancel", m_tabs.addTab(_("control.object_cancel_tab"))};
-		FanView m_fanView{"fan", m_tabs.addTab(_("control.fan_tab"))};
+		Xml::XmlView m_fanView{"fan", m_tabs.addTab(_("control.fan_tab")), "fan_screen"};
 	};
 } // namespace UI

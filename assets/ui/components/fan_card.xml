@@ -1,0 +1,27 @@
+<!--
+  One fan, inside <model_list model="om.fans">. Bindings resolve against this fan's item:
+    name, requested, actual, rpm, thermostatic, number, index
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content"
+		  flex_flow="row" style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="card"/>
+
+		<!-- Temperature-controlled fans can't be set by hand -->
+		<bind_flag_if_eq subject="thermostatic" flag="hidden" ref_value="1"/>
+
+		<ds_button name="off" translation_tag="fan.off" width="60" height="100%" style_min_width="content">
+			<action trigger="clicked" name="fans.set_speed" arg="0"/>
+		</ds_button>
+
+		<ds_slider name="slider" bind_label="name" bind_value="requested" min="0" max="100" numberpad="true"
+				   flex_grow="1" width="100%" height="content" style_pad_all="5">
+			<style name="no_border"/>
+			<action trigger="value_confirmed" name="fans.set_speed"/>
+		</ds_slider>
+
+		<ds_button name="max" translation_tag="fan.max" width="60" height="100%" style_min_width="content">
+			<action trigger="clicked" name="fans.set_speed" arg="100"/>
+		</ds_button>
+	</view>
+</component>

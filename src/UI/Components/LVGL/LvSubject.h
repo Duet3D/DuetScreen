@@ -19,6 +19,14 @@ namespace UI
 		LvSubject();
 		~LvSubject();
 
+		// Observers and XML bindings hold the address of the subject, so it must never move or be copied.
+		LvSubject(const LvSubject&) = delete;
+		LvSubject& operator=(const LvSubject&) = delete;
+		LvSubject(LvSubject&&) = delete;
+		LvSubject& operator=(LvSubject&&) = delete;
+
+		bool isInitialized() const { return m_initialized; }
+
 		operator lv_subject_t*() { return &m_subject; }
 
 		void initInt(int32_t value);

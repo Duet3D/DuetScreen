@@ -1,4 +1,5 @@
 #include "HomeView.h"
+#include "UI/Xml/XmlUi.h"
 
 #include "Debug.h"
 #include "UI/Core/Navigation.h"
@@ -107,11 +108,13 @@ namespace UI
 
 		/* NumberPad */
 		m_dashboard.setNumberPad(&m_numberpad);
+		Xml::setNumberPadProvider([this] { return &m_numberpad; });
 	}
 
 	HomeView::~HomeView()
 	{
 		ZoneScoped;
+		Xml::setNumberPadProvider(nullptr);
 		removeHomeScreen(this, false);
 	}
 

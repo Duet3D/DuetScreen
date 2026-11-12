@@ -9,9 +9,16 @@
 #include "Configuration.h"
 #include "Debug.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Xml/XmlUi.h"
 #include "i18n/i18n.h"
 #include "test_utils/utils.h"
 #include "utils/StorageHelper.h"
+
+UI::Xml::Paths UiTestSuiteInner::xmlPaths()
+{
+	// The shipped bundle, and no user bundles unless a test asks for them
+	return UI::Xml::Paths{.builtin = "assets/ui", .user = {}};
+}
 
 UiTestSuiteInner::UiTestSuiteInner()
 	: TestSuite()
@@ -52,6 +59,7 @@ UiTestSuiteInner::UiTestSuiteInner()
 	StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, false);
 
 	UI::Themes::init(display);
+	UI::Xml::init(xmlPaths());
 #if DEBUG_BORDERS
 	// UI::Themes::showDebugBorders(lv_screen_active(), true);
 #endif
@@ -66,6 +74,7 @@ UiTestSuiteInner::~UiTestSuiteInner()
 	/* Run at end of each test */
 	// Cleanup
 	LOG_INFO("Tearing down UI test");
+	UI::Xml::deinit();
 	lv_deinit();
 }
 
