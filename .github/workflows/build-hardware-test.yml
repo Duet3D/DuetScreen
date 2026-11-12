@@ -14,6 +14,10 @@ on:
         description: 'buildroot-duetscreen ref (branch/tag/SHA), or "latest" for the most recent tag on master'
         type: string
         default: latest
+      serial_prefix:
+        description: 'Serial number prefix pre-filled in the hardware test'
+        type: string
+        default: AD-04-01_
 
 jobs:
   image:
@@ -82,8 +86,17 @@ jobs:
         env:
           DUETSCREEN_SRC: ../DuetScreen
           DUETSCREEN_PRESET: ${{ inputs.preset }}
-          DUETSCREEN_EXTRA_CONF_OPTS: -DDUETSCREEN_HARDWARE_TEST=ON
+          SERIAL_PREFIX: ${{ inputs.serial_prefix }}
         run: |
+          set -euo pipefail
+          # The value ends up in a make recipe and a C string literal, so restrict the charset
+          if ! [[ "${SERIAL_PREFIX}" =~ ^[A-Za-z0-9_.-]*$ ]]; then
+            echo "::error::serial_prefix may only contain letters, digits, '_', '.' and '-'" >&2
+            exit 1
+          fi
+          # The single quotes are stripped by the shell in Buildroot's cmake recipe, leaving a quoted C string
+          export DUETSCREEN_EXTRA_CONF_OPTS="-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER='\"${SERIAL_PREFIX}\"'"
+          echo "DUETSCREEN_EXTRA_CONF_OPTS=${DUETSCREEN_EXTRA_CONF_OPTS}"
           make duet3d_duetscreen_defconfig
           make
 
