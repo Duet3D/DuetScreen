@@ -1,0 +1,26 @@
+<!--
+  The status bar across the top of the screen: connection and state on the left, the printer's name in the middle,
+  and the current tool's temperatures on the right.
+
+  The name is at most 40% wide and centred, and the temperatures at most 30% wide, so they never overlap. The
+  temperatures are spans so the tool and the temperatures share a baseline whatever the theme's fonts.
+
+  Fields:   status, name, has_tool, tool, heaters, fault (see src/UI/Screens/StatusBar/StatusBarPresenter.h)
+-->
+<component presenter="status_bar">
+	<view extends="lv_obj" width="100%" height="content" scrollable="false">
+		<lv_label name="status" bind_text="status" align="left_mid"/>
+
+		<!-- Long names scroll -->
+		<lv_label name="name" bind_text="name" align="center" long_mode="scroll_circular"
+				  style_max_width="40%" style_text_align="center"/>
+
+		<lv_spangroup name="temperatures" align="right_mid" width="content" height="content" style_max_width="30%"
+					  style_text_align="right">
+			<bind_flag_if_eq subject="has_tool" flag="hidden" ref_value="0"/>
+			<bind_style_if_eq name="text_warning" subject="fault" ref_value="1"/>
+			<lv_spangroup-span bind_text="tool" style="text_emphasis"/>
+			<lv_spangroup-span bind_text="heaters"/>
+		</lv_spangroup>
+	</view>
+</component>

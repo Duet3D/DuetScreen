@@ -27,5 +27,8 @@ target_include_directories(helix_xml PRIVATE ${HELIX_XML_DIR}/src)
 # LVGL 9.5 compatibility for an engine written against 9.6.
 target_compile_options(helix_xml PRIVATE -include ${HELIX_XML_COMPAT_DIR}/lvgl95_compat.h)
 
+# DuetScreen's LVGL fork lets a span point at a style instead of copying it, so XML spans follow theme switches
+target_compile_definitions(helix_xml PRIVATE LV_XML_HAVE_SPAN_STYLE_STATIC=1)
+
 # Third-party C: don't apply DuetScreen's warning policy, and keep expat quiet.
 target_compile_options(helix_xml PRIVATE -w)

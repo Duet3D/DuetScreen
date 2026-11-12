@@ -9,12 +9,12 @@
 #include "File/FilesScreen.h"
 #include "Notifications/NotificationsView.h"
 #include "Settings/SettingsView.h"
+#include "StatusBar/StatusBarPresenter.h"
 #include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
 #include "UI/Widgets/Dashboard/Dashboard.h"
 #include "UI/Widgets/SideBar/SideBar.h"
-#include "UI/Widgets/StatusBar/StatusBar.h"
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
@@ -42,21 +42,14 @@ namespace UI
 		return keyboard;
 	}
 
-	/** The status bar along the top of the screen */
-	static LvObj* createStatusBar(const std::string&, lv_obj_t* parent)
-	{
-		LvObjRef parentRef(parent);
-		return new StatusBar(parentRef);
-	}
-
 	void registerXmlScreens()
 	{
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
+		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
-		Xml::NativeViews::add("status_bar", createStatusBar);
 		Xml::NativeViews::add<SideBar>("side_bar");
 		Xml::NativeViews::add<Dashboard>("dashboard");
 		Xml::NativeViews::add<ConsoleView>("console");
