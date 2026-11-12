@@ -387,10 +387,17 @@ if(PROCESSOR STREQUAL "T113" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_options(DuetScreen.lib PRIVATE -Wno-error=cpp) # required because of fortify_source warnings
 endif()
 
+# Options that only steer the build system and have no meaning to the compiler.
+# The SBOM licence in particular is an SPDX expression, which is not a valid
+# macro body, and neither option should force a rebuild when it changes.
+set(DUETSCREEN_NON_COMPILE_OPTIONS
+    DUETSCREEN_GENERATE_SBOM
+    DUETSCREEN_SBOM_LICENSE)
+
 # Set DUETSCREEN_* cache options as compile definitions without the prefix
 get_cmake_property(_cache_vars CACHE_VARIABLES)
 foreach(_var ${_cache_vars})
-  if(_var MATCHES "^DUETSCREEN_")
+  if(_var MATCHES "^DUETSCREEN_" AND NOT _var IN_LIST DUETSCREEN_NON_COMPILE_OPTIONS)
     string(REPLACE "DUETSCREEN_" "" _short "${_var}")
     # Determine cache entry type to handle BOOL vs STRING/paths
     get_property(_type CACHE "${_var}" PROPERTY TYPE)
@@ -498,18 +505,19 @@ endif()
 
 # Link the executable with the DuetScreen core library.
 # Force-load only the themes archive so static theme registration objects are retained
-# without whole-archiving the full DuetScreen.lib.
+# without whole-archiving the full DuetScreen.lib. The force-load flag goes through
+# target_link_options on every platform rather than being threaded into the library
+# list: raw -Wl,--whole-archive entries in LINK_LIBRARIES are indistinguishable from
+# library names to anything that reads that property, and install(SBOM) records them
+# as bogus SPDX packages.
+target_link_libraries(DuetScreen PRIVATE DuetScreen.lib DuetScreen.themes)
 if(APPLE)
-  target_link_libraries(DuetScreen PRIVATE DuetScreen.lib DuetScreen.themes)
   target_link_options(DuetScreen PRIVATE "-Wl,-force_load,$<TARGET_FILE:DuetScreen.themes>")
 elseif(MSVC)
-  target_link_libraries(DuetScreen PRIVATE DuetScreen.lib DuetScreen.themes)
   target_link_options(DuetScreen PRIVATE "/WHOLEARCHIVE:$<TARGET_FILE:DuetScreen.themes>")
 else()
-  target_link_libraries(DuetScreen PRIVATE
-      DuetScreen.lib
-      -Wl,--whole-archive DuetScreen.themes -Wl,--no-whole-archive
-  )
+  target_link_options(DuetScreen PRIVATE
+      "-Wl,--whole-archive,$<TARGET_FILE:DuetScreen.themes>,--no-whole-archive")
 endif()
 
 # Link Tracy client at the final executable level so its symbols are available
@@ -606,3 +614,9 @@ endif()
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+# ----------------------------------------------------------------------------
+# SBOM
+# ----------------------------------------------------------------------------
+# Included last so the install rules see the fully linked DuetScreen target.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DuetScreenSbom.cmake)

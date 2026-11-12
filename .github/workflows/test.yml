@@ -10,15 +10,31 @@ permissions:
   pull-requests: write
 
 jobs:
+    image:
+        uses: ./.github/workflows/devcontainer.yml
+        permissions:
+            contents: read
+            packages: write
+
     test:
-        name: ${{ matrix.os == 'macos-latest' && 'Build DuetScreen (MacOS)' || 'Build DuetScreen & Run CTest (Ubuntu)' }}
-        runs-on: ${{ matrix.os }}
-        strategy:
-            fail-fast: false
-            matrix:
-                os: [ubuntu-latest, macos-latest]
+        name: Build DuetScreen & Run CTest (Ubuntu)
+        needs: image
+        runs-on: ubuntu-24.04
+        permissions:
+            contents: read
+            packages: read
+            issues: write
+            pull-requests: write
+        container:
+            image: ${{ needs.image.outputs.image }}
+            credentials:
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
 
         steps:
+            # The checkout is owned by the runner user, not the container's root user
+            - run: git config --global --add safe.directory '*'
+
             - name: Checkout code
               uses: actions/checkout@v4
               with:
@@ -26,33 +42,22 @@ jobs:
                 fetch-depth: 1
                 token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Install dependencies
-              run: ./scripts/install_prerequisites.sh
-
             - name: Update Version
               run: |
                 ./scripts/update_version.sh "${{ github.ref_name }}"
                 echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
             - name: Configure project
-              run: |
-                if [ "${{ runner.os }}" = "macOS" ]; then
-                  cmake --preset Test -D ENABLE_COVERAGE=OFF
-                else
-                  cmake --preset Test
-                fi
+              run: cmake --preset Test
 
             - name: Build project
               run: cmake --build --preset Test
 
             - name: Run CTest
-              # lvgl renders `_` differently on Linux and macOS, so we ignore test failures on macOS for now until lvgl is updated
-              if: runner.os == 'Linux'
               id: run_ctest
               run: ctest --test-dir out/build/Test --output-on-failure
             
             - name: Run Coverage
-              if: runner.os == 'Linux'
               run: |
                 mkdir -p tests/report
                 GCOV_EXE="gcov"
@@ -78,7 +83,6 @@ jobs:
                 gcovr out/build/Test --root . --filter src --xml tests/report/coverage.xml -j $(nproc) --print-summary --gcov-executable "$GCOV_EXE"
 
             - name: Code Coverage Report
-              if: runner.os == 'Linux'
               uses: irongut/CodeCoverageSummary@v1.3.0
               with:
                 filename: tests/report/coverage.xml
@@ -93,7 +97,7 @@ jobs:
             
             - name: Add Coverage PR Comment
               # Fork PRs get a read-only token, so skip sticky comments there.
-              if: runner.os == 'Linux' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+              if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
               uses: marocchino/sticky-pull-request-comment@v2
               with:
                 recreate: true
@@ -128,5 +132,32 @@ jobs:
                 name: ctest-error-images
                 path: ${{ steps.detect_err_images.outputs.error_files }}
                 if-no-files-found: error
-  
-            
+
+    # The devcontainer is Linux only, so macOS still installs its own dependencies. It only checks
+    # that the project builds: lvgl renders `_` differently on Linux and macOS, so the tests are not
+    # run here until lvgl is updated.
+    macos:
+        name: Build DuetScreen (MacOS)
+        runs-on: macos-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                submodules: recursive
+                fetch-depth: 1
+                token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Install dependencies
+              run: ./scripts/install_prerequisites.sh
+
+            - name: Update Version
+              run: |
+                ./scripts/update_version.sh "${{ github.ref_name }}"
+                echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+
+            - name: Configure project
+              run: cmake --preset Test -D ENABLE_COVERAGE=OFF
+
+            - name: Build project
+              run: cmake --build --preset Test

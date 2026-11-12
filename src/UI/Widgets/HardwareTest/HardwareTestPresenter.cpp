@@ -16,9 +16,14 @@
 #include "utils/StorageHelper.h"
 #include "utils/SystemHelper.h"
 #include "version.h"
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <mutex>
 #include <regex>
+#include <unistd.h>
 
 namespace UI
 {
@@ -207,6 +212,7 @@ namespace UI
 		if (m_colorIndex >= m_colors.size())
 		{
 			testFinished(TestId::DeadPixelTest);
+			return;
 		}
 
 		lv_color_t color = m_colors[m_colorIndex].color;
@@ -391,7 +397,11 @@ namespace UI
 #endif
 								  FILE* pipe = ::popen(cmd.c_str(), "r");
 								  if (!pipe)
+								  {
+									  commandTest.appendOutput("Failed to run `ip link`!\n");
+									  testFinished(TestId::WifiTest);
 									  return;
+								  }
 								  char buffer[256];
 								  while (fgets(buffer, sizeof(buffer), pipe))
 								  {
@@ -805,10 +815,11 @@ namespace UI
 		}
 
 		bool passed = m_currentTest->finish();
-		writeToLogFile(fmt::format("Test '{:s}' {:s}:\n{:s}",
-								   nameof::nameof_enum(id),
-								   passed ? "passed" : "failed",
-								   m_currentTest->getOutput().dump(4)));
+		writeToLogFile(
+			fmt::format("Test '{:s}' {:s}:\n{:s}",
+						nameof::nameof_enum(id),
+						passed ? "passed" : "failed",
+						m_currentTest->getOutput().dump(4, ' ', false, nlohmann::json::error_handler_t::replace)));
 
 		m_currentTest->cleanup();
 
@@ -824,12 +835,18 @@ namespace UI
 			auto& testResults = getView()->getTestResults();
 			testResults.clearResults();
 
+			std::string summary = "\n----------------------\n\nTest summary:";
 			for (size_t i = 0; i < m_tests.size(); ++i)
 			{
 				auto& test = m_tests[i];
-				testResults.addResult(nameof::nameof_enum(test.getId()), test.getOutput().dump(4), !test.getFailed());
+				testResults.addResult(nameof::nameof_enum(test.getId()),
+									  test.getOutput().dump(4, ' ', false, nlohmann::json::error_handler_t::replace),
+									  !test.getFailed());
+				summary += fmt::format(
+					"\n  {:s}: {:s}", nameof::nameof_enum(test.getId()), test.getFailed() ? "FAILED" : "passed");
 			}
 			getView()->showResults();
+			writeToLogFile(summary);
 			return;
 		}
 
@@ -909,13 +926,27 @@ namespace UI
 		}
 
 		LOG_INFO("{:s}", message);
-		std::ofstream out(m_logFile, std::ios::app);
-		if (!out)
+
+		// Called from both the UI thread and test worker threads
+		static std::mutex s_logMutex;
+		std::lock_guard<std::mutex> lock(s_logMutex);
+
+		FILE* out = std::fopen(m_logFile.c_str(), "a");
+		if (out == nullptr)
 		{
 			LOG_FATAL_THROW("Failed to open log file");
 			return false;
 		}
-		out << message << std::endl;
+		std::fputs(message.c_str(), out);
+		std::fputc('\n', out);
+		std::fflush(out);
+		// The log lives on the FAT /boot partition which is often powered off without being unmounted. Without an
+		// explicit sync the tail of the log sits in the page cache and is lost.
+		if (::fsync(::fileno(out)) != 0)
+		{
+			LOG_ERROR("Failed to sync log file: {:s}", std::strerror(errno));
+		}
+		std::fclose(out);
 		return true;
 	}
 
@@ -1006,7 +1037,8 @@ namespace UI
 			[this](TestProcedure& /* test */) { testWifi(); },
 			[this](TestProcedure& test)
 			{
-				std::string mac_addr = test.output["mac_address"].get<std::string>();
+				// `mac_address` is missing if enabling WiFi failed
+				std::string mac_addr = test.output.value("mac_address", "");
 
 				// Check `result` for `Finished pass 1 successfully`
 				return !mac_addr.empty();

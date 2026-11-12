@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Formatting LVGL code pre-commit"
-env/bin/python scripts/code-format.py
+python3 scripts/code-format.py
 
 # Stage modified staged files
 echo "Staging modified staged files"

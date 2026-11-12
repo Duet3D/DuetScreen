@@ -26,6 +26,27 @@
 				"Debug",
 			],
 			"default": "Release"
+		},
+		{
+			// Resolves to the CMake options; the serial number is only prompted for when ON is picked
+			"id": "hardware_test",
+			"type": "command",
+			"command": "extension.commandvariable.pickStringRemember",
+			"args": {
+				"description": "Build DuetScreen as a hardware test image?",
+				"options": [
+					["OFF", "-DDUETSCREEN_HARDWARE_TEST=OFF"],
+					["ON", "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER='\"${promptStringRemember:serial}\"'"]
+				],
+				"default": "-DDUETSCREEN_HARDWARE_TEST=OFF",
+				"promptStringRemember": {
+					"serial": {
+						"key": "hardware_test_serial",
+						"description": "Hardware test serial number prefix",
+						"default": "AD-04-01_"
+					}
+				}
+			}
 		}
 	],
 	"tasks": [
@@ -83,7 +104,7 @@
 		{
 			"type": "shell",
 			"label": "LVGL Format",
-			"command": "env/bin/python scripts/code-format.py",
+			"command": "python3 scripts/code-format.py",
 			"options": {
 				"cwd": "${workspaceFolder}/libraries/lvgl"
 			},
@@ -118,6 +139,7 @@
 				"env": {
 					"DUETSCREEN_SRC": "${workspaceFolder}",
 					"DUETSCREEN_PRESET": "T113-${input:build_type}",
+					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER=\"AC-04-01_\"",
 					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 				}
 			},
@@ -129,6 +151,29 @@
 				"$gcc"
 			],
 			"detail": "Builds DuetScreen for remote debugging"
+		},
+		{
+			"label": "Build Buildroot sdcard.img",
+			"type": "shell",
+			"command": "echo \"Building sdcard.img (${input:build_type}, $DUETSCREEN_EXTRA_CONF_OPTS)...\"; [ -f .config ] || make duet3d_duetscreen_defconfig; make duetscreen-reconfigure && make && echo \"Image: ${config:buildroot_path}/output/images/sdcard.img\"",
+			"args": [],
+			"options": {
+				"cwd": "${config:buildroot_path}",
+				"env": {
+					"DUETSCREEN_SRC": "${workspaceFolder}",
+					"DUETSCREEN_PRESET": "T113-${input:build_type}",
+					"DUETSCREEN_EXTRA_CONF_OPTS": "${input:hardware_test}",
+					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"detail": "Builds the full buildroot image (output/images/sdcard.img) with the local DuetScreen source"
 		},
 		{
 			"label": "Push DuetScreen - SSH",
@@ -315,7 +360,7 @@
 		{
 			"label": "Run Tests",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:test_filters}' --skip_configure",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}' --skip_configure",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -328,7 +373,7 @@
 		{
 			"label": "Run LVGL Tests",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:lvgl_test_filters}' --lvgl-tests",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:lvgl_test_filters}' --lvgl-tests",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -338,13 +383,13 @@
 			},
 			"problemMatcher": [],
 			"dependsOn": [
-				"LVGL Format"
+				// "LVGL Format"
 			]
 		},
 		{
 			"label": "Configure & Run Tests",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:test_filters}'",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}'",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -357,7 +402,7 @@
 		{
 			"label": "Run Test Coverage",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:test_filters}' --coverage",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}' --coverage",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -370,7 +415,7 @@
 		{
 			"label": "Verify i18n translations",
 			"type": "shell",
-			"command": "env/bin/python scripts/manage_translations.py",
+			"command": "python3 scripts/manage_translations.py",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},

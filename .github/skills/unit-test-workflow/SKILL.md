@@ -24,32 +24,32 @@ Use the project virtualenv and test runner script from the workspace root.
 
 ### Fast rerun (already configured build)
 ```bash
-env/bin/python scripts/run_tests.py --skip_configure --compare-mode cli
+python3 scripts/run_tests.py --skip_configure --compare-mode cli
 ```
 
 ### Filtered tests (preferred during iteration)
 ```bash
-env/bin/python scripts/run_tests.py --test_filter='<FILTER>' --skip_configure --compare-mode cli
+python3 scripts/run_tests.py --test_filter='<FILTER>' --skip_configure --compare-mode cli
 ```
 
 ### Configure + run tests
 ```bash
-env/bin/python scripts/run_tests.py --test_filter='<FILTER>' --compare-mode cli
+python3 scripts/run_tests.py --test_filter='<FILTER>' --compare-mode cli
 ```
 
 ### Full run
 ```bash
-env/bin/python scripts/run_tests.py --compare-mode cli
+python3 scripts/run_tests.py --compare-mode cli
 ```
 
 ### Coverage
 ```bash
-env/bin/python scripts/run_tests.py --coverage --compare-mode cli
+python3 scripts/run_tests.py --coverage --compare-mode cli
 ```
 
 ### LVGL tests
 ```bash
-env/bin/python scripts/run_tests.py --test_filter='<FILTER>' --lvgl-tests --compare-mode cli
+python3 scripts/run_tests.py --test_filter='<FILTER>' --lvgl-tests --compare-mode cli
 ```
 
 ## Required Workflow

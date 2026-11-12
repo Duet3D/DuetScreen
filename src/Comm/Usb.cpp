@@ -406,7 +406,9 @@ namespace Comm
 		const int r = libusb_submit_transfer(receiveTransfer.transfer);
 		if (r < 0)
 		{
-			LOG_ERROR("Failed to submit receive transfer on channel {}: {:s}", receiveTransfer.channelIndex, libusb_error_name(r));
+			LOG_ERROR("Failed to submit receive transfer on channel {}: {:s}",
+					  receiveTransfer.channelIndex,
+					  libusb_error_name(r));
 			libusb_free_transfer(receiveTransfer.transfer);
 			receiveTransfer.transfer = nullptr;
 			return false;
@@ -798,7 +800,8 @@ namespace Comm
 		s_completionCondition.notify_all(); // Notify event loop about completion
 	}
 
-	// Runs on the event thread: queue the data and resubmit right away so the endpoint never runs out of URBs while the JSON is parsed
+	// Runs on the event thread: queue the data and resubmit right away so the endpoint never runs out of URBs while the
+	// JSON is parsed
 	void LIBUSB_CALL UsbDevice::receiveTransferCallback(struct libusb_transfer* transfer)
 	{
 		ZoneScoped;
@@ -810,7 +813,9 @@ namespace Comm
 			if (transfer->actual_length > 0)
 			{
 				std::lock_guard<std::mutex> lock(device->m_receiveQueueMutex);
-				device->m_receiveQueue.push_back({receiveTransfer->channelIndex, std::vector<unsigned char>(transfer->buffer, transfer->buffer + transfer->actual_length)});
+				device->m_receiveQueue.push_back(
+					{receiveTransfer->channelIndex,
+					 std::vector<unsigned char>(transfer->buffer, transfer->buffer + transfer->actual_length)});
 			}
 			device->m_receiveQueueCondition.notify_one();
 		}
@@ -828,8 +833,10 @@ namespace Comm
 		}
 
 		device->m_pendingReceiveCount--;
-		// Resubmitting after an error spins at bus speed while the Duet reboots; leave the channel idle and let the response watchdog reconnect
-		if (device->m_eventThreadRunning.load(std::memory_order_relaxed) && device->m_handle && (transfer->status == LIBUSB_TRANSFER_COMPLETED || transfer->status == LIBUSB_TRANSFER_TIMED_OUT))
+		// Resubmitting after an error spins at bus speed while the Duet reboots; leave the channel idle and let the
+		// response watchdog reconnect
+		if (device->m_eventThreadRunning.load(std::memory_order_relaxed) && device->m_handle &&
+			(transfer->status == LIBUSB_TRANSFER_COMPLETED || transfer->status == LIBUSB_TRANSFER_TIMED_OUT))
 		{
 			const int r = libusb_submit_transfer(transfer);
 			if (r == 0)
@@ -863,7 +870,8 @@ namespace Comm
 			ReceivedChunk chunk;
 			{
 				std::unique_lock<std::mutex> lock(m_receiveQueueMutex);
-				m_receiveQueueCondition.wait(lock, [this] { return !m_receiveQueue.empty() || !m_decodeThreadRunning; });
+				m_receiveQueueCondition.wait(lock,
+											 [this] { return !m_receiveQueue.empty() || !m_decodeThreadRunning; });
 				if (!m_decodeThreadRunning)
 				{
 					return;

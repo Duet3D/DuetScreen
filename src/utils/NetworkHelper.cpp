@@ -26,8 +26,6 @@
 #include <thread>
 #include <vector>
 
-#include <atomic>
-
 #if T113
 #  include <wpa_ctrl.h>
 #endif
@@ -56,8 +54,12 @@ namespace NetworkHelper
 	static std::string s_interfaceName;
 	/// Background thread used for async enable.
 	static std::thread s_enableThread;
-	/// Guard to prevent overlapping enable operations.
-	static std::atomic<bool> s_enabling{false};
+	/// Guards s_enabling and s_enableCallbacks.
+	static TracyLockable(std::mutex, s_enableMutex);
+	/// Set while an enable operation is in progress, to prevent overlapping enable operations.
+	static bool s_enabling = false;
+	/// Callbacks to invoke when the in-progress enable operation completes.
+	static std::vector<std::function<void(bool)>> s_enableCallbacks;
 
 	/// Discover the wireless interface name from /sys/class/net.
 	/// Returns empty string if no wireless interface is found.
@@ -408,27 +410,41 @@ namespace NetworkHelper
 			return;
 		}
 
-		// Prevent overlapping enable attempts
-		if (s_enabling.exchange(true))
+		std::lock_guard<LockableBase(std::mutex)> lock(s_enableMutex);
+		if (callback)
+			s_enableCallbacks.push_back(std::move(callback));
+
+		// Prevent overlapping enable attempts, the callback is invoked when the in-progress attempt completes
+		if (s_enabling)
 		{
-			LOG_WARN("WiFi enable already in progress, ignoring duplicate request");
-			if (callback)
-				callback(false);
+			LOG_DBG("WiFi enable already in progress, waiting for it to complete");
 			return;
 		}
+		s_enabling = true;
 
-		// Clean up any previous enable thread
+		// Clean up any previous enable thread (can't join ourselves if called from a completion callback)
 		if (s_enableThread.joinable())
-			s_enableThread.join();
+		{
+			if (s_enableThread.get_id() == std::this_thread::get_id())
+				s_enableThread.detach();
+			else
+				s_enableThread.join();
+		}
 
 		// Launch the blocking work on a background thread
 		s_enableThread = std::thread(
-			[cb = std::move(callback)]()
+			[]()
 			{
 				tracy::SetThreadName("WifiEnableThread");
 				bool ok = enableBlocking(true);
-				s_enabling.store(false);
-				if (cb)
+
+				std::vector<std::function<void(bool)>> callbacks;
+				{
+					std::lock_guard<LockableBase(std::mutex)> lock(s_enableMutex);
+					callbacks.swap(s_enableCallbacks);
+					s_enabling = false;
+				}
+				for (auto& cb : callbacks)
 					cb(ok);
 			});
 	}
