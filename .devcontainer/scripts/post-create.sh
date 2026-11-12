@@ -6,13 +6,12 @@ buildroot_workspace="${BUILDROOT_WORKSPACE:-/workspaces/buildroot-duetscreen}"
 
 cd "${duetscreen_workspace}"
 
-# Install the Python requirements into the image's /opt/venv (already on PATH, see
-# the Dockerfile). It is root-owned, so install through sudo; this also keeps it
-# working when the container user's UID is remapped to match the host.
-sudo /opt/venv/bin/pip install --root-user-action=ignore -r requirements.txt
-
-# The `Run LVGL Tests` task needs LVGL's own Python prerequisites (pypng, lz4, ...).
-# Read them from the submodule so they track LVGL updates.
+# requirements.txt is already installed into /opt/venv by the Dockerfile.
+#
+# The `Run LVGL Tests` task also needs LVGL's own Python prerequisites (pypng, lz4, ...).
+# Read them from the submodule so they track LVGL updates. The venv is root-owned, so
+# install through sudo; this also keeps it working when the container user's UID is
+# remapped to match the host.
 lvgl_pip_requirements=libraries/lvgl/scripts/prerequisites-pip.txt
 if [[ -f "${lvgl_pip_requirements}" ]]; then
     sudo /opt/venv/bin/pip install --root-user-action=ignore -r "${lvgl_pip_requirements}"

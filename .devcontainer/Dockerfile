@@ -86,8 +86,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Python tooling (pillow, astyle and the pinned CMake from requirements.txt) lives in a
 # venv at /opt/venv that is first on PATH, so `python3`, `cmake` and `astyle` resolve to
 # it without activating anything. A venv rather than the system interpreter because
-# Ubuntu 24.04 refuses system-wide pip installs (PEP 668). The packages are installed by
-# .devcontainer/scripts/post-create.sh, as requirements.txt is outside this build context.
+# Ubuntu 24.04 refuses system-wide pip installs (PEP 668). The build context is the
+# repository root, filtered down to requirements.txt by Dockerfile.dockerignore.
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH=/opt/venv/bin:$PATH
-RUN python3 -m venv /opt/venv
+COPY requirements.txt /tmp/requirements.txt
+RUN python3 -m venv /opt/venv \
+    && pip install --no-cache-dir --root-user-action=ignore -r /tmp/requirements.txt \
+    && rm /tmp/requirements.txt

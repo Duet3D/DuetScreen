@@ -60,7 +60,7 @@ This repository includes a devcontainer under `.devcontainer/` for Linux develop
 4. Run `Dev Containers: Reopen in Container`.
 5. Wait for the post-create setup to finish.
 
-The post-create step installs the Python requirements into `/opt/venv`, which the image puts first on `PATH`. `python3`, `cmake` and `astyle` therefore resolve to it without activating a virtualenv; there is no `env/` in the workspace.
+The image installs the Python requirements into `/opt/venv`, which the image puts first on `PATH`. `python3`, `cmake` and `astyle` therefore resolve to it without activating a virtualenv; there is no `env/` in the workspace.
 
 If a folder named `buildroot-duetscreen` exists in the parent directory of this repository, the devcontainer setup automatically bind mounts it at `/workspaces/buildroot-duetscreen`.
 

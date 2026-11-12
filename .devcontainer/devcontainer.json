@@ -18,7 +18,8 @@
         "ms-vscode.cmake-tools",
         "TrevorNesbitt.smart-file-templates",
         "vadimcn.vscode-lldb",
-        "rioj7.command-variable"
+        "rioj7.command-variable",
+        "GitHub.vscode-pull-request-github"
       ],
       "settings": {
         "buildroot_path": "/workspaces/buildroot-duetscreen",
@@ -34,5 +35,9 @@
         "smartTemplates.jsonConfigurationFile": ".vscode/file_templates.json"
       }
     }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/fish-apt-get:1": {}
   }
 }

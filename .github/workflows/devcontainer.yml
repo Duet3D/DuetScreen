@@ -1,0 +1,62 @@
+# Publishes the devcontainer image to GHCR so CI builds in the same environment as local
+# development. The image is tagged by a hash of the files that define it, so it is only rebuilt
+# when they change. PRs from forks cannot push packages, so they must use an already published image.
+#
+# Called by the other workflows; the calling job must grant `contents: read` and `packages: write`.
+
+name: Devcontainer Image
+
+on:
+  workflow_call:
+    outputs:
+      image:
+        description: The devcontainer image reference to use as a job container
+        value: ${{ jobs.image.outputs.image }}
+
+jobs:
+  image:
+    name: Publish devcontainer image
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    env:
+      FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Compute image tag
+        id: meta
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}/devcontainer:${{ hashFiles('.devcontainer/Dockerfile', '.devcontainer/Dockerfile.dockerignore', 'requirements.txt') }}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for published image
+        id: check
+        run: |
+          if docker manifest inspect "${{ steps.meta.outputs.image }}" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif [ "$FORK_PR" = "true" ]; then
+            echo "::error::${{ steps.meta.outputs.image }} is not published and PRs from forks cannot push it. A maintainer must push the .devcontainer changes to this repository first."
+            exit 1
+          fi
+
+      - uses: docker/setup-buildx-action@v4
+        if: steps.check.outputs.exists != 'true'
+
+      - name: Build and push devcontainer image
+        if: steps.check.outputs.exists != 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: .devcontainer/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.image }}
+          cache-from: type=gha,scope=devcontainer
+          cache-to: type=gha,mode=max,scope=devcontainer

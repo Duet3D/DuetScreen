@@ -16,11 +16,32 @@ on:
         default: latest
 
 jobs:
+  image:
+    uses: ./.github/workflows/devcontainer.yml
+    permissions:
+      contents: read
+      packages: write
+
   build:
     name: Build Hardware Test Image
-    runs-on: ubuntu-latest
+    needs: image
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      # Jobs run as root inside the container, which Buildroot refuses without this
+      FORCE_UNSAFE_CONFIGURE: 1
 
     steps:
+      # The checkout is owned by the runner user, not the container's root user
+      - run: git config --global --add safe.directory '*'
+
       - name: Checkout DuetScreen
         uses: actions/checkout@v4
         with:
@@ -55,13 +76,6 @@ jobs:
           git checkout "${BUILDROOT_REF}"
           git submodule update --init --recursive
           echo "Using buildroot ${BUILDROOT_REF} ($(git rev-parse --short HEAD))"
-
-      - name: Install Linux Dependencies
-        run: |
-          cd DuetScreen
-          ./scripts/install_prerequisites.sh
-          cd ../buildroot-duetscreen
-          ./scripts/install_prerequisites.sh
 
       - name: Build sdcard.img
         working-directory: buildroot-duetscreen

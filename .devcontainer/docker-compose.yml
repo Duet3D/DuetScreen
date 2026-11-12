@@ -1,10 +1,11 @@
 services:
   dev:
     build:
-      # The Dockerfile has no COPY steps, so keep the build context to
-      # .devcontainer/ rather than shipping the whole repository to the daemon.
-      context: .
-      dockerfile: Dockerfile
+      # The repository root, so the Dockerfile can COPY requirements.txt.
+      # .devcontainer/Dockerfile.dockerignore keeps everything else out of the
+      # context so the whole repository is not shipped to the daemon.
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
     init: true
     command: sleep infinity
     environment:
