@@ -1,7 +1,6 @@
 
 add_subdirectory(BabyStep)
 add_subdirectory(Control)
-add_subdirectory(Dashboard)
 add_subdirectory(ExtruderControl)
 add_subdirectory(Filament)
 add_subdirectory(HardwareTest)
@@ -9,4 +8,3 @@ add_subdirectory(Temperature)
 add_subdirectory(Network)
 add_subdirectory(EStop)
 add_subdirectory(Status)
-add_subdirectory(ToolList)

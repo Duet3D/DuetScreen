@@ -14,12 +14,12 @@
 #include "Hardware/Usb.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Control/ControlView.h"
+#include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "UI/Screens/File/FilesScreen.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Widgets/Dashboard/Dashboard.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
 #include "UI/Xml/Runtime/HotReload.h"
 #include "UI/Xml/Runtime/XmlUi.h"
@@ -272,7 +272,7 @@ int main(int argc, char** argv)
 					auto control = [] { return UI::findView<UI::ControlView>("control"); };
 					auto files = [] { return UI::findView<UI::FilesScreen>("files"); };
 					auto settings = [] { return UI::findView<UI::SettingsView>("settings"); };
-					auto dashboard = [] { return UI::findView<UI::Dashboard>("dashboard"); };
+					auto dashboard = [] { return UI::findView<UI::DashboardTabs>("dashboard_tabs"); };
 					static const std::function<void()> cbs[] = {
 						[=]()
 						{

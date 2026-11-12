@@ -7,6 +7,7 @@
 #include "Debug.h"
 #include "FanSource.h"
 #include "HeatSource.h"
+#include "MachineSource.h"
 #include "NavigationSource.h"
 #include "ResponseSource.h"
 #include "ToolSource.h"
@@ -70,6 +71,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<FanSource>(),
 			std::make_shared<ToolSource>(),
 			std::make_shared<HeatSource>(),
+			std::make_shared<MachineSource>(),
 			std::make_shared<NavigationSource>(),
 			std::make_shared<ResponseSource>(),
 		};

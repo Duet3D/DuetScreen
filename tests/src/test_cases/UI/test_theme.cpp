@@ -33,7 +33,8 @@
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
 #include "UI/Widgets/Temperature/HeaterSlider.h"
-#include "UI/Widgets/ToolList/ToolList.h"
+#include "UI/Xml/Data/HeatSource.h"
+#include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
@@ -132,6 +133,47 @@ static std::unique_ptr<LvLabel> createLabel(const std::string& text, LvObj& pare
 	label->setMaxWidth(LV_PCT(100));
 	return label;
 }
+
+/** Two made-up tools for the widget gallery. Its lists shadow the printer's in the tool list's scope. */
+class GalleryTools : public Xml::XmlPresenter
+{
+  public:
+	GalleryTools()
+		: XmlPresenter("gallery_tools")
+	{
+		// Tool 0 is selected and has no heaters; tool 1 has one heater on standby
+		m_tools.sync(2,
+					 [](Xml::ToolRow& tool, size_t i)
+					 {
+						 tool.number.set(static_cast<int32_t>(i));
+						 tool.name.set(fmt::format("Tool {}", i));
+						 tool.selected.set(i == 0 ? 1 : 0);
+						 tool.heaterCount.set(static_cast<int32_t>(i));
+						 tool.heaters.sync(i,
+										   [](Xml::ToolHeaterRow& heater, size_t j)
+										   {
+											   heater.name.set(fmt::format("Heater {}", j));
+											   heater.status.set("standby");
+											   heater.current.set(
+												   fmt::format("{:.1f}", 100.0f + static_cast<float>(j * 10)));
+											   heater.active.set(static_cast<int32_t>(200 + j * 10));
+											   heater.standby.set(0);
+										   });
+					 });
+	}
+
+	void fields(Xml::FieldVisitor& f) override
+	{
+		f.list("tools", m_tools, "Made-up tools");
+		f.list("beds", m_beds, "No beds");
+		f.list("chambers", m_chambers, "No chambers");
+	}
+
+  private:
+	Xml::List<Xml::ToolRow> m_tools;
+	Xml::List<Xml::BedRow> m_beds;
+	Xml::List<Xml::ChamberRow> m_chambers;
+};
 
 TEST_F(TestTheme, Widgets)
 {
@@ -378,34 +420,10 @@ TEST_F(TestTheme, Widgets)
 	generic_axis.setAxisPosition(100.0f);
 	generic_axis.setDisabled(true);
 
-	/* Tool List */
-	ToolList tool_list("tool_list", cont);
+	/* Tool List: tool_list.xml showing made-up tools instead of the printer's */
+	auto galleryTools = std::make_shared<GalleryTools>();
+	Xml::XmlView tool_list("tool_list", cont, "tool_list", galleryTools);
 	tool_list.setSize(LV_PCT(40), LV_SIZE_CONTENT);
-	tool_list.setToolCount(2);
-	for (size_t i = 0; i < tool_list.getToolCount(); ++i)
-	{
-		auto item = tool_list.getTool(i);
-		if (item == nullptr)
-		{
-			continue;
-		}
-		item->setLabel(fmt::format("Tool {}", i));
-		item->setSelected(i == 0);
-		item->setHeaterCount(i);
-		for (size_t j = 0; j < item->getHeaterCount(); ++j)
-		{
-			auto heater = item->getHeater(j);
-			if (heater == nullptr)
-			{
-				continue;
-			}
-			heater->setLabel(fmt::format("Heater {}", j));
-			heater->setStatus("standby");
-			heater->setCurrentTemp(100 + j * 10);
-			heater->setActiveTemp(200 + j * 10);
-			heater->setStandbyTemp(0);
-		}
-	}
 
 	/* Text Box */
 	TextBox empty_text_box("empty_text_box", cont);

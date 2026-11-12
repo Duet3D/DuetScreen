@@ -1,0 +1,29 @@
+<!--
+  The tools, beds and chambers, with their heaters' states and temperatures.
+
+  Data:     the global tools, beds and chambers lists (src/UI/Xml/Data/ToolSource.h, HeatSource.h)
+  Actions:  tools.toggle, heaters.toggle, heaters.set_active, heaters.set_standby
+            (src/UI/Screens/Dashboard/ToolListPresenter.h)
+
+  Setting a temperature opens the number pad called tool_numberpad, which the screen showing this list hosts.
+-->
+<component presenter="tool_list">
+	<view extends="lv_obj" flex_flow="column">
+		<style name="pad_zero"/>
+
+		<lv_obj name="tools" width="100%" height="content" flex_flow="column" style_pad_all="0">
+			<ds_list name="list" list="tools" item="tool_card" width="100%" height="content" flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+
+		<lv_obj name="beds" width="100%" height="content" flex_flow="column" style_pad_all="0">
+			<ds_list name="list" list="beds" item="heater_card" width="100%" height="content" flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+
+		<lv_obj name="chambers" width="100%" height="content" flex_flow="column" style_pad_all="0">
+			<ds_list name="list" list="chambers" item="heater_card" width="100%" height="content" flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+	</view>
+</component>

@@ -5,6 +5,8 @@
 #include "Services.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
+#include "UI/Components/Input/ModalNumberPad.h"
+#include "UI/Core/Navigation.h"
 #include <string>
 
 namespace UI::Xml::Services
@@ -27,6 +29,23 @@ namespace UI::Xml::Services
 			return;
 		}
 		Comm::DUET.SendGcode(line);
+	}
+
+	bool askNumber(std::string_view numberPad, NumberRequest request)
+	{
+		auto* pad = findView<ModalNumberPad>(numberPad);
+		if (pad == nullptr)
+		{
+			LOG_WARN("No number pad called '{:s}'", numberPad);
+			return false;
+		}
+		pad->setHeader(request.header);
+		pad->setMinValue(request.min);
+		pad->setMaxValue(request.max);
+		pad->setConfirmCallback(std::move(request.onConfirm));
+		pad->clear();
+		openModal(pad);
+		return true;
 	}
 
 	void setGcodeSender(std::function<void(std::string_view)> sender)

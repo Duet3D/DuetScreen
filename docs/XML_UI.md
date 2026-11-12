@@ -71,6 +71,12 @@ Xml::XmlView m_fanView{"fan", parent, "fan_screen"};
 
 An `XmlView` behaves like any other `LvObj`: it works in tabs and navigation, and its presenter is active, and receives Model events, only while it is shown.
 
+A view can also be given a presenter, which then replaces the one the component names. Its fields shadow the globals, so a component can show other data: the theme gallery test shows `tool_list.xml` with made-up `tools`.
+
+```cpp
+Xml::XmlView toolList{"tool_list", parent, "tool_list", std::make_shared<MyTools>()};
+```
+
 ## Bundles
 
 A bundle is a directory with a `manifest.json` and component files. A component's name is its file name without `.xml`.
@@ -134,7 +140,7 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 
 | Kind | Names |
 | --- | --- |
-| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `nav.screen` (the open page, empty on the home screen), `responses.count`. |
+| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `nav.screen` (the open page, empty on the home screen), `responses.count`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
 | Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
@@ -148,7 +154,7 @@ A string subject can be compared with `bind_*_if_eq`: the sidebar checks the but
 <ds_list list="tools" item="tool_card" flex_flow="column"/>
 ```
 
-builds one `tool_card` per row of `tools`. Inside `tool_card`, a list belonging to the row is shown the same way:
+builds one `tool_card` per row of `tools` (see [tool_list.xml](../assets/ui/components/tool_list.xml)). Inside `tool_card`, a list belonging to the row is shown the same way:
 
 ```xml
 <ds_list list="heaters" item="tool_heater_row"/>

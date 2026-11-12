@@ -8,7 +8,6 @@
 #include "UI/Core/View.h"
 #include "UI/Widgets/ExtruderControl/ExtruderControl.h"
 #include "UI/Widgets/Temperature/ToolControl.h"
-#include "UI/Widgets/ToolList/ToolList.h"
 
 namespace UI
 {

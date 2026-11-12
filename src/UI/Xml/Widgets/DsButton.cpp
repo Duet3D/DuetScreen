@@ -78,13 +78,29 @@ namespace UI::Xml
 
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_text"))
 		{
-			lv_subject_add_observer_obj(
-				subject,
-				[](lv_observer_t* observer, lv_subject_t* s)
-				{ static_cast<DsButton*>(lv_observer_get_user_data(observer))->setText(lv_subject_get_string(s)); },
-				root,
-				button);
+			button->m_textFormat = attrOr(attrs, "bind_text-fmt", "");
+			lv_subject_add_observer_obj(subject, textObserverCb, root, button);
 		}
+	}
+
+	void DsButton::textObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* button = static_cast<DsButton*>(lv_observer_get_user_data(observer));
+		const char* format = button->m_textFormat.empty() ? nullptr : button->m_textFormat.c_str();
+		char text[128];
+		switch (subject->type)
+		{
+		case LV_SUBJECT_TYPE_INT:
+			lv_snprintf(text, sizeof(text), format ? format : "%d", lv_subject_get_int(subject));
+			break;
+		case LV_SUBJECT_TYPE_STRING:
+			lv_snprintf(text, sizeof(text), format ? format : "%s", lv_subject_get_string(subject));
+			break;
+		default:
+			LOG_WARN("ds_button bind_text needs a string or integer subject");
+			return;
+		}
+		button->setText(text);
 	}
 
 	void DsButton::flashObserverCb(lv_observer_t* observer, lv_subject_t*)

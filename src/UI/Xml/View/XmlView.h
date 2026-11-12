@@ -4,7 +4,9 @@
  * Hosts an XML component as an ordinary LvObj, so it can be used anywhere a C++ view is (tabs, navigation, the app
  * drawer). The component's root widget *is* this LvObj's root, so the widget tree has the same shape as a C++ view's.
  *
- * The view owns the component's presenter (if it names one) and a top-level scope holding the presenter's fields.
+ * The view owns the component's presenter (if it names one, or the one it is given) and a top-level scope holding the
+ * presenter's fields. Giving a view a presenter lets C++ show a component with data of its own: the presenter's
+ * fields shadow the globals, so e.g. tool_list.xml can show a presenter's `tools` list instead of the printer's.
  * Like a C++ View, it activates the presenter and connects it to the Model while shown, and disconnects it while
  * hidden.
  */
@@ -28,8 +30,8 @@ namespace UI::Xml
 		 */
 		struct XmlViewState
 		{
-			/** Create the presenter `component` names, and a scope holding its fields */
-			XmlViewState(std::string component, std::string objName);
+			/** Create the presenter `component` names (or use `given`), and a scope holding its fields */
+			XmlViewState(std::string component, std::string objName, std::shared_ptr<XmlPresenter> given = nullptr);
 
 			/** (Re)create the presenter if the component's definition names a different one, and a fresh scope */
 			void prepare();
@@ -37,7 +39,8 @@ namespace UI::Xml
 			std::string component;					// Name of the component shown
 			std::string objName;					// Name given to the root widget
 			std::shared_ptr<XmlPresenter> presenter; // The component's presenter, or nullptr if it names none
-			std::unique_ptr<Scope> scope;			// Names the component's widgets bind to
+			bool presenterGiven = false;			 // The presenter was given, not named by the component
+			std::unique_ptr<Scope> scope;			 // Names the component's widgets bind to
 		};
 	} // namespace detail
 
@@ -54,6 +57,9 @@ namespace UI::Xml
 
 		/** Build `component` inside a widget that has no C++ view, e.g. one created from XML */
 		XmlView(const std::string& name, lv_obj_t* parent, std::string component);
+
+		/** Build `component` inside `parent` with `presenter` instead of the one the component names */
+		XmlView(const std::string& name, LvObj& parent, std::string component, std::shared_ptr<XmlPresenter> presenter);
 
 		/** Disconnect the presenter; the widgets are deleted by ~LvObj */
 		~XmlView() override;

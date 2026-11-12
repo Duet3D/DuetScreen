@@ -15,6 +15,7 @@ namespace UI::Xml
 		f.field("number", number, "Tool number, as used by T");
 		f.field("name", name, "Display name");
 		f.field("selected", selected, "1 if this is the active tool, else 0");
+		f.field("heater_count", heaterCount, "Number of heaters");
 		f.list("heaters", heaters, "One row per heater of the tool");
 	}
 
@@ -23,6 +24,7 @@ namespace UI::Xml
 		number.set(static_cast<int32_t>(tool.index));
 		name.set(tool.GetName());
 		selected.set(tool.status == OM::ToolStatus::active ? 1 : 0);
+		heaterCount.set(static_cast<int32_t>(tool.GetHeaterCount()));
 
 		heaters.sync(tool.GetHeaterCount(),
 					 [&tool](ToolHeaterRow& row, size_t i)

@@ -5,6 +5,9 @@
 #include "XmlScreens.h"
 #include "Console/ConsoleView.h"
 #include "Control/ControlView.h"
+#include "Dashboard/DashboardGraph.h"
+#include "Dashboard/DashboardTabs.h"
+#include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FilesScreen.h"
 #include "Notifications/NotificationsView.h"
@@ -13,7 +16,6 @@
 #include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
-#include "UI/Widgets/Dashboard/Dashboard.h"
 #include "UI/Widgets/EStop/EStop.h"
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
@@ -47,11 +49,13 @@ namespace UI
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
+		Xml::Presenters::add<ToolListPresenter>("tool_list");
 
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<Dashboard>("dashboard");
+		Xml::NativeViews::add<DashboardGraph>("temperature_graph");
+		Xml::NativeViews::add<DashboardTabs>("dashboard_tabs");
 		Xml::NativeViews::add<ConsoleView>("console");
 		Xml::NativeViews::add<ControlView>("control");
 		Xml::NativeViews::add<FilesScreen>("files");

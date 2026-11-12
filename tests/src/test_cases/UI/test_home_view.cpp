@@ -12,13 +12,15 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
+#include "UI/Screens/Dashboard/DashboardGraph.h"
+#include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "UI/Screens/File/FileView.h"
 #include "UI/Screens/File/FilesScreen.h"
 #include "UI/Screens/Notifications/NotificationsView.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
-#include "UI/Widgets/Dashboard/Dashboard.h"
 #include "UI/Xml/View/XmlView.h"
+#include "helix_xml.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
@@ -48,7 +50,8 @@ class TestHomeView : public UiTestSuite
 		return *view;
 	}
 
-	static UI::Dashboard& dashboardPage() { return page<UI::Dashboard>("dashboard"); }
+	static UI::DashboardTabs& dashboardTabs() { return page<UI::DashboardTabs>("dashboard_tabs"); }
+	static UI::DashboardGraph& temperatureGraph() { return page<UI::DashboardGraph>("temperature_graph"); }
 	static UI::ControlView& controlPage() { return page<UI::ControlView>("control"); }
 	static UI::ConsoleView& consolePage() { return page<UI::ConsoleView>("console"); }
 	static UI::FilesScreen& filesPage() { return page<UI::FilesScreen>("files"); }
@@ -231,7 +234,7 @@ TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 
 TEST_F(TestHomeView, BlankStatusView)
 {
-	dashboardPage().showStatusTab();
+	dashboardTabs().showStatusTab();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/blank.png")
 }
 
@@ -539,17 +542,19 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	sensor->lastReading = 25.0f;
 	for (size_t i = 0; i < 1000; i++)
 	{
-		dashboardPage().getGraph().getPresenter()->tick();
+		temperatureGraph().getPresenter()->tick();
 		sensor->lastReading = (int32_t)(sensor->lastReading + 1) % 300;
 	}
 
-	dashboardPage().getGraph().showSeries(1, false);
+	temperatureGraph().showSeries(1, false);
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/temperature_graph.png");
 
 	/* Open the tool list numberpad */
-	dashboardPage().getToolList().getTool(0)->getHeater(0)->getChildByName("active")->sendEvent(LV_EVENT_CLICKED,
-																								nullptr);
+	// The first tool's first heater row, as tool_list.xml builds it
+	lv_obj_t* toolList = UI::findView("tool_list")->getRootPtr();
+	lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
+	lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
 	UI::closeAllModals();
@@ -560,6 +565,31 @@ TEST_F(TestHomeViewWithData, Dashboard)
 		theme->setThemeActive();
 		EXPECT_EQUAL_SCREENSHOT(fmt::format("home_view/dashboard/theme_{:s}.png", theme->getName()).c_str());
 	}
+}
+
+TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
+{
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+	lv_obj_t* toolList = UI::findView("tool_list")->getRootPtr();
+	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
+	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
+	ASSERT_NE(lv_obj_find_by_name(tools, "status"), nullptr);
+	ASSERT_NE(lv_obj_find_by_name(beds, "status"), nullptr);
+
+	// Printing: nothing that would change the job can be pressed
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "tool_name"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
+	// Temperatures can still be set
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "active"), LV_STATE_DISABLED));
+
+	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
@@ -686,10 +716,10 @@ TEST_F(TestHomeViewWithData, SettingsView)
 
 TEST_F(TestHomeViewWithData, StatusView)
 {
-	dashboardPage().showStatusTab();
+	dashboardTabs().showStatusTab();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
-	auto& statusView = dashboardPage().getStatusView();
+	auto& statusView = dashboardTabs().getStatusView();
 
 	UI::LvObj* speed_factor = statusView.getChildByName("print_info.speed_cont.speed_multiplier");
 	ASSERT_NE(speed_factor, nullptr);

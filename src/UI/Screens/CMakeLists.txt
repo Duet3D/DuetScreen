@@ -2,6 +2,7 @@ target_sources(DuetScreen.lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/XmlScreens.cpp
 
 add_subdirectory(Console)
 add_subdirectory(Control)
+add_subdirectory(Dashboard)
 add_subdirectory(Fan)
 add_subdirectory(File)
 add_subdirectory(Heightmap)

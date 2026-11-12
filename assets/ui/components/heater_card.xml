@@ -1,0 +1,18 @@
+<!--
+  A bed or chamber in the tool list: one heater row in a card.
+
+  Fields:   a row of the beds or chambers list (src/UI/Xml/Data/HeatSource.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+		<style name="tool_list_tool"/>
+		<style name="tool_selected" selector="checked"/>
+
+		<lv_obj name="heaters" width="100%" height="content" flex_flow="column" style_pad_all="0">
+			<lv_obj name="list" width="100%" height="content" flex_flow="column" style_pad_all="0"
+					style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
+				<heater_row name="0"/>
+			</lv_obj>
+		</lv_obj>
+	</view>
+</component>

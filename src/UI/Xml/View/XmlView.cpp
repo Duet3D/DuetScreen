@@ -36,20 +36,25 @@ namespace UI::Xml
 		}
 	} // namespace
 
-	detail::XmlViewState::XmlViewState(std::string componentName, std::string name)
+	detail::XmlViewState::XmlViewState(std::string componentName, std::string name, std::shared_ptr<XmlPresenter> given)
 		: component(std::move(componentName))
 		, objName(std::move(name))
+		, presenter(std::move(given))
+		, presenterGiven(presenter != nullptr)
 	{
 		prepare();
 	}
 
 	void detail::XmlViewState::prepare()
 	{
-		const std::string wanted = presenterNameOf(component);
-		const std::string current = presenter ? std::string(presenter->getName()) : std::string();
-		if (!presenter || wanted != current)
+		if (!presenterGiven)
 		{
-			presenter = createPresenterFor(component);
+			const std::string wanted = presenterNameOf(component);
+			const std::string current = presenter ? std::string(presenter->getName()) : std::string();
+			if (!presenter || wanted != current)
+			{
+				presenter = createPresenterFor(component);
+			}
 		}
 
 		// A screen is self-contained: its names are its presenter's, then the globals
@@ -64,6 +69,18 @@ namespace UI::Xml
 	XmlView::XmlView(const std::string& name, LvObj& parent, std::string componentName)
 		: XmlView(name, parent.getRootPtr(), std::move(componentName))
 	{
+	}
+
+	XmlView::XmlView(const std::string& name,
+					 LvObj& parent,
+					 std::string componentName,
+					 std::shared_ptr<XmlPresenter> givenPresenter)
+		: XmlViewState(std::move(componentName), name, std::move(givenPresenter))
+		, LvObj([this](lv_obj_t* p) { return build(p, *this); }, name, parent.getRootPtr())
+	{
+		ZoneScoped;
+		registerActions();
+		addView(this);
 	}
 
 	XmlView::XmlView(const std::string& name, lv_obj_t* parent, std::string componentName)

@@ -7,7 +7,7 @@
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Widgets/Dashboard/Dashboard.h"
+#include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <cctype>
@@ -190,7 +190,7 @@ namespace UI
 	{
 		ZoneScoped;
 		OM::FileSystem::StartPrint(m_gcodePath);
-		if (auto* dashboard = findView<Dashboard>("dashboard"))
+		if (auto* dashboard = findView<DashboardTabs>("dashboard_tabs"))
 		{
 			dashboard->disableJobsTab(true);
 		}

@@ -8,6 +8,7 @@
  *     number          tool number, as used by T
  *     name            display name
  *     selected        1 if this is the active tool, else 0
+ *     heater_count    number of heaters
  *     heaters         list, one row per heater of the tool (fields: see HeaterRow.h)
  */
 
@@ -41,6 +42,7 @@ namespace UI::Xml
 		IntSubject number;			 // Tool number
 		StringSubject<32> name;		 // Display name
 		IntSubject selected;		 // 1 if active
+		IntSubject heaterCount;		 // Number of heaters
 		List<ToolHeaterRow> heaters; // The tool's heaters
 	};
 
