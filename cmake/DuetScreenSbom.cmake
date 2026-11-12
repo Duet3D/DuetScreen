@@ -220,7 +220,6 @@ endfunction()
 set(_duetscreen_sbom_first_party
     DuetScreen
     DuetScreen.lib
-    DuetScreen.themes
     lvgl_tracy)
 
 foreach(_target IN LISTS _duetscreen_sbom_first_party)

@@ -1,0 +1,2 @@
+<!-- The default theme: the base theme as it is. -->
+<theme name="duetscreen" extends="base"/>

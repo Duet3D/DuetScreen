@@ -1,0 +1,10 @@
+<!-- Greyscale: no colour at all. The palette is fixed. -->
+<theme name="grey" extends="base">
+	<palette primary_hue="245" secondary_hue="190" chroma="0" dark="true" customisable="false">
+		<!-- Accents are never fully grey by default; make them so -->
+		<color name="primary" chroma="0"/>
+		<color name="primary_muted" chroma="0"/>
+		<color name="secondary" chroma="0"/>
+		<color name="secondary_muted" chroma="0"/>
+	</palette>
+</theme>

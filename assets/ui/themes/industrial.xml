@@ -1,0 +1,53 @@
+<!-- Industrial: angular and mechanical. Sharp corners, thick borders, heavy padding, hard offset shadows. -->
+<theme name="industrial" extends="base">
+	<palette primary_hue="245" secondary_hue="50" chroma="0.02" dark="false"/>
+
+	<fonts>
+		<font name="header" size="18" weight="800" style="bold"/>
+		<font name="normal" size="14" weight="500" style="normal"/>
+		<font name="emphasis" size="14" weight="700" style="bold"/>
+		<font name="subdued" size="12" weight="300" style="normal"/>
+	</fonts>
+
+	<styles>
+		<!-- Sharp corners everywhere -->
+		<style name="card" radius="0"/>
+		<style name="btn" radius="0"/>
+		<style name="knob" radius="2"/>
+
+		<!-- Thick, prominent borders -->
+		<style name="card" border_width="3" border_side="full"/>
+
+		<!-- Buttons: flat, angular, bordered -->
+		<style name="btn" bg_color="#bg_light" border_width="2" border_color="#primary" border_side="full" text_color="#primary"/>
+		<style name="actionBtn" bg_color="#primary" text_color="#text"/>
+
+		<!-- Heavier padding for an industrial panel feel -->
+		<style name="card" pad_all="8" pad_row="4" pad_column="4"/>
+
+		<!-- Hard offset shadow, no blur, for a stamped look -->
+		<style name="card" shadow_width="0" shadow_offset_x="3" shadow_offset_y="3" shadow_color="0x000000" shadow_opa="60%"/>
+
+		<!-- Thin rectangular scrollbar -->
+		<style name="scrollbar" radius="0" width="4"/>
+
+		<style name="btnm_btn" radius="0" border_width="2" border_color="#border"/>
+		<style name="bar" radius="0"/>
+		<style name="bar_indic" radius="0"/>
+		<style name="slider" radius="0"/>
+		<style name="slider_indic" radius="0"/>
+		<style name="slider_knob" radius="2" border_width="2"/>
+		<style name="cb_marker" radius="0"/>
+		<style name="bg_switch" radius="2"/>
+		<style name="switch_knob" radius="1"/>
+		<style name="keyboard_button" radius="0"/>
+		<style name="tab_btn" border_width="3" border_side="bottom"/>
+
+		<style name="bar_label_bg" radius="0"/>
+		<style name="estop" radius="4"/>
+
+		<!-- Files and folders follow the restyled buttons -->
+		<style name="folder" copy="btn"/>
+		<style name="file" merge="btn bg_light"/>
+	</styles>
+</theme>

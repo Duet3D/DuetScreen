@@ -8,7 +8,7 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Styles/Themes/CustomTheme.h"
+#include "UI/Styles/Theme.h"
 #include "i18n/i18n.h"
 #include "utils/DisplayHelper.h"
 #include "utils/StorageHelper.h"
@@ -701,14 +701,11 @@ namespace UI
 		}
 
 		LOG_DBG("Updating theme preview");
-		auto customTheme = dynamic_cast<const Themes::CustomTheme*>(theme);
-		m_themePreview.showControls(customTheme != nullptr);
-		if (customTheme != nullptr)
+		m_themePreview.showControls(theme->isCustomisable());
+		if (theme->isCustomisable())
 		{
-			m_themePreview.updateSliders(customTheme->getPrimaryHue(),
-										 customTheme->getSecondaryHue(),
-										 customTheme->getChroma(),
-										 customTheme->getDarkMode());
+			const auto palette = theme->getPalette();
+			m_themePreview.updateSliders(palette.primaryHue, palette.secondaryHue, palette.chroma, palette.dark);
 		}
 		m_themePreview.updateSwatches();
 	}

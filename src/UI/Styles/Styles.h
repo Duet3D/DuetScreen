@@ -24,240 +24,256 @@
 
 namespace UI::Themes
 {
+	/** An LVGL style. The global ones (LvglStyles, ComponentStyles) are filled in by the active theme. */
 	struct Style
 	{
+		/** An empty, unnamed style */
 		Style();
+		/** An empty style called `name` */
 		Style(const char* name);
+		/** A style filled in by `initFunc`, now or, if LVGL isn't running yet, by Themes::init() */
 		Style(const char* name, std::function<void(lv_style_t*)> initFunc);
 
-		/* Copy */
+		/** Copy the properties of `other` */
 		Style(const Style&);
+		/** Replace the properties with those of `other` */
 		Style& operator=(const Style&);
 
-		/* Move */
+		/** Take over the properties of `other` */
 		Style(Style&&);
+		/** Take over the properties of `other` */
 		Style& operator=(Style&&);
 
+		/** Free the properties */
 		~Style();
 
+		/** Run the deferred initFunc */
 		void init();
 
+		/** Set one property */
 		void setProp(lv_style_prop_t prop, lv_style_value_t value) { lv_style_set_prop(&style, prop, value); }
+		/** Read one property */
 		lv_style_res_t getProp(lv_style_prop_t prop, lv_style_value_t* value) const
 		{
 			return lv_style_get_prop(&style, prop, value);
 		}
+		/** @return whether the style sets `prop` */
 		bool hasProp(lv_style_prop_t prop) const
 		{
 			lv_style_value_t v;
 			return getProp(prop, &v) == LV_STYLE_RES_FOUND;
 		}
 
+		/** The LVGL style, to add to a widget */
 		operator lv_style_t*() { return &style; }
+		/** The LVGL style, to add to a widget */
 		operator const lv_style_t*() const { return &style; }
 
 	  private:
-		lv_style_t style;
-		bool m_moved = false;
-		const char* name;
-		std::function<void(lv_style_t*)> initFunc;
+		lv_style_t style;							// The LVGL style
+		bool m_moved = false;						// Moved from: don't free the properties
+		const char* name;							// Name, for debugging
+		std::function<void(lv_style_t*)> initFunc; // Deferred initialisation, or empty
 	};
 
+	/** Styles for LVGL's own widgets, and general-purpose ones. A theme sets their properties by member name. */
 	struct LvglStyles
 	{
+		/** Empty styles; the active theme fills them in */
 		LvglStyles();
 
 		Style base; // Base style applied to all objects
 
 		/* Background */
-		Style bg_dark;
-		Style bg;
-		Style bg_light;
+		Style bg_dark; // Screen background colour
+		Style bg; // Card background colour
+		Style bg_light; // Raised background colour
 		Style bg_color_primary; // button, button matrix (checked), bar indicator, slider indicator, table part focus
 								// key, checkbox indicator, switch indicator, roller selected, dropdown list selected,
 								// textarea selected, list button focus key, spinbox cursor, msgbox buttons
-		Style bg_color_primary_muted;
-		Style bg_color_secondary;
-		Style bg_color_secondary_muted;
-		Style bg_color_success;
-		Style bg_color_warning;
-		Style bg_color_error;
-		Style bg_color_header;
-		Style bg_color_list_item;
-		Style bg_modal;
+		Style bg_color_primary_muted; // Muted primary background
+		Style bg_color_secondary; // Secondary (action) background
+		Style bg_color_secondary_muted; // Muted secondary background
+		Style bg_color_success; // Success background
+		Style bg_color_warning; // Warning background
+		Style bg_color_error; // Error background
+		Style bg_color_header; // Translucent header strip
+		Style bg_color_list_item; // List item background
+		Style bg_modal; // Translucent backdrop behind modals
 
 		/* Text */
-		Style text;
-		Style text_muted;
-		Style text_emphasis;
-		Style text_header;
-		Style text_warning;
+		Style text; // Body text
+		Style text_muted; // Secondary text
+		Style text_emphasis; // Emphasised text
+		Style text_header; // Headings
+		Style text_warning; // Warnings
 
 		/* Border */
-		Style border;
-		Style border_muted;
-		Style border_highlight;
-		Style border_color_primary;
-		Style border_color_secondary;
-		Style border_color_card;
+		Style border; // Standard border
+		Style border_muted; // Subtle border
+		Style border_highlight; // Bright border
+		Style border_color_primary; // Primary-coloured border
+		Style border_color_secondary; // Secondary-coloured border
+		Style border_color_card; // Card border colour
 
-		Style screen;
-		Style scrollbar;
-		Style scrollbar_scrolled;
-		Style card;
-		Style tab_card;
-		Style modal;
-		Style btn;
-		Style btn_checked;
+		Style screen; // Screen background
+		Style scrollbar; // Scrollbars
+		Style scrollbar_scrolled; // Scrollbars while scrolling
+		Style card; // Cards and panels
+		Style tab_card; // Tab page panels
+		Style modal; // Modal dialogs
+		Style btn; // Buttons
+		Style btn_checked; // Checked buttons
 
 		/* Icons */
-		Style icon;
-		Style icon_recolor;
+		Style icon; // Icons
+		Style icon_recolor; // Icons tinted with the text colour
 
 		/*Utility*/
-		Style pressed;
-		Style disabled;
-		Style pad_base;
-		Style pad_zero;
-		Style pad_tiny;
-		Style pad_small;
-		Style pad_normal;
-		Style pad_large;
-		Style pad_gap;
+		Style pressed; // Pressed widgets
+		Style disabled; // Disabled widgets
+		Style pad_base; // Default padding
+		Style pad_zero; // No padding
+		Style pad_tiny; // Tiny padding
+		Style pad_small; // Small padding
+		Style pad_normal; // Normal padding
+		Style pad_large; // Large padding
+		Style pad_gap; // Gap between children
 		Style line_space_large;	 // roller, dropdown
 		Style text_align_center; // roller
 		Style outline_primary;	 // Focused via keypad or encoder
 		Style outline_secondary; // Edited by an encoder
-		Style circle;
-		Style no_radius;
-		Style no_border;
-		Style clip_corner;
-		Style rotary_scroll;
-		Style grow;
-		Style transition_delayed;
-		Style transition_normal;
-		Style anim;
-		Style anim_fast;
+		Style circle; // Fully rounded corners
+		Style no_radius; // Square corners
+		Style no_border; // No border
+		Style clip_corner; // Clip children to rounded corners
+		Style rotary_scroll; // Scroll speed for rotary encoders
+		Style grow; // Grow slightly (pressed buttons)
+		Style transition_delayed; // Delayed transitions
+		Style transition_normal; // Normal transitions
+		Style anim; // Normal animation time
+		Style anim_fast; // Fast animation time
 
 		Style actionBtn; // for UI elements that perform actions on the Duet
-		Style input;
-		Style long_press;
-		Style draggable;
-		Style dragging;
-		Style drag_complete;
+		Style input; // Text inputs
+		Style long_press; // Long-press feedback
+		Style draggable; // Draggable widgets
+		Style dragging; // Widgets being dragged
+		Style drag_complete; // Dragged to the end
 
 		/*Parts*/
-		Style knob;
+		Style knob; // Slider and switch knobs
 
 #if LV_USE_ARC
-		Style arc_indic;
-		Style arc_indic_primary;
+		Style arc_indic; // Arc indicator
+		Style arc_indic_primary; // Primary-coloured arc indicator
 #endif
 
 #if LV_USE_BAR
-		Style bar;
-		Style bar_indic;
+		Style bar; // Bar background
+		Style bar_indic; // Bar indicator
 #endif
 
 #if LV_USE_BUTTONMATRIX
-		Style btnm_bg;
-		Style btnm_btn;
-		Style btnm_btn_checked;
+		Style btnm_bg; // Button matrix background
+		Style btnm_btn; // Button matrix buttons
+		Style btnm_btn_checked; // Checked button matrix buttons
 #endif
 
 #if LV_USE_CHART
-		Style chart_series;
-		Style chart_indic;
-		Style chart_bg;
+		Style chart_series; // Chart series lines
+		Style chart_indic; // Chart point markers
+		Style chart_bg; // Chart background and grid
 #endif
 
 #if LV_USE_DROPDOWN
-		Style dropdown;
-		Style dropdown_list;
+		Style dropdown; // Dropdowns
+		Style dropdown_list; // Open dropdown lists
 #endif
 
 #if LV_USE_CHECKBOX
-		Style cb_marker;
-		Style cb_marker_checked;
+		Style cb_marker; // Checkbox box
+		Style cb_marker_checked; // Checkbox tick
 #endif
 
 #if LV_USE_SWITCH
-		Style bg_switch;
-		Style switch_knob;
+		Style bg_switch; // Switch track
+		Style switch_knob; // Switch knob
 #endif
 
 #if LV_USE_LINE
-		Style line;
+		Style line; // Lines
 #endif
 
 #if LV_USE_TABLE
-		Style table;
-		Style table_cell;
+		Style table; // Tables
+		Style table_cell; // Table cells
 #endif
 
 #if LV_USE_TEXTAREA
-		Style text_area;
-		Style ta_cursor;
-		Style ta_placeholder;
+		Style text_area; // Text areas
+		Style ta_cursor; // Text area cursor
+		Style ta_placeholder; // Text area placeholder
 #endif
 
 #if LV_USE_CALENDAR
-		Style calendar_btnm_bg;
-		Style calendar_btnm_day;
-		Style calendar_header;
+		Style calendar_btnm_bg; // Calendar day grid
+		Style calendar_btnm_day; // Calendar days
+		Style calendar_header; // Calendar header
 #endif
 
 #if LV_USE_CANVAS
-		Style canvas;
+		Style canvas; // Canvases
 #endif
 
 #if LV_USE_MENU
-		Style menu_bg;
-		Style menu_cont;
-		Style menu_sidebar_cont;
-		Style menu_main_cont;
-		Style menu_page;
-		Style menu_header_cont;
-		Style menu_header_btn;
-		Style menu_section;
-		Style menu_pressed;
-		Style menu_separator;
+		Style menu_bg; // Menu background
+		Style menu_cont; // Menu items
+		Style menu_sidebar_cont; // Menu sidebar
+		Style menu_main_cont; // Menu main area
+		Style menu_page; // Menu pages
+		Style menu_header_cont; // Menu header
+		Style menu_header_btn; // Menu header buttons
+		Style menu_section; // Menu sections
+		Style menu_pressed; // Pressed menu items
+		Style menu_separator; // Menu separators
 #endif
 
 #if LV_USE_MSGBOX
-		Style msgbox_backdrop_bg;
+		Style msgbox_backdrop_bg; // Message box backdrop
 #endif
 
 #if LV_USE_KEYBOARD
-		Style keyboard_button;
-		Style keyboard_button_checked_bg;
+		Style keyboard_button; // Keyboard keys
+		Style keyboard_button_checked_bg; // Checked keyboard keys
 #endif
 
 #if LV_USE_LIST
-		Style list_bg;
-		Style list_btn;
-		Style list_item_grow;
+		Style list_bg; // Lists
+		Style list_btn; // List buttons
+		Style list_item_grow; // Grow a pressed list item
 #endif
 
 #if LV_USE_TABVIEW
-		Style tab_bg_focus;
-		Style tab_btn;
+		Style tab_bg_focus; // Focused tab bar
+		Style tab_btn; // Selected tab button
 #endif
 #if LV_USE_LED
-		Style led;
+		Style led; // LEDs
 #endif
 
 #if LV_USE_SCALE
-		Style scale;
+		Style scale; // Scales
 #endif
 
 #if LV_USE_SLIDER
-		Style slider;
-		Style slider_indic;
-		Style slider_knob;
+		Style slider; // Slider track
+		Style slider_indic; // Slider fill
+		Style slider_knob; // Slider knob
 #endif
 	};
 
+	/** Styles for DuetScreen's own components. A theme sets their properties by member name. */
 	struct ComponentStyles
 	{
 		/* Sidebar */
@@ -267,19 +283,19 @@ namespace UI::Themes
 		Style estop;				 // Emergency stop button style
 
 		/* Files */
-		Style file;					 // File item style
-		Style folder;				 // Folder item style
+		Style file; // File items
+		Style folder; // Folder items
 
 		/* Move */
-		Style unhomed;				 // Used for the move view
+		Style unhomed; // Unhomed axes in the move view
 
 		/* Temperature */
-		Style temperature_bar;		 // Temperature bar style
-		Style temperature_bar_indic; // Temperature bar indicator style
-		Style tool_list;			 // Used in tool list
-		Style tool_list_tool;		 // Used in tool list
-		Style tool_list_heater;		 // Used in tool list
-		Style tool_selected;		 // Used in tool list
+		Style temperature_bar; // Temperature bar
+		Style temperature_bar_indic; // Temperature bar marker
+		Style tool_list; // Tool list
+		Style tool_list_tool; // One tool in the tool list
+		Style tool_list_heater; // One heater in the tool list
+		Style tool_selected; // The selected tool
 
 		/* Tabview */
 		Style tab_button;			 // Used in tabview tabs
@@ -288,27 +304,27 @@ namespace UI::Themes
 		Style slider_buttons;		 // Slider increment/decrement buttons
 
 		/* List */
-		Style list_header;
-		Style list_title;
+		Style list_header; // List header strip
+		Style list_title; // List title text
 
 		/* Graph */
-		Style graph_legend;
+		Style graph_legend; // Graph legend
 
 		/* Bar */
-		Style bar_label_bg;
-		Style bar_label;
+		Style bar_label_bg; // Background behind a bar's label
+		Style bar_label; // A bar's label
 
 		/* Object cancel */
 		Style object_cancel_base;	   // Base style for object cancel list items
 		Style object_cancel_current;   // Style for the current object label in the object cancel view
 		Style object_cancel_cancelled; // Style for the cancelled object label in the object cancel view
 
-#if DEBUG_BORDERS
-		Style debug_borders;
-#endif
+		Style debug_borders; // Outlines every widget when debug borders are shown (DEBUG_BORDERS builds)
 	};
 
+	/** The global LVGL widget styles */
 	const LvglStyles& getLvglStyles();
+	/** The global component styles */
 	const ComponentStyles& getComponentStyles();
 
 	/**
@@ -317,106 +333,29 @@ namespace UI::Themes
 	 */
 	void forEachStyle(const std::function<void(std::string_view name, Style& style)>& fn);
 
-	struct FontConfig
-	{
-		uint32_t size = 14;
-		uint32_t style = LV_FREETYPE_FONT_STYLE_NORMAL;
-	};
-
-	struct FontConfigSet
-	{
-		FontConfig header;
-		FontConfig normal;
-		FontConfig emphasis;
-		FontConfig subdued;
-	};
-
 	/**
-	 * @brief These are the lifetime-managed pointers to the fonts created by the font manager
-	 *
-	 * @note it is unclear whether
-	 */
-	struct ThemeFonts
-	{
-		FontManager::Font header;
-		FontManager::Font normal;
-		FontManager::Font emphasis;
-		FontManager::Font subdued;
-	};
-
-	/**
-	 * @brief The Theme class copies the font data into a static instance of this struct.
-	 *
-	 * @note This allows the address of these fonts to be used in `lv_style_set_text_font()` calls. Which means when the
-	 * theme is applied or the font is changed, all styles using these fonts will be updated automatically since the
-	 * address is the same.
+	 * The theme fonts. Styles point at these objects (`lv_style_set_text_font(style, &getFonts().normal)`), and the
+	 * active theme copies new fonts into them, so a theme or typeface change reaches every style using them.
 	 */
 	struct Fonts
 	{
-		lv_font_t header;
-		lv_font_t normal;
-		lv_font_t emphasis;
-		lv_font_t subdued;
+		lv_font_t header;	// Headings
+		lv_font_t normal;	// Body text
+		lv_font_t emphasis; // Emphasised text
+		lv_font_t subdued;	// Secondary text
 	};
 
+	/** The theme fonts */
 	const Fonts& getFonts();
 
-	class Theme
-	{
-	  public:
-		Theme(std::string_view name, FontConfigSet fontConfigSet, std::function<void(Theme* theme)> initFunc = nullptr);
-		~Theme();
-		Theme& operator=(const Theme&) = delete;
+	/** Copy the active theme's fonts into the theme fonts (see Theme.cpp) */
+	void setFonts(const lv_font_t& header, const lv_font_t& normal, const lv_font_t& emphasis, const lv_font_t& subdued);
 
-		void init();
-
-		void setThemeActive();
-		const LvglStyles& getLvglStyles() const;
-		const ComponentStyles& getComponentStyles() const;
-
-		const std::string_view getName() const { return m_name; }
-
-		LvglStyles& getLvglStyles();
-		ComponentStyles& getComponentStyles();
-
-		void setTypeface(const std::string& typeface);
-
-	  protected:
-		virtual void onInit() {}
-
-	  private:
-		// Base LVGL styles applied to existing and newly created objects
-		std::unique_ptr<LvglStyles> m_lvgl;
-
-		// Specific component styles
-		std::unique_ptr<ComponentStyles> m_components;
-
-		const std::string_view m_name;
-
-		/* Fonts */
-		FontConfigSet m_fontConfigSet;
-		ThemeFonts m_fonts;
-
-		std::function<void(Theme*)> m_initFunc;
-
-		enum class DisplaySize_t
-		{
-			DISP_SMALL = 3,
-			DISP_MEDIUM = 2,
-			DISP_LARGE = 1,
-		};
-		DisplaySize_t m_displaySize;
-	};
-
+	/**
+	 * Install DuetScreen's LVGL theme on `display`: the callback that gives every new widget its styles. The styles
+	 * themselves are built by the active theme (see Theme.h), which the XML UI loads.
+	 */
 	void init(lv_display_t* display);
-	const std::map<std::string_view, Theme*>& getThemes();
-	Theme* getCurrentTheme();
-	Theme* getTheme(const size_t index);
-	Theme* getThemeByName(std::string_view name);
-	Theme* getDefaultTheme();
-	size_t getThemeCount();
-	bool refreshCurrentTheme();
-	const std::vector<std::string_view> getThemeNames();
 
 	/* Icons */
 	void resetIconFolder();

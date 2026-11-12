@@ -12,6 +12,7 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/File/FileView.h"
 #include "UI/Screens/Home/HomeView.h"
+#include "UI/Styles/Theme.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"

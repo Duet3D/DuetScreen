@@ -11,6 +11,7 @@
 #include "UI/Components/Button/Button.h"
 #include "UI/Components/Input/Slider.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/FanSource.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Runtime/Services.h"
@@ -18,7 +19,9 @@
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
+#include <algorithm>
 #include <filesystem>
+#include <fmt/ranges.h>
 #include <fstream>
 #include <gtest/gtest.h>
 #include <unistd.h>
@@ -521,4 +524,114 @@ TEST_F(TestXmlUi, NestedListFollowsItsRowsLength)
 	EXPECT_EQ(toolCard(view, 0), firstCard) << "the remaining card is kept";
 	EXPECT_EQ(text(firstCard, "tool_name"), "Solo");
 	ASSERT_EQ(lv_obj_get_child_count(find(firstCard, "heaters")), 1u);
+}
+
+namespace
+{
+	/** A style property's value, or -1 if the style doesn't set it */
+	int32_t styleNum(const UI::Themes::Style& style, lv_style_prop_t prop)
+	{
+		lv_style_value_t v{};
+		return style.getProp(prop, &v) == LV_STYLE_RES_FOUND ? v.num : -1;
+	}
+
+	/** A style colour property as 0xRRGGBB, or -1 if the style doesn't set it */
+	int64_t styleColor(const UI::Themes::Style& style, lv_style_prop_t prop)
+	{
+		lv_style_value_t v{};
+		return style.getProp(prop, &v) == LV_STYLE_RES_FOUND ? (lv_color_to_u32(v.color) & 0xFFFFFF) : -1;
+	}
+
+	uint32_t rgb(lv_color_t color)
+	{
+		return lv_color_to_u32(color) & 0xFFFFFF;
+	}
+
+	constexpr std::string_view THEME_MANIFEST =
+		R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "themes": ["themes/*.xml"]})";
+} // namespace
+
+TEST_F(TestXmlUi, UserThemeExtendsABuiltinTheme)
+{
+	writeFile(bundleFile("manifest.json"), THEME_MANIFEST);
+	writeFile(bundleFile("themes/midnight.xml"), R"(
+		<theme name="midnight" extends="duetscreen">
+			<palette primary_hue="300"/>
+			<consts><const name="radius" value="9"/></consts>
+			<styles><style name="card" border_width="0"/></styles>
+		</theme>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	UI::Themes::Theme* theme = UI::Themes::getThemeByName("midnight");
+	ASSERT_NE(theme, nullptr);
+	EXPECT_EQ(UI::Themes::getThemeByName("base"), nullptr) << "abstract themes can't be chosen";
+	theme->resetPalette();
+	theme->setThemeActive();
+	const auto colors = theme->getColors();
+	const auto& lvgl = UI::Themes::getLvglStyles();
+	const auto& components = UI::Themes::getComponentStyles();
+
+	// The parent's styles, built with the child's palette and consts
+	EXPECT_EQ(styleColor(lvgl.btn, LV_STYLE_BG_COLOR), rgb(colors.primary));
+	EXPECT_EQ(styleNum(lvgl.card, LV_STYLE_RADIUS), 9);
+	// ...then the child's changes
+	EXPECT_EQ(styleNum(lvgl.card, LV_STYLE_BORDER_WIDTH), 0);
+	// A copy made in the parent sees the card as the parent left it: the child's change came later
+	EXPECT_EQ(styleNum(components.tool_list_tool, LV_STYLE_BORDER_WIDTH), 2);
+	EXPECT_EQ(styleNum(components.tool_list_tool, LV_STYLE_RADIUS), 9);
+}
+
+TEST_F(TestXmlUi, ThemeProblemsAreReported)
+{
+	writeFile(bundleFile("manifest.json"), THEME_MANIFEST);
+	writeFile(bundleFile("themes/broken.xml"), R"(<theme name="broken" extends="duetscreen">
+		<styles>
+			<style name="no_such_style" radius="1"/>
+			<style name="card" bg_color="#no_such_colour"/>
+		</styles>
+	</theme>)");
+	writeFile(bundleFile("themes/orphan.xml"), R"(<theme name="orphan" extends="nope"/>)");
+	writeFile(bundleFile("themes/malformed.xml"), "<theme name=\"m\">\n<styles>\n</theme>");
+	restartWithUserBundles();
+
+	std::vector<std::string> messages;
+	for (const auto& issue : UI::Xml::getIssues())
+	{
+		messages.push_back(issue.file.filename().string() + ": " + issue.message);
+	}
+	auto has = [&](std::string_view text)
+	{
+		return std::any_of(
+			messages.begin(), messages.end(), [&](const std::string& m) { return m.find(text) != std::string::npos; });
+	};
+	EXPECT_TRUE(has("broken.xml: line 3: unknown style 'no_such_style'"))
+		<< fmt::format("{}", fmt::join(messages, "\n"));
+	EXPECT_TRUE(has("broken.xml: line 4: bg_color: unknown colour or const '#no_such_colour'"));
+	EXPECT_TRUE(has("orphan.xml: theme 'nope' not found"));
+	EXPECT_TRUE(has("malformed.xml: line 3"));
+
+	// The built-in themes still load and the active one is unaffected
+	EXPECT_NE(UI::Themes::getCurrentTheme(), nullptr);
+	EXPECT_EQ(UI::Themes::getCurrentTheme()->getName(), "duetscreen");
+}
+
+TEST_F(TestXmlUi, ComponentsCanUseThemeColours)
+{
+	writeFile(bundleFile("manifest.json"), THEME_MANIFEST);
+	writeFile(bundleFile("components/swatch.xml"),
+			  R"(<component><view extends="lv_obj" style_bg_color="#primary" style_radius="#radius"/></component>)");
+	restartWithUserBundles();
+	ASSERT_TRUE(UI::Xml::getIssues().empty());
+
+	auto& view = makeView("swatch");
+	EXPECT_EQ(rgb(lv_obj_get_style_bg_color(view.getRootPtr(), LV_PART_MAIN)),
+			  rgb(UI::Themes::getCurrentTheme()->getColors().primary));
+	EXPECT_EQ(lv_obj_get_style_radius(view.getRootPtr(), LV_PART_MAIN), 5);
+
+	// Switching theme recolours the view
+	UI::Themes::Theme* grey = UI::Themes::getThemeByName("grey");
+	ASSERT_NE(grey, nullptr);
+	grey->setThemeActive();
+	EXPECT_EQ(rgb(lv_obj_get_style_bg_color(view.getRootPtr(), LV_PART_MAIN)), rgb(grey->getColors().primary));
 }

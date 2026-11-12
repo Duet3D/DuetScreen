@@ -24,5 +24,7 @@ namespace UI::Xml::ThemeStyles
 		lv_xml_register_font(nullptr, "font_normal", &fonts.normal);
 		lv_xml_register_font(nullptr, "font_emphasis", &fonts.emphasis);
 		lv_xml_register_font(nullptr, "font_subdued", &fonts.subdued);
+
+		lv_xml_register_image(nullptr, "symbol_ok", LV_SYMBOL_OK);
 	}
 } // namespace UI::Xml::ThemeStyles

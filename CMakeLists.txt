@@ -508,21 +508,7 @@ if (ENABLE_COVERAGE)
 endif()
 
 # Link the executable with the DuetScreen core library.
-# Force-load only the themes archive so static theme registration objects are retained
-# without whole-archiving the full DuetScreen.lib. The force-load flag goes through
-# target_link_options on every platform rather than being threaded into the library
-# list: raw -Wl,--whole-archive entries in LINK_LIBRARIES are indistinguishable from
-# library names to anything that reads that property, and install(SBOM) records them
-# as bogus SPDX packages.
-target_link_libraries(DuetScreen PRIVATE DuetScreen.lib DuetScreen.themes)
-if(APPLE)
-  target_link_options(DuetScreen PRIVATE "-Wl,-force_load,$<TARGET_FILE:DuetScreen.themes>")
-elseif(MSVC)
-  target_link_options(DuetScreen PRIVATE "/WHOLEARCHIVE:$<TARGET_FILE:DuetScreen.themes>")
-else()
-  target_link_options(DuetScreen PRIVATE
-      "-Wl,--whole-archive,$<TARGET_FILE:DuetScreen.themes>,--no-whole-archive")
-endif()
+target_link_libraries(DuetScreen PRIVATE DuetScreen.lib)
 
 # Link Tracy client at the final executable level so its symbols are available
 # when resolving references from static archives like lvgl.

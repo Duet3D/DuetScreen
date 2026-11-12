@@ -1,0 +1,78 @@
+<!-- Neon: dark, with glowing accent borders and shadows, thin borders and tight padding. -->
+<theme name="neon" extends="base">
+	<palette primary_hue="340" secondary_hue="45" chroma="0.05" dark="true">
+		<!-- More chroma so the accents pop -->
+		<color name="primary" chroma="+0.1"/>
+		<color name="secondary" chroma="+0.1"/>
+
+		<!-- In dark mode: brighter accents, muted variants with less chroma and more light, brighter headers -->
+		<color name="primary" lightness="+0.2" when="dark"/>
+		<color name="secondary" lightness="+0.2" when="dark"/>
+		<color name="primary_muted" from="primary" chroma="*0.5" lightness="+0.2" when="dark"/>
+		<color name="secondary_muted" from="secondary" chroma="*0.5" lightness="+0.2" when="dark"/>
+		<color name="text_header" from="text" chroma="+0.1" lightness="+0.3" when="dark"/>
+	</palette>
+
+	<fonts>
+		<font name="header" size="18" weight="700" style="bold"/>
+		<font name="normal" size="13" weight="400" style="normal"/>
+		<font name="emphasis" size="14" weight="600" style="bold"/>
+		<font name="subdued" size="11" weight="300" style="normal"/>
+	</fonts>
+
+	<styles>
+		<style name="base" shadow_opa="20%"/>
+
+		<!-- Moderate rounding -->
+		<style name="card" radius="3"/>
+		<style name="btn" radius="3"/>
+
+		<!-- Card: thin glowing border, coloured shadow -->
+		<style name="card" border_width="1" border_color="#primary" border_opa="40%" shadow_width="16" shadow_spread="2"
+			   shadow_color="#primary" shadow_offset_x="0" shadow_offset_y="0"/>
+
+		<!-- Tight padding for a dense display -->
+		<style name="card" pad_all="4" pad_row="3" pad_column="3"/>
+
+		<!-- Buttons: neon glow border -->
+		<style name="btn" bg_color="#bg_light" border_width="1" border_color="#primary" border_opa="70%" text_color="#primary"
+			   shadow_width="10" shadow_color="#primary" shadow_opa="30%" shadow_spread="2"/>
+
+		<!-- Action buttons glow in the secondary colour -->
+		<style name="actionBtn" bg_color="#bg_light" border_width="1" border_color="#secondary" text_color="#secondary"
+			   shadow_color="#secondary"/>
+
+		<!-- Checked button: filled, with a glow -->
+		<style name="btn_checked" shadow_width="14" shadow_color="#primary" shadow_opa="40%"/>
+
+		<!-- Pressed: brighten a little -->
+		<style name="pressed" recolor="0xffffff" recolor_opa="25"/>
+
+		<!-- Glowing knob -->
+		<style name="knob" shadow_width="8" shadow_color="#primary" shadow_opa="40%"/>
+
+		<!-- Thin neon scrollbar -->
+		<style name="scrollbar" radius="1" width="3" bg_color="#primary" bg_opa="50%"/>
+
+		<style name="btnm_btn" radius="3" border_width="1" border_color="#primary" border_opa="30%" shadow_width="6"
+			   shadow_color="#primary" shadow_opa="10%"/>
+		<style name="bar" radius="2"/>
+		<style name="bar_indic" radius="2"/>
+		<style name="slider" radius="2"/>
+		<style name="slider_indic" radius="2"/>
+		<style name="slider_knob" radius="circle"/>
+		<style name="slider" height="16"/>
+		<style name="slider_knob" shadow_width="10" shadow_color="#primary" shadow_opa="40%"/>
+		<style name="bg_switch" radius="3"/>
+		<style name="switch_knob" radius="2"/>
+		<style name="cb_marker" radius="2" border_color="#primary"/>
+		<style name="keyboard_button" radius="3" border_width="1" border_color="#primary" border_opa="30%"/>
+		<style name="tab_btn" border_color="#primary" border_width="2"/>
+
+		<style name="bar_label_bg" radius="3"/>
+
+		<!-- Files and folders follow the restyled buttons -->
+		<style name="folder" copy="btn"/>
+		<style name="file" merge="btn bg_light"/>
+	</styles>
+</theme>

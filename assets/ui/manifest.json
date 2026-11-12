@@ -1,9 +1,10 @@
 {
-  /* The built-in UI. User bundles in the user UI folder can replace any component here by giving a file the same name.
-     See src/UI/Xml/XmlUi.h. */
+  /* The built-in UI. User bundles in the user UI folder can replace any component or theme here by giving it the
+     same name. See src/UI/Xml/Runtime/Bundles.h. */
   "id": "duetscreen",
   "name": "DuetScreen",
   "version": "1.0.0",
   "ui_api": "1.0",
-  "components": ["components/*.xml", "screens/*.xml"]
+  "components": ["components/*.xml", "screens/*.xml"],
+  "themes": ["themes/*.xml"]
 }

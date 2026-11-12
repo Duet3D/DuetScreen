@@ -7,6 +7,7 @@
 
 #include "Font.h"
 #include "Debug.h"
+#include "Theme.h"
 #include "UI/Styles/Styles.h"
 #include "utils/StorageHelper.h"
 #include <filesystem>
@@ -211,7 +212,7 @@ namespace UI::FontManager
 		LOG_DBG("Setting typeface to '{:s}'", name);
 
 		s_activeTypeface = name;
-		Themes::getCurrentTheme()->setTypeface(name);
+		Themes::setTypeface(name);
 
 		lv_obj_refresh_style(lv_screen_active(), LV_PART_ANY, LV_STYLE_PROP_ANY);
 

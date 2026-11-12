@@ -11,6 +11,7 @@
 #include "Translations.h"
 #include "UI/Core/Model.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Styles/Theme.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
@@ -40,6 +41,15 @@ namespace UI::Xml
 			ZoneScoped;
 			s_loaded = Bundles::loadAll(s_paths);
 			HotReload::watch(s_loaded.files);
+
+			// Themes can only be checked once all are loaded: a theme's parent may come from another bundle
+			std::vector<std::pair<std::filesystem::path, std::string>> themeProblems;
+			Themes::setThemeFiles(std::move(s_loaded.themes), &themeProblems);
+			for (auto& [file, message] : themeProblems)
+			{
+				s_loaded.issues.push_back({file, std::move(message)});
+			}
+
 			for (const auto& issue : s_loaded.issues)
 			{
 				Model::get().post<EventType::Response>(
@@ -107,6 +117,7 @@ namespace UI::Xml
 		HotReload::watch({});
 		i18n::setLanguageChangedCallback(nullptr);
 		DataSources::stop();
+		Themes::clearThemes();
 		Globals::clear();
 		Actions::deinit();
 		lv_xml_deinit();

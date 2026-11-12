@@ -26,12 +26,6 @@ namespace UI::Themes
 		return v;
 	}
 
-	static auto& themes()
-	{
-		static std::map<std::string_view, Theme*> v; // Ordered map to ensure consistent theme order
-		return v;
-	}
-
 #define STATIC_ON_FIRST_USE(type, name)                                                                                \
 	static type& name()                                                                                                \
 	{                                                                                                                  \
@@ -43,8 +37,6 @@ namespace UI::Themes
 	static std::unique_ptr<ComponentStyles> s_componentStyles;
 
 	static Fonts s_fonts;
-
-	static Theme* s_currentTheme = nullptr;
 
 	Style::Style()
 		: name(nullptr)
@@ -138,17 +130,6 @@ namespace UI::Themes
 			s_lvglStyles = std::make_unique<LvglStyles>();
 		}
 		return *s_lvglStyles;
-	}
-
-	void setLvglStyles(const LvglStyles& styles)
-	{
-		ZoneScoped;
-		LOG_DBG("Setting lvgl styles");
-		if (!s_lvglStyles)
-		{
-			s_lvglStyles = std::make_unique<LvglStyles>();
-		}
-		*s_lvglStyles = styles;
 	}
 
 	const ComponentStyles& getComponentStyles()
@@ -343,9 +324,7 @@ namespace UI::Themes
 		{"object_cancel_base", &ComponentStyles::object_cancel_base},
 		{"object_cancel_current", &ComponentStyles::object_cancel_current},
 		{"object_cancel_cancelled", &ComponentStyles::object_cancel_cancelled},
-#if DEBUG_BORDERS
 		{"debug_borders", &ComponentStyles::debug_borders},
-#endif
 	};
 
 	void forEachStyle(const std::function<void(std::string_view name, Style& style)>& fn)
@@ -362,162 +341,19 @@ namespace UI::Themes
 		}
 	}
 
-	void setComponentStyles(const ComponentStyles& styles)
-	{
-		ZoneScoped;
-		LOG_DBG("Setting component styles");
-		if (!s_componentStyles)
-		{
-			s_componentStyles = std::make_unique<ComponentStyles>();
-		}
-		*s_componentStyles = styles;
-	}
-
 	const Fonts& getFonts()
 	{
 		ZoneScoped;
 		return s_fonts;
 	}
 
-	static void setFonts(const ThemeFonts& fonts)
+	void setFonts(const lv_font_t& header, const lv_font_t& normal, const lv_font_t& emphasis, const lv_font_t& subdued)
 	{
 		ZoneScoped;
-		LOG_DBG("Setting fonts");
-		s_fonts.header = *fonts.header.get();
-		s_fonts.normal = *fonts.normal.get();
-		s_fonts.emphasis = *fonts.emphasis.get();
-		s_fonts.subdued = *fonts.subdued.get();
-	}
-
-	static bool themeExists(std::string_view name)
-	{
-		ZoneScoped;
-		auto& t = themes();
-		return t.find(name) != t.end();
-	}
-
-	Theme::Theme(std::string_view name, FontConfigSet fontConfigSet, std::function<void(Theme* theme)> initFunc)
-		: m_name(name)
-		, m_fontConfigSet(fontConfigSet)
-		, m_initFunc(initFunc)
-	{
-		ZoneScoped;
-		if (themeExists(name))
-		{
-			LOG_FATAL_THROW("Theme with name {:s} already exists", name);
-			return;
-		}
-		themes()[name] = this;
-		LOG_INFO("Theme {:s} created", name);
-	}
-
-	Theme::~Theme()
-	{
-		ZoneScoped;
-		LOG_INFO("Destroying theme: {:s}", m_name);
-		themes().erase(m_name);
-	}
-
-	void Theme::init()
-	{
-		ZoneScoped;
-		UI_LOCK();
-		LOG_INFO("Initializing theme: {:s}", m_name);
-
-		m_lvgl = std::make_unique<LvglStyles>();
-		m_components = std::make_unique<ComponentStyles>();
-
-		onInit();
-
-		if (m_initFunc)
-		{
-			m_initFunc(this);
-		}
-	}
-
-	void Theme::setThemeActive()
-	{
-		ZoneScoped;
-		LOG_INFO("Applying theme: {:s}", m_name);
-
-		// Lazy-initialize the theme if it hasn't been initialized yet
-		if (!m_lvgl || !m_components)
-		{
-			init();
-		}
-
-		lv_enable_style_refresh(false);
-		setLvglStyles(getLvglStyles());
-		setComponentStyles(getComponentStyles());
-		setTypeface(FontManager::getActiveTypefaceName());
-
-		s_currentTheme = const_cast<Theme*>(this);
-
-		lv_enable_style_refresh(true);
-		{
-			ZoneScopedN("Refreshing styles");
-			lv_obj_report_style_change(NULL);
-		}
-		lv_obj_invalidate(lv_screen_active());
-	}
-
-	const LvglStyles& Theme::getLvglStyles() const
-	{
-		ZoneScoped;
-		if (!m_lvgl)
-		{
-			LOG_FATAL_THROW("LVGL styles not initialized");
-		}
-		return *m_lvgl;
-	}
-
-	const ComponentStyles& Theme::getComponentStyles() const
-	{
-		ZoneScoped;
-		if (!m_components)
-		{
-			LOG_FATAL_THROW("Component styles not initialized");
-		}
-		return *m_components;
-	}
-
-	LvglStyles& Theme::getLvglStyles()
-	{
-		ZoneScoped;
-		if (!m_lvgl)
-		{
-			m_lvgl = std::make_unique<LvglStyles>();
-		}
-		return *m_lvgl;
-	}
-
-	ComponentStyles& Theme::getComponentStyles()
-	{
-		ZoneScoped;
-		if (!m_components)
-		{
-			m_components = std::make_unique<ComponentStyles>();
-		}
-		return *m_components;
-	}
-
-	void Theme::setTypeface(const std::string& typeface)
-	{
-		ZoneScoped;
-		LOG_INFO("Setting typeface to {:s}", typeface);
-
-		/* This will release any previously held font resources */
-		m_fonts.header =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.header.size, m_fontConfigSet.header.style);
-		m_fonts.normal =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.normal.size, m_fontConfigSet.normal.style);
-		m_fonts.emphasis =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.emphasis.size, m_fontConfigSet.emphasis.style);
-		m_fonts.subdued =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.subdued.size, m_fontConfigSet.subdued.style);
-
-		/* Copy by value to the static fonts which the styles use the addresses of */
-		setFonts(m_fonts);
+		s_fonts.header = header;
+		s_fonts.normal = normal;
+		s_fonts.emphasis = emphasis;
+		s_fonts.subdued = subdued;
 	}
 
 	/**
@@ -1222,9 +1058,6 @@ namespace UI::Themes
 		s_lvglStyles.reset();
 		s_componentStyles.reset();
 
-		// Defer theme initialization: only the active theme is initialized now.
-		// Other themes are lazy-initialized when first activated via setThemeActive().
-
 		// lv_theme_t* baseTheme = lv_theme_default_init(display,
 		// 											  lv_palette_main(LV_PALETTE_BLUE),
 		// 											  lv_palette_main(LV_PALETTE_RED),
@@ -1244,20 +1077,7 @@ namespace UI::Themes
 
 		lv_theme_apply(lv_screen_active());
 
-		Theme* theme = getThemeByName(StorageHelper::getData(ID_THEME));
-		if (theme == nullptr)
-		{
-			LOG_INFO("Theme not found, using default theme");
-			theme = getDefaultTheme();
-			if (theme != nullptr)
-			{
-				StorageHelper::setData(ID_THEME, theme->getName());
-			}
-		}
-		if (theme != nullptr)
-		{
-			theme->setThemeActive();
-		}
+		// The styles are built when the XML UI loads the themes (see Theme.h)
 
 		/* Set icon folder */
 		std::string_view iconFolder = StorageHelper::getData(ID_ICON_FOLDER);
@@ -1267,90 +1087,6 @@ namespace UI::Themes
 		bool debugBordersEnabeled = StorageHelper::getData(ID_DEBUG_BORDERS);
 		showDebugBorders(lv_screen_active(), debugBordersEnabeled);
 #endif
-	}
-
-	const std::map<std::string_view, Theme*>& getThemes()
-	{
-		ZoneScoped;
-		return themes();
-	}
-
-	Theme* getCurrentTheme()
-	{
-		ZoneScoped;
-		return s_currentTheme;
-	}
-
-	Theme* getTheme(const size_t index)
-	{
-		ZoneScoped;
-		if (index >= getThemeCount())
-		{
-			LOG_ERROR("Theme with index {:d} not found", index);
-			return nullptr;
-		}
-		auto it = themes().begin();
-		std::advance(it, index);
-		return it->second;
-	}
-
-	Theme* getThemeByName(std::string_view name)
-	{
-		ZoneScoped;
-		auto it = themes().find(name);
-		if (it != themes().end())
-		{
-			return it->second;
-		}
-		LOG_ERROR("Theme with name {:s} not found", name);
-		return nullptr;
-	}
-
-	Theme* getDefaultTheme()
-	{
-		ZoneScoped;
-		Theme* theme = getThemeByName(ID_THEME.default_value);
-		if (theme == nullptr)
-		{
-			LOG_ERROR("Default theme not found, using first available theme");
-			theme = getTheme(0);
-		}
-
-		return theme;
-	}
-
-	size_t getThemeCount()
-	{
-		ZoneScoped;
-		return themes().size();
-	}
-
-	bool refreshCurrentTheme()
-	{
-		ZoneScoped;
-		UI_LOCK();
-		if (s_currentTheme)
-		{
-			s_currentTheme->setThemeActive();
-			return true;
-		}
-		else
-		{
-			LOG_ERROR("No current theme set");
-			return false;
-		}
-	}
-
-	const std::vector<std::string_view> getThemeNames()
-	{
-		ZoneScoped;
-		std::vector<std::string_view> names(getThemeCount());
-		size_t i = 0;
-		for (const auto& [name, theme] : themes())
-		{
-			names[i++] = name;
-		}
-		return names;
 	}
 
 	static std::string s_iconFolder(DEFAULT_ICON_SET);

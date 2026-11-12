@@ -1,0 +1,252 @@
+<!--
+  The base theme: every style the UI uses. The other themes extend it and change what they need.
+
+  How a theme is built, and the values it can use (#name, dpx, lighten(), …): src/UI/Styles/Theme.h
+  Palette colours (#bg, #primary, #text, …) and how they are generated:        src/UI/Styles/Palette.h
+  Style names are the members of LvglStyles and ComponentStyles:               src/UI/Styles/Styles.h
+-->
+<theme name="base" abstract="true">
+	<palette primary_hue="245" secondary_hue="50" chroma="0.02" dark="true" customisable="true"/>
+
+	<fonts>
+		<font name="header" size="18" weight="700" style="bold"/>
+		<font name="normal" size="14" weight="400" style="normal"/>
+		<font name="emphasis" size="14" weight="700" style="bold"/>
+		<font name="subdued" size="12" weight="200" style="italic"/>
+	</fonts>
+
+	<consts>
+		<const name="border_width" value="2"/>
+		<const name="outline_width" value="3"/>
+		<const name="radius" value="5"/>
+		<const name="pad_large" value="10"/>
+		<const name="pad" value="5"/>
+		<const name="pad_small" value="2"/>
+		<const name="pad_tiny" value="1"/>
+		<const name="shadow_offset" value="3"/>
+		<const name="transition_time" value="80"/>
+	</consts>
+
+	<styles>
+		<!-- Backgrounds -->
+		<style name="bg_dark" bg_color="#bg_dark" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg" bg_color="#bg" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_light" bg_color="#bg_light" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_primary" bg_color="#primary" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_primary_muted" bg_color="#primary_muted" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_secondary" bg_color="#secondary" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_secondary_muted" bg_color="#secondary_muted" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_success" bg_color="#success" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_warning" bg_color="#warning" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_error" bg_color="#error" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_header" bg_color="0xffffff" bg_opa="10%"/>
+		<style name="bg_color_list_item" bg_color="#bg" bg_opa="100%" bg_grad_color="#bg_light"/>
+		<style name="bg_modal" bg_color="#bg" bg_opa="70%"/>
+
+		<!-- Text -->
+		<style name="text" text_color="#text" text_font="font_normal"/>
+		<style name="text_muted" text_color="#text_muted" text_font="font_subdued"/>
+		<style name="text_emphasis" text_color="#text" text_font="font_emphasis"/>
+		<style name="text_header" text_color="#text_header" text_font="font_header"/>
+		<style name="text_warning" text_color="#error" text_font="font_emphasis"/>
+		<style name="line_space_large" text_line_space="20dpx"/>
+		<style name="text_align_center" text_align="center"/>
+
+		<!-- Borders -->
+		<style name="border" border_color="#border" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_muted" border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_highlight" border_color="#highlight" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_color_primary" border_color="#primary" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_color_secondary" border_color="#secondary" border_width="#border_width" border_opa="100%" border_side="full"/>
+
+		<!-- Outlines -->
+		<style name="outline_primary" outline_color="#primary" outline_width="#outline_width" outline_pad="#outline_width" outline_opa="50%"/>
+		<style name="outline_secondary" outline_color="#secondary" outline_width="#outline_width" outline_opa="50%"/>
+
+		<!-- Scrollbar -->
+		<style name="scrollbar" bg_color="#bg_light" border_color="#border" border_width="1" radius="circle"
+			   pad_all="7dpx" width="5dpx" bg_opa="40%"/>
+		<style name="scrollbar_scrolled" bg_opa="100%"/>
+
+		<!-- Base, applied to every widget -->
+		<style name="base" bg_opa="0" border_post="true"/>
+
+		<style name="screen" bg_color="#bg_dark" bg_opa="100%"/>
+
+		<style name="card" radius="#radius" pad_all="#pad" pad_row="#pad_small" pad_column="#pad_small"
+			   bg_opa="100%" bg_color="#bg"
+			   border_color="#border" border_width="#border_width" border_opa="100%" border_side="full"/>
+
+		<!-- Buttons -->
+		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#primary"/>
+		<style name="btn_checked" bg_grad_dir="none" merge="border_highlight"/>
+		<style name="actionBtn" bg_opa="100%" bg_color="#secondary"/>
+
+		<!-- Icons -->
+		<style name="icon_recolor" recolor="#text" recolor_opa="100%"/>
+
+		<!-- Modifiers -->
+		<style name="pressed" recolor="0x000000" recolor_opa="35"/>
+		<style name="disabled" recolor="#bg" recolor_opa="50%"/>
+		<style name="clip_corner" clip_corner="true" border_post="true"/>
+
+		<!-- Padding -->
+		<style name="pad_large" pad_all="#pad_large" pad_row="#pad_large" pad_column="#pad_large"/>
+		<style name="pad_normal" pad_all="#pad" pad_row="#pad" pad_column="#pad"/>
+		<style name="pad_small" pad_all="#pad_small" pad_gap="#pad_small"/>
+		<style name="pad_gap" pad_row="10dpx" pad_column="10dpx"/>
+		<style name="pad_base" pad_all="#pad" pad_row="#pad" pad_column="#pad"/>
+		<style name="pad_zero" pad_all="0" pad_row="0" pad_column="0"/>
+		<style name="pad_tiny" pad_all="#pad_tiny" pad_row="#pad_tiny" pad_column="#pad_tiny"/>
+
+		<style name="circle" radius="circle"/>
+		<style name="no_radius" radius="0"/>
+		<style name="no_border" border_width="0"/>
+
+		<!-- dpi / 4 * 256 at LVGL's 130 dpi -->
+		<style name="rotary_scroll" rotary_sensitivity="8192"/>
+
+		<style name="grow" transform_width="3dpx" transform_height="3dpx"/>
+		<style name="knob" bg_color="#primary" bg_opa="100%" pad_all="6dpx" radius="circle"/>
+		<style name="anim" anim_duration="200"/>
+		<style name="anim_fast" anim_duration="120"/>
+		<style name="input" border_color="#border" border_width="1" pad_hor="20" pad_ver="0" text_align="center"/>
+
+		<!-- Drag to E-stop -->
+		<style name="draggable" transition_props="transform_width transform_height" transition_duration="200ms"
+			   transition_easing="ease_in_out" transition_delay="100ms"/>
+		<!-- The dragging style animates outline_width, the property drag_complete changes. (The C++ theme this
+			 replaces also defined a transform/border transition for it, which was immediately overwritten.) -->
+		<style name="dragging" transform_width="20" transform_height="20" border_color="0xffffff" border_opa="30%"
+			   border_width="20" transition_props="outline_width" transition_duration="#transition_time"
+			   transition_easing="ease_in_out"/>
+		<style name="drag_complete" outline_color="0xffffff" outline_width="3"/>
+
+		<!-- Arc -->
+		<style name="arc_indic" arc_color="#highlight" arc_width="15dpx" arc_rounded="true"/>
+		<style name="arc_indic_primary" arc_color="#primary"/>
+
+		<!-- Bar -->
+		<style name="bar" bg_color="#highlight" bg_opa="100%" radius="circle"/>
+		<style name="bar_indic" radius="circle"/>
+
+		<!-- Button matrix -->
+		<style name="btnm_btn" bg_color="#bg_light" bg_grad_dir="none" merge="border_muted" shadow_width="0" radius="#radius"/>
+		<style name="btnm_btn_checked" bg_color="#primary" bg_opa="100%" text_color="#text"/>
+
+		<!-- Dropdown; the list's height is two inches at LVGL's 130 dpi -->
+		<style name="dropdown" pad_ver="#pad"/>
+		<style name="dropdown_list" max_height="260"/>
+
+		<!-- Checkbox -->
+		<style name="cb_marker" pad_all="3dpx" border_width="#border_width" border_color="#primary" bg_color="#bg"
+			   bg_opa="100%" radius="2"/>
+		<style name="cb_marker_checked" bg_image_src="symbol_ok"/>
+
+		<!-- Switch -->
+		<style name="bg_switch" bg_color="#bg_light" bg_opa="100%" radius="circle"/>
+		<style name="switch_knob" pad_all="-4dpx" bg_color="#text" radius="circle"/>
+
+		<!-- Line -->
+		<style name="line" line_width="1" line_color="#highlight"/>
+
+		<!-- Chart -->
+		<style name="chart_bg" border_width="#border_width" border_color="#highlight" border_opa="100%" border_post="false"
+			   pad_column="10dpx" line_color="#highlight"/>
+		<style name="chart_series" line_width="3dpx" radius="3dpx" width="8dpx" height="8dpx" pad_column="2dpx"/>
+		<style name="chart_indic" radius="circle" width="8dpx" height="8dpx" bg_color="#primary" bg_opa="100%"/>
+
+		<!-- Menu -->
+		<style name="menu_bg" pad_all="0" pad_gap="0" radius="0" clip_corner="true" border_side="none"/>
+		<style name="menu_section" radius="#radius" clip_corner="true" bg_opa="100%" bg_color="#bg" text_color="#text"/>
+		<style name="menu_cont" pad_hor="#pad_small" pad_ver="#pad_small" pad_gap="#pad_small" border_width="1dpx"
+			   border_opa="10%" border_color="#text" border_side="none"/>
+		<style name="menu_sidebar_cont" pad_all="0" pad_gap="0" border_width="1dpx" border_opa="10%"
+			   border_color="#text" border_side="right"/>
+		<style name="menu_main_cont" pad_all="0" pad_gap="0"/>
+		<style name="menu_header_cont" pad_hor="#pad_small" pad_ver="#pad_tiny" pad_gap="#pad_small"/>
+		<style name="menu_header_btn" pad_hor="#pad_tiny" pad_ver="#pad_tiny" shadow_opa="0" bg_opa="0" text_color="#text"/>
+		<style name="menu_page" pad_hor="0" pad_gap="0"/>
+		<style name="menu_pressed" bg_opa="20%" bg_color="#bg_light"/>
+		<style name="menu_separator" bg_opa="0" pad_ver="#pad_tiny"/>
+
+		<!-- Table -->
+		<style name="table" radius="0"/>
+		<style name="table_cell" bg_color="#bg" bg_opa="100%" text_color="#text" border_width="1dpx"
+			   border_color="#highlight" border_side="top|bottom"/>
+
+		<!-- Text area -->
+		<style name="text_area" pad_all="#pad"/>
+		<style name="ta_cursor" border_color="#text" border_width="2dpx" pad_left="-1dpx" border_side="left" anim_duration="400"/>
+		<style name="ta_placeholder" text_color="#text_muted"/>
+
+		<!-- Calendar -->
+		<style name="calendar_btnm_bg" pad_all="#pad_small" pad_gap="1"/>
+		<style name="calendar_btnm_day" border_width="1dpx" border_color="#highlight" bg_color="#bg" bg_opa="20%"/>
+		<style name="calendar_header" pad_hor="#pad_small" pad_top="#pad_small" pad_bottom="#pad_tiny" pad_gap="#pad_small"/>
+
+		<!-- Canvas -->
+		<style name="canvas" merge="bg border"/>
+
+		<!-- Keyboard -->
+		<style name="keyboard_button" bg_color="#bg_light" merge="border_muted" shadow_width="0" radius="#radius"/>
+		<style name="keyboard_button_checked_bg" bg_color="#primary" bg_opa="100%" text_color="#text"/>
+
+		<!-- Tab view: the selected tab is underlined with a double-width border -->
+		<style name="tab_btn" border_color="#primary" border_width="4" border_side="bottom" pad_top="4"/>
+		<style name="tab_bg_focus" outline_pad="-#border_width"/>
+
+		<!-- List -->
+		<style name="list_bg" pad_hor="#pad" pad_ver="0" pad_gap="0" clip_corner="true"/>
+		<style name="list_btn" border_width="1" border_color="#border" border_side="bottom" pad_all="#pad_small"
+			   pad_column="#pad_small"/>
+		<style name="list_item_grow" transform_width="#pad"/>
+
+		<!-- LED -->
+		<style name="led" bg_opa="100%" bg_color="0xffffff" bg_grad_color="#bg_dark" radius="circle"
+			   shadow_width="15dpx" shadow_color="0xffffff" shadow_spread="5dpx"/>
+
+		<!-- Scale -->
+		<style name="scale" line_color="#text" line_width="2dpx" arc_color="#text" arc_width="2dpx" length="6dpx"/>
+
+		<!-- Slider -->
+		<style name="slider" height="20" bg_color="#highlight" bg_opa="100%" radius="#radius"/>
+		<style name="slider_indic" radius="#radius"/>
+		<style name="slider_knob" radius="#radius" border_color="#primary_muted" border_width="#border_width"/>
+
+		<!-- DuetScreen components -->
+		<style name="console_btn_anim" recolor="#secondary"/>
+
+		<!-- E-stop: LVGL's palette red -->
+		<style name="estop" bg_color="0xf44336" text_color="0xffffff" radius="circle"/>
+
+		<style name="folder" copy="btn"/>
+		<style name="file" merge="btn bg_light border"/>
+
+		<style name="unhomed" bg_color="0xfb9514" border_width="0"/>
+
+		<!-- Blue to red (LVGL's palette) -->
+		<style name="temperature_bar" bg_opa="100%" bg_color="0x2196f3" bg_grad_color="0xf44336" bg_grad_dir="hor"/>
+		<style name="temperature_bar_indic" bg_color="#border" bg_opa="100%"/>
+
+		<style name="tool_list_tool" copy="card"/>
+		<style name="tool_list_heater" pad_all="0"/>
+		<style name="tool_selected" outline_color="#primary" outline_opa="100%" outline_width="3"
+			   shadow_color="rgb_darken(#primary, 10)" shadow_opa="50%" shadow_width="0"
+			   shadow_offset_x="-#shadow_offset" shadow_offset_y="#shadow_offset"/>
+
+		<style name="list_title" merge="text_emphasis"/>
+
+		<style name="slider_buttons" width="40" height="40"/>
+
+		<style name="graph_legend" min_width="150"/>
+
+		<style name="bar_label_bg" bg_color="#bg_light" bg_opa="50%" radius="#radius" pad_hor="#pad"/>
+
+		<style name="object_cancel_base" copy="card" bg_color="#bg_light" bg_opa="50%"/>
+		<style name="object_cancel_cancelled" bg_color="#error" bg_opa="100%"/>
+		<style name="object_cancel_current" bg_color="#primary" bg_opa="100%"/>
+
+		<style name="debug_borders" outline_color="#text" outline_width="1" outline_opa="100%"/>
+	</styles>
+</theme>

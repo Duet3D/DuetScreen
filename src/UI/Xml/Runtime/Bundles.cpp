@@ -188,12 +188,41 @@ namespace UI::Xml::Bundles
 				}
 
 				LOG_INFO("Loading UI bundle '{:s}' from {:s}", id, dir.string());
+				for (const auto& pattern : manifest.value("themes", std::vector<std::string>{}))
+				{
+					for (const auto& file : expand(dir, pattern))
+					{
+						loadTheme(file);
+					}
+				}
 				for (const auto& pattern : manifest.value("components", std::vector<std::string>{}))
 				{
 					for (const auto& file : expand(dir, pattern))
 					{
 						loadComponent(file, id);
 					}
+				}
+			}
+
+			/** Read one theme file; Themes builds it once every bundle is loaded */
+			void loadTheme(const std::filesystem::path& file)
+			{
+				ZoneScoped;
+				m_result.files.push_back(file);
+				auto text = readFile(file);
+				if (!text)
+				{
+					addIssue(file, "can't be read");
+					return;
+				}
+				std::string error;
+				if (auto theme = Themes::parseThemeFile(*text, file, error))
+				{
+					m_result.themes.push_back(std::move(*theme));
+				}
+				else
+				{
+					addIssue(file, error);
 				}
 			}
 

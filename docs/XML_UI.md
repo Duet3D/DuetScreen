@@ -18,6 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
 | Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list` | [Widgets/](../src/UI/Xml/Widgets) |
+| Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
 A view never contains logic and a presenter never touches a widget. Data flows one way, from C++ to XML through subjects; requests flow the other way, from XML to C++ through actions.
 
@@ -38,9 +39,10 @@ src/UI/Xml/
   Widgets/   DsButton, DsSlider, DsList
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource
+src/UI/Styles/                            global styles; Theme, ThemeFile and Palette build them from theme files
 src/UI/Screens/<Name>/<Name>Presenter.*   presenters live with their screen
 src/UI/Screens/XmlPresenters.cpp          the list of presenters XML can name
-assets/ui/                                the built-in bundle
+assets/ui/                                the built-in bundle (components, screens, themes)
 ```
 
 ## Hosting a view
@@ -61,11 +63,12 @@ A bundle is a directory with a `manifest.json` and component files. A component'
   "name": "DuetScreen",
   "version": "1.0.0",
   "ui_api": "1.0",
-  "components": ["components/*.xml", "screens/*.xml"]
+  "components": ["components/*.xml", "screens/*.xml"],
+  "themes": ["themes/*.xml"]
 }
 ```
 
-Bundles are loaded in this order. A component in a later bundle replaces the one with the same name from an earlier bundle.
+Bundles are loaded in this order. A component or theme in a later bundle replaces the one with the same name from an earlier bundle.
 
 1. **Built-in**: `assets/ui/`, shipped as `/etc/assets/ui/` on the screen.
 2. **User bundles**: each sub-directory of `/boot/ui/` on the SD card's boot partition (`var/ui/` in the simulator), in name order.
@@ -115,6 +118,7 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 | --- | --- |
 | Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
+| Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
 | Text | `translation_tag="fan.title"` on labels, `translation_tag` on `ds_button`. Keys are those in `assets/i18n/*.json`. |
 
@@ -158,6 +162,35 @@ An action is resolved like a name: first the presenter of the nearest enclosing 
 | --- | --- |
 | `gcode` | G-code to send, e.g. `M220 S{value}` |
 
+## Themes
+
+A theme is an XML file that sets the palette, the four fonts and the properties of every style. Themes extend each other: the built-in ones all extend [base.xml](../assets/ui/themes/base.xml), which defines every style, and change only what makes them different. A user bundle can add a theme, or replace a built-in one by giving it the same name.
+
+```xml
+<theme name="midnight" extends="duetscreen">
+	<palette primary_hue="300" chroma="0.08">
+		<color name="primary" lightness="+0.1"/>
+	</palette>
+	<fonts>
+		<font name="header" size="20" weight="800" style="bold"/>
+	</fonts>
+	<consts>
+		<const name="radius" value="8"/>
+	</consts>
+	<styles>
+		<style name="card" border_width="0" shadow_width="12" shadow_opa="20%"/>
+		<style name="folder" copy="btn"/>
+	</styles>
+</theme>
+```
+
+- **Palette.** Every colour (`bg`, `primary`, `text`, …) is generated from two hues, a chroma and light or dark mode, then the `<color>` adjustments run. See [Palette.h](../src/UI/Styles/Palette.h). `customisable="true"` lets the user pick the hues in the settings.
+- **Fonts and consts** are merged down the chain: a theme overrides its parent name by name.
+- **Styles** are built in order, the root ancestor's `<style>` elements first. Each element changes one style: `copy="x"` replaces it with style x as it is at that point, `merge="x y"` adds those styles' properties, then the element's own properties are set. So a theme's styles are changes on top of its parent's.
+- **Values** are LVGL's XML style values, plus `#name` for a palette colour or const, `7dpx` for DPI-scaled pixels, `lighten(#c, 0.05)` / `darken(#c, 0.05)` and `rgb_darken(#c, 10)`. See [Theme.h](../src/UI/Styles/Theme.h).
+
+Problems in a theme (an unknown style, colour or parent) are reported with the file and line, like component errors.
+
 ## Adding a screen
 
 1. Write `assets/ui/screens/<name>.xml`.
@@ -183,7 +216,8 @@ The declaration is used to bind the names into a scope, to publish them globally
 
 - **Hot reload.** The simulator watches the bundle files and rebuilds open views when one changes. Edit `assets/ui/` or `var/ui/` and save.
 - **Tests.**
-  - [test_xml_ui.cpp](../tests/src/test_cases/UI/test_xml_ui.cpp) covers loading, overrides, per-row and nested-list bindings, actions and reload.
+  - [test_xml_ui.cpp](../tests/src/test_cases/UI/test_xml_ui.cpp) covers loading, overrides, per-row and nested-list bindings, actions, reload and themes.
+  - Every theme is checked pixel by pixel by the dashboard and widget screenshots (`home_view/dashboard/theme_*.png`, `theme/*`).
   - Converted screens must still match their existing screenshots in `tests/ref_imgs`.
   - Engine changes belong in helix-xml with tests there (`cmake -S tests -B build` in `libraries/helix-xml`).
 

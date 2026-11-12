@@ -29,12 +29,14 @@
 #include "UI/Components/Theme/ThemePreview.h"
 #include "UI/Screens/File/FileView.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Styles/Themes/CustomTheme.h"
+#include "UI/Styles/Theme.h"
+#include "UI/Styles/ThemeFile.h"
 #include "UI/Widgets/SideBar/SideBar.h"
 #include "UI/Widgets/Temperature/HeaterSlider.h"
 #include "UI/Widgets/ToolList/ToolList.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
+#include <fstream>
 #include <gtest/gtest.h>
 
 using namespace UI;
@@ -61,21 +63,46 @@ TEST_F(TestTheme, DefaultTheme)
 	constexpr uint16_t secondaryHue = 50;
 	constexpr float chroma = 0.02f;
 	constexpr bool darkMode = true;
-	static Themes::FontConfigSet fontConfigs = {
-		.header = {.size = 18, .style = LV_FREETYPE_FONT_STYLE_BOLD},
-		.normal = {.size = 14, .style = LV_FREETYPE_FONT_STYLE_NORMAL},
-		.emphasis = {.size = 14, .style = LV_FREETYPE_FONT_STYLE_BOLD},
-		.subdued = {.size = 12, .style = LV_FREETYPE_FONT_STYLE_NORMAL},
-	};
 
-	Themes::CustomTheme theme("test_theme", Themes::ColorCtx{}, fontConfigs, [](Themes::Theme* theme) {});
-	theme.init();
-	theme.setThemeActive();
+	// A customisable theme with an all-zero light palette and fonts without weights
+	std::string error;
+	auto file = Themes::parseThemeFile(R"(
+		<theme name="test_theme" extends="base">
+			<palette primary_hue="0" secondary_hue="0" chroma="0" dark="false"/>
+			<fonts>
+				<font name="header" size="18" weight="none" style="bold"/>
+				<font name="normal" size="14" weight="none" style="normal"/>
+				<font name="emphasis" size="14" weight="none" style="bold"/>
+				<font name="subdued" size="12" weight="none" style="normal"/>
+			</fonts>
+		</theme>)",
+									   "test_theme.xml",
+									   error);
+	ASSERT_TRUE(file.has_value()) << error;
+	ASSERT_EQ(file->fonts["header"].weight, 0u) << "none is weight 0: the face's own weight";
+
+	// Load it alongside the built-in themes
+	std::vector<Themes::ThemeFile> files;
+	std::string text;
+	for (const char* name : {"base", "duetscreen"})
+	{
+		std::ifstream in(fmt::format("assets/ui/themes/{:s}.xml", name));
+		text.assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+		files.push_back(*Themes::parseThemeFile(text, name, error));
+	}
+	files.push_back(std::move(*file));
+	Themes::setThemeFiles(std::move(files), nullptr);
+
+	Themes::Theme* theme = Themes::getThemeByName("test_theme");
+	ASSERT_NE(theme, nullptr);
+	ASSERT_TRUE(theme->isCustomisable());
+	theme->resetPalette();
+	theme->setThemeActive();
 
 	ThemePreview themePreview("theme_preview", screen);
 	themePreview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 
-	EXPECT_TRUE(Themes::getCurrentTheme() == &theme);
+	EXPECT_TRUE(Themes::getCurrentTheme() == theme);
 	themePreview.setDarkMode(darkMode);
 	themePreview.setPrimaryHue(primaryHue);
 	themePreview.setSecondaryHue(secondaryHue);

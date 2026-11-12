@@ -6,7 +6,7 @@
  *
  * How the parts fit together:
  *
- *   Bundles      load XML components from the built-in bundle and user bundles on the SD card
+ *   Bundles      load XML components and themes from the built-in bundle and user bundles on the SD card
  *   XmlView      shows a component; creates the presenter it names
  *   XmlPresenter C++ behaviour for a view: declares subjects and lists, handles actions
  *   Data sources publish printer data (fans, tools, …) as global subjects and lists
@@ -34,8 +34,9 @@ namespace UI::Xml
 	Paths defaultPaths();
 
 	/**
-	 * Start the XML UI: the engine, theme styles, translations, widgets, actions, data sources, then the bundles.
-	 * Presenters must be registered first (see View/XmlPresenter.h). Call after `Themes::init()`.
+	 * Start the XML UI: the engine, theme styles, translations, widgets, actions, data sources, then the bundles. The
+	 * bundles include the themes, so this also applies the stored theme (see UI/Styles/Theme.h). Presenters must be
+	 * registered first (see View/XmlPresenter.h). Call after `Themes::init()`.
 	 */
 	void init(const Paths& paths = defaultPaths());
 

@@ -1,0 +1,61 @@
+<!-- Retro: a classic control panel. Square corners, heavy borders, chunky padding, hard shadows, earth tones. -->
+<theme name="retro" extends="base">
+	<palette primary_hue="65" secondary_hue="115" chroma="0.03" dark="false"/>
+
+	<fonts>
+		<font name="header" size="20" weight="800" style="bold"/>
+		<font name="normal" size="14" weight="500" style="normal"/>
+		<font name="emphasis" size="15" weight="700" style="bold"/>
+		<font name="subdued" size="12" weight="400" style="normal"/>
+	</fonts>
+
+	<styles>
+		<!-- Square: no rounding -->
+		<style name="card" radius="0"/>
+		<style name="btn" radius="0"/>
+		<style name="knob" radius="0"/>
+
+		<!-- Heavy borders -->
+		<style name="card" border_width="3" border_color="#text" border_opa="100%"/>
+
+		<!-- Chunky padding -->
+		<style name="card" pad_all="10" pad_row="6" pad_column="6"/>
+
+		<!-- Hard offset shadow for depth -->
+		<style name="card" shadow_width="0" shadow_offset_x="4" shadow_offset_y="4" shadow_color="#border" shadow_opa="100%"/>
+
+		<!-- Buttons: raised, with a hard shadow -->
+		<style name="btn" border_width="3" border_color="#text" shadow_width="0" shadow_offset_x="3" shadow_offset_y="3"
+			   shadow_color="#border" shadow_opa="100%"/>
+		<style name="btn_checked" border_color="#secondary" border_width="3"/>
+
+		<!-- Pressed: darker -->
+		<style name="pressed" recolor="0x000000" recolor_opa="30"/>
+
+		<!-- Wide, chunky scrollbar -->
+		<style name="scrollbar" radius="0" width="8" bg_opa="60%" border_width="1" border_color="#text"/>
+
+		<style name="btnm_btn" radius="0" border_width="2" border_color="#text" shadow_width="0" shadow_offset_x="2"
+			   shadow_offset_y="2" shadow_color="#border" shadow_opa="100%"/>
+		<style name="bar" radius="0"/>
+		<style name="bar_indic" radius="0"/>
+		<style name="slider" radius="0"/>
+		<style name="slider_indic" radius="0"/>
+		<style name="slider_knob" radius="0"/>
+		<style name="slider" height="24"/>
+		<style name="slider_knob" border_width="3" border_color="#text"/>
+		<style name="cb_marker" radius="0" border_width="3" border_color="#text"/>
+		<style name="bg_switch" radius="0"/>
+		<style name="switch_knob" radius="0"/>
+		<style name="keyboard_button" radius="0" border_width="2" border_color="#text"/>
+		<style name="tab_btn" border_width="3" border_color="#text" border_side="bottom"/>
+		<style name="list_btn" border_width="2" border_color="#border" pad_all="6"/>
+
+		<style name="bar_label_bg" radius="0"/>
+		<style name="estop" radius="0"/>
+
+		<!-- Files and folders follow the restyled buttons -->
+		<style name="folder" copy="btn"/>
+		<style name="file" merge="btn bg_light"/>
+	</styles>
+</theme>

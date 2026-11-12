@@ -9,7 +9,7 @@
 #include "Debug.h"
 #include "UI/Styles/Color.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Styles/Themes/CustomTheme.h"
+#include "UI/Styles/Theme.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -341,28 +341,24 @@ namespace UI
 	{
 		ZoneScoped;
 		UI::Themes::Theme* theme = Themes::getCurrentTheme();
-
 		if (!theme)
 		{
 			LOG_ERROR("No current theme set");
 			return;
 		}
-
-		auto customTheme = dynamic_cast<UI::Themes::CustomTheme*>(theme);
-		if (!customTheme)
+		if (!theme->isCustomisable())
 		{
-			LOG_ERROR("Current theme does not inherit from CustomTheme");
+			LOG_ERROR("Theme '{:s}' has a fixed palette", theme->getName());
 			return;
 		}
 
-		customTheme->setColors(static_cast<uint16_t>(m_primaryHueSlider.getValue()),
-							   static_cast<uint16_t>(m_secondaryHueSlider.getValue()),
-							   m_chromaSlider.getValue(),
-							   m_darkMode.getChecked());
-
+		theme->setPalette({.primaryHue = static_cast<uint16_t>(m_primaryHueSlider.getValue()),
+						   .secondaryHue = static_cast<uint16_t>(m_secondaryHueSlider.getValue()),
+						   .chroma = m_chromaSlider.getValue(),
+						   .dark = m_darkMode.getChecked()});
 		UI::Themes::refreshCurrentTheme();
 
-		const auto colors = customTheme->getColors();
+		const auto colors = theme->getColors();
 		renderColorPreview(m_primaryColorPreview, colors.primary.getL(), colors.primary.getC());
 		renderColorPreview(m_secondaryColorPreview, colors.secondary.getL(), colors.secondary.getC());
 		updateSwatches();
@@ -385,20 +381,17 @@ namespace UI
 		m_primaryHueSlider.getLvSlider().sendEvent(LV_EVENT_SIZE_CHANGED);
 		m_secondaryHueSlider.getLvSlider().sendEvent(LV_EVENT_SIZE_CHANGED);
 		UI::Themes::Theme* theme = Themes::getCurrentTheme();
-
 		if (!theme)
 		{
 			LOG_ERROR("No current theme set");
 			return;
 		}
-
-		auto customTheme = dynamic_cast<UI::Themes::CustomTheme*>(theme);
-		if (!customTheme)
+		if (!theme->isCustomisable())
 		{
 			return;
 		}
 
-		const auto colors = customTheme->getColors();
+		const auto colors = theme->getColors();
 		renderColorPreview(m_primaryColorPreview, colors.primary.getL(), colors.primary.getC());
 		renderColorPreview(m_secondaryColorPreview, colors.secondary.getL(), colors.secondary.getC());
 		updateSwatches();
