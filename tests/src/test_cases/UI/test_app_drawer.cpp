@@ -7,7 +7,6 @@
 
 #include "Debug.h"
 #include "UI/Components/AppDrawer/AppDrawer.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 
@@ -17,14 +16,9 @@ class TestAppDrawer : public UiTestSuite
 	TestAppDrawer()
 		: app_drawer("app_drawer", screen)
 	{
-		UI::HomeView::setInstance(&home);
-		home.hide();
-
 		app_drawer.init();
 	}
-	virtual ~TestAppDrawer() { UI::HomeView::setInstance(nullptr); }
 
-	UI::HomeView home;
 	UI::AppDrawer app_drawer;
 };
 

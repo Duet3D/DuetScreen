@@ -9,8 +9,7 @@
 
 namespace UI::Xml::Services
 {
-	static std::function<void(std::string_view)> s_gcodeSender;	 // Replacement sender, or empty for the Duet
-	static std::function<ModalNumberPad*()> s_numberPadProvider; // Owner of the number pad, or empty
+	static std::function<void(std::string_view)> s_gcodeSender; // Replacement sender, or empty for the Duet
 
 	void sendGcode(std::string_view gcode)
 	{
@@ -35,13 +34,4 @@ namespace UI::Xml::Services
 		s_gcodeSender = std::move(sender);
 	}
 
-	ModalNumberPad* numberPad()
-	{
-		return s_numberPadProvider ? s_numberPadProvider() : nullptr;
-	}
-
-	void setNumberPadProvider(std::function<ModalNumberPad*()> provider)
-	{
-		s_numberPadProvider = std::move(provider);
-	}
 } // namespace UI::Xml::Services

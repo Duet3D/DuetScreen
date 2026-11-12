@@ -10,7 +10,6 @@
 #include "UI/Components/LVGL/LvAnim.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/File/FileView.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 
@@ -153,16 +152,16 @@ namespace UI
 	void SideBar::setSelectedView(LvObj* view)
 	{
 		ZoneScoped;
-		auto& homeView = HomeView::instance();
+		const std::string_view name = getViewName(view);
 
 		const bool isHomeSelected = (view == nullptr);
-		const bool isControlSelected = (view == &homeView.getControlView());
-		const bool isFilesSelected = (view == &homeView.getFileView());
+		const bool isControlSelected = (name == "control");
+		const bool isFilesSelected = (name == "files");
 #if SIDE_BAR_CONSOLE_BUTTON
-		const bool isConsoleSelected = (view == &homeView.getConsoleView());
+		const bool isConsoleSelected = (name == "console");
 #endif
 #if SIDE_BAR_SETTINGS_BUTTON
-		const bool isSettingsSelected = (view == &homeView.getSettingsView());
+		const bool isSettingsSelected = (name == "settings");
 #endif
 
 		m_homeBtn.setChecked(isHomeSelected);
@@ -232,16 +231,14 @@ namespace UI
 	{
 		ZoneScoped;
 		LOG_INFO("Control button pressed");
-		HomeView& homeView = HomeView::instance();
-		openScreen(&homeView.getControlView(), true);
+		openScreen("control", true);
 	}
 
 	void SideBar::filesBtnEvent(lv_event_t*)
 	{
 		ZoneScoped;
 		LOG_INFO("Files button pressed");
-		auto& view = HomeView::instance().getFileView();
-		openScreen(&view, true);
+		openScreen("files", true);
 	}
 
 #if SIDE_BAR_APP_DRAWER
@@ -310,8 +307,7 @@ namespace UI
 	{
 		ZoneScoped;
 		LOG_INFO("Console button pressed");
-		HomeView& homeView = HomeView::instance();
-		openScreen(&homeView.getConsoleView(), true);
+		openScreen("console", true);
 	}
 #endif
 
@@ -320,8 +316,7 @@ namespace UI
 	{
 		ZoneScoped;
 		LOG_INFO("Settings button pressed");
-		HomeView& homeView = HomeView::instance();
-		openScreen(&homeView.getSettingsView(), true);
+		openScreen("settings", true);
 	}
 #endif
 

@@ -7,7 +7,7 @@
 
 #include "AppDrawer.h"
 #include "Debug.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Widgets/SideBar/SideBar.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -15,7 +15,7 @@ namespace UI
 	struct AppInfo
 	{
 		std::string_view name;
-		LvContainer* screen;
+		const char* screen; // Name of the screen to open (see Navigation.h)
 		std::string_view icon;
 	};
 
@@ -42,62 +42,29 @@ namespace UI
 	void AppDrawer::init()
 	{
 		ZoneScoped;
+		// Screens by the name they are registered under (see Navigation.h). Without the app drawer's own screens,
+		// those apps open the control screen, which has the same pages as tabs.
+#if SIDE_BAR_APP_DRAWER
+		static constexpr bool ownScreens = true;
+#else
+		static constexpr bool ownScreens = false;
+#endif
 		static const AppInfo apps[] = {
-			{.name = _("app_drawer.console"), .screen = &HomeView::instance().getConsoleView(), .icon = "console.png"},
-			{.name = _("app_drawer.move"),
-			 .screen =
-#if SIDE_BAR_APP_DRAWER
-				 &HomeView::instance().getMoveView(),
-#else
-				 &HomeView::instance().getControlView(),
-#endif
-			 .icon = "move.png"},
+			{.name = _("app_drawer.console"), .screen = "console", .icon = "console.png"},
+			{.name = _("app_drawer.move"), .screen = ownScreens ? "move" : "control", .icon = "move.png"},
 			{.name = _("app_drawer.temperature"),
-			 .screen =
-#if SIDE_BAR_APP_DRAWER
-				 &HomeView::instance().getTemperatureView(),
-#else
-				 &HomeView::instance().getControlView(),
-#endif
+			 .screen = ownScreens ? "temperature" : "control",
 			 .icon = "temperature.png"},
-#if 0
-			{.name = _("app_drawer.fan"), .screen = &HomeView::instance().getFanView(), .icon = "fan.png"},
-#endif
 			{.name = _("app_drawer.fine_tune"),
-			 .screen =
-#if SIDE_BAR_APP_DRAWER
-				 &HomeView::instance().getFineTuneView(),
-#else
-				 &HomeView::instance().getControlView(),
-#endif
+			 .screen = ownScreens ? "fine_tune" : "control",
 			 .icon = "fine_tune.png"},
-#if 0
-			{.name=_("app_drawer.macros"), .screen=&HomeView::instance().getMacroView(), .icon="macros.png"},
-#endif
 			{.name = _("app_drawer.heightmap"),
-			 .screen =
-#if SIDE_BAR_APP_DRAWER
-				 &HomeView::instance().getHeightmapView(),
-#else
-				 &HomeView::instance().getControlView(),
-#endif
+			 .screen = ownScreens ? "heightmap" : "control",
 			 .icon = "heightmap.png"},
 			{.name = _("app_drawer.object_cancel"),
-			 .screen =
-#if SIDE_BAR_APP_DRAWER
-				 &HomeView::instance().getObjectCancelView(),
-#else
-				 &HomeView::instance().getControlView(),
-#endif
+			 .screen = ownScreens ? "object_cancel" : "control",
 			 .icon = "cancel.png"},
-			{.name = _("app_drawer.settings"),
-			 .screen = &HomeView::instance().getSettingsView(),
-			 .icon = "settings.png"},
-#if 0
-			{.name = _("app_drawer.status"),
-			 .screen = &HomeView::instance().getDashboard().getStatusView(),
-			 .icon = "status.png"},
-#endif
+			{.name = _("app_drawer.settings"), .screen = "settings", .icon = "settings.png"},
 		};
 
 		m_apps.setItemCount(std::size(apps),
@@ -111,7 +78,7 @@ namespace UI
 								app->setMinWidth(LV_SIZE_CONTENT);
 								// app->setMinHeight(LV_SIZE_CONTENT);
 								// app->setFlexGrow(1);
-								app->setUserData((void*)appInfo.screen);
+								app->setUserData(const_cast<char*>(appInfo.screen));
 								return app;
 							});
 	}

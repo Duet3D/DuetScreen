@@ -2,6 +2,7 @@
 #include "Debug.h"
 #include "UI/Components/LVGL/Transitions.h"
 #include <algorithm>
+#include <map>
 #include <vector>
 
 namespace UI
@@ -13,6 +14,7 @@ namespace UI
 	static ViewList_t s_openScreens;
 	static ViewList_t s_returnableScreens;
 	static ViewList_t s_openModals;
+	static std::map<std::string, LvObjPtr, std::less<>> s_namedViews; // Views by name
 
 	static bool inVector(ViewList_t& vec, LvObjPtr item)
 	{
@@ -438,6 +440,61 @@ namespace UI
 		lastModal->hide();
 		s_openModals.pop_back();
 		notifySideBar();
+		return true;
+	}
+
+	void registerView(std::string name, LvObj* view)
+	{
+		UI_LOCK();
+		s_namedViews[std::move(name)] = view;
+	}
+
+	void forgetView(LvObj* view)
+	{
+		UI_LOCK();
+		std::erase_if(s_namedViews, [view](const auto& entry) { return entry.second == view; });
+		const bool changed = removeFromVector(s_homeScreens, view) | removeFromVector(s_openScreens, view) |
+							 removeFromVector(s_returnableScreens, view) | removeFromVector(s_openModals, view);
+		if (changed)
+		{
+			notifySideBar();
+		}
+	}
+
+	LvObj* findView(std::string_view name)
+	{
+		UI_LOCK();
+		auto it = s_namedViews.find(name);
+		return it == s_namedViews.end() ? nullptr : it->second;
+	}
+
+	std::string_view getViewName(const LvObj* view)
+	{
+		UI_LOCK();
+		for (const auto& [name, v] : s_namedViews)
+		{
+			if (v == view)
+			{
+				return name;
+			}
+		}
+		return {};
+	}
+
+	LvObj* getModalHost()
+	{
+		return findView("main_window");
+	}
+
+	bool openScreen(std::string_view name, bool closePrevious)
+	{
+		LvObj* view = findView(name);
+		if (view == nullptr)
+		{
+			LOG_WARN("No view called '{:s}' to open", name);
+			return false;
+		}
+		detail::openScreenImpl(view, closePrevious);
 		return true;
 	}
 } // namespace UI

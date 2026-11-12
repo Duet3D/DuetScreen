@@ -204,6 +204,8 @@ namespace UI
 		void showDeveloperSettings() { m_tabs.setActiveTab(3); }
 
 	  protected:
+		/** Find the on-screen keyboard */
+		void onInit() override;
 		void onShow() override;
 		void onHide() override;
 

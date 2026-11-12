@@ -12,7 +12,7 @@
 #include "ObjectModel/Job.h"
 #include "ObjectModel/Tool.h"
 #include "PrintInfo.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Core/Navigation.h"
 #include "i18n/i18n.h"
 
 namespace UI

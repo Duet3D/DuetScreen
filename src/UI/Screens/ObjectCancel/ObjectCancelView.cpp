@@ -9,7 +9,6 @@
 #include "Debug.h"
 #include "Storage.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -360,7 +359,10 @@ namespace UI
 	void ObjectCancelView::onInit()
 	{
 		ZoneScoped;
-		m_confirmModal.setParent(HomeView::instance().getMainWindow());
+		if (LvObj* host = getModalHost())
+		{
+			m_confirmModal.setParent(*host);
+		}
 	}
 
 	void ObjectCancelView::onShow()

@@ -1,7 +1,8 @@
 /*
  * DsSlider.h
  *
- * <ds_slider>: DuetScreen's Slider (label, value, -/+ buttons, optional number pad) in XML.
+ * <ds_slider>: DuetScreen's Slider (label, value, -/+ buttons, optional number pad) in XML. `numberpad="true"` uses
+ * the view registered as `numberpad` (see Navigation.h).
  *
  *     <ds_slider min="0" max="100" increment="1" decimals="0" label="…" label_tag="…"
  *                bind_label="subject" bind_value="subject" numberpad="true">

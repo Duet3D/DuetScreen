@@ -12,13 +12,18 @@
 #include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
-#include "UI/Screens/Home/HomeView.h"
-#include "UI/Screens/XmlPresenters.h"
+#include "UI/Core/Navigation.h"
+#include "UI/Screens/Control/ControlView.h"
+#include "UI/Screens/File/FilesScreen.h"
+#include "UI/Screens/Settings/SettingsView.h"
+#include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Widgets/Dashboard/Dashboard.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
 #include "UI/Xml/Runtime/HotReload.h"
 #include "UI/Xml/Runtime/XmlUi.h"
+#include "UI/Xml/View/XmlView.h"
 #include "glob.h"
 #include "hv/requests.h"
 #include "i18n/i18n.h"
@@ -132,7 +137,7 @@ int main(int argc, char** argv)
 	}
 	{
 		ZoneScopedN("Xml::init");
-		UI::registerXmlPresenters();
+		UI::registerXmlScreens();
 		UI::Xml::init();
 #if SIMULATION
 		// Edit assets/ui/ or var/ui/ and the running UI rebuilds
@@ -142,7 +147,12 @@ int main(int argc, char** argv)
 
 	DisplayHelper::setRotation(StorageHelper::getData(ID_DISPLAY_ROTATION));
 
-	UI::HomeView& home = UI::HomeView::instance();
+	// The whole UI: assets/ui/screens/home_screen.xml
+	lv_obj_set_style_pad_all(lv_screen_active(), 0, LV_PART_MAIN);
+	lv_enable_style_refresh(false); // One style refresh for the whole tree, below
+	UI::Xml::XmlView home("home", lv_screen_active(), "home_screen");
+	lv_enable_style_refresh(true);
+	lv_obj_refresh_style(home.getRootPtr(), LV_PART_ANY, LV_STYLE_PROP_ANY);
 	home.show();
 
 #if HARDWARE_TEST
@@ -258,53 +268,84 @@ int main(int argc, char** argv)
 				[](lv_timer_t* timer)
 				{
 					static size_t index = 0;
-					auto& home = UI::HomeView::instance();
+					// Every page in turn, by the names home_screen.xml registers them under
+					auto control = [] { return UI::findView<UI::ControlView>("control"); };
+					auto files = [] { return UI::findView<UI::FilesScreen>("files"); };
+					auto settings = [] { return UI::findView<UI::SettingsView>("settings"); };
+					auto dashboard = [] { return UI::findView<UI::Dashboard>("dashboard"); };
 					static const std::function<void()> cbs[] = {
-						[&]()
+						[=]()
 						{
 							UI::home();
-							home.getDashboard().showJobsTab();
+							if (auto* d = dashboard())
+								d->showJobsTab();
 						},
-						[&]()
+						[=]()
 						{
 							UI::home();
-							home.getDashboard().showStatusTab();
+							if (auto* d = dashboard())
+								d->showStatusTab();
 						},
-						[&]()
+						[=]()
 						{
-							UI::openScreen(&home.getControlView(), true);
-							home.getControlView().showMoveView();
+							UI::openScreen("control", true);
+							if (auto* c = control())
+								c->showMoveView();
 						},
-						[&]() { home.getControlView().showTemperatureView(); },
-						[&]() { home.getControlView().showHeightmapView(); },
-						[&]() { home.getControlView().showFanView(); },
-						[&]()
+						[=]()
 						{
-							UI::openScreen(&home.getFileView(), true);
-							home.getFileView().setActiveTab(0);
+							if (auto* c = control())
+								c->showTemperatureView();
 						},
-						[&]() { home.getFileView().setActiveTab(1); },
-						[&]() { UI::openScreen(&home.getConsoleView(), true); },
-#  if SIDE_BAR_APP_DRAWER
-						[&]() { UI::openScreen(&home.getMoveView(), true); },
-						[&]() { UI::openScreen(&home.getTemperatureView(), true); },
-						[&]() { UI::openScreen(&home.getFineTuneView(), true); },
-						[&]() { UI::openScreen(&home.getHeightmapView(), true); },
-#  endif
-						[&]()
+						[=]()
 						{
-							UI::openScreen(&home.getSettingsView(), true);
-							home.getSettingsView().showGeneralSettings();
+							if (auto* c = control())
+								c->showHeightmapView();
 						},
-						[&]() { home.getSettingsView().showConnectionSettings(); },
-						[&]() { home.getSettingsView().showDisplaySettings(); },
-						[&]() { home.getSettingsView().showDeveloperSettings(); },
+						[=]()
+						{
+							if (auto* c = control())
+								c->showFanView();
+						},
+						[=]()
+						{
+							UI::openScreen("files", true);
+							if (auto* f = files())
+								f->setActiveTab(0);
+						},
+						[=]()
+						{
+							if (auto* f = files())
+								f->setActiveTab(1);
+						},
+						[]() { UI::openScreen("console", true); },
+						[=]()
+						{
+							UI::openScreen("settings", true);
+							if (auto* v = settings())
+								v->showGeneralSettings();
+						},
+						[=]()
+						{
+							if (auto* v = settings())
+								v->showConnectionSettings();
+						},
+						[=]()
+						{
+							if (auto* v = settings())
+								v->showDisplaySettings();
+						},
+						[=]()
+						{
+							if (auto* v = settings())
+								v->showDeveloperSettings();
+						},
 					};
 
 					std::invoke(cbs[index]);
 					index = (index + 1) % std::size(cbs);
 				},
-				StorageHelper::getData(ID_BURNIN_FREQUENCY),
+				static_cast<uint32_t>(StorageHelper::getData(ID_BURNIN_FREQUENCY).count()),
 				NULL);
 			if (first_run)
 			{

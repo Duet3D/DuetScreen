@@ -4,9 +4,9 @@
 #include "MoveView.h"
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/Files.h"
+#include "ObjectModel/PrinterStatus.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 

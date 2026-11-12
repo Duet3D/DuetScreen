@@ -6,6 +6,7 @@
  *   <ds_button>       see DsButton.h
  *   <ds_slider>       see DsSlider.h
  *   <ds_list>         see DsList.h
+ *   <ds_view>         see DsView.h
  */
 
 #pragma once

@@ -6,7 +6,8 @@
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Tool.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Core/Navigation.h"
+#include "UI/Widgets/Dashboard/Dashboard.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <cctype>
@@ -189,7 +190,10 @@ namespace UI
 	{
 		ZoneScoped;
 		OM::FileSystem::StartPrint(m_gcodePath);
-		HomeView::instance().getDashboard().disableJobsTab(true);
+		if (auto* dashboard = findView<Dashboard>("dashboard"))
+		{
+			dashboard->disableJobsTab(true);
+		}
 		home();
 	}
 

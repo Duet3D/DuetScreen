@@ -8,7 +8,7 @@
 #include "UiTestSuite.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "UI/Screens/XmlPresenters.h"
+#include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "i18n/i18n.h"
@@ -60,7 +60,7 @@ UiTestSuiteInner::UiTestSuiteInner()
 	StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, false);
 
 	UI::Themes::init(display);
-	UI::registerXmlPresenters();
+	UI::registerXmlScreens();
 	UI::Xml::init(xmlPaths());
 #if DEBUG_BORDERS
 	// UI::Themes::showDebugBorders(lv_screen_active(), true);

@@ -36,13 +36,13 @@ namespace UI
 			return;
 		}
 
-		LvContainer* screen = static_cast<LvContainer*>(app->getUserData());
+		const auto* screen = static_cast<const char*>(app->getUserData());
 		if (screen == nullptr)
 		{
 			LOG_ERROR("App clicked event received with null screen user data");
 			return;
 		}
 
-		openScreen(screen, true);
+		openScreen(std::string_view(screen), true);
 	}
 } // namespace UI

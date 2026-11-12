@@ -1,6 +1,6 @@
 # XML UI
 
-DuetScreen can build views from XML files loaded at runtime. The Fan screen is built this way; the rest of the UI is still C++, and both kinds of view work side by side.
+DuetScreen builds its UI from XML files loaded at runtime. The home screen ([home_screen.xml](../assets/ui/screens/home_screen.xml)) is XML; some of the pages it shows are still C++ views, which XML hosts until they are rewritten, so both kinds work side by side.
 
 The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/helix-xml`), an MIT fork of the XML engine LVGL shipped before 9.5. The DuetScreen side is [src/UI/Xml](../src/UI/Xml).
 
@@ -17,7 +17,8 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | List | A dynamic-length list of rows; each row has its own subjects, and may have lists of its own | [Binding/List.h](../src/UI/Xml/Binding/List.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
 A view never contains logic and a presenter never touches a widget. Data flows one way, from C++ to XML through subjects; requests flow the other way, from XML to C++ through actions.
@@ -41,11 +42,28 @@ src/UI/Xml/
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource
 src/UI/Styles/                            global styles; Theme, ThemeFile and Palette build them from theme files
 src/UI/Screens/<Name>/<Name>Presenter.*   presenters live with their screen
-src/UI/Screens/XmlPresenters.cpp          the list of presenters XML can name
+src/UI/Screens/XmlScreens.cpp             the presenters XML can name, and the C++ views it can host
 assets/ui/                                the built-in bundle (components, screens, themes)
 ```
 
 ## Hosting a view
+
+In XML, a page of a screen is a `<ds_view>`:
+
+```xml
+<ds_view name="dashboard" view="dashboard" home="true"/>
+<ds_view name="control" view="control"/>
+```
+
+`view` names an XML component or, until it is rewritten, a C++ view registered in [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp). If both exist, the component wins, so a C++ page is replaced simply by adding a component of the same name. Every `<ds_view>` is registered with Navigation under its `name`:
+
+- `<action name="nav.open" arg="control"/>` opens it (also `nav.home` and `nav.back`)
+- C++ finds it with `findView<ControlView>("control")`, e.g. the shared `numberpad` or `keyboard`
+- modals open over the view called `main_window` (`getModalHost()`)
+
+Pages start hidden; `home="true"` makes a page a home screen (shown when nothing else is open) and `shown="true"` shows a part that is always there, such as the status bar.
+
+In C++, an XML component is hosted with `Xml::XmlView`:
 
 ```cpp
 Xml::XmlView m_fanView{"fan", parent, "fan_screen"};
@@ -145,6 +163,7 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_button>` | `text`, `translation_tag`, `bind_text`, `icon`, `checkable` |
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
+| `<ds_view>` | `name`, `view`, `home`, `shown`: a page (see Hosting a view) |
 
 ### Actions
 
@@ -161,6 +180,9 @@ An action is resolved like a name: first the presenter of the nearest enclosing 
 | Global action | `arg` |
 | --- | --- |
 | `gcode` | G-code to send, e.g. `M220 S{value}` |
+| `nav.open` | Name of the page to open |
+| `nav.home` | (none) Close every page and show the home screen |
+| `nav.back` | (none) Close the top modal, or go back a page |
 
 ## Themes
 
@@ -196,7 +218,7 @@ Problems in a theme (an unknown style, colour or parent) are reported with the f
 1. Write `assets/ui/screens/<name>.xml`.
 2. If it needs printer data that isn't published yet, add it to a data source (or add a source to the list in [DataSources.cpp](../src/UI/Xml/Data/DataSources.cpp)) and document the names in the source's header. These names are the public UI API: renaming one breaks user bundles and needs a `UI_API_VERSION_MAJOR` bump in [XmlUi.h](../src/UI/Xml/Runtime/XmlUi.h).
 3. If it needs behaviour, write a presenter in `src/UI/Screens/<Name>/` (see [FanPresenter](../src/UI/Screens/Fan/FanPresenter.h)), add it to [XmlPresenters.cpp](../src/UI/Screens/XmlPresenters.cpp), and name it on the root element: `<component presenter="…">`.
-4. Host it with `Xml::XmlView`.
+4. Add a `<ds_view>` for it to the screen that shows it (or host it in C++ with `Xml::XmlView`).
 
 ### Declaring names
 

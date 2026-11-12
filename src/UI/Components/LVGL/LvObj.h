@@ -262,6 +262,12 @@ namespace UI
 	  protected:
 		LvObj(lv_create_t initFunc, const std::string& name, lv_obj_t* parent);
 
+		/** Refer to `existing` without owning it (see LvObjRef) */
+		struct BorrowTag
+		{
+		};
+		LvObj(BorrowTag, lv_obj_t* existing);
+
 		virtual void onInit() {}
 		virtual void onShow() {}
 		virtual void onHide() {}
@@ -284,5 +290,24 @@ namespace UI
 		};
 		std::vector<EventCallbackInfo> m_eventCallbacks;
 		static void genericEventCallback(lv_event_t* e);
+	};
+	/**
+	 * A handle to a widget something else created and owns, such as the XML engine, so C++ views can be built inside
+	 * it:
+	 *
+	 *     LvObjRef parent(xmlCreatedObj);
+	 *     auto* view = new ControlView("control", parent);
+	 *
+	 * It never deletes the widget and leaves the widget's user data alone. Use it only while constructing: views must
+	 * not keep a reference to their parent.
+	 */
+	class LvObjRef : public LvObj
+	{
+	  public:
+		/** Refer to `obj` */
+		explicit LvObjRef(lv_obj_t* obj);
+
+		/** Let go of the widget without deleting it */
+		~LvObjRef() override;
 	};
 } // namespace UI

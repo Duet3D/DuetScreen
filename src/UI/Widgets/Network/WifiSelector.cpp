@@ -7,7 +7,7 @@
 
 #include "WifiSelector.h"
 #include "Debug.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 
@@ -215,7 +215,10 @@ namespace UI
 	void WifiSelector::onInit()
 	{
 		ZoneScoped;
-		m_passwordModal.setParent(HomeView::instance().getMainWindow());
+		if (LvObj* host = getModalHost())
+		{
+			m_passwordModal.setParent(*host);
+		}
 	}
 
 	void WifiSelector::openPasswordModal(const std::string& ssid)

@@ -8,6 +8,7 @@
 #include "Dashboard.h"
 #include "Configuration.h"
 #include "Debug.h"
+#include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 
@@ -54,6 +55,12 @@ namespace UI
 	{
 		ZoneScoped;
 		m_tabs.disableTab(0, disable);
+	}
+
+	void Dashboard::onInit()
+	{
+		ZoneScoped;
+		setNumberPad(findView<ModalNumberPad>("numberpad"));
 	}
 
 	void Dashboard::setNumberPad(ModalNumberPad* np)

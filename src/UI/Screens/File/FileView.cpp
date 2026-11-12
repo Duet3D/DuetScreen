@@ -2,11 +2,11 @@
 #include "Debug.h"
 #include "Hardware/Duet.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 #include "lvgl/lvgl_private.h"
 #include "utils/StorageHelper.h"
+#include "utils/UnitSystem.h"
 
 #define ENABLE_BREADCRUMB_SEPARATOR 1
 
@@ -750,7 +750,10 @@ namespace UI
 	void FileView::onInit()
 	{
 		ZoneScoped;
-		m_startPrint.setParent(HomeView::instance().getMainWindow());
+		if (LvObj* host = getModalHost())
+		{
+			m_startPrint.setParent(*host);
+		}
 	}
 
 	void FileView::onShow()

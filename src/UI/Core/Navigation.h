@@ -2,10 +2,48 @@
 
 #include "View.h"
 
+#include <concepts>
+#include <string>
+#include <string_view>
+
 namespace UI
 {
 	void back();
 	void home();
+
+	/*
+	 * Named views. A view registered by name can be found, and opened, by that name instead of through whatever owns
+	 * it. This is how the XML UI's `<ds_view>` makes the views it hosts available, e.g. `findView<ModalNumberPad>
+	 * ("numberpad")` or `<action name="nav.open" arg="control"/>`.
+	 */
+
+	/** Make `view` findable as `name`, replacing any earlier view of that name */
+	void registerView(std::string name, LvObj* view);
+
+	/** Forget `view`: its name and any home, open, returnable or modal entry. Call before destroying a view. */
+	void forgetView(LvObj* view);
+
+	/** The view registered as `name`, or nullptr */
+	LvObj* findView(std::string_view name);
+
+	/** The view registered as `name` if it is a T, or nullptr */
+	template <typename T>
+	T* findView(std::string_view name)
+	{
+		return dynamic_cast<T*>(findView(name));
+	}
+
+	/** The name `view` is registered under, or empty */
+	std::string_view getViewName(const LvObj* view);
+
+	/**
+	 * Where modals belong: the view registered as `main_window` (the area beside the sidebar and below the status
+	 * bar), so their backdrop dims the page and not the navigation. nullptr if there is none.
+	 */
+	LvObj* getModalHost();
+
+	/** Open the screen registered as `name` (see openScreen()). @return false if there is no such view */
+	bool openScreen(std::string_view name, bool closePrevious = true);
 
 	// Internal helpers used by template APIs; not part of public modal type contract
 	namespace detail
@@ -19,10 +57,10 @@ namespace UI
 	} // namespace detail
 
 	template <typename T>
-	concept NotModalType = !requires { typename T::modal_base_marker; };
+	concept NotModalType = std::derived_from<T, LvObj> && !requires { typename T::modal_base_marker; };
 
 	template <typename T>
-	concept ModalType = requires { typename T::modal_base_marker; };
+	concept ModalType = std::derived_from<T, LvObj> && requires { typename T::modal_base_marker; };
 
 	template <NotModalType T>
 	void addHomeScreen(T* view)

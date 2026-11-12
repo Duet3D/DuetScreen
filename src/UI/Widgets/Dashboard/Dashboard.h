@@ -37,6 +37,8 @@ namespace UI
 		void clear();
 
 	  protected:
+		/** Give the status tab the shared number pad */
+		void onInit() override;
 		void onHide() override;
 
 	  private:

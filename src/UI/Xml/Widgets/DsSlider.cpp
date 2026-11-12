@@ -3,7 +3,8 @@
  */
 
 #include "DsSlider.h"
-#include "UI/Xml/Runtime/Services.h"
+#include "UI/Components/Input/ModalNumberPad.h"
+#include "UI/Core/Navigation.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
 #include "i18n/i18n.h"
@@ -84,7 +85,7 @@ namespace UI::Xml
 		}
 		if (lv_xml_to_bool(attrOr(attrs, "numberpad", "false")))
 		{
-			slider.setNumberPad(Services::numberPad());
+			slider.setNumberPad(findView<ModalNumberPad>("numberpad"));
 		}
 
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_label"))

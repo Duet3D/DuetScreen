@@ -1,7 +1,6 @@
 #include "StatusView.h"
 #include "Debug.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 
@@ -181,7 +180,10 @@ namespace UI
 	void StatusView::onInit()
 	{
 		ZoneScoped;
-		m_confirmCancel.setParent(HomeView::instance().getMainWindow());
+		if (LvObj* host = getModalHost())
+		{
+			m_confirmCancel.setParent(*host);
+		}
 	}
 
 	void StatusView::onShow() {}

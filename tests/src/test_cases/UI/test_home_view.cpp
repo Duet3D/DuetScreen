@@ -10,9 +10,16 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "Storage.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Screens/Console/ConsoleView.h"
+#include "UI/Screens/Control/ControlView.h"
 #include "UI/Screens/File/FileView.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Screens/File/FilesScreen.h"
+#include "UI/Screens/Notifications/NotificationsView.h"
+#include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Widgets/Dashboard/Dashboard.h"
+#include "UI/Widgets/SideBar/SideBar.h"
+#include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
@@ -22,33 +29,48 @@
 class TestHomeView : public UiTestSuite
 {
   protected:
+	/** The home screen, as the application shows it */
 	TestHomeView()
+		: home("home", lv_screen_active(), "home_screen")
 	{
 		ZoneScoped;
-		// Override the singleton so code using HomeView::instance() uses our local view
-		UI::HomeView::setInstance(&view);
+		home.show();
 	}
 
-	virtual ~TestHomeView()
+	/** The view home_screen.xml registers as `name`; fails the test if there is none */
+	template <typename T>
+	static T& page(std::string_view name)
 	{
-		// Reset override
-		UI::HomeView::setInstance(nullptr);
+		T* view = UI::findView<T>(name);
+		if (view == nullptr)
+		{
+			throw std::runtime_error(fmt::format("home_screen has no {:s}", name));
+		}
+		return *view;
 	}
 
-	UI::HomeView view;
+	static UI::Dashboard& dashboardPage() { return page<UI::Dashboard>("dashboard"); }
+	static UI::ControlView& controlPage() { return page<UI::ControlView>("control"); }
+	static UI::ConsoleView& consolePage() { return page<UI::ConsoleView>("console"); }
+	static UI::FilesScreen& filesPage() { return page<UI::FilesScreen>("files"); }
+	static UI::SettingsView& settingsPage() { return page<UI::SettingsView>("settings"); }
+	static UI::SideBar& sideBarPage() { return page<UI::SideBar>("side_bar"); }
+	static UI::NotificationsView& notificationsPage() { return page<UI::NotificationsView>("notifications"); }
+
+	UI::Xml::XmlView home;
 };
 
 TEST_F(TestHomeView, BlankView)
 {
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/blank.png")
 
-	view.showKeyboard(true);
+	notificationsPage().showKeyboard(true);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/keyboard.png");
 }
 
 TEST_F(TestHomeView, BlankControlView)
 {
-	auto& control = view.getControlView();
+	auto& control = controlPage();
 
 	openScreen(&control);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
@@ -71,7 +93,7 @@ TEST_F(TestHomeView, BlankControlView)
 
 TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 {
-	auto& control = view.getControlView();
+	auto& control = controlPage();
 	openScreen(&control);
 	control.showObjectCancelView();
 
@@ -86,7 +108,7 @@ TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 
 TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 {
-	auto& control = view.getControlView();
+	auto& control = controlPage();
 	openScreen(&control);
 	control.showObjectCancelView();
 
@@ -118,13 +140,13 @@ TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 
 TEST_F(TestHomeView, BlankConsoleView)
 {
-	openScreen(&view.getConsoleView(), false);
+	openScreen(&consolePage(), false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/blank.png")
 }
 
 TEST_F(TestHomeView, BlankMacroView)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	openScreen(&files, false);
 	files.setActiveTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/macros_blank.png");
@@ -132,7 +154,7 @@ TEST_F(TestHomeView, BlankMacroView)
 
 TEST_F(TestHomeView, BlankJobView)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	openScreen(&files, false);
 	files.setActiveTab(1);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/jobs_blank.png");
@@ -140,7 +162,7 @@ TEST_F(TestHomeView, BlankJobView)
 
 TEST_F(TestHomeView, JobModalShowsDeleteButton)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	openScreen(&files, false);
 	files.setActiveTab(1);
 
@@ -162,7 +184,7 @@ TEST_F(TestHomeView, JobModalShowsDeleteButton)
 
 TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	openScreen(&files, false);
 	files.setActiveTab(0);
 
@@ -184,7 +206,7 @@ TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 
 TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	openScreen(&files, false);
 	files.setActiveTab(1);
 
@@ -211,64 +233,64 @@ TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 
 TEST_F(TestHomeView, BlankStatusView)
 {
-	view.getDashboard().showStatusTab();
+	dashboardPage().showStatusTab();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/blank.png")
 }
 
 #if SIDE_BAR_APP_DRAWER
 TEST_F(TestHomeView, BlankMoveView)
 {
-	openScreen(&view.getMoveView(), false);
+	openScreen("move", false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/blank.png");
 }
 
 TEST_F(TestHomeView, BlankTemperatureView)
 {
-	openScreen(&view.getTemperatureView(), false);
+	openScreen("temperature", false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/temperature_view/blank.png")
 }
 
 TEST_F(TestHomeView, BlankFanView)
 {
-	openScreen(&view.getFanView(), false);
+	openScreen("fan", false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/fan_view/blank.png");
 }
 
 TEST_F(TestHomeView, BlankHeightmapView)
 {
-	openScreen(&view.getHeightmapView(), false);
+	openScreen("heightmap", false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/heightmap_view/blank.png");
 }
 
 TEST_F(TestHomeView, AppDrawer)
 {
-	view.show();
-	view.getSideBar().showAppDrawer(true, LV_ANIM_OFF);
+	home.show();
+	sideBarPage().showAppDrawer(true, LV_ANIM_OFF);
 	EXPECT_EQUAL_SCREENSHOT("home_view/app_drawer.png");
 }
 #endif
 
 TEST_F(TestHomeView, Response)
 {
-	view.getPresenter()->newResponse(ResponseType::INFO, "This is a response message from the Duet");
+	notificationsPage().getPresenter()->newResponse(ResponseType::INFO, "This is a response message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response.png");
 }
 
 TEST_F(TestHomeView, SuccessResponse)
 {
-	view.getPresenter()->newResponse(ResponseType::SUCCESS, "This is a success message from the Duet");
+	notificationsPage().getPresenter()->newResponse(ResponseType::SUCCESS, "This is a success message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_success.png");
 }
 
 TEST_F(TestHomeView, WarningResponse)
 {
-	view.getPresenter()->newResponse(ResponseType::WARNING, "This is a warning message from the Duet");
+	notificationsPage().getPresenter()->newResponse(ResponseType::WARNING, "This is a warning message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_warning.png");
 }
 
 TEST_F(TestHomeView, ErrorResponse)
 {
-	view.getPresenter()->newResponse(ResponseType::ERROR, "This is an error message from the Duet");
+	notificationsPage().getPresenter()->newResponse(ResponseType::ERROR, "This is an error message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_error.png");
 }
 
@@ -279,9 +301,9 @@ TEST_F(TestHomeView, HandleUpdateResultSuccess)
 									.currentBuildrootVersion = "v1.0.0",
 									.updateBuildrootVersion = "v1.0.0"};
 
-	view.getPresenter()->handleUpdateResult(info);
+	notificationsPage().getPresenter()->handleUpdateResult(info);
 
-	auto& prompt = view.getUpdatePrompt();
+	auto& prompt = notificationsPage().getUpdatePrompt();
 	EXPECT_TRUE(prompt.isVisible());
 	EXPECT_TRUE(prompt.getOkBtn().isVisible());
 	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
@@ -299,9 +321,9 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
 									.currentBuildrootVersion = "v0.1.0",
 									.updateBuildrootVersion = "v1.0.0"};
 
-	view.getPresenter()->handleUpdateResult(info);
+	notificationsPage().getPresenter()->handleUpdateResult(info);
 
-	auto& prompt = view.getUpdatePrompt();
+	auto& prompt = notificationsPage().getUpdatePrompt();
 	EXPECT_TRUE(prompt.isVisible());
 	EXPECT_TRUE(prompt.getOkBtn().isVisible());
 	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
@@ -319,9 +341,9 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
 									.currentBuildrootVersion = "v1.0.0",
 									.updateBuildrootVersion = "v1.0.1"};
 
-	view.getPresenter()->handleUpdateResult(info);
+	notificationsPage().getPresenter()->handleUpdateResult(info);
 
-	auto& prompt = view.getUpdatePrompt();
+	auto& prompt = notificationsPage().getUpdatePrompt();
 	EXPECT_TRUE(prompt.isVisible());
 	EXPECT_TRUE(prompt.getOkBtn().isVisible());
 	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
@@ -334,76 +356,76 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
 
 TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	ASSERT_NE(files.getTabButton(1), nullptr);
 
-	view.getPresenter()->newStatus(OM::PrinterStatus::processing);
+	filesPage().getPresenter()->newStatus(OM::PrinterStatus::processing);
 	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
 
-	view.getPresenter()->newStatus(OM::PrinterStatus::idle);
+	filesPage().getPresenter()->newStatus(OM::PrinterStatus::idle);
 	EXPECT_FALSE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeView, AlertS0)
 {
 	load_model_data_from_file("tests/object_model/m291/s0.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s0.png");
 }
 
 TEST_F(TestHomeView, AlertS1)
 {
 	load_model_data_from_file("tests/object_model/m291/s1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s1.png");
 }
 
 TEST_F(TestHomeView, AlertS2)
 {
 	load_model_data_from_file("tests/object_model/m291/s2.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s2.png");
 }
 
 TEST_F(TestHomeView, AlertS3)
 {
 	load_model_data_from_file("tests/object_model/m291/s3.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3.png");
 
 	load_model_data_from_file("tests/object_model/test_bench/model_move_vn.json");
 	load_model_data_from_file("tests/object_model/m291/s3_axis.json");
-	view.show();
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	home.show();
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3_axis.png");
 }
 
 TEST_F(TestHomeView, AlertS4)
 {
 	load_model_data_from_file("tests/object_model/m291/s4.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4.png");
 
 	load_model_data_from_file("tests/object_model/m291/s4_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4_j1.png");
 }
 
 TEST_F(TestHomeView, AlertS5)
 {
 	load_model_data_from_file("tests/object_model/m291/s5.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits.png");
 
-	auto input_obj = view.getChildByName("modal_bg.alert.body.input_cont.input");
+	auto input_obj = notificationsPage().getChildByName("modal_bg.alert.body.input_cont.input");
 	ASSERT_NE(input_obj, nullptr);
 	input_obj->sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_input.png");
@@ -425,18 +447,18 @@ TEST_F(TestHomeView, AlertS5)
 TEST_F(TestHomeView, AlertS6)
 {
 	load_model_data_from_file("tests/object_model/m291/s6.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_limits.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits.png");
 
-	auto input_obj = view.getChildByName("modal_bg.alert.body.input_cont.input");
+	auto input_obj = notificationsPage().getChildByName("modal_bg.alert.body.input_cont.input");
 	ASSERT_NE(input_obj, nullptr);
 	input_obj->sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_input.png");
@@ -458,14 +480,14 @@ TEST_F(TestHomeView, AlertS6)
 TEST_F(TestHomeView, AlertS7)
 {
 	load_model_data_from_file("tests/object_model/m291/s7_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits.png");
 
-	auto input_obj = view.getChildByName("modal_bg.alert.body.input_cont.input");
+	auto input_obj = notificationsPage().getChildByName("modal_bg.alert.body.input_cont.input");
 	ASSERT_NE(input_obj, nullptr);
 	input_obj->sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_input.png");
@@ -502,7 +524,7 @@ class TestHomeViewWithData : public TestHomeView
 		load_model_data_from_file("tests/object_model/test_bench/model_all_d99f.json");
 		load_model_data_from_file("tests/object_model/rr_filelist/example1.json");
 
-		view.show();
+		home.show();
 	}
 };
 
@@ -517,17 +539,17 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	sensor->lastReading = 25.0f;
 	for (size_t i = 0; i < 1000; i++)
 	{
-		view.getDashboard().getGraph().getPresenter()->tick();
+		dashboardPage().getGraph().getPresenter()->tick();
 		sensor->lastReading = (int32_t)(sensor->lastReading + 1) % 300;
 	}
 
-	view.getDashboard().getGraph().showSeries(1, false);
+	dashboardPage().getGraph().showSeries(1, false);
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/temperature_graph.png");
 
 	/* Open the tool list numberpad */
-	view.getDashboard().getToolList().getTool(0)->getHeater(0)->getChildByName("active")->sendEvent(LV_EVENT_CLICKED,
-																									nullptr);
+	dashboardPage().getToolList().getTool(0)->getHeater(0)->getChildByName("active")->sendEvent(LV_EVENT_CLICKED,
+																								nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
 	UI::closeAllModals();
@@ -557,10 +579,10 @@ TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
 TEST_F(TestHomeViewWithData, ConsoleView)
 {
 	ZoneScoped;
-	openScreen(&view.getConsoleView());
+	openScreen(&consolePage());
 
-	auto presenter = view.getConsoleView().getPresenter();
-	view.getConsoleView().addCommand("M115");
+	auto presenter = consolePage().getPresenter();
+	consolePage().addCommand("M115");
 	presenter->newResponse(ResponseType::INFO, "Testing response");
 	presenter->newResponse(ResponseType::INFO, "new multi-line response\nline 2");
 	presenter->newResponse(ResponseType::SUCCESS, "Success response");
@@ -571,20 +593,20 @@ TEST_F(TestHomeViewWithData, ConsoleView)
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/duet_responses.png")
 
-	view.getConsoleView().showCommandList(true, false);
+	consolePage().showCommandList(true, false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list.png");
 
-	view.getConsoleView().showCommandList(false, false);
+	consolePage().showCommandList(false, false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list_hidden.png");
 
-	view.getConsoleView().showKeyboard(true);
+	consolePage().showKeyboard(true);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/keyboard.png");
 }
 
 TEST_F(TestHomeViewWithData, ControlView)
 {
 	ZoneScoped;
-	auto& control = view.getControlView();
+	auto& control = controlPage();
 
 	openScreen(&control);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move.png");
@@ -636,7 +658,7 @@ TEST_F(TestHomeViewWithData, ControlView)
 
 TEST_F(TestHomeViewWithData, MacroView)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	openScreen(&files, false);
 	files.setActiveTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/macros.png")
@@ -644,7 +666,7 @@ TEST_F(TestHomeViewWithData, MacroView)
 
 TEST_F(TestHomeViewWithData, SettingsView)
 {
-	auto& settings = view.getSettingsView();
+	auto& settings = settingsPage();
 	openScreen(&settings);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/initial.png")
 
@@ -664,10 +686,10 @@ TEST_F(TestHomeViewWithData, SettingsView)
 
 TEST_F(TestHomeViewWithData, StatusView)
 {
-	view.getDashboard().showStatusTab();
+	dashboardPage().showStatusTab();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
-	auto& statusView = view.getDashboard().getStatusView();
+	auto& statusView = dashboardPage().getStatusView();
 
 	UI::LvObj* speed_factor = statusView.getChildByName("print_info.speed_cont.speed_multiplier");
 	ASSERT_NE(speed_factor, nullptr);
@@ -694,35 +716,35 @@ TEST_F(TestHomeViewWithData, StatusView)
 #if SIDE_BAR_APP_DRAWER
 TEST_F(TestHomeViewWithData, MoveView)
 {
-	openScreen(&view.getMoveView());
+	openScreen("move");
 	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/move_view.png")
 
 	load_model_data_from_file("tests/object_model/5_axis/model_move_vn.json");
-	view.getMoveView().activate();
+	page<UI::LvObj>("move").show();
 	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/5_axis.png")
 }
 
 TEST_F(TestHomeViewWithData, TemperatureView)
 {
-	openScreen(&view.getTemperatureView());
+	openScreen("temperature");
 	EXPECT_EQUAL_SCREENSHOT("home_view/temperature_view/temperature_view.png")
 }
 
 TEST_F(TestHomeViewWithData, FanView)
 {
-	openScreen(&view.getFanView());
+	openScreen("fan");
 	EXPECT_EQUAL_SCREENSHOT("home_view/fan_view/fan_view.png")
 }
 
 TEST_F(TestHomeViewWithData, HeightmapView)
 {
-	openScreen(&view.getHeightmapView());
+	openScreen("heightmap");
 	EXPECT_EQUAL_SCREENSHOT("home_view/heightmap_view/heightmap_view.png")
 }
 
 TEST_F(TestHomeViewWithData, FineTuneView)
 {
-	UI::FineTune& fineTuneView = view.getFineTuneView();
+	auto& fineTuneView = page<UI::FineTune>("fine_tune");
 	openScreen(&fineTuneView);
 	EXPECT_EQUAL_SCREENSHOT("home_view/fine_tune_view/fine_tune_view.png")
 

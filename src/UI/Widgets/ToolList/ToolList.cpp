@@ -8,7 +8,6 @@
 #include "ToolList.h"
 #include "Debug.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
 

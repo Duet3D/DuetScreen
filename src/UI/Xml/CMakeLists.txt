@@ -18,10 +18,12 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/XmlUi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Theme/ThemeStyles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/Actions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/NativeViews.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/Widgets.cpp
 )

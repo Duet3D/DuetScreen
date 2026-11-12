@@ -6,6 +6,7 @@
 #include "DsButton.h"
 #include "DsList.h"
 #include "DsSlider.h"
+#include "DsView.h"
 
 namespace UI::Xml::Widgets
 {
@@ -14,5 +15,6 @@ namespace UI::Xml::Widgets
 		DsButton::registerXml();
 		DsSlider::registerXml();
 		DsList::registerXml();
+		DsView::registerXml();
 	}
 } // namespace UI::Xml::Widgets

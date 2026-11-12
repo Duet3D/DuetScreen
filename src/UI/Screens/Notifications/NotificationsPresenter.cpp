@@ -1,5 +1,10 @@
-#include "HomePresenter.h"
-#include "HomeView.h"
+/*
+ * NotificationsPresenter.cpp
+ */
+
+#include "NotificationsPresenter.h"
+#include "NotificationsView.h"
+#include "UI/Components/LVGL/LvKeyboard.h"
 
 #include "Hardware/Duet.h"
 #include "Hardware/Usb.h"
@@ -16,16 +21,16 @@
 
 namespace UI
 {
-	void HomePresenter::onInit()
+	void NotificationsPresenter::onInit()
 	{
 		ZoneScoped;
-		registerEventListener<EventType::UpdateAvailable>(this, &HomePresenter::newUpdateAvailable);
-		registerEventListener<EventType::GithubUpdateAvailable>(this, &HomePresenter::newGithubUpdateAvailable);
-		registerEventListener<EventType::UpdateResult>(this, &HomePresenter::handleUpdateResult);
-		registerEventListener<EventType::AxesData>(this, &HomePresenter::newAxesData);
-		registerEventListener<EventType::Response>(this, &HomePresenter::newResponse);
-		registerEventListener<EventType::Alert>(this, &HomePresenter::newAlertData);
-		registerEventListener<EventType::Status>(this, &HomePresenter::newStatus);
+		registerEventListener<EventType::UpdateAvailable>(this, &NotificationsPresenter::newUpdateAvailable);
+		registerEventListener<EventType::GithubUpdateAvailable>(this,
+																&NotificationsPresenter::newGithubUpdateAvailable);
+		registerEventListener<EventType::UpdateResult>(this, &NotificationsPresenter::handleUpdateResult);
+		registerEventListener<EventType::AxesData>(this, &NotificationsPresenter::newAxesData);
+		registerEventListener<EventType::Response>(this, &NotificationsPresenter::newResponse);
+		registerEventListener<EventType::Alert>(this, &NotificationsPresenter::newAlertData);
 
 		USB::UsbMonitor::getInstance().registerCallback(
 			[this](const std::string& path, bool mounted)
@@ -44,13 +49,13 @@ namespace UI
 			});
 	}
 
-	void HomePresenter::onActivate()
+	void NotificationsPresenter::onActivate()
 	{
 		ZoneScoped;
 		newAxesData();
 	}
 
-	void HomePresenter::clear()
+	void NotificationsPresenter::clear()
 	{
 		ZoneScoped;
 		UI_LOCK();
@@ -58,19 +63,19 @@ namespace UI
 		m_alertAxes.clear();
 	}
 
-	void HomePresenter::update()
+	void NotificationsPresenter::update()
 	{
 		ZoneScoped;
 		UpgradeHelper::upgradeFromUSB(m_updateFile);
 	}
 
-	void HomePresenter::updateFromGithub()
+	void NotificationsPresenter::updateFromGithub()
 	{
 		ZoneScoped;
 		UpgradeHelper::upgradeFromGithubLatest();
 	}
 
-	void HomePresenter::newUpdateAvailable(const std::string& file)
+	void NotificationsPresenter::newUpdateAvailable(const std::string& file)
 	{
 		ZoneScoped;
 		m_updateFile = file.c_str();
@@ -87,7 +92,7 @@ namespace UI
 		updatePrompt.open();
 	}
 
-	void HomePresenter::newGithubUpdateAvailable(const std::string& latestVersion)
+	void NotificationsPresenter::newGithubUpdateAvailable(const std::string& latestVersion)
 	{
 		ZoneScoped;
 
@@ -102,7 +107,7 @@ namespace UI
 		updatePrompt.open();
 	}
 
-	void HomePresenter::handleUpdateResult(const UpgradeHelper::UpgradeInfo& info)
+	void NotificationsPresenter::handleUpdateResult(const UpgradeHelper::UpgradeInfo& info)
 	{
 		ZoneScoped;
 
@@ -137,7 +142,7 @@ namespace UI
 		updatePrompt.open();
 	}
 
-	void HomePresenter::newAxesData()
+	void NotificationsPresenter::newAxesData()
 	{
 		ZoneScoped;
 		// Alert jog axes
@@ -146,16 +151,17 @@ namespace UI
 			auto axis = OM::Move::GetAxisByLetter(m_alertAxes[i]);
 			if (axis == nullptr)
 				continue;
-			m_view->m_alert.setJogAxisPosition(i, axis->userPosition);
-			m_view->m_alert.setJogAxisEnabled(i, axis->homed);
+			m_view->getAlert().setJogAxisPosition(i, axis->userPosition);
+			m_view->getAlert().setJogAxisEnabled(i, axis->homed);
 		}
 	}
 
-	void HomePresenter::newResponse(const ResponseType type, const std::string& resp)
+	void NotificationsPresenter::newResponse(const ResponseType type, const std::string& resp)
 	{
 		ZoneScoped;
 		UI_LOCK();
-		if (m_view->m_consoleView.isVisible())
+		// The console shows responses itself
+		if (LvObj* console = findView("console"); console != nullptr && console->isVisible())
 		{
 			return;
 		}
@@ -211,7 +217,7 @@ namespace UI
 			{
 				UI_LOCK();
 				m_view->clearMessageBoxes();
-				openScreen(&m_view->m_consoleView);
+				openScreen("console");
 			});
 		msgBox->okVisible(true);
 		msgBox->cancelVisible(true);
@@ -222,16 +228,17 @@ namespace UI
 			msgBox->setTimeout(StorageHelper::getData(ID_NOTIFICATION_TIMEOUT));
 		}
 		msgBox->setProgressCallback([](MessageBox* msgBox) -> uint32_t { return msgBox->getTimeOutPercentage(); });
-		if (m_view->m_alert.isVisible())
+		if (m_view->getAlert().isVisible())
 		{
 			msgBox->hide();
 		}
 	}
 
-	void HomePresenter::newAlertData(const OM::Alert& alert)
+	void NotificationsPresenter::newAlertData(const OM::Alert& alert)
 	{
 		ZoneScoped;
-		auto& modalAlert = m_view->m_alert;
+		auto& modalAlert = m_view->getAlert();
+		auto* keyboard = findView<LvKeyboard>("keyboard");
 
 		// First clear any existing alert state
 		m_alertAxes.clear();
@@ -265,7 +272,7 @@ namespace UI
 			[this]()
 			{
 				UI_LOCK();
-				m_view->m_alert.close();
+				m_view->getAlert().close();
 				if (m_view->getMessageBoxCount() > 0)
 				{
 					auto msgBox = m_view->getMessageBox(0);
@@ -310,8 +317,11 @@ namespace UI
 		case OM::Alert::Mode::NumberInt:
 		{
 			UI_LOCK();
-			m_view->getKeyboard().setMode(LV_KEYBOARD_MODE_NUMBER);
-			modalAlert.setKeyboard(&m_view->getKeyboard());
+			if (keyboard != nullptr)
+			{
+				keyboard->setMode(LV_KEYBOARD_MODE_NUMBER);
+			}
+			modalAlert.setKeyboard(keyboard);
 
 			if (alert.limits.numberInt.min > INT32_MIN)
 			{
@@ -364,8 +374,11 @@ namespace UI
 		break;
 
 		case OM::Alert::Mode::NumberFloat:
-			m_view->getKeyboard().setMode(LV_KEYBOARD_MODE_NUMBER);
-			modalAlert.setKeyboard(&m_view->getKeyboard());
+			if (keyboard != nullptr)
+			{
+				keyboard->setMode(LV_KEYBOARD_MODE_NUMBER);
+			}
+			modalAlert.setKeyboard(keyboard);
 
 			if (alert.limits.numberFloat.min > -FLT_MAX)
 			{
@@ -412,8 +425,11 @@ namespace UI
 			break;
 		case OM::Alert::Mode::Text:
 		{
-			m_view->getKeyboard().setMode(LV_KEYBOARD_MODE_TEXT_LOWER);
-			modalAlert.setKeyboard(&m_view->getKeyboard());
+			if (keyboard != nullptr)
+			{
+				keyboard->setMode(LV_KEYBOARD_MODE_TEXT_LOWER);
+			}
+			modalAlert.setKeyboard(keyboard);
 
 			modalAlert.setInput(alert.limits.text.valueDefault.c_str());
 			modalAlert.setInputValidationCallback(
@@ -488,12 +504,5 @@ namespace UI
 
 		// Finally show the message box
 		modalAlert.open();
-	}
-
-	void HomePresenter::newStatus(OM::PrinterStatus status)
-	{
-		ZoneScoped;
-		/* Disable "Jobs" tab when printing to prevent changes */
-		getView()->getFileView().disableTab(1, OM::IsPrintingStatus(status));
 	}
 } // namespace UI

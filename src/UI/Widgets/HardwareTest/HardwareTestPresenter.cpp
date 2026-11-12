@@ -10,7 +10,7 @@
 #include "Debug.h"
 #include "Hardware/Usb.h"
 #include "HardwareTest.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Core/Navigation.h"
 #include "nameof.hpp"
 #include "utils/NetworkHelper.h"
 #include "utils/StorageHelper.h"

@@ -8,7 +8,6 @@
 #include "PrintInfo.h"
 #include "Debug.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -140,10 +139,13 @@ namespace UI
 	void PrintInfo::onInit()
 	{
 		ZoneScoped;
-		// Can't put this in the constructor as it would cause `HomeView::instance()` to be called within itself
-		m_speedFactorModal.setParent(HomeView::instance().getMainWindow());
-		m_extrusionFactorModal.setParent(HomeView::instance().getMainWindow());
-		m_babyStepModal.setParent(HomeView::instance().getMainWindow());
+		// Not in the constructor: the modal host may not exist yet
+		if (LvObj* host = getModalHost())
+		{
+			m_speedFactorModal.setParent(*host);
+			m_extrusionFactorModal.setParent(*host);
+			m_babyStepModal.setParent(*host);
+		}
 	}
 
 	void PrintInfo::onShow() {}

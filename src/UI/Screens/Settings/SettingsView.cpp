@@ -6,13 +6,13 @@
 #include "Hardware/Reset.h"
 #include "ObjectModel/Job.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "i18n/i18n.h"
 #include "utils/DisplayHelper.h"
 #include "utils/StorageHelper.h"
 #include "utils/SystemHelper.h"
+#include "utils/UnitSystem.h"
 #include "utils/UpgradeHelper.h"
 #include "version.h"
 #include <ranges>
@@ -107,6 +107,12 @@ namespace UI
 	{
 		ZoneScoped;
 		return false;
+	}
+
+	void SettingsView::onInit()
+	{
+		ZoneScoped;
+		setKeyboard(findView<LvKeyboard>("keyboard"));
 	}
 
 	void SettingsView::onShow() {}
@@ -405,9 +411,9 @@ namespace UI
 	void GeneralSettings::onInit()
 	{
 		ZoneScoped;
-		m_brightness.setNumberPad(&HomeView::instance().getNumberPad());
-		m_screensaverTimeout.setNumberPad(&HomeView::instance().getNumberPad());
-		m_notificationTimeout.setNumberPad(&HomeView::instance().getNumberPad());
+		m_brightness.setNumberPad(findView<ModalNumberPad>("numberpad"));
+		m_screensaverTimeout.setNumberPad(findView<ModalNumberPad>("numberpad"));
+		m_notificationTimeout.setNumberPad(findView<ModalNumberPad>("numberpad"));
 	}
 
 	void GeneralSettings::onShow()
@@ -575,9 +581,9 @@ namespace UI
 	void ConnectionSettings::onInit()
 	{
 		ZoneScoped;
-		m_pollInterval.setNumberPad(&HomeView::instance().getNumberPad());
+		m_pollInterval.setNumberPad(findView<ModalNumberPad>("numberpad"));
 #if USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS
-		m_duetIpAddress.setNumberPad(&HomeView::instance().getNumberPad());
+		m_duetIpAddress.setNumberPad(findView<ModalNumberPad>("numberpad"));
 #endif
 	}
 
@@ -713,7 +719,7 @@ namespace UI
 	void DisplaySettings::onInit()
 	{
 		ZoneScoped;
-		m_themePreview.setNumberPad(&HomeView::instance().getNumberPad());
+		m_themePreview.setNumberPad(findView<ModalNumberPad>("numberpad"));
 	}
 
 	void DisplaySettings::onShow()

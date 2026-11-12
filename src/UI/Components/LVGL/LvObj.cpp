@@ -81,6 +81,22 @@ namespace UI
 		return static_cast<LvObj*>(user_data);
 	}
 
+	LvObj::LvObj(BorrowTag, lv_obj_t* existing)
+		: m_root(existing)
+		, m_name(existing && lv_obj_get_name(existing) ? lv_obj_get_name(existing) : "")
+	{
+	}
+
+	LvObjRef::LvObjRef(lv_obj_t* obj)
+		: LvObj(BorrowTag{}, obj)
+	{
+	}
+
+	LvObjRef::~LvObjRef()
+	{
+		m_root = nullptr; // ~LvObj deletes the root otherwise
+	}
+
 	LvObj::~LvObj()
 	{
 		ZoneScoped;

@@ -6,8 +6,8 @@
  */
 
 #include "Debug.h"
-#include "UI/Screens/Home/HomeView.h"
 #include "UI/Screens/Status/StatusView.h"
+#include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 
@@ -25,15 +25,13 @@ class TestStatus : public UiTestSuite
 		/* Need to wait for the filesystem operations to finish fully */
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-		HomeView::setInstance(&home);
 		view.setSize(LV_PCT(36), LV_PCT(90));
 		home.hide();
 	}
 
-	~TestStatus() { HomeView::setInstance(nullptr); }
-
 	StatusView view;
-	HomeView home;
+	/** Hidden: the status view's modals belong to its main window */
+	UI::Xml::XmlView home{"home", lv_screen_active(), "home_screen"};
 };
 
 TEST_F(TestStatus, Blank)
