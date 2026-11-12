@@ -18,7 +18,6 @@
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Widgets/Dashboard/Dashboard.h"
-#include "UI/Widgets/SideBar/SideBar.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
@@ -54,7 +53,6 @@ class TestHomeView : public UiTestSuite
 	static UI::ConsoleView& consolePage() { return page<UI::ConsoleView>("console"); }
 	static UI::FilesScreen& filesPage() { return page<UI::FilesScreen>("files"); }
 	static UI::SettingsView& settingsPage() { return page<UI::SettingsView>("settings"); }
-	static UI::SideBar& sideBarPage() { return page<UI::SideBar>("side_bar"); }
 	static UI::NotificationsView& notificationsPage() { return page<UI::NotificationsView>("notifications"); }
 
 	UI::Xml::XmlView home;
@@ -237,38 +235,40 @@ TEST_F(TestHomeView, BlankStatusView)
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/blank.png")
 }
 
-#if SIDE_BAR_APP_DRAWER
-TEST_F(TestHomeView, BlankMoveView)
+TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 {
-	openScreen("move", false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/blank.png");
-}
+	lv_obj_t* sidebar = UI::findView("side_bar")->getRootPtr();
+	auto button = [sidebar](const char* name) { return lv_obj_find_by_name(sidebar, name); };
+	auto pump = []
+	{
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	};
+	pump();
+	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
-TEST_F(TestHomeView, BlankTemperatureView)
-{
-	openScreen("temperature", false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/temperature_view/blank.png")
-}
+	// Each button raises nav.open with its page's name
+	lv_obj_send_event(button("control"), LV_EVENT_CLICKED, nullptr);
+	pump();
+	EXPECT_TRUE(UI::findView("control")->isVisible());
+	EXPECT_FALSE(UI::findView("dashboard")->isVisible());
+	EXPECT_TRUE(lv_obj_has_state(button("control"), LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
-TEST_F(TestHomeView, BlankFanView)
-{
-	openScreen("fan", false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/fan_view/blank.png");
-}
+	lv_obj_send_event(button("settings"), LV_EVENT_CLICKED, nullptr);
+	pump();
+	EXPECT_TRUE(UI::findView("settings")->isVisible());
+	EXPECT_FALSE(UI::findView("control")->isVisible());
+	EXPECT_TRUE(lv_obj_has_state(button("settings"), LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(button("control"), LV_STATE_CHECKED));
 
-TEST_F(TestHomeView, BlankHeightmapView)
-{
-	openScreen("heightmap", false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/heightmap_view/blank.png");
+	// nav.home closes them all
+	lv_obj_send_event(button("home"), LV_EVENT_CLICKED, nullptr);
+	pump();
+	EXPECT_TRUE(UI::findView("dashboard")->isVisible());
+	EXPECT_FALSE(UI::findView("settings")->isVisible());
+	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 }
-
-TEST_F(TestHomeView, AppDrawer)
-{
-	home.show();
-	sideBarPage().showAppDrawer(true, LV_ANIM_OFF);
-	EXPECT_EQUAL_SCREENSHOT("home_view/app_drawer.png");
-}
-#endif
 
 TEST_F(TestHomeView, Response)
 {
@@ -712,46 +712,3 @@ TEST_F(TestHomeViewWithData, StatusView)
 	babystep->sendEvent(LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
 }
-
-#if SIDE_BAR_APP_DRAWER
-TEST_F(TestHomeViewWithData, MoveView)
-{
-	openScreen("move");
-	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/move_view.png")
-
-	load_model_data_from_file("tests/object_model/5_axis/model_move_vn.json");
-	page<UI::LvObj>("move").show();
-	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/5_axis.png")
-}
-
-TEST_F(TestHomeViewWithData, TemperatureView)
-{
-	openScreen("temperature");
-	EXPECT_EQUAL_SCREENSHOT("home_view/temperature_view/temperature_view.png")
-}
-
-TEST_F(TestHomeViewWithData, FanView)
-{
-	openScreen("fan");
-	EXPECT_EQUAL_SCREENSHOT("home_view/fan_view/fan_view.png")
-}
-
-TEST_F(TestHomeViewWithData, HeightmapView)
-{
-	openScreen("heightmap");
-	EXPECT_EQUAL_SCREENSHOT("home_view/heightmap_view/heightmap_view.png")
-}
-
-TEST_F(TestHomeViewWithData, FineTuneView)
-{
-	auto& fineTuneView = page<UI::FineTune>("fine_tune");
-	openScreen(&fineTuneView);
-	EXPECT_EQUAL_SCREENSHOT("home_view/fine_tune_view/fine_tune_view.png")
-
-	UI::LvObj* input = fineTuneView.getChildByName("sliders.speed.slider_cont.slider_input");
-	ASSERT_NE(input, nullptr);
-
-	input->sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQUAL_SCREENSHOT("home_view/fine_tune_view/keyboard.png")
-}
-#endif

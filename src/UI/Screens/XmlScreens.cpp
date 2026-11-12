@@ -14,7 +14,7 @@
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
 #include "UI/Widgets/Dashboard/Dashboard.h"
-#include "UI/Widgets/SideBar/SideBar.h"
+#include "UI/Widgets/EStop/EStop.h"
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
@@ -50,7 +50,7 @@ namespace UI
 
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
-		Xml::NativeViews::add<SideBar>("side_bar");
+		Xml::NativeViews::add<EStop>("estop");
 		Xml::NativeViews::add<Dashboard>("dashboard");
 		Xml::NativeViews::add<ConsoleView>("console");
 		Xml::NativeViews::add<ControlView>("control");

@@ -8,6 +8,7 @@
 #include "Debug.h"
 #include "UI/Components/AxisControl/GenericAxisControl.h"
 #include "UI/Components/AxisControl/XYControl.h"
+#include "UI/Components/Button/DraggableButton.h"
 #include "UI/Components/Canvas/Canvas.h"
 #include "UI/Components/Graph/Graph.h"
 #include "UI/Components/Input/NumberPad.h"
@@ -31,9 +32,9 @@
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
-#include "UI/Widgets/SideBar/SideBar.h"
 #include "UI/Widgets/Temperature/HeaterSlider.h"
 #include "UI/Widgets/ToolList/ToolList.h"
+#include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include <fstream>
@@ -426,7 +427,7 @@ TEST_F(TestTheme, Widgets)
 	numberpad.setHeader("Numberpad");
 
 	/* Sidebar */
-	SideBar sidebar("sidebar", cont);
+	Xml::XmlView sidebar("sidebar", cont, "side_bar");
 	sidebar.setSize(LV_PCT(10), LV_PCT(100));
 
 	for (size_t i = 0; i < Themes::getThemeCount(); ++i)

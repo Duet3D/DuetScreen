@@ -7,7 +7,6 @@
 
 #include "AppDrawer.h"
 #include "Debug.h"
-#include "UI/Widgets/SideBar/SideBar.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -42,28 +41,15 @@ namespace UI
 	void AppDrawer::init()
 	{
 		ZoneScoped;
-		// Screens by the name they are registered under (see Navigation.h). Without the app drawer's own screens,
-		// those apps open the control screen, which has the same pages as tabs.
-#if SIDE_BAR_APP_DRAWER
-		static constexpr bool ownScreens = true;
-#else
-		static constexpr bool ownScreens = false;
-#endif
+		// Screens by the name they are registered under (see Navigation.h). Moving, temperatures, fine tuning, the
+		// heightmap and object cancelling are tabs of the control screen.
 		static const AppInfo apps[] = {
 			{.name = _("app_drawer.console"), .screen = "console", .icon = "console.png"},
-			{.name = _("app_drawer.move"), .screen = ownScreens ? "move" : "control", .icon = "move.png"},
-			{.name = _("app_drawer.temperature"),
-			 .screen = ownScreens ? "temperature" : "control",
-			 .icon = "temperature.png"},
-			{.name = _("app_drawer.fine_tune"),
-			 .screen = ownScreens ? "fine_tune" : "control",
-			 .icon = "fine_tune.png"},
-			{.name = _("app_drawer.heightmap"),
-			 .screen = ownScreens ? "heightmap" : "control",
-			 .icon = "heightmap.png"},
-			{.name = _("app_drawer.object_cancel"),
-			 .screen = ownScreens ? "object_cancel" : "control",
-			 .icon = "cancel.png"},
+			{.name = _("app_drawer.move"), .screen = "control", .icon = "move.png"},
+			{.name = _("app_drawer.temperature"), .screen = "control", .icon = "temperature.png"},
+			{.name = _("app_drawer.fine_tune"), .screen = "control", .icon = "fine_tune.png"},
+			{.name = _("app_drawer.heightmap"), .screen = "control", .icon = "heightmap.png"},
+			{.name = _("app_drawer.object_cancel"), .screen = "control", .icon = "cancel.png"},
 			{.name = _("app_drawer.settings"), .screen = "settings", .icon = "settings.png"},
 		};
 

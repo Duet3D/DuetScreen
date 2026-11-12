@@ -33,6 +33,9 @@ namespace UI
 		return dynamic_cast<T*>(findView(name));
 	}
 
+	/** The name of the open screen (the top one), or empty when the home screens are showing */
+	std::string_view getCurrentScreenName();
+
 	/** The name `view` is registered under, or empty */
 	std::string_view getViewName(const LvObj* view);
 

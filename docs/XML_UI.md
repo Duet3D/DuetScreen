@@ -134,11 +134,13 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 
 | Kind | Names |
 | --- | --- |
-| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`. |
+| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `nav.screen` (the open page, empty on the home screen), `responses.count`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
 | Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
 | Text | `translation_tag="fan.title"` on labels, `translation_tag` on `ds_button`. Keys are those in `assets/i18n/*.json`. |
+
+A string subject can be compared with `bind_*_if_eq`: the sidebar checks the button of the open page with `<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>`.
 
 ### Lists
 
@@ -160,7 +162,7 @@ These are in addition to the standard `lv_*` widgets.
 
 | Widget | Attributes |
 | --- | --- |
-| `<ds_button>` | `text`, `translation_tag`, `bind_text`, `icon`, `checkable` |
+| `<ds_button>` | `text`, `translation_tag`, `bind_text`, `icon`, `checkable`, `long_mode`, `flash_on` (flash whenever a subject changes) |
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
 | `<ds_view>` | `name`, `view`, `home`, `shown`: a page (see Hosting a view) |
