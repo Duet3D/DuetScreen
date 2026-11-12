@@ -65,6 +65,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xxd \
     xz-utils \
     curl \
+    # LVGL unit tests (libraries/lvgl/scripts/prerequisites-apt.txt, amd64 only; the
+    # i386 packages there are only for LVGL CI's NON_AMD64_BUILD runs)
+    ruby-full \
+    libjpeg-turbo8-dev \
+    libwebp-dev \
+    libglfw3-dev \
+    libinput-dev \
+    libxkbcommon-dev \
+    libdrm-dev \
+    wayland-protocols \
+    libwayland-dev \
+    libwayland-bin \
+    libudev-dev \
+    libuv1-dev \
     && if ! apt-cache show gcc-15 >/dev/null 2>&1; then add-apt-repository --yes --update ppa:ubuntu-toolchain-r/test; fi \
     && apt-get install -y --no-install-recommends gcc-15 g++-15 \
     && rm -rf /var/lib/apt/lists/*
+
+# Python tooling (pillow, astyle and the pinned CMake from requirements.txt) lives in a
+# venv at /opt/venv that is first on PATH, so `python3`, `cmake` and `astyle` resolve to
+# it without activating anything. A venv rather than the system interpreter because
+# Ubuntu 24.04 refuses system-wide pip installs (PEP 668). The packages are installed by
+# .devcontainer/scripts/post-create.sh, as requirements.txt is outside this build context.
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH=/opt/venv/bin:$PATH
+RUN python3 -m venv /opt/venv

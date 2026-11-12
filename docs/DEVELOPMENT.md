@@ -60,7 +60,7 @@ This repository includes a devcontainer under `.devcontainer/` for Linux develop
 4. Run `Dev Containers: Reopen in Container`.
 5. Wait for the post-create setup to finish.
 
-The post-create step creates `env/` if needed and installs the Python requirements automatically.
+The post-create step installs the Python requirements into `/opt/venv`, which the image puts first on `PATH`. `python3`, `cmake` and `astyle` therefore resolve to it without activating a virtualenv; there is no `env/` in the workspace.
 
 If a folder named `buildroot-duetscreen` exists in the parent directory of this repository, the devcontainer setup automatically bind mounts it at `/workspaces/buildroot-duetscreen`.
 
@@ -79,6 +79,8 @@ The VS Code tasks and launch configurations that target the physical screen refe
     "buildroot_path": "/absolute/path/to/buildroot-duetscreen"
 }
 ```
+
+The tasks and presets call `python3` and `cmake` from `PATH`. Outside the container, create the virtualenv with [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh) and activate it (`source env/bin/activate`) before starting VS Code, so they resolve to it.
 
 The screen's IP address is no longer a setting — the tasks and launch configurations prompt for it when they run.
 
@@ -222,8 +224,9 @@ library the executable links, including system libraries found through `pkg-conf
 Notes:
 
 - This needs CMake 4.3 or newer. The pinned version is in [requirements.txt](../requirements.txt)
-  and the presets use `env/bin/cmake` from the virtualenv created by
-  [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh). On CMake 4.3 and 4.4
+  and the presets use whichever `cmake` is first on `PATH`: `/opt/venv/bin/cmake` in the
+  devcontainer, or `env/bin/cmake` outside it once the virtualenv created by
+  [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh) is activated. On CMake 4.3 and 4.4
   the commands sit behind an experimental feature gate, so configuring prints a
   `CMake Warning (experimental)` per document; `-Wno-experimental` silences them.
 - Only dependency **licences** are stated by hand, in
@@ -248,7 +251,7 @@ Notes:
   `urn:lvgl#Package`, so a consumer has to match the two up by name. And `libhv` exports itself
   without a namespace, so configuring warns that it will be "recorded by its bare target name
   without provenance"; its `hv_static.spdx.json` is complete regardless.
-- The T113 build runs through buildroot, which uses its own CMake rather than `env/bin/cmake`,
+- The T113 build runs through buildroot, which uses its own CMake,
   and its install step copies the binary directly instead of running `cmake --install`. Producing
   an on-device SBOM through that path needs buildroot's CMake to be 4.3+ and
   [duetscreen.mk](https://github.com/Duet3D/buildroot-duetscreen/blob/master/package/duetscreen/duetscreen.mk)

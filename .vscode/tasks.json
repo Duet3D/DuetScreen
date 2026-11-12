@@ -104,7 +104,7 @@
 		{
 			"type": "shell",
 			"label": "LVGL Format",
-			"command": "env/bin/python scripts/code-format.py",
+			"command": "python3 scripts/code-format.py",
 			"options": {
 				"cwd": "${workspaceFolder}/libraries/lvgl"
 			},
@@ -360,7 +360,7 @@
 		{
 			"label": "Run Tests",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:test_filters}' --skip_configure",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}' --skip_configure",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -373,7 +373,7 @@
 		{
 			"label": "Run LVGL Tests",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:lvgl_test_filters}' --lvgl-tests",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:lvgl_test_filters}' --lvgl-tests",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -383,13 +383,13 @@
 			},
 			"problemMatcher": [],
 			"dependsOn": [
-				"LVGL Format"
+				// "LVGL Format"
 			]
 		},
 		{
 			"label": "Configure & Run Tests",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:test_filters}'",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}'",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -402,7 +402,7 @@
 		{
 			"label": "Run Test Coverage",
 			"type": "shell",
-			"command": "env/bin/python scripts/run_tests.py --test_filter='${input:test_filters}' --coverage",
+			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}' --coverage",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
@@ -415,7 +415,7 @@
 		{
 			"label": "Verify i18n translations",
 			"type": "shell",
-			"command": "env/bin/python scripts/manage_translations.py",
+			"command": "python3 scripts/manage_translations.py",
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},

@@ -24,7 +24,7 @@ These instructions guide Copilot (and AI agents) when proposing code or edits in
 	- Start service: `Start DuetScreen on remote`; start gdb: `Start gdbserver on DuetScreen`.
 	- Assets: `Push Assets - SSH`; libraries: `Push Libraries - SSH`.
 	- Package update: `Create update.tar.gz`; print notes: `Print Release Notes`.
-- **Testing**: Run `env/bin/python scripts/run_tests.py`. UI image tests under `tests/src/test_cases/UI/` compare against `tests/ref_imgs/` with `_err` diffs and a review GUI.
+- **Testing**: Run `python3 scripts/run_tests.py`. UI image tests under `tests/src/test_cases/UI/` compare against `tests/ref_imgs/` with `_err` diffs and a review GUI.
 - **Logs**: Default log file `DuetScreen.log` (PC: CWD; device: `/var/log/`). Filter with `scripts/filter_logs.py`.
 
 ## Integration & Assets
@@ -79,7 +79,7 @@ These instructions guide Copilot (and AI agents) when proposing code or edits in
 - Adding new production code, new features, or new logic paths requires adding or updating unit tests in the same task.
 - Aim for greater than 80% coverage of the changed code when practical.
 - Do not finish a production code change without tests unless there is a specific technical blocker, and the final response must explicitly justify the gap and identify the remaining untested paths.
-- Run tests with the `env/bin/python scripts/run_tests.py` command; get coverage via `env/bin/python scripts/run_tests.py --coverage`.
+- Run tests with the `python3 scripts/run_tests.py` command; get coverage via `python3 scripts/run_tests.py --coverage`.
 - Keep tests deterministic and fast; avoid external dependencies in unit tests.
 
 ## File Hygiene

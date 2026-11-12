@@ -8,6 +8,9 @@
   "workspaceFolder": "/workspaces/DuetScreen",
   "initializeCommand": "bash \"${localWorkspaceFolder}/.devcontainer/scripts/generate-buildroot-compose.sh\" \"${localWorkspaceFolder}\"",
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
+  "postStartCommand": {
+    "claude": ".devcontainer/scripts/claude-persist.sh"
+  },
   "customizations": {
     "vscode": {
       "extensions": [

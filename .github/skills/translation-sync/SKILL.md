@@ -20,7 +20,7 @@ Keep all locale files in `assets/i18n/` synchronized with `assets/i18n/en-GB.jso
 4. Validate after changes by running:
 
 ```bash
-env/bin/python scripts/manage_translations.py --show-keys
+python3 scripts/manage_translations.py --show-keys
 ```
 
 5. If validation reports missing keys, extra keys, or placeholder mismatches, fix all issues and rerun validation.

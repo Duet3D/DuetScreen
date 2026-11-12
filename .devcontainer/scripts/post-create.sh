@@ -6,21 +6,20 @@ buildroot_workspace="${BUILDROOT_WORKSPACE:-/workspaces/buildroot-duetscreen}"
 
 cd "${duetscreen_workspace}"
 
-# A venv created on the host (e.g. by scripts/install_prerequisites.sh) bakes in
-# absolute paths that do not resolve inside the container, so validate an
-# existing env/ before reusing it and rebuild it if its interpreter is broken.
-if [[ -d env ]] && ! env/bin/python3 -c '' >/dev/null 2>&1; then
-    echo "Existing env/ is not usable inside the container; recreating it"
-    rm -rf env
-fi
+# Install the Python requirements into the image's /opt/venv (already on PATH, see
+# the Dockerfile). It is root-owned, so install through sudo; this also keeps it
+# working when the container user's UID is remapped to match the host.
+sudo /opt/venv/bin/pip install --root-user-action=ignore -r requirements.txt
 
-if [[ ! -d env ]]; then
-    python3 -m venv env
+# The `Run LVGL Tests` task needs LVGL's own Python prerequisites (pypng, lz4, ...).
+# Read them from the submodule so they track LVGL updates.
+lvgl_pip_requirements=libraries/lvgl/scripts/prerequisites-pip.txt
+if [[ -f "${lvgl_pip_requirements}" ]]; then
+    sudo /opt/venv/bin/pip install --root-user-action=ignore -r "${lvgl_pip_requirements}"
+else
+    echo "WARNING: ${lvgl_pip_requirements} not found; is the lvgl submodule checked out?" >&2
+    echo "         The LVGL test task will fail until it is and the container is rebuilt." >&2
 fi
-
-source env/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
 
 if [[ -d "${buildroot_workspace}" ]]; then
     echo "Optional buildroot mount detected at ${buildroot_workspace}"

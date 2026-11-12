@@ -566,3 +566,6 @@ assets/splash.png
 
 # CI
 .devcontainer/docker-compose.buildroot.yml
+
+# Claude
+.claude/*
