@@ -7,7 +7,7 @@
 #include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"
 #include "UI/Screens/Temperature/TemperatureView.h"
-#include "UI/Xml/XmlView.h"
+#include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 
 namespace UI

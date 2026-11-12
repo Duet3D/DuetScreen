@@ -1,8 +1,8 @@
 <!--
   Fan screen: one card per fan in the object model.
 
-  Data:     om.fans (see src/UI/Xml/OmPublisher.h). Each fan_card binds to its own fan's subjects.
-  Actions:  fans.set_speed, from the `fans` presenter (src/UI/Xml/Presenters/FansPresenter.h).
+  Data:     the global `fans` list (src/UI/Xml/Data/FanSource.h). Each fan_card binds to its own fan's fields.
+  Actions:  fans.set_speed, from the `fans` presenter (src/UI/Screens/Fan/FanPresenter.h).
 -->
 <component presenter="fans">
 	<view extends="lv_obj" width="100%" height="100%"
@@ -20,8 +20,8 @@
 				</lv_label>
 			</lv_obj>
 
-			<model_list name="list" model="om.fans" item="fan_card" width="100%" height="content"
-						flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			<ds_list name="list" list="fans" item="fan_card" width="100%" height="content"
+					 flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 	</view>
 </component>

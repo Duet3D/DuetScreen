@@ -8,7 +8,7 @@
 #pragma once
 
 #include "UI/Components/Screen/Screen.h"
-#include "UI/Xml/XmlUi.h"
+#include "UI/Xml/Runtime/XmlUi.h"
 #include "test_utils/TestSuite.h"
 #include "test_utils/utils.h"
 #include <gtest/gtest.h>

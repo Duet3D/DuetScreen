@@ -13,10 +13,12 @@
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
 #include "UI/Screens/Home/HomeView.h"
+#include "UI/Screens/XmlPresenters.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
-#include "UI/Xml/XmlUi.h"
+#include "UI/Xml/Runtime/HotReload.h"
+#include "UI/Xml/Runtime/XmlUi.h"
 #include "glob.h"
 #include "hv/requests.h"
 #include "i18n/i18n.h"
@@ -130,10 +132,11 @@ int main(int argc, char** argv)
 	}
 	{
 		ZoneScopedN("Xml::init");
+		UI::registerXmlPresenters();
 		UI::Xml::init();
 #if SIMULATION
 		// Edit assets/ui/ or var/ui/ and the running UI rebuilds
-		UI::Xml::setHotReload(1000);
+		UI::Xml::HotReload::setPeriod(1000);
 #endif
 	}
 

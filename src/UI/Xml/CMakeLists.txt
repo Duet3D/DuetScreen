@@ -1,13 +1,27 @@
+# The runtime-loaded XML UI. See Runtime/XmlUi.h for how the parts fit together.
 target_sources(
   DuetScreen.lib
   PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/OmPublisher.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/XmlActions.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/XmlListModel.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/XmlPresenter.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/XmlUi.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/XmlView.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/XmlWidgets.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Presenters/FansPresenter.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Presenters/Presenters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Globals.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Binding/List.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Scope.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/FanSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/HeaterRow.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/HeatSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/ToolSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/HotReload.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Services.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Translations.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/XmlUi.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Theme/ThemeStyles.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/Actions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/Widgets.cpp
 )

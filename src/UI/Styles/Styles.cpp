@@ -11,8 +11,10 @@
 #include "lvgl/src/lvgl_private.h"
 #include "utils/StorageHelper.h"
 #include <array>
+#include <functional>
 #include <map>
 #include <memory>
+#include <utility>
 
 namespace UI::Themes
 {
@@ -157,6 +159,207 @@ namespace UI::Themes
 			s_componentStyles = std::make_unique<ComponentStyles>();
 		}
 		return *s_componentStyles;
+	}
+
+	/* Every style by name, for forEachStyle(). The name is the member name; XML and themes use it. */
+	static constexpr std::pair<const char*, Style LvglStyles::*> s_lvglStyleNames[] = {
+		{"base", &LvglStyles::base},
+		{"bg_dark", &LvglStyles::bg_dark},
+		{"bg", &LvglStyles::bg},
+		{"bg_light", &LvglStyles::bg_light},
+		{"bg_color_primary", &LvglStyles::bg_color_primary},
+		{"bg_color_primary_muted", &LvglStyles::bg_color_primary_muted},
+		{"bg_color_secondary", &LvglStyles::bg_color_secondary},
+		{"bg_color_secondary_muted", &LvglStyles::bg_color_secondary_muted},
+		{"bg_color_success", &LvglStyles::bg_color_success},
+		{"bg_color_warning", &LvglStyles::bg_color_warning},
+		{"bg_color_error", &LvglStyles::bg_color_error},
+		{"bg_color_header", &LvglStyles::bg_color_header},
+		{"bg_color_list_item", &LvglStyles::bg_color_list_item},
+		{"bg_modal", &LvglStyles::bg_modal},
+		{"text", &LvglStyles::text},
+		{"text_muted", &LvglStyles::text_muted},
+		{"text_emphasis", &LvglStyles::text_emphasis},
+		{"text_header", &LvglStyles::text_header},
+		{"text_warning", &LvglStyles::text_warning},
+		{"border", &LvglStyles::border},
+		{"border_muted", &LvglStyles::border_muted},
+		{"border_highlight", &LvglStyles::border_highlight},
+		{"border_color_primary", &LvglStyles::border_color_primary},
+		{"border_color_secondary", &LvglStyles::border_color_secondary},
+		{"border_color_card", &LvglStyles::border_color_card},
+		{"screen", &LvglStyles::screen},
+		{"scrollbar", &LvglStyles::scrollbar},
+		{"scrollbar_scrolled", &LvglStyles::scrollbar_scrolled},
+		{"card", &LvglStyles::card},
+		{"tab_card", &LvglStyles::tab_card},
+		{"modal", &LvglStyles::modal},
+		{"btn", &LvglStyles::btn},
+		{"btn_checked", &LvglStyles::btn_checked},
+		{"icon", &LvglStyles::icon},
+		{"icon_recolor", &LvglStyles::icon_recolor},
+		{"pressed", &LvglStyles::pressed},
+		{"disabled", &LvglStyles::disabled},
+		{"pad_base", &LvglStyles::pad_base},
+		{"pad_zero", &LvglStyles::pad_zero},
+		{"pad_tiny", &LvglStyles::pad_tiny},
+		{"pad_small", &LvglStyles::pad_small},
+		{"pad_normal", &LvglStyles::pad_normal},
+		{"pad_large", &LvglStyles::pad_large},
+		{"pad_gap", &LvglStyles::pad_gap},
+		{"line_space_large", &LvglStyles::line_space_large},
+		{"text_align_center", &LvglStyles::text_align_center},
+		{"outline_primary", &LvglStyles::outline_primary},
+		{"outline_secondary", &LvglStyles::outline_secondary},
+		{"circle", &LvglStyles::circle},
+		{"no_radius", &LvglStyles::no_radius},
+		{"no_border", &LvglStyles::no_border},
+		{"clip_corner", &LvglStyles::clip_corner},
+		{"rotary_scroll", &LvglStyles::rotary_scroll},
+		{"grow", &LvglStyles::grow},
+		{"transition_delayed", &LvglStyles::transition_delayed},
+		{"transition_normal", &LvglStyles::transition_normal},
+		{"anim", &LvglStyles::anim},
+		{"anim_fast", &LvglStyles::anim_fast},
+		{"actionBtn", &LvglStyles::actionBtn},
+		{"input", &LvglStyles::input},
+		{"long_press", &LvglStyles::long_press},
+		{"draggable", &LvglStyles::draggable},
+		{"dragging", &LvglStyles::dragging},
+		{"drag_complete", &LvglStyles::drag_complete},
+		{"knob", &LvglStyles::knob},
+#if LV_USE_ARC
+		{"arc_indic", &LvglStyles::arc_indic},
+		{"arc_indic_primary", &LvglStyles::arc_indic_primary},
+#endif
+#if LV_USE_BAR
+		{"bar", &LvglStyles::bar},
+		{"bar_indic", &LvglStyles::bar_indic},
+#endif
+#if LV_USE_BUTTONMATRIX
+		{"btnm_bg", &LvglStyles::btnm_bg},
+		{"btnm_btn", &LvglStyles::btnm_btn},
+		{"btnm_btn_checked", &LvglStyles::btnm_btn_checked},
+#endif
+#if LV_USE_CHART
+		{"chart_series", &LvglStyles::chart_series},
+		{"chart_indic", &LvglStyles::chart_indic},
+		{"chart_bg", &LvglStyles::chart_bg},
+#endif
+#if LV_USE_DROPDOWN
+		{"dropdown", &LvglStyles::dropdown},
+		{"dropdown_list", &LvglStyles::dropdown_list},
+#endif
+#if LV_USE_CHECKBOX
+		{"cb_marker", &LvglStyles::cb_marker},
+		{"cb_marker_checked", &LvglStyles::cb_marker_checked},
+#endif
+#if LV_USE_SWITCH
+		{"bg_switch", &LvglStyles::bg_switch},
+		{"switch_knob", &LvglStyles::switch_knob},
+#endif
+#if LV_USE_LINE
+		{"line", &LvglStyles::line},
+#endif
+#if LV_USE_TABLE
+		{"table", &LvglStyles::table},
+		{"table_cell", &LvglStyles::table_cell},
+#endif
+#if LV_USE_TEXTAREA
+		{"text_area", &LvglStyles::text_area},
+		{"ta_cursor", &LvglStyles::ta_cursor},
+		{"ta_placeholder", &LvglStyles::ta_placeholder},
+#endif
+#if LV_USE_CALENDAR
+		{"calendar_btnm_bg", &LvglStyles::calendar_btnm_bg},
+		{"calendar_btnm_day", &LvglStyles::calendar_btnm_day},
+		{"calendar_header", &LvglStyles::calendar_header},
+#endif
+#if LV_USE_CANVAS
+		{"canvas", &LvglStyles::canvas},
+#endif
+#if LV_USE_MENU
+		{"menu_bg", &LvglStyles::menu_bg},
+		{"menu_cont", &LvglStyles::menu_cont},
+		{"menu_sidebar_cont", &LvglStyles::menu_sidebar_cont},
+		{"menu_main_cont", &LvglStyles::menu_main_cont},
+		{"menu_page", &LvglStyles::menu_page},
+		{"menu_header_cont", &LvglStyles::menu_header_cont},
+		{"menu_header_btn", &LvglStyles::menu_header_btn},
+		{"menu_section", &LvglStyles::menu_section},
+		{"menu_pressed", &LvglStyles::menu_pressed},
+		{"menu_separator", &LvglStyles::menu_separator},
+#endif
+#if LV_USE_MSGBOX
+		{"msgbox_backdrop_bg", &LvglStyles::msgbox_backdrop_bg},
+#endif
+#if LV_USE_KEYBOARD
+		{"keyboard_button", &LvglStyles::keyboard_button},
+		{"keyboard_button_checked_bg", &LvglStyles::keyboard_button_checked_bg},
+#endif
+#if LV_USE_LIST
+		{"list_bg", &LvglStyles::list_bg},
+		{"list_btn", &LvglStyles::list_btn},
+		{"list_item_grow", &LvglStyles::list_item_grow},
+#endif
+#if LV_USE_TABVIEW
+		{"tab_bg_focus", &LvglStyles::tab_bg_focus},
+		{"tab_btn", &LvglStyles::tab_btn},
+#endif
+#if LV_USE_LED
+		{"led", &LvglStyles::led},
+#endif
+#if LV_USE_SCALE
+		{"scale", &LvglStyles::scale},
+#endif
+#if LV_USE_SLIDER
+		{"slider", &LvglStyles::slider},
+		{"slider_indic", &LvglStyles::slider_indic},
+		{"slider_knob", &LvglStyles::slider_knob},
+#endif
+	};
+
+	static constexpr std::pair<const char*, Style ComponentStyles::*> s_componentStyleNames[] = {
+		{"sidebar", &ComponentStyles::sidebar},
+		{"sidebar_btn", &ComponentStyles::sidebar_btn},
+		{"console_btn_anim", &ComponentStyles::console_btn_anim},
+		{"estop", &ComponentStyles::estop},
+		{"file", &ComponentStyles::file},
+		{"folder", &ComponentStyles::folder},
+		{"unhomed", &ComponentStyles::unhomed},
+		{"temperature_bar", &ComponentStyles::temperature_bar},
+		{"temperature_bar_indic", &ComponentStyles::temperature_bar_indic},
+		{"tool_list", &ComponentStyles::tool_list},
+		{"tool_list_tool", &ComponentStyles::tool_list_tool},
+		{"tool_list_heater", &ComponentStyles::tool_list_heater},
+		{"tool_selected", &ComponentStyles::tool_selected},
+		{"tab_button", &ComponentStyles::tab_button},
+		{"slider_buttons", &ComponentStyles::slider_buttons},
+		{"list_header", &ComponentStyles::list_header},
+		{"list_title", &ComponentStyles::list_title},
+		{"graph_legend", &ComponentStyles::graph_legend},
+		{"bar_label_bg", &ComponentStyles::bar_label_bg},
+		{"bar_label", &ComponentStyles::bar_label},
+		{"object_cancel_base", &ComponentStyles::object_cancel_base},
+		{"object_cancel_current", &ComponentStyles::object_cancel_current},
+		{"object_cancel_cancelled", &ComponentStyles::object_cancel_cancelled},
+#if DEBUG_BORDERS
+		{"debug_borders", &ComponentStyles::debug_borders},
+#endif
+	};
+
+	void forEachStyle(const std::function<void(std::string_view name, Style& style)>& fn)
+	{
+		auto& lvgl = const_cast<LvglStyles&>(getLvglStyles());
+		auto& components = const_cast<ComponentStyles&>(getComponentStyles());
+		for (const auto& [name, member] : s_lvglStyleNames)
+		{
+			fn(name, lvgl.*member);
+		}
+		for (const auto& [name, member] : s_componentStyleNames)
+		{
+			fn(name, components.*member);
+		}
 	}
 
 	void setComponentStyles(const ComponentStyles& styles)

@@ -7,12 +7,15 @@
  */
 
 #include "ObjectModel/Fan.h"
+#include "ObjectModel/Tool.h"
 #include "UI/Components/Button/Button.h"
 #include "UI/Components/Input/Slider.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Xml/OmPublisher.h"
-#include "UI/Xml/XmlUi.h"
-#include "UI/Xml/XmlView.h"
+#include "UI/Xml/Data/FanSource.h"
+#include "UI/Xml/Data/ToolSource.h"
+#include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Runtime/XmlUi.h"
+#include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include <filesystem>
@@ -45,6 +48,77 @@ namespace
 	{
 		return fmt::format(R"({{"id": "test", "ui_api": "{:s}", "components": ["components/*.xml"]}})", api);
 	}
+
+	/* A screen of tools, each with its own list of heaters: nested lists */
+	constexpr std::string_view TOOLS_SCREEN = R"(
+		<component presenter="test_tools">
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<ds_list name="tools" list="tools" item="tool_card" width="100%" height="content" flex_flow="column"/>
+			</view>
+		</component>)";
+
+	constexpr std::string_view TOOL_CARD = R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+				<lv_label name="tool_name" bind_text="name"/>
+				<ds_list name="heaters" list="heaters" item="tool_heater_row" width="100%" height="content"/>
+			</view>
+		</component>)";
+
+	/* `name` and `index` are the heater's; `number` is only on the tool row, `title` only on the presenter */
+	constexpr std::string_view TOOL_HEATER_ROW = R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content" flex_flow="row">
+				<lv_label name="heater_name" bind_text="name"/>
+				<lv_label name="title" bind_text="title"/>
+				<ds_button name="edit" text="Edit">
+					<action trigger="clicked" name="test.heater"/>
+				</ds_button>
+				<ds_button name="send" text="Send">
+					<action trigger="clicked" name="gcode" arg="T{number} H{index} {title}"/>
+				</ds_button>
+			</view>
+		</component>)";
+
+	/** One tool with one heater, replacing the test bench's four tools */
+	constexpr std::string_view ONE_TOOL =
+		R"({"key":"tools","flags":"v","result":[{"active":[200],"heaters":[2],"name":"Solo","number":0,"standby":[150],"state":"active"}]})";
+
+	/** Declares `title` and records which rows `test.heater` came from */
+	class RecordingPresenter : public UI::Xml::XmlPresenter
+	{
+	  public:
+		struct Call
+		{
+			int32_t tool;	// ToolRow::number, or -1 if no tool row was found
+			int32_t heater; // Row index of the ToolHeaterRow, or -1 if none was found
+			bool innermost; // Whether row() (any type) found the heater row
+			bool noFanRow;	// Whether row<FanRow>() found nothing
+			bool operator==(const Call&) const = default;
+		};
+
+		RecordingPresenter()
+			: XmlPresenter("test_tools")
+		{
+			action("test.heater",
+				   [this](const UI::Xml::ActionArgs& args)
+				   {
+					   auto* tool = args.row<UI::Xml::ToolRow>();
+					   auto* heater = args.row<UI::Xml::ToolHeaterRow>();
+					   calls.push_back({tool ? tool->number.get() : -1,
+										heater ? heater->index.get() : -1,
+										heater != nullptr && args.row() == heater,
+										args.row<UI::Xml::FanRow>() == nullptr});
+				   });
+		}
+
+		void fields(UI::Xml::FieldVisitor& f) override { f.field("title", m_title, "A presenter subject"); }
+
+		std::vector<Call> calls;
+
+	  private:
+		UI::Xml::StringSubject<16> m_title{"hot"};
+	};
 } // namespace
 
 class TestXmlUi : public UiTestSuite
@@ -52,9 +126,10 @@ class TestXmlUi : public UiTestSuite
   protected:
 	TestXmlUi()
 	{
+		UI::Xml::Presenters::add<RecordingPresenter>("test_tools");
 		m_userDir = fs::temp_directory_path() / fmt::format("duetscreen-xml-ui-{:d}", getpid());
 		fs::remove_all(m_userDir);
-		UI::Xml::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
+		UI::Xml::Services::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
 	}
 
 	~TestXmlUi() override
@@ -69,7 +144,7 @@ class TestXmlUi : public UiTestSuite
 		m_views.clear();
 		UI::Xml::deinit();
 		UI::Xml::init(UI::Xml::Paths{.builtin = "assets/ui", .user = m_userDir});
-		UI::Xml::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
+		UI::Xml::Services::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
 	}
 
 	fs::path bundleFile(std::string_view relative) const { return m_userDir / "test" / relative; }
@@ -93,6 +168,33 @@ class TestXmlUi : public UiTestSuite
 
 	static lv_obj_t* fanList(UI::LvObj& view) { return find(view, "list"); }
 	static lv_obj_t* fanCard(UI::LvObj& view, int32_t index) { return lv_obj_get_child(fanList(view), index); }
+
+	/** Install the tools screen as a user bundle and fill the model from the test bench */
+	UI::Xml::XmlView& makeToolsView()
+	{
+		writeFile(bundleFile("manifest.json"), manifest());
+		writeFile(bundleFile("components/tools_screen.xml"), TOOLS_SCREEN);
+		writeFile(bundleFile("components/tool_card.xml"), TOOL_CARD);
+		writeFile(bundleFile("components/tool_heater_row.xml"), TOOL_HEATER_ROW);
+		restartWithUserBundles();
+		EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+		load_model_data_from_file("tests/object_model/test_bench/model_sensors_v.json");
+		load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
+		load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
+		auto& view = makeView("tools_screen");
+		pump();
+		return view;
+	}
+
+	static lv_obj_t* toolCard(UI::LvObj& view, int32_t index) { return lv_obj_get_child(find(view, "tools"), index); }
+
+	static lv_obj_t* heaterRow(UI::LvObj& view, int32_t tool, int32_t heater)
+	{
+		return lv_obj_get_child(find(toolCard(view, tool), "heaters"), heater);
+	}
+
+	static std::string_view text(lv_obj_t* parent, const char* name) { return lv_label_get_text(find(parent, name)); }
 
 	static UI::Slider& slider(lv_obj_t* card)
 	{
@@ -238,7 +340,7 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 			<view extends="lv_obj" width="100%" height="content">
 				<lv_label name="custom" bind_text="name"/>
 				<ds_button name="home" text="Home">
-					<action trigger="clicked" name="gcode" arg="G28 ; from fan {index}"/>
+					<action trigger="clicked" name="gcode" arg="G28 ; from fan {number} at {index}"/>
 				</ds_button>
 			</view>
 		</component>)");
@@ -258,9 +360,9 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 	EXPECT_STREQ(lv_label_get_text(label), _("fine_tune.fan", 0).c_str());
 	EXPECT_EQ(find(fanCard(view, 0), "slider"), nullptr);
 
-	// A global action with the item's index
+	// A global action with placeholders filled from the row
 	lv_obj_send_event(find(fanCard(view, 2), "home"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(m_sent, (std::vector<std::string>{"G28 ; from fan 2\n"}));
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"G28 ; from fan 2 at 2\n"}));
 }
 
 TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
@@ -360,4 +462,63 @@ TEST_F(TestXmlUi, MissingComponentShowsAPlaceholder)
 	ASSERT_EQ(lv_obj_get_child_count(view.getRootPtr()), 1u);
 	EXPECT_NE(std::string_view(lv_label_get_text(lv_obj_get_child(view.getRootPtr(), 0))).find("no_such_component"),
 			  std::string_view::npos);
+}
+
+TEST_F(TestXmlUi, NestedListsShowEachRowsOwnChildren)
+{
+	auto& view = makeToolsView();
+
+	// Test bench: T0 (heater 2), T2 (heaters 0 and 3), T3 (none), T4 (heater 2)
+	const std::vector<size_t> heaterCounts = {1, 2, 0, 1};
+	ASSERT_EQ(lv_obj_get_child_count(find(view, "tools")), heaterCounts.size());
+	for (size_t slot = 0; slot < heaterCounts.size(); slot++)
+	{
+		auto tool = OM::GetToolBySlot(slot);
+		ASSERT_NE(tool, nullptr);
+		lv_obj_t* card = toolCard(view, static_cast<int32_t>(slot));
+		EXPECT_EQ(text(card, "tool_name"), tool->GetName());
+		ASSERT_EQ(lv_obj_get_child_count(find(card, "heaters")), heaterCounts[slot]) << "tool slot " << slot;
+
+		for (size_t h = 0; h < heaterCounts[slot]; h++)
+		{
+			lv_obj_t* row = heaterRow(view, static_cast<int32_t>(slot), static_cast<int32_t>(h));
+			const auto& heater = *tool->GetHeater(h)->heater;
+			const std::string expected =
+				heater.GetName().empty() ? _("temperature.heater", heater.index) : std::string(heater.GetName());
+			EXPECT_EQ(text(row, "heater_name"), expected) << "the heater's own name, not the tool's";
+			EXPECT_EQ(text(row, "title"), "hot") << "names the rows don't have come from the presenter";
+		}
+	}
+}
+
+TEST_F(TestXmlUi, ActionsFindEveryEnclosingRow)
+{
+	auto& view = makeToolsView();
+	auto* presenter = dynamic_cast<RecordingPresenter*>(view.getPresenter());
+	ASSERT_NE(presenter, nullptr);
+
+	lv_obj_send_event(find(heaterRow(view, 1, 1), "edit"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(heaterRow(view, 3, 0), "edit"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(presenter->calls,
+			  (std::vector<RecordingPresenter::Call>{{.tool = 2, .heater = 1, .innermost = true, .noFanRow = true},
+													 {.tool = 4, .heater = 0, .innermost = true, .noFanRow = true}}));
+
+	// Placeholders resolve like bindings: the heater's index, the tool's number, the presenter's title
+	lv_obj_send_event(find(heaterRow(view, 1, 1), "send"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"T2 H1 hot\n"}));
+}
+
+TEST_F(TestXmlUi, NestedListFollowsItsRowsLength)
+{
+	auto& view = makeToolsView();
+	ASSERT_EQ(lv_obj_get_child_count(find(toolCard(view, 1), "heaters")), 2u);
+	lv_obj_t* firstCard = toolCard(view, 0);
+
+	load_model_data(ONE_TOOL);
+	pump();
+
+	ASSERT_EQ(lv_obj_get_child_count(find(view, "tools")), 1u);
+	EXPECT_EQ(toolCard(view, 0), firstCard) << "the remaining card is kept";
+	EXPECT_EQ(text(firstCard, "tool_name"), "Solo");
+	ASSERT_EQ(lv_obj_get_child_count(find(firstCard, "heaters")), 1u);
 }

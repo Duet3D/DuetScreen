@@ -11,7 +11,7 @@
 #include "UI/Core/View.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
-#include "UI/Xml/XmlView.h"
+#include "UI/Xml/View/XmlView.h"
 #include "UI/Screens/Heightmap/HeightmapView.h"
 #include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"

@@ -311,6 +311,12 @@ namespace UI::Themes
 	const LvglStyles& getLvglStyles();
 	const ComponentStyles& getComponentStyles();
 
+	/**
+	 * Call `fn(name, style)` for every global style (LvglStyles and ComponentStyles). The name is the member's name,
+	 * which is also how XML and theme files refer to the style.
+	 */
+	void forEachStyle(const std::function<void(std::string_view name, Style& style)>& fn);
+
 	struct FontConfig
 	{
 		uint32_t size = 14;

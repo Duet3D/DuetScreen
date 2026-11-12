@@ -1,6 +1,6 @@
 <!--
-  One fan, inside <model_list model="om.fans">. Bindings resolve against this fan's item:
-    name, requested, actual, rpm, thermostatic, number, index
+  One fan, a row of <ds_list list="fans">. Bindings resolve against this fan's row first:
+    index, number, name, requested, actual, rpm, thermostatic
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content"
