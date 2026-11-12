@@ -2,7 +2,7 @@
   The dashboard, the home page: the tool list and temperature graph on the left, and the jobs, macros and print
   status tabs on the right.
 
-  The temperature graph and the tabs are C++ views (src/UI/Screens/XmlScreens.cpp) for now.
+  The tabs are a C++ view (src/UI/Screens/XmlScreens.cpp) for now.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" style_pad_all="0"
@@ -13,11 +13,13 @@
 			<style name="card"/>
 		</ds_view>
 
-		<ds_view name="temperature_graph" view="temperature_graph" shown="true"
-				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="0" style_grid_cell_column_span="1"
-				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1">
+		<!-- The last minute; the axis reaches at least 300°C, or the highest heater limit -->
+		<ds_graph name="temperature_graph" history="temperatures" seconds="60"
+				  y_min="0" y_max="300" bind_y_max="temperatures.limit"
+				  style_grid_cell_x_align="stretch" style_grid_cell_column_pos="0" style_grid_cell_column_span="1"
+				  style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1">
 			<style name="card"/>
-		</ds_view>
+		</ds_graph>
 
 		<ds_view name="dashboard_tabs" view="dashboard_tabs" shown="true"
 				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"

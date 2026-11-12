@@ -20,6 +20,13 @@ namespace UI
 		init();
 	}
 
+	Graph::Graph(const std::string& name, lv_obj_t* parent)
+		: LvContainer(name, parent)
+	{
+		ZoneScoped;
+		init();
+	}
+
 	void Graph::init()
 	{
 		ZoneScoped;

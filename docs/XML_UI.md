@@ -15,9 +15,10 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | Data source | Publishes printer data (fans, tools, …) as global subjects and lists | [Data/](../src/UI/Xml/Data) |
 | Subject | A named value a widget binds to (`bind_text="name"`) | [Binding/Subjects.h](../src/UI/Xml/Binding/Subjects.h) |
 | List | A dynamic-length list of rows; each row has its own subjects, and may have lists of its own | [Binding/List.h](../src/UI/Xml/Binding/List.h) |
+| History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list`, `ds_graph`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -35,11 +36,12 @@ A view never contains logic and a presenter never touches a widget. Data flows o
 src/UI/Xml/
   Runtime/   XmlUi (start, stop, reload), Bundles (manifest, checks), HotReload, Services (G-code, number pad),
              Translations, GlobalActions
-  Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row
+  Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History
   View/      XmlView, XmlPresenter (and the presenter registry), Actions
-  Widgets/   DsButton, DsSlider, DsList
+  Widgets/   DsButton, DsSlider, DsList, DsGraph, DsView
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
-  Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource
+  Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
+             MachineSource, NavigationSource, ResponseSource, TemperatureSource
 src/UI/Styles/                            global styles; Theme, ThemeFile and Palette build them from theme files
 src/UI/Screens/<Name>/<Name>Presenter.*   presenters live with their screen
 src/UI/Screens/XmlScreens.cpp             the presenters XML can name, and the C++ views it can host
@@ -140,7 +142,7 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 
 | Kind | Names |
 | --- | --- |
-| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `nav.screen` (the open page, empty on the home screen), `responses.count`. |
+| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `temperatures` (a history, one series per heater) and `temperatures.limit`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
 | Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
@@ -162,6 +164,16 @@ builds one `tool_card` per row of `tools` (see [tool_list.xml](../assets/ui/comp
 
 Lists add and remove rows at the end, so existing rows keep their scroll position and in-progress edits when the list changes length.
 
+### Graphs
+
+A subject holds only the current value. A graph needs the past, so data sources record into a *history*: a list whose rows are series (each with a `name`), and which adds one value to every series at a fixed rate. Sources record whether or not anything shows the history, so a graph built later starts with what came before it.
+
+```xml
+<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"/>
+```
+
+shows the last 60 seconds of every heater (see [dashboard.xml](../assets/ui/screens/dashboard.xml)). The Y axis runs from `y_min` to `y_max`, or to `bind_y_max`'s value if that is higher. Because a history is a list, `<ds_list list="temperatures" …>` can show its series too.
+
 ### DuetScreen widgets
 
 These are in addition to the standard `lv_*` widgets.
@@ -171,6 +183,7 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_button>` | `text`, `translation_tag`, `bind_text`, `icon`, `checkable`, `long_mode`, `flash_on` (flash whenever a subject changes) |
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
+| `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
 | `<ds_view>` | `name`, `view`, `home`, `shown`: a page (see Hosting a view) |
 
 ### Actions

@@ -3,6 +3,7 @@ target_sources(
   DuetScreen.lib
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Globals.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Binding/History.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/List.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Scope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
@@ -12,6 +13,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/NavigationSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ToolSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp
@@ -25,6 +27,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsView.cpp

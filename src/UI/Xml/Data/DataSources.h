@@ -7,6 +7,10 @@
 
 #pragma once
 
+#include "DataSource.h"
+#include <memory>
+#include <vector>
+
 namespace UI::Xml::DataSources
 {
 	/** Create every data source, publish its names globally, connect it to the Model and fill it */
@@ -14,6 +18,24 @@ namespace UI::Xml::DataSources
 
 	/** Disconnect every data source from the Model, remove its global names and destroy it */
 	void stop();
+
+	/** The running data sources; empty unless started */
+	const std::vector<std::shared_ptr<DataSource>>& all();
+
+	/** The running data source of type T, or nullptr, e.g. for tests to drive one directly */
+	template <typename T>
+		requires std::derived_from<T, DataSource>
+	T* find()
+	{
+		for (const auto& source : all())
+		{
+			if (auto* found = dynamic_cast<T*>(source.get()))
+			{
+				return found;
+			}
+		}
+		return nullptr;
+	}
 
 	/** Re-read every data source, e.g. after a language change, since some published text is translated */
 	void updateAll();

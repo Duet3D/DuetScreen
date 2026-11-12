@@ -12,14 +12,16 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
-#include "UI/Screens/Dashboard/DashboardGraph.h"
 #include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "UI/Screens/File/FileView.h"
 #include "UI/Screens/File/FilesScreen.h"
 #include "UI/Screens/Notifications/NotificationsView.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Data/TemperatureSource.h"
 #include "UI/Xml/View/XmlView.h"
+#include "UI/Xml/Widgets/DsGraph.h"
 #include "helix_xml.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
@@ -51,7 +53,18 @@ class TestHomeView : public UiTestSuite
 	}
 
 	static UI::DashboardTabs& dashboardTabs() { return page<UI::DashboardTabs>("dashboard_tabs"); }
-	static UI::DashboardGraph& temperatureGraph() { return page<UI::DashboardGraph>("temperature_graph"); }
+
+	/** The dashboard's temperature graph, as dashboard.xml builds it */
+	static UI::Xml::DsGraph& temperatureGraph()
+	{
+		lv_obj_t* graph = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "temperature_graph");
+		if (graph == nullptr)
+		{
+			throw std::runtime_error("the dashboard has no temperature_graph");
+		}
+		return static_cast<UI::Xml::DsGraph&>(*UI::LvObj::fromPtr(graph));
+	}
+
 	static UI::ControlView& controlPage() { return page<UI::ControlView>("control"); }
 	static UI::ConsoleView& consolePage() { return page<UI::ConsoleView>("console"); }
 	static UI::FilesScreen& filesPage() { return page<UI::FilesScreen>("files"); }
@@ -537,12 +550,14 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	EXPECT_EQ(OM::Heat::GetHeaterCount(), 4);
 	EXPECT_EQ(OM::GetToolCount(), 4);
 
-	/* Populate graph with fake sensor data */
+	/* Populate graph with fake sensor data, as the model ticks would */
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
 	auto sensor = OM::GetAnalogSensorBySlot(0);
 	sensor->lastReading = 25.0f;
 	for (size_t i = 0; i < 1000; i++)
 	{
-		temperatureGraph().getPresenter()->tick();
+		temperatures->sample();
 		sensor->lastReading = (int32_t)(sensor->lastReading + 1) % 300;
 	}
 

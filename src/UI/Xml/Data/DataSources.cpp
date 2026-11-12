@@ -10,6 +10,7 @@
 #include "MachineSource.h"
 #include "NavigationSource.h"
 #include "ResponseSource.h"
+#include "TemperatureSource.h"
 #include "ToolSource.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Globals.h"
@@ -74,6 +75,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<MachineSource>(),
 			std::make_shared<NavigationSource>(),
 			std::make_shared<ResponseSource>(),
+			std::make_shared<TemperatureSource>(),
 		};
 
 		Publisher publisher;
@@ -97,6 +99,11 @@ namespace UI::Xml::DataSources
 			source->fields(unpublisher);
 		}
 		s_sources.clear();
+	}
+
+	const std::vector<std::shared_ptr<DataSource>>& all()
+	{
+		return s_sources;
 	}
 
 	void updateAll()

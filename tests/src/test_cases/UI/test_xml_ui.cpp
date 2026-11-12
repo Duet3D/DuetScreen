@@ -12,11 +12,14 @@
 #include "UI/Components/Input/Slider.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Xml/Binding/Globals.h"
+#include "UI/Xml/Binding/History.h"
 #include "UI/Xml/Data/FanSource.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
+#include "UI/Xml/Widgets/DsGraph.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
@@ -122,6 +125,40 @@ namespace
 	  private:
 		UI::Xml::StringSubject<16> m_title{"hot"};
 	};
+
+	/* A graph of the presenter's `samples` history: 2 seconds at 10 samples a second is 20 points */
+	constexpr std::string_view HISTORY_SCREEN = R"(
+		<component presenter="test_history">
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_graph name="graph" history="samples" seconds="2" y_min="0" y_max="100" bind_y_max="limit"
+						  width="100%" height="100%"/>
+			</view>
+		</component>)";
+
+	/** Owns a history, recorded into by the tests, and a limit for the Y axis */
+	class HistoryPresenter : public UI::Xml::XmlPresenter
+	{
+	  public:
+		HistoryPresenter()
+			: XmlPresenter("test_history")
+		{
+		}
+
+		void fields(UI::Xml::FieldVisitor& f) override
+		{
+			f.list("samples", history, "Test history");
+			f.field("limit", limit, "Test limit");
+		}
+
+		/** Make the history `names.size()` series long, named `names` */
+		void setSeries(const std::vector<std::string>& names)
+		{
+			history.sync(names.size(), [&](UI::Xml::SeriesRow& row, size_t i) { row.name.set(names[i]); });
+		}
+
+		UI::Xml::History history{10, 50};
+		UI::Xml::IntSubject limit;
+	};
 } // namespace
 
 class TestXmlUi : public UiTestSuite
@@ -130,6 +167,7 @@ class TestXmlUi : public UiTestSuite
 	TestXmlUi()
 	{
 		UI::Xml::Presenters::add<RecordingPresenter>("test_tools");
+		UI::Xml::Presenters::add<HistoryPresenter>("test_history");
 		m_userDir = fs::temp_directory_path() / fmt::format("duetscreen-xml-ui-{:d}", getpid());
 		fs::remove_all(m_userDir);
 		UI::Xml::Services::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
@@ -202,6 +240,36 @@ class TestXmlUi : public UiTestSuite
 	static UI::Slider& slider(lv_obj_t* card)
 	{
 		return static_cast<UI::Slider&>(*UI::LvObj::fromPtr(find(card, "slider")));
+	}
+
+	/** Install the history screen as a user bundle */
+	void installHistoryScreen()
+	{
+		writeFile(bundleFile("manifest.json"), manifest());
+		writeFile(bundleFile("components/history_screen.xml"), HISTORY_SCREEN);
+		restartWithUserBundles();
+		EXPECT_TRUE(UI::Xml::getIssues().empty());
+	}
+
+	static UI::Xml::DsGraph& graph(UI::LvObj& view)
+	{
+		return static_cast<UI::Xml::DsGraph&>(*UI::LvObj::fromPtr(find(view, "graph")));
+	}
+
+	/** The newest `count` values a graph shows for a series, oldest first */
+	static std::vector<int32_t> shown(UI::Graph& graph, size_t series, uint32_t count)
+	{
+		lv_obj_t* chart = find(graph, "chart");
+		lv_chart_series_t* ser = graph.getSeries(series)->series;
+		const uint32_t points = lv_chart_get_point_count(chart);
+		const uint32_t start = lv_chart_get_x_start_point(chart, ser); // The oldest point
+		const int32_t* y = lv_chart_get_series_y_array(chart, ser);
+		std::vector<int32_t> values;
+		for (uint32_t i = points - count; i < points; i++)
+		{
+			values.push_back(y[(start + i) % points]);
+		}
+		return values;
 	}
 
 	fs::path m_userDir;
@@ -634,4 +702,78 @@ TEST_F(TestXmlUi, ComponentsCanUseThemeColours)
 	ASSERT_NE(grey, nullptr);
 	grey->setThemeActive();
 	EXPECT_EQ(rgb(lv_obj_get_style_bg_color(view.getRootPtr(), LV_PART_MAIN)), rgb(grey->getColors().primary));
+}
+
+TEST_F(TestXmlUi, GraphStartsWithTheHistoryRecordedBeforeIt)
+{
+	installHistoryScreen();
+	auto presenter = std::make_shared<HistoryPresenter>();
+	presenter->setSeries({"A"});
+	for (int32_t value : {1, 2, 3})
+	{
+		presenter->history.record([&](UI::Xml::SeriesRow&, size_t) { return value; });
+	}
+
+	auto& view =
+		*m_views.emplace_back(std::make_unique<UI::Xml::XmlView>("history", screen, "history_screen", presenter));
+	auto& g = graph(view);
+	ASSERT_EQ(g.getSeriesCount(), 1u);
+	EXPECT_EQ(g.getSeries(0)->legendObj->getText(), "A");
+	EXPECT_EQ(lv_chart_get_point_count(find(g, "chart")), 20u) << "2 seconds at 10 samples a second";
+	EXPECT_EQ(g.getXRange().min, -2);
+	EXPECT_EQ(shown(g, 0, 3), (std::vector<int32_t>{1, 2, 3}));
+}
+
+TEST_F(TestXmlUi, GraphFollowsSeriesAndSamples)
+{
+	installHistoryScreen();
+	auto presenter = std::make_shared<HistoryPresenter>();
+	auto& view =
+		*m_views.emplace_back(std::make_unique<UI::Xml::XmlView>("history", screen, "history_screen", presenter));
+	auto& g = graph(view);
+	EXPECT_EQ(g.getSeriesCount(), 0u);
+
+	// Added series show up; a value is added to every series
+	presenter->setSeries({"A", "B"});
+	ASSERT_EQ(g.getSeriesCount(), 2u);
+	presenter->history.record([](UI::Xml::SeriesRow&, size_t i) { return static_cast<int32_t>(10 + i); });
+	EXPECT_EQ(shown(g, 0, 1), (std::vector<int32_t>{10}));
+	EXPECT_EQ(shown(g, 1, 1), (std::vector<int32_t>{11}));
+
+	// Renamed series update their legend
+	presenter->setSeries({"A", "Bed"});
+	EXPECT_EQ(g.getSeries(1)->legendObj->getText(), "Bed");
+
+	// Removed series go
+	presenter->setSeries({"A"});
+	EXPECT_EQ(g.getSeriesCount(), 1u);
+
+	// The Y axis reaches the bound limit, but never drops below y_max
+	presenter->limit.set(250);
+	EXPECT_EQ(g.getYRange().max, 250);
+	presenter->limit.set(50);
+	EXPECT_EQ(g.getYRange().max, 100);
+}
+
+TEST_F(TestXmlUi, GraphOutlivesItsHistory)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/global_history.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_graph name="graph" history="test_samples"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	auto history = std::make_unique<UI::Xml::History>(10, 50);
+	history->sync(1, [](UI::Xml::SeriesRow& row, size_t) { row.name.set("A"); });
+	UI::Xml::Globals::add("test_samples", *history);
+
+	auto& view = makeView("global_history");
+	ASSERT_EQ(graph(view).getSeriesCount(), 1u);
+
+	UI::Xml::Globals::remove("test_samples");
+	history.reset();
+	EXPECT_EQ(graph(view).getSeriesCount(), 0u) << "the graph lets go of a destroyed history";
+	m_views.clear(); // Deleting the graph afterwards must not touch the history
 }
