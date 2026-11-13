@@ -1,180 +1,385 @@
+/*
+ * MovePresenter.cpp
+ */
+
 #include "MovePresenter.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
-#include "MoveView.h"
 #include "ObjectModel/Axis.h"
-#include "ObjectModel/Files.h"
 #include "ObjectModel/PrinterStatus.h"
-#include "ObjectModel/Tool.h"
-#include "UI/Core/Navigation.h"
+#include "UI/Core/Model.h"
+#include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
+#include "utils/UnitSystem.h"
+#include <algorithm>
+#include <cmath>
 
 namespace UI
 {
-	static bool canHome()
+	namespace
 	{
-		ZoneScoped;
-		switch (OM::GetStatus())
+		/** Whether the printer is in a state to home (not busy with a job or still connecting) */
+		bool canHome()
 		{
-		case OM::PrinterStatus::connecting:
-		case OM::PrinterStatus::pausing:
-		case OM::PrinterStatus::resuming:
-		case OM::PrinterStatus::processing:
-		case OM::PrinterStatus::off:
-			return false;
-		default:
-			return true;
+			switch (OM::GetStatus())
+			{
+			case OM::PrinterStatus::connecting:
+			case OM::PrinterStatus::pausing:
+			case OM::PrinterStatus::resuming:
+			case OM::PrinterStatus::processing:
+			case OM::PrinterStatus::off:
+				return false;
+			default:
+				return true;
+			}
 		}
+
+		/** Whether `axis` can be moved: homed, or moves before homing are allowed, and the printer isn't busy */
+		bool canMove(const OM::Move::Axis& axis)
+		{
+			return (axis.homed || !OM::Move::GetNoMovesBeforeHoming()) && canHome();
+		}
+
+		/** An axis' label, e.g. "X: 0.00", in the displayed unit */
+		std::string axisLabel(char letter, float position)
+		{
+			return fmt::format("{}: {:.2f}", letter, Units::convertDistanceToCurrentDisplayedUnit(position));
+		}
+	} // namespace
+
+	void MoveAxisRow::fields(Xml::FieldVisitor& f)
+	{
+		f.field("letter", letter, "Axis letter");
+		f.field("label", label, "E.g. \"U: 0.00\"");
+		f.field("homed", homed, "1 when homed");
+		f.field("jog_usable", jogUsable, "1 if it can be jogged");
+		f.field("home_usable", homeUsable, "1 if it can be homed");
 	}
 
-	static bool canMove(const OM::Move::AxisPtr& axis)
+	void MoveChoiceRow::fields(Xml::FieldVisitor& f)
 	{
-		ZoneScoped;
-		return (axis->homed || !OM::Move::GetNoMovesBeforeHoming()) && canHome();
+		f.field("text", text, "The value");
+		f.field("selected", selected, "1 for the one in use");
+	}
+
+	MovePresenter::MovePresenter()
+		: XmlPresenter("move")
+	{
+		action("move.jog",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const char letter = axisOf(args))
+				   {
+					   jog(letter, !args.arg.ends_with('-'));
+				   }
+			   });
+		action("move.home",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (args.arg == "all")
+				   {
+					   confirmThen(_("move.home_all_confirm.title"),
+								   _("move.home_all_confirm.text"),
+								   []() { Xml::Services::sendGcode("G28"); });
+				   }
+				   else if (args.arg == "XY")
+				   {
+					   confirmThen(_("move.home_xy_confirm.title"),
+								   _("move.home_xy_confirm.text"),
+								   []()
+								   {
+									   home('X');
+									   home('Y');
+								   });
+				   }
+				   else if (const char letter = axisOf(args))
+				   {
+					   confirmThen(_("move.home_generic_confirm.title", letter),
+								   _("move.home_generic_confirm.text", letter),
+								   [letter]() { home(letter); });
+				   }
+			   });
+		action("move.disable_motors",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   confirmThen(_("move.disable_motors_confirm.title"),
+							   _("move.disable_motors_confirm.text"),
+							   []() { Xml::Services::sendGcode("M18"); });
+			   });
+		action("move.set_position",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const char letter = axisOf(args))
+				   {
+					   askPosition(letter, args.target);
+				   }
+			   });
+		action("move.distance",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto* row = args.row<MoveChoiceRow>())
+				   {
+					   m_distance = static_cast<size_t>(row->index.get());
+					   showChoices();
+				   }
+			   });
+		action("move.feedrate",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto* row = args.row<MoveChoiceRow>())
+				   {
+					   m_feedrate = static_cast<size_t>(row->index.get());
+					   showChoices();
+				   }
+			   });
+		action("move.edit_distance",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   const auto* row = args.row<MoveChoiceRow>();
+				   if (row == nullptr)
+				   {
+					   return;
+				   }
+				   const auto i = static_cast<size_t>(row->index.get());
+				   Xml::Services::askNumber(
+					   args.target,
+					   {.header = _("move.distance_adjust_header", Units::getDisplayedDistanceUnit()),
+						.min = 0.01f,
+						.max = 1000.0f,
+						.value = m_distances.at(i),
+						.onConfirm = [this, i](float value)
+						{
+							m_distances.at(i) = value;
+							StorageHelper::setData(ID_MOVE_DISTANCES, m_distances);
+							showChoices();
+						}});
+			   });
+		action("move.edit_feedrate",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   const auto* row = args.row<MoveChoiceRow>();
+				   if (row == nullptr)
+				   {
+					   return;
+				   }
+				   const auto i = static_cast<size_t>(row->index.get());
+				   Xml::Services::askNumber(args.target,
+											{.header = _("move.feedrate_adjust_header", Units::getDisplayedSpeedUnit()),
+											 .min = 0.01f,
+											 .max = 1000.0f,
+											 .value = static_cast<float>(m_feedrates.at(i)),
+											 .onConfirm = [this, i](float value)
+											 {
+												 m_feedrates.at(i) = static_cast<uint32_t>(std::lround(value));
+												 StorageHelper::setData(ID_MOVE_FEEDRATES, m_feedrates);
+												 showChoices();
+											 }});
+			   });
+		action("move.confirm",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_confirm.set(0);
+				   if (m_confirmed)
+				   {
+					   m_confirmed();
+				   }
+			   });
+		action("move.close_dialog", [this](const Xml::ActionArgs&) { m_confirm.set(0); });
+	}
+
+	void MovePresenter::fields(Xml::FieldVisitor& f)
+	{
+		f.field("connected", m_connected, "1 while connected");
+		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}, {"z", &m_z}};
+		for (const auto& [prefix, axis] : named)
+		{
+			f.field(fmt::format("{}.label", prefix), axis->label, "E.g. \"X: 0.00\"");
+			f.field(fmt::format("{}.homed", prefix), axis->homed, "1 when homed");
+			f.field(fmt::format("{}.jog_usable", prefix), axis->jogUsable, "1 if it can be jogged");
+			f.field(fmt::format("{}.home_usable", prefix), axis->homeUsable, "1 if it can be homed");
+		}
+		f.field("xy.homed", m_xyHomed, "1 when X and Y are homed");
+		f.field("xy.home_usable", m_xyHomeUsable, "1 if X and Y can be homed");
+		f.field("home_all_usable", m_homeAllUsable, "1 if all axes can be homed");
+		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
+		f.list("axes", m_axes, "The axes other than X, Y and Z");
+		f.field("axes_shown", m_axesShown, "1 if there are other axes");
+		f.field("distance_title", m_distanceTitle, "Distance row title");
+		f.field("feedrate_title", m_feedrateTitle, "Speed row title");
+		f.list("distances", m_distanceChoices, "Jog distances");
+		f.list("feedrates", m_feedrateChoices, "Jog speeds");
+		f.field("confirm", m_confirm, "1 while asking before homing or disabling the motors");
+		f.field("confirm_title", m_confirmTitle, "The question's title");
+		f.field("confirm_text", m_confirmText, "The question");
 	}
 
 	void MovePresenter::onInit()
 	{
-		ZoneScoped;
-		MODEL_LOCK();
+		registerEventListener<EventType::AxesData>([this]() { showAxes(); });
+		registerEventListener<EventType::Status>([this](const OM::PrinterStatus&) { showAxes(); });
 
-		registerEventListener<EventType::AxesData>(this, &MovePresenter::newAxesData);
-		registerEventListener<EventType::Status>(this, &MovePresenter::newStatus);
+		if (auto distances = StorageHelper::getData(ID_MOVE_DISTANCES); !distances.empty())
+		{
+			m_distances = std::move(distances);
+		}
+		if (auto feedrates = StorageHelper::getData(ID_MOVE_FEEDRATES); !feedrates.empty())
+		{
+			m_feedrates = std::move(feedrates);
+		}
 	}
 
 	void MovePresenter::onActivate()
 	{
-		ZoneScoped;
-		getView()->setDisabled(!OM::IsConnected());
-		newAxesData();
-	}
-
-	void MovePresenter::homeAll()
-	{
-		ZoneScoped;
-		Comm::DUET.SendGcode("G28\n");
-	}
-
-	void MovePresenter::disableMotors()
-	{
-		ZoneScoped;
-		Comm::DUET.SendGcode("M18\n");
-	}
-
-	void MovePresenter::homeAxis(char axis_letter)
-	{
-		ZoneScoped;
-		MODEL_LOCK();
-		auto axis = OM::Move::GetAxisByLetter(axis_letter);
-		if (axis == nullptr)
-		{
-			LOG_WARN("Axis '{}' not found", axis_letter);
-			return;
-		}
-		axis->Home();
-	}
-
-	void MovePresenter::homeAxis(size_t axisSlot)
-	{
-		ZoneScoped;
-		MODEL_LOCK();
-		auto axis = OM::Move::GetAxisBySlot(axisSlot);
-		if (axis == nullptr)
-		{
-			LOG_WARN("Axis {:d} not found", axisSlot);
-			return;
-		}
-		axis->Home();
-	}
-
-	void MovePresenter::moveAxisAbsolute(char axis_letter, float position, uint32_t feedrate)
-	{
-		ZoneScoped;
-		MODEL_LOCK();
-		const bool useMachineCoordinates = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
-		auto axis = OM::Move::GetAxisByLetter(axis_letter);
-		if (axis == nullptr)
-		{
-			LOG_WARN("Axis '{}' not found", axis_letter);
-			return;
-		}
-		axis->MoveAbsolute(position, feedrate, useMachineCoordinates);
-	}
-
-	void MovePresenter::moveAxisRelative(char axis_letter, float distance, uint32_t feedrate)
-	{
-		ZoneScoped;
-		MODEL_LOCK();
-		auto axis = OM::Move::GetAxisByLetter(axis_letter);
-		if (axis == nullptr)
-		{
-			LOG_WARN("Axis '{}' not found", axis_letter);
-			return;
-		}
-		axis->MoveRelative(distance, feedrate);
-	}
-
-	void MovePresenter::moveAxisRelative(size_t axisSlot, float distance, uint32_t feedrate)
-	{
-		ZoneScoped;
-		MODEL_LOCK();
-		auto axis = OM::Move::GetAxisBySlot(axisSlot);
-		if (axis == nullptr)
-		{
-			LOG_WARN("Axis {:d} not found", axisSlot);
-			return;
-		}
-		axis->MoveRelative(distance, feedrate);
-	}
-
-	void MovePresenter::newAxesData()
-	{
-		ZoneScoped;
-		const bool useMachineCoordinates = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
-		std::vector<OM::Move::AxisPtr> axes = OM::Move::GetAxes(false);
-		{
-			/*
-			The view keeps a pointer to the m_axisData so we need to lock to prevent the view using half complete data
-			*/
-			UI_LOCK();
-			m_axisData.resize(axes.size());
-			for (size_t i = 0; i < axes.size(); i++)
-			{
-				auto& axis = axes[i];
-				const float position = useMachineCoordinates ? axis->machinePosition : axis->userPosition;
-				m_axisData[i] = {.letter = axis->letter[0],
-								 .homed = axis->homed != 0,
-								 .position = position,
-								 .min = axis->minPosition,
-								 .max = axis->maxPosition,
-								 .home_disabled = !canHome(),
-								 .jog_disabled = !canMove(axis)};
-			}
-
-			getView()->setAxisData(m_axisData);
-			getView()->setHomeAllDisabled(!canHome());
-			getView()->setDisableMotorsDisabled(!canHome());
-		}
-	}
-
-	void MovePresenter::newStatus(const OM::PrinterStatus& /* status */)
-	{
-		ZoneScoped;
-		getView()->setDisabled(!OM::IsConnected());
-		newAxesData();
-	}
-
-	void MovePresenter::onConnect()
-	{
-		ZoneScoped;
-		getView()->setDisabled(false);
+		m_confirm.set(0);
+		showChoices();
+		showAxes();
 	}
 
 	void MovePresenter::onDisconnect()
 	{
+		m_connected.set(0);
+		m_axes.clear();
+		showAxes();
+	}
+
+	void MovePresenter::showAxes()
+	{
 		ZoneScoped;
-		getView()->setDisabled(true);
-		getView()->clear();
+		MODEL_LOCK();
+		const bool connected = OM::IsConnected();
+		const bool homeable = connected && canHome();
+		const bool machine = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
+		m_connected.set(connected ? 1 : 0);
+		m_homeAllUsable.set(homeable ? 1 : 0);
+		m_disableMotorsUsable.set(homeable ? 1 : 0);
+
+		// X, Y and Z have controls of their own; disabled if the printer has no such axis
+		NamedAxis* named[] = {&m_x, &m_y, &m_z};
+		const char letters[] = {'X', 'Y', 'Z'};
+		for (size_t i = 0; i < 3; i++)
+		{
+			auto axis = OM::Move::GetAxisByLetter(letters[i]);
+			const float position = axis ? (machine ? axis->machinePosition : axis->userPosition) : 0.0f;
+			named[i]->label.set(axisLabel(letters[i], position));
+			named[i]->homed.set(axis && axis->homed ? 1 : 0);
+			named[i]->jogUsable.set(connected && axis && canMove(*axis) ? 1 : 0);
+			named[i]->homeUsable.set(homeable && axis ? 1 : 0);
+		}
+		m_xyHomed.set(m_x.homed.get() && m_y.homed.get() ? 1 : 0);
+		m_xyHomeUsable.set(m_x.homeUsable.get() && m_y.homeUsable.get() ? 1 : 0);
+
+		// Any others
+		std::vector<OM::Move::AxisPtr> others;
+		if (connected)
+		{
+			for (const auto& axis : OM::Move::GetAxes(false))
+			{
+				if (axis->letter[0] != 'X' && axis->letter[0] != 'Y' && axis->letter[0] != 'Z')
+				{
+					others.push_back(axis);
+				}
+			}
+		}
+		m_axes.sync(others.size(),
+					[&](MoveAxisRow& row, size_t i)
+					{
+						const auto& axis = *others[i];
+						row.letter.set(std::string(1, axis.letter[0]));
+						row.label.set(axisLabel(axis.letter[0], machine ? axis.machinePosition : axis.userPosition));
+						row.homed.set(axis.homed ? 1 : 0);
+						row.jogUsable.set(canMove(axis) ? 1 : 0);
+						row.homeUsable.set(homeable ? 1 : 0);
+					});
+		m_axesShown.set(others.empty() ? 0 : 1);
+	}
+
+	void MovePresenter::showChoices()
+	{
+		m_distanceTitle.set(_("move.distance", Units::getDisplayedDistanceUnit()));
+		m_feedrateTitle.set(_("move.feedrate", Units::getDisplayedSpeedUnit()));
+		m_distance = std::min(m_distance, m_distances.empty() ? 0 : m_distances.size() - 1);
+		m_feedrate = std::min(m_feedrate, m_feedrates.empty() ? 0 : m_feedrates.size() - 1);
+		m_distanceChoices.sync(m_distances.size(),
+							   [this](MoveChoiceRow& row, size_t i)
+							   {
+								   row.text.set(fmt::format("{}", m_distances[i]));
+								   row.selected.set(i == m_distance ? 1 : 0);
+							   });
+		m_feedrateChoices.sync(m_feedrates.size(),
+							   [this](MoveChoiceRow& row, size_t i)
+							   {
+								   row.text.set(fmt::format("{}", m_feedrates[i]));
+								   row.selected.set(i == m_feedrate ? 1 : 0);
+							   });
+	}
+
+	void MovePresenter::confirmThen(std::string title, std::string text, std::function<void()> action)
+	{
+		if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
+		{
+			action();
+			return;
+		}
+		m_confirmTitle.set(title);
+		m_confirmText.set(text);
+		m_confirmed = std::move(action);
+		m_confirm.set(1);
+	}
+
+	void MovePresenter::home(char letter)
+	{
+		MODEL_LOCK();
+		if (auto axis = OM::Move::GetAxisByLetter(letter))
+		{
+			axis->Home();
+		}
+	}
+
+	void MovePresenter::jog(char letter, bool forward)
+	{
+		if (m_distances.empty() || m_feedrates.empty())
+		{
+			return;
+		}
+		MODEL_LOCK();
+		if (auto axis = OM::Move::GetAxisByLetter(letter))
+		{
+			axis->MoveRelative((forward ? 1.0f : -1.0f) * m_distances[m_distance], m_feedrates[m_feedrate]);
+		}
+	}
+
+	void MovePresenter::askPosition(char letter, lv_obj_t* asker)
+	{
+		MODEL_LOCK();
+		auto axis = OM::Move::GetAxisByLetter(letter);
+		if (axis == nullptr || m_feedrates.empty())
+		{
+			return;
+		}
+		const bool machine = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
+		Xml::Services::askNumber(asker,
+								 {.header = _("move.set_position", letter),
+								  .min = axis->minPosition,
+								  .max = axis->maxPosition,
+								  .value = Units::convertDistanceToCurrentDisplayedUnit(machine ? axis->machinePosition
+																								: axis->userPosition),
+								  .onConfirm = [this, letter, machine](float value)
+								  {
+									  MODEL_LOCK();
+									  if (auto axis = OM::Move::GetAxisByLetter(letter))
+									  {
+										  axis->MoveAbsolute(value, m_feedrates[m_feedrate], machine);
+									  }
+								  }});
+	}
+
+	char MovePresenter::axisOf(const Xml::ActionArgs& args)
+	{
+		if (const auto* row = args.row<MoveAxisRow>())
+		{
+			const auto letter = row->letter.get();
+			return letter.empty() ? '\0' : letter.front();
+		}
+		return args.arg.empty() ? '\0' : args.arg.front();
 	}
 } // namespace UI

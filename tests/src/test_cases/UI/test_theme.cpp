@@ -6,8 +6,6 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/AxisControl/GenericAxisControl.h"
-#include "UI/Components/AxisControl/XYControl.h"
 #include "UI/Components/Button/DraggableButton.h"
 #include "UI/Components/Canvas/Canvas.h"
 #include "UI/Components/Graph/Graph.h"
@@ -133,6 +131,71 @@ static std::unique_ptr<LvLabel> createLabel(const std::string& text, LvObj& pare
 }
 
 /** Two made-up tools for the widget gallery. Its lists shadow the printer's in the tool list's scope. */
+/** Made-up X and Y for move_xy.xml: X homed, Y not homed and not movable */
+class GalleryXY : public Xml::XmlPresenter
+{
+  public:
+	GalleryXY()
+		: XmlPresenter("gallery_xy")
+	{
+		m_xLabel.set("X: 0.00");
+		m_yLabel.set("Y: 0.00");
+		m_xHomed.set(1);
+		m_xUsable.set(1);
+		m_yHomed.set(0);
+		m_yUsable.set(0);
+		m_xyHomed.set(0);
+		m_usable.set(1);
+	}
+
+	void fields(Xml::FieldVisitor& f) override
+	{
+		f.field("x.label", m_xLabel, "");
+		f.field("y.label", m_yLabel, "");
+		f.field("x.homed", m_xHomed, "");
+		f.field("y.homed", m_yHomed, "");
+		f.field("x.jog_usable", m_xUsable, "");
+		f.field("x.home_usable", m_xUsable, "");
+		f.field("y.jog_usable", m_yUsable, "");
+		f.field("y.home_usable", m_yUsable, "");
+		f.field("xy.homed", m_xyHomed, "");
+		f.field("xy.home_usable", m_yUsable, "");
+		f.field("home_all_usable", m_usable, "");
+		f.field("disable_motors_usable", m_usable, "");
+	}
+
+  private:
+	Xml::StringSubject<16> m_xLabel, m_yLabel;
+	Xml::IntSubject m_xHomed, m_yHomed, m_xUsable, m_yUsable, m_xyHomed, m_usable;
+};
+
+/** A made-up axis for move_axis.xml: Z at 100, homed, not movable */
+class GalleryAxis : public Xml::XmlPresenter
+{
+  public:
+	GalleryAxis()
+		: XmlPresenter("gallery_axis")
+	{
+		m_letter.set("Z");
+		m_label.set("Z: 100.00");
+		m_homed.set(1);
+	}
+
+	void fields(Xml::FieldVisitor& f) override
+	{
+		f.field("letter", m_letter, "");
+		f.field("label", m_label, "");
+		f.field("homed", m_homed, "");
+		f.field("jog_usable", m_usable, "");
+		f.field("home_usable", m_usable, "");
+	}
+
+  private:
+	Xml::StringSubject<4> m_letter;
+	Xml::StringSubject<16> m_label;
+	Xml::IntSubject m_homed, m_usable;
+};
+
 /** One made-up file or folder, for file_row.xml (it binds to `name`, `date`, `thumbnail` and `is_folder`) */
 class GalleryFile : public Xml::XmlPresenter
 {
@@ -418,17 +481,12 @@ TEST_F(TestTheme, Widgets)
 	axis_cont.setFlexFlow(LV_FLEX_FLOW_ROW);
 	axis_cont.addStyle(Themes::getLvglStyles().pad_zero);
 
-	XYControl axis_control("xy_control", axis_cont);
+	Xml::XmlView axis_control("xy_control", axis_cont, "move_xy", std::make_shared<GalleryXY>());
 	axis_control.setSize(LV_PCT(75), LV_PCT(100));
-	axis_control.setYHomed(false);
-	axis_control.setYDisabled(true);
 
-	GenericAxisControl generic_axis("generic_axis", axis_cont);
+	Xml::XmlView generic_axis("generic_axis", axis_cont, "move_axis", std::make_shared<GalleryAxis>());
 	generic_axis.setSize(LV_PCT(25), LV_PCT(100));
 	generic_axis.setMinWidth(LV_SIZE_CONTENT);
-	generic_axis.setAxisLetter('Z');
-	generic_axis.setAxisPosition(100.0f);
-	generic_axis.setDisabled(true);
 
 	/* Tool List: tool_list.xml showing made-up tools instead of the printer's */
 	auto galleryTools = std::make_shared<GalleryTools>();

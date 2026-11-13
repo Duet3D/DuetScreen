@@ -12,7 +12,6 @@
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"
 #include "UI/Screens/Settings/SettingsView.h"
@@ -809,11 +808,11 @@ TEST_F(TestHomeViewWithData, ControlView)
 	load_model_data_from_file("tests/object_model/test_bench/model_10_axes.json");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
 	{
-		auto btn = page<UI::MoveView>("move").getChildByName(
-			"central_row.babystep_cont.babystep.button_panel.value_list.list.value_btn_1");
-		ASSERT_NE(btn, nullptr);
-
-		btn->sendEvent(LV_EVENT_LONG_PRESSED);
+		// Hold the second babystep size to change it
+		lv_obj_t* steps = lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "value_list");
+		ASSERT_NE(steps, nullptr);
+		ASSERT_GE(lv_obj_get_child_count(steps), 2u);
+		lv_obj_send_event(lv_obj_get_child(steps, 1), LV_EVENT_LONG_PRESSED, nullptr);
 		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_babystep_long_press.png");
 	}
 

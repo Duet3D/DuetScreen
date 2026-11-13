@@ -296,7 +296,7 @@ namespace UI
 	 * it:
 	 *
 	 *     LvObjRef parent(xmlCreatedObj);
-	 *     auto* view = new MoveView("move", parent);
+	 *     auto* view = new TemperatureView("temperature", parent);
 	 *
 	 * It never deletes the widget and leaves the widget's user data alone. Use it only while constructing: views must
 	 * not keep a reference to their parent.

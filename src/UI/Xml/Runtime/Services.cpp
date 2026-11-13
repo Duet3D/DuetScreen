@@ -31,6 +31,47 @@ namespace UI::Xml::Services
 		Comm::DUET.SendGcode(line);
 	}
 
+	namespace
+	{
+		/** Show `request` on `pad` */
+		void ask(ModalNumberPad& pad, NumberRequest request)
+		{
+			pad.setHeader(request.header);
+			pad.setMinValue(request.min);
+			pad.setMaxValue(request.max);
+			pad.setConfirmCallback(std::move(request.onConfirm));
+			if (request.value)
+			{
+				pad.setValue(*request.value);
+			}
+			else
+			{
+				pad.clear();
+			}
+			openModal(&pad);
+		}
+
+		/** A number pad in `obj`'s widget tree, or nullptr */
+		ModalNumberPad* numberPadIn(lv_obj_t* obj)
+		{
+			if (lv_obj_get_user_data(obj) != nullptr)
+			{
+				if (auto* pad = dynamic_cast<ModalNumberPad*>(LvObj::fromPtr(obj)))
+				{
+					return pad;
+				}
+			}
+			for (uint32_t i = 0; i < lv_obj_get_child_count(obj); i++)
+			{
+				if (auto* pad = numberPadIn(lv_obj_get_child(obj, static_cast<int32_t>(i))))
+				{
+					return pad;
+				}
+			}
+			return nullptr;
+		}
+	} // namespace
+
 	bool askNumber(std::string_view numberPad, NumberRequest request)
 	{
 		auto* pad = findView<ModalNumberPad>(numberPad);
@@ -39,13 +80,22 @@ namespace UI::Xml::Services
 			LOG_WARN("No number pad called '{:s}'", numberPad);
 			return false;
 		}
-		pad->setHeader(request.header);
-		pad->setMinValue(request.min);
-		pad->setMaxValue(request.max);
-		pad->setConfirmCallback(std::move(request.onConfirm));
-		pad->clear();
-		openModal(pad);
+		ask(*pad, std::move(request));
 		return true;
+	}
+
+	bool askNumber(lv_obj_t* asker, NumberRequest request)
+	{
+		// The nearest: each enclosing widget in turn, so a number pad beside the asker wins over one further out
+		for (lv_obj_t* scope = asker; scope != nullptr; scope = lv_obj_get_parent(scope))
+		{
+			if (auto* pad = numberPadIn(scope))
+			{
+				ask(*pad, std::move(request));
+				return true;
+			}
+		}
+		return askNumber("numberpad", std::move(request));
 	}
 
 	void setGcodeSender(std::function<void(std::string_view)> sender)

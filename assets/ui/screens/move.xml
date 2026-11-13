@@ -1,0 +1,107 @@
+<!--
+  The Move tab: X and Y on a pad, Z beside it and any other axes after, babystepping on the right, and the jog
+  distance and speed along the bottom. Tap a position to move to one; hold a distance or speed to change it.
+
+  Fields and actions: src/UI/Screens/Move/MovePresenter.h. Its own number pad and question cover only this tab.
+-->
+<component presenter="move">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="bg_dark"/>
+
+		<lv_obj name="central_row" width="100%" flex_grow="1" flex_flow="row" style_pad_all="0">
+			<lv_obj name="axis_control" height="100%" flex_grow="1" scrollable="false" flex_flow="row"
+					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="card"/>
+				<bind_state_if_eq subject="connected" state="disabled" ref_value="0"/>
+
+				<!-- X and Y -->
+				<move_xy name="xy_control" width="38%" height="100%"/>
+
+				<!-- Z -->
+				<lv_obj name="z_control" width="13%" height="100%" style_min_width="content" flex_flow="column"
+						style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="pad_large"/>
+					<ds_button name="label" bind_text="z.label" width="100%" height="content" style_min_width="content"
+							   style_text_align="center">
+						<style name="input"/>
+						<style name="pad_base"/>
+						<bind_state_if_eq subject="z.jog_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="move.set_position" arg="Z"/>
+					</ds_button>
+					<ds_button name="increment" icon="increment.png" width="100%" flex_grow="1">
+						<style name="actionBtn"/>
+						<bind_state_if_eq subject="z.jog_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="move.jog" arg="Z+"/>
+					</ds_button>
+					<ds_button name="home" text="Z" icon="home_axis.png" width="100%" flex_grow="1">
+						<style name="actionBtn"/>
+						<style name="unhomed" selector="checked"/>
+						<bind_state_if_eq subject="z.homed" state="checked" ref_value="0"/>
+						<bind_state_if_eq subject="z.home_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="move.home" arg="Z"/>
+					</ds_button>
+					<ds_button name="decrement" icon="decrement.png" width="100%" flex_grow="1">
+						<style name="actionBtn"/>
+						<bind_state_if_eq subject="z.jog_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="move.jog" arg="Z-"/>
+					</ds_button>
+				</lv_obj>
+
+				<!-- Any other axes -->
+				<ds_list name="generic_axis_controls" list="axes" item="move_axis" height="100%" flex_grow="1"
+						 flex_flow="row" style_pad_all="0" style_pad_column="0">
+					<style name="no_border"/>
+					<bind_flag_if_eq subject="axes_shown" flag="hidden" ref_value="0"/>
+				</ds_list>
+			</lv_obj>
+
+			<lv_obj name="babystep_cont" width="22%" height="100%" flex_flow="column"
+					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="card"/>
+				<ds_view name="move_babystep" view="babystep" shown="true" width="100%" height="100%" flex_grow="1"/>
+			</lv_obj>
+		</lv_obj>
+
+		<!-- Jog distance and speed: the titles in one column, so they are the same width, each choice row as tall as
+			 its title -->
+		<lv_obj name="bottombar" width="100%" height="content" style_pad_all="0" style_pad_column="0" flex_flow="row">
+			<style name="card"/>
+			<lv_obj name="titles" width="content" height="content" flex_flow="column" style_pad_all="#pad"
+					style_pad_right="0" style_pad_row="#pad">
+				<lv_obj name="distance_header" width="content" height="content" style_min_width="100%" flex_flow="row"
+						style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+						style_text_align="center">
+					<style name="bg_color_header"/>
+					<style name="list_header"/>
+					<lv_label name="title" bind_text="distance_title" width="content" height="content">
+						<style name="list_title"/>
+					</lv_label>
+				</lv_obj>
+				<lv_obj name="feedrate_header" width="content" height="content" style_min_width="100%" flex_flow="row"
+						style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+						style_text_align="center">
+					<style name="bg_color_header"/>
+					<style name="list_header"/>
+					<lv_label name="title" bind_text="feedrate_title" width="content" height="content">
+						<style name="list_title"/>
+					</lv_label>
+				</lv_obj>
+			</lv_obj>
+			<lv_obj name="choices" height="100%" flex_grow="1" flex_flow="column" style_pad_all="#pad"
+					style_pad_row="#pad">
+				<ds_list name="distances" list="distances" item="move_distance" width="100%" flex_grow="1"
+						 flex_flow="row" style_pad_all="0"
+						 style_flex_main_place="center" style_flex_cross_place="center"
+						 style_flex_track_place="center"/>
+				<ds_list name="feedrates" list="feedrates" item="move_feedrate" width="100%" flex_grow="1"
+						 flex_flow="row" style_pad_all="0"
+						 style_flex_main_place="center" style_flex_cross_place="center"
+						 style_flex_track_place="center"/>
+			</lv_obj>
+		</lv_obj>
+
+		<ds_view name="move_numberpad" view="numberpad"/>
+		<question_dialog name="confirm_msgbox" open="confirm" title="confirm_title" text="confirm_text"
+						 confirm="move.confirm" close="move.close_dialog"/>
+	</view>
+</component>

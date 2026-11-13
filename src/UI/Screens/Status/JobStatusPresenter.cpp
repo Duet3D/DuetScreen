@@ -12,7 +12,6 @@
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Widgets/BabyStep/BabyStep.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
 #include "UI/Widgets/Control/SpeedFactor/SpeedFactor.h"
 #include "i18n/i18n.h"
@@ -73,14 +72,8 @@ namespace UI
 					   modal->open();
 				   }
 			   });
-		action("job.babystep",
-			   [](const Xml::ActionArgs&)
-			   {
-				   if (auto* modal = findView<Modal<BabyStep>>("babystep"))
-				   {
-					   modal->open();
-				   }
-			   });
+		action("job.babystep", [this](const Xml::ActionArgs&) { m_babystepOpen.set(1); });
+		action("job.close_babystep", [this](const Xml::ActionArgs&) { m_babystepOpen.set(0); });
 	}
 
 	void JobStatusPresenter::fields(Xml::FieldVisitor& f)
@@ -98,6 +91,7 @@ namespace UI
 		f.field("flow_text", m_flowText, "Volumetric flow");
 		f.field("flow", m_flow, "Volumetric flow, thousandths of the fastest extruder's maximum");
 		f.field("babystep", m_babystep, "Z babystep");
+		f.field("babystep_open", m_babystepOpen, "1 while the babystepping dialog is open");
 		f.field("elapsed", m_elapsed, "Elapsed time");
 		f.field("remaining", m_remaining, "Time left");
 		f.field("pause", m_pause, "Pause: 0 hidden, 1 disabled, 2 usable");
@@ -145,6 +139,7 @@ namespace UI
 	void JobStatusPresenter::onDeactivate()
 	{
 		m_confirmCancel.set(0);
+		m_babystepOpen.set(0);
 	}
 
 	void JobStatusPresenter::jobFileChanged(const std::string& file)

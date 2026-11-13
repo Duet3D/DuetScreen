@@ -1,0 +1,33 @@
+<!--
+  Babystepping: nudge Z up or down by the chosen step while printing, or reset. Hold a step to change its size.
+
+  Fields and actions: src/UI/Widgets/BabyStep/BabyStepPresenter.h. Step sizes are typed on the nearest number pad.
+-->
+<component presenter="babystep">
+	<view extends="lv_obj" flex_flow="column"
+		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+		<lv_label name="header" translation_tag="babystep.header"/>
+
+		<lv_obj name="button_panel" width="100%" flex_grow="1" flex_flow="column"
+				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+			<ds_button name="reset" bind_text="reset_text" width="100%" flex_grow="1" style_min_height="content">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="babystep.reset"/>
+			</ds_button>
+			<ds_button name="increment" icon="babystep_increment.png" width="100%" flex_grow="3">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="babystep.up"/>
+			</ds_button>
+			<ds_button name="decrement" icon="babystep_decrement.png" width="100%" flex_grow="3">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="babystep.down"/>
+			</ds_button>
+			<ds_list name="value_list" list="steps" item="babystep_step" width="100%" flex_grow="2"
+					 style_min_height="content" flex_flow="row" style_pad_all="0"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+	</view>
+</component>

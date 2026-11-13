@@ -8,7 +8,7 @@
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
 #include "Heightmap/HeightmapView.h"
-#include "Move/MoveView.h"
+#include "Move/MovePresenter.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "ObjectCancel/ObjectCancelView.h"
 #include "Settings/SettingsView.h"
@@ -17,7 +17,7 @@
 #include "Temperature/TemperatureView.h"
 #include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
-#include "UI/Widgets/BabyStep/BabyStep.h"
+#include "UI/Widgets/BabyStep/BabyStepPresenter.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
 #include "UI/Widgets/Control/SpeedFactor/SpeedFactor.h"
 #include "UI/Widgets/EStop/EStop.h"
@@ -58,16 +58,6 @@ namespace UI
 		return dialog;
 	}
 
-	/** The babystepping dialog, typing values on the shared number pad */
-	static LvObj* createBabyStep(const std::string& name, lv_obj_t* parent)
-	{
-		LvObjRef parentRef(parent);
-		auto* dialog = new Modal<BabyStep>(name, parentRef);
-		dialog->setSize(LV_PCT(40), LV_PCT(70));
-		dialog->setNumberPad(findView<ModalNumberPad>("numberpad"));
-		return dialog;
-	}
-
 	/** Make a file browser presenter with `settings` available as `name` */
 	static void addFileBrowser(std::string name, FileBrowserPresenter::Settings settings)
 	{
@@ -84,6 +74,8 @@ namespace UI
 		Xml::Presenters::add<JobStatusPresenter>("job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<ConsolePresenter>("console");
+		Xml::Presenters::add<MovePresenter>("move");
+		Xml::Presenters::add<BabyStepPresenter>("babystep");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -113,7 +105,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<MoveView>("move");
 		Xml::NativeViews::add<TemperatureView>("temperature");
 		Xml::NativeViews::add<HeightmapView>("heightmap");
 		Xml::NativeViews::add<ObjectCancelView>("object_cancel");
@@ -122,7 +113,6 @@ namespace UI
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");
 		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);
 		Xml::NativeViews::add("job_extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
-		Xml::NativeViews::add("babystep", createBabyStep);
 		Xml::NativeViews::add("keyboard", createKeyboard);
 	}
 } // namespace UI

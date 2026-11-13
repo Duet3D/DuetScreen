@@ -1,5 +1,4 @@
 add_subdirectory(AppDrawer)
-add_subdirectory(AxisControl)
 add_subdirectory(Bar)
 add_subdirectory(Button)
 add_subdirectory(Canvas)

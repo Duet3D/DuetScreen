@@ -1,0 +1,13 @@
+<!--
+  One jog feedrate choice. Tap to use it; hold to change it.
+
+  Fields:   a feedrates row: text, selected (src/UI/Screens/Move/MovePresenter.h)
+-->
+<component>
+	<view extends="ds_button" bind_text="text" height="100%" flex_grow="1" style_min_height="content">
+		<style name="long_press"/>
+		<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
+		<action trigger="clicked" name="move.feedrate"/>
+		<action trigger="long_pressed" name="move.edit_feedrate"/>
+	</view>
+</component>

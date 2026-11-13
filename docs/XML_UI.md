@@ -226,6 +226,14 @@ For a plain question, `confirm_dialog.xml` is ready-made:
                 confirm="job.cancel" close="job.close_dialog"/>
 ```
 
+`question_dialog.xml` asks yes or no with a title and text from subjects, over the view it is in:
+
+```xml
+<question_dialog open="confirm" title="confirm_title" text="confirm_text" confirm="move.confirm" close="move.close_dialog"/>
+```
+
+A presenter asks for a number with `Services::askNumber(args.target, {...})`: the number pad nearest the widget that was tapped answers, so a page can host its own (`<ds_view name="move_numberpad" view="numberpad"/>`) to keep it over the page, else the shared one does.
+
 When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
 
 ### Actions

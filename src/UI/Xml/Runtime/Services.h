@@ -7,6 +7,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -18,6 +19,7 @@ namespace UI::Xml::Services
 		std::string header;						// Shown above the keys, e.g. "T0 heater 1 active"
 		float min = 0.0f;						// Smallest value accepted
 		float max = 0.0f;						// Largest value accepted
+		std::optional<float> value;				// Shown to start with; the pad starts empty if not set
 		std::function<void(float)> onConfirm; // Called with the value the user confirms
 	};
 
@@ -27,6 +29,14 @@ namespace UI::Xml::Services
 	 * @return false if there is no such number pad
 	 */
 	bool askNumber(std::string_view numberPad, NumberRequest request);
+
+	/**
+	 * Ask the user for a number with the number pad nearest `asker` (the widget the user tapped, ActionArgs::target):
+	 * one in the same view before any further out, else the shared one registered as `numberpad`. So a page can
+	 * keep the number pad over itself by hosting its own: `<ds_view name="move_numberpad" view="numberpad"/>`.
+	 * @return false if there is no number pad
+	 */
+	bool askNumber(lv_obj_t* asker, NumberRequest request);
 
 	/** Send a line of G-code to the printer. A newline is added if missing. */
 	void sendGcode(std::string_view gcode);

@@ -25,13 +25,15 @@
  *   remaining          e.g. "Remaining: 00:45:03"
  *   pause, resume, print_again, cancel   each control's state: 0 hidden, 1 disabled, 2 usable
  *   confirm_cancel     1 while asking whether to cancel the job
+ *   babystep_open      1 while the babystepping dialog is open
  *
  * Actions
  *   job.pause, job.resume, job.print_again
  *   job.ask_cancel     ask whether to cancel the job
  *   job.cancel         cancel it (from the question)
  *   job.close_dialog   don't
- *   job.speed_factor, job.flow_factor, job.babystep   open the dialog to change them
+ *   job.speed_factor, job.flow_factor   open the dialog to change them
+ *   job.babystep, job.close_babystep    open or close the babystepping dialog
  */
 
 #pragma once
@@ -144,5 +146,6 @@ namespace UI
 		Xml::IntSubject m_printAgain;			// Print again control state
 		Xml::IntSubject m_cancel;				// Cancel control state
 		Xml::IntSubject m_confirmCancel;		// 1 while asking whether to cancel
+		Xml::IntSubject m_babystepOpen;			// 1 while the babystepping dialog is open
 	};
 } // namespace UI

@@ -1,0 +1,36 @@
+<!--
+  Controls for one axis: its position (tap to set it), forwards, home, backwards. Homing shows it unhomed until
+  done.
+
+  Fields:   an axes row: letter, label, homed, jog_usable, home_usable (src/UI/Screens/Move/MovePresenter.h)
+-->
+<component>
+	<view extends="lv_obj" height="100%" flex_grow="1" style_min_width="content" flex_flow="column"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="pad_large"/>
+		<ds_button name="label" bind_text="label" width="100%" height="content" style_min_width="content"
+				   style_text_align="center">
+			<style name="input"/>
+			<style name="pad_base"/>
+			<bind_state_if_eq subject="jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="move.set_position"/>
+		</ds_button>
+		<ds_button name="increment" icon="increment.png" width="100%" flex_grow="1">
+			<style name="actionBtn"/>
+			<bind_state_if_eq subject="jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="move.jog" arg="+"/>
+		</ds_button>
+		<ds_button name="home" bind_text="letter" icon="home_axis.png" width="100%" flex_grow="1">
+			<style name="actionBtn"/>
+			<style name="unhomed" selector="checked"/>
+			<bind_state_if_eq subject="homed" state="checked" ref_value="0"/>
+			<bind_state_if_eq subject="home_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="move.home"/>
+		</ds_button>
+		<ds_button name="decrement" icon="decrement.png" width="100%" flex_grow="1">
+			<style name="actionBtn"/>
+			<bind_state_if_eq subject="jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="move.jog" arg="-"/>
+		</ds_button>
+	</view>
+</component>
