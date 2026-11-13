@@ -11,7 +11,6 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/UnitSystem.h"
@@ -385,11 +384,6 @@ namespace UI
 		if (asked == "start_print")
 		{
 			OM::FileSystem::StartPrint(m_selected);
-			// Until the printer reports the job, so it can't be replaced in the meantime
-			if (auto* tabs = findView<DashboardTabs>("dashboard_tabs"))
-			{
-				tabs->disableJobsTab(true);
-			}
 			home();
 		}
 		else if (asked == "run_macro")

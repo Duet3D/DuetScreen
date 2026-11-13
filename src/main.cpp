@@ -12,10 +12,10 @@
 #include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
+#include "ObjectModel/PrinterStatus.h"
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Control/ControlView.h"
-#include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
@@ -270,26 +270,28 @@ int main(int argc, char** argv)
 					static size_t index = 0;
 					// Every page in turn, by the names home_screen.xml registers them under
 					auto control = [] { return UI::findView<UI::ControlView>("control"); };
-					auto files = []() -> UI::TabView*
+					// The tabs called `tabs` on the page called `page`
+					auto tabsOn = [](const char* page, const char* tabs) -> UI::TabView*
 					{
-						UI::LvObj* page = UI::findView("files");
-						lv_obj_t* tabs = page ? lv_obj_find_by_name(page->getRootPtr(), "tabs") : nullptr;
-						return tabs ? dynamic_cast<UI::TabView*>(UI::LvObj::fromPtr(tabs)) : nullptr;
+						UI::LvObj* view = UI::findView(page);
+						lv_obj_t* obj = view ? lv_obj_find_by_name(view->getRootPtr(), tabs) : nullptr;
+						return obj ? dynamic_cast<UI::TabView*>(UI::LvObj::fromPtr(obj)) : nullptr;
 					};
+					auto files = [=] { return tabsOn("files", "tabs"); };
 					auto settings = [] { return UI::findView<UI::SettingsView>("settings"); };
-					auto dashboard = [] { return UI::findView<UI::DashboardTabs>("dashboard_tabs"); };
+					auto dashboard = [=] { return tabsOn("dashboard", "dashboard_tabs"); };
 					static const std::function<void()> cbs[] = {
 						[=]()
 						{
 							UI::home();
 							if (auto* d = dashboard())
-								d->showJobsTab();
+								d->setActiveTab(0); // Jobs
 						},
 						[=]()
 						{
 							UI::home();
 							if (auto* d = dashboard())
-								d->showStatusTab();
+								d->setActiveTab(2); // Status
 						},
 						[=]()
 						{

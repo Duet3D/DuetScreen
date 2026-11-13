@@ -1,8 +1,6 @@
 <!--
   The dashboard, the home page: the tool list and temperature graph on the left, and the jobs, macros and print
   status tabs on the right.
-
-  The tabs are a C++ view (src/UI/Screens/XmlScreens.cpp) for now.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" style_pad_all="0"
@@ -21,9 +19,20 @@
 			<style name="card"/>
 		</ds_graph>
 
-		<ds_view name="dashboard_tabs" view="dashboard_tabs" shown="true"
+		<!-- Jobs (disabled while there is a job), macros, and the job's status, shown whenever a job starts -->
+		<ds_tabs name="dashboard_tabs"
 				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
-				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="0" style_grid_cell_row_span="2"/>
+				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="0" style_grid_cell_row_span="2">
+			<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
+				<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs" shown="true"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="macros" title_tag="file.macros">
+				<ds_view name="dashboard_macros" view="file_browser" presenter="dashboard_macros" shown="true"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="status" title_tag="app_drawer.status" select_on="job.file">
+				<ds_view name="job_status" view="job_status" shown="true"/>
+			</ds_tabs-tab>
+		</ds_tabs>
 
 		<!-- For the tool list's temperatures -->
 		<ds_view name="tool_numberpad" view="numberpad"/>

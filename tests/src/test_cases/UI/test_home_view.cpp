@@ -9,10 +9,10 @@
 #include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "Storage.h"
+#include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
-#include "UI/Screens/Dashboard/DashboardTabs.h"
 #include "UI/Screens/Notifications/NotificationsView.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
@@ -50,7 +50,18 @@ class TestHomeView : public UiTestSuite
 		return *view;
 	}
 
-	static UI::DashboardTabs& dashboardTabs() { return page<UI::DashboardTabs>("dashboard_tabs"); }
+	/** The dashboard's tabs (jobs, macros, status), as dashboard.xml builds them */
+	static UI::TabView& dashboardTabs()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "dashboard_tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the dashboard has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
+
+	static constexpr size_t STATUS_TAB = 2; // Index of the dashboard's Status tab
 
 	/** The dashboard's temperature graph, as dashboard.xml builds it */
 	static UI::Xml::DsGraph& temperatureGraph()
@@ -323,7 +334,7 @@ TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
 
 TEST_F(TestHomeView, BlankStatusView)
 {
-	dashboardTabs().showStatusTab();
+	dashboardTabs().setActiveTab(STATUS_TAB);
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/blank.png")
 }
 
@@ -809,10 +820,10 @@ TEST_F(TestHomeViewWithData, SettingsView)
 
 TEST_F(TestHomeViewWithData, StatusView)
 {
-	dashboardTabs().showStatusTab();
+	dashboardTabs().setActiveTab(STATUS_TAB);
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
-	lv_obj_t* status = page<UI::LvObj>("dashboard_tabs").getRootPtr();
+	lv_obj_t* status = page<UI::LvObj>("job_status").getRootPtr();
 	auto click = [&](const char* name)
 	{
 		lv_obj_t* obj = lv_obj_find_by_name(status, name);

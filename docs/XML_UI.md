@@ -41,7 +41,7 @@ src/UI/Xml/
   Widgets/   DsButton, DsIcon, DsBar, DsThumbnail, DsSlider, DsList, DsGraph, DsTabs, DsModal, DsView
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
-             MachineSource, NavigationSource, ResponseSource, TemperatureSource
+             JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
 src/UI/Styles/                            global styles; Theme, ThemeFile and Palette build them from theme files
 src/UI/Screens/<Name>/<Name>Presenter.*   presenters live with their screen
 src/UI/Screens/XmlScreens.cpp             the presenters XML can name, and the C++ views it can host
@@ -150,7 +150,7 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 
 | Kind | Names |
 | --- | --- |
-| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `machine.job_active`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `temperatures` (a history, one series per heater) and `temperatures.limit`. |
+| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `machine.job_active`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `job.file` (the current job, empty when none), `temperatures` (a history, one series per heater) and `temperatures.limit`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
 | Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
@@ -202,7 +202,7 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
-| `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, and `bind_disabled` (disabled while an integer subject is non-zero); its children are the tab's content. |
+| `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, `bind_disabled` (disabled while an integer subject is non-zero) and `select_on` (selected whenever a subject is set, e.g. the status tab when a job starts); its children are the tab's content. |
 | `<ds_modal>` | `bind_open`, `open_value`, `blocking`: a dialog over the main window, open while its subject is set (or equals `open_value`). Raises `dismissed` when the user closes it. See Dialogs. |
 | `<ds_view>` | `name`, `view`, `presenter`, `home`, `shown`: a page (see Hosting a view) |
 

@@ -5,7 +5,6 @@
 #include "XmlScreens.h"
 #include "Console/ConsoleView.h"
 #include "Control/ControlView.h"
-#include "Dashboard/DashboardTabs.h"
 #include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
@@ -109,7 +108,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<DashboardTabs>("dashboard_tabs");
 		Xml::NativeViews::add<ConsoleView>("console");
 		Xml::NativeViews::add<ControlView>("control");
 		Xml::NativeViews::add<SettingsView>("settings");

@@ -192,6 +192,7 @@ namespace
 		{
 			f.field("dialog", dialog, "Which dialog is open");
 			f.field("busy", busy, "Disables a tab");
+			f.field("job", job, "Selects a tab when set");
 			f.list("numbers", numbers, "A long list");
 		}
 
@@ -204,6 +205,7 @@ namespace
 		std::vector<std::string> calls;
 		UI::Xml::StringSubject<16> dialog;
 		UI::Xml::IntSubject busy;
+		UI::Xml::StringSubject<16> job;
 		UI::Xml::List<NumberRow> numbers;
 	};
 
@@ -220,6 +222,7 @@ namespace
 				<ds_tabs name="tabs" width="300" height="100">
 					<ds_tabs-tab name="first" title="First"/>
 					<ds_tabs-tab name="second" title="Second" bind_disabled="busy"/>
+					<ds_tabs-tab name="third" title="Third" select_on="job"/>
 				</ds_tabs>
 				<ds_list name="rows" list="numbers" item="number_item" windowed="true" item_height="50"
 						 width="300" height="200" y="100" style_pad_all="0" style_pad_row="0"/>
@@ -931,7 +934,7 @@ TEST_F(TestXmlUi, TabDisabledWhileItsSubjectIsSet)
 	auto& view = makeView("dialog_screen");
 	auto& tabs = static_cast<UI::Xml::DsTabs&>(*UI::LvObj::fromPtr(find(view, "tabs")));
 	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
-	ASSERT_EQ(tabs.getTabCount(), 2u);
+	ASSERT_EQ(tabs.getTabCount(), 3u);
 	EXPECT_EQ(tabs.getTabButton(1)->getText(), "Second");
 	EXPECT_FALSE(tabs.getTabButton(1)->hasState(LV_STATE_DISABLED));
 
@@ -1022,4 +1025,22 @@ TEST_F(TestXmlUi, WindowedListBuildsOnlyRowsOnScreen)
 	presenter.setCount(3);
 	EXPECT_EQ(builtRows(rows), (std::vector<int32_t>{0, 1, 2}));
 	EXPECT_EQ(builtRows(tiles), (std::vector<int32_t>{0, 1, 2}));
+}
+
+TEST_F(TestXmlUi, TabSelectedWhenItsSubjectIsSet)
+{
+	installDialogScreens();
+	auto& view = makeView("dialog_screen");
+	auto& tabs = static_cast<UI::Xml::DsTabs&>(*UI::LvObj::fromPtr(find(view, "tabs")));
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	EXPECT_EQ(tabs.getActiveTabIndex(), 0u);
+
+	presenter.job.set("a.gcode");
+	EXPECT_EQ(tabs.getActiveTabIndex(), 2u);
+
+	tabs.setActiveTab(0);
+	presenter.job.set("");
+	EXPECT_EQ(tabs.getActiveTabIndex(), 0u) << "clearing it selects nothing";
+	presenter.job.set("b.gcode");
+	EXPECT_EQ(tabs.getActiveTabIndex(), 2u) << "each time it is set";
 }

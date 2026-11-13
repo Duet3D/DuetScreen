@@ -94,6 +94,28 @@ namespace UI::Xml
 			deleteWith(tab, ref);
 			lv_subject_add_observer_obj(subject, disabledObserverCb, tab, ref);
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "select_on"))
+		{
+			auto* ref = new TabRef{tabs, index};
+			deleteWith(tab, ref);
+			lv_subject_add_observer_obj(subject, selectObserverCb, tab, ref);
+		}
+	}
+
+	void DsTabs::selectObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* ref = static_cast<TabRef*>(lv_observer_get_user_data(observer));
+		if (!ref->armed)
+		{
+			ref->armed = true;
+			return;
+		}
+		const bool set = subject->type == LV_SUBJECT_TYPE_STRING ? lv_subject_get_string(subject)[0] != '\0'
+																 : lv_subject_get_int(subject) != 0;
+		if (set)
+		{
+			ref->tabs->setActiveTab(ref->index);
+		}
 	}
 
 	void DsTabs::disabledObserverCb(lv_observer_t* observer, lv_subject_t* subject)

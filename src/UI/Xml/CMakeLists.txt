@@ -10,6 +10,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/FanSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/HeaterRow.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/HeatSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/JobSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/NavigationSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
