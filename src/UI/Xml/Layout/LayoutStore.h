@@ -96,7 +96,7 @@ namespace UI::Xml
 		/**
 		 * Write `text` to `file` so that a reader finds the old or the new contents, never a mix: write a temporary
 		 * file, flush it to the card, then rename it over `file`. Any earlier contents are first kept the same way
-		 * as `file` + ".bak".
+		 * as `file` + ".bak". Missing folders on the way to `file` are created, and flushed to the card too.
 		 * @param error Set to what went wrong if false is returned
 		 */
 		bool writeSafely(const std::filesystem::path& file, std::string_view text, std::string& error);

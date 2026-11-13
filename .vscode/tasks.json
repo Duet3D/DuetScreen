@@ -205,7 +205,7 @@
 		{
 			"label": "Push Assets - SSH",
 			"type": "shell",
-			"command": "ssh root@${input:duetscreen_ip_address} 'rm -rf /etc/assets; mkdir -p /etc/assets'; scp -r assets root@${input:duetscreen_ip_address}:/etc/",
+			"command": "ssh root@${input:duetscreen_ip_address} 'rm -rf /etc/assets; mkdir -p /etc/assets' && scp -r assets root@${input:duetscreen_ip_address}:/etc/ && ssh root@${input:duetscreen_ip_address} sync",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",
@@ -239,7 +239,7 @@
 					]
 				}
 			},
-			"command": "scp output/target/usr/lib/*lvgl* root@${input:duetscreen_ip_address}:/usr/lib",
+			"command": "scp output/target/usr/lib/*lvgl* root@${input:duetscreen_ip_address}:/usr/lib && ssh root@${input:duetscreen_ip_address} sync",
 			"group": {
 				"kind": "build",
 				"isDefault": false
@@ -318,7 +318,7 @@
 		{
 			"label": "Upload config.json",
 			"type": "shell",
-			"command": "scp config.json root@${input:duetscreen_ip_address}:/etc/duetscreen.json",
+			"command": "scp config.json root@${input:duetscreen_ip_address}:/etc/duetscreen.json && ssh root@${input:duetscreen_ip_address} sync",
 			"options": {
 				"shell": {
 					"executable": "/bin/bash",

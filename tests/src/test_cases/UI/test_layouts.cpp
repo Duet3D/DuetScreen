@@ -359,6 +359,18 @@ TEST_F(TestLayoutStore, SavingWritesTheLocalBundleAndKeepsTheOldCopy)
 	Layouts::removeListener(&listener);
 }
 
+TEST_F(TestLayoutStore, SafeWritesCreateTheFoldersOnTheWay)
+{
+	const fs::path file = m_dir / "a" / "b" / "file.json";
+	std::string error;
+	ASSERT_TRUE(Layouts::writeSafely(file, "{}\n", error)) << error;
+	EXPECT_EQ(readFile(file), "{}\n");
+
+	// A folder can't be made where a file is
+	EXPECT_FALSE(Layouts::writeSafely(file / "inside.json", "{}\n", error));
+	EXPECT_FALSE(error.empty());
+}
+
 TEST_F(TestLayoutStore, SavedLayoutsAreRepaired)
 {
 	use({{dashboard({}), "builtin.json"}});

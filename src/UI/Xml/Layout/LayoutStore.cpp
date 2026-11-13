@@ -103,6 +103,36 @@ namespace UI::Xml::Layouts
 			}
 		}
 
+		/**
+		 * Create `dir` and any folders above it that are missing, and flush each new folder's entry to the card: a
+		 * file synced into a folder whose own entry was never written is lost with the folder at a power cut
+		 * @param error Set to what went wrong if false is returned
+		 */
+		bool makeDirectories(const std::filesystem::path& dir, std::string& error)
+		{
+			std::error_code ec;
+			std::vector<std::filesystem::path> missing; // Deepest first
+			for (std::filesystem::path p = dir; !p.empty() && !std::filesystem::exists(p, ec); p = p.parent_path())
+			{
+				missing.push_back(p);
+				if (p == p.parent_path())
+				{
+					break;
+				}
+			}
+			std::filesystem::create_directories(dir, ec);
+			if (ec)
+			{
+				error = fmt::format("can't create {:s}: {:s}", dir.string(), ec.message());
+				return false;
+			}
+			for (auto it = missing.rbegin(); it != missing.rend(); ++it)
+			{
+				syncDirectory(it->parent_path().empty() ? std::filesystem::path(".") : it->parent_path());
+			}
+			return true;
+		}
+
 		/** Write `text` to a temporary file beside `file`, then rename it over `file` */
 		bool replace(const std::filesystem::path& file, std::string_view text, std::string& error)
 		{
@@ -259,12 +289,6 @@ namespace UI::Xml::Layouts
 			return true;
 		}
 
-		std::filesystem::create_directories(file.parent_path(), ec);
-		if (ec)
-		{
-			error = fmt::format("can't create {:s}: {:s}", file.parent_path().string(), ec.message());
-			return false;
-		}
 		return ensureLocalManifest(error) && writeSafely(file, layout.toJson().dump(2) + "\n", error);
 	}
 
@@ -309,6 +333,10 @@ namespace UI::Xml::Layouts
 
 	bool writeSafely(const std::filesystem::path& file, std::string_view text, std::string& error)
 	{
+		if (!makeDirectories(file.parent_path(), error))
+		{
+			return false;
+		}
 		if (std::filesystem::exists(file))
 		{
 			// Keep the old contents first, the same way, so there is always a whole copy of one or the other
