@@ -20,6 +20,8 @@
 #include "UI/Xml/Binding/History.h"
 #include "UI/Xml/Data/FanSource.h"
 #include "UI/Xml/Data/ToolSource.h"
+#include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
@@ -1270,4 +1272,63 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 	load_model_data(THREE_FANS);
 	pump();
 	EXPECT_EQ(lv_obj_get_child_count(list), 1u);
+}
+
+TEST_F(TestXmlUi, UserBundleAddsWidgetsAndLayouts)
+{
+	writeFile(
+		bundleFile("manifest.json"),
+		R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "widgets": ["components/*.widget.json"],
+				  "layouts": ["layouts/*.json"]})");
+	writeFile(
+		bundleFile("components/my_label.xml"),
+		R"(<component><api><prop name="text" type="string"/></api><view extends="lv_label" text="$text"/></component>)");
+	writeFile(
+		bundleFile("components/label.widget.json"),
+		R"({"component": "my_label", "slots": ["mine"], "settings": [{"name": "text", "kind": "text", "default": "Hi"}]})");
+	writeFile(bundleFile("components/broken.widget.json"), R"({"slots": []})");
+	writeFile(bundleFile("layouts/mine.json"),
+			  R"({"format": 1, "slot": "mine", "kind": "strip", "items": [{"id": "a", "widget": "label"}]})");
+	restartWithUserBundles();
+
+	const auto* widget = UI::Xml::WidgetCatalogue::find("label");
+	ASSERT_NE(widget, nullptr);
+	EXPECT_EQ(widget->component, "my_label");
+	EXPECT_EQ(widget->bundle, "test");
+	EXPECT_EQ(UI::Xml::WidgetCatalogue::find("broken"), nullptr);
+	ASSERT_NE(UI::Xml::Layouts::find("mine"), nullptr);
+	EXPECT_EQ(UI::Xml::Layouts::find("mine")->items[0].widget, "label");
+
+	const auto& issues = UI::Xml::getIssues();
+	ASSERT_EQ(issues.size(), 1u);
+	EXPECT_EQ(issues[0].file.filename(), "broken.widget.json");
+	EXPECT_EQ(issues[0].message, "\"slots\" must list the layout slots it can be placed in");
+}
+
+TEST_F(TestXmlUi, BrokenLayoutFallsBackToTheCopySavedBeforeIt)
+{
+	const fs::path local = m_userDir / "local";
+	writeFile(local / "manifest.json", R"({"id": "local", "ui_api": "1.0", "layouts": ["layouts/*.json"]})");
+	writeFile(local / "layouts/sidebar.json", "{ half a file");
+	writeFile(local / "layouts/sidebar.json.bak",
+			  R"({"format": 1, "slot": "sidebar", "kind": "strip", "items": [{"id": "estop", "widget": "estop"}]})");
+	restartWithUserBundles();
+
+	const auto& issues = UI::Xml::getIssues();
+	ASSERT_GE(issues.size(), 1u);
+	EXPECT_EQ(issues[0].file.filename(), "sidebar.json");
+	EXPECT_EQ(issues[0].message, "isn't valid JSON; the copy saved before it is used");
+}
+
+TEST_F(TestXmlUi, SafeModeLoadsOnlyTheBuiltinBundle)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/fan_card.xml"), "<component><view extends=\"lv_obj\"/></component>");
+	writeFile(m_userDir / "SAFE_MODE", "");
+	restartWithUserBundles();
+
+	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
+	const auto& issues = UI::Xml::getIssues();
+	ASSERT_EQ(issues.size(), 1u);
+	EXPECT_EQ(issues[0].message, "safe mode: only the built-in UI is loaded");
 }

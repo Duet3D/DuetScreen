@@ -4,6 +4,7 @@
 
 #include "Bundles.h"
 #include "Debug.h"
+#include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include "XmlUi.h"
 #include "helix_xml.h"
@@ -143,10 +144,21 @@ namespace UI::Xml::Bundles
 			/** Load every bundle under `paths` */
 			Result load(const Paths& paths)
 			{
-				loadBundle(paths.builtin);
+				loadBundle(paths.builtin, false);
+				if (isSafeMode(paths))
+				{
+					addIssue(paths.user / SAFE_MODE_FILE, "safe mode: only the built-in UI is loaded");
+					return std::move(m_result);
+				}
 				for (const auto& dir : userBundles(paths.user))
 				{
-					loadBundle(dir);
+					loadBundle(dir, false);
+				}
+				// The changes made on the screen go last, over everything
+				const std::filesystem::path local = paths.user / Layouts::LOCAL_BUNDLE;
+				if (!paths.user.empty() && std::filesystem::exists(local / "manifest.json"))
+				{
+					loadBundle(local, true);
 				}
 				return std::move(m_result);
 			}
@@ -159,7 +171,7 @@ namespace UI::Xml::Bundles
 				m_result.issues.push_back({file, std::move(message)});
 			}
 
-			/** The bundle directories in `dir` (those with a manifest), in name order */
+			/** The bundle directories in `dir` (those with a manifest), in name order, except the local bundle */
 			static std::vector<std::filesystem::path> userBundles(const std::filesystem::path& dir)
 			{
 				std::vector<std::filesystem::path> bundles;
@@ -170,7 +182,8 @@ namespace UI::Xml::Bundles
 				}
 				for (const auto& entry : std::filesystem::directory_iterator(dir, ec))
 				{
-					if (entry.is_directory() && std::filesystem::exists(entry.path() / "manifest.json"))
+					if (entry.is_directory() && entry.path().filename() != Layouts::LOCAL_BUNDLE &&
+						std::filesystem::exists(entry.path() / "manifest.json"))
 					{
 						bundles.push_back(entry.path());
 					}
@@ -179,8 +192,11 @@ namespace UI::Xml::Bundles
 				return bundles;
 			}
 
-			/** Load one bundle directory */
-			void loadBundle(const std::filesystem::path& dir)
+			/**
+			 * Load one bundle directory
+			 * @param local Whether it is the local bundle, the changes made on the screen
+			 */
+			void loadBundle(const std::filesystem::path& dir, bool local)
 			{
 				ZoneScoped;
 				const std::filesystem::path manifestPath = dir / "manifest.json";
@@ -230,6 +246,97 @@ namespace UI::Xml::Bundles
 						loadComponent(file, id);
 					}
 				}
+				for (const auto& pattern : manifest.value("widgets", std::vector<std::string>{}))
+				{
+					for (const auto& file : expand(dir, pattern))
+					{
+						loadWidget(file, id);
+					}
+				}
+				for (const auto& pattern : manifest.value("layouts", std::vector<std::string>{}))
+				{
+					for (const auto& file : expand(dir, pattern))
+					{
+						loadLayout(file, local);
+					}
+				}
+			}
+
+			/** Read one widget file */
+			void loadWidget(const std::filesystem::path& file, const std::string& bundle)
+			{
+				ZoneScoped;
+				m_result.files.push_back(file);
+				const std::string name = file.filename().string();
+				if (!name.ends_with(WidgetCatalogue::FILE_SUFFIX))
+				{
+					addIssue(file, fmt::format("a widget file's name must end {:s}", WidgetCatalogue::FILE_SUFFIX));
+					return;
+				}
+				auto text = readFile(file);
+				if (!text)
+				{
+					addIssue(file, "can't be read");
+					return;
+				}
+				const nlohmann::json json = nlohmann::json::parse(*text, nullptr, false, true);
+				if (json.is_discarded())
+				{
+					addIssue(file, "isn't valid JSON");
+					return;
+				}
+				std::string error;
+				auto widget = WidgetCatalogue::parse(
+					json, name.substr(0, name.size() - WidgetCatalogue::FILE_SUFFIX.size()), error);
+				if (!widget)
+				{
+					addIssue(file, error);
+					return;
+				}
+				widget->bundle = bundle;
+				widget->source = file;
+				m_result.widgets.push_back(std::move(*widget));
+			}
+
+			/** Read one layout file, or its backup if it can't be read (see Layout/LayoutStore.h) */
+			void loadLayout(const std::filesystem::path& file, bool local)
+			{
+				ZoneScoped;
+				m_result.files.push_back(file);
+				std::string error;
+				if (auto layout = readLayout(file, error))
+				{
+					m_result.layouts.push_back({std::move(*layout), file, local});
+					return;
+				}
+				std::filesystem::path backup = file;
+				backup += ".bak";
+				std::string backupError;
+				if (auto layout = readLayout(backup, backupError))
+				{
+					addIssue(file, fmt::format("{:s}; the copy saved before it is used", error));
+					m_result.layouts.push_back({std::move(*layout), backup, local});
+					return;
+				}
+				addIssue(file, error);
+			}
+
+			/** A layout file, or nullopt with `error` set */
+			static std::optional<Layout> readLayout(const std::filesystem::path& file, std::string& error)
+			{
+				auto text = readFile(file);
+				if (!text)
+				{
+					error = "can't be read";
+					return std::nullopt;
+				}
+				const nlohmann::json json = nlohmann::json::parse(*text, nullptr, false, true);
+				if (json.is_discarded())
+				{
+					error = "isn't valid JSON";
+					return std::nullopt;
+				}
+				return Layout::fromJson(json, error);
 			}
 
 			/** Read one theme file; Themes builds it once every bundle is loaded */
@@ -306,5 +413,11 @@ namespace UI::Xml::Bundles
 	{
 		ZoneScoped;
 		return Loader().load(paths);
+	}
+
+	bool isSafeMode(const Paths& paths)
+	{
+		std::error_code ec;
+		return !paths.user.empty() && std::filesystem::exists(paths.user / SAFE_MODE_FILE, ec);
 	}
 } // namespace UI::Xml::Bundles

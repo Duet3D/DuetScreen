@@ -16,6 +16,8 @@
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
@@ -50,6 +52,14 @@ namespace UI::Xml
 			{
 				s_loaded.issues.push_back({file, std::move(message)});
 			}
+
+			// Layouts are checked against the widgets, which may come from any bundle. In safe mode the changes made
+			// on the screen aren't loaded, so none are saved either: they would only be lost.
+			WidgetCatalogue::set(std::move(s_loaded.widgets));
+			const bool canSave = !s_paths.user.empty() && !Bundles::isSafeMode(s_paths);
+			Layouts::set(std::move(s_loaded.layouts),
+						 canSave ? s_paths.user / Layouts::LOCAL_BUNDLE : std::filesystem::path(),
+						 s_loaded.issues);
 
 			for (const auto& issue : s_loaded.issues)
 			{
@@ -118,6 +128,8 @@ namespace UI::Xml
 		HotReload::watch({});
 		i18n::setLanguageChangedCallback(nullptr);
 		DataSources::stop();
+		Layouts::clear();
+		WidgetCatalogue::set({});
 		Themes::clearThemes();
 		Globals::clear();
 		Actions::deinit();
