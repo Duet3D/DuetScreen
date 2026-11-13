@@ -41,6 +41,9 @@ namespace UI::Xml
 			return point.x >= area.x1 && point.x <= area.x2 && point.y >= area.y1 && point.y <= area.y2;
 		}
 
+		/** How far in from a selected grid widget's edge a touch grabs that edge, in pixels, at most */
+		constexpr int32_t GRAB_BAND = 40;
+
 		/** Where the touch now is */
 		lv_point_t touchPoint()
 		{
@@ -386,10 +389,17 @@ namespace UI::Xml
 			{
 				return;
 			}
+			// A grid widget already selected (showing its handles) is resized from near its edges; a first touch
+			// only selects it, and moves it if dragged
 			const lv_point_t point = touchPoint();
+			const LayoutEditor::Selection& selection = editor.selection();
+			const bool wasSelected = selection.slot == layout->m_slot && selection.item == item->id;
 			editor.select(layout->m_slot, item->id);
 			layout->m_drag = Drag{.id = item->id, .start = point, .from = *item};
-			handleAt(overlay, point, *layout->m_drag);
+			if (wasSelected && draft->kind == LayoutKind::Grid)
+			{
+				grabbedEdges(overlay, point, *layout->m_drag);
+			}
 			editor.beginGesture();
 			break;
 		}
@@ -537,28 +547,18 @@ namespace UI::Xml
 			m_place, LV_GRID_ALIGN_STRETCH, selection.cell->first, 1, LV_GRID_ALIGN_STRETCH, selection.cell->second, 1);
 	}
 
-	void DsLayout::handleAt(lv_obj_t* overlay, const lv_point_t& point, Drag& drag)
+	void DsLayout::grabbedEdges(lv_obj_t* overlay, const lv_point_t& point, Drag& drag)
 	{
-		constexpr std::string_view PREFIX = "handle_";
-		for (uint32_t i = 0; i < lv_obj_get_child_count(overlay); i++)
-		{
-			lv_obj_t* child = lv_obj_get_child(overlay, static_cast<int32_t>(i));
-			const char* name = lv_obj_get_name(child);
-			lv_area_t area;
-			lv_obj_get_coords(child, &area);
-			// Handles show only on the selected widget, so a first touch on one selects rather than resizes
-			if (name == nullptr || !std::string_view(name).starts_with(PREFIX) ||
-				lv_obj_has_flag(child, LV_OBJ_FLAG_HIDDEN) || !contains(area, point))
-			{
-				continue;
-			}
-			const std::string_view direction = std::string_view(name).substr(PREFIX.size());
-			drag.top = direction.find('n') != std::string_view::npos;
-			drag.bottom = direction.find('s') != std::string_view::npos;
-			drag.right = direction.find('e') != std::string_view::npos;
-			drag.left = direction.find('w') != std::string_view::npos;
-			return;
-		}
+		// A band along each edge, at most a third of the widget across, so the bands never meet and the middle
+		// always moves the widget, however small it is
+		lv_area_t area;
+		lv_obj_get_coords(overlay, &area);
+		const int32_t bandX = std::min(GRAB_BAND, lv_area_get_width(&area) / 3);
+		const int32_t bandY = std::min(GRAB_BAND, lv_area_get_height(&area) / 3);
+		drag.left = point.x < area.x1 + bandX;
+		drag.right = point.x > area.x2 - bandX;
+		drag.top = point.y < area.y1 + bandY;
+		drag.bottom = point.y > area.y2 - bandY;
 	}
 
 	DsLayout::Placement* DsLayout::placementOf(lv_obj_t* overlay)

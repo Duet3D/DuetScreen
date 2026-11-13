@@ -586,3 +586,53 @@ TEST_F(TestCustomiseHome, TextSettingsAreTypedInTheSettingsAboveTheKeyboard)
 	lv_obj_get_coords(dialog, &after);
 	EXPECT_EQ(after.y1, before.y1);
 }
+
+TEST_F(TestCustomiseHome, EdgesAreGrabbedAnywhereNearThemEvenOnASmallWidget)
+{
+	auto& editor = UI::Xml::LayoutEditor::get();
+	start();
+	editor.select("dashboard", "temperature_graph");
+	editor.removeSelected();
+	editor.selectPlace("dashboard", std::pair{4, 8});
+	ASSERT_EQ(editor.add("gcode_button"), "gcode_button"); // 4x2, the smallest default
+	update();
+	lv_obj_t* dashboard = UI::Xml::DsLayout::find("dashboard")->getContainer();
+	const int32_t column = lv_obj_get_content_width(dashboard) / 20;
+	const int32_t row = lv_obj_get_content_height(dashboard) / 12;
+	const auto area = [&]
+	{
+		lv_area_t coords;
+		lv_obj_get_coords(overlayOf("dashboard", "gcode_button"), &coords);
+		return coords;
+	};
+	const auto rect = []
+	{
+		const auto* item = draftItem("dashboard", "gcode_button");
+		return std::array{item->x, item->y, item->w, item->h};
+	};
+
+	// Near the top right corner, but not on its bracket: both edges move
+	lv_area_t a = area();
+	drag({a.x2 - 20, a.y1 + 20}, {a.x2 - 20 + column, a.y1 + 20 - row});
+	EXPECT_EQ(rect(), (std::array{4, 7, 5, 3}));
+
+	// Near the bottom edge, well away from its bar: only the bottom moves
+	a = area();
+	drag({a.x1 + 30, a.y2 - 10}, {a.x1 + 30, a.y2 - 10 + row});
+	EXPECT_EQ(rect(), (std::array{4, 7, 5, 4}));
+
+	// The middle moves the whole widget
+	a = area();
+	const lv_point_t middle = {(a.x1 + a.x2) / 2, (a.y1 + a.y2) / 2};
+	drag(middle, {middle.x + column, middle.y});
+	EXPECT_EQ(rect(), (std::array{5, 7, 5, 4}));
+
+	// A first touch near an edge of a widget not yet selected selects it; a drag moves it
+	const lv_point_t tools = middleOf(placed("dashboard", "tools"));
+	lv_area_t toolsArea;
+	lv_obj_get_coords(overlayOf("dashboard", "tools"), &toolsArea);
+	drag({tools.x, toolsArea.y2 - 10}, {tools.x, toolsArea.y2 - 10 + row});
+	EXPECT_EQ(editor.selection().item, "tools");
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 6);
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 1);
+}

@@ -1,8 +1,8 @@
 <!--
   The edit overlay over each widget of a grid while the user customises the screen: as customise_item.xml, with
-  crop-tool handles on the selected widget: a bracket on each corner and a bar on each edge. Dragging one moves those
-  edges, resizing the widget. <ds_layout> finds the handles by their names: `handle_` and the compass direction of the
-  edges they move. Each is a box larger than what it shows, which is what is grabbed.
+  crop-tool handles on the selected widget: a bracket on each corner and a bar on each edge. They show where to drag:
+  <ds_layout> resizes the widget from a drag that starts anywhere near an edge or corner (see DsLayout.h), so they
+  needn't be hit exactly.
 -->
 <component>
 	<api>

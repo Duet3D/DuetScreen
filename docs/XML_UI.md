@@ -376,7 +376,7 @@ A user bundle adds a widget the same way, and a slot for it to go in if none fit
 
 ### Customising on the screen
 
-*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it a cell at a time or along its strip. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. The selected dashboard widget has grab handles on its corners and edges; dragging one moves those edges. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be).
+*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it a cell at a time or along its strip. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be).
 
 How it is built:
 
