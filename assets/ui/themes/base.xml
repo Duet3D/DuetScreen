@@ -79,7 +79,10 @@
 
 		<!-- Buttons -->
 		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#primary"/>
-		<style name="btn_checked" bg_grad_dir="none" merge="border_highlight"/>
+		<!-- Checked: highlighted by an outline drawn inside the edge, which (unlike a border) takes no layout space, so
+		     a content-sized button doesn't grow when checked -->
+		<style name="btn_checked" bg_grad_dir="none" outline_color="#highlight" outline_width="#border_width"
+			   outline_pad="-#border_width" outline_opa="100%"/>
 		<style name="action_btn" bg_opa="100%" bg_color="#secondary"/>
 
 		<!-- Icons -->

@@ -27,7 +27,7 @@
 		<!-- Buttons: raised, with a hard shadow -->
 		<style name="btn" border_width="3" border_color="#text" shadow_width="0" shadow_offset_x="3" shadow_offset_y="3"
 			   shadow_color="#border" shadow_opa="100%"/>
-		<style name="btn_checked" border_color="#secondary" border_width="3"/>
+		<style name="btn_checked" border_color="#secondary" border_width="3" outline_width="0"/>
 
 		<!-- Pressed: darker -->
 		<style name="pressed" recolor="0x000000" recolor_opa="30"/>

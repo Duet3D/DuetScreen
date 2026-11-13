@@ -6,7 +6,7 @@
 		<style name="card" border_width="0"/>
 
 		<style name="btn" bg_color="#bg_light" bg_grad_dir="none" text_color="#primary"/>
-		<style name="btn_checked" border_color="#primary"/>
+		<style name="btn_checked" outline_color="#primary"/>
 		<style name="action_btn" bg_color="#secondary" bg_grad_dir="none" text_color="#text" recolor="#text"/>
 
 		<style name="card" bg_color="#bg" bg_grad_dir="none"/>

@@ -1511,7 +1511,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `tab_card` |  | *(not set)* |
 | `modal` |  | *(not set)* |
 | `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#primary |
-| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | merge=border_highlight bg_grad_dir=none |
+| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_grad_dir=none outline_color=#highlight outline_width=#border_width outline_pad=-#border_width outline_opa=100% |
 | `icon` |  | *(not set)* |
 | `icon_recolor` | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/icon_recolor.png) | recolor=#text recolor_opa=100% |
 | `pressed` | ![pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/pressed.png) | recolor=0x000000 recolor_opa=35 |
