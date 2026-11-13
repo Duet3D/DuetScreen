@@ -50,8 +50,9 @@ namespace UI::Xml
 		/** `arg` as an integer, if it is one */
 		std::optional<int32_t> argInt() const;
 
-		/** The text a text area holds (an edit's result, e.g. on `value_changed`), else `arg` */
-		std::string_view text() const;
+		/** The text a text area holds, or the option a dropdown has chosen (an edit's result, e.g. on
+		 * `value_changed`), else `arg` */
+		std::string text() const;
 
 		/** The innermost list row the widget is in, or nullptr */
 		Row* row() const;
@@ -106,7 +107,7 @@ namespace UI::Xml
 		/** Register the `<action>` element and the `value_confirmed` event. Call after lv_xml_init(). */
 		void init();
 
-		/** Forget every handler and widget registration */
+		/** Forget every widget registration. Global actions are kept, like presenters, for the life of the program. */
 		void deinit();
 
 		/** The event DuetScreen widgets send, with a `float*` parameter, when an edit is confirmed */
@@ -128,7 +129,8 @@ namespace UI::Xml
 		 */
 		void setOwner(lv_obj_t* obj, lv_obj_t* owner);
 
-		/** Handle `name` everywhere it isn't handled by a presenter */
+		/** Handle `name` everywhere it isn't handled by a presenter, replacing any earlier handler. Lasts for the life of
+		 * the program, so it may be called before init(). */
 		void addGlobal(std::string name, ActionHandler handler);
 
 		/**

@@ -1,0 +1,12 @@
+<!--
+  One preset of a value_selector. Tap to use it; hold to change it.
+
+  Fields:   a choices row: text (src/UI/Xml/View/ValueSelector.h)
+-->
+<component>
+	<view extends="ds_button" bind_text="text" height="100%" flex_grow="1" style_min_height="content">
+		<style name="long_press"/>
+		<action trigger="clicked" name="selector.pick"/>
+		<action trigger="long_pressed" name="selector.edit_choice"/>
+	</view>
+</component>

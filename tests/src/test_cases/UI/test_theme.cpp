@@ -6,6 +6,7 @@
  */
 
 #include "Debug.h"
+#include "UI/Components/Bar/Bar.h"
 #include "UI/Components/Button/DraggableButton.h"
 #include "UI/Components/Canvas/Canvas.h"
 #include "UI/Components/Graph/Graph.h"
@@ -28,7 +29,6 @@
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
-#include "UI/Widgets/Temperature/HeaterSlider.h"
 #include "UI/Xml/Data/HeatSource.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/View/XmlView.h"
@@ -263,6 +263,29 @@ class GalleryTools : public Xml::XmlPresenter
 	Xml::List<Xml::ChamberRow> m_chambers;
 };
 
+/** One heater, active, for temperature_heater.xml */
+class GalleryHeater : public Xml::XmlPresenter
+{
+  public:
+	GalleryHeater()
+		: XmlPresenter("gallery_heater")
+	{
+		m_heater.update({.heater = 0,
+						 .name = "Heater",
+						 .state = "active",
+						 .current = 250.0f,
+						 .active = 200,
+						 .standby = 0,
+						 .min = 0.0f,
+						 .max = 300.0f});
+	}
+
+	void fields(Xml::FieldVisitor& f) override { m_heater.fields(f); }
+
+  private:
+	Xml::HeaterRow m_heater; // The heater shown
+};
+
 TEST_F(TestTheme, Widgets)
 {
 	screen.setFlexFlow(LV_FLEX_FLOW_COLUMN);
@@ -459,15 +482,8 @@ TEST_F(TestTheme, Widgets)
 	UI::Themes::resetIconFolder();
 
 	/* Heater Slider */
-	HeaterSlider heater_slider("heater_slider", cont);
+	Xml::XmlView heater_slider("heater_slider", cont, "temperature_heater", std::make_shared<GalleryHeater>());
 	heater_slider.setSize(LV_PCT(40), LV_SIZE_CONTENT);
-	heater_slider.setHeaterName("Heater");
-	heater_slider.setHeaterMinTemperature(0);
-	heater_slider.setHeaterMaxTemperature(300);
-	heater_slider.setActiveTemperature(200);
-	heater_slider.setStandbyTemperature(0);
-	heater_slider.setCurrentTemperature(250);
-	heater_slider.setHeaterState(HeaterSliderPresenter::heater_state_t::active, "Active");
 
 	/* Icon */
 	Icon icon("icon", cont);

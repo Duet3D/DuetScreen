@@ -1,7 +1,7 @@
 <!--
   The Control page: moving the axes, temperatures, the height map, cancelling objects, and fans, in tabs.
 
-  Move, temperature, height map and object cancel are C++ views (src/UI/Screens/XmlScreens.cpp) for now.
+  The height map and object cancel are C++ views (src/UI/Screens/XmlScreens.cpp) for now.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">

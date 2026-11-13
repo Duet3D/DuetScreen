@@ -1,0 +1,68 @@
+<!--
+  The Temperature tab: the tools, beds and chambers with their heaters on the left; the selected tool and the extruder
+  panel (extruder.xml) on the right.
+
+  Fields and actions: src/UI/Screens/Temperature/TemperaturePresenter.h; the beds and chambers are the global lists
+  (src/UI/Xml/Data/HeatSource.h). Its own number pad covers only this tab.
+-->
+<component presenter="temperature">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="row">
+		<style name="bg_dark"/>
+
+		<lv_obj name="temperature_cont" height="100%" flex_grow="2" flex_flow="column">
+			<style name="card"/>
+
+			<lv_obj name="tools" width="100%" height="content" flex_flow="column">
+				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="bg_color_header"/>
+					<style name="list_header"/>
+					<lv_label name="title" translation_tag="temperature.tools" width="content" height="content">
+						<style name="list_title"/>
+					</lv_label>
+				</lv_obj>
+				<ds_list name="list" list="tools" item="temperature_tool" width="100%" height="content"
+						 flex_flow="column"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="beds" width="100%" height="content" flex_flow="column">
+				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="bg_color_header"/>
+					<style name="list_header"/>
+					<lv_label name="title" translation_tag="temperature.beds" width="content" height="content">
+						<style name="list_title"/>
+					</lv_label>
+				</lv_obj>
+				<ds_list name="list" list="beds" item="temperature_heater_card" width="100%" height="content"
+						 flex_flow="column"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="chambers" width="100%" height="content" flex_flow="column">
+				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="bg_color_header"/>
+					<style name="list_header"/>
+					<lv_label name="title" translation_tag="temperature.chambers" width="content" height="content">
+						<style name="list_title"/>
+					</lv_label>
+				</lv_obj>
+				<ds_list name="list" list="chambers" item="temperature_heater_card" width="100%" height="content"
+						 flex_flow="column"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_obj name="control_cont" height="100%" flex_grow="1" flex_flow="column" style_pad_all="0">
+			<lv_label name="selected_tool_label" bind_text="selected_tool" width="100%" height="content"
+					  style_text_align="center"/>
+			<ds_view name="extruder_control" view="extruder" shown="true" width="100%" flex_grow="1">
+				<style name="card"/>
+			</ds_view>
+		</lv_obj>
+
+		<ds_view name="temperature_numberpad" view="numberpad"/>
+	</view>
+</component>

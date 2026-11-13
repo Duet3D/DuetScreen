@@ -1,106 +1,185 @@
+/*
+ * TemperaturePresenter.cpp
+ */
+
 #include "TemperaturePresenter.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
+#include "ObjectModel/Axis.h"
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Tool.h"
-#include "TemperatureView.h"
+#include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
 #include "i18n/i18n.h"
-#include "utils/UnitSystem.h"
+#include <fmt/format.h>
 
 namespace UI
 {
-	void TemperaturePresenter::newToolData()
+	void ToolExtruderRow::fields(Xml::FieldVisitor& f)
 	{
-		ZoneScoped;
-		MODEL_LOCK();
-		auto& tools = m_view->getTools();
-		std::vector<size_t> toolIndices;
-		toolIndices.reserve(OM::GetToolCount());
-		OM::IterateToolsWhile(
-			[&toolIndices](OM::ToolPtr tool, size_t index)
-			{
-				if (tool->GetHeaterCount() > 0)
-				{
-					toolIndices.push_back(index);
-				}
-				return true;
-			});
+		f.field("factor", factor, "Extrusion factor, e.g. \"100%\"");
+	}
 
-		tools.setItemCount(toolIndices.size(),
-						   [this, &toolIndices](size_t index, LvObj& parent)
+	void TemperatureToolRow::fields(Xml::FieldVisitor& f)
+	{
+		ToolRow::fields(f);
+		f.field("state", state, "Status key, e.g. active, standby, off");
+		f.field("status", status, "Status, translated for display");
+		f.list("extruders", extruders, "The tool's extruders, each with `factor`");
+		f.field("filament_shown", filamentShown, "1 if the tool takes filament");
+		f.field("filament_text", filamentText, "The filament picked or loaded, or \"No Filament Loaded\"");
+		f.field("filament_loaded", filamentLoaded, "1 if filament is loaded, so it can be unloaded");
+		f.field("change_shown", changeShown, "1 if a filament other than the loaded one has been picked");
+		f.field("change_text", changeText, "\"Load\", or \"Change\" when filament is loaded");
+	}
+
+	void TemperatureToolRow::update(OM::Tool& tool)
+	{
+		ToolRow::update(tool);
+		state.set(tool.GetStatusStr());
+		status.set(_(fmt::format("temperature.status.{:s}", tool.GetStatusStr())));
+		extruders.sync(tool.GetExtruderCount(),
+					   [&tool](ToolExtruderRow& row, size_t i)
+					   {
+						   if (auto extruder = tool.GetExtruder(i))
 						   {
-							   auto control = std::make_unique<ToolControl>(fmt::format("{}", index), parent);
-							   control->getPresenter()->setToolIndex(toolIndices[index]);
-							   control->setNumberPad(&m_view->getNumberPad());
-							   control->setExtrusionModal(findView<ModalExtrusionFactor>("extrusion_factor"));
-							   control->addStyle(Themes::getLvglStyles().card);
-							   control->show(); // show recursively activates presenters
-							   return control;
-						   });
+							   row.factor.set(fmt::format("{:d}%", static_cast<int>(100 * extruder->factor)));
+						   }
+					   });
+		filamentShown.set(tool.filamentExtruder >= 0 ? 1 : 0);
 
-		if (auto current_tool = OM::GetCurrentTool())
+		// A new filament loaded replaces whatever was picked
+		std::string filament(tool.GetFilament().c_str());
+		if (filament != loaded)
 		{
-			getView()->setSelectedToolName(current_tool->GetName());
+			loaded = std::move(filament);
+			picked = loaded;
 		}
-		else
-		{
-			getView()->setSelectedToolName("");
-		}
+		showFilament();
 	}
 
-	void TemperaturePresenter::newBedHeaterData()
+	void TemperatureToolRow::pick(std::string filament)
 	{
-		ZoneScoped;
-		auto& beds = m_view->getBeds();
-		beds.setItemCount(OM::GetBedCount(),
-						  [this](size_t index, LvObj& parent)
-						  {
-							  auto control = std::make_unique<HeaterSlider>(fmt::format("{}", index), parent);
-							  control->getPresenter()->setBedIndex(index);
-							  control->setNumberPad(&m_view->getNumberPad());
-							  control->addStyle(Themes::getLvglStyles().card);
-							  control->show(); // show recursively activates presenters
-							  return control;
-						  });
+		picked = std::move(filament);
+		showFilament();
 	}
 
-	void TemperaturePresenter::newChamberHeaterData()
+	void TemperatureToolRow::showFilament()
 	{
-		ZoneScoped;
-		auto& chambers = m_view->getChambers();
-		chambers.setItemCount(OM::GetChamberCount(),
-							  [this](size_t index, LvObj& parent)
-							  {
-								  auto control = std::make_unique<HeaterSlider>(fmt::format("{}", index), parent);
-								  control->getPresenter()->setChamberIndex(index);
-								  control->setNumberPad(&m_view->getNumberPad());
-								  control->addStyle(Themes::getLvglStyles().card);
-								  control->show(); // show recursively activates presenters
-								  return control;
-							  });
+		filamentText.set(picked.empty() ? _("filament.not_loaded") : picked);
+		filamentLoaded.set(loaded.empty() ? 0 : 1);
+		changeShown.set(picked != loaded ? 1 : 0);
+		changeText.set(loaded.empty() ? _("filament.load") : _("filament.change"));
 	}
 
-	void TemperaturePresenter::onDisconnect()
+	TemperaturePresenter::TemperaturePresenter()
+		: XmlPresenter("temperature")
 	{
-		ZoneScoped;
-		m_view->getTools().clear();
-		m_view->getBeds().clear();
-		m_view->getChambers().clear();
+		action("temperature.extrusion_factor",
+			   [](const Xml::ActionArgs& args)
+			   {
+				   auto tool = toolOf(args);
+				   auto* dialog = findView<ModalExtrusionFactor>("extrusion_factor");
+				   if (tool == nullptr || dialog == nullptr)
+				   {
+					   return;
+				   }
+				   dialog->getExtrusionFactor().getPresenter()->setTool(tool);
+				   openModal(dialog);
+			   });
+		action("temperature.pick_filament",
+			   [](const Xml::ActionArgs& args)
+			   {
+				   if (auto* row = args.row<TemperatureToolRow>())
+				   {
+					   row->pick(args.text());
+				   }
+			   });
+		action("temperature.change_filament",
+			   [](const Xml::ActionArgs& args)
+			   {
+				   const auto* row = args.row<TemperatureToolRow>();
+				   if (auto tool = toolOf(args); tool && row)
+				   {
+					   tool->ChangeFilament(row->picked);
+				   }
+			   });
+		action("temperature.unload_filament",
+			   [](const Xml::ActionArgs& args)
+			   {
+				   if (auto tool = toolOf(args))
+				   {
+					   tool->UnloadFilament();
+				   }
+			   });
+	}
+
+	void TemperaturePresenter::fields(Xml::FieldVisitor& f)
+	{
+		f.list("tools", m_tools, "The tools with heaters");
+		f.field("filaments", m_filaments, "The filaments the printer knows, one per line");
+		f.field("selected_tool", m_selectedTool, "E.g. \"Selected Tool: Tool 0\"");
+	}
+
+	void TemperaturePresenter::onInit()
+	{
+		registerEventListener<EventType::ToolData>([this]() { showTools(); });
+		registerEventListener<EventType::ToolHeaterData>([this](size_t) { showTools(); });
+		registerEventListener<EventType::HeaterData>([this]() { showTools(); });
+		registerEventListener<EventType::Filaments>([this](const std::vector<std::string>& filaments)
+													{ showFilaments(filaments); });
 	}
 
 	void TemperaturePresenter::onActivate()
 	{
-		ZoneScoped;
-		MODEL_LOCK();
-
-		newToolData();
-		newBedHeaterData();
-		newChamberHeaterData();
-
+		showTools();
+		{
+			MODEL_LOCK();
+			showFilaments(OM::FileSystem::GetFilamentList());
+		}
 		OM::FileSystem::RequestFilaments();
 	}
 
-	void TemperaturePresenter::onDeactivate() {}
+	void TemperaturePresenter::onDisconnect()
+	{
+		m_tools.clear();
+		m_selectedTool.set(_("temperature.selected_tool_label", ""));
+	}
+
+	void TemperaturePresenter::showTools()
+	{
+		ZoneScoped;
+		MODEL_LOCK();
+		std::vector<OM::ToolPtr> heated;
+		heated.reserve(OM::GetToolCount());
+		OM::IterateToolsWhile(
+			[&heated](OM::ToolPtr tool, size_t)
+			{
+				if (tool->GetHeaterCount() > 0)
+				{
+					heated.push_back(tool);
+				}
+				return true;
+			});
+		m_tools.sync(heated.size(), [&heated](TemperatureToolRow& row, size_t i) { row.update(*heated[i]); });
+
+		const auto current = OM::GetCurrentTool();
+		m_selectedTool.set(_("temperature.selected_tool_label", current ? current->GetName() : std::string()));
+	}
+
+	void TemperaturePresenter::showFilaments(const std::vector<std::string>& filaments)
+	{
+		m_filaments.set(fmt::format("{}", fmt::join(filaments, "\n")));
+	}
+
+	OM::ToolPtr TemperaturePresenter::toolOf(const Xml::ActionArgs& args)
+	{
+		const auto* row = args.row<Xml::ToolRow>();
+		if (row == nullptr)
+		{
+			LOG_WARN("{:s} must come from a tools row", args.name);
+			return nullptr;
+		}
+		return OM::GetTool(static_cast<size_t>(row->number.get()));
+	}
 } // namespace UI

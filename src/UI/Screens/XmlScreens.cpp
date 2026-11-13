@@ -4,7 +4,6 @@
 
 #include "XmlScreens.h"
 #include "Console/ConsolePresenter.h"
-#include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
 #include "Heightmap/HeightmapView.h"
@@ -14,7 +13,9 @@
 #include "Settings/SettingsView.h"
 #include "Status/JobStatusPresenter.h"
 #include "StatusBar/StatusBarPresenter.h"
-#include "Temperature/TemperatureView.h"
+#include "Temperature/ExtruderPresenter.h"
+#include "Temperature/HeaterActions.h"
+#include "Temperature/TemperaturePresenter.h"
 #include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/BabyStep/BabyStepPresenter.h"
@@ -67,15 +68,19 @@ namespace UI
 
 	void registerXmlScreens()
 	{
+		/* Actions every view can raise */
+		HeaterActions::registerAll();
+
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
-		Xml::Presenters::add<ToolListPresenter>("tool_list");
 		Xml::Presenters::add<JobStatusPresenter>("job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");
+		Xml::Presenters::add<TemperaturePresenter>("temperature");
+		Xml::Presenters::add<ExtruderPresenter>("extruder");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -105,7 +110,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<TemperatureView>("temperature");
 		Xml::NativeViews::add<HeightmapView>("heightmap");
 		Xml::NativeViews::add<ObjectCancelView>("object_cancel");
 		Xml::NativeViews::add<SettingsView>("settings");

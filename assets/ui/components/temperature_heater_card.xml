@@ -1,0 +1,10 @@
+<!--
+  A bed or chamber on the Temperature tab: its heater (temperature_heater.xml) in a card.
+
+  Fields:   a row of the beds or chambers list (src/UI/Xml/Data/HeatSource.h)
+-->
+<component>
+	<view extends="temperature_heater">
+		<style name="card"/>
+	</view>
+</component>

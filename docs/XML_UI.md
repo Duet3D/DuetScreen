@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_bar_marker`, `ds_dropdown`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -197,7 +197,9 @@ These are in addition to the standard `lv_*` widgets.
 | --- | --- |
 | `<ds_button>` | `text`, `translation_tag`, `bind_text`, `icon`, `checkable`, `long_mode`, `flash_on` (flash whenever a subject changes) |
 | `<ds_icon>` | `icon`: an icon from the icon set chosen in the settings, e.g. `icon="folder.png"`; follows icon set changes |
-| `<ds_bar>` | `min`, `max`, `label_format`, `bind_value`: a progress bar that draws its value, e.g. `label_format="{}%"` |
+| `<ds_bar>` | `min`, `max`, `bind_min`, `bind_max`, `label_format`, `bind_value`: a progress bar that draws its value, e.g. `label_format="{}%"` |
+| `<ds_bar_marker>` | `bar`, `min`, `max`, `bind_min`, `bind_max`, `bind_value`, `label_format`: a value marked on a sibling bar that spans its parent, e.g. a heater's target above its temperature. Dragged along the bar it raises `value_confirmed` with the new value; tapped, `clicked`. |
+| `<ds_dropdown>` | `bind_options` (one per line), `bind_text` (shown instead of the chosen option), and every `lv_dropdown` attribute; handlers read the option chosen with `ActionArgs::text()` |
 | `<ds_thumbnail>` | `bind_src`: an image as tall as its parent's content and as wide as its aspect ratio needs; no width without an image |
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list; `windowed` (see Lists); `follow_end` keeps a log-like list showing its newest rows |
@@ -232,6 +234,8 @@ For a plain question, `confirm_dialog.xml` is ready-made:
 <question_dialog open="confirm" title="confirm_title" text="confirm_text" confirm="move.confirm" close="move.close_dialog"/>
 ```
 
+A value with - and + and a row of presets, such as the extruder's feed distance, is `value_selector.xml`, backed by a `ValueSelector` the presenter owns ([ValueSelector.h](../src/UI/Xml/View/ValueSelector.h)), which also stores the presets and the value.
+
 A presenter asks for a number with `Services::askNumber(args.target, {...})`: the number pad nearest the widget that was tapped answers, so a page can host its own (`<ds_view name="move_numberpad" view="numberpad"/>`) to keep it over the page, else the shared one does.
 
 When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
@@ -254,6 +258,11 @@ An action is resolved like a name: first the presenter of the nearest enclosing 
 | `nav.open` | Name of the page to open |
 | `nav.home` | (none) Close every page and show the home screen |
 | `nav.back` | (none) Close the top modal, or go back a page |
+| `tools.toggle` | (in a tools row) Select or deselect the tool |
+| `heaters.toggle` | (in a tool heater, bed or chamber row) Cycle the heater through active, standby and off |
+| `heaters.set_active`, `heaters.set_standby` | (in such a row) Set the target to the edited value (`value_confirmed`), else ask for it on the nearest number pad |
+
+Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program; the tool and heater actions are in [HeaterActions.h](../src/UI/Screens/Temperature/HeaterActions.h).
 
 ## Themes
 

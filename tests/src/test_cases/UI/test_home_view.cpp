@@ -6,8 +6,12 @@
  */
 
 #include "Debug.h"
+#include "ObjectModel/Axis.h"
+#include "ObjectModel/BedOrChamber.h"
+#include "ObjectModel/Heat.h"
 #include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tool.h"
 #include "Storage.h"
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Components/LVGL/LvTextarea.h"
@@ -15,7 +19,6 @@
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
 #include "UI/Screens/ObjectCancel/ObjectCancelView.h"
 #include "UI/Screens/Settings/SettingsView.h"
-#include "UI/Screens/Temperature/TemperatureView.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/TemperatureSource.h"
@@ -819,11 +822,11 @@ TEST_F(TestHomeViewWithData, ControlView)
 	control.setActiveTab(1);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature.png");
 	{
-		auto& temperature = page<UI::TemperatureView>("temperature");
-		auto input =
-			temperature.getChildByName("control_cont.extruder_control.controls.distance_selector.topRow.valueDisplay");
+		lv_obj_t* selector = lv_obj_find_by_name(page<UI::LvObj>("temperature").getRootPtr(), "distance_selector");
+		ASSERT_NE(selector, nullptr);
+		lv_obj_t* input = lv_obj_find_by_name(selector, "value");
 		ASSERT_NE(input, nullptr);
-		input->sendEvent(LV_EVENT_CLICKED, nullptr);
+		lv_obj_send_event(input, LV_EVENT_CLICKED, nullptr);
 		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_distance_input.png");
 	}
 

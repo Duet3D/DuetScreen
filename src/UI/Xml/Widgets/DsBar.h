@@ -6,7 +6,8 @@
  *
  *     <ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>
  *
- * `label_format` is an fmt format for the value (default "{}"). Takes every lv_obj attribute.
+ * `label_format` is an fmt format for the value (default "{}"). `bind_min` and `bind_max` follow integer subjects for
+ * the range, e.g. a heater's. Takes every lv_obj attribute.
  */
 
 #pragma once
@@ -35,5 +36,11 @@ namespace UI::Xml
 
 		/** `<ds_bar>` apply callback: lv_obj attributes, then the bar's own */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
+
+		/** `bind_min` observer: make the subject's value the bottom of the range */
+		static void minObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** `bind_max` observer: make the subject's value the top of the range */
+		static void maxObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 	};
 } // namespace UI::Xml

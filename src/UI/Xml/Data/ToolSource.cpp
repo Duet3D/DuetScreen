@@ -43,7 +43,9 @@ namespace UI::Xml
 									 .state = heater.GetHeaterStatusStr(),
 									 .current = heater.current,
 									 .active = toolHeater->activeTemp,
-									 .standby = toolHeater->standbyTemp});
+									 .standby = toolHeater->standbyTemp,
+									 .min = heater.min,
+									 .max = heater.max});
 					 });
 	}
 

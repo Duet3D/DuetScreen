@@ -243,11 +243,17 @@ namespace UI::Xml
 		return value;
 	}
 
-	std::string_view ActionArgs::text() const
+	std::string ActionArgs::text() const
 	{
 		if (target != nullptr && lv_obj_check_type(target, &lv_textarea_class))
 		{
 			return lv_textarea_get_text(target);
+		}
+		if (target != nullptr && lv_obj_check_type(target, &lv_dropdown_class))
+		{
+			char option[128];
+			lv_dropdown_get_selected_str(target, option, sizeof(option));
+			return option;
 		}
 		return arg;
 	}
@@ -299,7 +305,6 @@ namespace UI::Xml
 		void deinit()
 		{
 			s_targets.clear();
-			s_globals = ActionHandlerSet{};
 			s_valueConfirmed = LV_EVENT_LAST;
 			s_dismissed = LV_EVENT_LAST;
 		}

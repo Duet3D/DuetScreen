@@ -26,10 +26,13 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Theme/ThemeStyles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/Actions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/NativeViews.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/ValueSelector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsBarMarker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsDropdown.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsIcon.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsKeyboard.cpp

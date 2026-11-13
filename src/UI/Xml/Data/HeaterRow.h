@@ -8,6 +8,9 @@
  *     state           status key: active, standby, off, fault, tuning, offline or unknown
  *     status          status, translated for display
  *     current         current temperature as text, one decimal place, e.g. "21.2"
+ *     current_value   current temperature, whole °C, for a bar
+ *     scale_min       bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0
+ *     scale_max       top of a temperature scale, °C: the heater's maximum
  *     active          active target temperature, °C
  *     standby         standby target temperature, °C
  */
@@ -31,6 +34,8 @@ namespace UI::Xml
 			float current;		   // Current temperature, °C
 			int32_t active;		   // Active target, °C
 			int32_t standby;	   // Standby target, °C
+			float min;			   // Lowest temperature the heater allows, °C
+			float max;			   // Highest temperature the heater allows, °C
 		};
 
 		/** Declare the heater fields */
@@ -44,6 +49,9 @@ namespace UI::Xml
 		StringSubject<16> state;	 // Status key
 		StringSubject<32> status;	 // Translated status
 		StringSubject<16> current;	 // Current temperature, one decimal place
+		IntSubject currentValue;	 // Current temperature, whole °C
+		IntSubject scaleMin;		 // Bottom of a temperature scale, °C
+		IntSubject scaleMax;		 // Top of a temperature scale, °C
 		IntSubject active;			 // Active target, °C
 		IntSubject standby;			 // Standby target, °C
 	};

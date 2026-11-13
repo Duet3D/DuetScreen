@@ -1,0 +1,46 @@
+<!--
+  A value with - and + beside it, under a title, and a row of presets below. Tap the value to type one in; tap a
+  preset to use it; hold a preset to change it.
+
+      <value_selector selector="distance" title="distance.title" value="distance.value" choices="distance.choices"/>
+
+  `selector` is the selector's id, the arg of its actions; `title`, `value` and `choices` name its fields. The
+  presenter showing it owns a ValueSelector, which declares those fields and handles the actions
+  (src/UI/Xml/View/ValueSelector.h). Values are typed on the nearest number pad.
+-->
+<component>
+	<api>
+		<prop name="selector" type="string"/>
+		<prop name="title" type="string"/>
+		<prop name="value" type="string"/>
+		<prop name="choices" type="string"/>
+	</api>
+
+	<view extends="lv_obj" flex_flow="column">
+		<lv_label name="label" bind_text="$title" width="100%" height="content" style_min_width="content">
+			<style name="bg_color_header"/>
+			<style name="list_header"/>
+			<style name="list_title"/>
+		</lv_label>
+
+		<lv_obj name="top_row" width="100%" height="content" style_min_height="content" flex_flow="row"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+			<ds_button name="decrement" icon="decrement.png" height="100%" style_min_height="content">
+				<action trigger="clicked" name="selector.decrement" arg="$selector"/>
+			</ds_button>
+			<ds_textarea name="value" bind_text="$value" one_line="true" height="content" flex_grow="1"
+						 style_text_align="center">
+				<action trigger="clicked" name="selector.edit" arg="$selector"/>
+			</ds_textarea>
+			<ds_button name="increment" icon="increment.png" height="100%" style_min_height="content">
+				<action trigger="clicked" name="selector.increment" arg="$selector"/>
+			</ds_button>
+		</lv_obj>
+
+		<lv_obj name="values" width="100%" flex_grow="1" style_min_height="content" flex_flow="column">
+			<ds_list name="list" list="$choices" item="value_choice" width="100%" flex_grow="1"
+					 style_min_height="content" flex_flow="row"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+	</view>
+</component>

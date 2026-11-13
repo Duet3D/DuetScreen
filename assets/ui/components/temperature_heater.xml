@@ -1,0 +1,48 @@
+<!--
+  One heater on the Temperature tab: its name, which cycles it through active, standby and off, its state, and its
+  temperature on a bar with the active target marked above and the standby target below. Drag a target along the bar
+  to change it, or tap it to type one in. The state can't be changed while printing.
+
+  Fields:   a heater row: name, state, status, current_value, scale_min, scale_max, active, standby
+            (src/UI/Xml/Data/HeaterRow.h)
+  Actions:  heaters.toggle, heaters.set_active, heaters.set_standby (src/UI/Screens/Temperature/HeaterActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_pad_all="0"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<lv_obj name="heater_info_cont" width="30%" height="100%" style_min_height="content" flex_flow="column"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start">
+			<ds_button name="heater_name" bind_text="name" width="100%" height="content">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="heaters.toggle"/>
+			</ds_button>
+			<lv_label name="heater_state" bind_text="status" width="100%" height="content" style_text_align="center"/>
+		</lv_obj>
+
+		<lv_obj name="temperature_cont" height="100%" style_min_height="100" flex_grow="1" scrollable="false">
+			<ds_bar name="current_temperature" bind_value="current_value" bind_min="scale_min" bind_max="scale_max"
+					width="100%" height="15" align="center">
+				<style name="temperature_bar" selector="indicator"/>
+			</ds_bar>
+			<ds_bar_marker name="active_temperature" bar="current_temperature" bind_value="active"
+						   bind_min="scale_min" bind_max="scale_max" label_format="{} °C" align="left_mid" y="-30">
+				<style name="pad_normal"/>
+				<style name="input"/>
+				<style name="temperature_bar_indic" selector="indicator"/>
+				<bind_state_if_eq subject="state" state="checked" ref_value="active"/>
+				<action trigger="clicked" name="heaters.set_active"/>
+				<action trigger="value_confirmed" name="heaters.set_active"/>
+			</ds_bar_marker>
+			<ds_bar_marker name="standby_temperature" bar="current_temperature" bind_value="standby"
+						   bind_min="scale_min" bind_max="scale_max" label_format="{} °C" align="left_mid" y="31">
+				<style name="pad_normal"/>
+				<style name="input"/>
+				<style name="temperature_bar_indic" selector="indicator"/>
+				<bind_state_if_eq subject="state" state="checked" ref_value="standby"/>
+				<action trigger="clicked" name="heaters.set_standby"/>
+				<action trigger="value_confirmed" name="heaters.set_standby"/>
+			</ds_bar_marker>
+		</lv_obj>
+	</view>
+</component>

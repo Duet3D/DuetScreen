@@ -1,0 +1,39 @@
+<!--
+  The extruder panel: extrude or retract with the selected tool, by the feed distance and at the feed rate chosen
+  below. The buttons are disabled while the tool is too cold or a job is running.
+
+  Fields and actions: src/UI/Screens/Temperature/ExtruderPresenter.h. Values are typed on the nearest number pad.
+-->
+<component presenter="extruder">
+	<view extends="lv_obj" flex_flow="column"
+		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
+		<lv_obj name="controls" width="100%" flex_grow="1" style_layout="grid"
+				style_grid_column_dsc_array="fr(1) fr(1)" style_grid_row_dsc_array="fr(3) fr(5) fr(5)">
+			<ds_button name="retract" translation_tag="extrude.retract" icon="retract.png"
+					   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="retract_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="extruder.retract"/>
+			</ds_button>
+			<ds_button name="extrude" translation_tag="extrude.extrude" icon="extrude.png"
+					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="extrude_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="extruder.extrude"/>
+			</ds_button>
+
+			<value_selector name="distance_selector" selector="distance" title="distance.title"
+							value="distance.value" choices="distance.choices"
+							style_grid_cell_column_pos="0" style_grid_cell_column_span="2"
+							style_grid_cell_x_align="stretch"
+							style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch"/>
+			<value_selector name="feedrate_selector" selector="feedrate" title="feedrate.title"
+							value="feedrate.value" choices="feedrate.choices"
+							style_grid_cell_column_pos="0" style_grid_cell_column_span="2"
+							style_grid_cell_x_align="stretch"
+							style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch"/>
+		</lv_obj>
+	</view>
+</component>

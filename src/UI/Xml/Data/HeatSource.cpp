@@ -26,7 +26,9 @@ namespace UI::Xml
 						.state = item.GetHeaterStatusStr(),
 						.current = item.GetCurrentTemp(),
 						.active = item.GetActiveTemp(),
-						.standby = item.GetStandbyTemp()});
+						.standby = item.GetStandbyTemp(),
+						.min = item.GetMin(),
+						.max = item.GetMax()});
 		}
 	} // namespace
 

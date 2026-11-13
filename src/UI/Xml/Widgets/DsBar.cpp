@@ -49,9 +49,29 @@ namespace UI::Xml
 		{
 			bar.setLabelFormat(format);
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_min"))
+		{
+			lv_subject_add_observer_obj(subject, minObserverCb, root, &bar);
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_max"))
+		{
+			lv_subject_add_observer_obj(subject, maxObserverCb, root, &bar);
+		}
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_value"))
 		{
 			lv_bar_bind_value(root, subject);
 		}
+	}
+
+	void DsBar::minObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto& bar = *static_cast<DsBar*>(lv_observer_get_user_data(observer));
+		bar.setMinValue(lv_subject_get_int(subject));
+	}
+
+	void DsBar::maxObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto& bar = *static_cast<DsBar*>(lv_observer_get_user_data(observer));
+		bar.setMaxValue(lv_subject_get_int(subject));
 	}
 } // namespace UI::Xml

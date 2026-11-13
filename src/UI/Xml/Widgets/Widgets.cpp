@@ -4,7 +4,9 @@
 
 #include "Widgets.h"
 #include "DsBar.h"
+#include "DsBarMarker.h"
 #include "DsButton.h"
+#include "DsDropdown.h"
 #include "DsGraph.h"
 #include "DsIcon.h"
 #include "DsKeyboard.h"
@@ -21,7 +23,9 @@ namespace UI::Xml::Widgets
 	void registerAll()
 	{
 		DsBar::registerXml();
+		DsBarMarker::registerXml();
 		DsButton::registerXml();
+		DsDropdown::registerXml();
 		DsGraph::registerXml();
 		DsIcon::registerXml();
 		DsSlider::registerXml();

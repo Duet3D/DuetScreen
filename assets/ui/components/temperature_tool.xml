@@ -1,0 +1,62 @@
+<!--
+  One tool on the Temperature tab, outlined while selected: its name, which selects it, its state, its extrusion
+  factors, its filament, and a row per heater (temperature_heater.xml).
+
+  Pick a filament, then Load (or Change) to load it. Nothing that would change the job can be pressed while printing.
+
+  Fields and actions: a tools row (src/UI/Screens/Temperature/TemperaturePresenter.h); tools.toggle
+  (src/UI/Screens/Temperature/HeaterActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+		<style name="card"/>
+		<style name="tool_selected" selector="checked"/>
+		<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
+
+		<lv_obj name="tool_info" width="100%" height="content" flex_flow="row_wrap"
+				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+			<ds_button name="tool_name" bind_text="name" width="content" height="content">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
+				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="tools.toggle"/>
+			</ds_button>
+			<lv_label name="tool_state" bind_text="status" width="content" height="content"/>
+			<lv_obj name="tool_info_spacer" height="0" flex_grow="1"/>
+
+			<lv_obj name="extrusion_factors" width="content" height="content" style_pad_all="0" flex_flow="column">
+				<ds_list name="list" list="extruders" item="temperature_extruder" width="content" height="content"
+						 flex_flow="row"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="filament_select" width="content" height="content" style_min_width="content" flex_grow="1"
+					flex_flow="row">
+				<bind_flag_if_eq subject="filament_shown" flag="hidden" ref_value="0"/>
+				<ds_dropdown name="filament_dropdown" bind_options="filaments" bind_text="filament_text"
+							 height="content" style_min_width="content" flex_grow="1">
+					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="value_changed" name="temperature.pick_filament"/>
+				</ds_dropdown>
+				<ds_button name="filament_change" bind_text="change_text" width="content" height="100%">
+					<style name="actionBtn"/>
+					<bind_flag_if_eq subject="change_shown" flag="hidden" ref_value="0"/>
+					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="temperature.change_filament"/>
+				</ds_button>
+				<ds_button name="filament_load_unload" translation_tag="filament.unload" width="content" height="100%">
+					<style name="actionBtn"/>
+					<bind_state_if_eq subject="filament_loaded" state="disabled" ref_value="0"/>
+					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="temperature.unload_filament"/>
+				</ds_button>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_obj name="heaters" width="100%" height="content" flex_flow="column">
+			<ds_list name="list" list="heaters" item="temperature_heater" width="100%" height="content"
+					 flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+	</view>
+</component>

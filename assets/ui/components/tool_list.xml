@@ -3,11 +3,11 @@
 
   Data:     the global tools, beds and chambers lists (src/UI/Xml/Data/ToolSource.h, HeatSource.h)
   Actions:  tools.toggle, heaters.toggle, heaters.set_active, heaters.set_standby
-            (src/UI/Screens/Dashboard/ToolListPresenter.h)
+            (src/UI/Screens/Temperature/HeaterActions.h)
 
-  Setting a temperature opens the number pad called tool_numberpad, which the screen showing this list hosts.
+  Setting a temperature opens the nearest number pad, which the screen showing this list hosts.
 -->
-<component presenter="tool_list">
+<component>
 	<view extends="lv_obj" flex_flow="column">
 		<style name="pad_zero"/>
 
