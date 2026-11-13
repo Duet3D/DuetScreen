@@ -9,6 +9,7 @@
 #include "Debug.h"
 #include "UI/Components/LVGL/LvAnim.h"
 #include "UI/Components/LVGL/Transitions.h"
+#include "UI/Core/Navigation.h"
 #include "lvgl/src/lvgl_private.h"
 #include "utils/StorageHelper.h"
 
@@ -222,6 +223,9 @@ namespace UI
 			next_tab.setFlag(LV_OBJ_FLAG_HIDDEN, false);
 			return;
 		}
+
+		// A dialog opened from the tab being left goes with it, as one the tab hosted itself would
+		closeModalsNotAround(getRootPtr());
 
 		if (!animate || !StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) || previous_tab == nullptr)
 		{

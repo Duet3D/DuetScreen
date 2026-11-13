@@ -35,6 +35,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Theme/ThemeStyles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/Actions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/NativeViews.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/NumberEntry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/ValueSelector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp

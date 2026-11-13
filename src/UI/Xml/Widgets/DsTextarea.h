@@ -32,6 +32,9 @@ namespace UI::Xml
 		/** `<ds_textarea>` apply callback: lv_obj attributes, then the text box's own */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
+		/** Stop `value_changed` reaching the actions while the text is written by `bind_text` */
+		static void quietChangeCb(lv_event_t* e);
+
 		/** `bind_text` observer */
 		static void textObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
@@ -55,5 +58,6 @@ namespace UI::Xml
 		std::string m_keyboard = "keyboard";					 // Name of the keyboard to use
 		bool m_hideOnReady = true;								 // Put the keyboard away on its OK key
 		bool m_hideOnDefocus = true;							 // Put the keyboard away when focus leaves
+		bool m_settingQuietly = false;							 // True while `bind_text` writes the text
 	};
 } // namespace UI::Xml

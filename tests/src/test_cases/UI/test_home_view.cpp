@@ -8,13 +8,13 @@
 #include "Debug.h"
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/BedOrChamber.h"
+#include "ObjectModel/Fan.h"
 #include "ObjectModel/Heat.h"
 #include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "ObjectModel/Tool.h"
 #include "Storage.h"
 #include "UI/Components/Containers/TabView.h"
-#include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/Input/Slider.h"
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
@@ -1207,24 +1207,11 @@ namespace
 		return true;
 	}
 
-	/** The number pad shown in `obj`'s widget tree, or nullptr */
-	UI::ModalNumberPad* shownNumberPadIn(lv_obj_t* obj)
+	/** The shared number pad's dialog if it is open, else nullptr */
+	lv_obj_t* openNumberPad()
 	{
-		if (lv_obj_get_user_data(obj) != nullptr)
-		{
-			if (auto* pad = dynamic_cast<UI::ModalNumberPad*>(UI::LvObj::fromPtr(obj)); pad && shownOnScreen(obj))
-			{
-				return pad;
-			}
-		}
-		for (uint32_t i = 0; i < lv_obj_get_child_count(obj); i++)
-		{
-			if (auto* pad = shownNumberPadIn(lv_obj_get_child(obj, static_cast<int32_t>(i))))
-			{
-				return pad;
-			}
-		}
-		return nullptr;
+		lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "numberpad_dialog");
+		return dialog != nullptr && shownOnScreen(dialog) ? dialog : nullptr;
 	}
 
 	/**
@@ -1250,7 +1237,7 @@ namespace
 			obj = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(obj)).getInput().getRootPtr();
 		}
 		lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
-		return shownNumberPadIn(lv_screen_active()) != nullptr;
+		return openNumberPad() != nullptr;
 	}
 } // namespace
 
@@ -1261,7 +1248,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 		lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
 		lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
-		EXPECT_NE(shownNumberPadIn(lv_screen_active()), nullptr) << "dashboard heater";
+		EXPECT_NE(openNumberPad(), nullptr) << "dashboard heater";
 	}
 
 	openControlTab(0);
@@ -1310,4 +1297,41 @@ TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
 
 	UI::home();
 	EXPECT_FALSE(extruder->getPresenter()->isActive()) << "nothing listens while its page is closed";
+}
+
+TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
+{
+	UI::openScreen(std::string_view("settings"), false);
+	settingsPage().setActiveTab(1);
+	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
+	lv_obj_t* dialog = openNumberPad();
+
+	// Typed on the keys, then OK
+	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "1234");
+	lv_obj_t* keys = lv_obj_find_by_name(dialog, "keys");
+	lv_obj_send_event(keys, LV_EVENT_READY, nullptr);
+	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
+	auto& slider = static_cast<UI::Slider&>(
+		*UI::LvObj::fromPtr(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval")));
+	EXPECT_EQ(slider.getValue(), 1234.0f);
+
+	// Out of range: OK does nothing
+	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
+	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "5");
+	lv_obj_send_event(keys, LV_EVENT_READY, nullptr);
+	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
+	EXPECT_EQ(slider.getValue(), 1234.0f);
+	UI::closeAllModals();
+}
+
+TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
+{
+	// The fans go while one's question is open, taking its slider: the question goes, and nothing answers the slider
+	runEvents();
+	openControlTab(4);
+	ASSERT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true));
+	OM::RemoveFan(0, true);
+	Model::get().post<EventType::FanData>();
+	runEvents();
+	EXPECT_EQ(openNumberPad(), nullptr);
 }

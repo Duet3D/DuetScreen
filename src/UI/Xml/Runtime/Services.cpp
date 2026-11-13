@@ -5,8 +5,9 @@
 #include "Services.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
-#include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Screens/NumberPad/NumberPadPresenter.h"
+#include "UI/Xml/View/XmlView.h"
 #include <string>
 
 namespace UI::Xml::Services
@@ -33,79 +34,38 @@ namespace UI::Xml::Services
 
 	namespace
 	{
-		/** Show `request` on `pad` */
-		void ask(ModalNumberPad& pad, NumberRequest request)
+		/** The shared number pad's presenter, or nullptr if there is none */
+		NumberPadPresenter* sharedNumberPad()
 		{
-			pad.setHeader(request.header);
-			pad.setMinValue(request.min);
-			pad.setMaxValue(request.max);
-			pad.setConfirmCallback(std::move(request.onConfirm));
-			if (request.value)
+			auto* view = findView<XmlView>("numberpad");
+			auto* presenter = view != nullptr ? dynamic_cast<NumberPadPresenter*>(view->getPresenter()) : nullptr;
+			if (presenter == nullptr)
 			{
-				pad.setValue(*request.value);
+				LOG_WARN("There is no shared number pad (a view called 'numberpad' showing numberpad.xml)");
 			}
-			else
-			{
-				pad.clear();
-			}
-			openModal(&pad);
+			return presenter;
 		}
-
 	} // namespace
 
-	ModalNumberPad* numberPadFor(lv_obj_t* asker)
+	bool askNumber(NumberRequest request)
 	{
-		// A pad serves what is inside the widget it was placed in, so a page's own pad isn't found from another page
-		const std::vector<ModalNumberPad*> pads = findViews<ModalNumberPad>();
-		for (lv_obj_t* scope = asker; scope != nullptr; scope = lv_obj_get_parent(scope))
-		{
-			for (ModalNumberPad* pad : pads)
-			{
-				if (lv_obj_get_parent(pad->getBackdropPtr()) == scope)
-				{
-					return pad;
-				}
-			}
-		}
-		return findView<ModalNumberPad>("numberpad");
-	}
-
-	bool askNumber(std::string_view numberPad, NumberRequest request)
-	{
-		auto* pad = findView<ModalNumberPad>(numberPad);
+		auto* pad = sharedNumberPad();
 		if (pad == nullptr)
 		{
-			LOG_WARN("No number pad called '{:s}'", numberPad);
 			return false;
 		}
-		ask(*pad, std::move(request));
+		pad->ask(std::move(request));
 		return true;
 	}
 
-	bool askNumber(lv_obj_t* asker, NumberRequest request)
+	bool askText(TextRequest request)
 	{
-		auto* pad = numberPadFor(asker);
+		auto* pad = sharedNumberPad();
 		if (pad == nullptr)
 		{
-			LOG_WARN("No number pad to ask for {:s}", request.header);
 			return false;
 		}
-		ask(*pad, std::move(request));
-		return true;
-	}
-
-	bool askText(lv_obj_t* asker, TextRequest request)
-	{
-		auto* pad = numberPadFor(asker);
-		if (pad == nullptr)
-		{
-			LOG_WARN("No number pad to ask for {:s}", request.header);
-			return false;
-		}
-		pad->setHeader(request.header);
-		pad->setConfirmCallback(std::move(request.onConfirm));
-		pad->setText(request.text);
-		openModal(pad);
+		pad->ask(std::move(request));
 		return true;
 	}
 

@@ -255,6 +255,16 @@ namespace UI
 		}
 	}
 
+	float Slider::lowestTypable() const
+	{
+		return m_outOfRangeMode & OutOfRange::LOWER ? std::numeric_limits<float>::lowest() : m_min;
+	}
+
+	float Slider::highestTypable() const
+	{
+		return m_outOfRangeMode & OutOfRange::UPPER ? std::numeric_limits<float>::max() : m_max;
+	}
+
 	void Slider::onInputEvent(lv_event_t* e)
 	{
 		ZoneScoped;
@@ -266,19 +276,9 @@ namespace UI
 		case LV_EVENT_CLICKED:
 		{
 			slider->m_focused = true;
-			if (ModalNumberPad* pad = slider->getNumberPad())
+			if (slider->askForValue())
 			{
-				pad->setHeader(slider->getLabelText());
-				pad->setValue(slider->getValue());
-
-				auto outOfRangeMode = slider->m_outOfRangeMode;
-				pad->setMinValue(outOfRangeMode & OutOfRange::LOWER ? std::numeric_limits<float>::lowest()
-																	: slider->getMin());
-				pad->setMaxValue(outOfRangeMode & OutOfRange::UPPER ? std::numeric_limits<float>::max()
-																	: slider->getMax());
-				pad->setConfirmCallback([slider](float value) { slider->setValue(value); });
 				slider->getInput().sendEvent(LV_EVENT_DEFOCUSED, nullptr); // stop cursor blinking
-				openModal(pad);
 			}
 			if (slider->m_focusedCallback)
 			{

@@ -9,6 +9,7 @@
 #include "Heightmap/HeightmapPresenter.h"
 #include "Move/MovePresenter.h"
 #include "Notifications/NotificationsPresenter.h"
+#include "NumberPad/NumberPadPresenter.h"
 #include "ObjectCancel/ObjectCancelPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
 #include "Settings/DeveloperSettingsPresenter.h"
@@ -21,7 +22,6 @@
 #include "Temperature/ExtruderPresenter.h"
 #include "Temperature/HeaterActions.h"
 #include "Temperature/TemperaturePresenter.h"
-#include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/BabyStep/BabyStepPresenter.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
@@ -81,6 +81,7 @@ namespace UI
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 		Xml::Presenters::add<JobStatusPresenter>("dashboard_job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
+		Xml::Presenters::add<NumberPadPresenter>("numberpad");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");
@@ -124,7 +125,6 @@ namespace UI
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
 		Xml::NativeViews::add("extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
-		Xml::NativeViews::add<ModalNumberPad>("numberpad");
 		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);
 		Xml::NativeViews::add("job_extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
 		Xml::NativeViews::add("keyboard", createKeyboard);

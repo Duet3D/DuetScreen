@@ -1,7 +1,7 @@
 <!--
   Babystepping: nudge Z up or down by the chosen step while printing, or reset. Hold a step to change its size.
 
-  Fields and actions: src/UI/Widgets/BabyStep/BabyStepPresenter.h. Step sizes are typed on the nearest number pad.
+  Fields and actions: src/UI/Widgets/BabyStep/BabyStepPresenter.h. Step sizes are typed on the shared number pad.
 -->
 <component presenter="babystep">
 	<view extends="lv_obj" flex_flow="column"

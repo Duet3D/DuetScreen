@@ -108,10 +108,9 @@ namespace UI::Xml
 					   });
 	}
 
-	void ValueSelector::ask(lv_obj_t* asker, std::string header, float start, std::function<void(float)> onConfirm)
+	void ValueSelector::ask(std::string header, float start, std::function<void(float)> onConfirm)
 	{
-		Services::askNumber(asker,
-							{.header = std::move(header),
+		Services::askNumber({.header = std::move(header),
 							 .min = m_settings.min,
 							 .max = m_settings.max,
 							 .value = start,
@@ -164,8 +163,7 @@ namespace UI::Xml
 			 {
 				 if (auto* s = selectorOf(args))
 				 {
-					 s->ask(args.target,
-							_("multi_value_selector.numberpad_input_header"),
+					 s->ask(_("multi_value_selector.numberpad_input_header"),
 							s->m_value,
 							[s](float value) { s->setValue(value); });
 				 }
@@ -203,8 +201,7 @@ namespace UI::Xml
 				 {
 					 return;
 				 }
-				 s->ask(args.target,
-						_("multi_value_selector.numberpad_new_value_header"),
+				 s->ask(_("multi_value_selector.numberpad_new_value_header"),
 						s->m_presets[index],
 						[s, index](float value)
 						{

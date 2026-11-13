@@ -2,7 +2,7 @@
   The Move tab: X and Y on a pad, Z beside it and any other axes after, babystepping on the right, and the jog
   distance and speed along the bottom. Tap a position to move to one; hold a distance or speed to change it.
 
-  Fields and actions: src/UI/Screens/Move/MovePresenter.h. Its own number pad and question cover only this tab.
+  Fields and actions: src/UI/Screens/Move/MovePresenter.h. Its question covers only this tab.
 -->
 <component presenter="move">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
@@ -100,7 +100,6 @@
 			</lv_obj>
 		</lv_obj>
 
-		<ds_view name="move_numberpad" view="numberpad"/>
 		<question_dialog name="confirm_msgbox" open="confirm" title="confirm_title" text="confirm_text"
 						 confirm="move.confirm" close="move.close_dialog"/>
 	</view>

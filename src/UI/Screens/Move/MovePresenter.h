@@ -91,8 +91,8 @@ namespace UI
 		/** Jog the axis called `letter` by the chosen distance, forwards or backwards */
 		void jog(char letter, bool forward);
 
-		/** Ask for a position for the axis called `letter`, from the widget `asker`, and move there */
-		void askPosition(char letter, lv_obj_t* asker);
+		/** Ask for a position for the axis called `letter`, and move there */
+		void askPosition(char letter);
 
 		/** The axis letter an action is about: its `arg`'s first character, or its axes row's */
 		static char axisOf(const Xml::ActionArgs& args);

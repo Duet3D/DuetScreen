@@ -14,7 +14,7 @@ namespace UI
 
 	/*
 	 * Named views. A view registered by name can be found, and opened, by that name instead of through whatever owns
-	 * it. This is how the XML UI's `<ds_view>` makes the views it hosts available, e.g. `findView<ModalNumberPad>
+	 * it. This is how the XML UI's `<ds_view>` makes the views it hosts available, e.g. `findView<XmlView>
 	 * ("numberpad")` or `<action name="nav.open" arg="control"/>`.
 	 */
 
@@ -32,24 +32,6 @@ namespace UI
 	T* findView(std::string_view name)
 	{
 		return dynamic_cast<T*>(findView(name));
-	}
-
-	/** Every registered view */
-	std::vector<LvObj*> getViews();
-
-	/** Every registered view that is a T */
-	template <typename T>
-	std::vector<T*> findViews()
-	{
-		std::vector<T*> found;
-		for (LvObj* view : getViews())
-		{
-			if (auto* t = dynamic_cast<T*>(view))
-			{
-				found.push_back(t);
-			}
-		}
-		return found;
 	}
 
 	/** The name of the open screen (the top one), or empty when the home screens are showing */
@@ -145,5 +127,11 @@ namespace UI
 	}
 
 	void closeAllModals();
+
+	/**
+	 * Close every open modal except those `obj` is inside, e.g. when a tab view changes tab: a dialog opened from the
+	 * tab left behind goes with it, but not a dialog the tab view is in
+	 */
+	void closeModalsNotAround(lv_obj_t* obj);
 	bool closeLastModal();
 } // namespace UI

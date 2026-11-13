@@ -36,6 +36,22 @@ namespace UI
         "_", "-", "Z", "X", "C", "V", "B", "N", "M", ".", ",", ":", "\n",
         LV_SYMBOL_KEYBOARD, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""
     };
+
+	// The number pad: digits, sign and point, then backspace and OK
+	static const char* number_pad_map[] = {
+		"1", "2", "3", "\n",
+		"4", "5", "6", "\n",
+		"7", "8", "9", "\n",
+		"+/-", "0", ".", "\n",
+		LV_SYMBOL_BACKSPACE, LV_SYMBOL_OK, ""};
+
+	static const lv_buttonmatrix_ctrl_t number_pad_ctrl_map[] = {
+		LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_WIDTH_1,
+		LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_WIDTH_1,
+		LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_WIDTH_1,
+		LV_BUTTONMATRIX_CTRL_CHECKED, LV_BUTTONMATRIX_CTRL_WIDTH_1, LV_BUTTONMATRIX_CTRL_CHECKED,
+		LV_BUTTONMATRIX_CTRL_CHECKED, LV_BUTTONMATRIX_CTRL_CHECKED,
+	};
 	// clang-format on
 
 	LvKeyboard::LvKeyboard(const std::string& name, LvObj& parent)
@@ -45,6 +61,7 @@ namespace UI
 
 		setMap(LV_KEYBOARD_MODE_TEXT_LOWER, default_kb_map_lc, default_kb_ctrl_lc_map);
 		setMap(LV_KEYBOARD_MODE_TEXT_UPPER, default_kb_map_uc, default_kb_ctrl_lc_map);
+		setMap(NUMBER_PAD_MODE, number_pad_map, number_pad_ctrl_map);
 	}
 
 	void LvKeyboard::setTextarea(LvTextarea* ta)

@@ -413,6 +413,48 @@ namespace UI
 		notifySideBar();
 	}
 
+	void closeModalsNotAround(lv_obj_t* obj)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		// A modal's card sits on its backdrop, so `obj` is around it if it is in either
+		auto isAround = [obj](const LvObj* modal)
+		{
+			lv_obj_t* card = modal->getRootPtr();
+			lv_obj_t* backdrop = card != nullptr ? lv_obj_get_parent(card) : nullptr;
+			for (lv_obj_t* o = obj; o != nullptr; o = lv_obj_get_parent(o))
+			{
+				if (o == card || o == backdrop)
+				{
+					return true;
+				}
+			}
+			return false;
+		};
+		const ViewList_t closing = [&]
+		{
+			ViewList_t list;
+			for (LvObjPtr modal : s_openModals)
+			{
+				if (!isAround(modal))
+				{
+					list.push_back(modal);
+				}
+			}
+			return list;
+		}();
+		for (LvObjPtr modal : closing)
+		{
+			removeFromVector(s_openModals, modal);
+			LOG_INFO("Closing modal '{:s}'", modal->getName());
+			modal->hide();
+		}
+		if (!closing.empty())
+		{
+			notifySideBar();
+		}
+	}
+
 	bool closeLastModal()
 	{
 		ZoneScoped;
@@ -466,18 +508,6 @@ namespace UI
 		UI_LOCK();
 		auto it = s_namedViews.find(name);
 		return it == s_namedViews.end() ? nullptr : it->second;
-	}
-
-	std::vector<LvObj*> getViews()
-	{
-		UI_LOCK();
-		std::vector<LvObj*> views;
-		views.reserve(s_namedViews.size());
-		for (const auto& [name, view] : s_namedViews)
-		{
-			views.push_back(view);
-		}
-		return views;
 	}
 
 	std::string_view getCurrentScreenName()

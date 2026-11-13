@@ -11,6 +11,7 @@
 #include "UI/Components/Input/NumberPad.h"
 #include "UI/Components/Input/Slider.h"
 #include "UI/Components/List/List.h"
+#include "UI/Components/Modal/Modal.h"
 #include "UI/Core/View.h"
 
 namespace UI

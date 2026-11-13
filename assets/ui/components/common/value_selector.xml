@@ -6,7 +6,7 @@
 
   `selector` is the selector's id, the arg of its actions; `title`, `value` and `choices` name its fields. The
   presenter showing it owns a ValueSelector, which declares those fields and handles the actions
-  (src/UI/Xml/View/ValueSelector.h). Values are typed on the nearest number pad.
+  (src/UI/Xml/View/ValueSelector.h). Values are typed on the shared number pad.
 -->
 <component>
 	<api>

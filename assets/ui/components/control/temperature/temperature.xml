@@ -3,7 +3,7 @@
   panel (temperature_extrusion.xml) on the right.
 
   Fields and actions: src/UI/Screens/Temperature/TemperaturePresenter.h; the beds and chambers are the global lists
-  (src/UI/Xml/Data/HeatSource.h). Its own number pad covers only this tab.
+  (src/UI/Xml/Data/HeatSource.h).
 -->
 <component presenter="temperature">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="row">
@@ -62,7 +62,5 @@
 				<style name="card"/>
 			</ds_view>
 		</lv_obj>
-
-		<ds_view name="temperature_numberpad" view="numberpad"/>
 	</view>
 </component>

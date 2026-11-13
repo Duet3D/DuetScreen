@@ -7,7 +7,6 @@
 
 #include "TextBox.h"
 #include "Debug.h"
-#include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "i18n/i18n.h"
@@ -52,21 +51,6 @@ namespace UI
 				if (m_keyboard)
 				{
 					m_keyboard->setTextarea(&m_textarea);
-				}
-				else if (m_numberPad)
-				{
-					switch (m_mode)
-					{
-					case Mode::TEXT:
-						m_numberPad->setConfirmCallback([this](std::string_view text) { setText(std::string(text)); });
-						break;
-					case Mode::NUMBER:
-						m_numberPad->setConfirmCallback([this](float value) { setText(fmt::format("{:g}", value)); });
-						break;
-					}
-					m_numberPad->setText(std::string(m_textarea.getText()));
-					m_textarea.sendEvent(LV_EVENT_DEFOCUSED); // stop cursor blinking
-					openModal(m_numberPad);
 				}
 			},
 			LV_EVENT_CLICKED);

@@ -38,6 +38,16 @@ namespace UI::Xml
 		{
 			lv_obj_add_event_cb(getRootPtr(), keyboardEventCb, code, this);
 		}
+		// Added before any <action>, so it can keep them from seeing a value that isn't an edit
+		lv_obj_add_event_cb(getRootPtr(), quietChangeCb, LV_EVENT_VALUE_CHANGED, this);
+	}
+
+	void DsTextarea::quietChangeCb(lv_event_t* e)
+	{
+		if (static_cast<DsTextarea*>(lv_event_get_user_data(e))->m_settingQuietly)
+		{
+			lv_event_stop_processing(e);
+		}
 	}
 
 	void DsTextarea::registerXml()
@@ -48,7 +58,9 @@ namespace UI::Xml
 			 .description =
 				 "A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close "
 				 "key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and "
-				 "ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text().",
+				 "ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text(). Text "
+				 "written by `bind_text` is not an edit and raises nothing, so a handler can store each edit in the "
+				 "subject the box shows.",
 			 .example =
 				 R"(<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
 			 width="300">
@@ -139,7 +151,11 @@ namespace UI::Xml
 		// Already showing it, e.g. the edit that the presenter is echoing: don't move the cursor
 		if (std::string_view(lv_textarea_get_text(textarea)) != text)
 		{
+			// Set a character at a time when only some are accepted, each raising value_changed
+			auto* box = static_cast<DsTextarea*>(lv_observer_get_user_data(observer));
+			box->m_settingQuietly = true;
 			lv_textarea_set_text(textarea, text);
+			box->m_settingQuietly = false;
 		}
 	}
 

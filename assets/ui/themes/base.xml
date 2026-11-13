@@ -42,6 +42,8 @@
 		<style name="bg_color_header" bg_color="0xffffff" bg_opa="10%"/>
 		<style name="bg_color_list_item" bg_color="#bg" bg_opa="100%" bg_grad_color="#bg_light"/>
 		<style name="bg_modal" bg_color="#bg" bg_opa="70%"/>
+		<!-- A dialog's card, centred over its backdrop; a view's own style can place it elsewhere -->
+		<style name="modal" align="center"/>
 
 		<!-- Text -->
 		<style name="text" text_color="#text" text_font="font_normal"/>

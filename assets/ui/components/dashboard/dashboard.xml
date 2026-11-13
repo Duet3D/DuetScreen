@@ -33,8 +33,5 @@
 				<ds_view name="dashboard_job_status" view="dashboard_job_status" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>
-
-		<!-- For the tool list's temperatures -->
-		<ds_view name="tool_numberpad" view="numberpad"/>
 	</view>
 </component>

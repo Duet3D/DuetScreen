@@ -75,11 +75,10 @@ namespace UI
 				   }
 			   });
 		action("settings.duet_ip",
-			   "Ask for the Duet's IP address with the nearest number pad, and use it",
-			   [this](const Xml::ActionArgs& args)
+			   "Ask for the Duet's IP address with the number pad, and use it",
+			   [this](const Xml::ActionArgs&)
 			   {
-				   Xml::Services::askText(args.target,
-										  {.header = _("settings.duet_ip_address_prompt"),
+				   Xml::Services::askText({.header = _("settings.duet_ip_address_prompt"),
 										   .text = std::string(m_ip.get()),
 										   .onConfirm = [this](std::string_view ip)
 										   {

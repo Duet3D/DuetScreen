@@ -1,0 +1,16 @@
+<!--
+  The shared number pad: a dialog asking for one number, or for digits and dots, at a time. Code asks it with
+  Xml::Services::askNumber() or askText() (src/UI/Xml/Runtime/Services.h); a slider with numberpad="true" asks it when
+  its value is tapped. Confirming answers and closes it.
+
+  Fields and actions: src/UI/Screens/NumberPad/NumberPadPresenter.h
+-->
+<component presenter="numberpad">
+	<view extends="lv_obj" width="0" height="0">
+		<ds_modal name="numberpad_dialog" bind_open="open" width="50%" height="70%" scrollable="false">
+			<action trigger="dismissed" name="numberpad.close"/>
+			<numberpad_panel name="panel" entry="pad" header="pad.header" text="pad.text" accepted="pad.accepted"
+							 confirmable="pad.confirmable" signed="pad.signed" width="100%" height="100%"/>
+		</ds_modal>
+	</view>
+</component>

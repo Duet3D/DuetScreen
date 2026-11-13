@@ -227,7 +227,9 @@ For a plain question, `confirm_dialog.xml` is ready-made:
 
 A value with - and + and a row of presets, such as the extruder's feed distance, is `value_selector.xml`, backed by a `ValueSelector` the presenter owns ([ValueSelector.h](../src/UI/Xml/View/ValueSelector.h)), which also stores the presets and the value.
 
-A presenter asks for digits and dots, such as an IP address, with `Services::askText(args.target, {...})`, and for a number with `Services::askNumber(args.target, {...})`: the number pad nearest the widget that was tapped answers, so a page can host its own (`<ds_view name="move_numberpad" view="numberpad"/>`) to keep it over the page, else the shared one does.
+Numbers are typed on the number pad. There is one, shared by the whole UI: `numberpad.xml`, hosted in the home screen as `<ds_view name="numberpad" view="numberpad"/>`. A presenter asks it for a number with `Services::askNumber({.header, .min, .max, .value, .onConfirm})`, or for digits and dots, such as an IP address, with `Services::askText({...})` ([Services.h](../src/UI/Xml/Runtime/Services.h)); a `ds_slider` with `numberpad="true"` asks it when its value is tapped. It answers one question at a time, and closes when the user confirms, dismisses it, or changes tab.
+
+A dialog that keeps a number pad beside its own controls, as the speed and extrusion factor dialogs do, places `numberpad_panel.xml` and owns a `NumberEntry` for it ([NumberEntry.h](../src/UI/Xml/View/NumberEntry.h)), as a value selector owns a `ValueSelector`.
 
 When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
 

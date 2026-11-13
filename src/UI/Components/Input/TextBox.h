@@ -15,8 +15,6 @@
 
 namespace UI
 {
-	class ModalNumberPad;
-
 	class TextBox : public LvContainer
 	{
 	  public:
@@ -78,8 +76,6 @@ namespace UI
 		void setKeyboard(LvKeyboard* keyboard) { m_keyboard = keyboard; }
 		LvKeyboard* getKeyboard() const { return m_keyboard; }
 
-		void setNumberPad(ModalNumberPad* numberpad) { m_numberPad = numberpad; }
-		ModalNumberPad* getNumberPad() const { return m_numberPad; }
 
 	  private:
 		void init();
@@ -89,7 +85,6 @@ namespace UI
 		Button m_showPassword{"show_password", getRoot(), LV_SYMBOL_EYE_OPEN};
 
 		LvKeyboard* m_keyboard = nullptr;
-		ModalNumberPad* m_numberPad = nullptr;
 
 		Mode m_mode = Mode::TEXT;
 		bool m_passwordMode = false;

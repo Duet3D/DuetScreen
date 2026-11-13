@@ -117,7 +117,7 @@ namespace UI
 			   {
 				   if (const char letter = axisOf(args))
 				   {
-					   askPosition(letter, args.target);
+					   askPosition(letter);
 				   }
 			   });
 		action("move.distance",
@@ -151,7 +151,6 @@ namespace UI
 				   }
 				   const auto i = static_cast<size_t>(row->index.get());
 				   Xml::Services::askNumber(
-					   args.target,
 					   {.header = _("move.distance_adjust_header", Units::getDisplayedDistanceUnit()),
 						.min = 0.01f,
 						.max = 1000.0f,
@@ -173,8 +172,7 @@ namespace UI
 					   return;
 				   }
 				   const auto i = static_cast<size_t>(row->index.get());
-				   Xml::Services::askNumber(args.target,
-											{.header = _("move.feedrate_adjust_header", Units::getDisplayedSpeedUnit()),
+				   Xml::Services::askNumber({.header = _("move.feedrate_adjust_header", Units::getDisplayedSpeedUnit()),
 											 .min = 0.01f,
 											 .max = 1000.0f,
 											 .value = static_cast<float>(m_feedrates.at(i)),
@@ -363,7 +361,7 @@ namespace UI
 		}
 	}
 
-	void MovePresenter::askPosition(char letter, lv_obj_t* asker)
+	void MovePresenter::askPosition(char letter)
 	{
 		MODEL_LOCK();
 		auto axis = OM::Move::GetAxisByLetter(letter);
@@ -372,8 +370,7 @@ namespace UI
 			return;
 		}
 		const bool machine = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
-		Xml::Services::askNumber(asker,
-								 {.header = _("move.set_position", letter),
+		Xml::Services::askNumber({.header = _("move.set_position", letter),
 								  .min = axis->minPosition,
 								  .max = axis->maxPosition,
 								  .value = Units::convertDistanceToCurrentDisplayedUnit(machine ? axis->machinePosition

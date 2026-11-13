@@ -164,6 +164,12 @@
 			<xs:enumeration value="notification_timeout"/>
 			<xs:enumeration value="number"/>
 			<xs:enumeration value="objects"/>
+			<xs:enumeration value="open"/>
+			<xs:enumeration value="pad.accepted"/>
+			<xs:enumeration value="pad.confirmable"/>
+			<xs:enumeration value="pad.header"/>
+			<xs:enumeration value="pad.signed"/>
+			<xs:enumeration value="pad.text"/>
 			<xs:enumeration value="password"/>
 			<xs:enumeration value="password_open"/>
 			<xs:enumeration value="password_title"/>
@@ -367,6 +373,10 @@
 			<xs:enumeration value="nav.back"/>
 			<xs:enumeration value="nav.home"/>
 			<xs:enumeration value="nav.open"/>
+			<xs:enumeration value="numberpad.clear"/>
+			<xs:enumeration value="numberpad.close"/>
+			<xs:enumeration value="numberpad.confirm"/>
+			<xs:enumeration value="numberpad.typed"/>
 			<xs:enumeration value="object_cancel.cancel_current"/>
 			<xs:enumeration value="object_cancel.close_dialog"/>
 			<xs:enumeration value="object_cancel.confirm"/>
@@ -529,6 +539,7 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="numberpad"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
@@ -579,6 +590,8 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="numberpad"/>
+			<xs:enumeration value="numberpad_panel"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
@@ -649,6 +662,7 @@
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
 			<xs:enumeration value="numberpad"/>
+			<xs:enumeration value="numberpad_panel"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
@@ -761,6 +775,8 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="numberpad"/>
+			<xs:enumeration value="numberpad_panel"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
@@ -2388,7 +2404,16 @@
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_keyboard.attributes">
 		<xs:attribute name="mode" type="xs:string">
-			<xs:annotation><xs:documentation>Key layout: `text` (default), `text_upper` or `number`</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>Key layout: `text` (default), `text_upper`, `number` or `numberpad`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="textarea" type="xs:string">
+			<xs:annotation><xs:documentation>Always type into the text box of this name: the nearest one around the keyboard, written before it</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_ok_enabled" type="subject">
+			<xs:annotation><xs:documentation>Follow an int subject: the OK key works only while it is non-zero</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_sign_enabled" type="subject">
+			<xs:annotation><xs:documentation>Follow an int subject: the `numberpad` layout's +/- key works only while it is non-zero</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_list.attributes">
@@ -2541,7 +2566,7 @@
 			<xs:annotation><xs:documentation>Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="numberpad" type="xs:string">
-			<xs:annotation><xs:documentation>&quot;true&quot; to type the value on a number pad when the value is tapped: the one hosted nearest the slider, else the shared `numberpad` (default false)</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>&quot;true&quot; to type the value on the shared number pad when the value is tapped (default false)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_tabs-tab.attributes">
@@ -4102,6 +4127,26 @@
 			<xs:annotation><xs:documentation>Set cursor position (0-based)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="numberpad_panel.attributes">
+		<xs:attribute name="entry" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `entry` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="header" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `header` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="accepted" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `accepted` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="confirmable" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `confirmable` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="signed" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `signed` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="question_dialog.attributes">
 		<xs:attribute name="open" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `open` (string)</xs:documentation></xs:annotation>
@@ -5219,7 +5264,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_keyboard">
-		<xs:annotation><xs:documentation>An on-screen keyboard with DuetScreen's key layouts. A `&lt;ds_textarea&gt;` brings it up and types into it, so it is usually written `hidden=&quot;true&quot;`. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>An on-screen keyboard with DuetScreen's key layouts. A `&lt;ds_textarea&gt;` brings it up and types into it, so it is usually written `hidden=&quot;true&quot;`; or, with `textarea`, it always types into one box, as the number pad's keys do. Its OK key raises `ready`. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_keyboard.attributes"/>
@@ -5307,7 +5352,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_textarea">
-		<xs:annotation><xs:documentation>A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text(). Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text(). Text written by `bind_text` is not an edit and raises nothing, so a handler can store each edit in the subject the box shows. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_textarea.attributes"/>
@@ -8309,6 +8354,23 @@
 			<xs:attribute name="moves_machine" type="bool">
 				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="numberpad">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/numberpad/numberpad.xml, with presenter numberpad.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="numberpad_panel">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/numberpad/numberpad_panel.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="numberpad_panel.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>

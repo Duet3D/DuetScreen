@@ -3,7 +3,6 @@
  */
 
 #include "DsSlider.h"
-#include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
@@ -65,8 +64,8 @@ namespace UI::Xml
 							 "Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a "
 							 "timeout longer than the slider reaches"},
 							{"numberpad",
-							 "\"true\" to type the value on a number pad when the value is tapped: the one hosted "
-							 "nearest the slider, else the shared `numberpad` (default false)"}},
+							 "\"true\" to type the value on the shared number pad when the value is tapped "
+							 "(default false)"}},
 			 .exampleSubjects = {{"brightness", "int", "60"}}},
 			xmlCreate,
 			xmlApply);
@@ -86,10 +85,19 @@ namespace UI::Xml
 		m_settingQuietly = false;
 	}
 
-	ModalNumberPad* DsSlider::getNumberPad() const
+	bool DsSlider::askForValue()
 	{
-		// Found when needed: the number pad may be built after the slider, or rebuilt by a reload
-		return m_usesNumberPad ? Services::numberPadFor(getRootPtr()) : nullptr;
+		if (!m_usesNumberPad)
+		{
+			return false;
+		}
+		// The request goes with the slider: a reload may delete it while the number pad is open
+		return Services::askNumber({.header = std::string(getLabelText()),
+									.min = lowestTypable(),
+									.max = highestTypable(),
+									.value = getValue(),
+									.onConfirm = [this](float value) { setValue(value); },
+									.asker = getRootPtr()});
 	}
 
 	void* DsSlider::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

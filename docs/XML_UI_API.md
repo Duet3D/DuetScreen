@@ -522,6 +522,26 @@ Each row of `alert.axes`:
 | `update.close` | Close the update prompt without installing |
 | `update.confirm` | Install the update offered (nothing when a result is showing), and close |
 
+### numberpad
+
+Used by `numberpad`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `open` | int | 1 while the dialog is open |
+| `pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
+| `pad.text` | text | What has been typed |
+| `pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `pad.signed` | int | 1 if the number may be negative, so the +/- key works |
+
+| Action | Description |
+| --- | --- |
+| `numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
+| `numberpad.close` | Close the dialog without answering, e.g. when it is dismissed |
+| `numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
+| `numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
+
 ### object_cancel
 
 Used by `object_cancel`.
@@ -578,7 +598,7 @@ Used by `settings_connection`.
 | Action | Description |
 | --- | --- |
 | `settings.connection_method` | Connect to the Duet by the method at the edited index of `connection_methods`, setting the USB-C mode to suit |
-| `settings.duet_ip` | Ask for the Duet's IP address with the nearest number pad, and use it |
+| `settings.duet_ip` | Ask for the Duet's IP address with the number pad, and use it |
 | `settings.duet_password` | Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password |
 | `settings.poll_interval` | Poll the Duet every edited value ms |
 | `settings.usb_mode` | Use the USB-C port in the mode at the edited index of `usb_modes` |
@@ -1045,7 +1065,7 @@ Also takes every `lv_image` attribute.
 
 ### ds_keyboard
 
-An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and types into it, so it is usually written `hidden="true"`.
+An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and types into it, so it is usually written `hidden="true"`; or, with `textarea`, it always types into one box, as the number pad's keys do. Its OK key raises `ready`.
 
 Also takes every `lv_obj` attribute.
 
@@ -1057,7 +1077,10 @@ Also takes every `lv_obj` attribute.
 
 | Attribute | Description |
 | --- | --- |
-| `mode` | Key layout: `text` (default), `text_upper` or `number` |
+| `mode` | Key layout: `text` (default), `text_upper`, `number` or `numberpad` |
+| `textarea` | Always type into the text box of this name: the nearest one around the keyboard, written before it |
+| `bind_ok_enabled` | Follow an int subject: the OK key works only while it is non-zero |
+| `bind_sign_enabled` | Follow an int subject: the `numberpad` layout's +/- key works only while it is non-zero |
 
 ### ds_list
 
@@ -1208,7 +1231,7 @@ Also takes every `lv_obj` attribute.
 | `value_scale` | How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 held as 2 with value_scale="100" (default 1) |
 | `send` | `confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` on every movement, for a setting seen as it changes such as brightness |
 | `out_of_range` | Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches |
-| `numberpad` | "true" to type the value on a number pad when the value is tapped: the one hosted nearest the slider, else the shared `numberpad` (default false) |
+| `numberpad` | "true" to type the value on the shared number pad when the value is tapped (default false) |
 
 ### ds_tabs
 
@@ -1244,7 +1267,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_textarea
 
-A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text().
+A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text(). Text written by `bind_text` is not an edit and raises nothing, so a handler can store each edit in the subject the box shows.
 
 Also takes every `lv_obj` attribute.
 
@@ -1370,6 +1393,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
+| `numberpad` | `numberpad` |  | `home` | [numberpad.xml](../assets/ui/components/numberpad/numberpad.xml) |
+| `numberpad_panel` |  | `entry`, `header`, `text`, `accepted`, `confirmable`, `signed` | `numberpad` | [numberpad_panel.xml](../assets/ui/components/numberpad/numberpad_panel.xml) |
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
@@ -1395,7 +1420,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
-C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `numberpad`, `speed_factor`
+C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `speed_factor`
 
 ### Views
 
@@ -1509,7 +1534,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `scrollbar_scrolled` | ![scrollbar_scrolled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar_scrolled.png) | bg_opa=100% |
 | `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border border_width=#border_width border_opa=100% border_side=full |
 | `tab_card` |  | *(not set)* |
-| `modal` |  | *(not set)* |
+| `modal` |  | align=center |
 | `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#primary |
 | `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_grad_dir=none outline_color=#highlight outline_width=#border_width outline_pad=-#border_width outline_opa=100% |
 | `icon` |  | *(not set)* |

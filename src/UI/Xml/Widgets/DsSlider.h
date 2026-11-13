@@ -28,10 +28,10 @@ namespace UI::Xml
 		/** Set the range without raising `value_confirmed` */
 		void setRangeQuietly(float min, float max);
 
-		/** With `numberpad="true"`, the number pad nearest the slider when it is tapped (Services::numberPadFor()) */
-		ModalNumberPad* getNumberPad() const override;
-
 	  protected:
+		/** With `numberpad="true"`, ask for the value on the shared number pad */
+		bool askForValue() override;
+
 		/** `<ds_slider>` apply callback: apply lv_obj attributes, then the slider's own. Also for widgets extending it.
 		 */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);

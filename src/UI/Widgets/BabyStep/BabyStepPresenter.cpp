@@ -56,8 +56,7 @@ namespace UI
 					   return;
 				   }
 				   const auto i = static_cast<size_t>(row->index.get());
-				   Xml::Services::askNumber(args.target,
-											{.header = _("multi_value_selector.numberpad_new_value_header"),
+				   Xml::Services::askNumber({.header = _("multi_value_selector.numberpad_new_value_header"),
 											 .min = 0.001f,
 											 .max = 1.0f,
 											 .value = m_steps.at(i),

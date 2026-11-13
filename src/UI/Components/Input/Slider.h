@@ -8,7 +8,6 @@
 #pragma once
 
 #include "UI/Components/Button/Button.h"
-#include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvContainer.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Components/LVGL/LvLabel.h"
@@ -51,8 +50,6 @@ namespace UI
 		float getMax() const { return m_max; }
 		LvSlider& getLvSlider() { return m_slider; }
 		LvTextarea& getInput() { return m_input; }
-		/** The number pad the value is typed on when tapped, or nullptr to type it in place */
-		virtual ModalNumberPad* getNumberPad() const { return m_numberPad; }
 
 		bool isFocused() const { return m_focused; }
 
@@ -65,7 +62,6 @@ namespace UI
 		void setDisplayDecimals(int decimals);
 		void setSendMode(SendMode mode) { m_sendMode = mode; }
 		void setLongPressedEnabled(bool enabled) { m_longPressEnabled = enabled; }
-		void setNumberPad(ModalNumberPad* numberPad) { m_numberPad = numberPad; }
 		void setValueChangedCallback(value_changed_callback_t callback) { m_valueChangedCallback = callback; }
 
 		/**
@@ -81,6 +77,18 @@ namespace UI
 		int32_t normaliseValue(float value) const;
 		void updateText();
 		bool hasDefaultValue() const { return !std::isnan(m_defaultValue); }
+
+		/**
+		 * The value was tapped: ask for a new one somewhere else, e.g. on a number pad, and set it with setValue().
+		 * @return false to type it in place instead (the default)
+		 */
+		virtual bool askForValue() { return false; }
+
+		/** The lowest value that can be typed: the bottom of the range, or none if it may go below */
+		float lowestTypable() const;
+
+		/** The highest value that can be typed: the top of the range, or none if it may go above */
+		float highestTypable() const;
 
 	  private:
 		void init();
@@ -98,7 +106,6 @@ namespace UI
 		LvTextarea m_input{"input", m_sliderCont};
 
 		float m_incrementValue = 1;
-		ModalNumberPad* m_numberPad = nullptr;
 
 		float m_min;
 		float m_max;

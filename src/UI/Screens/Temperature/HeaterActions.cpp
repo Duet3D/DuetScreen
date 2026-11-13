@@ -74,7 +74,7 @@ namespace UI::HeaterActions
 	static void setTemperature(const Xml::ActionArgs& args, bool active)
 	{
 		ZoneScoped;
-		Xml::Services::NumberRequest request;
+		Xml::NumberRequest request;
 
 		if (const auto* heaterRow = args.row<Xml::ToolHeaterRow>())
 		{
@@ -158,7 +158,7 @@ namespace UI::HeaterActions
 			request.onConfirm(*value);
 			return;
 		}
-		Xml::Services::askNumber(args.target, std::move(request));
+		Xml::Services::askNumber(std::move(request));
 	}
 
 	void registerAll()

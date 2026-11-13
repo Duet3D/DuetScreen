@@ -94,8 +94,8 @@ namespace UI::Xml
 		/** Show the presets */
 		void showPresets();
 
-		/** Ask, from the widget `asker`, for a value with `header`, then call `onConfirm` with it */
-		void ask(lv_obj_t* asker, std::string header, float start, std::function<void(float)> onConfirm);
+		/** Ask for a value with `header`, then call `onConfirm` with it */
+		void ask(std::string header, float start, std::function<void(float)> onConfirm);
 
 		Settings m_settings;		   // How it is set up
 		std::vector<float> m_presets;  // The presets
