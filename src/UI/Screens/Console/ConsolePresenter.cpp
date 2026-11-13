@@ -1,60 +1,96 @@
+/*
+ * ConsolePresenter.cpp
+ */
+
 #include "ConsolePresenter.h"
-#include "ConsoleView.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
-#include "i18n/i18n.h"
+#include "Gcodes.h"
+#include "UI/Core/Model.h"
+#include "UI/Xml/Runtime/Services.h"
+#include "utils/StorageHelper.h"
+#include <algorithm>
+#include <cctype>
+#include <vector>
 
 namespace UI
 {
-	bool ConsolePresenter::back()
+	void GcodeRow::fields(Xml::FieldVisitor& f)
 	{
-		ZoneScoped;
-		return false;
+		f.field("gcode", gcode, "E.g. G28");
+		f.field("description", description, "What it does");
 	}
 
-	void ConsolePresenter::newResponse(ResponseType /* type */, const std::string& resp)
+	ConsolePresenter::ConsolePresenter()
+		: XmlPresenter("console")
 	{
-		ZoneScoped;
-		m_view->addResponse(resp);
+		action("console.input",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   m_input.set(args.text());
+				   filter(args.text());
+			   });
+		action("console.send",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   const std::string command(m_input.get());
+				   if (command.empty())
+				   {
+					   return;
+				   }
+				   Model::get().post<EventType::ConsoleCommand>(command); // Shown in the console's output
+				   Xml::Services::sendGcode(command);
+			   });
+		action("console.clear", [this](const Xml::ActionArgs&) { m_input.set(""); });
+		action("console.pick",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto* row = args.row<GcodeRow>())
+				   {
+					   m_input.set(row->gcode.get());
+				   }
+			   });
+		action("console.toggle_commands",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   const bool show = m_commandsShown.get() == 0;
+				   m_commandsShown.set(show ? 1 : 0);
+				   StorageHelper::setData(ID_UI_CONSOLE_COMMAND_LIST_COLLAPSED, !show);
+			   });
+		filter("");
 	}
 
-	void ConsolePresenter::newLogMessage(const Log::DebugLevel& /* level */,
-										 const Log::log_time_t& /* time */,
-										 const std::string& message)
+	void ConsolePresenter::fields(Xml::FieldVisitor& f)
 	{
-		ZoneScoped;
-		m_view->addResponse(message);
+		f.field("input", m_input, "What is typed");
+		f.field("commands_shown", m_commandsShown, "1 when the G-code list is showing");
+		f.list("gcodes", m_gcodes, "The G-codes starting with the first word typed");
 	}
 
-	void ConsolePresenter::sendCommand(std::string_view cmd)
+	void ConsolePresenter::onInit()
+	{
+		m_commandsShown.set(StorageHelper::getData(ID_UI_CONSOLE_COMMAND_LIST_COLLAPSED) ? 0 : 1);
+	}
+
+	void ConsolePresenter::filter(std::string_view typed)
 	{
 		ZoneScoped;
-		m_view->addCommand(cmd);
-#if ENABLE_CONSOLE_SHELL
-		if (m_shellEnabled)
+		std::string word(typed.substr(0, typed.find(' ')));
+		std::transform(word.begin(), word.end(), word.begin(), [](unsigned char c) { return std::toupper(c); });
+
+		std::vector<const gcode*> matches;
+		for (size_t i = 0; i < Gcodes::getGcodeCount(); i++)
 		{
-			std::string result;
-
-			FILE* pipe = ::popen(cmd.data(), "r");
-			if (!pipe)
-				return;
-			char buffer[256];
-			while (fgets(buffer, sizeof(buffer), pipe))
+			const gcode* g = Gcodes::getGcode(i);
+			if (g->gcode.starts_with(word))
 			{
-				result.append(buffer);
+				matches.push_back(g);
 			}
-			::pclose(pipe);
-
-			m_view->addResponse(result);
 		}
-		else
-		{
-#endif
-			Comm::DUET.SendGcode(cmd);
-#if ENABLE_CONSOLE_SHELL
-		}
-#endif
+		m_gcodes.sync(matches.size(),
+					  [&](GcodeRow& row, size_t i)
+					  {
+						  row.gcode.set(matches[i]->gcode);
+						  row.description.set(matches[i]->helpText);
+					  });
 	}
-
-	void ConsolePresenter::onActivate() {}
 } // namespace UI

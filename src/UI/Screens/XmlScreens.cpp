@@ -3,7 +3,7 @@
  */
 
 #include "XmlScreens.h"
-#include "Console/ConsoleView.h"
+#include "Console/ConsolePresenter.h"
 #include "Control/ControlView.h"
 #include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
@@ -80,6 +80,7 @@ namespace UI
 		Xml::Presenters::add<ToolListPresenter>("tool_list");
 		Xml::Presenters::add<JobStatusPresenter>("job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
+		Xml::Presenters::add<ConsolePresenter>("console");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -109,7 +110,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<ConsoleView>("console");
 		Xml::NativeViews::add<ControlView>("control");
 		Xml::NativeViews::add<SettingsView>("settings");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");

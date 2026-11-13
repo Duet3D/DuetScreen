@@ -1,0 +1,62 @@
+<!--
+  The console: what was sent and what came back, a G-code reference that narrows as you type, and a line to type
+  G-code into, with the console's own keyboard.
+
+  The lines are the global console.lines (src/UI/Xml/Data/ConsoleSource.h), recorded even while the console isn't
+  showing. Fields and actions: src/UI/Screens/Console/ConsolePresenter.h
+-->
+<component presenter="console">
+	<styles>
+		<style name="commands_open" flex_grow="10"/>
+		<!-- Folded away, the list is as narrow as its button -->
+		<style name="commands_folded" flex_grow="1" min_width="content"/>
+	</styles>
+
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="bg_dark"/>
+
+		<lv_obj name="top_cont" width="100%" flex_grow="1" flex_flow="row">
+			<style name="no_border"/>
+
+			<!-- Its width comes from the styles above: a flex_grow attribute here would override them -->
+			<lv_obj name="command_list" height="100%" flex_flow="column">
+				<bind_style name="commands_open" subject="commands_shown" ref_value="1"/>
+				<bind_style name="commands_folded" subject="commands_shown" ref_value="0"/>
+				<ds_list name="list" list="gcodes" item="console_gcode" windowed="true" item_height="30"
+						 item_width="content" width="100%" height="100%" flex_grow="1" scroll_dir="all">
+					<bind_flag_if_eq subject="commands_shown" flag="hidden" ref_value="0"/>
+				</ds_list>
+				<!-- Over the list's corner while it shows; on its own while it is folded away -->
+				<ds_button name="command_visibility" text="&#xF00B;" align="top_right">
+					<bind_state_if_eq subject="commands_shown" state="checked" ref_value="1"/>
+					<bind_flag_if_eq subject="commands_shown" flag="floating" ref_value="1"/>
+					<action trigger="clicked" name="console.toggle_commands"/>
+				</ds_button>
+			</lv_obj>
+
+			<ds_list name="output" list="console.lines" item="console_line" follow_end="true" height="100%"
+					 flex_grow="30" flex_flow="column" style_pad_row="0">
+				<style name="card"/>
+			</ds_list>
+		</lv_obj>
+
+		<lv_obj name="input_cont" width="100%" height="content" flex_flow="row"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="no_border"/>
+			<ds_textarea name="input" one_line="true" placeholder_tag="console.input_placeholder" height="content"
+						 flex_grow="1" style_text_align="left" bind_text="input" keyboard="console_keyboard"
+						 keyboard_mode="text_upper" hide_keyboard_on_ready="false" hide_keyboard_on_defocus="false">
+				<action trigger="value_changed" name="console.input"/>
+				<action trigger="ready" name="console.send"/>
+			</ds_textarea>
+			<ds_button name="clear" icon="clear.png" width="50" height="50">
+				<action trigger="clicked" name="console.clear"/>
+			</ds_button>
+			<ds_button name="enter" icon="send.png" width="50" height="50">
+				<action trigger="clicked" name="console.send"/>
+			</ds_button>
+		</lv_obj>
+
+		<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="40%" hidden="true"/>
+	</view>
+</component>

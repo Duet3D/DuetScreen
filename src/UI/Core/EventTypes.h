@@ -70,6 +70,7 @@ namespace UI
 	XX(CurrentMoveExtrusionSpeed)                                                                                      \
 	XX(CompensationFile)                                                                                               \
 	XX(Response, ResponseType, std::string)                                                                            \
+	XX(ConsoleCommand, std::string)                                                                                    \
 	XX(LogMessage, Log::DebugLevel, Log::log_time_t, std::string)                                                      \
 	XX(AnalogSensorData)                                                                                               \
 	XX(EndstopData)                                                                                                    \

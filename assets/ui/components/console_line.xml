@@ -1,0 +1,12 @@
+<!--
+  One line of the console: when it arrived, then the command sent (emphasised) or the response.
+
+  Fields:   a console.lines row: time, command, text (src/UI/Xml/Data/ConsoleSource.h)
+-->
+<component>
+	<view extends="lv_spangroup" width="100%" height="content">
+		<lv_spangroup-span bind_text="time" style="text_muted"/>
+		<lv_spangroup-span bind_text="command" style="text_emphasis"/>
+		<lv_spangroup-span bind_text="text" style="text"/>
+	</view>
+</component>

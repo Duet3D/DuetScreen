@@ -12,7 +12,6 @@
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
 #include "UI/Screens/Settings/SettingsView.h"
@@ -78,7 +77,11 @@ class TestHomeView : public UiTestSuite
 	}
 
 	static UI::ControlView& controlPage() { return page<UI::ControlView>("control"); }
-	static UI::ConsoleView& consolePage() { return page<UI::ConsoleView>("console"); }
+	/** The widget called `name` on the console page */
+	static lv_obj_t* consolePart(const char* name)
+	{
+		return lv_obj_find_by_name(page<UI::LvObj>("console").getRootPtr(), name);
+	}
 
 	/** The Files page's tabs, as files_screen.xml builds them */
 	static UI::TabView& filesPage()
@@ -279,7 +282,7 @@ TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 
 TEST_F(TestHomeView, BlankConsoleView)
 {
-	openScreen(&consolePage(), false);
+	UI::openScreen(std::string_view("console"), false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/blank.png")
 }
 
@@ -730,28 +733,57 @@ TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
 TEST_F(TestHomeViewWithData, ConsoleView)
 {
 	ZoneScoped;
-	openScreen(&consolePage());
+	UI::openScreen(std::string_view("console"));
 
-	auto presenter = consolePage().getPresenter();
-	consolePage().addCommand("M115");
-	presenter->newResponse(ResponseType::INFO, "Testing response");
-	presenter->newResponse(ResponseType::INFO, "new multi-line response\nline 2");
-	presenter->newResponse(ResponseType::SUCCESS, "Success response");
-	presenter->newResponse(ResponseType::WARNING, "Warning response");
-	presenter->newResponse(ResponseType::ERROR, "Error response");
-
-	presenter->newLogMessage(Log::DebugLevel::Info, Log::log_time_t{}, "Testing log message");
+	// As the Duet and the logger would report them
+	Model::get().post<EventType::ConsoleCommand>(std::string("M115"));
+	Model::get().post<EventType::Response>(ResponseType::INFO, std::string("Testing response"));
+	Model::get().post<EventType::Response>(ResponseType::INFO, std::string("new multi-line response\nline 2"));
+	Model::get().post<EventType::Response>(ResponseType::SUCCESS, std::string("Success response"));
+	Model::get().post<EventType::Response>(ResponseType::WARNING, std::string("Warning response"));
+	Model::get().post<EventType::Response>(ResponseType::ERROR, std::string("Error response"));
+	Model::get().post<EventType::LogMessage>(
+		Log::DebugLevel::Info, Log::log_time_t{}, std::string("Testing log message"));
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/duet_responses.png")
-
-	consolePage().showCommandList(true, false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list.png");
 
-	consolePage().showCommandList(false, false);
+	lv_obj_send_event(consolePart("command_visibility"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list_hidden.png");
 
-	consolePage().showKeyboard(true);
+	lv_obj_send_event(consolePart("input"), LV_EVENT_FOCUSED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/keyboard.png");
+
+	// Put back as it was, for the next test
+	lv_obj_send_event(consolePart("command_visibility"), LV_EVENT_CLICKED, nullptr);
+}
+
+TEST_F(TestHomeViewWithData, ConsoleNarrowsTheGcodesAndSends)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	UI::openScreen(std::string_view("console"));
+	lv_obj_t* list = consolePart("list");
+	auto& input = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("input")));
+
+	input.setText("m11");
+	lv_obj_t* first = nullptr;
+	for (uint32_t i = 0; i < lv_obj_get_child_count(list) && first == nullptr; i++)
+	{
+		first = lv_obj_find_by_name(lv_obj_get_child(list, static_cast<int32_t>(i)), "gcode");
+	}
+	ASSERT_NE(first, nullptr);
+	EXPECT_TRUE(std::string_view(lv_label_get_text(first)).starts_with("M11")) << "typed lower case";
+
+	// Picking one types it; sending sends what is typed
+	lv_obj_send_event(lv_obj_get_parent(first), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(input.getText(), lv_label_get_text(first));
+	input.setText("M115 P1");
+	lv_obj_send_event(consolePart("enter"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent, (std::vector<std::string>{"M115 P1\n"}));
+	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
 TEST_F(TestHomeViewWithData, ControlView)

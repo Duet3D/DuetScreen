@@ -3,6 +3,7 @@
  */
 
 #include "DataSources.h"
+#include "ConsoleSource.h"
 #include "DataSource.h"
 #include "Debug.h"
 #include "FanSource.h"
@@ -70,6 +71,7 @@ namespace UI::Xml::DataSources
 
 		// The printer data available to XML. Keep this list in step with docs/XML_UI.md.
 		s_sources = {
+			std::make_shared<ConsoleSource>(),
 			std::make_shared<FanSource>(),
 			std::make_shared<ToolSource>(),
 			std::make_shared<HeatSource>(),

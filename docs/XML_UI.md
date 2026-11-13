@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -38,10 +38,10 @@ src/UI/Xml/
              Translations, GlobalActions
   Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History
   View/      XmlView, XmlPresenter (and the presenter registry), Actions
-  Widgets/   DsButton, DsIcon, DsBar, DsThumbnail, DsSlider, DsList, DsGraph, DsTabs, DsModal, DsTextarea, DsView
+  Widgets/   DsButton, DsIcon, DsBar, DsThumbnail, DsSlider, DsList, DsGraph, DsTabs, DsModal, DsTextarea, DsKeyboard, DsView
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
-             JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
+             ConsoleSource, JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
 src/UI/Styles/                            global styles; Theme, ThemeFile and Palette build them from theme files
 src/UI/Screens/<Name>/<Name>Presenter.*   presenters live with their screen
 src/UI/Screens/XmlScreens.cpp             the presenters XML can name, and the C++ views it can host
@@ -150,7 +150,7 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 
 | Kind | Names |
 | --- | --- |
-| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `machine.job_active`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `job.file` (the current job, empty when none), `temperatures` (a history, one series per heater) and `temperatures.limit`. |
+| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `machine.job_active`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `job.file` (the current job, empty when none), `console.lines` (what the console shows, recorded even while it isn't open), `temperatures` (a history, one series per heater) and `temperatures.limit`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
 | Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
@@ -200,10 +200,11 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_bar>` | `min`, `max`, `label_format`, `bind_value`: a progress bar that draws its value, e.g. `label_format="{}%"` |
 | `<ds_thumbnail>` | `bind_src`: an image as tall as its parent's content and as wide as its aspect ratio needs; no width without an image |
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
-| `<ds_list>` | `list`, `item`: one `item` component per row of the list |
+| `<ds_list>` | `list`, `item`: one `item` component per row of the list; `windowed` (see Lists); `follow_end` keeps a log-like list showing its newest rows |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
 | `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, `bind_disabled` (disabled while an integer subject is non-zero) and `select_on` (selected whenever a subject is set, e.g. the status tab when a job starts); its children are the tab's content. |
-| `<ds_textarea>` | `bind_text`, `bind_accepted_chars`, `bind_keyboard_mode`, `one_line`: a text box that brings up the on-screen keyboard while edited; handlers read edits with `ActionArgs::text()` |
+| `<ds_textarea>` | `bind_text`, `bind_accepted_chars`, `keyboard_mode`/`bind_keyboard_mode`, `keyboard`, `hide_keyboard_on_ready`, `hide_keyboard_on_defocus`, `one_line`, `placeholder`/`placeholder_tag`: a text box that brings up an on-screen keyboard while edited (the shared one, or a `<ds_keyboard>` named by `keyboard`); handlers read edits with `ActionArgs::text()` |
+| `<ds_keyboard>` | `mode`: DuetScreen's on-screen keyboard, e.g. one inside a page's own layout |
 | `<ds_modal>` | `bind_open`, `open_value`, `blocking`, `in_place`: a dialog over the main window, open while its subject is set (or equals `open_value`). Raises `dismissed` when the user closes it. See Dialogs. |
 | `<ds_view>` | `name`, `view`, `presenter`, `home`, `shown`: a page (see Hosting a view) |
 

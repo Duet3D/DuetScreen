@@ -1,0 +1,15 @@
+<!--
+  One G-code in the console's list: the code and what it does. Tap to type it.
+
+  Fields:   a gcodes row: gcode, description (src/UI/Screens/Console/ConsolePresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="content" height="30" flex_flow="row" scrollable="false"
+		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+		<action trigger="clicked" name="console.pick"/>
+		<lv_label name="gcode" bind_text="gcode" width="50" style_min_width="content"/>
+		<lv_label name="description" bind_text="description" width="content">
+			<style name="text_muted"/>
+		</lv_label>
+	</view>
+</component>

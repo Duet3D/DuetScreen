@@ -17,10 +17,14 @@
  *     <ds_list list="files" item="file_row" windowed="true" item_height="90" flow="column"/>
  *     <ds_list list="files" item="file_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
  *
- *   item_width   pixels, or the list's full width if not given
+ *   item_width   pixels; `content` for each item's own width (column flow only; the list scrolls sideways to show
+ *                wide items); the list's full width if not given
  *   item_height  pixels (required)
  *   flow         `column`: one item per line (default); `row_wrap`: as many per line as fit
  * The gaps between items are the list's style_pad_row and style_pad_column.
+ *
+ * follow_end="true" keeps a list (not a windowed one) that scrolls showing its last rows as rows are added, like a log, unless the user
+ * has scrolled back to read earlier ones.
  */
 
 #pragma once
@@ -44,6 +48,7 @@ namespace UI::Xml
 		struct Window
 		{
 			std::optional<int32_t> itemWidth; // Item width in pixels; the list's width if not set
+			bool contentWidth = false;		  // Items keep their own width (column flow)
 			int32_t itemHeight = 0;			  // Item height in pixels
 			bool wrap = false;				  // Several items per line, as many as fit
 		};
@@ -57,7 +62,8 @@ namespace UI::Xml
 			   ListBase& list,
 			   std::string item,
 			   lv_xml_subject_ctx_t* parentContext,
-			   std::optional<Window> window = std::nullopt);
+			   std::optional<Window> window = std::nullopt,
+			   bool followEnd = false);
 
 		/** Stop listening; runs while LVGL deletes the container, which deletes the rows' widgets next */
 		~DsList() override;
@@ -87,6 +93,12 @@ namespace UI::Xml
 
 		/** A windowed list scrolled or changed size: show the items now on screen */
 		static void windowEventCb(lv_event_t* e);
+
+		/** follow_end: scrolled (note whether the user left the end) or laid out (go back to the end) */
+		static void followEndEventCb(lv_event_t* e);
+
+		/** Position and size row `index`'s item for the window */
+		void placeItem(lv_obj_t* obj, size_t index, int32_t perLine) const;
 
 		/** Build the widget for row `index` */
 		Entry buildRow(size_t index);
@@ -125,5 +137,7 @@ namespace UI::Xml
 		std::map<size_t, Entry> m_shown;	   // Windowed: the items built, by row
 		lv_obj_t* m_sizer = nullptr;		   // Windowed: invisible widget giving the scrollable area its size
 		size_t m_count = 0;					   // Windowed: rows to show (the list's length as last told)
+		bool m_followEnd = false;			   // Keep showing the last rows
+		bool m_atEnd = true;				   // follow_end: the user hasn't scrolled away from the end
 	};
 } // namespace UI::Xml

@@ -16,15 +16,22 @@ namespace UI::Xml
 				   ListBase& list,
 				   std::string item,
 				   lv_xml_subject_ctx_t* parentContext,
-				   std::optional<Window> window)
+				   std::optional<Window> window,
+				   bool followEnd)
 		: m_container(container)
 		, m_list(&list)
 		, m_item(std::move(item))
 		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
 		, m_window(window)
 		, m_count(list.size())
+		, m_followEnd(followEnd)
 	{
 		m_list->addListener(this);
+		if (m_followEnd)
+		{
+			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_SCROLL_END, this);
+			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_LAYOUT_CHANGED, this);
+		}
 		if (!m_window)
 		{
 			build(0, m_list->size());
@@ -127,7 +134,14 @@ namespace UI::Xml
 							.wrap = lv_streq(attrOr(attrs, "flow", "column"), "row_wrap")};
 			if (const char* width = lv_xml_get_value_of(attrs, "item_width"))
 			{
-				window->itemWidth = lv_xml_atoi(width);
+				if (lv_streq(width, "content"))
+				{
+					window->contentWidth = true;
+				}
+				else
+				{
+					window->itemWidth = lv_xml_atoi(width);
+				}
 			}
 			if (window->itemHeight <= 0)
 			{
@@ -137,7 +151,8 @@ namespace UI::Xml
 		}
 
 		lv_obj_t* container = itemOf(state);
-		deleteWith(container, new DsList(container, *list, item, context, window));
+		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
+		deleteWith(container, new DsList(container, *list, item, context, window, followEnd));
 	}
 
 	void DsList::windowEventCb(lv_event_t* e)
@@ -179,11 +194,33 @@ namespace UI::Xml
 		Actions::setRow(obj, &row);
 		if (m_window)
 		{
-			const lv_area_t area = itemArea(index, itemsPerLine());
-			lv_obj_set_pos(obj, area.x1, area.y1);
-			lv_obj_set_size(obj, lv_area_get_width(&area), lv_area_get_height(&area));
+			placeItem(obj, index, itemsPerLine());
 		}
 		return {obj, std::move(scope)};
+	}
+
+	void DsList::placeItem(lv_obj_t* obj, size_t index, int32_t perLine) const
+	{
+		const lv_area_t area = itemArea(index, perLine);
+		lv_obj_set_pos(obj, area.x1, area.y1);
+		lv_obj_set_height(obj, lv_area_get_height(&area));
+		if (!m_window->contentWidth)
+		{
+			lv_obj_set_width(obj, lv_area_get_width(&area));
+		}
+	}
+
+	void DsList::followEndEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (lv_event_get_code(e) == LV_EVENT_SCROLL_END)
+		{
+			list->m_atEnd = lv_obj_get_scroll_bottom(list->m_container) <= 0;
+		}
+		else if (list->m_atEnd && lv_obj_get_scroll_bottom(list->m_container) > 0)
+		{
+			lv_obj_scroll_to_y(list->m_container, LV_COORD_MAX, LV_ANIM_OFF);
+		}
 	}
 
 	void DsList::deleteRow(Entry& entry)
@@ -271,9 +308,7 @@ namespace UI::Xml
 			}
 			if (it->second.obj != nullptr)
 			{
-				const lv_area_t area = itemArea(it->first, perLine);
-				lv_obj_set_pos(it->second.obj, area.x1, area.y1);
-				lv_obj_set_size(it->second.obj, lv_area_get_width(&area), lv_area_get_height(&area));
+				placeItem(it->second.obj, it->first, perLine);
 			}
 			++it;
 		}
