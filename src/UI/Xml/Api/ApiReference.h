@@ -130,6 +130,7 @@ namespace UI::Xml::Api
 		std::vector<std::string> lvglElements;	  // The XML engine's own widgets and elements, in name order
 		std::vector<Component> components;		  // In name order
 		std::vector<WidgetDef> placeable;		  // The widgets a user can place in a layout, in id order
+		std::vector<Field> placedFields;		  // Names every placed widget has besides its presenter's (its size)
 		std::vector<Layout> layouts;			  // The layout each slot shows by default, in slot order
 		std::vector<Theme> themes;				  // Every loaded theme, the root first, then in name order
 		std::string rootTheme;					  // The theme that styles, consts and fonts are described from

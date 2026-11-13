@@ -53,7 +53,8 @@ src/UI/
                ConsoleSource, JobSource, MachineSource, MoveSource, NavigationSource, ResponseSource,
                TemperatureSource, and CustomiseSource (the state of customising the screen)
     Layout/    WidgetCatalogue (the widgets the user can place), Layout (layout files, and repairing them),
-               LayoutStore (the layout each slot shows, and saving the user's), LayoutEditor (customising)
+               LayoutStore (the layout each slot shows, and saving the user's), LayoutEditor (customising),
+               PlacementScope (a placed widget's size classes)
   Widgets/     every ds_* widget, beside the C++ class behind it; Widgets.cpp registers them
     Buttons/   ds_button, ds_drag_button, ds_password_toggle
     Inputs/    ds_slider, ds_hue_slider, ds_textarea, ds_keyboard, ds_dropdown, ds_toggle
@@ -370,6 +371,16 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 ```
 
 - The component's root is a plain `lv_obj` (not a `ds_*` widget, which has a C++ object of its own). In a grid it fills its cells (the `<ds_layout>` makes it, so it needn't set a size); in a strip it sizes itself, as the sidebar's buttons take the sidebar's width and share its height (`width="100%" flex_grow="1"`).
+- A widget fits what it shows to the room it is given. Lay it out with `%`, `fr` grid tracks and `flex_grow` first, so it looks right at its default and smallest sizes, scrolling only as a last resort. Where that isn't enough, its place's *size classes* are names it can use: `widget.width_class` and `widget.height_class` (0 compact, 1 regular, 2 expanded) and `widget.portrait`. Use them for three things only: hiding secondary parts, a larger font for a value, and orientation, with `bind_flag_if` and `bind_style_if` (not `<if>`, which builds its contents again), and say why in a comment:
+
+  ```xml
+  <!-- The standby target goes when the row is too narrow for it -->
+  <ds_button name="standby" bind_text="standby">
+      <bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>
+  </ds_button>
+  ```
+
+  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A grid measures each widget's cells, which only the grid sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
 - A widget about one of something (a fan, a tool) shows it with a keyed list, so it follows the printer's rows; it shows nothing while the printer has no such one.
 - Printer data is global, so a widget shows it wherever it is placed. A widget may name a presenter, and each placed widget then has one of its own.
 - The lint checks each widget file (its component takes every prop and setting, a `row` setting's list and fields exist, every translation key exists) and each widget's component with its default settings.

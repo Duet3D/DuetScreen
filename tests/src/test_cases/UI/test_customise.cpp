@@ -6,6 +6,7 @@
  */
 
 #include "UI/Core/Navigation.h"
+#include "UI/Styles/Theme.h"
 #include "UI/Widgets/Layout/DsLayout.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutStore.h"
@@ -36,7 +37,7 @@ namespace
 
 	/* A bundle with a `test` slot: a label widget whose text is a setting, and a 4x2 grid layout of two labels */
 	constexpr std::string_view MANIFEST = R"({"id": "test", "ui_api": "1.0", "components": ["*.xml"],
-		"widgets": ["widgets/*.json"], "layouts": ["*.layout.json"]})";
+		"widgets": ["widgets/*.json"], "layouts": ["*.layout.json"], "themes": ["themes/*.xml"]})";
 
 	constexpr std::string_view LABEL = R"(
 		<component>
@@ -46,6 +47,26 @@ namespace
 
 	constexpr std::string_view LABEL_WIDGET =
 		R"({"component": "test_label", "slots": ["test"], "settings": [{"name": "text", "kind": "text", "default": "Hi"}]})";
+
+	/* A widget showing which size classes its place has: `wide` unless compact across, `tall` unless compact down,
+	   `expanded` if expanded across, and `upright` if portrait */
+	constexpr std::string_view SIZED = R"(
+		<component>
+			<view extends="lv_obj">
+				<lv_obj name="wide"><bind_flag_if cond="widget.width_class eq 0" flag="hidden"/></lv_obj>
+				<lv_obj name="tall"><bind_flag_if cond="widget.height_class eq 0" flag="hidden"/></lv_obj>
+				<lv_obj name="expanded"><bind_flag_if cond="widget.width_class lt 2" flag="hidden"/></lv_obj>
+				<lv_obj name="upright"><bind_flag_if cond="widget.portrait" flag="hidden" invert="true"/></lv_obj>
+			</view>
+		</component>)";
+
+	/* A theme whose widgets need more room to be regular across: 250 pixels rather than the base theme's 180 */
+	constexpr std::string_view ROOMY_THEME = R"(
+		<theme name="roomy" extends="duetscreen">
+			<consts><const name="widget_regular_min" value="250"/></consts>
+		</theme>)";
+
+	constexpr std::string_view SIZED_WIDGET = R"({"component": "test_sized", "slots": ["test"]})";
 
 	constexpr std::string_view LAYOUT = R"({"format": 1, "slot": "test", "kind": "grid", "columns": 4, "rows": 2,
 		"items": [{"id": "a", "widget": "label", "x": 0, "y": 0, "w": 2, "h": 1},
@@ -70,6 +91,9 @@ class TestCustomise : public UiTestSuite
 		writeFile(m_userDir / "test/test_label.xml", LABEL);
 		writeFile(m_userDir / "test/test_screen.xml", SCREEN);
 		writeFile(m_userDir / "test/widgets/label.json", LABEL_WIDGET);
+		writeFile(m_userDir / "test/test_sized.xml", SIZED);
+		writeFile(m_userDir / "test/widgets/sized.json", SIZED_WIDGET);
+		writeFile(m_userDir / "test/themes/roomy.xml", ROOMY_THEME);
 		writeFile(m_userDir / "test/test.layout.json", LAYOUT);
 		m_view.reset();
 		UI::Xml::deinit();
@@ -91,6 +115,14 @@ class TestCustomise : public UiTestSuite
 
 	/** The widget placed as item `id` */
 	lv_obj_t* item(const char* id) const { return lv_obj_find_by_name(layout(), id); }
+
+	/** Whether the child `name` of `widget` is shown */
+	static bool shown(lv_obj_t* widget, const char* name)
+	{
+		lv_obj_t* child = lv_obj_find_by_name(widget, name);
+		EXPECT_NE(child, nullptr) << name;
+		return child != nullptr && !lv_obj_has_flag(child, LV_OBJ_FLAG_HIDDEN);
+	}
 
 	/** The text of the label placed as item `id` */
 	std::string text(const char* id) const { return lv_label_get_text(item(id)); }
@@ -147,6 +179,71 @@ TEST_F(TestCustomise, LayoutRebuildsOnlyWhatChanged)
 	save(changed);
 	EXPECT_EQ(item("a"), nullptr);
 	EXPECT_EQ(lv_obj_get_child_count(layout()), 1u);
+}
+
+TEST_F(TestCustomise, WidgetsFollowTheSizeClassesOfTheirCells)
+{
+	Layout changed = *Layouts::find("test");
+	changed.items[0].widget = "sized"; // 2x1 cells: 200x100, regular across and compact down
+	save(changed);
+	lv_obj_update_layout(layout());
+	lv_obj_t* sized = item("a");
+	EXPECT_TRUE(shown(sized, "wide"));
+	EXPECT_FALSE(shown(sized, "tall"));
+	EXPECT_FALSE(shown(sized, "expanded"));
+	EXPECT_FALSE(shown(sized, "upright"));
+
+	// Resized, it is kept, and follows its new size: 100x200
+	changed.items[0].w = 1;
+	changed.items[0].h = 2;
+	save(changed);
+	lv_obj_update_layout(layout());
+	EXPECT_EQ(item("a"), sized);
+	EXPECT_FALSE(shown(sized, "wide"));
+	EXPECT_TRUE(shown(sized, "tall"));
+	EXPECT_TRUE(shown(sized, "upright"));
+
+	// 400x100: expanded across, from the base theme's widget_expanded_min
+	changed.items[0].w = 4;
+	changed.items[0].h = 1;
+	changed.items[1].y = 1; // Out of the way, below
+	changed.items[1].x = 0;
+	save(changed);
+	lv_obj_update_layout(layout());
+	EXPECT_TRUE(shown(sized, "expanded"));
+}
+
+TEST_F(TestCustomise, SizeClassesFollowTheThemesBreakpoints)
+{
+	Layout changed = *Layouts::find("test");
+	changed.items[0].widget = "sized"; // 200 wide: regular in the base theme
+	save(changed);
+	lv_obj_update_layout(layout());
+	lv_obj_t* sized = item("a");
+	ASSERT_TRUE(shown(sized, "wide"));
+
+	UI::Themes::Theme* original = UI::Themes::getCurrentTheme();
+	UI::Themes::Theme* roomy = UI::Themes::getThemeByName("roomy");
+	ASSERT_NE(roomy, nullptr);
+	roomy->setThemeActive();
+	EXPECT_EQ(item("a"), sized); // Not built again
+	EXPECT_FALSE(shown(sized, "wide")) << "200 is compact where regular starts at 250";
+
+	ASSERT_NE(original, nullptr);
+	original->setThemeActive();
+	EXPECT_TRUE(shown(sized, "wide"));
+}
+
+TEST_F(TestCustomise, StripWidgetsAreRegular)
+{
+	// A strip sizes its widgets by their content, so it doesn't measure them: tiny as it is, this one is regular
+	Layout strip{.slot = "test", .kind = UI::Xml::LayoutKind::Strip};
+	strip.items = {{.id = "x", .widget = "sized"}};
+	save(strip);
+	lv_obj_update_layout(layout());
+	EXPECT_TRUE(shown(item("x"), "wide"));
+	EXPECT_TRUE(shown(item("x"), "tall"));
+	EXPECT_FALSE(shown(item("x"), "upright"));
 }
 
 TEST_F(TestCustomise, StripKeepsTheLayoutsOrder)

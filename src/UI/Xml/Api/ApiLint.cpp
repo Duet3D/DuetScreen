@@ -126,7 +126,8 @@ namespace UI::Xml::Api
 						const std::map<std::string, std::string> noProps;
 						instance(def, scope, noProps);
 					}
-					// A placed widget is a view of its own too, given its widget's props and default settings
+					// A placed widget is a view of its own too, given its widget's props and default settings, and
+					// with the names of its place (its size) after its presenter's
 					for (const auto& use : component.uses)
 					{
 						if (use.as != Use::As::Widget)
@@ -136,8 +137,10 @@ namespace UI::Xml::Api
 						if (const WidgetDef* widget = placeable(use.by))
 						{
 							const auto props = widget->propsFor(nlohmann::json::object());
-							scope.where = "widget " + widget->id;
-							instance(def, scope, props);
+							Scope placed = scope;
+							placed.fields.push_back(&m_reference.placedFields);
+							placed.where = "widget " + widget->id;
+							instance(def, placed, props);
 						}
 					}
 				}

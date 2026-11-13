@@ -1680,6 +1680,16 @@ The built-in slots and the layout each shows until the user changes it.
 | `sidebar` | strip | `home`: `page_home`; `control`: `page_control`; `files`: `page_files`; `console`: `page_console`; `settings`: `page_settings`, locked; `estop`: `estop`, locked |
 | `status_bar` | strip | none |
 
+### Placed widgets' names
+
+A placed widget's component can use these as well as its presenter's names and the globals (they are found after its presenter's), to fit what it shows to the room it has, e.g. `<bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>` hides a part when the widget is narrow. The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h) for when to use them.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `widget.width_class` | int | How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints (widget_regular_min, widget_expanded_min); always 1 in a strip |
+| `widget.height_class` | int | How tall the widget's place is, as `widget.width_class` |
+| `widget.portrait` | int | 1 if the widget's place is taller than it is wide, else 0 |
+
 ### Placeable widgets
 
 Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings.
@@ -2248,6 +2258,8 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 | `#pad_tiny` | 1 |
 | `#shadow_offset` | 3 |
 | `#transition_time` | 80 |
+| `#widget_regular_min` | 180 |
+| `#widget_expanded_min` | 400 |
 
 ### Fonts
 

@@ -25,6 +25,11 @@
 		<const name="pad_tiny" value="1"/>
 		<const name="shadow_offset" value="3"/>
 		<const name="transition_time" value="80"/>
+		<!-- Size classes of a placed widget's place (see src/UI/Xml/Layout/PlacementScope.h): narrower or shorter
+			 than widget_regular_min is compact, from widget_expanded_min expanded. Pixels, like the fonts they
+			 follow: a theme with larger fonts raises them. -->
+		<const name="widget_regular_min" value="180"/>
+		<const name="widget_expanded_min" value="400"/>
 	</consts>
 
 	<styles>

@@ -245,7 +245,8 @@ namespace UI::Xml
 		Placement placement{.item = item,
 							.component = widget ? widget->component : MISSING_COMPONENT,
 							.props = widget ? widget->propsFor(item.settings)
-											: std::map<std::string, std::string>{{"widget", item.widget}}};
+											: std::map<std::string, std::string>{{"widget", item.widget}},
+							.names = std::make_unique<PlacementScope>()};
 
 		// In a grid, a plain box the grid sizes, which the widget fills (see the file comment)
 		const Layout* layout = Layouts::find(m_slot);
@@ -262,7 +263,8 @@ namespace UI::Xml
 			parent = placement.cell;
 		}
 
-		placement.view = new XmlView(item.id, parent, placement.component, nullptr, placement.props);
+		placement.view =
+			new XmlView(item.id, parent, placement.component, nullptr, placement.props, &placement.names->getScope());
 		placement.root = placement.view->getRootPtr();
 		if (placement.cell != nullptr)
 		{
@@ -272,6 +274,12 @@ namespace UI::Xml
 		// Forget the placement first, then delete the view
 		lv_obj_add_event_cb(placement.root, viewDeletedCb, LV_EVENT_DELETE, this);
 		deleteWith(placement.root, placement.view);
+		// In a grid, the size classes are the cell's, which the grid alone sizes; a strip's widgets size themselves,
+		// so they aren't measured (see PlacementScope.h)
+		if (placement.cell != nullptr)
+		{
+			placement.names->follow(placement.cell);
+		}
 		lv_obj_move_to_index(placement.outer(), static_cast<int32_t>(index));
 		DsView::showWithParent(*placement.view, m_container);
 		return placement;

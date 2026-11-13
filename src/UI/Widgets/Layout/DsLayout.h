@@ -5,7 +5,8 @@
  * attributes are in registerXml().
  *
  * Each placed widget is an XmlView of the widget's component, with the widget's props and settings as the component's
- * props, so a widget with a presenter has one of its own. A grid layout makes the ds_layout a grid of equal cells and
+ * props, so a widget with a presenter has one of its own. Its names are its presenter's, then its PlacementScope's (the
+ * size classes of its cells in a grid, see UI/Xml/Layout/PlacementScope.h), then the globals. A grid layout makes the ds_layout a grid of equal cells and
  * puts each widget in its rectangle; a strip leaves the ds_layout's own layout (e.g. `flex_flow="column"`) to place
  * them in order.
  *
@@ -32,8 +33,10 @@
 #include "UI/Xml/Layout/Layout.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/PlacementScope.h"
 #include "helix_xml.h"
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -82,6 +85,7 @@ namespace UI::Xml
 			LayoutItem item;							// What was placed, as last shown
 			std::string component;						// The component built
 			std::map<std::string, std::string> props;	// The props it was built with
+			std::unique_ptr<PlacementScope> names;		// Its place's size classes, searched after its presenter's names
 			XmlView* view = nullptr;					// The view showing it; deleted with its widgets
 			lv_obj_t* root = nullptr;					// The view's root widget; nullptr once deleted
 			lv_obj_t* cell = nullptr;					// Grid: the box the grid sizes, holding root; else nullptr

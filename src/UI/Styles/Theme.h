@@ -29,6 +29,7 @@
 #include "Palette.h"
 #include "ThemeFile.h"
 #include "lvgl/lvgl.h"
+#include <functional>
 #include <map>
 #include <string>
 #include <string_view>
@@ -130,4 +131,14 @@ namespace UI::Themes
 
 	/** Recreate the theme fonts in `typeface` (see FontManager) */
 	void setTypeface(const std::string& typeface);
+
+	/**
+	 * Call `listener` each time a theme has been applied (chosen, its palette changed, or its files reloaded), after
+	 * its styles, fonts and consts are in place, e.g. to read a const again
+	 * @return an id for removeThemeListener()
+	 */
+	size_t addThemeListener(std::function<void()> listener);
+
+	/** Stop calling the listener added as `id` */
+	void removeThemeListener(size_t id);
 } // namespace UI::Themes

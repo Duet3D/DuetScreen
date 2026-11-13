@@ -15,7 +15,8 @@
  * as a placeholder saying so; wrap it in an `lv_obj`.
  *
  * A view can be given props, the values of the component's `<api><prop>`s, e.g. the settings of a widget placed by
- * `<ds_layout>`.
+ * `<ds_layout>`, and an outer scope, whose names are found after the presenter's and before the globals, e.g. a placed
+ * widget's size (see UI/Xml/Layout/PlacementScope.h).
  */
 
 #pragma once
@@ -39,11 +40,15 @@ namespace UI::Xml
 		 */
 		struct XmlViewState
 		{
-			/** Create the presenter `component` names (or use `given`), and a scope holding its fields */
+			/**
+			 * Create the presenter `component` names (or use `given`), and a scope holding its fields, searched before
+			 * `outer` (if not nullptr), which must outlive the view's widgets
+			 */
 			XmlViewState(std::string component,
 						  std::string objName,
 						  std::shared_ptr<XmlPresenter> given = nullptr,
-						  std::map<std::string, std::string> props = {});
+						  std::map<std::string, std::string> props = {},
+						  const Scope* outer = nullptr);
 
 			/** (Re)create the presenter if the component's definition names a different one, and a fresh scope */
 			void prepare();
@@ -54,6 +59,7 @@ namespace UI::Xml
 			bool presenterGiven = false;			 // The presenter was given, not named by the component
 			std::unique_ptr<Scope> scope;			 // Names the component's widgets bind to
 			std::map<std::string, std::string> props; // Values of the component's props
+			const Scope* outer = nullptr;			  // Searched after the presenter's names; nullptr for none
 		};
 	} // namespace detail
 
@@ -76,13 +82,15 @@ namespace UI::Xml
 
 		/**
 		 * Build `component` inside a widget that has no C++ view, with `presenter` instead of the one it names (or
-		 * its own if nullptr) and these values of its props
+		 * its own if nullptr), these values of its props, and `outer`'s names after the presenter's (if not nullptr;
+		 * it must outlive the view's widgets)
 		 */
 		XmlView(const std::string& name,
 				lv_obj_t* parent,
 				std::string component,
 				std::shared_ptr<XmlPresenter> presenter,
-				std::map<std::string, std::string> props = {});
+				std::map<std::string, std::string> props = {},
+				const Scope* outer = nullptr);
 
 		/** Disconnect the presenter; the widgets are deleted by ~LvObj */
 		~XmlView() override;

@@ -31,6 +31,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutEditor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutLibrary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutStore.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Layout/PlacementScope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/WidgetCatalogue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp

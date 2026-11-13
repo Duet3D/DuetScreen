@@ -9,6 +9,7 @@
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/PlacementScope.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
@@ -404,6 +405,11 @@ namespace UI::Xml::Api
 		for (const auto& [id, widget] : WidgetCatalogue::all())
 		{
 			reference.placeable.push_back(widget);
+		}
+		{
+			PlacementScope placed;
+			FieldCollector collector(reference.placedFields);
+			placed.fields(collector);
 		}
 		for (const auto& slot : Layouts::slots())
 		{

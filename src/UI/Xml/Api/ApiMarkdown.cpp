@@ -333,8 +333,17 @@ namespace UI::Xml::Api
 							   items.empty() ? std::string("none") : fmt::format("{:s}", fmt::join(items, "; ")));
 			}
 
+			out += "\n### Placed widgets' names\n\n"
+				   "A placed widget's component can use these as well as its presenter's names and the globals (they "
+				   "are found after its presenter's), to fit what it shows to the room it has, e.g. "
+				   "`<bind_flag_if cond=\"widget.width_class eq 0\" flag=\"hidden\"/>` hides a part when the "
+				   "widget is narrow. The breakpoints are the theme's consts `widget_regular_min` and "
+				   "`widget_expanded_min`. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h) for when to "
+				   "use them.\n\n";
+			writeFields(out, reference.placedFields);
+
 			out +=
-				"\n### Placeable widgets\n\n"
+				"### Placeable widgets\n\n"
 				"Each widget is a component (with its props) and a widget file beside it, which says where it can be "
 				"placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is "
 				"pictured as placed, at its default size in its first slot, with its default settings.\n\n";

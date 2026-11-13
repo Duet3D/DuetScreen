@@ -54,6 +54,8 @@ namespace UI::Themes
 		std::vector<std::unique_ptr<Theme>> s_themes;		   // One per non-abstract file
 		std::map<std::string_view, Theme*> s_index;			   // s_themes by name
 		std::string s_current;								   // Name of the active theme; empty for none
+		std::map<size_t, std::function<void()>> s_listeners;   // Called after a theme is applied, by id
+		size_t s_nextListener = 0;							   // Id of the next listener added
 		std::vector<Record> s_records; // Properties set by the active theme's styles; the styles point into them
 		FontConfigSet s_fontConfig;	   // The active theme's fonts
 		ActiveFonts s_activeFonts;	   // The fonts created from s_fontConfig
@@ -658,6 +660,25 @@ namespace UI::Themes
 			lv_xml_reapply_token_styles(lv_screen_active());
 		}
 		lv_obj_invalidate(lv_screen_active());
+
+		// A copy: a listener may remove itself, or another
+		const auto listeners = s_listeners;
+		for (const auto& [id, listener] : listeners)
+		{
+			listener();
+		}
+	}
+
+	size_t addThemeListener(std::function<void()> listener)
+	{
+		const size_t id = s_nextListener++;
+		s_listeners.emplace(id, std::move(listener));
+		return id;
+	}
+
+	void removeThemeListener(size_t id)
+	{
+		s_listeners.erase(id);
 	}
 
 	std::vector<const ThemeFile*> getThemeChain(std::string_view name)

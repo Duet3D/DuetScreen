@@ -13,7 +13,8 @@
  *     keys, components and presenters
  *
  * A name is looked up where the component is used, as at runtime. A component that nothing uses is a view of its own
- * (shown from C++): its names are its presenter's, then the globals. `<ds_view view="x">` starts a new view, with
+ * (shown from C++): its names are its presenter's, then the globals; a placed widget's component has the names of its
+ * place (its size, Reference::placedFields) between the two. `<ds_view view="x">` starts a new view, with
  * the presenter it names, or else x's own. `<ds_list list="l" item="x">` builds x in a row of l, so l's row fields
  * come first. A component used as an element is built in the scope it is written in, with its `$props` replaced by
  * the values given there. Actions are looked for in the presenters of every enclosing view, then the global actions.

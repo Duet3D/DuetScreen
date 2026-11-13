@@ -8,6 +8,7 @@
 #include "UI/Styles/Theme.h"
 #include "UI/Widgets/Layout/DsLayout.h"
 #include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/PlacementScope.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "XmlTree.h"
@@ -544,8 +545,11 @@ namespace UI::Xml::Api
 				int32_t height = LV_SIZE_CONTENT; // In pixels, or LV_SIZE_CONTENT
 			};
 
-			/** How big `widget` is placed in its first slot, as the home screen lays that slot out */
-			static PlacedSize placedSize(const WidgetDef& widget)
+			/**
+			 * How big `widget` is placed in its first slot, as the home screen lays that slot out: `cells` in a grid,
+			 * its own size in a strip
+			 */
+			static PlacedSize placedSize(const WidgetDef& widget, CellSize cells)
 			{
 				const std::string& slot = widget.slots.front();
 				const DsLayout* live = DsLayout::find(slot);
@@ -572,11 +576,11 @@ namespace UI::Xml::Api
 				return {.width = span(lv_obj_get_content_width(container),
 									  lv_obj_get_style_pad_column(container, LV_PART_MAIN),
 									  layout->columns,
-									  widget.defaultSize.columns),
+									  cells.columns),
 						.height = span(lv_obj_get_content_height(container),
 									   lv_obj_get_style_pad_row(container, LV_PART_MAIN),
 									   layout->rows,
-									   widget.defaultSize.rows)};
+									   cells.rows)};
 			}
 
 			/**
@@ -614,34 +618,51 @@ namespace UI::Xml::Api
 					lv_obj_update_layout(lv_screen_active());
 					for (const auto& widget : m_reference.placeable)
 					{
-						sizes[widget.id] = placedSize(widget);
+						sizes[widget.id] = placedSize(widget, widget.defaultSize);
 					}
 				}
 				lv_obj_delete(screenFrame);
 
 				for (const auto& widget : m_reference.placeable)
 				{
-					const PlacedSize size = sizes[widget.id];
-					lv_obj_t* area = frame(size.width, size.height);
+					const std::string file = drawPlaced(widget, sizes[widget.id], "widgets/" + widget.id);
+					if (!file.empty())
 					{
-						XmlView view(
-							widget.id, area, widget.component, nullptr, widget.propsFor(sampleSettings(widget)));
-						// A grid widget fills its cells, as <ds_layout> makes it
-						if (size.height != LV_SIZE_CONTENT)
-						{
-							lv_obj_set_size(view.getRootPtr(), LV_PCT(100), LV_PCT(100));
-						}
-						view.show();
-						m_settle();
-						lv_obj_update_layout(lv_screen_active());
-						const std::string file = picture(grown(areaOf(area), MARGIN), "widgets/" + widget.id);
-						if (!file.empty())
-						{
-							m_images.placeable[widget.id] = file;
-						}
+						m_images.placeable[widget.id] = file;
 					}
-					lv_obj_delete(area);
 				}
+			}
+
+			/** Picture `widget` placed at `size` as `name`; @return the picture's file, or empty if none was kept */
+			std::string drawPlaced(const WidgetDef& widget, PlacedSize size, const std::string& name)
+			{
+				lv_obj_t* area = frame(size.width, size.height);
+				std::string file;
+				{
+					// A grid widget's place is its area, as <ds_layout> measures its cells; a strip's isn't measured
+					PlacementScope place;
+					if (size.height != LV_SIZE_CONTENT)
+					{
+						place.follow(area);
+					}
+					XmlView view(widget.id,
+								 area,
+								 widget.component,
+								 nullptr,
+								 widget.propsFor(sampleSettings(widget)),
+								 &place.getScope());
+					// A grid widget fills its cells, as <ds_layout> makes it
+					if (size.height != LV_SIZE_CONTENT)
+					{
+						lv_obj_set_size(view.getRootPtr(), LV_PCT(100), LV_PCT(100));
+					}
+					view.show();
+					m_settle();
+					lv_obj_update_layout(lv_screen_active());
+					file = picture(grown(areaOf(area), MARGIN), name);
+				}
+				lv_obj_delete(area);
+				return file;
 			}
 
 			/**

@@ -40,12 +40,14 @@ namespace UI::Xml
 	detail::XmlViewState::XmlViewState(std::string componentName,
 									   std::string name,
 									   std::shared_ptr<XmlPresenter> given,
-									   std::map<std::string, std::string> givenProps)
+									   std::map<std::string, std::string> givenProps,
+									   const Scope* outerScope)
 		: component(std::move(componentName))
 		, objName(std::move(name))
 		, presenter(std::move(given))
 		, presenterGiven(presenter != nullptr)
 		, props(std::move(givenProps))
+		, outer(outerScope)
 	{
 		prepare();
 	}
@@ -62,8 +64,8 @@ namespace UI::Xml
 			}
 		}
 
-		// A screen is self-contained: its names are its presenter's, then the globals
-		scope = std::make_unique<Scope>(nullptr);
+		// A screen is self-contained: its names are its presenter's, then the outer scope's (if any), then the globals
+		scope = std::make_unique<Scope>(outer ? outer->context() : nullptr);
 		if (presenter)
 		{
 			ScopeBinder binder(*scope);
@@ -93,8 +95,9 @@ namespace UI::Xml
 					 lv_obj_t* parent,
 					 std::string componentName,
 					 std::shared_ptr<XmlPresenter> givenPresenter,
-					 std::map<std::string, std::string> givenProps)
-		: XmlViewState(std::move(componentName), name, std::move(givenPresenter), std::move(givenProps))
+					 std::map<std::string, std::string> givenProps,
+					 const Scope* outerScope)
+		: XmlViewState(std::move(componentName), name, std::move(givenPresenter), std::move(givenProps), outerScope)
 		, LvObj([this](lv_obj_t* p) { return build(p, *this); }, name, parent)
 	{
 		ZoneScoped;
