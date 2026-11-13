@@ -2,7 +2,7 @@
  * ThemeStyles.h
  *
  * Makes the theme's styles and fonts available to XML, and to theme files, by name: every member of LvglStyles and
- * ComponentStyles (`<style name="card"/>`), the four theme fonts (`style_text_font="font_header"`) and the LVGL
+ * ComponentStyles (`<style name="card"/>`), the theme fonts (`style_text_font="font_header"`, see FONT_ROLES in UI/Styles/Styles.h) and the LVGL
  * symbols themes use as images (`bg_image_src="symbol_ok"`).
  *
  * XML uses the theme's own style objects rather than copies, so a theme switch, which rewrites those objects in

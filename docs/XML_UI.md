@@ -403,7 +403,7 @@ How it is built:
 
 ## Themes
 
-A theme is an XML file that sets the palette, the four fonts and the properties of every style. Themes extend each other: the built-in ones all extend [base.xml](../assets/ui/themes/base.xml), which defines every style, and change only what makes them different. A user bundle can add a theme, or replace a built-in one by giving it the same name.
+A theme is an XML file that sets the palette, the fonts (`header`, `normal`, `emphasis`, `subdued`, and `small`, `large`, `xlarge` and `huge` for widgets' text and values) and the properties of every style. Themes extend each other: the built-in ones all extend [base.xml](../assets/ui/themes/base.xml), which defines every style, and change only what makes them different. A user bundle can add a theme, or replace a built-in one by giving it the same name.
 
 ```xml
 <theme name="midnight" extends="duetscreen">

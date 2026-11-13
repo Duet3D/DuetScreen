@@ -2230,6 +2230,19 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `graph_legend` |  | min_width=150 |
 | `bar_label_bg` | ![bar_label_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label_bg.png) | bg_color=#bg_light bg_opa=50% radius=#radius pad_hor=#pad |
 | `bar_label` |  | *(not set)* |
+| `widget_title` | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_title.png) | text_color=#text_muted text_font=font_emphasis |
+| `widget_value` | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value.png) | text_color=#text text_font=font_large |
+| `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | text_font=font_huge |
+| `widget_detail` | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_detail.png) | text_color=#text_muted text_font=font_small |
+| `gauge_arc` |  | arc_color=#bg_light arc_width=10dpx arc_rounded=true bg_opa=0 pad_all=0 |
+| `gauge_arc_indic` |  | arc_color=#primary arc_width=10dpx arc_rounded=true |
+| `gauge_arc_target` |  | arc_color=#primary_muted |
+| `gauge_bar` | ![gauge_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/gauge_bar.png) | bg_color=#bg_light bg_opa=100% radius=#radius pad_all=0 |
+| `gauge_bar_indic` | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/gauge_bar_indic.png) | bg_color=#primary bg_opa=100% radius=#radius |
+| `gauge_bar_target` |  | bg_color=#primary_muted |
+| `gauge_standby` |  | arc_color=#secondary bg_color=#secondary |
+| `gauge_off` |  | arc_color=#text_muted bg_color=#text_muted |
+| `gauge_fault` |  | arc_color=#error bg_color=#error |
 | `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=50% |
 | `object_cancel_current` | ![object_cancel_current](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_current.png) | bg_color=#primary bg_opa=100% |
 | `object_cancel_cancelled` | ![object_cancel_cancelled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_cancelled.png) | bg_color=#error bg_opa=100% |
@@ -2263,7 +2276,7 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 
 ### Fonts
 
-Used as `style_text_font="…"`: `font_header`, `font_normal`, `font_emphasis`, `font_subdued`
+Used as `style_text_font="…"`: `font_header`, `font_normal`, `font_emphasis`, `font_subdued`, `font_small`, `font_large`, `font_xlarge`, `font_huge`
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/duetscreen/fonts.png)
 

@@ -29,15 +29,6 @@ namespace UI::Themes
 			std::map<std::string, std::string, std::less<>> consts; // Const values by name
 		};
 
-		/** The fonts of the active theme; FontManager frees a font when its last holder lets go */
-		struct ActiveFonts
-		{
-			FontManager::Font header;	// Headings
-			FontManager::Font normal;	// Body text
-			FontManager::Font emphasis; // Emphasised text
-			FontManager::Font subdued;	// Secondary text
-		};
-
 		/** Frees a style record, used by unique_ptr */
 		struct RecordDeleter
 		{
@@ -58,7 +49,9 @@ namespace UI::Themes
 		size_t s_nextListener = 0;							   // Id of the next listener added
 		std::vector<Record> s_records; // Properties set by the active theme's styles; the styles point into them
 		FontConfigSet s_fontConfig;	   // The active theme's fonts
-		ActiveFonts s_activeFonts;	   // The fonts created from s_fontConfig
+		std::map<std::string_view, FontManager::Font>
+			s_activeFonts; // The fonts made from s_fontConfig, by name;
+						   // FontManager frees one when its last holder lets go
 
 		/** Storage keys for a theme's palette choice */
 		struct PaletteKeys
@@ -451,24 +444,22 @@ namespace UI::Themes
 			return flags;
 		}
 
-		/** The four fonts in `merged` */
+		/** Every theme font (FONT_ROLES) in `merged`; one it doesn't set is 14 px, normal */
 		FontConfigSet fontConfig(const Merged& merged)
 		{
-			auto get = [&](const char* name)
+			FontConfigSet set;
+			for (const auto& role : FONT_ROLES)
 			{
 				FontConfig config;
-				auto it = merged.fonts.find(name);
+				auto it = merged.fonts.find(std::string(role.name));
 				if (it != merged.fonts.end())
 				{
 					config.size = it->second.size.value_or(config.size);
 					config.style = fontStyleFlags(it->second);
 				}
-				return config;
-			};
-			return FontConfigSet{.header = get("header"),
-								 .normal = get("normal"),
-								 .emphasis = get("emphasis"),
-								 .subdued = get("subdued")};
+				set.emplace(role.name, config);
+			}
+			return set;
 		}
 
 		/** Make palette colours and consts XML consts, so components can use `#primary` */
@@ -741,7 +732,7 @@ namespace UI::Themes
 		forEachStyle([](std::string_view, Style& style) { lv_style_reset(style); });
 		s_records.clear();
 		// Release the fonts while LVGL is still running; static destruction at exit would be too late
-		s_activeFonts = ActiveFonts{};
+		s_activeFonts.clear();
 		s_index.clear();
 		s_themes.clear();
 		s_files.clear();
@@ -820,17 +811,16 @@ namespace UI::Themes
 		LOG_INFO("Setting typeface to {:s}", typeface);
 
 		// Replacing a holder releases the previous font
-		s_activeFonts.header = FontManager::createFont(typeface, s_fontConfig.header.size, s_fontConfig.header.style);
-		s_activeFonts.normal = FontManager::createFont(typeface, s_fontConfig.normal.size, s_fontConfig.normal.style);
-		s_activeFonts.emphasis =
-			FontManager::createFont(typeface, s_fontConfig.emphasis.size, s_fontConfig.emphasis.style);
-		s_activeFonts.subdued =
-			FontManager::createFont(typeface, s_fontConfig.subdued.size, s_fontConfig.subdued.style);
+		Fonts fonts{};
+		for (const auto& role : FONT_ROLES)
+		{
+			const FontConfig& config = s_fontConfig.at(std::string(role.name));
+			FontManager::Font& font = s_activeFonts[role.name];
+			font = FontManager::createFont(typeface, config.size, config.style);
+			fonts.*role.member = *font.get();
+		}
 
 		// The styles point at the global fonts, so copying into them changes every style using them
-		setFonts(*s_activeFonts.header.get(),
-				 *s_activeFonts.normal.get(),
-				 *s_activeFonts.emphasis.get(),
-				 *s_activeFonts.subdued.get());
+		setFonts(fonts);
 	}
 } // namespace UI::Themes

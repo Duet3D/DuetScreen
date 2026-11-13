@@ -321,6 +321,19 @@ namespace UI::Themes
 		{"graph_legend", &ComponentStyles::graph_legend},
 		{"bar_label_bg", &ComponentStyles::bar_label_bg},
 		{"bar_label", &ComponentStyles::bar_label},
+		{"widget_title", &ComponentStyles::widget_title},
+		{"widget_value", &ComponentStyles::widget_value},
+		{"widget_value_large", &ComponentStyles::widget_value_large},
+		{"widget_detail", &ComponentStyles::widget_detail},
+		{"gauge_arc", &ComponentStyles::gauge_arc},
+		{"gauge_arc_indic", &ComponentStyles::gauge_arc_indic},
+		{"gauge_arc_target", &ComponentStyles::gauge_arc_target},
+		{"gauge_bar", &ComponentStyles::gauge_bar},
+		{"gauge_bar_indic", &ComponentStyles::gauge_bar_indic},
+		{"gauge_bar_target", &ComponentStyles::gauge_bar_target},
+		{"gauge_standby", &ComponentStyles::gauge_standby},
+		{"gauge_off", &ComponentStyles::gauge_off},
+		{"gauge_fault", &ComponentStyles::gauge_fault},
 		{"object_cancel_base", &ComponentStyles::object_cancel_base},
 		{"object_cancel_current", &ComponentStyles::object_cancel_current},
 		{"object_cancel_cancelled", &ComponentStyles::object_cancel_cancelled},
@@ -347,13 +360,10 @@ namespace UI::Themes
 		return s_fonts;
 	}
 
-	void setFonts(const lv_font_t& header, const lv_font_t& normal, const lv_font_t& emphasis, const lv_font_t& subdued)
+	void setFonts(const Fonts& fonts)
 	{
 		ZoneScoped;
-		s_fonts.header = header;
-		s_fonts.normal = normal;
-		s_fonts.emphasis = emphasis;
-		s_fonts.subdued = subdued;
+		s_fonts = fonts;
 	}
 
 	/**

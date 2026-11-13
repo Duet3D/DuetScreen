@@ -1109,6 +1109,15 @@
 			<xs:enumeration value="estop"/>
 			<xs:enumeration value="file"/>
 			<xs:enumeration value="folder"/>
+			<xs:enumeration value="gauge_arc"/>
+			<xs:enumeration value="gauge_arc_indic"/>
+			<xs:enumeration value="gauge_arc_target"/>
+			<xs:enumeration value="gauge_bar"/>
+			<xs:enumeration value="gauge_bar_indic"/>
+			<xs:enumeration value="gauge_bar_target"/>
+			<xs:enumeration value="gauge_fault"/>
+			<xs:enumeration value="gauge_off"/>
+			<xs:enumeration value="gauge_standby"/>
 			<xs:enumeration value="graph_legend"/>
 			<xs:enumeration value="grow"/>
 			<xs:enumeration value="icon"/>
@@ -1189,6 +1198,10 @@
 			<xs:enumeration value="transition_delayed"/>
 			<xs:enumeration value="transition_normal"/>
 			<xs:enumeration value="unhomed"/>
+			<xs:enumeration value="widget_detail"/>
+			<xs:enumeration value="widget_title"/>
+			<xs:enumeration value="widget_value"/>
+			<xs:enumeration value="widget_value_large"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="style">
@@ -1917,8 +1930,12 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="font_emphasis"/>
 			<xs:enumeration value="font_header"/>
+			<xs:enumeration value="font_huge"/>
+			<xs:enumeration value="font_large"/>
 			<xs:enumeration value="font_normal"/>
+			<xs:enumeration value="font_small"/>
 			<xs:enumeration value="font_subdued"/>
+			<xs:enumeration value="font_xlarge"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="font">

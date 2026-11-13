@@ -9,11 +9,13 @@
 
 #include "UI/Styles/Font.h"
 #include "lvgl/lvgl.h"
+#include <array>
 #include <filesystem>
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #if SIMULATION
@@ -314,6 +316,23 @@ namespace UI::Themes
 		Style bar_label_bg; // Background behind a bar's label
 		Style bar_label; // A bar's label
 
+		/* Placed widgets */
+		Style widget_title;		  // A widget's title
+		Style widget_value;		  // A widget's main value
+		Style widget_value_large; // A widget's main value, in a large widget
+		Style widget_detail;	  // Anything else a widget shows beside its value, e.g. a target
+
+		/* Gauges */
+		Style gauge_arc;		// An arc gauge's track
+		Style gauge_arc_indic;	// An arc gauge's value
+		Style gauge_arc_target; // An arc gauge's target, under its value
+		Style gauge_bar;		// A bar gauge's track
+		Style gauge_bar_indic;	// A bar gauge's value
+		Style gauge_bar_target; // A bar gauge's target, under its value
+		Style gauge_standby;	// A gauge's value while its heater is on standby
+		Style gauge_off;		// A gauge's value while its heater is off
+		Style gauge_fault;		// A gauge's value while its heater has a fault
+
 		/* Object cancel */
 		Style object_cancel_base;	   // Base style for object cancel list items
 		Style object_cancel_current;   // Style for the current object label in the object cancel view
@@ -343,13 +362,37 @@ namespace UI::Themes
 		lv_font_t normal;	// Body text
 		lv_font_t emphasis; // Emphasised text
 		lv_font_t subdued;	// Secondary text
+		lv_font_t small;	// Small plain text, e.g. a gauge's target beside its value
+		lv_font_t large;	// A value shown large, e.g. a gauge's reading
+		lv_font_t xlarge;	// Larger still
+		lv_font_t huge;		// The largest, for a value that fills a big widget
 	};
+
+	/** One theme font: its name in theme files (`<font name="large">`), in XML (`font_large`), and its member */
+	struct FontRole
+	{
+		std::string_view name;	  // Name in theme files
+		const char* xmlName;	  // Name XML uses, e.g. in `style_text_font`
+		lv_font_t Fonts::*member; // Where the font is kept
+	};
+
+	/** Every theme font, in the order themes list them */
+	inline constexpr std::array<FontRole, 8> FONT_ROLES = {{
+		{"header", "font_header", &Fonts::header},
+		{"normal", "font_normal", &Fonts::normal},
+		{"emphasis", "font_emphasis", &Fonts::emphasis},
+		{"subdued", "font_subdued", &Fonts::subdued},
+		{"small", "font_small", &Fonts::small},
+		{"large", "font_large", &Fonts::large},
+		{"xlarge", "font_xlarge", &Fonts::xlarge},
+		{"huge", "font_huge", &Fonts::huge},
+	}};
 
 	/** The theme fonts */
 	const Fonts& getFonts();
 
 	/** Copy the active theme's fonts into the theme fonts (see Theme.cpp) */
-	void setFonts(const lv_font_t& header, const lv_font_t& normal, const lv_font_t& emphasis, const lv_font_t& subdued);
+	void setFonts(const Fonts& fonts);
 
 	/**
 	 * Install DuetScreen's LVGL theme on `display`: the callback that gives every new widget its styles. The styles

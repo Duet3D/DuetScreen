@@ -318,10 +318,10 @@ namespace UI::Xml::Api
 				return file;
 			}
 
-			/** A line in each font, named */
+			/** A line in each font, named, as wide as the screen allows: the largest fonts wrap */
 			std::string fonts(std::string_view name)
 			{
-				lv_obj_t* list = frame(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+				lv_obj_t* list = frame(lv_display_get_horizontal_resolution(nullptr) - 2 * MARGIN, LV_SIZE_CONTENT);
 				lv_obj_set_flex_flow(list, LV_FLEX_FLOW_COLUMN);
 				lv_obj_set_style_pad_gap(list, MARGIN, LV_PART_MAIN);
 				for (const auto& fontName : m_reference.fonts)
@@ -336,6 +336,7 @@ namespace UI::Xml::Api
 						label,
 						fmt::format("{:s}: The quick brown fox jumps over the lazy dog 0123456789", fontName).c_str());
 					lv_obj_set_style_text_font(label, font, LV_PART_MAIN);
+					lv_obj_set_width(label, LV_PCT(100));
 				}
 				lv_obj_update_layout(lv_screen_active());
 				const std::string file = picture(grown(areaOf(list), MARGIN), name);

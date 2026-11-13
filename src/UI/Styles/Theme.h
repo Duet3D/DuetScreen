@@ -44,14 +44,8 @@ namespace UI::Themes
 		uint32_t style = LV_FREETYPE_FONT_STYLE_NORMAL; // LV_FREETYPE_FONT_STYLE_* flags and weight
 	};
 
-	/** The four fonts every theme provides */
-	struct FontConfigSet
-	{
-		FontConfig header;	 // Headings
-		FontConfig normal;	 // Body text
-		FontConfig emphasis; // Emphasised text
-		FontConfig subdued;	 // Secondary text
-	};
+	/** The size and style of each theme font, by its name in theme files (see FONT_ROLES in Styles.h) */
+	using FontConfigSet = std::map<std::string, FontConfig, std::less<>>;
 
 	class Theme
 	{

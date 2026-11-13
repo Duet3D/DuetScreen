@@ -11,14 +11,6 @@
 
 namespace UI::Xml::ThemeStyles
 {
-	/** The theme fonts by XML name */
-	static constexpr std::pair<const char*, const lv_font_t Themes::Fonts::*> s_fonts[] = {
-		{"font_header", &Themes::Fonts::header},
-		{"font_normal", &Themes::Fonts::normal},
-		{"font_emphasis", &Themes::Fonts::emphasis},
-		{"font_subdued", &Themes::Fonts::subdued},
-	};
-
 	/** The LVGL symbols themes use as images, by XML name */
 	static constexpr std::pair<const char*, const char*> s_images[] = {
 		{"symbol_ok", LV_SYMBOL_OK},
@@ -35,9 +27,9 @@ namespace UI::Xml::ThemeStyles
 			});
 
 		const Themes::Fonts& fonts = Themes::getFonts();
-		for (const auto& [name, member] : s_fonts)
+		for (const auto& role : Themes::FONT_ROLES)
 		{
-			lv_xml_register_font(nullptr, name, &(fonts.*member));
+			lv_xml_register_font(nullptr, role.xmlName, &(fonts.*role.member));
 		}
 
 		for (const auto& [name, symbol] : s_images)
@@ -49,9 +41,9 @@ namespace UI::Xml::ThemeStyles
 	std::vector<std::string_view> fontNames()
 	{
 		std::vector<std::string_view> names;
-		for (const auto& [name, member] : s_fonts)
+		for (const auto& role : Themes::FONT_ROLES)
 		{
-			names.emplace_back(name);
+			names.emplace_back(role.xmlName);
 		}
 		return names;
 	}
