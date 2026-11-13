@@ -11,9 +11,9 @@
 #include "Notifications/NotificationsPresenter.h"
 #include "ObjectCancel/ObjectCancelPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
+#include "Settings/DeveloperSettingsPresenter.h"
 #include "Settings/DisplaySettingsPresenter.h"
 #include "Settings/GeneralSettingsPresenter.h"
-#include "Settings/SettingsView.h"
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
 #include "Status/JobStatusPresenter.h"
@@ -93,6 +93,7 @@ namespace UI
 		Xml::Presenters::add<WifiPresenter>("wifi");
 		Xml::Presenters::add<DisplaySettingsPresenter>("settings_display");
 		Xml::Presenters::add<ThemePreviewPresenter>("theme_preview");
+		Xml::Presenters::add<DeveloperSettingsPresenter>("settings_developer");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -122,7 +123,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<DeveloperSettings>("developer_settings");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");
 		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);

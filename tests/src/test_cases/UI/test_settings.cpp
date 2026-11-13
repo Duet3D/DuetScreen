@@ -113,3 +113,32 @@ TEST_F(TestDisplaySettings, PickingAThemeUsesAndStoresIt)
 	lv_obj_send_event(themes, LV_EVENT_VALUE_CHANGED, nullptr);
 	EXPECT_EQ(UI::Themes::getCurrentTheme(), UI::Themes::getTheme(original));
 }
+
+class TestDeveloperSettings : public UiTestSuite
+{
+  protected:
+	TestDeveloperSettings()
+	{
+		tab.setSize(800, 600);
+		tab.show();
+	}
+
+	UI::Xml::XmlView tab{"developer_settings", screen, "settings_developer"};
+};
+
+TEST_F(TestDeveloperSettings, TogglesAreStoredAndBuildOnlyOptionsHidden)
+{
+	const bool original = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	lv_obj_t* toggle = lv_obj_find_by_name(tab.getRootPtr(), "enable_advanced_settings");
+	ASSERT_NE(toggle, nullptr);
+	lv_obj_set_state(toggle, LV_STATE_CHECKED, !original);
+	lv_obj_send_event(toggle, LV_EVENT_VALUE_CHANGED, nullptr);
+	EXPECT_EQ(StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS), !original);
+	lv_obj_set_state(toggle, LV_STATE_CHECKED, original);
+	lv_obj_send_event(toggle, LV_EVENT_VALUE_CHANGED, nullptr);
+
+	EXPECT_EQ(lv_obj_has_flag(lv_obj_find_by_name(tab.getRootPtr(), "enable_ssh"), LV_OBJ_FLAG_HIDDEN),
+			  !DEVELOPER_MODE);
+	EXPECT_EQ(lv_obj_has_flag(lv_obj_find_by_name(tab.getRootPtr(), "debug_borders"), LV_OBJ_FLAG_HIDDEN),
+			  !DEBUG_BORDERS);
+}
