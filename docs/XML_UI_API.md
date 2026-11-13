@@ -54,6 +54,10 @@ Each row of `fans`:
 | Name | Type | Description |
 | --- | --- | --- |
 | `tools` | list | One row per tool, in slot order |
+| `current_tool.shown` | int | 1 if there is a current tool with heaters, else 0 |
+| `current_tool.label` | text | The current tool, e.g. "T0:", or empty if it has no heaters |
+| `current_tool.heaters` | text | The current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C" |
+| `current_tool.fault` | int | 1 if any of the current tool's heaters has a fault, else 0 |
 
 Each row of `tools`:
 
@@ -128,9 +132,18 @@ Each row of `chambers`:
 | Name | Type | Description |
 | --- | --- | --- |
 | `job.file` | text | The current job's file, e.g. "0:/gcodes/part.gcode"; empty when there is none |
+| `job.latest_file` | text | The latest job's file: the current job's, or the last job's when it has finished |
+| `job.finished` | int | 1 when the latest job is the last one, finished, else 0 |
+| `job.thumbnail` | text | The latest job's thumbnail path, or empty until it arrives |
 | `job.progress` | int | The current job's progress, percent 0-100, through the file or the expected time as set in the settings |
 | `job.elapsed` | text | How long the current job has been running, e.g. "00:03:43" |
 | `job.remaining` | text | The current job's expected time left, e.g. "00:45:03" |
+| `job.elapsed_text` | text | `job.elapsed` in a sentence, translated, e.g. "Elapsed: 00:03:43" |
+| `job.remaining_text` | text | `job.remaining` in a sentence, translated, e.g. "Remaining: 00:45:03" |
+| `job.pause_control` | int | Pausing the job (job.pause): 0 hidden, 1 disabled, 2 usable |
+| `job.resume_control` | int | Resuming the job (job.resume): 0 hidden, 1 disabled, 2 usable |
+| `job.print_again_control` | int | Printing the last job again (job.print_again): 0 hidden, 1 disabled, 2 usable |
+| `job.cancel_control` | int | Cancelling the job: 0 hidden, 1 disabled, 2 usable |
 
 ### machine
 
@@ -139,6 +152,10 @@ Each row of `chambers`:
 | `machine.status` | text | State key, e.g. idle, processing, paused; translated under state.* |
 | `machine.printing` | int | 1 while a job is running and not paused, else 0: controls that would change the job are disabled |
 | `machine.job_active` | int | 1 while there is a job (running, pausing, paused, resuming or simulating), else 0 |
+| `machine.name` | text | The printer's name; empty while it isn't connected |
+| `machine.connection` | text | How the screen is connected to the printer, e.g. "USB" |
+| `machine.state` | text | The printer's state, translated, e.g. "Idle" |
+| `machine.summary` | text | The connection and the state, e.g. "USB - Idle" |
 
 ### move
 
@@ -148,6 +165,11 @@ Each row of `chambers`:
 | `move.speed_factor` | text | The speed override, e.g. "100%" |
 | `move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
 | `move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
+| `move.speed_text` | text | The current move's top and requested speeds, e.g. "0/0 mm/s" |
+| `move.speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000), for a gauge |
+| `move.speed_requested` | int | The current move's requested speed, in thousandths of the fastest axis' maximum (0-1000) |
+| `move.flow_text` | text | The volumetric flow, e.g. "0.0 mm³/s" |
+| `move.flow` | int | The volumetric flow, in thousandths of the current tool's fastest extruder's maximum (0-1000) |
 
 Each row of `move.axes`:
 
@@ -198,6 +220,10 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 | `heaters.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `heaters.toggle`. |
 | `heaters.set_standby` | As `heaters.set_active`, for the standby temperature |
 | `heaters.toggle` | Cycle the heater through active, standby and off. From a tool's `heaters` row, or a row of `beds` or `chambers`. |
+| `job.ask_cancel` | Ask whether to cancel the job; it is cancelled, which also turns the heaters off, only if the user says so |
+| `job.pause` | Pause the job |
+| `job.print_again` | Start the last job again |
+| `job.resume` | Resume the paused job |
 | `nav.back` | Close the top modal, or else go back a screen |
 | `nav.home` | Close every screen and show the home screens |
 | `nav.open` | Open the screen registered as `arg`, e.g. `arg="control"` |
@@ -270,33 +296,12 @@ Used by `dashboard_job_status`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `file` | text | The current job's file, else the last job's |
-| `finished` | int | 1 when showing the last job (none is running), else 0 |
-| `thumbnail` | text | The job's thumbnail path, or empty until it arrives |
-| `speed_text` | text | Current and requested speed, e.g. "0/0 mm/s" |
-| `speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000) |
-| `speed_requested` | int | Requested speed, in thousandths of the fastest axis' maximum (0-1000) |
-| `flow_text` | text | Volumetric flow, e.g. "0.0 mm³/s" |
-| `flow` | int | Volumetric flow, in thousandths of the fastest extruder's maximum (0-1000) |
 | `babystep_open` | int | 1 while the babystepping dialog is open |
-| `elapsed` | text | Elapsed time, e.g. "Elapsed: 00:03:43" |
-| `remaining` | text | Time left, e.g. "Remaining: 00:45:03" |
-| `pause` | int | Pause: 0 hidden, 1 disabled, 2 usable |
-| `resume` | int | Resume: 0 hidden, 1 disabled, 2 usable |
-| `print_again` | int | Print again: 0 hidden, 1 disabled, 2 usable |
-| `cancel` | int | Cancel: 0 hidden, 1 disabled, 2 usable |
-| `confirm_cancel` | int | 1 while asking whether to cancel the job |
 
 | Action | Description |
 | --- | --- |
-| `job.ask_cancel` | Ask whether to cancel the job (sets `confirm_cancel`) |
 | `job.babystep` | Open the babystepping dialog (sets `babystep_open`) |
-| `job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
 | `job.close_babystep` | Close the babystepping dialog |
-| `job.close_dialog` | Close the question without cancelling the job |
-| `job.pause` | Pause the job |
-| `job.print_again` | Start the last job again |
-| `job.resume` | Resume the paused job |
 
 ### dashboard_jobs, dashboard_macros, files_jobs, files_macros
 
@@ -504,6 +509,19 @@ Each row of `maps`:
 | `heightmap.mode` | Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range) |
 | `heightmap.show` | Show that height map. From a row of `maps`. |
 | `heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
+
+### job_cancel
+
+Used by `job_cancel`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `confirm` | int | 1 while asking whether to cancel the job |
+
+| Action | Description |
+| --- | --- |
+| `job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
+| `job.close_cancel` | Close the question without cancelling the job |
 
 ### move
 
@@ -900,19 +918,6 @@ Each row of `networks`:
 | `wifi.keyboard` | Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
 | `wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
 | `wifi.refresh` | Scan for networks now |
-
-### status_bar
-
-Used by `status_bar`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `status` | text | Connection and state, e.g. "USB - Idle" |
-| `name` | text | The printer's name |
-| `has_tool` | int | 1 if there is a current tool with heaters, else 0 |
-| `tool` | text | The current tool, e.g. "T0:", or empty if it has no heaters |
-| `heaters` | text | The current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C" |
-| `fault` | int | 1 if any of the current tool's heaters has a fault, else 0 |
 
 ### temperature
 
@@ -1469,7 +1474,7 @@ An image as tall as its parent's content and as wide as its aspect ratio needs, 
 Also takes every `lv_image` attribute.
 
 ```xml
-<ds_thumbnail bind_src="thumbnail" height="100%"/>
+<ds_thumbnail bind_src="job.thumbnail" height="100%"/>
 ```
 
 | Attribute | Description |
@@ -1752,7 +1757,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | --- | --- | --- | --- | --- |
 | [`babystep`](#control) | `babystep` |  | `dashboard_babystep`, `dashboard_job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
-| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `dashboard_job_status` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
+| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_cancel` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
 | [`console`](#console) | `console` |  | `home` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
 | `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
@@ -1793,6 +1798,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
+| `job_cancel` | `job_cancel` |  | `home` | [job_cancel.xml](../assets/ui/components/modals/job_cancel.xml) |
 | [`move`](#control) | `move` |  | `control` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
@@ -1821,7 +1827,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `sidebar_estop` |  |  | `estop` | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
 | `sidebar_gcode_button` |  | `label`, `icon`, `gcode` | `sidebar_gcode` | [sidebar_gcode_button.xml](../assets/ui/components/sidebar/sidebar_gcode_button.xml) |
 | `sidebar_page_button` |  | `page`, `action`, `label`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
-| [`status_bar`](#home) | `status_bar` |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
+| [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
 | `status_bar_gcode_button` |  | `label`, `gcode` | `status_gcode` | [status_bar_gcode_button.xml](../assets/ui/components/status_bar/status_bar_gcode_button.xml) |
 | [`temperature`](#temperature) | `temperature` |  | `control` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |

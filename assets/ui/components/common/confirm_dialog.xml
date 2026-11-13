@@ -1,8 +1,8 @@
 <!--
   A question with Cancel and OK, over the main window, open while the subject named by `open` is non-zero.
 
-      <confirm_dialog open="confirm_cancel" title_tag="status.print_cancel_title"
-                      text_tag="status.print_cancel_message" confirm="job.cancel" close="job.close_dialog"/>
+      <confirm_dialog open="confirm" title_tag="status.print_cancel_title"
+                      text_tag="status.print_cancel_message" confirm="job.cancel" close="job.close_cancel"/>
 
   `confirm` is raised by OK; `close` by Cancel, or when the dialog is closed any other way.
 -->

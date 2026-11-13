@@ -5,8 +5,10 @@
   Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens
   babystep.xml in a dialog.
 
-  Data:     job.progress (src/UI/Xml/Data/JobSource.h); move.axes, move.speed_factor, move.extrusion_factor and
-            move.babystep (src/UI/Xml/Data/MoveSource.h)
+  Data:     job.* (src/UI/Xml/Data/JobSource.h): the latest job, its progress, thumbnail and controls; move.*
+            (src/UI/Xml/Data/MoveSource.h): positions, overrides, babystep, speeds and flow
+  Actions:  job.pause, job.resume, job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h) and
+            job.ask_cancel (global: the shared question, src/UI/Presenters/Modals/JobCancelPresenter.h)
   Fields and actions: src/UI/Presenters/Dashboard/JobStatusPresenter.h
 -->
 <component presenter="dashboard_job_status">
@@ -25,12 +27,12 @@
 			<lv_label name="printed_tag" translation_tag="status.print_finished" width="100%" height="content"
 					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
-				<bind_flag_if_eq subject="finished" flag="hidden" ref_value="0"/>
+				<bind_flag_if_eq subject="job.finished" flag="hidden" ref_value="0"/>
 			</lv_label>
-			<lv_label name="filename" bind_text="file" width="100%" height="content"
+			<lv_label name="filename" bind_text="job.latest_file" width="100%" height="content"
 					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					  style_grid_cell_row_pos="1" style_grid_cell_y_align="start"/>
-			<ds_thumbnail name="thumbnail" bind_src="thumbnail" inner_align="contain" height="100%" width="50"
+			<ds_thumbnail name="thumbnail" bind_src="job.thumbnail" inner_align="contain" height="100%" width="50"
 						  style_min_height="50" style_max_width="30%"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="end"
 						  style_grid_cell_row_pos="0" style_grid_cell_row_span="4" style_grid_cell_y_align="start"/>
@@ -73,17 +75,17 @@
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
 					<action trigger="clicked" name="factors.speed"/>
 				</ds_button>
-				<lv_bar name="requested_speed" max_value="1000" bind_value="speed_requested" height="content"
+				<lv_bar name="requested_speed" max_value="1000" bind_value="move.speed_requested" height="content"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
 					<style name="bg_color_primary_muted" selector="indicator"/>
 					<style name="anim_fast"/>
 				</lv_bar>
-				<lv_bar name="current_speed" max_value="1000" bind_value="speed_top" height="content"
+				<lv_bar name="current_speed" max_value="1000" bind_value="move.speed_top" height="content"
 						style_bg_opa="0"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-					<lv_label name="speed_label" bind_text="speed_text" align="left_mid" x="10">
+					<lv_label name="speed_label" bind_text="move.speed_text" align="left_mid" x="10">
 						<style name="bar_label_bg"/>
 						<style name="bar_label"/>
 					</lv_label>
@@ -106,10 +108,10 @@
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
 					<action trigger="clicked" name="factors.extrusion"/>
 				</ds_button>
-				<lv_bar name="extruder_feedrate" max_value="1000" bind_value="flow" height="content"
+				<lv_bar name="extruder_feedrate" max_value="1000" bind_value="move.flow" height="content"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-					<lv_label name="extruder_feedrate_label" bind_text="flow_text" align="left_mid" x="10">
+					<lv_label name="extruder_feedrate_label" bind_text="move.flow_text" align="left_mid" x="10">
 						<style name="bar_label_bg"/>
 						<style name="bar_label"/>
 					</lv_label>
@@ -125,8 +127,8 @@
 					<style name="pad_normal"/>
 					<style name="text_emphasis"/>
 				</lv_label>
-				<lv_label name="elapsed_time" bind_text="elapsed"/>
-				<lv_label name="remaining_time" bind_text="remaining"/>
+				<lv_label name="elapsed_time" bind_text="job.elapsed_text"/>
+				<lv_label name="remaining_time" bind_text="job.remaining_text"/>
 			</lv_obj>
 
 			<lv_obj name="babystep_cont" width="content" height="content" flex_flow="column"
@@ -151,28 +153,28 @@
 			<ds_button name="pause" translation_tag="status.pause" icon="pause.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
-				<bind_flag_if_eq subject="pause" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="pause" state="disabled" ref_value="2"/>
+				<bind_flag_if_eq subject="job.pause_control" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="job.pause_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.pause"/>
 			</ds_button>
 			<ds_button name="resume" translation_tag="status.resume" icon="resume.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
-				<bind_flag_if_eq subject="resume" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="resume" state="disabled" ref_value="2"/>
+				<bind_flag_if_eq subject="job.resume_control" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="job.resume_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.resume"/>
 			</ds_button>
 			<ds_button name="print_again" translation_tag="status.print_again" icon="print_again.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
-				<bind_flag_if_eq subject="print_again" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="print_again" state="disabled" ref_value="2"/>
+				<bind_flag_if_eq subject="job.print_again_control" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="job.print_again_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.print_again"/>
 			</ds_button>
 			<ds_button name="cancel" translation_tag="status.cancel" icon="cancel.png" height="100%"
 					   style_min_height="content" flex_grow="1">
-				<bind_flag_if_eq subject="cancel" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="cancel" state="disabled" ref_value="2"/>
+				<bind_flag_if_eq subject="job.cancel_control" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="job.cancel_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.ask_cancel"/>
 			</ds_button>
 		</lv_obj>
@@ -181,8 +183,5 @@
 			<action trigger="dismissed" name="job.close_babystep"/>
 			<ds_view name="job_babystep" view="babystep" shown="true" width="100%" height="100%" style_pad_all="0"/>
 		</ds_modal>
-
-		<confirm_dialog name="confirm_cancel" open="confirm_cancel" title_tag="status.print_cancel_title"
-						text_tag="status.print_cancel_message" confirm="job.cancel" close="job.close_dialog"/>
 	</view>
 </component>

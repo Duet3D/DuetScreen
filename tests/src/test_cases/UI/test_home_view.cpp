@@ -1416,3 +1416,31 @@ TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQ(std::string_view(lv_label_get_text(lv_obj_find_by_name(response, "text"))), _("estop.message"));
 }
+
+TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
+{
+	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
+	runEvents();
+	dashboardTabs().setActiveTab(STATUS_TAB);
+	// A dialog opens over the main window, not in the view it belongs to
+	lv_obj_t* question = lv_obj_find_by_name(lv_screen_active(), "confirm_cancel");
+	ASSERT_NE(question, nullptr);
+	EXPECT_FALSE(shownOnScreen(question));
+
+	// The job panel's Cancel button asks the shared question
+	lv_obj_t* cancel = lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "cancel");
+	ASSERT_NE(cancel, nullptr);
+	EXPECT_FALSE(lv_obj_has_state(cancel, LV_STATE_DISABLED)) << "a paused job can be cancelled";
+	lv_obj_send_event(cancel, LV_EVENT_CLICKED, nullptr);
+	ASSERT_TRUE(shownOnScreen(question));
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/cancel_question.png")
+
+	// Answering no closes it
+	lv_obj_send_event(lv_obj_find_by_name(question, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(shownOnScreen(question));
+
+	// Any view can ask it, e.g. a button placed in the sidebar
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "job.ask_cancel", "");
+	EXPECT_TRUE(shownOnScreen(question));
+	UI::closeAllModals();
+}

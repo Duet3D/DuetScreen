@@ -1,0 +1,13 @@
+<!--
+  The shared question before cancelling the job, hosted once by the home screen. Any view asks it with the global
+  action `job.ask_cancel`, e.g. a Cancel button shown while `job.cancel_control` is 2.
+
+  Fields and actions: src/UI/Presenters/Modals/JobCancelPresenter.h
+-->
+<component presenter="job_cancel">
+	<!-- Takes no room: its dialog opens over the main window -->
+	<view extends="lv_obj" width="0" height="0" floating="true">
+		<confirm_dialog name="confirm_cancel" open="confirm" title_tag="status.print_cancel_title"
+						text_tag="status.print_cancel_message" confirm="job.cancel" close="job.close_cancel"/>
+	</view>
+</component>

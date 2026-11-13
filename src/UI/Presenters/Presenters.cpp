@@ -12,10 +12,12 @@
 #include "Control/Temperature/ExtruderPresenter.h"
 #include "Control/Temperature/HeaterActions.h"
 #include "Control/Temperature/TemperaturePresenter.h"
+#include "Dashboard/JobActions.h"
 #include "Dashboard/JobStatusPresenter.h"
 #include "FileBrowser/FileBrowserPresenter.h"
 #include "HardwareTest/HardwareTestPresenter.h"
 #include "Modals/FactorsPresenter.h"
+#include "Modals/JobCancelPresenter.h"
 #include "Modals/NumberPadPresenter.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
@@ -25,7 +27,6 @@
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
 #include "Sidebar/EStopAction.h"
-#include "StatusBar/StatusBarPresenter.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
 namespace UI
@@ -43,15 +44,17 @@ namespace UI
 		HeaterActions::registerAll();
 		FactorsPresenter::registerActions();
 		EStopAction::registerAll();
+		JobActions::registerAll();
+		JobCancelPresenter::registerActions();
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
-		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 		Xml::Presenters::add<JobStatusPresenter>("dashboard_job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<NumberPadPresenter>("numberpad");
 		Xml::Presenters::add<FactorsPresenter>("factors");
+		Xml::Presenters::add<JobCancelPresenter>("job_cancel");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");

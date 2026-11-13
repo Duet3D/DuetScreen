@@ -4,6 +4,7 @@
 
 #include "ToolSource.h"
 #include "Debug.h"
+#include "ObjectModel/Heat.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
@@ -57,6 +58,12 @@ namespace UI::Xml
 	void ToolSource::fields(FieldVisitor& f)
 	{
 		f.list("tools", m_tools, "One row per tool, in slot order");
+		f.field("current_tool.shown", m_currentShown, "1 if there is a current tool with heaters, else 0");
+		f.field("current_tool.label", m_currentLabel, "The current tool, e.g. \"T0:\", or empty if it has no heaters");
+		f.field("current_tool.heaters",
+				m_currentHeaters,
+				"The current tool's heaters' current and target temperatures, e.g. \" 210°C/215°C 60°C/60°C\"");
+		f.field("current_tool.fault", m_currentFault, "1 if any of the current tool's heaters has a fault, else 0");
 	}
 
 	void ToolSource::onInit()
@@ -77,10 +84,41 @@ namespace UI::Xml
 							 row.update(*tool);
 						 }
 					 });
+		showCurrentTool();
 	}
 
 	void ToolSource::clear()
 	{
 		m_tools.clear();
+		MODEL_LOCK();
+		showCurrentTool();
+	}
+
+	void ToolSource::showCurrentTool()
+	{
+		const auto tool = OM::GetCurrentTool();
+		if (!tool || tool->GetHeaterCount() == 0)
+		{
+			m_currentShown.set(0);
+			m_currentLabel.set("");
+			m_currentHeaters.set("");
+			m_currentFault.set(0);
+			return;
+		}
+		std::string heaters;
+		bool fault = false;
+		tool->IterateHeaters(
+			[&](OM::ToolHeaterPtr toolHeater, size_t)
+			{
+				if (const auto heater = toolHeater->heater)
+				{
+					heaters += fmt::format(" {:g}°C/{:d}°C", heater->current, heater->GetTargetTemp());
+					fault |= heater->status == OM::Heat::HeaterStatus::fault;
+				}
+			});
+		m_currentShown.set(1);
+		m_currentLabel.set(fmt::format("T{:d}:", tool->index));
+		m_currentHeaters.set(heaters);
+		m_currentFault.set(fault ? 1 : 0);
 	}
 } // namespace UI::Xml

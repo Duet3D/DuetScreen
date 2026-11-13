@@ -21,6 +21,7 @@ namespace UI::Xml
 		, m_parent(parent.getRootPtr())
 	{
 		lv_obj_add_event_cb(m_parent, parentChangedCb, LV_EVENT_CHILD_CHANGED, this);
+		lv_obj_add_event_cb(m_parent, parentChangedCb, LV_EVENT_SIZE_CHANGED, this);
 	}
 
 	DsThumbnail::~DsThumbnail()
@@ -36,7 +37,7 @@ namespace UI::Xml
 						  "An image as tall as its parent's content and as wide as its aspect ratio needs, so a "
 						  "thumbnail beside some text is as large as it can be without making the row taller. With "
 						  "no image it takes no width.",
-					  .example = R"(<ds_thumbnail bind_src="thumbnail" height="100%"/>)",
+					  .example = R"(<ds_thumbnail bind_src="job.thumbnail" height="100%"/>)",
 					  .attributes = {{"bind_src",
 									  "Follow a text subject holding an image path; empty shows no image",
 									  AttributeKind::Subject}}},
@@ -49,6 +50,8 @@ namespace UI::Xml
 		m_path = path;
 		setSrc(m_path.empty() ? nullptr : m_path.c_str());
 		lv_obj_update_layout(m_parent);
+		// Fit now as well as when the parent next changes: the parent may already be laid out for good
+		fit();
 	}
 
 	void* DsThumbnail::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

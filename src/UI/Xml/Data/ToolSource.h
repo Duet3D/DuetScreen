@@ -61,6 +61,13 @@ namespace UI::Xml
 		void onInit() override;
 
 	  private:
-		List<ToolRow> m_tools; // One row per tool
+		/** Show the current tool's heaters, as the status bar does. Call with the model locked. */
+		void showCurrentTool();
+
+		List<ToolRow> m_tools;				 // One row per tool
+		IntSubject m_currentShown;			 // 1 if there is a current tool with heaters
+		StringSubject<16> m_currentLabel;	 // e.g. "T0:"
+		StringSubject<96> m_currentHeaters; // e.g. " 210°C/215°C 60°C/60°C"
+		IntSubject m_currentFault;			 // 1 if one of its heaters has a fault
 	};
 } // namespace UI::Xml

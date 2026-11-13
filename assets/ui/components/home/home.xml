@@ -35,9 +35,10 @@
 				 style_grid_cell_x_align="start" style_grid_cell_column_pos="0" style_grid_cell_column_span="1"
 				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="0" style_grid_cell_row_span="2"/>
 
-		<!-- The shared dialogs, which open over the main window: the number pad, and speed and extrusion factors -->
+		<!-- The shared dialogs, which open over the main window -->
 		<ds_view name="numberpad" view="numberpad" shown="true"/>
 		<ds_view name="factors" view="factors" shown="true"/>
+		<ds_view name="job_cancel" view="job_cancel" shown="true"/>
 
 		<!-- Over everything: responses, alerts and update prompts, then the keyboard -->
 		<ds_view name="notifications" view="notifications" shown="true"/>

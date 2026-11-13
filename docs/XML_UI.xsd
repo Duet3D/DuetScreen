@@ -36,7 +36,6 @@
 			<xs:enumeration value="brightness"/>
 			<xs:enumeration value="buildroot"/>
 			<xs:enumeration value="cache_size"/>
-			<xs:enumeration value="cancel"/>
 			<xs:enumeration value="cancelled"/>
 			<xs:enumeration value="chambers"/>
 			<xs:enumeration value="change_shown"/>
@@ -48,7 +47,6 @@
 			<xs:enumeration value="command"/>
 			<xs:enumeration value="commands_shown"/>
 			<xs:enumeration value="confirm"/>
-			<xs:enumeration value="confirm_cancel"/>
 			<xs:enumeration value="confirm_text"/>
 			<xs:enumeration value="confirm_title"/>
 			<xs:enumeration value="confirmations"/>
@@ -62,6 +60,10 @@
 			<xs:enumeration value="crumbs"/>
 			<xs:enumeration value="current"/>
 			<xs:enumeration value="current_object"/>
+			<xs:enumeration value="current_tool.fault"/>
+			<xs:enumeration value="current_tool.heaters"/>
+			<xs:enumeration value="current_tool.label"/>
+			<xs:enumeration value="current_tool.shown"/>
 			<xs:enumeration value="current_value"/>
 			<xs:enumeration value="dark"/>
 			<xs:enumeration value="date"/>
@@ -85,7 +87,6 @@
 			<xs:enumeration value="distances"/>
 			<xs:enumeration value="duet_ip"/>
 			<xs:enumeration value="duet_password"/>
-			<xs:enumeration value="elapsed"/>
 			<xs:enumeration value="error_notifications_stay"/>
 			<xs:enumeration value="exit_shown"/>
 			<xs:enumeration value="extrude_usable"/>
@@ -102,7 +103,6 @@
 			<xs:enumeration value="factor"/>
 			<xs:enumeration value="failed"/>
 			<xs:enumeration value="fans"/>
-			<xs:enumeration value="fault"/>
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrate.title"/>
 			<xs:enumeration value="feedrate.value"/>
@@ -112,17 +112,12 @@
 			<xs:enumeration value="filament_shown"/>
 			<xs:enumeration value="filament_text"/>
 			<xs:enumeration value="filaments"/>
-			<xs:enumeration value="file"/>
 			<xs:enumeration value="files"/>
-			<xs:enumeration value="finished"/>
 			<xs:enumeration value="firmware"/>
-			<xs:enumeration value="flow"/>
-			<xs:enumeration value="flow_text"/>
 			<xs:enumeration value="font"/>
 			<xs:enumeration value="fonts"/>
 			<xs:enumeration value="gcode"/>
 			<xs:enumeration value="gcodes"/>
-			<xs:enumeration value="has_tool"/>
 			<xs:enumeration value="heater"/>
 			<xs:enumeration value="heater_count"/>
 			<xs:enumeration value="heaters"/>
@@ -142,10 +137,19 @@
 			<xs:enumeration value="input"/>
 			<xs:enumeration value="ip"/>
 			<xs:enumeration value="is_folder"/>
+			<xs:enumeration value="job.cancel_control"/>
 			<xs:enumeration value="job.elapsed"/>
+			<xs:enumeration value="job.elapsed_text"/>
 			<xs:enumeration value="job.file"/>
+			<xs:enumeration value="job.finished"/>
+			<xs:enumeration value="job.latest_file"/>
+			<xs:enumeration value="job.pause_control"/>
+			<xs:enumeration value="job.print_again_control"/>
 			<xs:enumeration value="job.progress"/>
 			<xs:enumeration value="job.remaining"/>
+			<xs:enumeration value="job.remaining_text"/>
+			<xs:enumeration value="job.resume_control"/>
+			<xs:enumeration value="job.thumbnail"/>
 			<xs:enumeration value="jog_usable"/>
 			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="keyboard_layout"/>
@@ -162,9 +166,13 @@
 			<xs:enumeration value="levelling_usable"/>
 			<xs:enumeration value="load_text"/>
 			<xs:enumeration value="loaded"/>
+			<xs:enumeration value="machine.connection"/>
 			<xs:enumeration value="machine.job_active"/>
+			<xs:enumeration value="machine.name"/>
 			<xs:enumeration value="machine.printing"/>
+			<xs:enumeration value="machine.state"/>
 			<xs:enumeration value="machine.status"/>
+			<xs:enumeration value="machine.summary"/>
 			<xs:enumeration value="machine_position_mode"/>
 			<xs:enumeration value="maps"/>
 			<xs:enumeration value="max"/>
@@ -175,7 +183,12 @@
 			<xs:enumeration value="move.axes"/>
 			<xs:enumeration value="move.babystep"/>
 			<xs:enumeration value="move.extrusion_factor"/>
+			<xs:enumeration value="move.flow"/>
+			<xs:enumeration value="move.flow_text"/>
 			<xs:enumeration value="move.speed_factor"/>
+			<xs:enumeration value="move.speed_requested"/>
+			<xs:enumeration value="move.speed_text"/>
+			<xs:enumeration value="move.speed_top"/>
 			<xs:enumeration value="name"/>
 			<xs:enumeration value="nav.screen"/>
 			<xs:enumeration value="network_shown"/>
@@ -196,16 +209,13 @@
 			<xs:enumeration value="password"/>
 			<xs:enumeration value="password_open"/>
 			<xs:enumeration value="password_title"/>
-			<xs:enumeration value="pause"/>
 			<xs:enumeration value="poll_interval"/>
 			<xs:enumeration value="position"/>
 			<xs:enumeration value="primary.chroma"/>
 			<xs:enumeration value="primary.lightness"/>
 			<xs:enumeration value="primary_hue"/>
-			<xs:enumeration value="print_again"/>
 			<xs:enumeration value="progress_source"/>
 			<xs:enumeration value="progress_sources"/>
-			<xs:enumeration value="remaining"/>
 			<xs:enumeration value="requested"/>
 			<xs:enumeration value="reset_text"/>
 			<xs:enumeration value="response.open"/>
@@ -214,7 +224,6 @@
 			<xs:enumeration value="response.title"/>
 			<xs:enumeration value="response.type"/>
 			<xs:enumeration value="responses.count"/>
-			<xs:enumeration value="resume"/>
 			<xs:enumeration value="retract_usable"/>
 			<xs:enumeration value="rotation"/>
 			<xs:enumeration value="rotations"/>
@@ -247,9 +256,6 @@
 			<xs:enumeration value="speed_dialog.pad.text"/>
 			<xs:enumeration value="speed_dialog.pad_shown"/>
 			<xs:enumeration value="speed_dialog.title"/>
-			<xs:enumeration value="speed_requested"/>
-			<xs:enumeration value="speed_text"/>
-			<xs:enumeration value="speed_top"/>
 			<xs:enumeration value="ssh"/>
 			<xs:enumeration value="ssid"/>
 			<xs:enumeration value="stage"/>
@@ -282,7 +288,6 @@
 			<xs:enumeration value="tiles"/>
 			<xs:enumeration value="time"/>
 			<xs:enumeration value="title"/>
-			<xs:enumeration value="tool"/>
 			<xs:enumeration value="tools"/>
 			<xs:enumeration value="update.can_cancel"/>
 			<xs:enumeration value="update.ok_text"/>
@@ -420,7 +425,7 @@
 			<xs:enumeration value="job.babystep"/>
 			<xs:enumeration value="job.cancel"/>
 			<xs:enumeration value="job.close_babystep"/>
-			<xs:enumeration value="job.close_dialog"/>
+			<xs:enumeration value="job.close_cancel"/>
 			<xs:enumeration value="job.pause"/>
 			<xs:enumeration value="job.print_again"/>
 			<xs:enumeration value="job.resume"/>
@@ -603,6 +608,7 @@
 			<xs:enumeration value="files_macros"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
+			<xs:enumeration value="job_cancel"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="numberpad"/>
@@ -613,7 +619,6 @@
 			<xs:enumeration value="settings_general"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_wifi"/>
-			<xs:enumeration value="status_bar"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extrusion"/>
 		</xs:restriction>
@@ -666,6 +671,7 @@
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_cancel"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
@@ -755,6 +761,7 @@
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_cancel"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
@@ -868,6 +875,7 @@
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_cancel"/>
 			<xs:enumeration value="lv_arc"/>
 			<xs:enumeration value="lv_bar"/>
 			<xs:enumeration value="lv_button"/>
@@ -7246,6 +7254,14 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="job_cancel">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/job_cancel.xml, with presenter job_cancel.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="move">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move.xml, with presenter move.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -9017,7 +9033,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="status_bar">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar/status_bar.xml, with presenter status_bar.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar/status_bar.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

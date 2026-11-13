@@ -3,8 +3,11 @@
  */
 
 #include "MachineSource.h"
+#include "Hardware/Duet.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
+#include "i18n/i18n.h"
+#include <fmt/format.h>
 
 namespace UI::Xml
 {
@@ -22,16 +25,35 @@ namespace UI::Xml
 		f.field("machine.job_active",
 				m_jobActive,
 				"1 while there is a job (running, pausing, paused, resuming or simulating), else 0");
+		f.field("machine.name", m_name, "The printer's name; empty while it isn't connected");
+		f.field("machine.connection", m_connection, "How the screen is connected to the printer, e.g. \"USB\"");
+		f.field("machine.state", m_state, "The printer's state, translated, e.g. \"Idle\"");
+		f.field("machine.summary", m_summary, "The connection and the state, e.g. \"USB - Idle\"");
 	}
 
 	void MachineSource::onInit()
 	{
 		registerEventListener<EventType::Status>(this, &MachineSource::statusChanged);
+		registerEventListener<EventType::NetworkName>([this]() { nameChanged(); });
 	}
 
 	void MachineSource::update()
 	{
 		statusChanged(OM::GetStatus());
+		nameChanged();
+	}
+
+	void MachineSource::onConnect()
+	{
+		update();
+		showState("connected");
+	}
+
+	void MachineSource::clear()
+	{
+		statusChanged(OM::GetStatus());
+		showState("disconnected");
+		m_name.set("");
 	}
 
 	void MachineSource::statusChanged(const OM::PrinterStatus& status)
@@ -39,10 +61,18 @@ namespace UI::Xml
 		m_status.set(OM::GetStatusText());
 		m_printing.set(OM::IsPrintingStatus(status) && status != OM::PrinterStatus::paused ? 1 : 0);
 		m_jobActive.set(OM::IsPrintingStatus(status) ? 1 : 0);
+		showState(OM::GetStatusText());
 	}
 
-	void MachineSource::clear()
+	void MachineSource::showState(std::string_view state)
 	{
-		update();
+		m_connection.set(_(Comm::DUET.GetCommunicationTypeName()));
+		m_state.set(_(fmt::format("state.{:s}", state)));
+		m_summary.set(fmt::format("{:s} - {:s}", m_connection.get(), m_state.get()));
+	}
+
+	void MachineSource::nameChanged()
+	{
+		m_name.set(OM::GetPrinterName());
 	}
 } // namespace UI::Xml

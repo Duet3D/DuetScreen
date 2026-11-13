@@ -7,14 +7,15 @@
   never overlap. The temperatures are spans so the tool and the temperatures share a baseline whatever the theme's
   fonts.
 
-  Fields:   status, name, has_tool, tool, heaters, fault (see src/UI/Presenters/StatusBar/StatusBarPresenter.h)
+  Data:     machine.summary, machine.name (src/UI/Xml/Data/MachineSource.h); current_tool.*
+            (src/UI/Xml/Data/ToolSource.h)
 -->
-<component presenter="status_bar">
+<component>
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">
-		<lv_label name="status" bind_text="status" align="left_mid"/>
+		<lv_label name="status" bind_text="machine.summary" align="left_mid"/>
 
 		<!-- Long names scroll -->
-		<lv_label name="name" bind_text="name" align="center" long_mode="scroll_circular"
+		<lv_label name="name" bind_text="machine.name" align="center" long_mode="scroll_circular"
 				  style_max_width="40%" style_text_align="center"/>
 
 		<lv_obj name="right" align="right_mid" width="content" height="content" style_max_width="30%"
@@ -28,10 +29,10 @@
 			</ds_layout>
 
 			<lv_spangroup name="temperatures" width="content" height="content" style_text_align="right">
-				<bind_flag_if_eq subject="has_tool" flag="hidden" ref_value="0"/>
-				<bind_style_if_eq name="text_warning" subject="fault" ref_value="1"/>
-				<lv_spangroup-span bind_text="tool" style="text_emphasis"/>
-				<lv_spangroup-span bind_text="heaters"/>
+				<bind_flag_if_eq subject="current_tool.shown" flag="hidden" ref_value="0"/>
+				<bind_style_if_eq name="text_warning" subject="current_tool.fault" ref_value="1"/>
+				<lv_spangroup-span bind_text="current_tool.label" style="text_emphasis"/>
+				<lv_spangroup-span bind_text="current_tool.heaters"/>
 			</lv_spangroup>
 		</lv_obj>
 	</view>

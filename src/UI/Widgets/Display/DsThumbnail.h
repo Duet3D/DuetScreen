@@ -41,7 +41,7 @@ namespace UI::Xml
 		/** `bind_src` observer */
 		static void srcObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		/** Something in the parent changed size or place: fit the parent's content height again */
+		/** The parent, or something in it, changed size or place: fit the parent's content height again */
 		static void parentChangedCb(lv_event_t* e);
 
 		/** Set the width for the parent's content height and the image's aspect ratio */
