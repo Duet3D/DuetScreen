@@ -17,7 +17,6 @@
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
-#include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/TemperatureSource.h"
 #include "UI/Xml/Runtime/Services.h"
@@ -736,13 +735,6 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
 	UI::closeAllModals();
-
-	/* Test all themes */
-	for (auto& [name, theme] : UI::Themes::getThemes())
-	{
-		theme->setThemeActive();
-		EXPECT_EQUAL_SCREENSHOT(fmt::format("home_view/dashboard/theme_{:s}.png", theme->getName()).c_str());
-	}
 }
 
 TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)

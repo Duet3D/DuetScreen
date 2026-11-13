@@ -27,9 +27,8 @@ namespace UI::Xml
 			{.name = "ds_keyboard",
 			 .extends = "lv_obj",
 			 .description = "An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and "
-							"types into it.",
-			 .example =
-				 R"(<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="40%" hidden="true"/>)",
+							"types into it, so it is usually written `hidden=\"true\"`.",
+			 .example = R"(<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="200"/>)",
 			 .attributes = {{"mode", "Key layout: `text` (default), `text_upper` or `number`"}}},
 			xmlCreate,
 			xmlApply);

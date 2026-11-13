@@ -1,28 +1,35 @@
 /*
  * test_xml_ui_api.cpp
  *
- * The UI API reference, docs/XML_UI_API.md, and its schema, docs/XML_UI.xsd, are generated from the code
- * (src/UI/Xml/Api). These tests check that the committed copies match the code; when one doesn't, the file is
- * rewritten and the test fails, so the change shows in `git diff` to be reviewed and committed. They also lint the
- * built-in bundle against the reference.
+ * The UI API reference, docs/XML_UI_API.md, its schema, docs/XML_UI.xsd, and the built-in themes,
+ * docs/XML_UI_THEMES.md, are generated from the code (src/UI/Xml/Api). These tests check that the committed copies
+ * match the code; when one doesn't, the file is rewritten and the test fails, so the change shows in `git diff` to be
+ * reviewed and committed. Their pictures are reference images (tests/ref_imgs/xml_ui_api/), compared like every other
+ * screenshot: a changed one is written beside it as `_err`, for run_tests.py to review. The tests also lint the
+ * built-in bundle.
  *
  * Presenters and global actions are registered for the life of the program, so the reference must be built in a
  * process that has registered only the firmware's own: ctest runs each test in a process of its own. Running the test
  * binary directly, filter to this suite (`--gtest_filter='XmlUiApi.*'`).
  */
 
+#include "UI/Core/Model.h"
+#include "UI/Xml/Api/ApiImages.h"
 #include "UI/Xml/Api/ApiLint.h"
 #include "UI/Xml/Api/ApiMarkdown.h"
 #include "UI/Xml/Api/ApiReference.h"
 #include "UI/Xml/Api/ApiXsd.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <set>
 #include <sstream>
+#include <thread>
 #include <unistd.h>
 
 namespace
@@ -30,11 +37,31 @@ namespace
 	// Relative to the repository, where tests run
 	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md"; // The reference
 	constexpr const char* SCHEMA_PATH = "docs/XML_UI.xsd";		 // Its schema
+	constexpr const char* THEMES_PATH = "docs/XML_UI_THEMES.md"; // The built-in themes
+	constexpr const char* IMAGE_ROOT = "../tests/ref_imgs/";	 // The reference images, from docs/
+
+	/** Object model replies describing the printer the views are pictured with */
+	constexpr const char* SAMPLE_PRINTER[] = {
+		"tests/object_model/test_bench/model_boards_v.json",
+		"tests/object_model/test_bench/model_directories_v.json",
+		"tests/object_model/test_bench/model_fans_v.json",
+		"tests/object_model/test_bench/model_heat_v.json",
+		"tests/object_model/job/model_job_printing_layer_2.json",
+		"tests/object_model/test_bench/model_move_vn.json",
+		"tests/object_model/test_bench/model_network_v.json",
+		"tests/object_model/test_bench/model_sensors_v.json",
+		"tests/object_model/test_bench/model_spindles_v.json",
+		"tests/object_model/job/model_state_printing.json",
+		"tests/object_model/test_bench/model_tools_v.json",
+		"tests/object_model/test_bench/model_volumes_v.json",
+		"tests/object_model/test_bench/model_all_d99f.json",
+		"tests/object_model/rr_filelist/example1.json",
+	};
 
 	/** The contents of `path`, or empty if it can't be read */
 	std::string readFile(const char* path)
 	{
-		std::ifstream file(path);
+		std::ifstream file(path, std::ios::binary);
 		std::stringstream text;
 		text << file.rdbuf();
 		return text.str();
@@ -121,10 +148,60 @@ TEST_F(XmlUiApi, DescribesEveryKindOfName)
 	EXPECT_NE(std::find(reference.fonts.begin(), reference.fonts.end(), "font_header"), reference.fonts.end());
 }
 
-/* docs/XML_UI_API.md matches the code; if not, it is rewritten for review */
+/* docs/XML_UI_API.md and docs/XML_UI_THEMES.md match the code, and their pictures the reference images */
 TEST_F(XmlUiApi, ReferenceIsUpToDate)
 {
-	expectUpToDate(REFERENCE_PATH, UI::Xml::Api::toMarkdown(UI::Xml::Api::build()) + "\n");
+	// The printer the views are pictured with: the one the home view screenshots use
+	for (const char* file : SAMPLE_PRINTER)
+	{
+		load_model_data_from_file(file);
+	}
+	const auto reference = UI::Xml::Api::build();
+
+	// Deliver the events a view causes, then those of the threads it starts (the WiFi scanner posts its networks
+	// when its scan, instant in simulation, finishes), so every picture is drawn with everything there
+	const auto settle = []
+	{
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	};
+	// The pictures show the release firmware, as the Test preset builds it. A developer build shows more (developer
+	// settings, the console's shell), so its pictures differ and aren't compared; its Markdown is the same.
+#if DEVELOPER_MODE || DEBUG_BORDERS || ENABLE_CONSOLE_SHELL
+	constexpr bool comparePictures = false;
+#else
+	constexpr bool comparePictures = true;
+#endif
+	const auto images = UI::Xml::Api::render(reference,
+											 settle,
+											 [&](const std::string& file)
+											 {
+												 if (comparePictures)
+												 {
+													 EXPECT_EQUAL_PICTURE(file.c_str());
+												 }
+											 });
+	EXPECT_FALSE(images.themes.empty());
+	EXPECT_FALSE(images.views.empty());
+
+	// Pictures of things that are gone (a changed picture's `_err` is run_tests.py's to clean up)
+	const std::set<std::string> drawn(images.files.begin(), images.files.end());
+	const std::filesystem::path root = REF_IMGS_PATH;
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(root / UI::Xml::Api::IMAGES_DIR))
+	{
+		const std::string file = std::filesystem::relative(entry.path(), root).generic_string();
+		if (comparePictures && entry.is_regular_file() && !file.ends_with("_err.png") && !drawn.contains(file))
+		{
+			std::filesystem::remove(entry.path());
+			ADD_FAILURE() << entry.path().string() << " pictures nothing any more and has been removed: commit that";
+		}
+	}
+
+	expectUpToDate(REFERENCE_PATH, UI::Xml::Api::toMarkdown(reference, images, IMAGE_ROOT) + "\n");
+	expectUpToDate(THEMES_PATH, UI::Xml::Api::toThemesMarkdown(reference, images, IMAGE_ROOT) + "\n");
 }
 
 /* docs/XML_UI.xsd matches the code; if not, it is rewritten for review */

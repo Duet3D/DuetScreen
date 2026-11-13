@@ -40,7 +40,8 @@ namespace UI::Xml
 				   AttributeKind::Subject},
 				  {"bind_selected",
 				   "Follow an int subject for the index of the option shown chosen, kept when the options change",
-				   AttributeKind::Subject}}},
+				   AttributeKind::Subject}},
+			 .exampleSubjects = {{"filaments", "string", "PLA\nPETG\nABS"}, {"filament_text", "string", "PLA"}}},
 			xmlCreate,
 			xmlApply);
 	}

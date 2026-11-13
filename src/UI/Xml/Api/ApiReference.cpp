@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+#include <map>
+#include <set>
 
 namespace UI::Xml::Api
 {
@@ -105,19 +107,58 @@ namespace UI::Xml::Api
 		}
 
 		/** Every loaded component */
+		/** Add to `uses` each use, by `user`, of the components in `names`, in `element` and its descendants */
+		void collectUses(const Element& element,
+						 const std::string& user,
+						 const std::set<std::string, std::less<>>& names,
+						 std::map<std::string, std::vector<Use>>& uses)
+		{
+			const auto use = [&](const std::string* name, Use::As as, const std::string* presenter = nullptr)
+			{
+				if (name && names.contains(*name))
+				{
+					uses[*name].push_back({.by = user, .as = as, .presenter = presenter ? *presenter : ""});
+				}
+			};
+			if (element.tag == "view")
+			{
+				use(element.attr("extends"), Use::As::Base);
+			}
+			else if (element.tag == "ds_view")
+			{
+				use(element.attr("view"), Use::As::View, element.attr("presenter"));
+			}
+			else
+			{
+				use(&element.tag, Use::As::Element);
+			}
+			use(element.attr("item"), Use::As::Item);
+			for (const auto& child : element.children)
+			{
+				collectUses(child, user, names, uses);
+			}
+		}
+
+		/** Every loaded component, with its props and where it is used */
 		std::vector<Component> components()
 		{
 			std::vector<Component> result;
+			std::map<std::string, Element> roots;
 			for (const auto& [name, info] : getComponents())
 			{
 				Component& component = result.emplace_back(Component{.name = name,
 																	 .presenter = info.presenter,
 																	 .bundle = info.bundle,
 																	 .source = info.source.generic_string()});
-				// The file loaded, so it parses; its props are the `<prop>`s of its `<api>`
+				// The file loaded, so it parses
 				std::string error;
-				const auto root = parseXmlFile(component.source, error);
-				const Element* api = root ? root->child("api") : nullptr;
+				auto root = parseXmlFile(component.source, error);
+				if (!root)
+				{
+					continue;
+				}
+				// Its props are the `<prop>`s of its `<api>`
+				const Element* api = root->child("api");
 				for (const auto& prop : api ? api->children : std::vector<Element>{})
 				{
 					const std::string* propName = prop.attr("name");
@@ -130,6 +171,22 @@ namespace UI::Xml::Api
 					component.props.push_back(
 						{.name = *propName, .type = type ? *type : "", .defaultValue = fallback ? *fallback : ""});
 				}
+				roots.emplace(name, std::move(*root));
+			}
+
+			std::set<std::string, std::less<>> names;
+			for (const auto& component : result)
+			{
+				names.insert(component.name);
+			}
+			std::map<std::string, std::vector<Use>> uses;
+			for (const auto& [name, root] : roots)
+			{
+				collectUses(root, name, names, uses);
+			}
+			for (auto& component : result)
+			{
+				component.uses = std::move(uses[component.name]);
 			}
 			return result;
 		}
@@ -158,6 +215,112 @@ namespace UI::Xml::Api
 				}
 			}
 			return fmt::format("{}", fmt::join(parts, " "));
+		}
+
+		/** `change` as written in a `<color>` attribute: "+0.1", "*0.5" or "0.3" */
+		std::string describeChange(const Themes::ColorAdjustment::Change& change)
+		{
+			using Op = Themes::ColorAdjustment::Change::Op;
+			const char* prefix = change.op == Op::Add		 ? (change.amount < 0 ? "" : "+")
+								 : change.op == Op::Multiply ? "*"
+															 : "";
+			return fmt::format("{:s}{:g}", prefix, change.amount);
+		}
+
+		/** `adjustment` as its `<color>` element's attributes, e.g. "primary lightness=+0.1 when=dark" */
+		std::string describeAdjustment(const Themes::ColorAdjustment& adjustment)
+		{
+			using When = Themes::ColorAdjustment::When;
+			std::string text = adjustment.color;
+			if (!adjustment.from.empty())
+			{
+				text += fmt::format(" from={:s}", adjustment.from);
+			}
+			if (adjustment.lightness)
+			{
+				text += fmt::format(" lightness={:s}", describeChange(*adjustment.lightness));
+			}
+			if (adjustment.chroma)
+			{
+				text += fmt::format(" chroma={:s}", describeChange(*adjustment.chroma));
+			}
+			if (adjustment.when != When::Always)
+			{
+				text += adjustment.when == When::Dark ? " when=dark" : " when=light";
+			}
+			return text;
+		}
+
+		/** `font` as text, e.g. "18 px, weight 700, bold"; what it leaves to its parent theme is left out */
+		std::string describeFont(const Themes::FontSpec& font)
+		{
+			std::vector<std::string> parts;
+			if (font.size)
+			{
+				parts.push_back(fmt::format("{} px", *font.size));
+			}
+			if (font.weight)
+			{
+				parts.push_back(*font.weight == 0 ? "the face's own weight" : fmt::format("weight {}", *font.weight));
+			}
+			if (font.style)
+			{
+				parts.push_back(*font.style);
+			}
+			return fmt::format("{}", fmt::join(parts, ", "));
+		}
+
+		/** Every loaded theme as its file sets it, the root of the active theme first */
+		std::vector<Theme> themes(const std::string& root)
+		{
+			std::vector<std::string> names;
+			// The loaded files are found through the chains of the themes users can choose, and the root
+			for (const auto name : Themes::getThemeNames())
+			{
+				for (const Themes::ThemeFile* file : Themes::getThemeChain(name))
+				{
+					if (std::find(names.begin(), names.end(), file->name) == names.end())
+					{
+						names.push_back(file->name);
+					}
+				}
+			}
+			std::sort(names.begin(),
+					  names.end(),
+					  [&](const std::string& a, const std::string& b)
+					  { return (a == root) != (b == root) ? a == root : a < b; });
+
+			std::vector<Theme> result;
+			for (const auto& name : names)
+			{
+				const auto chain = Themes::getThemeChain(name);
+				if (chain.empty())
+				{
+					continue;
+				}
+				const Themes::ThemeFile& file = *chain.back();
+				Theme& theme = result.emplace_back(Theme{.name = file.name,
+														 .extends = file.extends,
+														 .abstract = file.abstract,
+														 .source = file.source.generic_string(),
+														 .palette = {file.palette.begin(), file.palette.end()},
+														 .colours = {},
+														 .fonts = {},
+														 .consts = {}});
+				for (const auto& adjustment : file.colors)
+				{
+					theme.colours.push_back(describeAdjustment(adjustment));
+				}
+				for (const auto& [fontName, font] : file.fonts)
+				{
+					theme.fonts.push_back(fmt::format("{:s}: {:s}", fontName, describeFont(font)));
+				}
+				for (const auto& [constName, value] : file.consts)
+				{
+					theme.consts.push_back({.name = constName, .value = value});
+				}
+			}
+			return result;
 		}
 
 		/** Fill in the styles, consts and colours, described from the root of the active theme */
@@ -189,6 +352,12 @@ namespace UI::Xml::Api
 		}
 	} // namespace
 
+	bool Component::isView() const
+	{
+		return uses.empty() ||
+			   std::any_of(uses.begin(), uses.end(), [](const Use& use) { return use.as == Use::As::View; });
+	}
+
 	Reference build()
 	{
 		Reference reference;
@@ -204,6 +373,7 @@ namespace UI::Xml::Api
 		reference.components = components();
 		reference.nativeViews = NativeViews::names();
 		describeTheme(reference);
+		reference.themes = themes(reference.rootTheme);
 		for (const auto name : ThemeStyles::fontNames())
 		{
 			reference.fonts.emplace_back(name);

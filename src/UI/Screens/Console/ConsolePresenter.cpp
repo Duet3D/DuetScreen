@@ -8,6 +8,7 @@
 #include "Subscribers/ResponseSubscribers.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Runtime/Services.h"
+#include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
 #include <cctype>
@@ -132,7 +133,7 @@ namespace UI
 					  [&](GcodeRow& row, size_t i)
 					  {
 						  row.gcode.set(matches[i]->gcode);
-						  row.description.set(matches[i]->helpText);
+						  row.description.set(_(matches[i]->helpKey));
 					  });
 	}
 } // namespace UI

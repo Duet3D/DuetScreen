@@ -1819,7 +1819,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_keyboard">
-		<xs:annotation><xs:documentation>An on-screen keyboard with DuetScreen's key layouts. A `&lt;ds_textarea&gt;` brings it up and types into it. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>An on-screen keyboard with DuetScreen's key layouts. A `&lt;ds_textarea&gt;` brings it up and types into it, so it is usually written `hidden=&quot;true&quot;`. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attribute name="mode" type="xs:string">

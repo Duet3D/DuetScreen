@@ -19,6 +19,9 @@
  * the values given there. Actions are looked for in the presenters of every enclosing view, then the global actions.
  * A component used in several places is checked in each.
  *
+ * Each widget's example (WidgetSpec::example) is checked too, as it is documentation and the source of its picture.
+ * It is a snippet from somewhere in the UI, so its names may be any presenter's as well as its sample subjects'.
+ *
  * Attributes themselves are not checked: whether `<lv_label long_mode>` exists is the XML engine's to say, and it
  * warns about unknown ones as it builds the view.
  */
@@ -34,7 +37,7 @@ namespace UI::Xml::Api
 	/** A name a component uses that the UI doesn't provide there */
 	struct LintIssue
 	{
-		std::string file;	 // The component's file
+		std::string file;	 // The component's file, or e.g. "ds_slider example" for a widget's example
 		int line = 0;		 // Line of the element that uses the name
 		std::string message; // What is wrong, and where the component was used, e.g. "in fan_screen › fans"
 

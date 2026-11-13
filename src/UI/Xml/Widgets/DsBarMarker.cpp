@@ -52,11 +52,16 @@ namespace UI::Xml
 				 "when released (the marker shows the dragged value until the subject changes), or tap it to raise "
 				 "`clicked`; a drag doesn't raise `clicked`.",
 			 .example =
-				 R"(<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
-               label_format="{} °C" align="left_mid" y="-30">
-	<action trigger="clicked" name="heaters.set_active"/>
-	<action trigger="value_confirmed" name="heaters.set_active"/>
-</ds_bar_marker>)",
+				 R"(<lv_obj width="400" height="100" scrollable="false">
+	<ds_bar name="current" bind_value="current_value" bind_min="scale_min" bind_max="scale_max"
+			width="100%" height="15" align="center"/>
+	<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
+				   label_format="{} °C" align="left_mid" y="-30">
+		<style name="input"/>
+		<action trigger="clicked" name="heaters.set_active"/>
+		<action trigger="value_confirmed" name="heaters.set_active"/>
+	</ds_bar_marker>
+</lv_obj>)",
 			 .attributes = {{"bar",
 							 "Name of the sibling bar it marks, written before the marker. The bar spans its parent's "
 							 "width (e.g. width=\"100%\"), as the marker is placed by percentages of that width"},
@@ -65,7 +70,11 @@ namespace UI::Xml
 							{"bind_min", "Follow an int subject for the bottom of the scale", AttributeKind::Subject},
 							{"bind_max", "Follow an int subject for the top of the scale", AttributeKind::Subject},
 							{"bind_value", "Follow an int subject for the value marked", AttributeKind::Subject},
-							{"label_format", "fmt format for the value's text (default \"{}\")"}}},
+							{"label_format", "fmt format for the value's text (default \"{}\")"}},
+			 .exampleSubjects = {{"current_value", "int", "180"},
+								 {"active", "int", "210"},
+								 {"scale_min", "int", "0"},
+								 {"scale_max", "int", "300"}}},
 			xmlCreate,
 			xmlApply);
 	}

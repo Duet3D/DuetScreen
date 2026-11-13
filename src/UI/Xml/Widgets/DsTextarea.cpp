@@ -50,7 +50,8 @@ namespace UI::Xml
 				 "key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and "
 				 "ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text().",
 			 .example =
-				 R"(<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode">
+				 R"(<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
+			 width="300">
 	<action trigger="value_changed" name="alert.input"/>
 </ds_textarea>)",
 			 .attributes =
@@ -77,7 +78,8 @@ namespace UI::Xml
 				  {"placeholder", "Text shown while the box is empty"},
 				  {"placeholder_tag",
 				   "Translation key for the placeholder, instead of `placeholder`",
-				   AttributeKind::Translation}}},
+				   AttributeKind::Translation}},
+			 .exampleSubjects = {{"alert.input", "string", "M115"}, {"alert.keyboard_mode", "string", "text"}}},
 			xmlCreate,
 			xmlApply);
 	}

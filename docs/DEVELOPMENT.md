@@ -372,6 +372,8 @@ The UI has image-based regression tests that render components/views and compare
 - Test sources: `tests/src/test_cases/UI/`
 - Reference images: `tests/ref_imgs/`
 - On mismatch, a new image is created next to the reference with the suffix `_err`.
+- A missing reference is created from what is drawn.
+- `EXPECT_EQUAL_SCREENSHOT(path)` compares the whole screen. `EXPECT_EQUAL_PICTURE(path)` compares the display at whatever size it is: to picture one widget, cut the display down to it with `lv_display_set_resolution()` first (see `src/UI/Xml/Api/ApiImages.cpp`). A picture whose size changed is written as `_err` too.
 
 A test suite would look like this:
 ```cpp

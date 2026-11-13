@@ -36,7 +36,8 @@ namespace UI::Xml
 									  "Follow an int subject for the top of the range, e.g. a heater's maximum",
 									  AttributeKind::Subject},
 									 {"bind_value", "Follow an int subject for the value", AttributeKind::Subject},
-									 {"label_format", "fmt format for the value's text (default \"{}\")"}}},
+									 {"label_format", "fmt format for the value's text (default \"{}\")"}},
+					  .exampleSubjects = {{"progress", "int", "42"}}},
 					 xmlCreate,
 					 xmlApply);
 	}

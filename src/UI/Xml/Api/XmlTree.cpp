@@ -88,8 +88,11 @@ namespace UI::Xml::Api
 		}
 		std::stringstream buffer;
 		buffer << file.rdbuf();
-		const std::string text = buffer.str();
+		return parseXmlText(buffer.str(), error);
+	}
 
+	std::optional<Element> parseXmlText(const std::string& text, std::string& error)
+	{
 		ParseState state;
 		state.parser = XML_ParserCreate(nullptr);
 		XML_SetUserData(state.parser, &state);

@@ -883,6 +883,8 @@ Also takes every `lv_obj` attribute.
 <ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>
 ```
 
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar.png)
+
 | Attribute | Description |
 | --- | --- |
 | `min` | Bottom of the range (default 0) |
@@ -899,12 +901,19 @@ A value marked on a bar, such as a heater's target temperature above its current
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
-               label_format="{} °C" align="left_mid" y="-30">
-	<action trigger="clicked" name="heaters.set_active"/>
-	<action trigger="value_confirmed" name="heaters.set_active"/>
-</ds_bar_marker>
+<lv_obj width="400" height="100" scrollable="false">
+	<ds_bar name="current" bind_value="current_value" bind_min="scale_min" bind_max="scale_max"
+			width="100%" height="15" align="center"/>
+	<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
+				   label_format="{} °C" align="left_mid" y="-30">
+		<style name="input"/>
+		<action trigger="clicked" name="heaters.set_active"/>
+		<action trigger="value_confirmed" name="heaters.set_active"/>
+	</ds_bar_marker>
+</lv_obj>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar_marker.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -927,6 +936,8 @@ Also takes every `lv_obj` attribute.
 	<action trigger="clicked" name="fans.set_speed" arg="100"/>
 </ds_button>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_button.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -951,6 +962,8 @@ Also takes every `lv_dropdown` attribute.
 </ds_dropdown>
 ```
 
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_dropdown.png)
+
 | Attribute | Description |
 | --- | --- |
 | `bind_options` | Follow a text subject holding the options, one per line |
@@ -964,8 +977,11 @@ A line graph of a history, with a legend whose buttons show and hide series. Ser
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"/>
+<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"
+		  width="400" height="250"/>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_graph.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -982,8 +998,10 @@ A colour map of a surface, such as a bed's height map, with X and Y scales, a gr
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_heatmap bind_surface="surface" bind_title="title" resolution="200"/>
+<ds_heatmap bind_surface="surface" bind_title="title" resolution="200" width="400" height="300"/>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_heatmap.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -998,8 +1016,11 @@ A `<ds_slider>` for a hue, 0 to 360, whose track shows every hue at a lightness 
 Also takes every `ds_slider` attribute.
 
 ```xml
-<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"/>
+<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"
+			   width="100%"/>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_hue_slider.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -1016,19 +1037,23 @@ Also takes every `lv_image` attribute.
 <ds_icon icon="folder.png" width="72" height="72"/>
 ```
 
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_icon.png)
+
 | Attribute | Description |
 | --- | --- |
 | `icon` | Icon file from the icon set, e.g. "folder.png" |
 
 ### ds_keyboard
 
-An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and types into it.
+An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and types into it, so it is usually written `hidden="true"`.
 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="40%" hidden="true"/>
+<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="200"/>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_keyboard.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -1082,12 +1107,14 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
-         bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max">
+		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
-		<ds_list list="objects" item="object_rect" width="100%" height="100%"/>
+		<ds_list list="objects" item="job_object_rect" width="100%" height="100%"/>
 	</ds_plot_layer>
 </ds_plot>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_plot.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -1140,10 +1167,13 @@ A slider with a label, its value and -/+ buttons, and optionally a number pad. R
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_slider min="0" max="100" increment="1" decimals="0" label_tag="fan.speed" bind_value="requested" numberpad="true">
-	<action trigger="value_confirmed" name="fans.set_speed"/>
+<ds_slider label_tag="settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
+		   numberpad="true" send="change" width="100%">
+	<action trigger="value_confirmed" name="settings.brightness"/>
 </ds_slider>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_slider.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -1168,15 +1198,17 @@ A row of tab buttons over the selected tab's content. Each tab is a `<ds_tabs-ta
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_tabs width="100%" height="100%">
+<ds_tabs width="100%" height="200">
 	<ds_tabs-tab name="macros" title_tag="file.macros">
-		…the tab's content…
+		<lv_label text="The first tab's content"/>
 	</ds_tabs-tab>
 	<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
-		…
+		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
 </ds_tabs>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_tabs.png)
 
 ### ds_tabs-tab
 
@@ -1198,10 +1230,13 @@ A text box that brings up an on-screen keyboard while it is being edited. The ke
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode">
+<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
+			 width="300">
 	<action trigger="value_changed" name="alert.input"/>
 </ds_textarea>
 ```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_textarea.png)
 
 | Attribute | Description |
 | --- | --- |
@@ -1244,6 +1279,8 @@ Also takes every `lv_obj` attribute.
 </ds_toggle>
 ```
 
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_toggle.png)
+
 ### ds_view
 
 A view inside a screen, e.g. a page of the home screen, registered with navigation as its `name` (default: its `view`) so it can be opened with `nav.open`. A view starts hidden, like any screen that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns.
@@ -1279,222 +1316,296 @@ Written `<action>` inside any widget: run the named action when the widget raise
 
 The components of the built-in bundle. A user bundle replaces one by giving its own the same name; a component is used as an element (`<fan_card/>`) or as a list's `item`.
 
-| Component | Presenter | Props | File |
-| --- | --- | --- | --- |
-| `alert_axis` |  |  | [alert_axis.xml](../assets/ui/components/alert_axis.xml) |
-| `alert_choice` |  |  | [alert_choice.xml](../assets/ui/components/alert_choice.xml) |
-| `axis_position` |  |  | [axis_position.xml](../assets/ui/components/axis_position.xml) |
-| `babystep` | `babystep` |  | [babystep.xml](../assets/ui/components/babystep.xml) |
-| `babystep_step` |  |  | [babystep_step.xml](../assets/ui/components/babystep_step.xml) |
-| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | [confirm_dialog.xml](../assets/ui/components/confirm_dialog.xml) |
-| `console` | `console` |  | [console.xml](../assets/ui/screens/console.xml) |
-| `console_gcode` |  |  | [console_gcode.xml](../assets/ui/components/console_gcode.xml) |
-| `console_line` |  |  | [console_line.xml](../assets/ui/components/console_line.xml) |
-| `control_screen` |  |  | [control_screen.xml](../assets/ui/screens/control_screen.xml) |
-| `dashboard` |  |  | [dashboard.xml](../assets/ui/screens/dashboard.xml) |
-| `extruder` | `extruder` |  | [extruder.xml](../assets/ui/components/extruder.xml) |
-| `fan_card` |  |  | [fan_card.xml](../assets/ui/components/fan_card.xml) |
-| `fan_screen` | `fans` |  | [fan_screen.xml](../assets/ui/screens/fan_screen.xml) |
-| `file_browser` |  |  | [file_browser.xml](../assets/ui/components/file_browser.xml) |
-| `file_crumb` |  |  | [file_crumb.xml](../assets/ui/components/file_crumb.xml) |
-| `file_dialog` |  |  | [file_dialog.xml](../assets/ui/components/file_dialog.xml) |
-| `file_row` |  |  | [file_row.xml](../assets/ui/components/file_row.xml) |
-| `file_tile` |  |  | [file_tile.xml](../assets/ui/components/file_tile.xml) |
-| `files_screen` |  |  | [files_screen.xml](../assets/ui/screens/files_screen.xml) |
-| `heater_card` |  |  | [heater_card.xml](../assets/ui/components/heater_card.xml) |
-| `heater_row` |  |  | [heater_row.xml](../assets/ui/components/heater_row.xml) |
-| `heightmap` | `heightmap` |  | [heightmap.xml](../assets/ui/screens/heightmap.xml) |
-| `heightmap_file` |  |  | [heightmap_file.xml](../assets/ui/components/heightmap_file.xml) |
-| `home_screen` |  |  | [home_screen.xml](../assets/ui/screens/home_screen.xml) |
-| `job_object_item` |  |  | [job_object_item.xml](../assets/ui/components/job_object_item.xml) |
-| `job_object_rect` |  |  | [job_object_rect.xml](../assets/ui/components/job_object_rect.xml) |
-| `job_status` | `job_status` |  | [job_status.xml](../assets/ui/components/job_status.xml) |
-| `move` | `move` |  | [move.xml](../assets/ui/screens/move.xml) |
-| `move_axis` |  |  | [move_axis.xml](../assets/ui/components/move_axis.xml) |
-| `move_distance` |  |  | [move_distance.xml](../assets/ui/components/move_distance.xml) |
-| `move_feedrate` |  |  | [move_feedrate.xml](../assets/ui/components/move_feedrate.xml) |
-| `move_xy` |  |  | [move_xy.xml](../assets/ui/components/move_xy.xml) |
-| `notifications` | `notifications` |  | [notifications.xml](../assets/ui/components/notifications.xml) |
-| `object_cancel` | `object_cancel` |  | [object_cancel.xml](../assets/ui/screens/object_cancel.xml) |
-| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | [question_dialog.xml](../assets/ui/components/question_dialog.xml) |
-| `setting_dropdown` |  | `options`, `selected`, `action` | [setting_dropdown.xml](../assets/ui/components/setting_dropdown.xml) |
-| `settings_connection` | `settings_connection` |  | [settings_connection.xml](../assets/ui/screens/settings_connection.xml) |
-| `settings_developer` | `settings_developer` |  | [settings_developer.xml](../assets/ui/screens/settings_developer.xml) |
-| `settings_display` | `settings_display` |  | [settings_display.xml](../assets/ui/screens/settings_display.xml) |
-| `settings_general` | `settings_general` |  | [settings_general.xml](../assets/ui/screens/settings_general.xml) |
-| `settings_screen` |  |  | [settings_screen.xml](../assets/ui/screens/settings_screen.xml) |
-| `side_bar` |  |  | [side_bar.xml](../assets/ui/components/side_bar.xml) |
-| `status_bar` | `status_bar` |  | [status_bar.xml](../assets/ui/components/status_bar.xml) |
-| `temperature` | `temperature` |  | [temperature.xml](../assets/ui/screens/temperature.xml) |
-| `temperature_extruder` |  |  | [temperature_extruder.xml](../assets/ui/components/temperature_extruder.xml) |
-| `temperature_heater` |  |  | [temperature_heater.xml](../assets/ui/components/temperature_heater.xml) |
-| `temperature_heater_card` |  |  | [temperature_heater_card.xml](../assets/ui/components/temperature_heater_card.xml) |
-| `temperature_tool` |  |  | [temperature_tool.xml](../assets/ui/components/temperature_tool.xml) |
-| `theme_preview` | `theme_preview` |  | [theme_preview.xml](../assets/ui/components/theme_preview.xml) |
-| `theme_swatch` |  |  | [theme_swatch.xml](../assets/ui/components/theme_swatch.xml) |
-| `tool_card` |  |  | [tool_card.xml](../assets/ui/components/tool_card.xml) |
-| `tool_list` |  |  | [tool_list.xml](../assets/ui/components/tool_list.xml) |
-| `value_choice` |  |  | [value_choice.xml](../assets/ui/components/value_choice.xml) |
-| `value_selector` |  | `selector`, `title`, `value`, `choices` | [value_selector.xml](../assets/ui/components/value_selector.xml) |
-| `wifi_network` |  |  | [wifi_network.xml](../assets/ui/components/wifi_network.xml) |
-| `wifi_selector` | `wifi` |  | [wifi_selector.xml](../assets/ui/components/wifi_selector.xml) |
+| Component | Presenter | Props | Used by | File |
+| --- | --- | --- | --- | --- |
+| `alert_axis` |  |  | `notifications` | [alert_axis.xml](../assets/ui/components/alert_axis.xml) |
+| `alert_choice` |  |  | `notifications` | [alert_choice.xml](../assets/ui/components/alert_choice.xml) |
+| `axis_position` |  |  | `job_status` | [axis_position.xml](../assets/ui/components/axis_position.xml) |
+| [`babystep`](#control_screen) | `babystep` |  | `job_status`, `move` | [babystep.xml](../assets/ui/components/babystep.xml) |
+| `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/babystep_step.xml) |
+| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_status` | [confirm_dialog.xml](../assets/ui/components/confirm_dialog.xml) |
+| [`console`](#console) | `console` |  | `home_screen` | [console.xml](../assets/ui/screens/console.xml) |
+| `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console_gcode.xml) |
+| `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console_line.xml) |
+| [`control_screen`](#control_screen) |  |  | `home_screen` | [control_screen.xml](../assets/ui/screens/control_screen.xml) |
+| [`dashboard`](#home_screen) |  |  | `home_screen` | [dashboard.xml](../assets/ui/screens/dashboard.xml) |
+| [`extruder`](#temperature) | `extruder` |  | `temperature` | [extruder.xml](../assets/ui/components/extruder.xml) |
+| `fan_card` |  |  | `fan_screen` | [fan_card.xml](../assets/ui/components/fan_card.xml) |
+| [`fan_screen`](#fan_screen) | `fans` |  | `control_screen` | [fan_screen.xml](../assets/ui/screens/fan_screen.xml) |
+| [`file_browser`](#files_screen) |  |  | `dashboard`, `files_screen` | [file_browser.xml](../assets/ui/components/file_browser.xml) |
+| `file_crumb` |  |  | `file_browser` | [file_crumb.xml](../assets/ui/components/file_crumb.xml) |
+| `file_dialog` |  |  | `file_browser` | [file_dialog.xml](../assets/ui/components/file_dialog.xml) |
+| `file_row` |  |  | `file_browser` | [file_row.xml](../assets/ui/components/file_row.xml) |
+| `file_tile` |  |  | `file_browser` | [file_tile.xml](../assets/ui/components/file_tile.xml) |
+| [`files_screen`](#files_screen) |  |  | `home_screen` | [files_screen.xml](../assets/ui/screens/files_screen.xml) |
+| `heater_card` |  |  | `tool_list` | [heater_card.xml](../assets/ui/components/heater_card.xml) |
+| `heater_row` |  |  | `heater_card`, `tool_card` | [heater_row.xml](../assets/ui/components/heater_row.xml) |
+| [`heightmap`](#heightmap) | `heightmap` |  | `control_screen` | [heightmap.xml](../assets/ui/screens/heightmap.xml) |
+| `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/heightmap_file.xml) |
+| [`home_screen`](#home_screen) |  |  |  | [home_screen.xml](../assets/ui/screens/home_screen.xml) |
+| `job_object_item` |  |  | `object_cancel` | [job_object_item.xml](../assets/ui/components/job_object_item.xml) |
+| `job_object_rect` |  |  | `object_cancel` | [job_object_rect.xml](../assets/ui/components/job_object_rect.xml) |
+| [`job_status`](#job_status) | `job_status` |  | `dashboard` | [job_status.xml](../assets/ui/components/job_status.xml) |
+| [`move`](#control_screen) | `move` |  | `control_screen` | [move.xml](../assets/ui/screens/move.xml) |
+| `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/move_axis.xml) |
+| `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/move_distance.xml) |
+| `move_feedrate` |  |  | `move` | [move_feedrate.xml](../assets/ui/components/move_feedrate.xml) |
+| `move_xy` |  |  | `move` | [move_xy.xml](../assets/ui/components/move_xy.xml) |
+| [`notifications`](#home_screen) | `notifications` |  | `home_screen` | [notifications.xml](../assets/ui/components/notifications.xml) |
+| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control_screen` | [object_cancel.xml](../assets/ui/screens/object_cancel.xml) |
+| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/question_dialog.xml) |
+| `setting_dropdown` |  | `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [setting_dropdown.xml](../assets/ui/components/setting_dropdown.xml) |
+| [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings_screen` | [settings_connection.xml](../assets/ui/screens/settings_connection.xml) |
+| [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings_screen` | [settings_developer.xml](../assets/ui/screens/settings_developer.xml) |
+| [`settings_display`](#settings_display) | `settings_display` |  | `settings_screen` | [settings_display.xml](../assets/ui/screens/settings_display.xml) |
+| [`settings_general`](#settings_screen) | `settings_general` |  | `settings_screen` | [settings_general.xml](../assets/ui/screens/settings_general.xml) |
+| [`settings_screen`](#settings_screen) |  |  | `home_screen` | [settings_screen.xml](../assets/ui/screens/settings_screen.xml) |
+| [`side_bar`](#home_screen) |  |  | `home_screen` | [side_bar.xml](../assets/ui/components/side_bar.xml) |
+| [`status_bar`](#home_screen) | `status_bar` |  | `home_screen` | [status_bar.xml](../assets/ui/components/status_bar.xml) |
+| [`temperature`](#temperature) | `temperature` |  | `control_screen` | [temperature.xml](../assets/ui/screens/temperature.xml) |
+| `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/temperature_extruder.xml) |
+| `temperature_heater` |  |  | `temperature_heater_card`, `temperature_tool` | [temperature_heater.xml](../assets/ui/components/temperature_heater.xml) |
+| `temperature_heater_card` |  |  | `temperature` | [temperature_heater_card.xml](../assets/ui/components/temperature_heater_card.xml) |
+| `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/temperature_tool.xml) |
+| [`theme_preview`](#settings_display) | `theme_preview` |  | `settings_display` | [theme_preview.xml](../assets/ui/components/theme_preview.xml) |
+| `theme_swatch` |  |  | `theme_preview` | [theme_swatch.xml](../assets/ui/components/theme_swatch.xml) |
+| `tool_card` |  |  | `tool_list` | [tool_card.xml](../assets/ui/components/tool_card.xml) |
+| [`tool_list`](#home_screen) |  |  | `dashboard` | [tool_list.xml](../assets/ui/components/tool_list.xml) |
+| `value_choice` |  |  | `value_selector` | [value_choice.xml](../assets/ui/components/value_choice.xml) |
+| `value_selector` |  | `selector`, `title`, `value`, `choices` | `extruder` | [value_selector.xml](../assets/ui/components/value_selector.xml) |
+| `wifi_network` |  |  | `wifi_selector` | [wifi_network.xml](../assets/ui/components/wifi_network.xml) |
+| [`wifi_selector`](#settings_connection) | `wifi` |  | `settings_connection` | [wifi_selector.xml](../assets/ui/components/wifi_selector.xml) |
 
 C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `numberpad`, `speed_factor`
 
+### Views
+
+The components shown as views of their own, drawn with sample printer data in the `duetscreen` theme. A view that shows in another's picture (the status bar in the home screen's) is pictured only there.
+
+#### console
+
+![console](../tests/ref_imgs/xml_ui_api/views/console.png)
+
+#### control_screen
+
+Also shows `babystep`, `move`.
+
+![control_screen](../tests/ref_imgs/xml_ui_api/views/control_screen.png)
+
+#### fan_screen
+
+![fan_screen](../tests/ref_imgs/xml_ui_api/views/fan_screen.png)
+
+#### files_screen
+
+Also shows `file_browser`.
+
+![files_screen](../tests/ref_imgs/xml_ui_api/views/files_screen.png)
+
+#### heightmap
+
+![heightmap](../tests/ref_imgs/xml_ui_api/views/heightmap.png)
+
+#### home_screen
+
+Also shows `dashboard`, `notifications`, `side_bar`, `status_bar`, `tool_list`.
+
+![home_screen](../tests/ref_imgs/xml_ui_api/views/home_screen.png)
+
+#### job_status
+
+![job_status](../tests/ref_imgs/xml_ui_api/views/job_status.png)
+
+#### object_cancel
+
+![object_cancel](../tests/ref_imgs/xml_ui_api/views/object_cancel.png)
+
+#### settings_connection
+
+Also shows `wifi_selector`.
+
+![settings_connection](../tests/ref_imgs/xml_ui_api/views/settings_connection.png)
+
+#### settings_developer
+
+![settings_developer](../tests/ref_imgs/xml_ui_api/views/settings_developer.png)
+
+#### settings_display
+
+Also shows `theme_preview`.
+
+![settings_display](../tests/ref_imgs/xml_ui_api/views/settings_display.png)
+
+#### settings_screen
+
+Also shows `settings_general`.
+
+![settings_screen](../tests/ref_imgs/xml_ui_api/views/settings_screen.png)
+
+#### temperature
+
+Also shows `extruder`.
+
+![temperature](../tests/ref_imgs/xml_ui_api/views/temperature.png)
+
 ## Theme
 
-Themes are described in [XML_UI.md](XML_UI.md#themes). Everything here follows theme changes.
+Themes are described in [XML_UI.md](XML_UI.md#themes), and every built-in theme, with what it changes and how it looks, in [XML_UI_THEMES.md](XML_UI_THEMES.md). Everything here follows theme changes.
 
 ### Styles
 
 Used with `<style name="…"/>`. The definition is the one in the `base` theme, which every theme extends; other themes change some of them.
 
-| Style | Definition in `base` |
-| --- | --- |
-| `base` | bg_opa=0 border_post=true |
-| `bg_dark` | bg_color=#bg_dark bg_opa=100% bg_grad_dir=none |
-| `bg` | bg_color=#bg bg_opa=100% bg_grad_dir=none |
-| `bg_light` | bg_color=#bg_light bg_opa=100% bg_grad_dir=none |
-| `bg_color_primary` | bg_color=#primary bg_opa=100% bg_grad_dir=none |
-| `bg_color_primary_muted` | bg_color=#primary_muted bg_opa=100% bg_grad_dir=none |
-| `bg_color_secondary` | bg_color=#secondary bg_opa=100% bg_grad_dir=none |
-| `bg_color_secondary_muted` | bg_color=#secondary_muted bg_opa=100% bg_grad_dir=none |
-| `bg_color_success` | bg_color=#success bg_opa=100% bg_grad_dir=none |
-| `bg_color_warning` | bg_color=#warning bg_opa=100% bg_grad_dir=none |
-| `bg_color_error` | bg_color=#error bg_opa=100% bg_grad_dir=none |
-| `bg_color_header` | bg_color=0xffffff bg_opa=10% |
-| `bg_color_list_item` | bg_color=#bg bg_opa=100% bg_grad_color=#bg_light |
-| `bg_modal` | bg_color=#bg bg_opa=70% |
-| `text` | text_color=#text text_font=font_normal |
-| `text_muted` | text_color=#text_muted text_font=font_subdued |
-| `text_emphasis` | text_color=#text text_font=font_emphasis |
-| `text_header` | text_color=#text_header text_font=font_header |
-| `text_warning` | text_color=#error text_font=font_emphasis |
-| `border` | border_color=#border border_width=#border_width border_opa=100% border_side=full |
-| `border_muted` | border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
-| `border_highlight` | border_color=#highlight border_width=#border_width border_opa=100% border_side=full |
-| `border_color_primary` | border_color=#primary border_width=#border_width border_opa=100% border_side=full |
-| `border_color_secondary` | border_color=#secondary border_width=#border_width border_opa=100% border_side=full |
-| `border_color_card` | *(not set)* |
-| `screen` | bg_color=#bg_dark bg_opa=100% |
-| `scrollbar` | bg_color=#bg_light border_color=#border border_width=1 radius=circle pad_all=7dpx width=5dpx bg_opa=40% |
-| `scrollbar_scrolled` | bg_opa=100% |
-| `card` | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border border_width=#border_width border_opa=100% border_side=full |
-| `tab_card` | *(not set)* |
-| `modal` | *(not set)* |
-| `btn` | radius=#radius bg_opa=100% bg_color=#primary |
-| `btn_checked` | merge=border_highlight bg_grad_dir=none |
-| `icon` | *(not set)* |
-| `icon_recolor` | recolor=#text recolor_opa=100% |
-| `pressed` | recolor=0x000000 recolor_opa=35 |
-| `disabled` | recolor=#bg recolor_opa=50% |
-| `pad_base` | pad_all=#pad pad_row=#pad pad_column=#pad |
-| `pad_zero` | pad_all=0 pad_row=0 pad_column=0 |
-| `pad_tiny` | pad_all=#pad_tiny pad_row=#pad_tiny pad_column=#pad_tiny |
-| `pad_small` | pad_all=#pad_small pad_gap=#pad_small |
-| `pad_normal` | pad_all=#pad pad_row=#pad pad_column=#pad |
-| `pad_large` | pad_all=#pad_large pad_row=#pad_large pad_column=#pad_large |
-| `pad_gap` | pad_row=10dpx pad_column=10dpx |
-| `line_space_large` | text_line_space=20dpx |
-| `text_align_center` | text_align=center |
-| `outline_primary` | outline_color=#primary outline_width=#outline_width outline_pad=#outline_width outline_opa=50% |
-| `outline_secondary` | outline_color=#secondary outline_width=#outline_width outline_opa=50% |
-| `circle` | radius=circle |
-| `no_radius` | radius=0 |
-| `no_border` | border_width=0 |
-| `clip_corner` | clip_corner=true border_post=true |
-| `rotary_scroll` | rotary_sensitivity=8192 |
-| `grow` | transform_width=3dpx transform_height=3dpx |
-| `transition_delayed` | *(not set)* |
-| `transition_normal` | *(not set)* |
-| `anim` | anim_duration=200 |
-| `anim_fast` | anim_duration=120 |
-| `actionBtn` | bg_opa=100% bg_color=#secondary |
-| `input` | border_color=#border border_width=1 pad_hor=20 pad_ver=0 text_align=center |
-| `long_press` | *(not set)* |
-| `draggable` | transition_props=transform_width transform_height transition_duration=200ms transition_easing=ease_in_out transition_delay=100ms |
-| `dragging` | transform_width=20 transform_height=20 border_color=0xffffff border_opa=30% border_width=20 transition_props=outline_width transition_duration=#transition_time transition_easing=ease_in_out |
-| `drag_complete` | outline_color=0xffffff outline_width=3 |
-| `knob` | bg_color=#primary bg_opa=100% pad_all=6dpx radius=circle |
-| `arc_indic` | arc_color=#highlight arc_width=15dpx arc_rounded=true |
-| `arc_indic_primary` | arc_color=#primary |
-| `bar` | bg_color=#highlight bg_opa=100% radius=circle |
-| `bar_indic` | radius=circle |
-| `btnm_bg` | *(not set)* |
-| `btnm_btn` | merge=border_muted bg_color=#bg_light bg_grad_dir=none shadow_width=0 radius=#radius |
-| `btnm_btn_checked` | bg_color=#primary bg_opa=100% text_color=#text |
-| `chart_series` | line_width=3dpx radius=3dpx width=8dpx height=8dpx pad_column=2dpx |
-| `chart_indic` | radius=circle width=8dpx height=8dpx bg_color=#primary bg_opa=100% |
-| `chart_bg` | border_width=#border_width border_color=#highlight border_opa=100% border_post=false pad_column=10dpx line_color=#highlight |
-| `dropdown` | pad_ver=#pad |
-| `dropdown_list` | max_height=260 |
-| `cb_marker` | pad_all=3dpx border_width=#border_width border_color=#primary bg_color=#bg bg_opa=100% radius=2 |
-| `cb_marker_checked` | bg_image_src=symbol_ok |
-| `bg_switch` | bg_color=#bg_light bg_opa=100% radius=circle |
-| `switch_knob` | pad_all=-4dpx bg_color=#text radius=circle |
-| `line` | line_width=1 line_color=#highlight |
-| `table` | radius=0 |
-| `table_cell` | bg_color=#bg bg_opa=100% text_color=#text border_width=1dpx border_color=#highlight border_side=top\|bottom |
-| `text_area` | pad_all=#pad |
-| `ta_cursor` | border_color=#text border_width=2dpx pad_left=-1dpx border_side=left anim_duration=400 |
-| `ta_placeholder` | text_color=#text_muted |
-| `calendar_btnm_bg` | pad_all=#pad_small pad_gap=1 |
-| `calendar_btnm_day` | border_width=1dpx border_color=#highlight bg_color=#bg bg_opa=20% |
-| `calendar_header` | pad_hor=#pad_small pad_top=#pad_small pad_bottom=#pad_tiny pad_gap=#pad_small |
-| `canvas` | merge=bg merge=border |
-| `menu_bg` | pad_all=0 pad_gap=0 radius=0 clip_corner=true border_side=none |
-| `menu_cont` | pad_hor=#pad_small pad_ver=#pad_small pad_gap=#pad_small border_width=1dpx border_opa=10% border_color=#text border_side=none |
-| `menu_sidebar_cont` | pad_all=0 pad_gap=0 border_width=1dpx border_opa=10% border_color=#text border_side=right |
-| `menu_main_cont` | pad_all=0 pad_gap=0 |
-| `menu_page` | pad_hor=0 pad_gap=0 |
-| `menu_header_cont` | pad_hor=#pad_small pad_ver=#pad_tiny pad_gap=#pad_small |
-| `menu_header_btn` | pad_hor=#pad_tiny pad_ver=#pad_tiny shadow_opa=0 bg_opa=0 text_color=#text |
-| `menu_section` | radius=#radius clip_corner=true bg_opa=100% bg_color=#bg text_color=#text |
-| `menu_pressed` | bg_opa=20% bg_color=#bg_light |
-| `menu_separator` | bg_opa=0 pad_ver=#pad_tiny |
-| `msgbox_backdrop_bg` | *(not set)* |
-| `keyboard_button` | merge=border_muted bg_color=#bg_light shadow_width=0 radius=#radius |
-| `keyboard_button_checked_bg` | bg_color=#primary bg_opa=100% text_color=#text |
-| `list_bg` | pad_hor=#pad pad_ver=0 pad_gap=0 clip_corner=true |
-| `list_btn` | border_width=1 border_color=#border border_side=bottom pad_all=#pad_small pad_column=#pad_small |
-| `list_item_grow` | transform_width=#pad |
-| `tab_bg_focus` | outline_pad=-#border_width |
-| `tab_btn` | border_color=#primary border_width=4 border_side=bottom pad_top=4 |
-| `led` | bg_opa=100% bg_color=0xffffff bg_grad_color=#bg_dark radius=circle shadow_width=15dpx shadow_color=0xffffff shadow_spread=5dpx |
-| `scale` | line_color=#text line_width=2dpx arc_color=#text arc_width=2dpx length=6dpx |
-| `slider` | height=20 bg_color=#highlight bg_opa=100% radius=#radius |
-| `slider_indic` | radius=#radius |
-| `slider_knob` | radius=#radius border_color=#primary_muted border_width=#border_width |
-| `sidebar` | *(not set)* |
-| `sidebar_btn` | *(not set)* |
-| `console_btn_anim` | recolor=#secondary |
-| `estop` | bg_color=0xf44336 text_color=0xffffff radius=circle |
-| `file` | merge=btn merge=bg_light merge=border |
-| `folder` | copy=btn |
-| `unhomed` | bg_color=0xfb9514 border_width=0 |
-| `temperature_bar` | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
-| `temperature_bar_indic` | bg_color=#border bg_opa=100% |
-| `tool_list` | *(not set)* |
-| `tool_list_tool` | copy=card |
-| `tool_list_heater` | pad_all=0 |
-| `tool_selected` | outline_color=#primary outline_opa=100% outline_width=3 shadow_color=rgb_darken(#primary, 10) shadow_opa=50% shadow_width=0 shadow_offset_x=-#shadow_offset shadow_offset_y=#shadow_offset |
-| `tab_button` | *(not set)* |
-| `slider_buttons` | width=40 height=40 |
-| `list_header` | *(not set)* |
-| `list_title` | merge=text_emphasis |
-| `graph_legend` | min_width=150 |
-| `bar_label_bg` | bg_color=#bg_light bg_opa=50% radius=#radius pad_hor=#pad |
-| `bar_label` | *(not set)* |
-| `object_cancel_base` | copy=card bg_color=#bg_light bg_opa=50% |
-| `object_cancel_current` | bg_color=#primary bg_opa=100% |
-| `object_cancel_cancelled` | bg_color=#error bg_opa=100% |
-| `debug_borders` | outline_color=#text outline_width=1 outline_opa=100% |
+The swatch is a box with some text, with the style added, in the `duetscreen` theme; a style that changes nothing on its own (a state's, or a part's) has none.
+
+| Style | Swatch | Definition in `base` |
+| --- | --- | --- |
+| `base` |  | bg_opa=0 border_post=true |
+| `bg_dark` |  | bg_color=#bg_dark bg_opa=100% bg_grad_dir=none |
+| `bg` | ![bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg.png) | bg_color=#bg bg_opa=100% bg_grad_dir=none |
+| `bg_light` | ![bg_light](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_light.png) | bg_color=#bg_light bg_opa=100% bg_grad_dir=none |
+| `bg_color_primary` | ![bg_color_primary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_primary.png) | bg_color=#primary bg_opa=100% bg_grad_dir=none |
+| `bg_color_primary_muted` | ![bg_color_primary_muted](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_primary_muted.png) | bg_color=#primary_muted bg_opa=100% bg_grad_dir=none |
+| `bg_color_secondary` | ![bg_color_secondary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_secondary.png) | bg_color=#secondary bg_opa=100% bg_grad_dir=none |
+| `bg_color_secondary_muted` | ![bg_color_secondary_muted](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_secondary_muted.png) | bg_color=#secondary_muted bg_opa=100% bg_grad_dir=none |
+| `bg_color_success` | ![bg_color_success](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_success.png) | bg_color=#success bg_opa=100% bg_grad_dir=none |
+| `bg_color_warning` | ![bg_color_warning](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_warning.png) | bg_color=#warning bg_opa=100% bg_grad_dir=none |
+| `bg_color_error` | ![bg_color_error](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_error.png) | bg_color=#error bg_opa=100% bg_grad_dir=none |
+| `bg_color_header` | ![bg_color_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_header.png) | bg_color=0xffffff bg_opa=10% |
+| `bg_color_list_item` | ![bg_color_list_item](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_list_item.png) | bg_color=#bg bg_opa=100% bg_grad_color=#bg_light |
+| `bg_modal` | ![bg_modal](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_modal.png) | bg_color=#bg bg_opa=70% |
+| `text` | ![text](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text.png) | text_color=#text text_font=font_normal |
+| `text_muted` | ![text_muted](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_muted.png) | text_color=#text_muted text_font=font_subdued |
+| `text_emphasis` | ![text_emphasis](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_emphasis.png) | text_color=#text text_font=font_emphasis |
+| `text_header` | ![text_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_header.png) | text_color=#text_header text_font=font_header |
+| `text_warning` | ![text_warning](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_warning.png) | text_color=#error text_font=font_emphasis |
+| `border` | ![border](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/border.png) | border_color=#border border_width=#border_width border_opa=100% border_side=full |
+| `border_muted` | ![border_muted](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/border_muted.png) | border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
+| `border_highlight` | ![border_highlight](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/border_highlight.png) | border_color=#highlight border_width=#border_width border_opa=100% border_side=full |
+| `border_color_primary` | ![border_color_primary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/border_color_primary.png) | border_color=#primary border_width=#border_width border_opa=100% border_side=full |
+| `border_color_secondary` | ![border_color_secondary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/border_color_secondary.png) | border_color=#secondary border_width=#border_width border_opa=100% border_side=full |
+| `border_color_card` |  | *(not set)* |
+| `screen` |  | bg_color=#bg_dark bg_opa=100% |
+| `scrollbar` | ![scrollbar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar.png) | bg_color=#bg_light border_color=#border border_width=1 radius=circle pad_all=7dpx width=5dpx bg_opa=40% |
+| `scrollbar_scrolled` | ![scrollbar_scrolled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar_scrolled.png) | bg_opa=100% |
+| `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border border_width=#border_width border_opa=100% border_side=full |
+| `tab_card` |  | *(not set)* |
+| `modal` |  | *(not set)* |
+| `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#primary |
+| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | merge=border_highlight bg_grad_dir=none |
+| `icon` |  | *(not set)* |
+| `icon_recolor` | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/icon_recolor.png) | recolor=#text recolor_opa=100% |
+| `pressed` | ![pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/pressed.png) | recolor=0x000000 recolor_opa=35 |
+| `disabled` | ![disabled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/disabled.png) | recolor=#bg recolor_opa=50% |
+| `pad_base` |  | pad_all=#pad pad_row=#pad pad_column=#pad |
+| `pad_zero` |  | pad_all=0 pad_row=0 pad_column=0 |
+| `pad_tiny` |  | pad_all=#pad_tiny pad_row=#pad_tiny pad_column=#pad_tiny |
+| `pad_small` |  | pad_all=#pad_small pad_gap=#pad_small |
+| `pad_normal` |  | pad_all=#pad pad_row=#pad pad_column=#pad |
+| `pad_large` |  | pad_all=#pad_large pad_row=#pad_large pad_column=#pad_large |
+| `pad_gap` |  | pad_row=10dpx pad_column=10dpx |
+| `line_space_large` |  | text_line_space=20dpx |
+| `text_align_center` |  | text_align=center |
+| `outline_primary` | ![outline_primary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/outline_primary.png) | outline_color=#primary outline_width=#outline_width outline_pad=#outline_width outline_opa=50% |
+| `outline_secondary` | ![outline_secondary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/outline_secondary.png) | outline_color=#secondary outline_width=#outline_width outline_opa=50% |
+| `circle` |  | radius=circle |
+| `no_radius` |  | radius=0 |
+| `no_border` |  | border_width=0 |
+| `clip_corner` |  | clip_corner=true border_post=true |
+| `rotary_scroll` |  | rotary_sensitivity=8192 |
+| `grow` |  | transform_width=3dpx transform_height=3dpx |
+| `transition_delayed` |  | *(not set)* |
+| `transition_normal` |  | *(not set)* |
+| `anim` |  | anim_duration=200 |
+| `anim_fast` |  | anim_duration=120 |
+| `actionBtn` | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/actionBtn.png) | bg_opa=100% bg_color=#secondary |
+| `input` | ![input](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/input.png) | border_color=#border border_width=1 pad_hor=20 pad_ver=0 text_align=center |
+| `long_press` |  | *(not set)* |
+| `draggable` |  | transition_props=transform_width transform_height transition_duration=200ms transition_easing=ease_in_out transition_delay=100ms |
+| `dragging` | ![dragging](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dragging.png) | transform_width=20 transform_height=20 border_color=0xffffff border_opa=30% border_width=20 transition_props=outline_width transition_duration=#transition_time transition_easing=ease_in_out |
+| `drag_complete` | ![drag_complete](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/drag_complete.png) | outline_color=0xffffff outline_width=3 |
+| `knob` | ![knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/knob.png) | bg_color=#primary bg_opa=100% pad_all=6dpx radius=circle |
+| `arc_indic` |  | arc_color=#highlight arc_width=15dpx arc_rounded=true |
+| `arc_indic_primary` |  | arc_color=#primary |
+| `bar` | ![bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar.png) | bg_color=#highlight bg_opa=100% radius=circle |
+| `bar_indic` |  | radius=circle |
+| `btnm_bg` |  | *(not set)* |
+| `btnm_btn` | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn.png) | merge=border_muted bg_color=#bg_light bg_grad_dir=none shadow_width=0 radius=#radius |
+| `btnm_btn_checked` | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn_checked.png) | bg_color=#primary bg_opa=100% text_color=#text |
+| `chart_series` |  | line_width=3dpx radius=3dpx width=8dpx height=8dpx pad_column=2dpx |
+| `chart_indic` | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_indic.png) | radius=circle width=8dpx height=8dpx bg_color=#primary bg_opa=100% |
+| `chart_bg` | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_bg.png) | border_width=#border_width border_color=#highlight border_opa=100% border_post=false pad_column=10dpx line_color=#highlight |
+| `dropdown` |  | pad_ver=#pad |
+| `dropdown_list` |  | max_height=260 |
+| `cb_marker` | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker.png) | pad_all=3dpx border_width=#border_width border_color=#primary bg_color=#bg bg_opa=100% radius=2 |
+| `cb_marker_checked` | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker_checked.png) | bg_image_src=symbol_ok |
+| `bg_switch` | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_switch.png) | bg_color=#bg_light bg_opa=100% radius=circle |
+| `switch_knob` |  | pad_all=-4dpx bg_color=#text radius=circle |
+| `line` |  | line_width=1 line_color=#highlight |
+| `table` |  | radius=0 |
+| `table_cell` | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/table_cell.png) | bg_color=#bg bg_opa=100% text_color=#text border_width=1dpx border_color=#highlight border_side=top\|bottom |
+| `text_area` |  | pad_all=#pad |
+| `ta_cursor` | ![ta_cursor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/ta_cursor.png) | border_color=#text border_width=2dpx pad_left=-1dpx border_side=left anim_duration=400 |
+| `ta_placeholder` | ![ta_placeholder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/ta_placeholder.png) | text_color=#text_muted |
+| `calendar_btnm_bg` |  | pad_all=#pad_small pad_gap=1 |
+| `calendar_btnm_day` | ![calendar_btnm_day](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/calendar_btnm_day.png) | border_width=1dpx border_color=#highlight bg_color=#bg bg_opa=20% |
+| `calendar_header` |  | pad_hor=#pad_small pad_top=#pad_small pad_bottom=#pad_tiny pad_gap=#pad_small |
+| `canvas` | ![canvas](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/canvas.png) | merge=bg merge=border |
+| `menu_bg` |  | pad_all=0 pad_gap=0 radius=0 clip_corner=true border_side=none |
+| `menu_cont` |  | pad_hor=#pad_small pad_ver=#pad_small pad_gap=#pad_small border_width=1dpx border_opa=10% border_color=#text border_side=none |
+| `menu_sidebar_cont` | ![menu_sidebar_cont](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_sidebar_cont.png) | pad_all=0 pad_gap=0 border_width=1dpx border_opa=10% border_color=#text border_side=right |
+| `menu_main_cont` |  | pad_all=0 pad_gap=0 |
+| `menu_page` |  | pad_hor=0 pad_gap=0 |
+| `menu_header_cont` |  | pad_hor=#pad_small pad_ver=#pad_tiny pad_gap=#pad_small |
+| `menu_header_btn` | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_header_btn.png) | pad_hor=#pad_tiny pad_ver=#pad_tiny shadow_opa=0 bg_opa=0 text_color=#text |
+| `menu_section` | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_section.png) | radius=#radius clip_corner=true bg_opa=100% bg_color=#bg text_color=#text |
+| `menu_pressed` | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_pressed.png) | bg_opa=20% bg_color=#bg_light |
+| `menu_separator` |  | bg_opa=0 pad_ver=#pad_tiny |
+| `msgbox_backdrop_bg` |  | *(not set)* |
+| `keyboard_button` | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button.png) | merge=border_muted bg_color=#bg_light shadow_width=0 radius=#radius |
+| `keyboard_button_checked_bg` | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button_checked_bg.png) | bg_color=#primary bg_opa=100% text_color=#text |
+| `list_bg` |  | pad_hor=#pad pad_ver=0 pad_gap=0 clip_corner=true |
+| `list_btn` | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_btn.png) | border_width=1 border_color=#border border_side=bottom pad_all=#pad_small pad_column=#pad_small |
+| `list_item_grow` |  | transform_width=#pad |
+| `tab_bg_focus` |  | outline_pad=-#border_width |
+| `tab_btn` | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_btn.png) | border_color=#primary border_width=4 border_side=bottom pad_top=4 |
+| `led` | ![led](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/led.png) | bg_opa=100% bg_color=0xffffff bg_grad_color=#bg_dark radius=circle shadow_width=15dpx shadow_color=0xffffff shadow_spread=5dpx |
+| `scale` |  | line_color=#text line_width=2dpx arc_color=#text arc_width=2dpx length=6dpx |
+| `slider` | ![slider](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider.png) | height=20 bg_color=#highlight bg_opa=100% radius=#radius |
+| `slider_indic` |  | radius=#radius |
+| `slider_knob` | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider_knob.png) | radius=#radius border_color=#primary_muted border_width=#border_width |
+| `sidebar` |  | *(not set)* |
+| `sidebar_btn` |  | *(not set)* |
+| `console_btn_anim` |  | recolor=#secondary |
+| `estop` | ![estop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/estop.png) | bg_color=0xf44336 text_color=0xffffff radius=circle |
+| `file` | ![file](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file.png) | merge=btn merge=bg_light merge=border |
+| `folder` | ![folder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder.png) | copy=btn |
+| `unhomed` |  | bg_color=0xfb9514 border_width=0 |
+| `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
+| `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
+| `tool_list` |  | *(not set)* |
+| `tool_list_tool` | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_list_tool.png) | copy=card |
+| `tool_list_heater` |  | pad_all=0 |
+| `tool_selected` | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_selected.png) | outline_color=#primary outline_opa=100% outline_width=3 shadow_color=rgb_darken(#primary, 10) shadow_opa=50% shadow_width=0 shadow_offset_x=-#shadow_offset shadow_offset_y=#shadow_offset |
+| `tab_button` |  | *(not set)* |
+| `slider_buttons` |  | width=40 height=40 |
+| `list_header` |  | *(not set)* |
+| `list_title` | ![list_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_title.png) | merge=text_emphasis |
+| `graph_legend` |  | min_width=150 |
+| `bar_label_bg` | ![bar_label_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label_bg.png) | bg_color=#bg_light bg_opa=50% radius=#radius pad_hor=#pad |
+| `bar_label` |  | *(not set)* |
+| `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=50% |
+| `object_cancel_current` | ![object_cancel_current](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_current.png) | bg_color=#primary bg_opa=100% |
+| `object_cancel_cancelled` | ![object_cancel_cancelled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_cancelled.png) | bg_color=#error bg_opa=100% |
+| `debug_borders` | ![debug_borders](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/debug_borders.png) | outline_color=#text outline_width=1 outline_opa=100% |
 
 ### Colours
 
 Palette colours, used as attribute values, e.g. `style_bg_color="#primary"`:
 
 `#bg_dark`, `#bg`, `#bg_light`, `#primary`, `#primary_muted`, `#secondary`, `#secondary_muted`, `#text`, `#text_muted`, `#text_header`, `#border`, `#border_muted`, `#highlight`, `#shadow`, `#success`, `#warning`, `#error`
+
+![The palette](../tests/ref_imgs/xml_ui_api/themes/duetscreen/colours.png)
 
 ### Consts
 
@@ -1515,6 +1626,8 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 ### Fonts
 
 Used as `style_text_font="…"`: `font_header`, `font_normal`, `font_emphasis`, `font_subdued`
+
+![The fonts](../tests/ref_imgs/xml_ui_api/themes/duetscreen/fonts.png)
 
 ### Images
 

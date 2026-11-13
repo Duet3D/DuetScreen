@@ -44,9 +44,9 @@ namespace UI::Xml
 							"drawing area, and `<ds_plot_rect>`s inside a layer are kept at their X/Y bounds.",
 			 .example =
 				 R"(<ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
-         bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max">
+		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
-		<ds_list list="objects" item="object_rect" width="100%" height="100%"/>
+		<ds_list list="objects" item="job_object_rect" width="100%" height="100%"/>
 	</ds_plot_layer>
 </ds_plot>)",
 			 .attributes = {{"title", "The title above the area, if there is no `title_tag`"},
@@ -63,7 +63,12 @@ namespace UI::Xml
 							{"bind_y_min", "Follow an int subject for `y_min`", AttributeKind::Subject},
 							{"bind_y_max", "Follow an int subject for `y_max`", AttributeKind::Subject},
 							{"resolution",
-							 "Pixels the grid is drawn with along each side, scaled to fit (default 200)"}}},
+							 "Pixels the grid is drawn with along each side, scaled to fit (default 200)"}},
+			 .exampleSubjects = {{"current", "string", "gear"},
+								 {"x_min", "int", "0"},
+								 {"x_max", "int", "300"},
+								 {"y_min", "int", "0"},
+								 {"y_max", "int", "200"}}},
 			xmlCreate,
 			xmlApply);
 	}

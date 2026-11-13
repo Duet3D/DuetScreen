@@ -46,12 +46,12 @@ namespace UI::Xml
 					  .extends = "lv_obj",
 					  .description = "A row of tab buttons over the selected tab's content. Each tab is a "
 									 "`<ds_tabs-tab>` inside it; the first starts selected.",
-					  .example = R"(<ds_tabs width="100%" height="100%">
+					  .example = R"(<ds_tabs width="100%" height="200">
 	<ds_tabs-tab name="macros" title_tag="file.macros">
-		…the tab's content…
+		<lv_label text="The first tab's content"/>
 	</ds_tabs-tab>
 	<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
-		…
+		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
 </ds_tabs>)"},
 					 xmlCreate,

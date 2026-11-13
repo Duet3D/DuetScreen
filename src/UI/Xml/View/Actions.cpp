@@ -322,7 +322,8 @@ namespace UI::Xml
 								 "Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by "
 								 "the current value of the subject `name`, looked up from where the `<action>` is "
 								 "written",
-								 AttributeKind::ActionArg}}},
+								 AttributeKind::ActionArg}},
+				 .exampleSubjects = {{"number", "int", "1"}}},
 				actionCreate,
 				actionApply);
 		}

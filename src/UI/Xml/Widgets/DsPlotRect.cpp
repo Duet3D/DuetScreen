@@ -24,23 +24,25 @@ namespace UI::Xml
 
 	void DsPlotRect::registerXml()
 	{
-		Widgets::add({.name = "ds_plot_rect",
-					  .extends = "lv_obj",
-					  .description =
-						  "A rectangle kept at its X/Y bounds over a `<ds_plot>`, e.g. an object on the bed. It is "
-						  "written inside a `<ds_plot_layer>` of the plot, directly or deeper (in a list row, say), "
-						  "and hidden while its bounds are outside the plot's span. It sets its own position and size.",
-					  .example = R"(<ds_plot_rect bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2"/>)",
-					  .attributes = {{"x1", "X of one corner, in the plot's units"},
-									 {"y1", "Y of that corner"},
-									 {"x2", "X of the opposite corner"},
-									 {"y2", "Y of the opposite corner"},
-									 {"bind_x1", "Follow an int subject for `x1`", AttributeKind::Subject},
-									 {"bind_y1", "Follow an int subject for `y1`", AttributeKind::Subject},
-									 {"bind_x2", "Follow an int subject for `x2`", AttributeKind::Subject},
-									 {"bind_y2", "Follow an int subject for `y2`", AttributeKind::Subject}}},
-					 xmlCreate,
-					 xmlApply);
+		Widgets::add(
+			{.name = "ds_plot_rect",
+			 .extends = "lv_obj",
+			 .description =
+				 "A rectangle kept at its X/Y bounds over a `<ds_plot>`, e.g. an object on the bed. It is "
+				 "written inside a `<ds_plot_layer>` of the plot, directly or deeper (in a list row, say), "
+				 "and hidden while its bounds are outside the plot's span. It sets its own position and size.",
+			 .example = R"(<ds_plot_rect bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2"/>)",
+			 .attributes = {{"x1", "X of one corner, in the plot's units"},
+							{"y1", "Y of that corner"},
+							{"x2", "X of the opposite corner"},
+							{"y2", "Y of the opposite corner"},
+							{"bind_x1", "Follow an int subject for `x1`", AttributeKind::Subject},
+							{"bind_y1", "Follow an int subject for `y1`", AttributeKind::Subject},
+							{"bind_x2", "Follow an int subject for `x2`", AttributeKind::Subject},
+							{"bind_y2", "Follow an int subject for `y2`", AttributeKind::Subject}},
+			 .exampleSubjects = {{"x1", "int", "50"}, {"y1", "int", "40"}, {"x2", "int", "120"}, {"y2", "int", "90"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsPlotRect::place()

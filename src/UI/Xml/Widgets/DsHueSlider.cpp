@@ -51,14 +51,18 @@ namespace UI::Xml
 				 "A `<ds_slider>` for a hue, 0 to 360, whose track shows every hue at a lightness and chroma, so the "
 				 "slider is a colour picker, e.g. for a theme's primary colour. `min` and `max` default to 0 and 360.",
 			 .example =
-				 R"(<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"/>)",
+				 R"(<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"
+			   width="100%"/>)",
 			 .attributes =
 				 {{"bind_lightness",
 				   "Follow an int subject for the OKLCH lightness the hues are shown at, in thousandths (0.65 is 650)",
 				   AttributeKind::Subject},
 				  {"bind_chroma",
 				   "Follow an int subject for the OKLCH chroma the hues are shown at, in thousandths",
-				   AttributeKind::Subject}}},
+				   AttributeKind::Subject}},
+			 .exampleSubjects = {{"primary_hue", "int", "245"},
+								 {"primary.lightness", "int", "600"},
+								 {"primary.chroma", "int", "120"}}},
 			xmlCreate,
 			xmlApply);
 	}

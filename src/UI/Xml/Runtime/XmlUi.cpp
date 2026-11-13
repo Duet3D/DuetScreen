@@ -207,6 +207,11 @@ namespace UI::Xml
 		return s_loaded.components;
 	}
 
+	const std::vector<XmlView*>& getViews()
+	{
+		return s_views;
+	}
+
 	void addView(XmlView* view)
 	{
 		s_views.push_back(view);

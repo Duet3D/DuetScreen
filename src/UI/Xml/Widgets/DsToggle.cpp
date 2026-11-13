@@ -31,7 +31,8 @@ namespace UI::Xml
 					  .example = R"(<ds_toggle>
 	<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
 	<action trigger="value_changed" name="settings.confirmations"/>
-</ds_toggle>)"},
+</ds_toggle>)",
+					  .exampleSubjects = {{"confirmations", "int", "1"}}},
 					 xmlCreate,
 					 xmlApply);
 	}

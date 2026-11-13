@@ -11,10 +11,11 @@
 #include <string_view>
 #include <vector>
 
+/** A G-code the console offers */
 struct gcode
 {
-	std::string_view gcode;
-	std::string_view helpText;
+	std::string_view gcode;	  // e.g. "G28"
+	std::string_view helpKey; // Translation key of what it does; translate it when it is shown (see i18n.h)
 };
 
 class Gcodes

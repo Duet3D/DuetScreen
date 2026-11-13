@@ -38,6 +38,14 @@ namespace UI::Xml
 		AttributeKind kind = AttributeKind::Text; // What its value names
 	};
 
+	/** A value for a subject an example binds to, so the reference can picture the example */
+	struct SampleSubject
+	{
+		std::string name;  // The subject the example binds to
+		std::string type;  // "int" or "string"
+		std::string value; // Its value in the picture
+	};
+
 	/** What a widget is, for the UI API reference */
 	struct WidgetSpec
 	{
@@ -45,7 +53,8 @@ namespace UI::Xml
 		std::string extends = {}; // The widget whose attributes it also takes, e.g. "lv_obj"; empty for none
 		std::string description;  // What it is and how it behaves
 		std::string example = {}; // A short XML example; empty for none
-		std::vector<WidgetAttribute> attributes = {}; // Its own attributes, in the order worth reading them
+		std::vector<WidgetAttribute> attributes = {};	 // Its own attributes, in the order worth reading them
+		std::vector<SampleSubject> exampleSubjects = {}; // Values for what `example` binds to, for its picture
 	};
 
 	namespace Widgets

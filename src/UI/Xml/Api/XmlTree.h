@@ -32,4 +32,7 @@ namespace UI::Xml::Api
 
 	/** The root element of the XML file at `path`, or nullopt (with `error` set) if it can't be read or parsed */
 	std::optional<Element> parseXmlFile(const std::string& path, std::string& error);
+
+	/** The root element of the XML in `text`, or nullopt (with `error` set) if it can't be parsed */
+	std::optional<Element> parseXmlText(const std::string& text, std::string& error);
 } // namespace UI::Xml::Api

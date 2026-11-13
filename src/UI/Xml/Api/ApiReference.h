@@ -70,6 +70,36 @@ namespace UI::Xml::Api
 		std::string defaultValue; // Its value when not given; empty for none
 	};
 
+	/** One place a component is used by another */
+	struct Use
+	{
+		/** How it is used */
+		enum class As
+		{
+			Element, // As an element: `<fan_card/>`
+			Item,	 // As a list's item: `<ds_list item="fan_card">`
+			View,	 // As a view: `<ds_view view="fan_screen">`
+			Base,	 // As the base of a view: `<view extends="fan_card">`
+		};
+
+		std::string by;		   // The component that uses it
+		As as = As::Element;   // How
+		std::string presenter; // For a view, the presenter `<ds_view presenter="…">` gives it; else empty
+	};
+
+	/** A theme, as its file sets it: what it changes from the theme it extends */
+	struct Theme
+	{
+		std::string name;	   // e.g. "duetscreen"
+		std::string extends;   // The theme it extends, or empty
+		bool abstract = false; // Only a base for other themes, so not offered to users
+		std::string source;	   // File it was loaded from
+		std::vector<std::pair<std::string, std::string>> palette; // Its `<palette>` attributes, as written
+		std::vector<std::string> colours;						  // Its colour adjustments, as written
+		std::vector<std::string> fonts;							  // Its fonts, e.g. "header: 18 px, weight 700, bold"
+		std::vector<Const> consts;								  // The consts it sets
+	};
+
 	/** A loaded component */
 	struct Component
 	{
@@ -78,6 +108,10 @@ namespace UI::Xml::Api
 		std::string bundle;		   // Id of the bundle it came from
 		std::string source;		   // File it was loaded from
 		std::vector<Prop> props{}; // Props it takes, in order
+		std::vector<Use> uses{};   // Where other components use it, in name order
+
+		/** Whether it is shown as a view of its own: by a `<ds_view>`, or from C++ as nothing else uses it */
+		bool isView() const;
 	};
 
 	/** Everything the XML UI provides to XML */
@@ -91,6 +125,7 @@ namespace UI::Xml::Api
 		std::vector<WidgetSpec> widgets;		  // DuetScreen widgets and elements, in name order
 		std::vector<Component> components;		  // In name order
 		std::vector<std::string> nativeViews;	  // C++ views `<ds_view view="…">` can show, in name order
+		std::vector<Theme> themes;				  // Every loaded theme, the root first, then in name order
 		std::string rootTheme;					  // The theme that styles, consts and fonts are described from
 		std::vector<Style> styles;				  // Theme styles
 		std::vector<std::string> colours;		  // Palette colour names, for `#name`

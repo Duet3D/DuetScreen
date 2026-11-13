@@ -69,4 +69,7 @@ namespace UI::Xml
 
 	/** Stop rebuilding `view` on reload. Called by XmlView. */
 	void removeView(XmlView* view);
+
+	/** Every live XmlView */
+	const std::vector<XmlView*>& getViews();
 } // namespace UI::Xml

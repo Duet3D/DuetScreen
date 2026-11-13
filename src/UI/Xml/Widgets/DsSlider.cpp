@@ -41,8 +41,9 @@ namespace UI::Xml
 							"`bind_value` are not edits and raise nothing, so a view can show live data and send "
 							"changes without echoing the data back to the printer.",
 			 .example =
-				 R"(<ds_slider min="0" max="100" increment="1" decimals="0" label_tag="fan.speed" bind_value="requested" numberpad="true">
-	<action trigger="value_confirmed" name="fans.set_speed"/>
+				 R"(<ds_slider label_tag="settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
+		   numberpad="true" send="change" width="100%">
+	<action trigger="value_confirmed" name="settings.brightness"/>
 </ds_slider>)",
 			 .attributes = {{"min", "Bottom of the range, may have a fraction (default 0)"},
 							{"max", "Top of the range, may have a fraction (default 100)"},
@@ -65,7 +66,8 @@ namespace UI::Xml
 							 "timeout longer than the slider reaches"},
 							{"numberpad",
 							 "\"true\" to type the value on the number pad (the view registered as `numberpad`) when "
-							 "the value is tapped (default false)"}}},
+							 "the value is tapped (default false)"}},
+			 .exampleSubjects = {{"brightness", "int", "60"}}},
 			xmlCreate,
 			xmlApply);
 	}

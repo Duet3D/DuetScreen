@@ -8,6 +8,7 @@
 #include "src/xml/lv_xml_widget.h"
 #include <algorithm>
 #include <cctype>
+#include <deque>
 #include <fmt/format.h>
 #include <fstream>
 #include <map>
@@ -106,13 +107,14 @@ namespace UI::Xml::Api
 					load(component);
 				}
 
-				const NameSet used = usedComponents();
-				for (const auto& [name, def] : m_components)
+				for (const auto& component : m_reference.components)
 				{
-					if (used.contains(name))
+					auto found = m_components.find(component.name);
+					if (!component.uses.empty() || found == m_components.end())
 					{
 						continue;
 					}
+					const ComponentDef& def = found->second;
 					Scope scope;
 					if (const Presenter* presenter = presenterNamed(def.presenter))
 					{
@@ -122,6 +124,7 @@ namespace UI::Xml::Api
 					const std::map<std::string, std::string> noProps;
 					instance(def, scope, noProps);
 				}
+				examples();
 
 				std::sort(m_issues.begin(),
 						  m_issues.end(),
@@ -168,35 +171,43 @@ namespace UI::Xml::Api
 				}
 			}
 
-			/** The components some other component uses (as an element, a list item, a view or a base) */
-			NameSet usedComponents() const
+			/**
+			 * Check each widget's example. An example is a snippet from somewhere in the UI, so its names are looked up
+			 * in its sample subjects, every presenter and the globals, and its actions in every presenter.
+			 */
+			void examples()
 			{
-				NameSet used;
-				for (const auto& [name, def] : m_components)
+				Scope scope;
+				for (const auto& presenter : m_reference.presenters)
 				{
-					collectUses(def.root, used);
+					scope.fields.push_back(&presenter.fields);
+					scope.handlers.push_back(&presenter);
 				}
-				return used;
-			}
-
-			/** Add to `used` the components `element` and its descendants use */
-			void collectUses(const Element& element, NameSet& used) const
-			{
-				if (m_components.contains(element.tag))
+				for (const auto& widget : m_reference.widgets)
 				{
-					used.insert(element.tag);
-				}
-				for (const char* attr : {"item", "view", "extends"})
-				{
-					const std::string* value = element.attr(attr);
-					if (value && m_components.contains(*value))
+					if (widget.example.empty())
 					{
-						used.insert(*value);
+						continue;
 					}
-				}
-				for (const auto& child : element.children)
-				{
-					collectUses(child, used);
+					// The first line of the example is on the line of the <view> it is put in
+					const std::string name = fmt::format("{:s} example", widget.name);
+					std::string error;
+					auto view = parseXmlText("<view extends=\"lv_obj\">" + widget.example + "</view>", error);
+					if (!view)
+					{
+						m_issues.push_back({.file = name, .line = 0, .message = error});
+						continue;
+					}
+					ComponentDef& def =
+						m_examples.emplace_back(ComponentDef{.name = name, .presenter = "", .file = name, .root = {}});
+					def.root.tag = "component";
+					def.root.children.push_back(std::move(*view));
+					for (const auto& subject : widget.exampleSubjects)
+					{
+						def.subjects.insert(subject.name);
+					}
+					const std::map<std::string, std::string> noProps;
+					instance(def, scope, noProps);
 				}
 			}
 
@@ -721,8 +732,9 @@ namespace UI::Xml::Api
 			NameSet m_nativeViews;											 // C++ view names
 			NameSet m_triggers;												 // Action trigger names
 			std::map<std::string, ComponentDef, std::less<>> m_components;	 // Components by name
-			std::vector<std::string> m_stack; // Components being checked, outermost first
-			std::vector<LintIssue> m_issues;  // Problems found
+			std::deque<ComponentDef> m_examples; // The widgets' examples, as components; a deque keeps them in place
+			std::vector<std::string> m_stack;	 // Components being checked, outermost first
+			std::vector<LintIssue> m_issues;	 // Problems found
 		};
 	} // namespace
 
