@@ -16,6 +16,7 @@
 #include "UI/Core/Model.h"
 #include "UI/Xml/Api/ApiImages.h"
 #include "UI/Xml/Api/ApiLint.h"
+#include "UI/Xml/Api/ApiLvgl.h"
 #include "UI/Xml/Api/ApiMarkdown.h"
 #include "UI/Xml/Api/ApiReference.h"
 #include "UI/Xml/Api/ApiXsd.h"
@@ -35,10 +36,11 @@
 namespace
 {
 	// Relative to the repository, where tests run
-	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md"; // The reference
-	constexpr const char* SCHEMA_PATH = "docs/XML_UI.xsd";		 // Its schema
-	constexpr const char* THEMES_PATH = "docs/XML_UI_THEMES.md"; // The built-in themes
-	constexpr const char* IMAGE_ROOT = "../tests/ref_imgs/";	 // The reference images, from docs/
+	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md";	  // The reference
+	constexpr const char* SCHEMA_PATH = "docs/XML_UI.xsd";			  // Its schema
+	constexpr const char* LVGL_API_PATH = "libraries/helix-xml/xmls"; // What the XML engine's own elements take
+	constexpr const char* THEMES_PATH = "docs/XML_UI_THEMES.md";	  // The built-in themes
+	constexpr const char* IMAGE_ROOT = "../tests/ref_imgs/";		  // The reference images, from docs/
 
 	/** Object model replies describing the printer the views are pictured with */
 	constexpr const char* SAMPLE_PRINTER[] = {
@@ -207,7 +209,10 @@ TEST_F(XmlUiApi, ReferenceIsUpToDate)
 /* docs/XML_UI.xsd matches the code; if not, it is rewritten for review */
 TEST_F(XmlUiApi, SchemaIsUpToDate)
 {
-	expectUpToDate(SCHEMA_PATH, UI::Xml::Api::toXsd(UI::Xml::Api::build()));
+	std::string error;
+	const auto lvgl = UI::Xml::Api::readLvglApi(LVGL_API_PATH, error);
+	ASSERT_TRUE(lvgl.has_value()) << error;
+	expectUpToDate(SCHEMA_PATH, UI::Xml::Api::toXsd(UI::Xml::Api::build(), *lvgl));
 }
 
 /* Every name the built-in bundle uses is one the UI provides where it is used */

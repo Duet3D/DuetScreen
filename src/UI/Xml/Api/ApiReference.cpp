@@ -159,6 +159,9 @@ namespace UI::Xml::Api
 				{
 					continue;
 				}
+				const Element* view = root->child("view");
+				const std::string* extends = view ? view->attr("extends") : nullptr;
+				component.extends = extends ? *extends : "lv_obj";
 				// Its props are the `<prop>`s of its `<api>`
 				const Element* api = root->child("api");
 				for (const auto& prop : api ? api->children : std::vector<Element>{})

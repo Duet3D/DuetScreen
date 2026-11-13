@@ -107,6 +107,7 @@ namespace UI::Xml::Api
 		std::string presenter;	   // Presenter it names, or empty
 		std::string bundle;		   // Id of the bundle it came from
 		std::string source;		   // File it was loaded from
+		std::string extends{};	   // What its view extends: a widget, or another component
 		std::vector<Prop> props{}; // Props it takes, in order
 		std::vector<Use> uses{};   // Where other components use it, in name order
 
