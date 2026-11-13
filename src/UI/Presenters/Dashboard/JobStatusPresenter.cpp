@@ -11,8 +11,8 @@
 #include "ObjectModel/Job.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/JobSource.h"
 #include "i18n/i18n.h"
-#include "utils/StorageHelper.h"
 #include <algorithm>
 #include <cmath>
 
@@ -20,12 +20,6 @@ namespace UI
 {
 	namespace
 	{
-		/** `seconds` as hh:mm:ss */
-		std::string clock(uint32_t seconds)
-		{
-			return fmt::format("{:02d}:{:02d}:{:02d}", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
-		}
-
 		/** `value` in thousandths of `max` */
 		int32_t permille(float value, int32_t max)
 		{
@@ -33,11 +27,6 @@ namespace UI
 				static_cast<int32_t>(std::lround(1000.0f * value / static_cast<float>(std::max(max, 1)))), 0, 1000);
 		}
 	} // namespace
-
-	void AxisPositionRow::fields(Xml::FieldVisitor& f)
-	{
-		f.field("text", text, "Letter and user position on two lines, e.g. \"X\\n0.00\"");
-	}
 
 	JobStatusPresenter::JobStatusPresenter()
 		: XmlPresenter("dashboard_job_status")
@@ -72,10 +61,7 @@ namespace UI
 	{
 		f.field("file", m_file, "The current job's file, else the last job's");
 		f.field("finished", m_finished, "1 when showing the last job (none is running), else 0");
-		f.field("progress", m_progress, "Progress, percent 0-100");
 		f.field("thumbnail", m_thumbnail, "The job's thumbnail path, or empty until it arrives");
-		f.list("axes", m_axes, "One row per axis");
-		f.field("speed_factor", m_speedFactor, "Speed override, e.g. \"100%\"");
 		f.field("speed_text", m_speedText, "Current and requested speed, e.g. \"0/0 mm/s\"");
 		f.field("speed_top",
 				m_speedTop,
@@ -83,10 +69,8 @@ namespace UI
 		f.field("speed_requested",
 				m_speedRequested,
 				"Requested speed, in thousandths of the fastest axis' maximum (0-1000)");
-		f.field("flow_factor", m_flowFactor, "Extrusion override, e.g. \"100%\"");
 		f.field("flow_text", m_flowText, "Volumetric flow, e.g. \"0.0 mm³/s\"");
 		f.field("flow", m_flow, "Volumetric flow, in thousandths of the fastest extruder's maximum (0-1000)");
-		f.field("babystep", m_babystep, "Z babystep, e.g. \"0 mm\"");
 		f.field("babystep_open", m_babystepOpen, "1 while the babystepping dialog is open");
 		f.field("elapsed", m_elapsed, "Elapsed time, e.g. \"Elapsed: 00:03:43\"");
 		f.field("remaining", m_remaining, "Time left, e.g. \"Remaining: 00:45:03\"");
@@ -108,7 +92,6 @@ namespace UI
 		registerEventListener<EventType::Status>(this, &JobStatusPresenter::showControls);
 		registerEventListener<EventType::AxesData>([this]() { showAxes(); });
 		registerEventListener<EventType::ExtruderData>([this]() { showExtruders(); });
-		registerEventListener<EventType::SpeedFactor>([this]() { showSpeedFactor(); });
 		registerEventListener<EventType::CurrentMoveRequestedSpeed>([this]() { showSpeeds(); });
 		registerEventListener<EventType::CurrentMoveTopSpeed>([this]() { showSpeeds(); });
 		registerEventListener<EventType::CurrentMoveExtrusionSpeed>([this]() { showFlow(); });
@@ -125,7 +108,6 @@ namespace UI
 		showControls(OM::GetStatus());
 		showAxes();
 		showExtruders();
-		showSpeedFactor();
 		showSpeeds();
 		showFlow();
 
@@ -159,31 +141,13 @@ namespace UI
 
 	void JobStatusPresenter::showProgress()
 	{
-		ZoneScoped;
-		uint32_t progress = 0;
-		{
-			MODEL_LOCK();
-			if (StorageHelper::getData(ID_JOB_PROGRESS_SOURCE) == OM::JobProgressSource::FILE)
-			{
-				const uint32_t size = OM::GetFileSize();
-				progress = size == 0 ? 0 : std::min<uint32_t>(100 * OM::GetFilePosition() / size, 100);
-			}
-			else
-			{
-				const uint32_t elapsed = OM::GetPrintDuration();
-				const uint32_t warmUp = OM::GetWarmUpDuration();
-				const uint32_t total = std::max<uint32_t>(OM::GetPrintTime(), OM::GetSimulatedTime());
-				progress =
-					total == 0 ? 0 : std::min<uint32_t>(100 * (elapsed > warmUp ? elapsed - warmUp : 0) / total, 100);
-			}
-		}
-		m_progress.set(static_cast<int32_t>(progress));
-		m_elapsed.set(_("status.elapsed_time", clock(OM::GetPrintDuration())));
+		m_elapsed.set(_("status.elapsed_time", Xml::JobSource::clock(OM::GetPrintDuration())));
 	}
 
 	void JobStatusPresenter::showRemaining()
 	{
-		m_remaining.set(_("status.remaining_time", clock(OM::GetPrintRemaining(OM::RemainingTimeType::AUTO))));
+		m_remaining.set(
+			_("status.remaining_time", Xml::JobSource::clock(OM::GetPrintRemaining(OM::RemainingTimeType::AUTO))));
 	}
 
 	void JobStatusPresenter::showControls(OM::PrinterStatus status)
@@ -223,63 +187,39 @@ namespace UI
 	void JobStatusPresenter::showAxes()
 	{
 		ZoneScoped;
-		MODEL_LOCK();
-		int32_t maxSpeed = 1;
-		m_axes.sync(OM::Move::GetAxisCount(),
-					[&](AxisPositionRow& row, size_t slot)
-					{
-						if (auto axis = OM::Move::GetAxisBySlot(slot))
-						{
-							row.text.set(fmt::format("{}\n{:.2f}", axis->letter[0], axis->userPosition));
-							maxSpeed = std::max(maxSpeed, axis->maxSpeed);
-						}
-					});
-		m_maxSpeed = maxSpeed;
-
-		auto z = OM::Move::GetAxisByLetter('Z');
-		m_babystep.set(_("status.babystep_value", z ? z->babystep : 0.0f));
+		{
+			MODEL_LOCK();
+			int32_t maxSpeed = 1;
+			for (size_t slot = 0; slot < OM::Move::GetAxisCount(); slot++)
+			{
+				if (auto axis = OM::Move::GetAxisBySlot(slot))
+				{
+					maxSpeed = std::max(maxSpeed, axis->maxSpeed);
+				}
+			}
+			m_maxSpeed = maxSpeed;
+		}
 		showSpeeds();
 	}
 
 	void JobStatusPresenter::showExtruders()
 	{
 		ZoneScoped;
-		uint32_t factors = 0;
-		uint32_t count = 0;
-		int32_t maxRate = 1;
-		auto add = [&](OM::Move::ExtruderAxisPtr extruder)
 		{
-			factors += static_cast<uint32_t>(std::lround(100 * extruder->factor));
-			count++;
-			maxRate = std::max(maxRate, extruder->maxSpeed);
-		};
-
-		if (auto tool = OM::GetCurrentTool())
-		{
-			tool->IterateExtruders([&](OM::Move::ExtruderAxisPtr extruder, size_t) { add(extruder); });
-			if (count > 0)
+			MODEL_LOCK();
+			// The current tool's extruders; with no tool (or none with extruders) the range stays as it was
+			int32_t maxRate = 0;
+			if (auto tool = OM::GetCurrentTool())
+			{
+				tool->IterateExtruders([&](OM::Move::ExtruderAxisPtr extruder, size_t)
+									   { maxRate = std::max(maxRate, extruder->maxSpeed); });
+			}
+			if (maxRate > 0)
 			{
 				m_maxExtrusionRate = maxRate;
 			}
 		}
-		else
-		{
-			// No tool: the average of every extruder
-			OM::Move::IterateExtruderAxesWhile(
-				[&](OM::Move::ExtruderAxisPtr extruder, size_t)
-				{
-					add(extruder);
-					return true;
-				});
-		}
-		m_flowFactor.set(_("status.flow_multiplier", count > 0 ? factors / count : 100u));
 		showFlow();
-	}
-
-	void JobStatusPresenter::showSpeedFactor()
-	{
-		m_speedFactor.set(
-			_("status.speed_multiplier", static_cast<uint32_t>(std::lround(100 * OM::Move::GetSpeedFactor()))));
 	}
 
 	void JobStatusPresenter::showSpeeds()

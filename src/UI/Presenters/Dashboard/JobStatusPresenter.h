@@ -2,8 +2,9 @@
  * JobStatusPresenter.h
  *
  * Behaviour for the job status panel (assets/ui/components/dashboard/dashboard_job_status.xml): the current (or last)
- * job with its progress and thumbnail, the tool position, speed, flow, babystepping and times, and pause, resume, print
- * again and cancel.
+ * job with its thumbnail, the speed and flow gauges and times, and pause, resume, print again and cancel. The printer
+ * data any view can show (progress, axis positions, overrides, babystep) is global: `job.*` and `move.*`
+ * (UI/Xml/Data/JobSource.h, MoveSource.h).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).
@@ -12,23 +13,12 @@
 #pragma once
 
 #include "ObjectModel/PrinterStatus.h"
-#include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <string>
 
 namespace UI
 {
-	/** One axis' position */
-	class AxisPositionRow : public Xml::Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(Xml::FieldVisitor& f) override;
-
-		Xml::StringSubject<24> text; // Letter and position on two lines
-	};
-
 	class JobStatusPresenter : public Xml::XmlPresenter
 	{
 	  public:
@@ -72,14 +62,11 @@ namespace UI
 		/** Show the controls usable in `status` */
 		void showControls(OM::PrinterStatus status);
 
-		/** Show the axes' positions, the speed range and babystepping */
+		/** Find the speed range: the fastest axis' maximum */
 		void showAxes();
 
-		/** Show the extrusion override and flow range */
+		/** Find the flow range: the fastest extruder's maximum */
 		void showExtruders();
-
-		/** Show the speed override */
-		void showSpeedFactor();
 
 		/** Show the current move's speeds */
 		void showSpeeds();
@@ -101,17 +88,12 @@ namespace UI
 
 		Xml::StringSubject<256> m_file;			// Job shown
 		Xml::IntSubject m_finished;				// 1 when showing the last job
-		Xml::IntSubject m_progress;				// 0-100
 		Xml::StringSubject<256> m_thumbnail;	// Thumbnail path, or empty
-		Xml::List<AxisPositionRow> m_axes;		// Axis positions
-		Xml::StringSubject<16> m_speedFactor;	// Speed override text
 		Xml::StringSubject<32> m_speedText;		// Current and requested speed text
 		Xml::IntSubject m_speedTop;				// Top speed, thousandths of the maximum
 		Xml::IntSubject m_speedRequested;		// Requested speed, thousandths of the maximum
-		Xml::StringSubject<16> m_flowFactor;	// Extrusion override text
 		Xml::StringSubject<32> m_flowText;		// Volumetric flow text
 		Xml::IntSubject m_flow;					// Volumetric flow, thousandths of the maximum
-		Xml::StringSubject<24> m_babystep;		// Babystep text
 		Xml::StringSubject<48> m_elapsed;		// Elapsed time text
 		Xml::StringSubject<48> m_remaining;		// Time left text
 		Xml::IntSubject m_pause;				// Pause control state

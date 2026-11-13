@@ -127,6 +127,9 @@ Each row of `chambers`:
 | Name | Type | Description |
 | --- | --- | --- |
 | `job.file` | text | The current job's file, e.g. "0:/gcodes/part.gcode"; empty when there is none |
+| `job.progress` | int | The current job's progress, percent 0-100, through the file or the expected time as set in the settings |
+| `job.elapsed` | text | How long the current job has been running, e.g. "00:03:43" |
+| `job.remaining` | text | The current job's expected time left, e.g. "00:45:03" |
 
 ### machine
 
@@ -135,6 +138,25 @@ Each row of `chambers`:
 | `machine.status` | text | State key, e.g. idle, processing, paused; translated under state.* |
 | `machine.printing` | int | 1 while a job is running and not paused, else 0: controls that would change the job are disabled |
 | `machine.job_active` | int | 1 while there is a job (running, pausing, paused, resuming or simulating), else 0 |
+
+### move
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `move.axes` | list | One row per axis, in slot order |
+| `move.speed_factor` | text | The speed override, e.g. "100%" |
+| `move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
+| `move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
+
+Each row of `move.axes`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `letter` | text | The axis' letter, e.g. "X" |
+| `position` | text | User position, two decimal places, e.g. "12.50" |
+| `homed` | int | 1 when the axis is homed, else 0 |
+| `visible` | int | 1 if the axis is shown to the user, else 0 |
 
 ### navigation
 
@@ -249,17 +271,12 @@ Used by `dashboard_job_status`.
 | --- | --- | --- |
 | `file` | text | The current job's file, else the last job's |
 | `finished` | int | 1 when showing the last job (none is running), else 0 |
-| `progress` | int | Progress, percent 0-100 |
 | `thumbnail` | text | The job's thumbnail path, or empty until it arrives |
-| `axes` | list | One row per axis |
-| `speed_factor` | text | Speed override, e.g. "100%" |
 | `speed_text` | text | Current and requested speed, e.g. "0/0 mm/s" |
 | `speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000) |
 | `speed_requested` | int | Requested speed, in thousandths of the fastest axis' maximum (0-1000) |
-| `flow_factor` | text | Extrusion override, e.g. "100%" |
 | `flow_text` | text | Volumetric flow, e.g. "0.0 mm³/s" |
 | `flow` | int | Volumetric flow, in thousandths of the fastest extruder's maximum (0-1000) |
-| `babystep` | text | Z babystep, e.g. "0 mm" |
 | `babystep_open` | int | 1 while the babystepping dialog is open |
 | `elapsed` | text | Elapsed time, e.g. "Elapsed: 00:03:43" |
 | `remaining` | text | Time left, e.g. "Remaining: 00:45:03" |
@@ -268,13 +285,6 @@ Used by `dashboard_job_status`.
 | `print_again` | int | Print again: 0 hidden, 1 disabled, 2 usable |
 | `cancel` | int | Cancel: 0 hidden, 1 disabled, 2 usable |
 | `confirm_cancel` | int | 1 while asking whether to cancel the job |
-
-Each row of `axes`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | Letter and user position on two lines, e.g. "X\n0.00" |
 
 | Action | Description |
 | --- | --- |

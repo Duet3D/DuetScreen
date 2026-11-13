@@ -31,7 +31,6 @@
 			<xs:enumeration value="animations"/>
 			<xs:enumeration value="axes"/>
 			<xs:enumeration value="axes_shown"/>
-			<xs:enumeration value="babystep"/>
 			<xs:enumeration value="babystep_open"/>
 			<xs:enumeration value="beds"/>
 			<xs:enumeration value="brightness"/>
@@ -118,7 +117,6 @@
 			<xs:enumeration value="finished"/>
 			<xs:enumeration value="firmware"/>
 			<xs:enumeration value="flow"/>
-			<xs:enumeration value="flow_factor"/>
 			<xs:enumeration value="flow_text"/>
 			<xs:enumeration value="font"/>
 			<xs:enumeration value="fonts"/>
@@ -144,7 +142,10 @@
 			<xs:enumeration value="input"/>
 			<xs:enumeration value="ip"/>
 			<xs:enumeration value="is_folder"/>
+			<xs:enumeration value="job.elapsed"/>
 			<xs:enumeration value="job.file"/>
+			<xs:enumeration value="job.progress"/>
+			<xs:enumeration value="job.remaining"/>
 			<xs:enumeration value="jog_usable"/>
 			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="keyboard_layout"/>
@@ -171,6 +172,10 @@
 			<xs:enumeration value="min"/>
 			<xs:enumeration value="mode"/>
 			<xs:enumeration value="mode_icon"/>
+			<xs:enumeration value="move.axes"/>
+			<xs:enumeration value="move.babystep"/>
+			<xs:enumeration value="move.extrusion_factor"/>
+			<xs:enumeration value="move.speed_factor"/>
 			<xs:enumeration value="name"/>
 			<xs:enumeration value="nav.screen"/>
 			<xs:enumeration value="network_shown"/>
@@ -193,11 +198,11 @@
 			<xs:enumeration value="password_title"/>
 			<xs:enumeration value="pause"/>
 			<xs:enumeration value="poll_interval"/>
+			<xs:enumeration value="position"/>
 			<xs:enumeration value="primary.chroma"/>
 			<xs:enumeration value="primary.lightness"/>
 			<xs:enumeration value="primary_hue"/>
 			<xs:enumeration value="print_again"/>
-			<xs:enumeration value="progress"/>
 			<xs:enumeration value="progress_source"/>
 			<xs:enumeration value="progress_sources"/>
 			<xs:enumeration value="remaining"/>
@@ -242,7 +247,6 @@
 			<xs:enumeration value="speed_dialog.pad.text"/>
 			<xs:enumeration value="speed_dialog.pad_shown"/>
 			<xs:enumeration value="speed_dialog.title"/>
-			<xs:enumeration value="speed_factor"/>
 			<xs:enumeration value="speed_requested"/>
 			<xs:enumeration value="speed_text"/>
 			<xs:enumeration value="speed_top"/>
@@ -293,6 +297,7 @@
 			<xs:enumeration value="usb_modes"/>
 			<xs:enumeration value="value"/>
 			<xs:enumeration value="version"/>
+			<xs:enumeration value="visible"/>
 			<xs:enumeration value="x.home_usable"/>
 			<xs:enumeration value="x.homed"/>
 			<xs:enumeration value="x.jog_usable"/>
@@ -341,6 +346,7 @@
 			<xs:enumeration value="gcodes"/>
 			<xs:enumeration value="heaters"/>
 			<xs:enumeration value="maps"/>
+			<xs:enumeration value="move.axes"/>
 			<xs:enumeration value="networks"/>
 			<xs:enumeration value="objects"/>
 			<xs:enumeration value="passed"/>
@@ -6865,7 +6871,6 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_axis.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="lv_label.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

@@ -10,6 +10,7 @@
 #include "HeatSource.h"
 #include "JobSource.h"
 #include "MachineSource.h"
+#include "MoveSource.h"
 #include "NavigationSource.h"
 #include "ResponseSource.h"
 #include "TemperatureSource.h"
@@ -77,6 +78,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<HeatSource>(),
 			std::make_shared<JobSource>(),
 			std::make_shared<MachineSource>(),
+			std::make_shared<MoveSource>(),
 			std::make_shared<NavigationSource>(),
 			std::make_shared<ResponseSource>(),
 			std::make_shared<TemperatureSource>(),

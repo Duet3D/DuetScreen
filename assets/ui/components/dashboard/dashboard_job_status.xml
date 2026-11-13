@@ -5,6 +5,8 @@
   Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens
   babystep.xml in a dialog.
 
+  Data:     job.progress (src/UI/Xml/Data/JobSource.h); move.axes, move.speed_factor, move.extrusion_factor and
+            move.babystep (src/UI/Xml/Data/MoveSource.h)
   Fields and actions: src/UI/Presenters/Dashboard/JobStatusPresenter.h
 -->
 <component presenter="dashboard_job_status">
@@ -17,7 +19,7 @@
 		<lv_obj name="header" width="100%" height="content" style_max_height="30%" style_layout="grid"
 				style_grid_column_dsc_array="fr(5) content" style_grid_row_dsc_array="content content fr(1) content">
 			<style name="card"/>
-			<ds_bar name="progress" min="0" max="100" label_format="{}%" bind_value="progress" height="content"
+			<ds_bar name="progress" min="0" max="100" label_format="{}%" bind_value="job.progress" height="content"
 					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					style_grid_cell_row_pos="3" style_grid_cell_y_align="end"/>
 			<lv_label name="printed_tag" translation_tag="status.print_finished" width="100%" height="content"
@@ -50,7 +52,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="axes" item="dashboard_axis" width="100%" height="content"
+				<ds_list name="list" list="move.axes" item="dashboard_axis" width="100%" height="content"
 						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="start"
 						 style_flex_track_place="start"/>
 			</lv_obj>
@@ -66,7 +68,7 @@
 					<style name="pad_normal"/>
 					<style name="text_emphasis"/>
 				</lv_label>
-				<ds_button name="speed_multiplier" bind_text="speed_factor" width="content" height="content"
+				<ds_button name="speed_multiplier" bind_text="move.speed_factor" width="content" height="content"
 						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
 					<action trigger="clicked" name="factors.speed"/>
@@ -99,7 +101,7 @@
 					<style name="pad_normal"/>
 					<style name="text_emphasis"/>
 				</lv_label>
-				<ds_button name="flow_multiplier" bind_text="flow_factor" width="content" height="content"
+				<ds_button name="flow_multiplier" bind_text="move.extrusion_factor" width="content" height="content"
 						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
 					<action trigger="clicked" name="factors.extrusion"/>
@@ -136,7 +138,7 @@
 					<style name="pad_normal"/>
 					<style name="text_emphasis"/>
 				</lv_label>
-				<ds_button name="babystep_button" bind_text="babystep" width="100%" height="content"
+				<ds_button name="babystep_button" bind_text="move.babystep" width="100%" height="content"
 						   style_min_width="content">
 					<action trigger="clicked" name="job.babystep"/>
 				</ds_button>

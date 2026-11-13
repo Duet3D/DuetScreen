@@ -21,6 +21,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/HeatSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JobSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/MoveSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/NavigationSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
