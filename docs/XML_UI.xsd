@@ -1583,6 +1583,25 @@
 	<xs:simpleType name="translation">
 		<xs:union memberTypes="translation.names xs:string"/>
 	</xs:simpleType>
+	<xs:simpleType name="font.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="font_emphasis"/>
+			<xs:enumeration value="font_header"/>
+			<xs:enumeration value="font_normal"/>
+			<xs:enumeration value="font_subdued"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="font">
+		<xs:union memberTypes="font.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="image.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="symbol_ok"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="image">
+		<xs:union memberTypes="image.names xs:string"/>
+	</xs:simpleType>
 	<xs:simpleType name="lv_align.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="default"><xs:annotation><xs:documentation>Top-left</xs:documentation></xs:annotation></xs:enumeration>
@@ -2181,6 +2200,22 @@
 	<xs:simpleType name="bool">
 		<xs:union memberTypes="bool.names xs:string"/>
 	</xs:simpleType>
+	<xs:simpleType name="size.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="content"><xs:annotation><xs:documentation>As big as its content</xs:documentation></xs:annotation></xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="size">
+		<xs:union memberTypes="size.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="radius.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="circle"><xs:annotation><xs:documentation>Fully round</xs:documentation></xs:annotation></xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="radius">
+		<xs:union memberTypes="radius.names xs:string"/>
+	</xs:simpleType>
 	<xs:simpleType name="selector.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="main"><xs:annotation><xs:documentation>Main body</xs:documentation></xs:annotation></xs:enumeration>
@@ -2754,7 +2789,7 @@
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_image.attributes">
-		<xs:attribute name="src" type="xs:string">
+		<xs:attribute name="src" type="image">
 			<xs:annotation><xs:documentation>Set the image source (file, symbol, or variable)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="inner_align" type="lv_image_align">
@@ -2788,7 +2823,7 @@
 		<xs:attribute name="state" type="lv_imagebutton_state">
 			<xs:annotation><xs:documentation>Set the image in this state</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="src" type="xs:string">
+		<xs:attribute name="src" type="image">
 			<xs:annotation><xs:documentation>The image in the given state</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
@@ -2796,7 +2831,7 @@
 		<xs:attribute name="state" type="lv_imagebutton_state">
 			<xs:annotation><xs:documentation>Set the image in this state</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="src" type="xs:string">
+		<xs:attribute name="src" type="image">
 			<xs:annotation><xs:documentation>The image in the given state</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
@@ -2804,7 +2839,7 @@
 		<xs:attribute name="state" type="lv_imagebutton_state">
 			<xs:annotation><xs:documentation>Set the image in this state</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="src" type="xs:string">
+		<xs:attribute name="src" type="image">
 			<xs:annotation><xs:documentation>The image in the given state</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
@@ -2837,16 +2872,16 @@
 		<xs:attribute name="name" type="xs:string">
 			<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="x" type="xs:string">
+		<xs:attribute name="x" type="size">
 			<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="y" type="xs:string">
+		<xs:attribute name="y" type="size">
 			<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="height" type="xs:string">
+		<xs:attribute name="height" type="size">
 			<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="width" type="xs:string">
+		<xs:attribute name="width" type="size">
 			<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="align" type="lv_align">
@@ -2870,25 +2905,25 @@
 		<xs:attribute name="ext_draw_size" type="xs:string">
 			<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_height" type="xs:string">
+		<xs:attribute name="style_height" type="size">
 			<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_min_height" type="xs:string">
+		<xs:attribute name="style_min_height" type="size">
 			<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_max_height" type="xs:string">
+		<xs:attribute name="style_max_height" type="size">
 			<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_width" type="xs:string">
+		<xs:attribute name="style_width" type="size">
 			<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_min_width" type="xs:string">
+		<xs:attribute name="style_min_width" type="size">
 			<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_max_width" type="xs:string">
+		<xs:attribute name="style_max_width" type="size">
 			<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_length" type="xs:string">
+		<xs:attribute name="style_length" type="size">
 			<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="style_pad_top" type="xs:string">
@@ -2945,7 +2980,7 @@
 		<xs:attribute name="style_margin_all" type="xs:string">
 			<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_radius" type="xs:string">
+		<xs:attribute name="style_radius" type="radius">
 			<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="style_radial_offset" type="xs:string">
@@ -2987,7 +3022,7 @@
 		<xs:attribute name="style_bg_grad" type="xs:string">
 			<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_bg_image_src" type="xs:string">
+		<xs:attribute name="style_bg_image_src" type="image">
 			<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -3050,7 +3085,7 @@
 		<xs:attribute name="style_text_opa" type="xs:string">
 			<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_text_font" type="xs:string">
+		<xs:attribute name="style_text_font" type="font">
 			<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="style_text_align" type="lv_text_align">
@@ -3104,7 +3139,7 @@
 		<xs:attribute name="style_arc_rounded" type="bool">
 			<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_arc_image_src" type="xs:string">
+		<xs:attribute name="style_arc_image_src" type="image">
 			<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="style_layout" type="lv_layout">
@@ -3203,7 +3238,7 @@
 		<xs:attribute name="style_transform_skew_y" type="xs:string">
 			<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+		<xs:attribute name="style_bitmap_mask_src" type="image">
 			<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -4110,25 +4145,25 @@
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="styledef.attributes">
-		<xs:attribute name="height" type="xs:string">
+		<xs:attribute name="height" type="size">
 			<xs:annotation><xs:documentation>Set height (px, %, or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="min_height" type="xs:string">
+		<xs:attribute name="min_height" type="size">
 			<xs:annotation><xs:documentation>Set min height (px, %, or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="max_height" type="xs:string">
+		<xs:attribute name="max_height" type="size">
 			<xs:annotation><xs:documentation>Set max height (px, %, or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="width" type="xs:string">
+		<xs:attribute name="width" type="size">
 			<xs:annotation><xs:documentation>Set width (px, %, or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="min_width" type="xs:string">
+		<xs:attribute name="min_width" type="size">
 			<xs:annotation><xs:documentation>Set min width (px, %, or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="max_width" type="xs:string">
+		<xs:attribute name="max_width" type="size">
 			<xs:annotation><xs:documentation>Set max width (px, %, or content)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="length" type="xs:string">
+		<xs:attribute name="length" type="size">
 			<xs:annotation><xs:documentation>Set length (used by some widgets)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="pad_top" type="xs:string">
@@ -4185,7 +4220,7 @@
 		<xs:attribute name="margin_all" type="xs:string">
 			<xs:annotation><xs:documentation>Set margins in all 4 directions</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="radius" type="xs:string">
+		<xs:attribute name="radius" type="radius">
 			<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="radial_offset" type="xs:string">
@@ -4227,7 +4262,7 @@
 		<xs:attribute name="bg_grad" type="xs:string">
 			<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="bg_image_src" type="xs:string">
+		<xs:attribute name="bg_image_src" type="image">
 			<xs:annotation><xs:documentation>Set background image</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="bg_image_tiled" type="bool">
@@ -4290,7 +4325,7 @@
 		<xs:attribute name="text_opa" type="xs:string">
 			<xs:annotation><xs:documentation>Set text opacity</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="text_font" type="xs:string">
+		<xs:attribute name="text_font" type="font">
 			<xs:annotation><xs:documentation>Set font</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="text_align" type="lv_text_align">
@@ -4344,7 +4379,7 @@
 		<xs:attribute name="arc_rounded" type="bool">
 			<xs:annotation><xs:documentation>Round arc ends</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="arc_image_src" type="xs:string">
+		<xs:attribute name="arc_image_src" type="image">
 			<xs:annotation><xs:documentation>Set arc image</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="layout" type="lv_layout">
@@ -4443,7 +4478,7 @@
 		<xs:attribute name="transform_skew_y" type="xs:string">
 			<xs:annotation><xs:documentation>Skew Y (no SW render)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="bitmap_mask_src" type="xs:string">
+		<xs:attribute name="bitmap_mask_src" type="image">
 			<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="rotary_sensitivity" type="xs:string">
@@ -4605,16 +4640,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -4638,25 +4673,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -4713,7 +4748,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -4755,7 +4790,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -4818,7 +4853,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -4872,7 +4907,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -4971,7 +5006,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -5285,7 +5320,7 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_thumbnail.attributes"/>
-			<xs:attribute name="src" type="xs:string">
+			<xs:attribute name="src" type="image">
 				<xs:annotation><xs:documentation>Set the image source (file, symbol, or variable)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="inner_align" type="lv_image_align">
@@ -5972,16 +6007,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -6005,25 +6040,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -6080,7 +6115,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -6122,7 +6157,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -6185,7 +6220,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -6239,7 +6274,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -6338,7 +6373,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -6698,16 +6733,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -6731,25 +6766,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -6806,7 +6841,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -6848,7 +6883,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -6911,7 +6946,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -6965,7 +7000,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -7064,7 +7099,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -7219,16 +7254,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -7252,25 +7287,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -7327,7 +7362,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -7369,7 +7404,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -7432,7 +7467,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -7486,7 +7521,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -7585,7 +7620,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -7764,16 +7799,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -7797,25 +7832,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -7872,7 +7907,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -7914,7 +7949,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -7977,7 +8012,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -8031,7 +8066,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -8130,7 +8165,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -8425,16 +8460,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -8458,25 +8493,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -8533,7 +8568,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -8575,7 +8610,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -8638,7 +8673,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -8692,7 +8727,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -8791,7 +8826,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
@@ -8987,16 +9022,16 @@
 			<xs:attribute name="name" type="xs:string">
 				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="x" type="xs:string">
+			<xs:attribute name="x" type="size">
 				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="y" type="xs:string">
+			<xs:attribute name="y" type="size">
 				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="height" type="xs:string">
+			<xs:attribute name="height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="width" type="xs:string">
+			<xs:attribute name="width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="align" type="lv_align">
@@ -9020,25 +9055,25 @@
 			<xs:attribute name="ext_draw_size" type="xs:string">
 				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_height" type="xs:string">
+			<xs:attribute name="style_height" type="size">
 				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_height" type="xs:string">
+			<xs:attribute name="style_min_height" type="size">
 				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_height" type="xs:string">
+			<xs:attribute name="style_max_height" type="size">
 				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_width" type="xs:string">
+			<xs:attribute name="style_width" type="size">
 				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_min_width" type="xs:string">
+			<xs:attribute name="style_min_width" type="size">
 				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_max_width" type="xs:string">
+			<xs:attribute name="style_max_width" type="size">
 				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_length" type="xs:string">
+			<xs:attribute name="style_length" type="size">
 				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_pad_top" type="xs:string">
@@ -9095,7 +9130,7 @@
 			<xs:attribute name="style_margin_all" type="xs:string">
 				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_radius" type="xs:string">
+			<xs:attribute name="style_radius" type="radius">
 				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_radial_offset" type="xs:string">
@@ -9137,7 +9172,7 @@
 			<xs:attribute name="style_bg_grad" type="xs:string">
 				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bg_image_src" type="xs:string">
+			<xs:attribute name="style_bg_image_src" type="image">
 				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_bg_image_tiled" type="bool">
@@ -9200,7 +9235,7 @@
 			<xs:attribute name="style_text_opa" type="xs:string">
 				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_text_font" type="xs:string">
+			<xs:attribute name="style_text_font" type="font">
 				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_text_align" type="lv_text_align">
@@ -9254,7 +9289,7 @@
 			<xs:attribute name="style_arc_rounded" type="bool">
 				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_arc_image_src" type="xs:string">
+			<xs:attribute name="style_arc_image_src" type="image">
 				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_layout" type="lv_layout">
@@ -9353,7 +9388,7 @@
 			<xs:attribute name="style_transform_skew_y" type="xs:string">
 				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
-			<xs:attribute name="style_bitmap_mask_src" type="xs:string">
+			<xs:attribute name="style_bitmap_mask_src" type="image">
 				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="style_rotary_sensitivity" type="xs:string">

@@ -209,6 +209,8 @@ namespace UI::Xml::Api
 				writeNameType("widget", widgets);
 				writeNameType("style", styles);
 				writeNameType("translation", {m_reference.translationKeys.begin(), m_reference.translationKeys.end()});
+				writeNameType("font", {m_reference.fonts.begin(), m_reference.fonts.end()});
+				writeNameType("image", {m_reference.images.begin(), m_reference.images.end()});
 			}
 
 			/** Type `name`: any string, offering `names` */
@@ -265,6 +267,9 @@ namespace UI::Xml::Api
 					}
 				}
 				writeNameType("bool", std::set<std::string>{"false", "true"});
+				// Besides a number of px, or a percentage
+				writeDocumentedNameType("size", {{"content", "As big as its content"}});
+				writeDocumentedNameType("radius", {{"circle", "Fully round"}});
 				writeDocumentedNameType("selector", selectors);
 			}
 
@@ -284,9 +289,13 @@ namespace UI::Xml::Api
 					return "translation";
 				}
 				const std::string& type = attribute.type;
-				if (type == "subject" || type == "style")
+				if (type == "subject" || type == "style" || type == "font" || type == "image" || type == "radius")
 				{
 					return type;
+				}
+				if (type == "coords")
+				{
+					return "size";
 				}
 				if (type == "bool" || type.starts_with("flag:"))
 				{
