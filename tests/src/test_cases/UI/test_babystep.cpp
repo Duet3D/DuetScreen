@@ -1,7 +1,7 @@
 /*
  * test_babystep.cpp
  *
- * The babystepping panel (assets/ui/components/common/babystep.xml, src/UI/Widgets/BabyStep/BabyStepPresenter.h).
+ * The babystepping panel (assets/ui/components/common/babystep.xml, src/UI/Screens/Common/BabyStepPresenter.h).
  */
 
 #include "UI/Xml/Runtime/Services.h"

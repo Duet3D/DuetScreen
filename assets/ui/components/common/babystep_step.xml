@@ -1,7 +1,7 @@
 <!--
   One babystep size. Tap to use it; hold to change it.
 
-  Fields:   a steps row: text, selected (src/UI/Widgets/BabyStep/BabyStepPresenter.h)
+  Fields:   a steps row: text, selected (src/UI/Screens/Common/BabyStepPresenter.h)
 -->
 <component>
 	<view extends="ds_button" bind_text="text" long_mode="wrap" width="0" height="100%" flex_grow="1"

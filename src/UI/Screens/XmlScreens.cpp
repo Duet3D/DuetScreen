@@ -3,6 +3,7 @@
  */
 
 #include "XmlScreens.h"
+#include "Common/BabyStepPresenter.h"
 #include "Console/ConsolePresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
@@ -24,7 +25,6 @@
 #include "Temperature/ExtruderPresenter.h"
 #include "Temperature/HeaterActions.h"
 #include "Temperature/TemperaturePresenter.h"
-#include "UI/Widgets/BabyStep/BabyStepPresenter.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
 namespace UI
