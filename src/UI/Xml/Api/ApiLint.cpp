@@ -379,6 +379,10 @@ namespace UI::Xml::Api
 					auto item = valueOf(element, "item", context);
 					const Field* field = list ? findField(*list, context) : nullptr;
 					auto component = item ? m_components.find(*item) : m_components.end();
+					if (auto key = valueOf(element, "key", context); key && field)
+					{
+						checkKey(*key, *field, element, context);
+					}
 					if (field && component != m_components.end())
 					{
 						Scope scope = context.scope;
@@ -501,6 +505,22 @@ namespace UI::Xml::Api
 				if (!findField(name, context) && !isLocalSubject(name, context))
 				{
 					issue(context, element, fmt::format("no subject `{:s}`", name));
+				}
+			}
+
+			/** Report a `<ds_list key="…">` that isn't a field of the rows of `list`, or is one of their lists */
+			void checkKey(const std::string& key, const Field& list, const Element& element, const Context& context)
+			{
+				const auto row = std::find_if(list.rowFields.begin(),
+											  list.rowFields.end(),
+											  [&key](const Field& field) { return field.name == key; });
+				if (row == list.rowFields.end())
+				{
+					issue(context, element, fmt::format("rows of `{:s}` have no field `{:s}`", list.name, key));
+				}
+				else if (!row->rowFields.empty())
+				{
+					issue(context, element, fmt::format("`{:s}` is a list, so it can't be a key", key));
 				}
 			}
 

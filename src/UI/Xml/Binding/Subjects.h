@@ -9,7 +9,9 @@
 #pragma once
 
 #include "UI/Lvgl/LvSubject.h"
+#include "helix_xml.h"
 #include <array>
+#include <charconv>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -27,6 +29,12 @@ namespace UI::Xml
 
 		/** What the subject holds, as the UI API reference names it, e.g. "int" or "text" */
 		virtual std::string_view typeName() const = 0;
+
+		/**
+		 * Whether the value is `text`, written as XML writes a value, e.g. `<ds_list key="number" value="2">`
+		 * @return false if `text` isn't a value of this type
+		 */
+		virtual bool equals(std::string_view text) const = 0;
 	};
 
 	/** A whole number, e.g. a fan number, a percentage or a 0/1 flag */
@@ -53,6 +61,15 @@ namespace UI::Xml
 
 		/** "int" */
 		std::string_view typeName() const override { return "int"; }
+
+		/** Whether `text` is a whole number, in decimal, equal to the value */
+		bool equals(std::string_view text) const override
+		{
+			int32_t value = 0;
+			const char* end = text.data() + text.size();
+			const auto [ptr, error] = std::from_chars(text.data(), end, value);
+			return error == std::errc() && ptr == end && value == get();
+		}
 
 	  private:
 		LvSubject m_subject; // The LVGL subject
@@ -82,6 +99,13 @@ namespace UI::Xml
 
 		/** "colour" */
 		std::string_view typeName() const override { return "colour"; }
+
+		/** Whether `text`, a colour as XML writes one (e.g. "0xff0000"), is the colour held */
+		bool equals(std::string_view text) const override
+		{
+			const std::string terminated(text);
+			return lv_color_eq(lv_xml_to_color(terminated.c_str()), get());
+		}
 
 	  private:
 		LvSubject m_subject; // The LVGL subject
@@ -123,6 +147,9 @@ namespace UI::Xml
 
 		/** "text" */
 		std::string_view typeName() const override { return "text"; }
+
+		/** Whether the text held is `text` */
+		bool equals(std::string_view text) const override { return get() == text; }
 
 	  private:
 		/** Cut `value` to what fits in the buffer */

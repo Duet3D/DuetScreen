@@ -64,6 +64,9 @@ namespace UI::Xml
 		/** "surface" */
 		std::string_view typeName() const override { return "surface"; }
 
+		/** Never: a surface has no form XML can write */
+		bool equals(std::string_view) const override { return false; }
+
 	  private:
 		Values m_values;	 // What it shows
 		LvSubject m_subject; // Pointer subject whose value is this Surface

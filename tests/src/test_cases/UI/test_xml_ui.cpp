@@ -204,6 +204,12 @@ namespace
 			numbers.sync(count, [](NumberRow& row, size_t i) { row.value.set(static_cast<int32_t>(i)); });
 		}
 
+		/** Make `numbers` hold `values`, one row each */
+		void setValues(const std::vector<int32_t>& values)
+		{
+			numbers.sync(values.size(), [&](NumberRow& row, size_t i) { row.value.set(values[i]); });
+		}
+
 		std::vector<std::string> calls;
 		UI::Xml::StringSubject<16> dialog;
 		UI::Xml::IntSubject busy;
@@ -238,6 +244,35 @@ namespace
 		<component>
 			<view extends="lv_obj">
 				<lv_label name="value" bind_text="value"/>
+			</view>
+		</component>)";
+
+	/* Keyed lists of the dialog presenter's numbers: the 3s, a key that isn't a field, and a windowed keyed list */
+	constexpr std::string_view KEYED_SCREEN = R"(
+		<component presenter="test_dialog">
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<ds_list name="threes" list="numbers" key="value" value="3" item="number_item" height="content"
+						 flex_flow="column"/>
+				<ds_list name="no_field" list="numbers" key="nothing" value="3" item="number_item" height="content"/>
+				<ds_list name="windowed" list="numbers" key="value" value="3" item="number_item" windowed="true"
+						 item_height="50" height="100"/>
+			</view>
+		</component>)";
+
+	/* One fan, picked by a prop, with the built-in fan card and the fans presenter's actions */
+	constexpr std::string_view ONE_FAN_SCREEN = R"(
+		<component presenter="fans">
+			<view extends="lv_obj" width="100%" height="100%">
+				<fan_pick name="pick" fan="2"/>
+			</view>
+		</component>)";
+
+	constexpr std::string_view FAN_PICK = R"(
+		<component>
+			<api><prop name="fan" type="int"/></api>
+			<view extends="lv_obj" width="100%" height="content">
+				<ds_list name="list" list="fans" key="number" value="$fan" item="fan_card" width="100%"
+						 height="content"/>
 			</view>
 		</component>)";
 
@@ -379,6 +414,28 @@ class TestXmlUi : public UiTestSuite
 		writeFile(bundleFile("components/hosted_limit.xml"), HOSTED_LIMIT);
 		restartWithUserBundles();
 		EXPECT_TRUE(UI::Xml::getIssues().empty());
+	}
+
+	/** Install the keyed list screens as a user bundle */
+	void installKeyedScreens()
+	{
+		writeFile(bundleFile("manifest.json"), manifest());
+		writeFile(bundleFile("components/keyed_screen.xml"), KEYED_SCREEN);
+		writeFile(bundleFile("components/number_item.xml"), NUMBER_ITEM);
+		writeFile(bundleFile("components/one_fan_screen.xml"), ONE_FAN_SCREEN);
+		writeFile(bundleFile("components/fan_pick.xml"), FAN_PICK);
+		restartWithUserBundles();
+	}
+
+	/** The names of a list's items, which are their rows' indices, in the order shown */
+	static std::vector<std::string> itemNames(lv_obj_t* list)
+	{
+		std::vector<std::string> names;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+		{
+			names.emplace_back(lv_obj_get_name(lv_obj_get_child(list, static_cast<int32_t>(i))));
+		}
+		return names;
 	}
 
 	/** The values shown by a windowed list's items, in row order */
@@ -1145,4 +1202,72 @@ TEST_F(TestXmlUi, UnknownStylePropertyIsOnlyWarnedAbout)
 	restartWithUserBundles();
 	auto& view = makeView("style_prop_screen");
 	EXPECT_NE(lv_obj_find_by_name(view.getRootPtr(), "after"), nullptr);
+}
+
+TEST_F(TestXmlUi, KeyedListShowsOnlyTheRowsWhoseKeyMatches)
+{
+	installKeyedScreens();
+	auto& view = makeView("keyed_screen");
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	lv_obj_t* threes = find(view, "threes");
+
+	presenter.setValues({1, 2, 3, 4});
+	EXPECT_EQ(itemNames(threes), (std::vector<std::string>{"2"}));
+	EXPECT_EQ(text(threes, "value"), "3");
+
+	presenter.setValues({3, 1, 3});
+	EXPECT_EQ(itemNames(threes), (std::vector<std::string>{"0", "2"})) << "every match, in the rows' order";
+
+	// A key that isn't a field of the rows, or a keyed list that is windowed, shows nothing
+	EXPECT_EQ(lv_obj_get_child_count(find(view, "no_field")), 0u);
+	EXPECT_EQ(lv_obj_get_child_count(find(view, "windowed")), 0u);
+}
+
+TEST_F(TestXmlUi, KeyedListFollowsKeysThatChange)
+{
+	installKeyedScreens();
+	auto& view = makeView("keyed_screen");
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	lv_obj_t* threes = find(view, "threes");
+
+	presenter.setValues({1, 2, 3});
+	EXPECT_EQ(itemNames(threes), (std::vector<std::string>{"2"}));
+
+	// Removing the first item refills the rows by position: the 3 moves to row 1, and row 2 goes
+	presenter.setValues({2, 3});
+	EXPECT_EQ(itemNames(threes), (std::vector<std::string>{"1"}));
+	EXPECT_EQ(text(threes, "value"), "3");
+
+	presenter.setValues({1, 2});
+	EXPECT_EQ(lv_obj_get_child_count(threes), 0u);
+
+	// A row before a shown one starting to match goes before it
+	presenter.setValues({1, 3});
+	presenter.setValues({3, 3});
+	EXPECT_EQ(itemNames(threes), (std::vector<std::string>{"0", "1"}));
+
+	presenter.setValues({});
+	EXPECT_EQ(lv_obj_get_child_count(threes), 0u);
+}
+
+TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
+{
+	installKeyedScreens();
+	auto& view = makeView("one_fan_screen");
+	lv_obj_t* list = find(find(view, "pick"), "list");
+	load_model_data(THREE_FANS);
+	pump();
+
+	ASSERT_EQ(lv_obj_get_child_count(list), 1u);
+	EXPECT_EQ(slider(lv_obj_get_child(list, 0)).getLabelText(), _("fine_tune.fan", 2));
+	lv_obj_send_event(find(lv_obj_get_child(list, 0), "max"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"M106 P2 S255\n"}));
+
+	// The fan's card goes with the fan, and comes back with it
+	load_model_data(ONE_FAN);
+	pump();
+	EXPECT_EQ(lv_obj_get_child_count(list), 0u);
+	load_model_data(THREE_FANS);
+	pump();
+	EXPECT_EQ(lv_obj_get_child_count(list), 1u);
 }

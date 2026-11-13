@@ -2,12 +2,17 @@
  * DsList.h
  *
  * <ds_list>: one component per row of a List (see Binding/List.h). Its attributes are in registerXml().
+ *
+ * A keyed list (`key="number" value="2"`) shows only the rows whose `key` field equals `value`: one fan, a tool's
+ * card, every active heater. It watches each row's key, so the rows shown follow the data even when a row is
+ * refilled with another item (List::sync() fills rows by position, so removing fan 1 moves fan 2 into its row).
  */
 
 #pragma once
 
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Scope.h"
+#include "UI/Xml/Binding/Subjects.h"
 #include "helix_xml.h"
 #include <map>
 #include <memory>
@@ -30,17 +35,27 @@ namespace UI::Xml
 			bool wrap = false;				  // Several items per line, as many as fit
 		};
 
+		/** Which rows a keyed list shows */
+		struct Key
+		{
+			std::string field; // Name of the row field compared, e.g. "number"
+			std::string value; // The value it must have, as XML writes it, e.g. "2"
+		};
+
 		/**
 		 * Show `list` in `container`, one `item` component per row
 		 * @param parentContext Context the list is built in; each row's scope is its child
 		 * @param window Build only the items on screen, placed like this; build every item if not given
+		 * @param key Show only the rows whose field `key.field` is `key.value`; every row if not given. Not with
+		 *        `window`. The rows must have the field (see keyOf()).
 		 */
 		DsList(lv_obj_t* container,
 			   ListBase& list,
 			   std::string item,
 			   lv_xml_subject_ctx_t* parentContext,
 			   std::optional<Window> window = std::nullopt,
-			   bool followEnd = false);
+			   bool followEnd = false,
+			   std::optional<Key> key = std::nullopt);
 
 		/** Stop listening; runs while LVGL deletes the container, which deletes the rows' widgets next */
 		~DsList() override;
@@ -58,8 +73,10 @@ namespace UI::Xml
 		/** A row's widget and the scope it was built in */
 		struct Entry
 		{
-			lv_obj_t* obj;				  // Root widget of the item component, or nullptr if it failed to build
-			std::unique_ptr<Scope> scope; // The row's fields
+			lv_obj_t* obj = nullptr;			  // Root widget of the item component, or nullptr if not built
+			std::unique_ptr<Scope> scope;		  // The row's fields, while the item is built
+			Subject* key = nullptr;				  // Keyed: the row's key field
+			lv_observer_t* keyObserver = nullptr; // Keyed: watches `key`
 		};
 
 		/** `<ds_list>` create callback: a plain container */
@@ -67,6 +84,12 @@ namespace UI::Xml
 
 		/** `<ds_list>` apply callback: lv_obj attributes, then start showing the list */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
+
+		/** The field of `row` called `name`, or nullptr if it has none or it is a list */
+		static Subject* keyOf(Row& row, std::string_view name);
+
+		/** Keyed: a row's key changed; show or remove its item */
+		static void keyObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
 		/** A windowed list scrolled or changed size: show the items now on screen */
 		static void windowEventCb(lv_event_t* e);
@@ -93,11 +116,17 @@ namespace UI::Xml
 		/** Delete a row's widget */
 		static void deleteRow(Entry& entry);
 
-		/** Eager: build widgets for rows [from, to) */
+		/** Eager: build widgets for rows [from, to), or keyed, watch their keys and build those that match */
 		void build(size_t from, size_t to);
 
-		/** Eager: delete widgets until `count` remain */
+		/** Eager: forget rows, deleting their widgets, until `count` remain */
 		void truncate(size_t count);
+
+		/** Keyed: build row `index`'s item if its key matches, else delete it */
+		void showIfMatches(size_t index);
+
+		/** Keyed: the number of items built for rows before `index`, which is where row `index`'s item goes */
+		uint32_t itemsBefore(size_t index) const;
 
 		/** Windowed: size the scrollable area for every row, then build the items on screen and delete the rest */
 		void updateWindow();
@@ -118,7 +147,8 @@ namespace UI::Xml
 		ListBase* m_list;					   // The list shown, or nullptr once it is destroyed
 		std::string m_item;					   // Component built for each row
 		lv_xml_subject_ctx_t* m_parentContext; // Context the list was built in; holds a reference
-		std::vector<Entry> m_entries;		   // Eager: one per row shown
+		std::vector<Entry> m_entries;		   // Eager: one per row
+		std::optional<Key> m_key;			   // Keyed: which rows are shown; nullopt shows every row
 
 		std::optional<Window> m_window;	 // Windowed: how items are placed; nullopt if eager
 		std::map<size_t, Entry> m_shown; // Windowed: the items built, by row

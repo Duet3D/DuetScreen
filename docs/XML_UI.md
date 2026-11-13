@@ -195,6 +195,15 @@ A long list should be windowed: only the rows on screen are built, and rows are 
 <ds_list list="files" item="file_browser_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
 ```
 
+A keyed list shows only the rows whose `key` field is `value`, for a widget about one fan, bed or tool:
+
+```xml
+<ds_list list="fans" key="number" value="2" item="fan_card"/>
+<ds_list list="beds" key="number" value="$bed" item="dashboard_heater_card"/>
+```
+
+Each item is still a row of the list, so its names and actions work as in the full list. The list watches every row's key, so it follows the data: an item appears when its fan does and goes when it goes, and stays right when the rows are refilled (removing fan 1 moves fan 2 into fan 1's row). Key on the item's number rather than `index`, which is only its position. Any field of the rows can be a key, and every row that matches is shown, so `key="state" value="active"` shows every active heater. A keyed list can't be windowed.
+
 ### Graphs
 
 A subject holds only the current value. A graph needs the past, so data sources record into a *history*: a list whose rows are series (each with a `name`), and which adds one value to every series at a fixed rate. Sources record whether or not anything shows the history, so a graph built later starts with what came before it.

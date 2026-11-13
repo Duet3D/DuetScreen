@@ -1220,7 +1220,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_list
 
-A container with one component per row of a list. Each item is built in a scope of its own holding its row's fields, so names are found in the row first, then where the list is written. With `windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of widgets; every item then has the same size, and the list places them itself (its own layout is ignored), with its style_pad_row and style_pad_column as the gaps.
+A container with one component per row of a list. Each item is built in a scope of its own holding its row's fields, so names are found in the row first, then where the list is written. With `windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of widgets; every item then has the same size, and the list places them itself (its own layout is ignored), with its style_pad_row and style_pad_column as the gaps. With `key` and `value`, only the rows whose `key` field is `value` are shown, e.g. one fan.
 
 Also takes every `lv_obj` attribute.
 
@@ -1237,6 +1237,8 @@ Also takes every `lv_obj` attribute.
 | `item_width` | Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; the list scrolls sideways); the list's full width if not given |
 | `flow` | Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit |
 | `follow_end` | "true" to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false) |
+| `key` | A field of the rows: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. |
+| `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="fans" key="number" value="2" item="…"/>` shows fan 2 |
 
 ### ds_modal
 

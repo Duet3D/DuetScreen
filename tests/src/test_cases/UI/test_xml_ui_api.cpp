@@ -249,7 +249,15 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<no_such_widget/>
 		<lv_obj style_radius="#no_such_const" style_pad_all="#pad"/>
 		<bind_flag_if cond="machine.printing and no_such_operand" flag="hidden"/>
+		<ds_list list="fans" key="numbr" value="2" item="lint_plain"/>
+		<ds_list list="tools" key="heaters" value="2" item="lint_plain"/>
+		<ds_list list="fans" key="number" value="2" item="lint_plain"/>
 	</view>
+</component>)";
+
+	// An item using no names, for the keyed lists
+	std::ofstream(userDir / "test" / "components" / "lint_plain.xml") << R"(<component>
+	<view extends="lv_obj"/>
 </component>)";
 
 	// A list item: its row's fields come first
@@ -296,6 +304,8 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:11: <no_such_widget> is no widget, component or binding (in lint_screen)",
 		"lint_screen.xml:12: no const or colour `#no_such_const` (in lint_screen)",
 		"lint_screen.xml:13: no subject `no_such_operand` (in lint_screen)",
+		"lint_screen.xml:14: rows of `fans` have no field `numbr` (in lint_screen)",
+		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
 }

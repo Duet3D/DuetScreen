@@ -5,6 +5,7 @@
 #include "DsList.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/View/Actions.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
@@ -18,11 +19,13 @@ namespace UI::Xml
 				   std::string item,
 				   lv_xml_subject_ctx_t* parentContext,
 				   std::optional<Window> window,
-				   bool followEnd)
+				   bool followEnd,
+				   std::optional<Key> key)
 		: m_container(container)
 		, m_list(&list)
 		, m_item(std::move(item))
 		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
+		, m_key(std::move(key))
 		, m_window(window)
 		, m_count(list.size())
 		, m_followEnd(followEnd)
@@ -58,6 +61,14 @@ namespace UI::Xml
 		if (m_list)
 		{
 			m_list->removeListener(this);
+			// The rows outlive the list's view, so stop watching their keys
+			for (auto& entry : m_entries)
+			{
+				if (entry.keyObserver)
+				{
+					lv_observer_remove(entry.keyObserver);
+				}
+			}
 		}
 		if (m_display)
 		{
@@ -78,7 +89,8 @@ namespace UI::Xml
 				 "its row's fields, so names are found in the row first, then where the list is written. With "
 				 "`windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of "
 				 "widgets; every item then has the same size, and the list places them itself (its own layout is "
-				 "ignored), with its style_pad_row and style_pad_column as the gaps.",
+				 "ignored), with its style_pad_row and style_pad_column as the gaps. With `key` and `value`, only the "
+				 "rows whose `key` field is `value` are shown, e.g. one fan.",
 			 .example =
 				 R"(<ds_list list="files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
 			 .attributes =
@@ -98,7 +110,13 @@ namespace UI::Xml
 				   "Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit"},
 				  {"follow_end",
 				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
-				   "unless the user has scrolled back (default false)"}}},
+				   "unless the user has scrolled back (default false)"},
+				  {"key",
+				   "A field of the rows: only the rows whose `key` is `value` are shown, as the data changes. Not "
+				   "with `windowed`."},
+				  {"value",
+				   "With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, "
+				   "e.g. `<ds_list list=\"fans\" key=\"number\" value=\"2\" item=\"…\"/>` shows fan 2"}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -187,9 +205,56 @@ namespace UI::Xml
 			}
 		}
 
+		std::optional<Key> key;
+		const char* keyField = lv_xml_get_value_of(attrs, "key");
+		const char* keyValue = lv_xml_get_value_of(attrs, "value");
+		if ((keyField == nullptr) != (keyValue == nullptr))
+		{
+			LOG_WARN("<ds_list list=\"{:s}\">: key= and value= go together", listName);
+			return;
+		}
+		if (keyField != nullptr)
+		{
+			if (window)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\">: a keyed list can't be windowed", listName);
+				return;
+			}
+			// Checked on the list's example row, so even an empty list reports a bad key. Only whether the field
+			// was found is used: the example row is gone once rowFields() returns.
+			FieldFinder finder(keyField);
+			list->rowFields(finder);
+			if (finder.foundSubject == nullptr)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\" key=\"{:s}\">: the rows have no such field", listName, keyField);
+				return;
+			}
+			key = Key{.field = keyField, .value = keyValue};
+		}
+
 		lv_obj_t* container = itemOf(state);
 		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
-		deleteWith(container, new DsList(container, *list, item, context, window, followEnd));
+		deleteWith(container, new DsList(container, *list, item, context, window, followEnd, std::move(key)));
+	}
+
+	Subject* DsList::keyOf(Row& row, std::string_view name)
+	{
+		FieldFinder finder(name);
+		row.allFields(finder);
+		return finder.foundSubject;
+	}
+
+	void DsList::keyObserverCb(lv_observer_t* observer, lv_subject_t* /* subject */)
+	{
+		auto* list = static_cast<DsList*>(lv_observer_get_user_data(observer));
+		const auto& entries = list->m_entries;
+		const auto it = std::find_if(
+			entries.begin(), entries.end(), [observer](const Entry& entry) { return entry.keyObserver == observer; });
+		// Not found while the observer is being added, which calls it at once: build() then checks the row itself
+		if (it != entries.end())
+		{
+			list->showIfMatches(static_cast<size_t>(it - entries.begin()));
+		}
 	}
 
 	void DsList::windowEventCb(lv_event_t* e)
@@ -287,7 +352,22 @@ namespace UI::Xml
 	{
 		for (size_t i = from; i < to; i++)
 		{
-			m_entries.push_back(buildRow(i));
+			if (!m_key)
+			{
+				m_entries.push_back(buildRow(i));
+				continue;
+			}
+
+			Entry& entry = m_entries.emplace_back();
+			entry.key = keyOf(m_list->row(i), m_key->field);
+			if (entry.key == nullptr)
+			{
+				// Every row of a list has the same fields, and xmlApply() checked them
+				LOG_ERROR("<ds_list>: row {:d} has no key field '{:s}'", i, m_key->field);
+				continue;
+			}
+			entry.keyObserver = lv_subject_add_observer(entry.key->raw(), keyObserverCb, this);
+			showIfMatches(i);
 		}
 	}
 
@@ -295,9 +375,43 @@ namespace UI::Xml
 	{
 		while (m_entries.size() > count)
 		{
-			deleteRow(m_entries.back());
+			Entry& entry = m_entries.back();
+			if (entry.keyObserver)
+			{
+				lv_observer_remove(entry.keyObserver);
+			}
+			deleteRow(entry);
 			m_entries.pop_back();
 		}
+	}
+
+	void DsList::showIfMatches(size_t index)
+	{
+		Entry& entry = m_entries[index];
+		const bool matches = entry.key->equals(m_key->value);
+		if (matches && entry.obj == nullptr)
+		{
+			Entry built = buildRow(index);
+			entry.obj = built.obj;
+			entry.scope = std::move(built.scope);
+			if (entry.obj)
+			{
+				// Items keep the rows' order, whichever row matched first
+				lv_obj_move_to_index(entry.obj, static_cast<int32_t>(itemsBefore(index)));
+			}
+		}
+		else if (!matches && entry.obj != nullptr)
+		{
+			deleteRow(entry);
+			entry.scope.reset();
+		}
+	}
+
+	uint32_t DsList::itemsBefore(size_t index) const
+	{
+		return static_cast<uint32_t>(std::count_if(m_entries.begin(),
+												   m_entries.begin() + static_cast<std::ptrdiff_t>(index),
+												   [](const Entry& entry) { return entry.obj != nullptr; }));
 	}
 
 	int32_t DsList::itemsPerLine() const

@@ -72,4 +72,39 @@ namespace UI::Xml
 	  private:
 		Scope& m_scope; // Scope the fields are added to
 	};
+
+	/** Finds the field called `name` among those it visits */
+	class FieldFinder : public FieldVisitor
+	{
+	  public:
+		/** Look for `name` */
+		explicit FieldFinder(std::string_view name)
+			: m_name(name)
+		{
+		}
+
+		/** Note the subject if it is the one looked for */
+		void field(std::string_view name, Subject& subject, std::string_view) override
+		{
+			if (name == m_name)
+			{
+				foundSubject = &subject;
+			}
+		}
+
+		/** Note the list if it is the one looked for */
+		void list(std::string_view name, ListBase& list, std::string_view) override
+		{
+			if (name == m_name)
+			{
+				foundList = &list;
+			}
+		}
+
+		Subject* foundSubject = nullptr; // The subject called `name`, or nullptr
+		ListBase* foundList = nullptr;	   // The list called `name`, or nullptr
+
+	  private:
+		std::string_view m_name; // Name looked for; must outlive the visit
+	};
 } // namespace UI::Xml
