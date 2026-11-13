@@ -2,4 +2,7 @@
 
 set -eu
 
+# Put the files just unpacked on the card, so a power cycle can't lose or truncate them
+sync
+
 /etc/init.d/S21DuetScreenMonitor start
