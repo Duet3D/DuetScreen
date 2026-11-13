@@ -1,0 +1,48 @@
+<!--
+  A question with Cancel and OK, over the main window, open while the subject named by `open` is non-zero.
+
+      <confirm_dialog open="confirm_cancel" title_tag="status.print_cancel_title"
+                      text_tag="status.print_cancel_message" confirm="job.cancel" close="job.close_dialog"/>
+
+  `confirm` is raised by OK; `close` by Cancel, or when the dialog is closed any other way.
+-->
+<component>
+	<api>
+		<prop name="open" type="string"/>
+		<prop name="title_tag" type="string"/>
+		<prop name="text_tag" type="string"/>
+		<prop name="confirm" type="string"/>
+		<prop name="close" type="string"/>
+	</api>
+
+	<view extends="ds_modal" bind_open="$open" width="70%" height="content" flex_flow="column">
+		<action trigger="dismissed" name="$close"/>
+
+		<lv_obj name="header" width="100%" height="content" flex_flow="row">
+			<style name="bg_color_header"/>
+			<style name="text_header"/>
+			<lv_label name="title" translation_tag="$title_tag"/>
+		</lv_obj>
+
+		<lv_obj name="body" width="100%" height="content" flex_flow="column">
+			<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
+				<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
+						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+					<lv_label name="text" translation_tag="$text_tag" width="100%"/>
+				</lv_obj>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_obj name="pad" width="100%" flex_grow="1"/>
+
+		<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+			<ds_button name="cancel" translation_tag="common.cancel" height="content" flex_grow="1">
+				<action trigger="clicked" name="$close"/>
+			</ds_button>
+			<ds_button name="ok" translation_tag="common.ok" height="content" flex_grow="1">
+				<style name="actionBtn"/>
+				<action trigger="clicked" name="$confirm"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

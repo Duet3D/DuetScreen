@@ -1,8 +1,5 @@
 target_sources(
   DuetScreen.lib
   PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/StatusPresenter.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/StatusView.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/FineTune.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/FineTunePresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/JobStatusPresenter.cpp
 )

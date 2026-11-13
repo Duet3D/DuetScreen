@@ -37,9 +37,4 @@ namespace UI
 		setActiveTab(JOBS_TAB);
 	}
 
-	void DashboardTabs::onInit()
-	{
-		ZoneScoped;
-		m_statusView.setNumberPad(findView<ModalNumberPad>("numberpad"));
-	}
 } // namespace UI

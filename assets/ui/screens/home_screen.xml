@@ -30,6 +30,10 @@
 			<ds_view name="settings" view="settings"/>
 			<ds_view name="extrusion_factor" view="extrusion_factor"/>
 			<ds_view name="numberpad" view="numberpad"/>
+			<!-- The job status panel's dialogs; babystepping uses the number pad above -->
+			<ds_view name="speed_factor" view="speed_factor"/>
+			<ds_view name="job_extrusion_factor" view="job_extrusion_factor"/>
+			<ds_view name="babystep" view="babystep"/>
 		</ds_view>
 
 		<!-- After the main window, so a dragged E-stop passes over it -->

@@ -26,6 +26,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/View/NativeViews.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsBar.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsIcon.cpp
@@ -33,6 +34,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsModal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTabs.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsThumbnail.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/Widgets.cpp
 )

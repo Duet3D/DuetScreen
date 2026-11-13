@@ -812,26 +812,26 @@ TEST_F(TestHomeViewWithData, StatusView)
 	dashboardTabs().showStatusTab();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
-	auto& statusView = dashboardTabs().getStatusView();
+	lv_obj_t* status = page<UI::LvObj>("dashboard_tabs").getRootPtr();
+	auto click = [&](const char* name)
+	{
+		lv_obj_t* obj = lv_obj_find_by_name(status, name);
+		ASSERT_NE(obj, nullptr) << name;
+		lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
+	};
 
-	UI::LvObj* speed_factor = statusView.getChildByName("print_info.speed_cont.speed_multiplier");
-	ASSERT_NE(speed_factor, nullptr);
-	speed_factor->sendEvent(LV_EVENT_CLICKED, nullptr);
+	click("speed_multiplier");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_numberpad.png")
 
 	UI::closeAllModals();
 
-	UI::LvObj* extrusion_factor = statusView.getChildByName("print_info.flow_cont.flow_multiplier");
-	ASSERT_NE(extrusion_factor, nullptr);
-	extrusion_factor->sendEvent(LV_EVENT_CLICKED, nullptr);
+	click("flow_multiplier");
 	OM::Move::SetExtruderFactor(0, 1.2f);
 	Model::get().post<EventType::ExtruderData>();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
 
 	UI::closeAllModals();
 
-	UI::LvObj* babystep = statusView.getChildByName("print_info.babystep_cont.babystep_button");
-	ASSERT_NE(babystep, nullptr);
-	babystep->sendEvent(LV_EVENT_CLICKED, nullptr);
+	click("babystep_button");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
 }

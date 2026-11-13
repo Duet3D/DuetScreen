@@ -11,8 +11,8 @@
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Presenter.h"
 #include "UI/Core/View.h"
-#include "UI/Screens/Status/StatusView.h"
 #include "UI/Xml/View/XmlView.h"
+#include "i18n/i18n.h"
 
 namespace UI
 {
@@ -50,13 +50,6 @@ namespace UI
 		/** Enable or disable the Jobs tab */
 		void disableJobsTab(bool disable) { disableTab(JOBS_TAB, disable); }
 
-		/** The Status tab */
-		StatusView& getStatusView() { return m_statusView; }
-
-	  protected:
-		/** Give the status tab the shared number pad */
-		void onInit() override;
-
 	  private:
 		static constexpr size_t JOBS_TAB = 0;	// Index of the Jobs tab
 		static constexpr size_t STATUS_TAB = 2; // Index of the Status tab
@@ -66,6 +59,6 @@ namespace UI
 			"dashboard_jobs", addTab(_("file.jobs")), "file_browser", Xml::Presenters::create("dashboard_jobs")};
 		Xml::XmlView m_macrosView{
 			"dashboard_macros", addTab(_("file.macros")), "file_browser", Xml::Presenters::create("dashboard_macros")};
-		StatusView m_statusView{"status", addTab(_("app_drawer.status"))}; // Print status
+		Xml::XmlView m_statusView{"status", addTab(_("app_drawer.status")), "job_status"}; // Print status (job_status.xml)
 	};
 } // namespace UI

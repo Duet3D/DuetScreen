@@ -1,0 +1,11 @@
+<!--
+  One axis' position in the job status panel: its letter above its position.
+
+  Fields:   an axes row: text (src/UI/Screens/Status/JobStatusPresenter.h)
+-->
+<component>
+	<view extends="lv_label" bind_text="text" height="content" flex_grow="1" style_min_width="content"
+		  style_text_align="center">
+		<style name="bg_light"/>
+	</view>
+</component>

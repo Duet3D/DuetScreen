@@ -1,0 +1,181 @@
+<!--
+  The job status panel: the current (or last) job with its progress and thumbnail; the tool position, speed, flow,
+  babystepping and times; and pause, resume, print again and cancel.
+
+  Tapping the speed, flow or babystepping value opens the dialog to change it (speed_factor, job_extrusion_factor and
+  babystep, which the screen showing this panel hosts).
+
+  Fields and actions: src/UI/Screens/Status/JobStatusPresenter.h
+-->
+<component presenter="job_status">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<style name="bg_dark"/>
+
+		<!-- The job: name, progress and thumbnail -->
+		<lv_obj name="header" width="100%" height="content" style_max_height="30%" style_layout="grid"
+				style_grid_column_dsc_array="fr(5) content" style_grid_row_dsc_array="content content fr(1) content">
+			<style name="card"/>
+			<ds_bar name="progress" min="0" max="100" label_format="{}%" bind_value="progress" height="content"
+					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="3" style_grid_cell_y_align="end"/>
+			<lv_label name="printed_tag" translation_tag="status.print_finished" width="100%" height="content"
+					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
+				<bind_flag_if_eq subject="finished" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<lv_label name="filename" bind_text="file" width="100%" height="content"
+					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					  style_grid_cell_row_pos="1" style_grid_cell_y_align="start"/>
+			<ds_thumbnail name="thumbnail" bind_src="thumbnail" inner_align="contain" height="100%" width="50"
+						  style_min_height="50" style_max_width="30%"
+						  style_grid_cell_column_pos="1" style_grid_cell_x_align="end"
+						  style_grid_cell_row_pos="0" style_grid_cell_row_span="4" style_grid_cell_y_align="start"/>
+		</lv_obj>
+
+		<lv_obj name="print_info" width="100%" height="100%" flex_grow="5" style_layout="grid"
+				style_grid_column_dsc_array="fr(3) content"
+				style_grid_row_dsc_array="content content content content">
+			<style name="card"/>
+
+			<lv_obj name="positions" width="100%" height="content" flex_flow="column"
+					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
+				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="bg_color_header"/>
+					<style name="list_header"/>
+					<lv_label name="title" translation_tag="status.positions" width="content" height="content">
+						<style name="list_title"/>
+					</lv_label>
+				</lv_obj>
+				<ds_list name="list" list="axes" item="axis_position" width="100%" height="content"
+						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="start"
+						 style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="speed_cont" height="content" scrollable="false" style_layout="grid"
+					style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content"
+					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
+				<lv_label name="speed_header" translation_tag="status.speed_header"
+						  style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+						  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
+					<style name="bg_color_header"/>
+					<style name="pad_normal"/>
+					<style name="text_emphasis"/>
+				</lv_label>
+				<ds_button name="speed_multiplier" bind_text="speed_factor" width="content" height="content"
+						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
+						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+					<action trigger="clicked" name="job.speed_factor"/>
+				</ds_button>
+				<lv_bar name="requested_speed" max_value="1000" bind_value="speed_requested" height="content"
+						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+					<style name="bg_color_primary_muted" selector="indicator"/>
+					<style name="anim_fast"/>
+				</lv_bar>
+				<lv_bar name="current_speed" max_value="1000" bind_value="speed_top" height="content"
+						style_bg_opa="0"
+						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+					<lv_label name="speed_label" bind_text="speed_text" align="left_mid" x="10">
+						<style name="bar_label_bg"/>
+						<style name="bar_label"/>
+					</lv_label>
+				</lv_bar>
+			</lv_obj>
+
+			<lv_obj name="flow_cont" height="content" scrollable="false" style_layout="grid"
+					style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content"
+					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
+				<lv_label name="flow_header" translation_tag="status.flow_header"
+						  style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+						  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
+					<style name="bg_color_header"/>
+					<style name="pad_normal"/>
+					<style name="text_emphasis"/>
+				</lv_label>
+				<ds_button name="flow_multiplier" bind_text="flow_factor" width="content" height="content"
+						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
+						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+					<action trigger="clicked" name="job.flow_factor"/>
+				</ds_button>
+				<lv_bar name="extruder_feedrate" max_value="1000" bind_value="flow" height="content"
+						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+					<lv_label name="extruder_feedrate_label" bind_text="flow_text" align="left_mid" x="10">
+						<style name="bar_label_bg"/>
+						<style name="bar_label"/>
+					</lv_label>
+				</lv_bar>
+			</lv_obj>
+
+			<lv_obj name="time_cont" height="content" flex_flow="column"
+					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="3" style_grid_cell_y_align="end">
+				<lv_label name="time_header" translation_tag="status.time_header" width="100%" height="content"
+						  style_min_width="content">
+					<style name="bg_color_header"/>
+					<style name="pad_normal"/>
+					<style name="text_emphasis"/>
+				</lv_label>
+				<lv_label name="elapsed_time" bind_text="elapsed"/>
+				<lv_label name="remaining_time" bind_text="remaining"/>
+			</lv_obj>
+
+			<lv_obj name="babystep_cont" width="content" height="content" flex_flow="column"
+					style_grid_cell_column_pos="1" style_grid_cell_x_align="end"
+					style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
+				<lv_label name="babystep_header" translation_tag="status.babystep_header" width="100%"
+						  height="content" style_min_width="content">
+					<style name="bg_color_header"/>
+					<style name="pad_normal"/>
+					<style name="text_emphasis"/>
+				</lv_label>
+				<ds_button name="babystep_button" bind_text="babystep" width="100%" height="content"
+						   style_min_width="content">
+					<action trigger="clicked" name="job.babystep"/>
+				</ds_button>
+			</lv_obj>
+		</lv_obj>
+
+		<!-- Job controls: each is hidden (0), disabled (1) or usable (2) -->
+		<lv_obj name="footer" width="100%" height="15%" style_min_height="content" flex_flow="row">
+			<style name="card"/>
+			<ds_button name="pause" translation_tag="status.pause" icon="pause.png" height="100%"
+					   style_min_height="content" flex_grow="1">
+				<style name="actionBtn"/>
+				<bind_flag_if_eq subject="pause" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="pause" state="disabled" ref_value="2"/>
+				<action trigger="clicked" name="job.pause"/>
+			</ds_button>
+			<ds_button name="resume" translation_tag="status.resume" icon="resume.png" height="100%"
+					   style_min_height="content" flex_grow="1">
+				<style name="actionBtn"/>
+				<bind_flag_if_eq subject="resume" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="resume" state="disabled" ref_value="2"/>
+				<action trigger="clicked" name="job.resume"/>
+			</ds_button>
+			<ds_button name="print_again" translation_tag="status.print_again" icon="print_again.png" height="100%"
+					   style_min_height="content" flex_grow="1">
+				<style name="actionBtn"/>
+				<bind_flag_if_eq subject="print_again" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="print_again" state="disabled" ref_value="2"/>
+				<action trigger="clicked" name="job.print_again"/>
+			</ds_button>
+			<ds_button name="cancel" translation_tag="status.cancel" icon="cancel.png" height="100%"
+					   style_min_height="content" flex_grow="1">
+				<bind_flag_if_eq subject="cancel" flag="hidden" ref_value="0"/>
+				<bind_state_if_not_eq subject="cancel" state="disabled" ref_value="2"/>
+				<action trigger="clicked" name="job.ask_cancel"/>
+			</ds_button>
+		</lv_obj>
+
+		<confirm_dialog name="confirm_cancel" open="confirm_cancel" title_tag="status.print_cancel_title"
+						text_tag="status.print_cancel_message" confirm="job.cancel" close="job.close_dialog"/>
+	</view>
+</component>

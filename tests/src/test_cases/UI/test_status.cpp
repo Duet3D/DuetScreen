@@ -5,8 +5,9 @@
  *      Author: Andy Everitt
  */
 
+#include "Comm/Thumbnail.h"
 #include "Debug.h"
-#include "UI/Screens/Status/StatusView.h"
+#include "UI/Styles/Styles.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
@@ -17,7 +18,7 @@ class TestStatus : public UiTestSuite
 {
   public:
 	TestStatus()
-		: view("status", screen)
+		: view("status", screen, "job_status")
 	{
 		// TODO: there is a race condition between the filesystem operations and the test execution when tests are run
 		// in parallel
@@ -29,7 +30,7 @@ class TestStatus : public UiTestSuite
 		home.hide();
 	}
 
-	StatusView view;
+	UI::Xml::XmlView view;
 	/** Hidden: the status view's modals belong to its main window */
 	UI::Xml::XmlView home{"home", lv_screen_active(), "home_screen"};
 };
@@ -43,11 +44,15 @@ TEST_F(TestStatus, Blank)
 
 TEST_F(TestStatus, Header)
 {
-	view.show();
+	// A job half way through (by time, the default progress source), with a thumbnail
+	std::filesystem::path thumbnailPath = GetThumbnailPath("test.gcode");
+	std::filesystem::create_directories(thumbnailPath.parent_path());
+	std::filesystem::remove(thumbnailPath);
+	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
+	load_model_data(
+		R"({"key":"job","flags":"v","result":{"duration":50,"warmUpDuration":0,"file":{"fileName":"test.gcode","size":100,"printTime":100}}})");
 
-	view.setFilename("test.gcode", true);
-	view.updateProgress(50);
-	view.setThumbnail(UI::Themes::getFixedIconPath("examples", "example.bmp").c_str());
+	view.show();
 	view.updateLayout();
 
 	EXPECT_EQUAL_SCREENSHOT("status_view/header.png")

@@ -1,0 +1,148 @@
+/*
+ * JobStatusPresenter.h
+ *
+ * Behaviour for the job status panel (assets/ui/components/job_status.xml): the current (or last) job with its
+ * progress and thumbnail, the tool position, speed, flow, babystepping and times, and pause, resume, print again and
+ * cancel.
+ *
+ * Fields
+ *   file               the current job's file, else the last job's
+ *   finished           1 when showing the last job (none is running), else 0
+ *   progress           0-100
+ *   thumbnail          the job's thumbnail path, or empty until it arrives
+ *   axes               list, one row per axis
+ *     index            position in the list
+ *     text             letter and user position on two lines, e.g. "X\n0.00"
+ *   speed_factor       speed override, e.g. "100%"
+ *   speed_text         current and requested speed, e.g. "0/0 mm/s"
+ *   speed_top          current move's top speed, in thousandths of the fastest axis' maximum (0-1000)
+ *   speed_requested    requested speed, likewise
+ *   flow_factor        extrusion override, e.g. "100%"
+ *   flow_text          volumetric flow, e.g. "0.0 mm³/s"
+ *   flow               volumetric flow, in thousandths of the fastest extruder's maximum (0-1000)
+ *   babystep           Z babystep, e.g. "0 mm"
+ *   elapsed            e.g. "Elapsed: 00:03:43"
+ *   remaining          e.g. "Remaining: 00:45:03"
+ *   pause, resume, print_again, cancel   each control's state: 0 hidden, 1 disabled, 2 usable
+ *   confirm_cancel     1 while asking whether to cancel the job
+ *
+ * Actions
+ *   job.pause, job.resume, job.print_again
+ *   job.ask_cancel     ask whether to cancel the job
+ *   job.cancel         cancel it (from the question)
+ *   job.close_dialog   don't
+ *   job.speed_factor, job.flow_factor, job.babystep   open the dialog to change them
+ */
+
+#pragma once
+
+#include "ObjectModel/PrinterStatus.h"
+#include "UI/Xml/Binding/List.h"
+#include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/View/XmlPresenter.h"
+#include <string>
+
+namespace UI
+{
+	/** One axis' position */
+	class AxisPositionRow : public Xml::Row
+	{
+	  public:
+		/** Declare the row's fields */
+		void fields(Xml::FieldVisitor& f) override;
+
+		Xml::StringSubject<24> text; // Letter and position on two lines
+	};
+
+	class JobStatusPresenter : public Xml::XmlPresenter
+	{
+	  public:
+		/** A control's state, as published */
+		enum class Control : int32_t
+		{
+			Hidden = 0,
+			Disabled = 1,
+			Usable = 2
+		};
+
+		/** Create the presenter */
+		JobStatusPresenter();
+
+		/** Declare the panel's fields */
+		void fields(Xml::FieldVisitor& f) override;
+
+	  protected:
+		/** Listen for job, state, move and extruder changes */
+		void onInit() override;
+
+		/** Show everything as it is now */
+		void onActivate() override;
+
+		/** Close the question: the job may have changed */
+		void onDeactivate() override;
+
+	  private:
+		/** A job started (or none is running, if `file` is empty) */
+		void jobFileChanged(const std::string& file);
+
+		/** The last job's file changed */
+		void lastJobFileChanged(const std::string& file);
+
+		/** Show the job's progress and elapsed time */
+		void showProgress();
+
+		/** Show the time left */
+		void showRemaining();
+
+		/** Show the controls usable in `status` */
+		void showControls(OM::PrinterStatus status);
+
+		/** Show the axes' positions, the speed range and babystepping */
+		void showAxes();
+
+		/** Show the extrusion override and flow range */
+		void showExtruders();
+
+		/** Show the speed override */
+		void showSpeedFactor();
+
+		/** Show the current move's speeds */
+		void showSpeeds();
+
+		/** Show the volumetric flow */
+		void showFlow();
+
+		/** Show `file`'s thumbnail, asking the printer for it if it isn't here yet; nothing if `file` is empty */
+		void showThumbnail(const std::string& file);
+
+		/** A thumbnail arrived */
+		void thumbnailReceived(const std::string& file);
+
+		/** The job shown: the current one, else the last one */
+		static const std::string& shownJob();
+
+		int32_t m_maxSpeed = 1;			// Fastest axis' maximum speed, mm/s
+		int32_t m_maxExtrusionRate = 1; // Fastest extruder's maximum speed
+
+		Xml::StringSubject<256> m_file;			// Job shown
+		Xml::IntSubject m_finished;				// 1 when showing the last job
+		Xml::IntSubject m_progress;				// 0-100
+		Xml::StringSubject<256> m_thumbnail;	// Thumbnail path, or empty
+		Xml::List<AxisPositionRow> m_axes;		// Axis positions
+		Xml::StringSubject<16> m_speedFactor;	// Speed override text
+		Xml::StringSubject<32> m_speedText;		// Current and requested speed text
+		Xml::IntSubject m_speedTop;				// Top speed, thousandths of the maximum
+		Xml::IntSubject m_speedRequested;		// Requested speed, thousandths of the maximum
+		Xml::StringSubject<16> m_flowFactor;	// Extrusion override text
+		Xml::StringSubject<32> m_flowText;		// Volumetric flow text
+		Xml::IntSubject m_flow;					// Volumetric flow, thousandths of the maximum
+		Xml::StringSubject<24> m_babystep;		// Babystep text
+		Xml::StringSubject<48> m_elapsed;		// Elapsed time text
+		Xml::StringSubject<48> m_remaining;		// Time left text
+		Xml::IntSubject m_pause;				// Pause control state
+		Xml::IntSubject m_resume;				// Resume control state
+		Xml::IntSubject m_printAgain;			// Print again control state
+		Xml::IntSubject m_cancel;				// Cancel control state
+		Xml::IntSubject m_confirmCancel;		// 1 while asking whether to cancel
+	};
+} // namespace UI

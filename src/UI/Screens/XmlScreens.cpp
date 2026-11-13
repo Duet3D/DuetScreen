@@ -11,10 +11,13 @@
 #include "File/FileBrowserPresenter.h"
 #include "Notifications/NotificationsView.h"
 #include "Settings/SettingsView.h"
+#include "Status/JobStatusPresenter.h"
 #include "StatusBar/StatusBarPresenter.h"
 #include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
+#include "UI/Widgets/BabyStep/BabyStep.h"
 #include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
+#include "UI/Widgets/Control/SpeedFactor/SpeedFactor.h"
 #include "UI/Widgets/EStop/EStop.h"
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
@@ -43,6 +46,26 @@ namespace UI
 		return keyboard;
 	}
 
+	/** A dialog of type M, 80% wide and as tall as it needs */
+	template <typename M>
+	static LvObj* createFactorDialog(const std::string& name, lv_obj_t* parent)
+	{
+		LvObjRef parentRef(parent);
+		auto* dialog = new M(name, parentRef);
+		dialog->setSize(LV_PCT(80), LV_SIZE_CONTENT);
+		return dialog;
+	}
+
+	/** The babystepping dialog, typing values on the shared number pad */
+	static LvObj* createBabyStep(const std::string& name, lv_obj_t* parent)
+	{
+		LvObjRef parentRef(parent);
+		auto* dialog = new Modal<BabyStep>(name, parentRef);
+		dialog->setSize(LV_PCT(40), LV_PCT(70));
+		dialog->setNumberPad(findView<ModalNumberPad>("numberpad"));
+		return dialog;
+	}
+
 	/** Make a file browser presenter with `settings` available as `name` */
 	static void addFileBrowser(std::string name, FileBrowserPresenter::Settings settings)
 	{
@@ -56,6 +79,7 @@ namespace UI
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 		Xml::Presenters::add<ToolListPresenter>("tool_list");
+		Xml::Presenters::add<JobStatusPresenter>("job_status");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -92,6 +116,9 @@ namespace UI
 		Xml::NativeViews::add<NotificationsView>("notifications");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");
+		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);
+		Xml::NativeViews::add("job_extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
+		Xml::NativeViews::add("babystep", createBabyStep);
 		Xml::NativeViews::add("keyboard", createKeyboard);
 	}
 } // namespace UI
