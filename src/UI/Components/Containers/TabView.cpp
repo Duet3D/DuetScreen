@@ -53,6 +53,18 @@ namespace UI
 		: LvContainer(name, parent)
 	{
 		ZoneScoped;
+		init();
+	}
+
+	TabView::TabView(const std::string& name, lv_obj_t* parent)
+		: LvContainer(name, parent)
+	{
+		ZoneScoped;
+		init();
+	}
+
+	void TabView::init()
+	{
 		setTabBarPosition(LV_DIR_TOP);
 		setStylePad(0);
 		setStylePad(-5, LV_PART_MAIN, Padding::ROW);

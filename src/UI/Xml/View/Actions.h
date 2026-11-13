@@ -14,7 +14,8 @@
  * The handler gets an ActionArgs, which can also find the list rows the widget is inside: `args.row<FanRow>()`.
  *
  * Triggers are LVGL's event names (`clicked`, `value_changed`, `long_pressed`, ...) plus `value_confirmed`, which
- * DuetScreen widgets raise once an edit is finished (a slider is released, or a value is typed in).
+ * DuetScreen widgets raise once an edit is finished (a slider is released, or a value is typed in), and `dismissed`,
+ * which a `<ds_modal>` raises when the user closes it (see Widgets/DsModal.h).
  *
  * `arg` may contain `{name}` placeholders. `{value}` is the edited value; any other name is replaced by the current
  * value of the subject of that name, looked up from where the `<action>` was written (row, then presenter, then
@@ -58,7 +59,7 @@ namespace UI::Xml
 			requires std::derived_from<R, Row>
 		R* row() const
 		{
-			for (lv_obj_t* obj = target; obj != nullptr; obj = lv_obj_get_parent(obj))
+			for (lv_obj_t* obj = target; obj != nullptr; obj = outerOf(obj))
 			{
 				if (auto* r = dynamic_cast<R*>(rowOf(obj)))
 				{
@@ -71,6 +72,10 @@ namespace UI::Xml
 	  private:
 		/** The row `obj` is the root widget of, or nullptr */
 		static Row* rowOf(lv_obj_t* obj);
+
+	  public:
+		/** Where looking outwards from `obj` continues: its owner (see Actions::setOwner), else its parent */
+		static lv_obj_t* outerOf(lv_obj_t* obj);
 	};
 
 	/** Handles one action */
@@ -104,11 +109,21 @@ namespace UI::Xml
 		/** The event DuetScreen widgets send, with a `float*` parameter, when an edit is confirmed */
 		lv_event_code_t valueConfirmedEvent();
 
+		/** The event a `<ds_modal>` sends when it is closed other than by its subject (tapped outside, back, …) */
+		lv_event_code_t dismissedEvent();
+
 		/** Actions from `obj` and the widgets inside it try `handlers` before outer ones. Until `obj` is deleted. */
 		void setHandlers(lv_obj_t* obj, const ActionHandlerSet* handlers);
 
 		/** `obj` is the root widget of `row` in a `<ds_list>`. Until `obj` is deleted. */
 		void setRow(lv_obj_t* obj, Row* row);
+
+		/**
+		 * Actions (and rows) from `obj` and the widgets inside it are looked for outwards from `owner` instead of from
+		 * `obj`'s parent: for widgets written in one view but shown elsewhere, such as a dialog moved to the modal host.
+		 * `owner` must outlive `obj`. Until `obj` is deleted.
+		 */
+		void setOwner(lv_obj_t* obj, lv_obj_t* owner);
 
 		/** Handle `name` everywhere it isn't handled by a presenter */
 		void addGlobal(std::string name, ActionHandler handler);

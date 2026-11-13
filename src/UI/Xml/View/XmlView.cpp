@@ -75,16 +75,20 @@ namespace UI::Xml
 					 LvObj& parent,
 					 std::string componentName,
 					 std::shared_ptr<XmlPresenter> givenPresenter)
-		: XmlViewState(std::move(componentName), name, std::move(givenPresenter))
-		, LvObj([this](lv_obj_t* p) { return build(p, *this); }, name, parent.getRootPtr())
+		: XmlView(name, parent.getRootPtr(), std::move(componentName), std::move(givenPresenter))
 	{
-		ZoneScoped;
-		registerActions();
-		addView(this);
 	}
 
 	XmlView::XmlView(const std::string& name, lv_obj_t* parent, std::string componentName)
-		: XmlViewState(std::move(componentName), name)
+		: XmlView(name, parent, std::move(componentName), nullptr)
+	{
+	}
+
+	XmlView::XmlView(const std::string& name,
+					 lv_obj_t* parent,
+					 std::string componentName,
+					 std::shared_ptr<XmlPresenter> givenPresenter)
+		: XmlViewState(std::move(componentName), name, std::move(givenPresenter))
 		, LvObj([this](lv_obj_t* p) { return build(p, *this); }, name, parent)
 	{
 		ZoneScoped;

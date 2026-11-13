@@ -21,6 +21,7 @@ namespace UI::Xml
 		{
 			const ActionHandlerSet* handlers = nullptr; // Presenter actions, if the widget is a view root
 			Row* row = nullptr;							// The row, if the widget is a list row's root
+			lv_obj_t* owner = nullptr;					// Where to look outwards from instead of the parent, if set
 		};
 
 		/** One `<action>` element, attached to its widget */
@@ -34,6 +35,7 @@ namespace UI::Xml
 		std::unordered_map<lv_obj_t*, Target> s_targets;  // Widgets that are view or row roots
 		ActionHandlerSet s_globals;						  // Actions no presenter handles
 		lv_event_code_t s_valueConfirmed = LV_EVENT_LAST; // Registered at init()
+		lv_event_code_t s_dismissed = LV_EVENT_LAST;	  // Registered at init()
 
 		/** Forget a deleted widget */
 		void targetDeletedCb(lv_event_t* e)
@@ -146,6 +148,10 @@ namespace UI::Xml
 			{
 				return s_valueConfirmed;
 			}
+			if (lv_streq(trigger, "dismissed"))
+			{
+				return s_dismissed;
+			}
 			return lv_xml_trigger_text_to_enum_value(trigger);
 		}
 
@@ -239,7 +245,7 @@ namespace UI::Xml
 
 	Row* ActionArgs::row() const
 	{
-		for (lv_obj_t* obj = target; obj != nullptr; obj = lv_obj_get_parent(obj))
+		for (lv_obj_t* obj = target; obj != nullptr; obj = outerOf(obj))
 		{
 			if (Row* r = rowOf(obj))
 			{
@@ -253,6 +259,12 @@ namespace UI::Xml
 	{
 		auto it = s_targets.find(obj);
 		return it == s_targets.end() ? nullptr : it->second.row;
+	}
+
+	lv_obj_t* ActionArgs::outerOf(lv_obj_t* obj)
+	{
+		auto it = s_targets.find(obj);
+		return it != s_targets.end() && it->second.owner != nullptr ? it->second.owner : lv_obj_get_parent(obj);
 	}
 
 	bool ActionHandlerSet::dispatch(const ActionArgs& args) const
@@ -271,6 +283,7 @@ namespace UI::Xml
 		void init()
 		{
 			s_valueConfirmed = static_cast<lv_event_code_t>(lv_event_register_id());
+			s_dismissed = static_cast<lv_event_code_t>(lv_event_register_id());
 			lv_xml_register_widget("lv_obj-action", actionCreate, actionApply);
 		}
 
@@ -279,11 +292,17 @@ namespace UI::Xml
 			s_targets.clear();
 			s_globals = ActionHandlerSet{};
 			s_valueConfirmed = LV_EVENT_LAST;
+			s_dismissed = LV_EVENT_LAST;
 		}
 
 		lv_event_code_t valueConfirmedEvent()
 		{
 			return s_valueConfirmed;
+		}
+
+		lv_event_code_t dismissedEvent()
+		{
+			return s_dismissed;
 		}
 
 		void setHandlers(lv_obj_t* obj, const ActionHandlerSet* handlers)
@@ -302,6 +321,14 @@ namespace UI::Xml
 			}
 		}
 
+		void setOwner(lv_obj_t* obj, lv_obj_t* owner)
+		{
+			if (obj != nullptr)
+			{
+				targetFor(obj).owner = owner;
+			}
+		}
+
 		void addGlobal(std::string name, ActionHandler handler)
 		{
 			s_globals.add(std::move(name), std::move(handler));
@@ -313,7 +340,7 @@ namespace UI::Xml
 			const ActionArgs args{.name = name, .arg = std::string(arg), .event = event, .target = from};
 
 			// The innermost presenter that handles it
-			for (lv_obj_t* obj = from; obj != nullptr; obj = lv_obj_get_parent(obj))
+			for (lv_obj_t* obj = from; obj != nullptr; obj = ActionArgs::outerOf(obj))
 			{
 				auto it = s_targets.find(obj);
 				if (it != s_targets.end() && it->second.handlers != nullptr && it->second.handlers->dispatch(args))

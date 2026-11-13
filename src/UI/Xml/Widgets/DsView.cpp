@@ -35,6 +35,22 @@ namespace UI::Xml::DsView
 			delete view;
 		}
 
+		/** The presenter `presenter=` names, or nullptr to use the component's own */
+		std::shared_ptr<XmlPresenter> presenterFor(const char** attrs)
+		{
+			const char* name = lv_xml_get_value_of(attrs, "presenter");
+			if (name == nullptr || name[0] == '\0')
+			{
+				return nullptr;
+			}
+			auto presenter = Presenters::create(name);
+			if (!presenter)
+			{
+				LOG_ERROR("<ds_view presenter=\"{:s}\">: no such presenter; using the component's own", name);
+			}
+			return presenter;
+		}
+
 		/** Create the view: an XML component if there is one by that name, else a C++ view */
 		void* create(lv_xml_parser_state_t* state, const char** attrs)
 		{
@@ -51,7 +67,7 @@ namespace UI::Xml::DsView
 			if (findComponent(view) != nullptr || !NativeViews::exists(view))
 			{
 				// A missing component still gets an XmlView, which shows what is missing
-				object = new XmlView(name, parent, view);
+				object = new XmlView(name, parent, view, presenterFor(attrs));
 			}
 			else
 			{

@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list`, `ds_graph`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -78,6 +78,14 @@ A view can also be given a presenter, which then replaces the one the component 
 ```cpp
 Xml::XmlView toolList{"tool_list", parent, "tool_list", std::make_shared<MyTools>()};
 ```
+
+In XML, `presenter=` does the same with a registered presenter, so one component can be shown in several places with different data or settings (each placement's presenter is registered in [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp)):
+
+```xml
+<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs"/>
+```
+
+Views inside another view (its `<ds_view>`s) are rebuilt with it when bundles are reloaded.
 
 ## Bundles
 
@@ -142,7 +150,7 @@ So in a heater row inside a tool card, `name` is the heater's name, `number` is 
 
 | Kind | Names |
 | --- | --- |
-| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `temperatures` (a history, one series per heater) and `temperatures.limit`. |
+| Data | The data sources in [Data/](../src/UI/Xml/Data); each header lists its names. `fans`, `tools` (each with `heaters`), `beds`, `chambers`, `machine.status`, `machine.printing`, `machine.job_active`, `nav.screen` (the open page, empty on the home screen), `responses.count`, `temperatures` (a history, one series per heater) and `temperatures.limit`. |
 | Theme styles | Every member of `LvglStyles` and `ComponentStyles` by name, e.g. `<style name="card"/>`. They follow theme changes. |
 | Theme colours and consts | The palette colours and the theme's consts, e.g. `style_bg_color="#primary"`, `style_radius="#radius"`. They follow theme changes. |
 | Fonts | `font_header`, `font_normal`, `font_emphasis`, `font_subdued` |
@@ -164,6 +172,13 @@ builds one `tool_card` per row of `tools` (see [tool_list.xml](../assets/ui/comp
 
 Lists add and remove rows at the end, so existing rows keep their scroll position and in-progress edits when the list changes length.
 
+A long list should be windowed: only the rows on screen are built, and rows are built and deleted as it scrolls. Every item then has the same size, set by the list:
+
+```xml
+<ds_list list="files" item="file_row" windowed="true" item_height="90"/>
+<ds_list list="files" item="file_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
+```
+
 ### Graphs
 
 A subject holds only the current value. A graph needs the past, so data sources record into a *history*: a list whose rows are series (each with a `name`), and which adds one value to every series at a fixed rate. Sources record whether or not anything shows the history, so a graph built later starts with what came before it.
@@ -184,7 +199,22 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
-| `<ds_view>` | `name`, `view`, `home`, `shown`: a page (see Hosting a view) |
+| `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, and `bind_disabled` (disabled while an integer subject is non-zero); its children are the tab's content. |
+| `<ds_modal>` | `bind_open`, `open_value`, `blocking`: a dialog over the main window, open while its subject is set (or equals `open_value`). Raises `dismissed` when the user closes it. See Dialogs. |
+| `<ds_view>` | `name`, `view`, `presenter`, `home`, `shown`: a page (see Hosting a view) |
+
+### Dialogs
+
+A dialog is a `<ds_modal>` whose subject says whether it is open, so the presenter opens and closes it by setting a subject and never touches a widget:
+
+```xml
+<ds_modal name="file_dialog" bind_open="dialog" open_value="start_print" width="70%" height="content">
+    <action trigger="dismissed" name="files.close_dialog"/>
+    …
+</ds_modal>
+```
+
+When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
 
 ### Actions
 
@@ -194,7 +224,7 @@ These are in addition to the standard `lv_*` widgets.
 
 An action is resolved like a name: first the presenter of the nearest enclosing view, then the global actions. A handler can find the rows the widget is inside: `args.row<FanRow>()`, or from a heater row both `args.row<ToolHeaterRow>()` and `args.row<ToolRow>()`.
 
-`trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...) or `value_confirmed`.
+`trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...), `value_confirmed` (an edit finished) or `dismissed` (a `<ds_modal>` was closed by the user).
 
 `arg` may contain placeholders: `{value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{number} S{value}"`.
 

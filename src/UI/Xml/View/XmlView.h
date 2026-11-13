@@ -61,6 +61,12 @@ namespace UI::Xml
 		/** Build `component` inside `parent` with `presenter` instead of the one the component names */
 		XmlView(const std::string& name, LvObj& parent, std::string component, std::shared_ptr<XmlPresenter> presenter);
 
+		/** Build `component` inside a widget that has no C++ view, with `presenter` instead of the one it names */
+		XmlView(const std::string& name,
+				lv_obj_t* parent,
+				std::string component,
+				std::shared_ptr<XmlPresenter> presenter);
+
 		/** Disconnect the presenter; the widgets are deleted by ~LvObj */
 		~XmlView() override;
 

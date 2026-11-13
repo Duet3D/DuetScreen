@@ -10,6 +10,7 @@
 #include "ObjectModel/Tool.h"
 #include "UI/Components/Button/Button.h"
 #include "UI/Components/Input/Slider.h"
+#include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Binding/Globals.h"
@@ -20,6 +21,8 @@
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "UI/Xml/Widgets/DsGraph.h"
+#include "UI/Xml/Widgets/DsModal.h"
+#include "UI/Xml/Widgets/DsTabs.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
@@ -159,6 +162,94 @@ namespace
 		UI::Xml::History history{10, 50};
 		UI::Xml::IntSubject limit;
 	};
+
+	/** A row holding one number */
+	class NumberRow : public UI::Xml::Row
+	{
+	  public:
+		void fields(UI::Xml::FieldVisitor& f) override { f.field("value", value, "The number"); }
+
+		UI::Xml::IntSubject value;
+	};
+
+	/** Owns a dialog subject and a long list, and records the actions it handles */
+	class DialogPresenter : public UI::Xml::XmlPresenter
+	{
+	  public:
+		DialogPresenter()
+			: XmlPresenter("test_dialog")
+		{
+			action("test.ok", [this](const UI::Xml::ActionArgs&) { calls.emplace_back("ok"); });
+			action("test.dismissed",
+				   [this](const UI::Xml::ActionArgs&)
+				   {
+					   calls.emplace_back("dismissed");
+					   dialog.set("");
+				   });
+		}
+
+		void fields(UI::Xml::FieldVisitor& f) override
+		{
+			f.field("dialog", dialog, "Which dialog is open");
+			f.field("busy", busy, "Disables a tab");
+			f.list("numbers", numbers, "A long list");
+		}
+
+		/** Make `numbers` `count` long, each row holding its index */
+		void setCount(size_t count)
+		{
+			numbers.sync(count, [](NumberRow& row, size_t i) { row.value.set(static_cast<int32_t>(i)); });
+		}
+
+		std::vector<std::string> calls;
+		UI::Xml::StringSubject<16> dialog;
+		UI::Xml::IntSubject busy;
+		UI::Xml::List<NumberRow> numbers;
+	};
+
+	/* A dialog, tabs and two windowed lists (a column of rows, and a grid of 100x50 tiles, 3 to a line) */
+	constexpr std::string_view DIALOG_SCREEN = R"(
+		<component presenter="test_dialog">
+			<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
+				<ds_modal name="dialog" bind_open="dialog" open_value="ask" width="50%" height="content">
+					<action trigger="dismissed" name="test.dismissed"/>
+					<ds_button name="ok" text="OK">
+						<action trigger="clicked" name="test.ok"/>
+					</ds_button>
+				</ds_modal>
+				<ds_tabs name="tabs" width="300" height="100">
+					<ds_tabs-tab name="first" title="First"/>
+					<ds_tabs-tab name="second" title="Second" bind_disabled="busy"/>
+				</ds_tabs>
+				<ds_list name="rows" list="numbers" item="number_item" windowed="true" item_height="50"
+						 width="300" height="200" y="100" style_pad_all="0" style_pad_row="0"/>
+				<ds_list name="tiles" list="numbers" item="number_item" windowed="true" item_width="100"
+						 item_height="50" flow="row_wrap" width="300" height="100" y="300" style_pad_all="0"
+						 style_pad_row="0" style_pad_column="0"/>
+			</view>
+		</component>)";
+
+	constexpr std::string_view NUMBER_ITEM = R"(
+		<component>
+			<view extends="lv_obj">
+				<lv_label name="value" bind_text="value"/>
+			</view>
+		</component>)";
+
+	/* Hosts a view that is given the test_history presenter by name */
+	constexpr std::string_view HOST_SCREEN = R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_view name="hosted" view="hosted_limit" presenter="test_history" shown="true"/>
+			</view>
+		</component>)";
+
+	constexpr std::string_view HOSTED_LIMIT = R"(
+		<component>
+			<view extends="lv_obj">
+				<lv_label name="limit" bind_text="limit"/>
+			</view>
+		</component>)";
 } // namespace
 
 class TestXmlUi : public UiTestSuite
@@ -168,6 +259,7 @@ class TestXmlUi : public UiTestSuite
 	{
 		UI::Xml::Presenters::add<RecordingPresenter>("test_tools");
 		UI::Xml::Presenters::add<HistoryPresenter>("test_history");
+		UI::Xml::Presenters::add<DialogPresenter>("test_dialog");
 		m_userDir = fs::temp_directory_path() / fmt::format("duetscreen-xml-ui-{:d}", getpid());
 		fs::remove_all(m_userDir);
 		UI::Xml::Services::setGcodeSender([this](std::string_view gcode) { m_sent.emplace_back(gcode); });
@@ -270,6 +362,34 @@ class TestXmlUi : public UiTestSuite
 			values.push_back(y[(start + i) % points]);
 		}
 		return values;
+	}
+
+	/** Install the dialog and host screens as a user bundle */
+	void installDialogScreens()
+	{
+		writeFile(bundleFile("manifest.json"), manifest());
+		writeFile(bundleFile("components/dialog_screen.xml"), DIALOG_SCREEN);
+		writeFile(bundleFile("components/number_item.xml"), NUMBER_ITEM);
+		writeFile(bundleFile("components/host_screen.xml"), HOST_SCREEN);
+		writeFile(bundleFile("components/hosted_limit.xml"), HOSTED_LIMIT);
+		restartWithUserBundles();
+		EXPECT_TRUE(UI::Xml::getIssues().empty());
+	}
+
+	/** The values shown by a windowed list's items, in row order */
+	static std::vector<int32_t> builtRows(lv_obj_t* list)
+	{
+		std::vector<int32_t> rows;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+		{
+			lv_obj_t* label = find(lv_obj_get_child(list, static_cast<int32_t>(i)), "value");
+			if (label != nullptr)
+			{
+				rows.push_back(std::stoi(lv_label_get_text(label)));
+			}
+		}
+		std::sort(rows.begin(), rows.end());
+		return rows;
 	}
 
 	fs::path m_userDir;
@@ -776,4 +896,130 @@ TEST_F(TestXmlUi, GraphOutlivesItsHistory)
 	history.reset();
 	EXPECT_EQ(graph(view).getSeriesCount(), 0u) << "the graph lets go of a destroyed history";
 	m_views.clear(); // Deleting the graph afterwards must not touch the history
+}
+
+TEST_F(TestXmlUi, ViewCanBeGivenAPresenterByName)
+{
+	installDialogScreens();
+	auto& host = makeView("host_screen");
+	auto* hosted = UI::findView<UI::Xml::XmlView>("hosted");
+	ASSERT_NE(hosted, nullptr);
+	ASSERT_NE(hosted->getPresenter(), nullptr);
+	EXPECT_EQ(hosted->getPresenter()->getName(), "test_history");
+
+	auto& presenter = static_cast<HistoryPresenter&>(*hosted->getPresenter());
+	presenter.limit.set(42);
+	EXPECT_EQ(text(host.getRootPtr(), "limit"), "42") << "the component shows the given presenter's names";
+}
+
+TEST_F(TestXmlUi, ReloadRebuildsHostedViewsWithTheirHost)
+{
+	installDialogScreens();
+	auto& host = makeView("host_screen");
+	ASSERT_NE(UI::findView("hosted"), nullptr);
+
+	UI::Xml::reload(); // Used to free the hosted view while it rebuilt itself
+
+	auto* hosted = UI::findView<UI::Xml::XmlView>("hosted");
+	ASSERT_NE(hosted, nullptr);
+	EXPECT_EQ(lv_obj_get_parent(hosted->getRootPtr()), host.getRootPtr()) << "built afresh inside the new host";
+}
+
+TEST_F(TestXmlUi, TabDisabledWhileItsSubjectIsSet)
+{
+	installDialogScreens();
+	auto& view = makeView("dialog_screen");
+	auto& tabs = static_cast<UI::Xml::DsTabs&>(*UI::LvObj::fromPtr(find(view, "tabs")));
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	ASSERT_EQ(tabs.getTabCount(), 2u);
+	EXPECT_EQ(tabs.getTabButton(1)->getText(), "Second");
+	EXPECT_FALSE(tabs.getTabButton(1)->hasState(LV_STATE_DISABLED));
+
+	presenter.busy.set(1);
+	EXPECT_TRUE(tabs.getTabButton(1)->hasState(LV_STATE_DISABLED));
+	EXPECT_FALSE(tabs.getTabButton(0)->hasState(LV_STATE_DISABLED));
+	presenter.busy.set(0);
+	EXPECT_FALSE(tabs.getTabButton(1)->hasState(LV_STATE_DISABLED));
+}
+
+TEST_F(TestXmlUi, ModalFollowsItsSubjectFromTheModalHost)
+{
+	installDialogScreens();
+	UI::LvContainer mainWindow("main_window", screen);
+	UI::registerView("main_window", &mainWindow);
+
+	auto& view = makeView("dialog_screen");
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	lv_obj_t* dialog = find(mainWindow, "dialog");
+	ASSERT_NE(dialog, nullptr) << "the dialog is in the modal host";
+	EXPECT_EQ(find(view, "dialog"), nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// Its subject opens and closes it, raising nothing
+	presenter.dialog.set("ask");
+	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	presenter.dialog.set("other");
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "open_value must match";
+	EXPECT_TRUE(presenter.calls.empty());
+
+	// Actions in it reach the view it was written in
+	presenter.dialog.set("ask");
+	lv_obj_send_event(find(dialog, "ok"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok"}));
+
+	// Closed by navigation, it says so, and the presenter's answer doesn't reopen it
+	UI::closeAllModals();
+	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok", "dismissed"}));
+	EXPECT_EQ(presenter.dialog.get(), "");
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// It goes with the view it was written in
+	m_views.clear();
+	EXPECT_EQ(find(mainWindow, "dialog"), nullptr);
+	UI::forgetView(&mainWindow);
+}
+
+TEST_F(TestXmlUi, ModalGoesWithItsHost)
+{
+	installDialogScreens();
+	auto mainWindow = std::make_unique<UI::LvContainer>("main_window", screen);
+	UI::registerView("main_window", mainWindow.get());
+	auto& view = makeView("dialog_screen");
+	ASSERT_NE(find(*mainWindow, "dialog"), nullptr);
+
+	UI::forgetView(mainWindow.get());
+	mainWindow.reset(); // Deletes the dialog
+	m_views.clear();	// Mustn't touch it again
+	(void)view;
+}
+
+TEST_F(TestXmlUi, WindowedListBuildsOnlyRowsOnScreen)
+{
+	installDialogScreens();
+	auto& view = makeView("dialog_screen");
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	lv_obj_t* rows = find(view, "rows");
+	lv_obj_t* tiles = find(view, "tiles");
+
+	presenter.setCount(100);
+	EXPECT_EQ(builtRows(rows), (std::vector<int32_t>{0, 1, 2, 3, 4})) << "200px high, 50px rows";
+	EXPECT_EQ(builtRows(tiles), (std::vector<int32_t>{0, 1, 2, 3, 4, 5, 6, 7, 8})) << "3 tiles a line, 2 lines";
+	lv_obj_t* row2 = find(rows, "2");
+	ASSERT_NE(row2, nullptr);
+	lv_obj_update_layout(row2);
+	EXPECT_EQ(lv_obj_get_y(row2), 100);
+	EXPECT_EQ(lv_obj_get_height(row2), 50);
+	EXPECT_EQ(lv_obj_get_width(row2), 300) << "no item_width: the list's width";
+	EXPECT_EQ(lv_obj_get_x(find(tiles, "5")), 200);
+
+	// Scrolling adds the rows coming on screen; the ones that left go when it stops
+	lv_obj_scroll_to_y(rows, 1000, LV_ANIM_OFF);
+	EXPECT_NE(find(rows, "20"), nullptr);
+	lv_obj_send_event(rows, LV_EVENT_SCROLL_END, nullptr);
+	EXPECT_EQ(builtRows(rows), (std::vector<int32_t>{20, 21, 22, 23, 24}));
+
+	// Rows removed from the list go at once
+	presenter.setCount(3);
+	EXPECT_EQ(builtRows(rows), (std::vector<int32_t>{0, 1, 2}));
+	EXPECT_EQ(builtRows(tiles), (std::vector<int32_t>{0, 1, 2}));
 }

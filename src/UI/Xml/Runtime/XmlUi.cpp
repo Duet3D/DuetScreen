@@ -133,6 +133,22 @@ namespace UI::Xml
 		return s_initialized;
 	}
 
+	namespace
+	{
+		/** Whether `view`'s widgets are inside another XmlView's */
+		bool isInsideAnotherView(const XmlView& view)
+		{
+			for (lv_obj_t* obj = lv_obj_get_parent(view.getRootPtr()); obj != nullptr; obj = lv_obj_get_parent(obj))
+			{
+				if (dynamic_cast<XmlView*>(LvObj::fromPtr(obj)) != nullptr)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	} // namespace
+
 	void reload()
 	{
 		ZoneScoped;
@@ -142,9 +158,19 @@ namespace UI::Xml
 			return;
 		}
 		loadBundles();
-		const auto views = s_views; // A rebuild may create or destroy views
-		for (XmlView* view : views)
+
+		// Rebuild the outermost views only: rebuilding one builds the views inside it (its <ds_view>s) afresh
+		std::vector<XmlView*> outermost;
+		for (XmlView* view : s_views)
 		{
+			if (!isInsideAnotherView(*view))
+			{
+				outermost.push_back(view);
+			}
+		}
+		for (XmlView* view : outermost)
+		{
+			// A rebuild destroys the views inside it, and may destroy other outermost views' parents
 			if (std::find(s_views.begin(), s_views.end(), view) != s_views.end())
 			{
 				view->rebuild();

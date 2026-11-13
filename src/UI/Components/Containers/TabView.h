@@ -21,6 +21,9 @@ namespace UI
 
 		TabView(const std::string& name, LvObj& parent);
 
+		/** For widgets built by the XML engine, whose parent has no C++ wrapper */
+		TabView(const std::string& name, lv_obj_t* parent);
+
 		LvContainer& addTab(std::string_view tab_name);
 		bool renameTab(size_t index, std::string_view new_name);
 
@@ -36,6 +39,9 @@ namespace UI
 		bool disableTab(size_t index, bool disable);
 
 	  private:
+		/** Lay out the tab bar and content area */
+		void init();
+
 		List<TabButton> m_tabButtons{"tab_buttons", getRoot()};
 		LvContainer m_tabContent{"tab_content", getRoot()};
 
