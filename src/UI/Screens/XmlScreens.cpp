@@ -6,7 +6,7 @@
 #include "Console/ConsolePresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
-#include "Heightmap/HeightmapView.h"
+#include "Heightmap/HeightmapPresenter.h"
 #include "Move/MovePresenter.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "ObjectCancel/ObjectCancelView.h"
@@ -81,6 +81,7 @@ namespace UI
 		Xml::Presenters::add<BabyStepPresenter>("babystep");
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
 		Xml::Presenters::add<ExtruderPresenter>("extruder");
+		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -110,7 +111,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<HeightmapView>("heightmap");
 		Xml::NativeViews::add<ObjectCancelView>("object_cancel");
 		Xml::NativeViews::add<SettingsView>("settings");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");

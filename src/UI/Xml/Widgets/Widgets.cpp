@@ -8,6 +8,7 @@
 #include "DsButton.h"
 #include "DsDropdown.h"
 #include "DsGraph.h"
+#include "DsHeatmap.h"
 #include "DsIcon.h"
 #include "DsKeyboard.h"
 #include "DsList.h"
@@ -27,6 +28,7 @@ namespace UI::Xml::Widgets
 		DsButton::registerXml();
 		DsDropdown::registerXml();
 		DsGraph::registerXml();
+		DsHeatmap::registerXml();
 		DsIcon::registerXml();
 		DsSlider::registerXml();
 		DsKeyboard::registerXml();

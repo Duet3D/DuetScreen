@@ -1,0 +1,85 @@
+<!--
+  The Bed Levelling tab: the height map shown, with its colour scale; buttons to level the bed (G32) and probe it
+  (G29); the height map files on the printer; how values are coloured; and the map's statistics along the bottom.
+
+  Fields and actions: src/UI/Screens/Heightmap/HeightmapPresenter.h
+-->
+<component presenter="heightmap">
+	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"
+		  style_grid_column_dsc_array="fr(2) fr(1)" style_grid_row_dsc_array="content fr(1) content content">
+		<style name="bg_dark"/>
+
+		<ds_heatmap name="heightmap" bind_surface="surface" bind_title="title"
+					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="0" style_grid_cell_row_span="3" style_grid_cell_y_align="stretch">
+			<style name="card"/>
+		</ds_heatmap>
+
+		<lv_obj name="control_buttons" width="100%" height="content" flex_flow="row"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+				style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
+			<style name="card"/>
+			<!-- A width, though flex_grow sets it, so the text wraps rather than widening the button -->
+			<ds_button name="true_bed_level" translation_tag="heightmap.true_bed_level" width="0" height="100%"
+					   style_min_height="content" flex_grow="1">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="levelling_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="gcode" arg="G32"/>
+			</ds_button>
+			<ds_button name="mesh_bed_level" translation_tag="heightmap.mesh_bed_level" width="0" height="100%"
+					   style_min_height="content" flex_grow="1">
+				<style name="actionBtn"/>
+				<bind_state_if_eq subject="levelling_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="gcode" arg="G29"/>
+			</ds_button>
+		</lv_obj>
+
+		<lv_obj name="heightmap_list" flex_flow="column"
+				style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+			<style name="card"/>
+			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="bg_color_header"/>
+				<style name="list_header"/>
+				<lv_label name="title" translation_tag="heightmap.list_header" width="content" height="content">
+					<style name="list_title"/>
+				</lv_label>
+			</lv_obj>
+			<ds_list name="list" list="maps" item="heightmap_file" width="100%" flex_grow="1" flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+
+		<lv_obj name="heightmap_render_mode" width="100%" height="content" flex_flow="column"
+				style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
+			<style name="card"/>
+			<lv_label name="label" translation_tag="heightmap.render_mode"/>
+			<lv_obj name="btns" width="100%" height="content" flex_flow="row"
+					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start">
+				<ds_button name="heightmap_fixed" translation_tag="heightmap.fixed" height="content" flex_grow="1">
+					<bind_state_if_eq subject="mode" state="checked" ref_value="0"/>
+					<action trigger="clicked" name="heightmap.mode" arg="fixed"/>
+				</ds_button>
+				<ds_button name="heightmap_auto" translation_tag="heightmap.auto" height="content" flex_grow="1">
+					<bind_state_if_eq subject="mode" state="checked" ref_value="1"/>
+					<action trigger="clicked" name="heightmap.mode" arg="auto"/>
+				</ds_button>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_obj name="heightmap_statistics" width="100%" height="content" flex_flow="row_wrap"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start"
+				style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+				style_grid_cell_row_pos="3" style_grid_cell_y_align="start">
+			<style name="card"/>
+			<lv_label name="num_points" bind_text="stats.points"/>
+			<lv_label name="area" bind_text="stats.area"/>
+			<lv_label name="min_error" bind_text="stats.min"/>
+			<lv_label name="max_error" bind_text="stats.max"/>
+			<lv_label name="mean_error" bind_text="stats.mean"/>
+			<lv_label name="std_dev" bind_text="stats.rms"/>
+		</lv_obj>
+	</view>
+</component>

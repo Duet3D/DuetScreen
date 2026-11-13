@@ -106,9 +106,7 @@ namespace UI
 	{
 		ZoneScoped;
 		UI_LOCK();
-		m_minValue = std::min(m_minValue, value);
-		m_maxValue = std::max(m_maxValue, value);
-
+		// Values outside the range take its end colours: the scale beside the map doesn't change
 		lv_color_t color = GetColorForPercent(normalizeValue(value));
 		m_canvas.drawPx(px, py, color, LV_OPA_COVER);
 	}

@@ -47,6 +47,7 @@ namespace UI
 		bool pxToPos(size_t px, size_t py, float& x, float& y) const { return m_canvas.pxToPos(px, py, x, y); }
 		bool posToPx(float x, float y, size_t& px, size_t& py) const { return m_canvas.posToPx(x, y, px, py); }
 
+		/** Colour pixel (px, py) for `value`; values outside the value range take its end colours */
 		void setPx(size_t px, size_t py, float value);
 		void setPos(float x, float y, float value);
 

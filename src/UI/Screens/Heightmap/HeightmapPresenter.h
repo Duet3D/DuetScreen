@@ -1,69 +1,134 @@
+/*
+ * HeightmapPresenter.h
+ *
+ * Behaviour for the Bed Levelling tab (assets/ui/screens/heightmap.xml): the height map shown, the height map files
+ * on the printer, and their statistics.
+ *
+ * Fields
+ *   surface             the height map shown, sampled for <ds_heatmap> (see src/UI/Xml/Binding/Surface.h)
+ *   title               e.g. "Heightmap: heightmap.csv"
+ *   maps                list of the height map files, each with
+ *     name              the file name
+ *     loaded            1 for the one the printer is using
+ *     load_text         "Load", or "Unload" for the one in use
+ *   stats.points, stats.area, stats.min, stats.max, stats.mean, stats.rms
+ *                       the shown map's statistics, as text, e.g. "Number of points: 0;"
+ *   mode                how values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range)
+ *   levelling_usable    1 if the bed can be levelled or probed: connected and no job running
+ *
+ * Actions
+ *   heightmap.show      (in a maps row) show that map
+ *   heightmap.toggle    (in a maps row) make the printer use that map, or stop using it, and show it
+ *   heightmap.mode      arg "fixed" or "auto": colour values that way
+ * Levelling and probing use the global `gcode` action (G32, G29).
+ */
+
 #pragma once
 
+#include "ObjectModel/Files.h"
 #include "ObjectModel/Heightmap.h"
-#include "UI/Core/Presenter.h"
-#include "tracy/Tracy.hpp"
-#include <shared_mutex>
+#include "UI/Xml/Binding/List.h"
+#include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Binding/Surface.h"
+#include "UI/Xml/View/XmlPresenter.h"
+#include <memory>
+#include <mutex>
 
 namespace UI
 {
-	class HeightmapView;
-
-	class HeightmapPresenter : public Presenter<HeightmapView>
+	/** One height map file */
+	class HeightmapFileRow : public Xml::Row
 	{
 	  public:
-		enum class HeightmapRenderMode
+		/** Declare the row's fields */
+		void fields(Xml::FieldVisitor& f) override;
+
+		Xml::StringSubject<64> name;	  // File name
+		Xml::IntSubject loaded;			  // 1 if the printer is using it
+		Xml::StringSubject<16> loadText;  // "Load" or "Unload"
+	};
+
+	class HeightmapPresenter : public Xml::XmlPresenter
+	{
+	  public:
+		/** How values are coloured */
+		enum class RenderMode
 		{
-			Fixed = 0,
-			Auto,
+			Fixed = 0, // ±0.25 mm
+			Auto,	   // The map's own range
 		};
 
-		struct AxisRange
-		{
-			float min = 0.0f;
-			float max = 0.0f;
+		/** Create the presenter */
+		HeightmapPresenter();
 
-			bool operator==(const AxisRange& other) const { return min == other.min && max == other.max; }
-		};
+		/** Declare the tab's fields */
+		void fields(Xml::FieldVisitor& f) override;
 
-		PRESENTER_CONSTRUCTOR(HeightmapPresenter, HeightmapView)
+	  protected:
+		/** Listen for height maps, files, axes and the printer's state */
+		void onInit() override;
 
-		// Actions
-		void setHeightmap(const std::shared_ptr<OM::Heightmap>& heightmap);
-		void setRenderMode(HeightmapRenderMode mode);
-		HeightmapRenderMode getRenderMode() const { return m_mode; }
-		void render();
-		void setActiveHeightmap(const size_t index);
-		void toggleHeightmap(const size_t index);
-		void meshBedLevel();
-		void trueBedLevel();
-
-		// Observers
-		void newCompensationFile();
-		void newDirectories();
-		void newAxesData();
-		void newStatus(OM::PrinterStatus status);
-
-	  private:
+		/** Ask for the height maps and show the one in use */
 		void onActivate() override;
-		void onInit() override
-		{
-			registerEventListener<EventType::CompensationFile>(this, &HeightmapPresenter::newCompensationFile);
-			registerEventListener<EventType::Directories>(this, &HeightmapPresenter::newDirectories);
-			registerEventListener<EventType::AxesData>(this, &HeightmapPresenter::newAxesData);
-			registerEventListener<EventType::Status>(this, &HeightmapPresenter::newStatus);
-		}
+
+		/** Ask for the height maps again */
 		void onConnect() override;
+
+		/** Forget every height map */
 		void onDisconnect() override;
 
-		void requestHeightmaps();
-		void updateHeightmapList();
+	  private:
+		/** The X or Y span of a height map's axis, allowing for the current tool's offset */
+		struct AxisRange
+		{
+			float min = 0.0f; // Lowest
+			float max = 0.0f; // Highest
 
-		std::shared_ptr<OM::Heightmap> m_heightmap;
-		TracySharedLockable(std::shared_mutex, m_heightmapMutex);
-		OM::FileSystem::ItemList m_heightmapFiles;
-		HeightmapRenderMode m_mode = HeightmapRenderMode::Fixed;
-		AxisRange m_axis0Range;
-		AxisRange m_axis1Range;
+			/** Whether two spans are the same */
+			bool operator==(const AxisRange& other) const = default;
+		};
+
+		/** Show `map`, or nothing if it is null; samples it on the calling thread, so may be called off the UI thread */
+		void show(const OM::HeightmapPtr& map);
+
+		/** Show nothing, with empty statistics */
+		void clear();
+
+		/** Load `map` from the printer and show it when it arrives */
+		void load(const OM::HeightmapPtr& map);
+
+		/** Ask for the list of height map files */
+		void requestFiles();
+
+		/** Show the height map files, marking the one in use */
+		void showFiles();
+
+		/** Show whether the bed can be levelled */
+		void showUsable();
+
+		/** The axes changed: show the map again if its span moved */
+		void axesChanged();
+
+		/** The file a maps row is about, or nullptr */
+		OM::FileSystem::ItemPtr fileOf(const Xml::ActionArgs& args) const;
+
+		std::mutex m_mapMutex;						// Guards m_map, which is loaded on another thread
+		OM::HeightmapPtr m_map;						// The map shown, or nullptr
+		OM::FileSystem::ItemList m_files;			// Height map files, by name
+		RenderMode m_mode = RenderMode::Fixed;		// How values are coloured
+		AxisRange m_xRange;							// X span the map was shown with
+		AxisRange m_yRange;							// Y span the map was shown with
+
+		Xml::Surface m_surface;						// The map shown
+		Xml::StringSubject<96> m_title;				// "Heightmap: …"
+		Xml::List<HeightmapFileRow> m_maps;			// The files
+		Xml::StringSubject<48> m_points;			// Statistics, as text
+		Xml::StringSubject<48> m_area;				// …
+		Xml::StringSubject<48> m_min;				// …
+		Xml::StringSubject<48> m_max;				// …
+		Xml::StringSubject<48> m_mean;				// …
+		Xml::StringSubject<48> m_rms;				// …
+		Xml::IntSubject m_modeSubject;				// `mode`
+		Xml::IntSubject m_levellingUsable;			// 1 if the bed can be levelled
 	};
 } // namespace UI

@@ -6,6 +6,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/History.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/List.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Scope.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ConsoleSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/FanSource.cpp
@@ -34,6 +35,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsDropdown.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsHeatmap.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsIcon.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsKeyboard.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp

@@ -8,6 +8,7 @@
  *   <ds_button>       see DsButton.h
  *   <ds_dropdown>     see DsDropdown.h
  *   <ds_graph>        see DsGraph.h
+ *   <ds_heatmap>      see DsHeatmap.h
  *   <ds_icon>         see DsIcon.h
  *   <ds_keyboard>     see DsKeyboard.h
  *   <ds_list>         see DsList.h
