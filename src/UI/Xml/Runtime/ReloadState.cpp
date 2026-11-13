@@ -3,6 +3,7 @@
  */
 
 #include "ReloadState.h"
+#include "Debug.h"
 #include "UI/Components/Containers/TabView.h"
 #include <array>
 

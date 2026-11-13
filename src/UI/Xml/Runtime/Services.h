@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "lvgl/lvgl.h"
 #include <functional>
 #include <optional>
 #include <string>

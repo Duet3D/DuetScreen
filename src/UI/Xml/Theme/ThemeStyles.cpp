@@ -3,6 +3,7 @@
  */
 
 #include "ThemeStyles.h"
+#include "Debug.h"
 #include "UI/Styles/Styles.h"
 #include "helix_xml.h"
 #include <string>
