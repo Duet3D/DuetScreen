@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -38,7 +38,7 @@ src/UI/Xml/
              Translations, GlobalActions
   Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History
   View/      XmlView, XmlPresenter (and the presenter registry), Actions
-  Widgets/   DsButton, DsIcon, DsBar, DsThumbnail, DsSlider, DsList, DsGraph, DsTabs, DsModal, DsView
+  Widgets/   DsButton, DsIcon, DsBar, DsThumbnail, DsSlider, DsList, DsGraph, DsTabs, DsModal, DsTextarea, DsView
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
              JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
@@ -203,7 +203,8 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
 | `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, `bind_disabled` (disabled while an integer subject is non-zero) and `select_on` (selected whenever a subject is set, e.g. the status tab when a job starts); its children are the tab's content. |
-| `<ds_modal>` | `bind_open`, `open_value`, `blocking`: a dialog over the main window, open while its subject is set (or equals `open_value`). Raises `dismissed` when the user closes it. See Dialogs. |
+| `<ds_textarea>` | `bind_text`, `bind_accepted_chars`, `bind_keyboard_mode`, `one_line`: a text box that brings up the on-screen keyboard while edited; handlers read edits with `ActionArgs::text()` |
+| `<ds_modal>` | `bind_open`, `open_value`, `blocking`, `in_place`: a dialog over the main window, open while its subject is set (or equals `open_value`). Raises `dismissed` when the user closes it. See Dialogs. |
 | `<ds_view>` | `name`, `view`, `presenter`, `home`, `shown`: a page (see Hosting a view) |
 
 ### Dialogs

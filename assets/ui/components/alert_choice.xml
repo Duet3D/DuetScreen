@@ -1,0 +1,10 @@
+<!--
+  One choice in an M291 alert. Tap to answer with it.
+
+  Fields:   an alert.choices row: text (src/UI/Screens/Notifications/NotificationsPresenter.h)
+-->
+<component>
+	<view extends="ds_button" bind_text="text" width="20%" height="content">
+		<action trigger="clicked" name="alert.choose"/>
+	</view>
+</component>

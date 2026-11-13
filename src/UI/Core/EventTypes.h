@@ -41,6 +41,7 @@ namespace UI
 	XX(UpdateAvailable, std::string)                                                                                   \
 	XX(GithubUpdateAvailable, std::string)                                                                             \
 	XX(UpdateResult, UpgradeHelper::UpgradeInfo)                                                                       \
+	XX(UsbDrive, std::string, bool)                                                                                    \
 	XX(FanData)                                                                                                        \
 	XX(BedHeaterData)                                                                                                  \
 	XX(ChamberHeaterData)                                                                                              \

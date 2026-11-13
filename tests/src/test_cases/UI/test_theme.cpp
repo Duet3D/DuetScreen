@@ -25,7 +25,6 @@
 #include "UI/Components/LVGL/LvList.h"
 #include "UI/Components/LVGL/LvSlider.h"
 #include "UI/Components/LVGL/LvTextarea.h"
-#include "UI/Components/MessageBox/AlertMessageBox.h"
 #include "UI/Components/MessageBox/MessageBox.h"
 #include "UI/Components/Theme/ThemePreview.h"
 #include "UI/Styles/Styles.h"

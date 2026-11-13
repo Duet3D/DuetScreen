@@ -12,13 +12,15 @@
  *   bind_open   open while this subject is non-zero (integer) or non-empty (string), or, with open_value, equal to it
  *   open_value  the value bind_open must have for the dialog to be open
  *   blocking    tapping outside doesn't close it (default false)
+ *   in_place    stay in the widget it is written in rather than move to the main window, so the backdrop covers
+ *               that widget instead (default false); e.g. alerts that cover the whole screen
  *
  * Closed any other way (tapped outside, the back button, navigation closing every modal), it raises `dismissed`, so
  * the presenter can update the subject; closing it by its subject raises nothing. The content is laid out in the
  * dialog's card, which takes every lv_obj attribute.
  *
- * The dialog lives in the modal host but belongs to where it is written: it is deleted with the widget it was
- * written in (e.g. when that view is rebuilt), or with the modal host, whichever goes first.
+ * Unless in_place, the dialog lives in the modal host but belongs to where it is written: it is deleted with the
+ * widget it was written in (e.g. when that view is rebuilt), or with the modal host, whichever goes first.
  */
 
 #pragma once
@@ -35,10 +37,11 @@ namespace UI::Xml
 	{
 	  public:
 		/**
-		 * Create a closed dialog belonging to `owner`, in the modal host if there is one, else in `owner`
+		 * Create a closed dialog belonging to `owner`
 		 * @param owner The widget the dialog is written in; deleting it deletes the dialog
+		 * @param inPlace Stay in `owner`; otherwise move to the modal host, if there is one
 		 */
-		DsModal(const std::string& name, lv_obj_t* owner);
+		DsModal(const std::string& name, lv_obj_t* owner, bool inPlace = false);
 
 		/** Stop belonging to the owner, and leave navigation's list of modals */
 		~DsModal() override;
@@ -52,7 +55,7 @@ namespace UI::Xml
 
 	  private:
 		/** Pass a temporary C++ wrapper for `owner` to Modal, which only uses it during construction */
-		DsModal(const std::string& name, lv_obj_t* owner, LvObjRef&& ownerRef);
+		DsModal(const std::string& name, lv_obj_t* owner, bool inPlace, LvObjRef&& ownerRef);
 
 		/** `<ds_modal>` create callback: create the dialog */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);

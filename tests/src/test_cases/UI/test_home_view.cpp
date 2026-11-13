@@ -10,14 +10,16 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "Storage.h"
 #include "UI/Components/Containers/TabView.h"
+#include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
-#include "UI/Screens/Notifications/NotificationsView.h"
+#include "UI/Screens/Notifications/NotificationsPresenter.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/TemperatureSource.h"
+#include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "UI/Xml/Widgets/DsGraph.h"
@@ -159,7 +161,40 @@ class TestHomeView : public UiTestSuite
 		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
 	}
 	static UI::SettingsView& settingsPage() { return page<UI::SettingsView>("settings"); }
-	static UI::NotificationsView& notificationsPage() { return page<UI::NotificationsView>("notifications"); }
+	/** What notifications.xml shows responses, alerts and update prompts with */
+	static UI::NotificationsPresenter& notifications()
+	{
+		return static_cast<UI::NotificationsPresenter&>(*page<UI::Xml::XmlView>("notifications").getPresenter());
+	}
+
+	/** The widget called `name` in the notifications */
+	static lv_obj_t* notificationPart(const char* name)
+	{
+		return lv_obj_find_by_name(page<UI::LvObj>("notifications").getRootPtr(), name);
+	}
+
+	/** The update prompt's checks shared by the update result tests */
+	static void expectUpdateResult()
+	{
+		lv_obj_t* prompt = notificationPart("update_prompt");
+		ASSERT_NE(prompt, nullptr);
+		EXPECT_FALSE(lv_obj_has_flag(prompt, LV_OBJ_FLAG_HIDDEN));
+		EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(prompt, "ok"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(prompt, "cancel"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_STRNE(lv_label_get_text(lv_obj_find_by_name(prompt, "title")), "");
+		EXPECT_STRNE(lv_label_get_text(lv_obj_find_by_name(prompt, "text")), "");
+	}
+
+	/** The M291 alert's text box */
+	static UI::LvTextarea& alertInput()
+	{
+		lv_obj_t* input = notificationPart("input");
+		if (input == nullptr)
+		{
+			throw std::runtime_error("the alert has no input");
+		}
+		return static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(input));
+	}
 
 	UI::Xml::XmlView home;
 };
@@ -168,7 +203,7 @@ TEST_F(TestHomeView, BlankView)
 {
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/blank.png")
 
-	notificationsPage().showKeyboard(true);
+	UI::findView("keyboard")->setVisible(true, true);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/keyboard.png");
 }
 
@@ -376,25 +411,25 @@ TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 
 TEST_F(TestHomeView, Response)
 {
-	notificationsPage().getPresenter()->newResponse(ResponseType::INFO, "This is a response message from the Duet");
+	notifications().newResponse(ResponseType::INFO, "This is a response message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response.png");
 }
 
 TEST_F(TestHomeView, SuccessResponse)
 {
-	notificationsPage().getPresenter()->newResponse(ResponseType::SUCCESS, "This is a success message from the Duet");
+	notifications().newResponse(ResponseType::SUCCESS, "This is a success message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_success.png");
 }
 
 TEST_F(TestHomeView, WarningResponse)
 {
-	notificationsPage().getPresenter()->newResponse(ResponseType::WARNING, "This is a warning message from the Duet");
+	notifications().newResponse(ResponseType::WARNING, "This is a warning message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_warning.png");
 }
 
 TEST_F(TestHomeView, ErrorResponse)
 {
-	notificationsPage().getPresenter()->newResponse(ResponseType::ERROR, "This is an error message from the Duet");
+	notifications().newResponse(ResponseType::ERROR, "This is an error message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_error.png");
 }
 
@@ -405,17 +440,12 @@ TEST_F(TestHomeView, HandleUpdateResultSuccess)
 									.currentBuildrootVersion = "v1.0.0",
 									.updateBuildrootVersion = "v1.0.0"};
 
-	notificationsPage().getPresenter()->handleUpdateResult(info);
+	notifications().handleUpdateResult(info);
 
-	auto& prompt = notificationsPage().getUpdatePrompt();
-	EXPECT_TRUE(prompt.isVisible());
-	EXPECT_TRUE(prompt.getOkBtn().isVisible());
-	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
-	EXPECT_NE(std::string(prompt.getTitle().getText()), "");
-	EXPECT_NE(std::string(prompt.getText().getText()), "");
+	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_success.png");
-	prompt.close();
+	UI::closeAllModals();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
@@ -425,17 +455,12 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
 									.currentBuildrootVersion = "v0.1.0",
 									.updateBuildrootVersion = "v1.0.0"};
 
-	notificationsPage().getPresenter()->handleUpdateResult(info);
+	notifications().handleUpdateResult(info);
 
-	auto& prompt = notificationsPage().getUpdatePrompt();
-	EXPECT_TRUE(prompt.isVisible());
-	EXPECT_TRUE(prompt.getOkBtn().isVisible());
-	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
-	EXPECT_NE(std::string(prompt.getTitle().getText()), "");
-	EXPECT_NE(std::string(prompt.getText().getText()), "");
+	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_failed.png");
-	prompt.close();
+	UI::closeAllModals();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
@@ -445,17 +470,12 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
 									.currentBuildrootVersion = "v1.0.0",
 									.updateBuildrootVersion = "v1.0.1"};
 
-	notificationsPage().getPresenter()->handleUpdateResult(info);
+	notifications().handleUpdateResult(info);
 
-	auto& prompt = notificationsPage().getUpdatePrompt();
-	EXPECT_TRUE(prompt.isVisible());
-	EXPECT_TRUE(prompt.getOkBtn().isVisible());
-	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
-	EXPECT_NE(std::string(prompt.getTitle().getText()), "");
-	EXPECT_NE(std::string(prompt.getText().getText()), "");
+	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_warning.png");
-	prompt.close();
+	UI::closeAllModals();
 }
 
 TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
@@ -477,68 +497,66 @@ TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 TEST_F(TestHomeView, AlertS0)
 {
 	load_model_data_from_file("tests/object_model/m291/s0.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s0.png");
 }
 
 TEST_F(TestHomeView, AlertS1)
 {
 	load_model_data_from_file("tests/object_model/m291/s1.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s1.png");
 }
 
 TEST_F(TestHomeView, AlertS2)
 {
 	load_model_data_from_file("tests/object_model/m291/s2.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s2.png");
 }
 
 TEST_F(TestHomeView, AlertS3)
 {
 	load_model_data_from_file("tests/object_model/m291/s3.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3.png");
 
 	load_model_data_from_file("tests/object_model/test_bench/model_move_vn.json");
 	load_model_data_from_file("tests/object_model/m291/s3_axis.json");
 	home.show();
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3_axis.png");
 }
 
 TEST_F(TestHomeView, AlertS4)
 {
 	load_model_data_from_file("tests/object_model/m291/s4.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4.png");
 
 	load_model_data_from_file("tests/object_model/m291/s4_j1.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4_j1.png");
 }
 
 TEST_F(TestHomeView, AlertS5)
 {
 	load_model_data_from_file("tests/object_model/m291/s5.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_j1.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits.png");
 
-	auto input_obj = notificationsPage().getChildByName("modal_bg.alert.body.input_cont.input");
-	ASSERT_NE(input_obj, nullptr);
-	input_obj->sendEvent(LV_EVENT_FOCUSED);
+	auto& input = alertInput();
+	input.sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_input.png");
 
-	auto& input = static_cast<UI::LvTextarea&>(*input_obj);
 	input.setText("-1");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_min.png");
 
@@ -555,23 +573,21 @@ TEST_F(TestHomeView, AlertS5)
 TEST_F(TestHomeView, AlertS6)
 {
 	load_model_data_from_file("tests/object_model/m291/s6.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_j1.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_limits.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits.png");
 
-	auto input_obj = notificationsPage().getChildByName("modal_bg.alert.body.input_cont.input");
-	ASSERT_NE(input_obj, nullptr);
-	input_obj->sendEvent(LV_EVENT_FOCUSED);
+	auto& input = alertInput();
+	input.sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_input.png");
 
-	auto& input = static_cast<UI::LvTextarea&>(*input_obj);
 	input.setText("-0.1");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_min.png");
 
@@ -588,19 +604,17 @@ TEST_F(TestHomeView, AlertS6)
 TEST_F(TestHomeView, AlertS7)
 {
 	load_model_data_from_file("tests/object_model/m291/s7_j1.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
-	notificationsPage().getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(OM::g_currentAlert);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits.png");
 
-	auto input_obj = notificationsPage().getChildByName("modal_bg.alert.body.input_cont.input");
-	ASSERT_NE(input_obj, nullptr);
-	input_obj->sendEvent(LV_EVENT_FOCUSED);
+	auto& input = alertInput();
+	input.sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_input.png");
 
-	auto& input = static_cast<UI::LvTextarea&>(*input_obj);
 	input.setText("short");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_min.png");
 
@@ -894,4 +908,68 @@ TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
 	auto& tabs = dashboardTabs();
 	EXPECT_TRUE(tabs.getTabButton(0)->hasState(LV_STATE_DISABLED));
 	EXPECT_EQ(tabs.getActiveTabIndex(), 1u) << "the first tab that isn't disabled";
+}
+
+TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
+{
+	lv_obj_t* response = notificationPart("response");
+	notifications().newResponse(ResponseType::INFO, "first");
+	notifications().newResponse(ResponseType::WARNING, "second");
+	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(response, "text")), "first");
+
+	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(response, "text")), "second");
+
+	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+
+	// The console shows responses itself
+	UI::openScreen(std::string_view("console"), false);
+	notifications().newResponse(ResponseType::INFO, "in the console");
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+}
+
+TEST_F(TestHomeView, AlertAnswersThePrinter)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	lv_obj_t* response = notificationPart("response");
+	auto alertPart = [](const char* name) { return lv_obj_find_by_name(notificationPart("alert"), name); };
+	auto click = [&](const char* name) { lv_obj_send_event(alertPart(name), LV_EVENT_CLICKED, nullptr); };
+
+	// A response waits while an alert is open
+	load_model_data_from_file("tests/object_model/m291/s3.json");
+	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newResponse(ResponseType::INFO, "waiting");
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+
+	// Cancel, offered by the printer, answers it
+	const uint32_t seq3 = OM::g_currentAlert.seq;
+	click("cancel");
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 P1 S{:d}\n", seq3)}));
+	EXPECT_TRUE(lv_obj_has_flag(notificationPart("alert"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN)) << "then the response shows";
+	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+
+	// A choice answers with its index
+	sent.clear();
+	load_model_data_from_file("tests/object_model/m291/s4.json");
+	notifications().newAlertData(OM::g_currentAlert);
+	lv_obj_t* choices = lv_obj_find_by_name(notificationPart("choices_list"), "list");
+	ASSERT_EQ(lv_obj_get_child_count(choices), 3u);
+	lv_obj_send_event(lv_obj_get_child(choices, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{1}} S{:d}\n", OM::g_currentAlert.seq)}));
+
+	// A value can't be sent until it is within the limits
+	sent.clear();
+	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
+	notifications().newAlertData(OM::g_currentAlert);
+	alertInput().setText("11");
+	EXPECT_TRUE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
+	alertInput().setText("7");
+	EXPECT_FALSE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
+	click("ok");
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", OM::g_currentAlert.seq)}));
+	UI::Xml::Services::setGcodeSender(nullptr);
 }

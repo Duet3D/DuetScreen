@@ -243,6 +243,15 @@ namespace UI::Xml
 		return value;
 	}
 
+	std::string_view ActionArgs::text() const
+	{
+		if (target != nullptr && lv_obj_check_type(target, &lv_textarea_class))
+		{
+			return lv_textarea_get_text(target);
+		}
+		return arg;
+	}
+
 	Row* ActionArgs::row() const
 	{
 		for (lv_obj_t* obj = target; obj != nullptr; obj = outerOf(obj))

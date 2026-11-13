@@ -3,6 +3,7 @@
 #include "Comm/Usb.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
+#include "Hardware/Usb.h"
 #include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "Presenter.h"
@@ -195,6 +196,10 @@ Model::Model()
 	m_timers.receive = lv_timer_create(
 		[](lv_timer_t* timer) { static_cast<Model*>(lv_timer_get_user_data(timer))->receiveNewUsbData(); }, 5, this);
 #endif
+
+	// USB drives coming and going, as an event: presenters come and go, so they can't each hold a callback
+	USB::UsbMonitor::getInstance().registerCallback([this](const std::string& path, bool mounted)
+													{ post<EventType::UsbDrive>(path, mounted); });
 
 	addEventListener<EventType::Connected>(this, &Model::connected);
 	addEventListener<EventType::Disconnected>(this, &Model::disconnected);

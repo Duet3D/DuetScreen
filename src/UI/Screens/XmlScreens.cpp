@@ -8,7 +8,7 @@
 #include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
-#include "Notifications/NotificationsView.h"
+#include "Notifications/NotificationsPresenter.h"
 #include "Settings/SettingsView.h"
 #include "Status/JobStatusPresenter.h"
 #include "StatusBar/StatusBarPresenter.h"
@@ -79,6 +79,7 @@ namespace UI
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 		Xml::Presenters::add<ToolListPresenter>("tool_list");
 		Xml::Presenters::add<JobStatusPresenter>("job_status");
+		Xml::Presenters::add<NotificationsPresenter>("notifications");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -111,7 +112,6 @@ namespace UI
 		Xml::NativeViews::add<ConsoleView>("console");
 		Xml::NativeViews::add<ControlView>("control");
 		Xml::NativeViews::add<SettingsView>("settings");
-		Xml::NativeViews::add<NotificationsView>("notifications");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");
 		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);

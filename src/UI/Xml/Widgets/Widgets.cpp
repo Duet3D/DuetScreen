@@ -11,6 +11,7 @@
 #include "DsModal.h"
 #include "DsSlider.h"
 #include "DsTabs.h"
+#include "DsTextarea.h"
 #include "DsThumbnail.h"
 #include "DsView.h"
 
@@ -26,6 +27,7 @@ namespace UI::Xml::Widgets
 		DsList::registerXml();
 		DsModal::registerXml();
 		DsTabs::registerXml();
+		DsTextarea::registerXml();
 		DsThumbnail::registerXml();
 		DsView::registerXml();
 	}

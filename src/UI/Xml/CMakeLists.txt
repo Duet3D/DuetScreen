@@ -35,6 +35,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsModal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTabs.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTextarea.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsThumbnail.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/Widgets.cpp

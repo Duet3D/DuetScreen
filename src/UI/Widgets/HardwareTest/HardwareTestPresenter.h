@@ -130,6 +130,9 @@ namespace UI
 		bool checkTouchCalibration(TestProcedure& test);
 		void updateUsbMounts();
 
+		/** A USB drive was mounted or removed: use it, or another one still mounted */
+		void usbDriveChanged(const std::string& path, bool mounted);
+
 	  private:
 		std::string m_uid;
 		std::string m_serialNumber;

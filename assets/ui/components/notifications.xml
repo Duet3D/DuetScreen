@@ -1,0 +1,182 @@
+<!--
+  Messages over every screen: responses from the Duet, M291 alerts, and firmware update prompts. An invisible layer
+  covering the screen that only takes touches where a message is showing; the alert and update prompt dim the whole
+  screen behind them.
+
+  Fields and actions: src/UI/Screens/Notifications/NotificationsPresenter.h
+-->
+<component presenter="notifications">
+	<styles>
+		<!-- Out of the on-screen keyboard's way -->
+		<style name="above_keyboard" translate_y="5" max_height="45%"/>
+	</styles>
+
+	<view extends="lv_obj" width="100%" height="100%" floating="true" clickable="false" scrollable="false">
+		<style name="pad_zero"/>
+
+		<!-- M291 alert -->
+		<ds_modal name="alert" in_place="true" blocking="true" bind_open="alert.open" width="70%" height="content"
+				  align="top_mid" style_max_height="70%" flex_flow="column">
+			<bind_style name="above_keyboard" subject="alert.keyboard" ref_value="1"/>
+			<action trigger="dismissed" name="alert.dismissed"/>
+
+			<lv_obj name="header" width="100%" height="content" flex_flow="row">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="alert.title"/>
+			</lv_obj>
+
+			<lv_obj name="body" width="100%" height="content" flex_flow="column">
+				<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
+					<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
+							style_flex_main_place="start" style_flex_cross_place="center"
+							style_flex_track_place="center">
+						<lv_label name="text" bind_text="alert.text" width="100%">
+							<bind_flag_if_eq subject="alert.text" flag="hidden" ref_value=""/>
+						</lv_label>
+					</lv_obj>
+				</lv_obj>
+
+				<!-- A value to type, with its limits and what is wrong with it -->
+				<lv_obj name="input_cont" width="100%" height="content" style_layout="grid"
+						style_grid_column_dsc_array="fr(1) fr(3) fr(1)" style_grid_row_dsc_array="content content">
+					<bind_flag_if_eq subject="alert.input_shown" flag="hidden" ref_value="0"/>
+					<lv_label name="warning_text" bind_text="alert.warning" style_text_align="center"
+							  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+							  style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
+						<bind_flag_if_eq subject="alert.warning" flag="hidden" ref_value=""/>
+					</lv_label>
+					<lv_label name="min_text" bind_text="alert.min" style_text_align="center"
+							  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+							  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+						<bind_flag_if_eq subject="alert.min" flag="hidden" ref_value=""/>
+					</lv_label>
+					<lv_label name="max_text" bind_text="alert.max" style_text_align="center"
+							  style_grid_cell_column_pos="2" style_grid_cell_x_align="stretch"
+							  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+						<bind_flag_if_eq subject="alert.max" flag="hidden" ref_value=""/>
+					</lv_label>
+					<ds_textarea name="input" one_line="true" bind_text="alert.input"
+								 bind_accepted_chars="alert.accepted_chars" bind_keyboard_mode="alert.keyboard_mode"
+								 style_text_align="center"
+								 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+								 style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+						<style name="pad_zero"/>
+						<action trigger="value_changed" name="alert.input"/>
+						<action trigger="focused" name="alert.keyboard" arg="1"/>
+						<action trigger="defocused" name="alert.keyboard" arg="0"/>
+						<action trigger="ready" name="alert.keyboard" arg="0"/>
+					</ds_textarea>
+				</lv_obj>
+
+				<lv_obj name="axis_jog_list" width="100%" height="content" flex_flow="column">
+					<bind_flag_if_eq subject="alert.axes_shown" flag="hidden" ref_value="0"/>
+					<ds_list name="list" list="alert.axes" item="alert_axis" width="100%" height="content"
+							 flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start"
+							 style_flex_track_place="start"/>
+				</lv_obj>
+
+				<lv_obj name="choices_list" width="100%" height="content" flex_flow="column">
+					<bind_flag_if_eq subject="alert.choices_shown" flag="hidden" ref_value="0"/>
+					<ds_list name="list" list="alert.choices" item="alert_choice" width="100%" height="content"
+							 flex_flow="row" style_flex_main_place="start" style_flex_cross_place="start"
+							 style_flex_track_place="start"/>
+				</lv_obj>
+			</lv_obj>
+
+			<lv_obj name="pad" width="100%" flex_grow="1"/>
+
+			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+				<bind_flag_if_eq subject="alert.footer_shown" flag="hidden" ref_value="0"/>
+				<ds_button name="cancel" translation_tag="common.cancel" height="content" flex_grow="1">
+					<style name="actionBtn"/>
+					<bind_flag_if_eq subject="alert.cancel" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="alert.cancel"/>
+				</ds_button>
+				<ds_button name="ok" bind_text="alert.ok_text" height="content" flex_grow="1">
+					<style name="actionBtn"/>
+					<bind_flag_if_eq subject="alert.ok" flag="hidden" ref_value="0"/>
+					<bind_state_if_eq subject="alert.ok" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="alert.ok"/>
+				</ds_button>
+			</lv_obj>
+
+			<lv_bar name="progress" bind_value="alert.progress" width="100%" height="5">
+				<bind_flag_if_eq subject="alert.progress_shown" flag="hidden" ref_value="0"/>
+			</lv_bar>
+		</ds_modal>
+
+		<!-- An update to install, or how one went -->
+		<ds_modal name="update_prompt" in_place="true" bind_open="update.open" width="70%" height="content"
+				  style_max_height="70%" flex_flow="column">
+			<action trigger="dismissed" name="update.close"/>
+
+			<lv_obj name="header" width="100%" height="content" flex_flow="row">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="update.title"/>
+			</lv_obj>
+
+			<lv_obj name="body" width="100%" height="content" flex_flow="column">
+				<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
+					<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
+							style_flex_main_place="start" style_flex_cross_place="center"
+							style_flex_track_place="center">
+						<lv_label name="text" bind_text="update.text" width="100%"/>
+					</lv_obj>
+				</lv_obj>
+			</lv_obj>
+
+			<lv_obj name="pad" width="100%" flex_grow="1"/>
+
+			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+				<ds_button name="cancel" translation_tag="message.update_cancel" height="content" flex_grow="1">
+					<bind_flag_if_eq subject="update.can_cancel" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="update.close"/>
+				</ds_button>
+				<ds_button name="ok" bind_text="update.ok_text" height="content" flex_grow="1">
+					<action trigger="clicked" name="update.confirm"/>
+				</ds_button>
+			</lv_obj>
+		</ds_modal>
+
+		<!-- The response showing: it closes itself as its bar runs down -->
+		<lv_obj name="response" width="70%" height="content" floating="true" align="top_mid" y="2"
+				style_max_height="70%" flex_flow="column">
+			<style name="card"/>
+			<bind_style name="bg_color_success" subject="response.type" ref_value="1"/>
+			<bind_style name="bg_color_warning" subject="response.type" ref_value="2"/>
+			<bind_style name="bg_color_error" subject="response.type" ref_value="3"/>
+			<bind_flag_if_eq subject="response.open" flag="hidden" ref_value="0"/>
+
+			<lv_obj name="header" width="100%" height="content" flex_flow="row">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="response.title"/>
+			</lv_obj>
+
+			<lv_obj name="body" width="100%" height="content" flex_flow="column">
+				<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
+					<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
+							style_flex_main_place="start" style_flex_cross_place="center"
+							style_flex_track_place="center">
+						<lv_label name="text" bind_text="response.text" width="100%"/>
+					</lv_obj>
+				</lv_obj>
+			</lv_obj>
+
+			<lv_obj name="pad" width="100%" flex_grow="1"/>
+
+			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+				<ds_button name="cancel" translation_tag="common.close" height="content" flex_grow="1">
+					<action trigger="clicked" name="response.close"/>
+				</ds_button>
+				<ds_button name="ok" translation_tag="msgbox.open_console" height="content" flex_grow="1">
+					<action trigger="clicked" name="response.open_console"/>
+				</ds_button>
+			</lv_obj>
+
+			<lv_bar name="progress" bind_value="response.progress" width="100%" height="5"/>
+		</lv_obj>
+	</view>
+</component>

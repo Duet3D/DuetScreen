@@ -959,6 +959,23 @@ namespace UI
 		m_tests.emplace_back(id, start_cb, finish_cb, cleanup_cb);
 	}
 
+	void HardwareTestPresenter::usbDriveChanged(const std::string& path, bool mounted)
+	{
+		ZoneScoped;
+		if (mounted)
+		{
+			m_usbMountPath = path;
+		}
+		else
+		{
+			// Another drive, if one is still mounted
+			const auto mounts = USB::UsbMonitor::getInstance().getMountedDrives();
+			m_usbMountPath = mounts.empty() ? std::string() : mounts.front();
+		}
+		LOG_INFO("USB drive in use: '{:s}'", m_usbMountPath);
+		updateUsbMounts();
+	}
+
 	void HardwareTestPresenter::onInit()
 	{
 		ZoneScoped;
@@ -966,29 +983,11 @@ namespace UI
 		std::srand(static_cast<unsigned int>(std::time(nullptr)));
 		std::filesystem::create_directories(FOLDER);
 
-		USB::UsbMonitor::getInstance().registerCallback(
-			[this](const std::string& path, bool mounted)
-			{
-				const auto& mounts = USB::UsbMonitor::getInstance().getMountedDrives();
-				if (mounted)
-				{
-					m_usbMountPath = path;
-				}
-				else
-				{
-					if (mounts.empty())
-					{
-						LOG_INFO("USB drive unmounted");
-						m_usbMountPath.clear();
-						goto update_view;
-					}
-					m_usbMountPath = mounts.front();
-				}
-				LOG_INFO("USB drive mounted at: {:s}", m_usbMountPath);
-			update_view:
-				updateUsbMounts();
-			},
-			true);
+		// The drive in use: the one mounted now, then as drives come and go
+		registerEventListener<EventType::UsbDrive>(this, &HardwareTestPresenter::usbDriveChanged);
+		const auto mounts = USB::UsbMonitor::getInstance().getMountedDrives();
+		m_usbMountPath = mounts.empty() ? std::string() : mounts.front();
+		updateUsbMounts();
 
 /* Create test procedures */
 #if ENABLE_TOUCH_TEST

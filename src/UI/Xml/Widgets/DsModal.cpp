@@ -12,16 +12,17 @@ namespace UI::Xml
 {
 	using namespace WidgetSupport;
 
-	DsModal::DsModal(const std::string& name, lv_obj_t* owner)
-		: DsModal(name, owner, LvObjRef(owner))
+	DsModal::DsModal(const std::string& name, lv_obj_t* owner, bool inPlace)
+		: DsModal(name, owner, inPlace, LvObjRef(owner))
 	{
 	}
 
-	DsModal::DsModal(const std::string& name, lv_obj_t* owner, LvObjRef&& ownerRef)
+	DsModal::DsModal(const std::string& name, lv_obj_t* owner, bool inPlace, LvObjRef&& ownerRef)
 		: Modal<LvContainer>(name, ownerRef)
 		, m_owner(owner)
 	{
-		if (LvObj* host = getModalHost())
+		LvObj* host = inPlace ? nullptr : getModalHost();
+		if (host != nullptr)
 		{
 			setParent(*host);
 		}
@@ -57,7 +58,8 @@ namespace UI::Xml
 
 	void* DsModal::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
 	{
-		auto* modal = new DsModal(attrOr(attrs, "name", "modal"), parentOf(state));
+		auto* modal = new DsModal(
+			attrOr(attrs, "name", "modal"), parentOf(state), lv_xml_to_bool(attrOr(attrs, "in_place", "false")));
 		return modal->getRootPtr();
 	}
 

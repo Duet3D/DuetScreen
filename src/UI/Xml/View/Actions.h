@@ -50,6 +50,9 @@ namespace UI::Xml
 		/** `arg` as an integer, if it is one */
 		std::optional<int32_t> argInt() const;
 
+		/** The text a text area holds (an edit's result, e.g. on `value_changed`), else `arg` */
+		std::string_view text() const;
+
 		/** The innermost list row the widget is in, or nullptr */
 		Row* row() const;
 
