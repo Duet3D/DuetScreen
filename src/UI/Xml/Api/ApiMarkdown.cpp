@@ -291,10 +291,10 @@ namespace UI::Xml::Api
 			return "";
 		}
 
-		/** A size in cells, e.g. "3×2" */
-		std::string cells(const CellSize& size)
+		/** A size in pixels, e.g. "300×140 px" */
+		std::string pixels(const Size& size)
 		{
-			return fmt::format("{:d}×{:d}", size.columns, size.rows);
+			return fmt::format("{:d}×{:d} px", size.width, size.height);
 		}
 
 		/** The layouts section: each slot's default layout, then every widget a user can place */
@@ -302,8 +302,9 @@ namespace UI::Xml::Api
 		{
 			out += "## Layouts\n\n"
 				   "What the user places on the screen, and where; see Layouts in [XML_UI.md](XML_UI.md). A "
-				   "`<ds_layout slot=\"…\">` shows its slot's layout, a file in a bundle's `layouts/`. A grid places "
-				   "widgets in rectangles of cells; a strip shows them one after another. Locked items can be moved "
+				   "`<ds_layout slot=\"…\">` shows its slot's layout, a file in a bundle's `layouts/`. A free layout "
+				   "places widgets in rectangles of pixels; a strip shows them one after another. Locked items can be "
+				   "moved "
 				   "but not removed.\n\n"
 				   "### Slots\n\n"
 				   "The built-in slots and the layout each shows until the user changes it.\n\n"
@@ -314,7 +315,7 @@ namespace UI::Xml::Api
 				for (const auto& item : layout.items)
 				{
 					std::string text = fmt::format("{:s}: {:s}", code(item.id), code(item.widget));
-					if (layout.kind == LayoutKind::Grid)
+					if (layout.kind == LayoutKind::Free)
 					{
 						text += fmt::format(" at {:d},{:d}, {:d}×{:d}", item.x, item.y, item.w, item.h);
 					}
@@ -327,9 +328,8 @@ namespace UI::Xml::Api
 				fmt::format_to(std::back_inserter(out),
 							   "| {:s} | {:s} | {:s} |\n",
 							   code(layout.slot),
-							   layout.kind == LayoutKind::Grid
-								   ? fmt::format("grid of {:d}×{:d}", layout.columns, layout.rows)
-								   : std::string("strip"),
+							   layout.kind == LayoutKind::Free ? fmt::format("free, {:s}", pixels(layout.area()))
+															   : std::string("strip"),
 							   items.empty() ? std::string("none") : fmt::format("{:s}", fmt::join(items, "; ")));
 			}
 
@@ -345,8 +345,8 @@ namespace UI::Xml::Api
 			out +=
 				"### Placeable widgets\n\n"
 				"Each widget is a component (with its props) and a widget file beside it, which says where it can be "
-				"placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is "
-				"pictured as placed, at its default size in its first slot, with its default settings; a grid "
+				"placed, its sizes in pixels, and its settings: props the user chooses on the screen. Each is "
+				"pictured as placed, at its default size in its first slot, with its default settings; a free layout's "
 				"widget is pictured at its smallest size too.\n\n";
 			for (const auto& widget : reference.placeable)
 			{
@@ -363,15 +363,15 @@ namespace UI::Xml::Api
 				if (std::any_of(reference.layouts.begin(),
 								reference.layouts.end(),
 								[&](const Layout& layout)
-								{ return layout.kind == LayoutKind::Grid && widget.fits(layout.slot); }))
+								{ return layout.kind == LayoutKind::Free && widget.fits(layout.slot); }))
 				{
-					const bool unbounded = widget.maxSize == CellSize{MAX_GRID_CELLS, MAX_GRID_CELLS};
+					const bool unbounded = widget.maxSize == UNBOUNDED;
 					fmt::format_to(
 						std::back_inserter(out),
-						" In a grid it is {:s} cells, and {:s}.",
-						cells(widget.defaultSize),
-						unbounded ? fmt::format("at least {:s}", cells(widget.minSize))
-								  : fmt::format("from {:s} to {:s}", cells(widget.minSize), cells(widget.maxSize)));
+						" In a free layout it is {:s}, and {:s}.",
+						pixels(widget.defaultSize),
+						unbounded ? fmt::format("at least {:s}", pixels(widget.minSize))
+								  : fmt::format("from {:s} to {:s}", pixels(widget.minSize), pixels(widget.maxSize)));
 				}
 				out += "\n\n";
 				if (auto it = pictures.images.placeable.find(widget.id); it != pictures.images.placeable.end())
@@ -383,7 +383,7 @@ namespace UI::Xml::Api
 				{
 					fmt::format_to(std::back_inserter(out),
 								   "At its smallest, {:s}:\n\n{:s}\n\n",
-								   cells(widget.minSize),
+								   pixels(widget.minSize),
 								   pictures.image(widget.id + " at its smallest", it->second));
 				}
 				if (!widget.settings.empty())

@@ -47,7 +47,8 @@ namespace UI::Xml
 		IntSubject m_canRemove;		 // 1 if it can be removed
 		IntSubject m_canConfigure;	 // 1 if it has settings to change
 		IntSubject m_canUndo;		 // 1 if there is a change to undo
-		IntSubject m_isGrid;		 // 1 if widgets are added to a grid
+		IntSubject m_isFree;		 // 1 if widgets are added to a free layout
+		IntSubject m_snap;			 // 1 if that layout's dragged widgets snap
 		StringSubject<64> m_title;	 // The selected widget's name, translated
 	};
 } // namespace UI::Xml

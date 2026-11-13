@@ -35,6 +35,9 @@
 			 follow: a theme with larger fonts raises them. -->
 		<const name="widget_regular_min" value="180"/>
 		<const name="widget_expanded_min" value="400"/>
+		<!-- The gap the screen leaves between widgets it places in a free layout, and which a dragged widget snaps to
+			 (see src/UI/Xml/Layout/Geometry.h) -->
+		<const name="widget_gap" value="5"/>
 	</consts>
 
 	<styles>

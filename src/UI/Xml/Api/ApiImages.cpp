@@ -539,7 +539,7 @@ namespace UI::Xml::Api
 				}
 			}
 
-			/** The size a placed widget has in a slot: its default cells in a grid, its own size in a strip */
+			/** The size a placed widget has in a slot: its size in pixels in a free layout, its own in a strip */
 			struct PlacedSize
 			{
 				int32_t width = LV_SIZE_CONTENT;  // In pixels, or LV_SIZE_CONTENT
@@ -547,10 +547,10 @@ namespace UI::Xml::Api
 			};
 
 			/**
-			 * How big `widget` is placed in its first slot, as the home screen lays that slot out: `cells` in a grid,
-			 * its own size in a strip
+			 * How big `widget` is placed in its first slot, as the home screen lays that slot out: `size` in a free
+			 * layout, its own size in a strip
 			 */
-			static PlacedSize placedSize(const WidgetDef& widget, CellSize cells)
+			static PlacedSize placedSize(const WidgetDef& widget, Size size)
 			{
 				const std::string& slot = widget.slots.front();
 				const DsLayout* live = DsLayout::find(slot);
@@ -559,29 +559,16 @@ namespace UI::Xml::Api
 				{
 					return {}; // Not on the home screen: its own size
 				}
-				lv_obj_t* container = live->getContainer();
 				if (layout->kind == LayoutKind::Strip)
 				{
 					// A column (the sidebar) gives its widgets its width; a row (the status bar) its height
-					if (lv_obj_get_style_flex_flow(container, LV_PART_MAIN) == LV_FLEX_FLOW_COLUMN)
+					if (lv_obj_get_style_flex_flow(live->getContainer(), LV_PART_MAIN) == LV_FLEX_FLOW_COLUMN)
 					{
-						return {.width = lv_obj_get_content_width(container)};
+						return {.width = lv_obj_get_content_width(live->getContainer())};
 					}
 					return {};
 				}
-				const auto span = [](int32_t space, int32_t gap, int32_t cells, int32_t used)
-				{
-					const int32_t cell = (space - gap * (cells - 1)) / cells;
-					return cell * used + gap * (used - 1);
-				};
-				return {.width = span(lv_obj_get_content_width(container),
-									  lv_obj_get_style_pad_column(container, LV_PART_MAIN),
-									  layout->columns,
-									  cells.columns),
-						.height = span(lv_obj_get_content_height(container),
-									   lv_obj_get_style_pad_row(container, LV_PART_MAIN),
-									   layout->rows,
-									   cells.rows)};
+				return {.width = std::min(size.width, layout->width), .height = std::min(size.height, layout->height)};
 			}
 
 			/**
@@ -606,8 +593,8 @@ namespace UI::Xml::Api
 			}
 
 			/**
-			 * Each widget a user can place, as placed: see the file comment of ApiImages.h. A grid widget is pictured
-			 * at its smallest size too, to show how it fits what it shows to its size.
+			 * Each widget a user can place, as placed: see the file comment of ApiImages.h. A free layout's widget is
+			 * pictured at its smallest size too, to show how it fits what it shows to its size.
 			 */
 			void placeable()
 			{
@@ -656,7 +643,7 @@ namespace UI::Xml::Api
 				lv_obj_t* area = frame(size.width, size.height);
 				std::string file;
 				{
-					// A grid widget's place is its area, as <ds_layout> measures its cells; a strip's isn't measured
+					// A free widget's place is its area, as <ds_layout> measures its box; a strip's isn't measured
 					PlacementScope place;
 					if (size.height != LV_SIZE_CONTENT)
 					{
@@ -668,7 +655,7 @@ namespace UI::Xml::Api
 								 nullptr,
 								 widget.propsFor(sampleSettings(widget)),
 								 &place.getScope());
-					// A grid widget fills its cells, as <ds_layout> makes it
+					// A free widget fills its box, as <ds_layout> makes it
 					if (size.height != LV_SIZE_CONTENT)
 					{
 						lv_obj_set_size(view.getRootPtr(), LV_PCT(100), LV_PCT(100));

@@ -43,7 +43,7 @@ namespace UI::Xml
 		{
 			std::string slot;							// The slot; empty if nothing is selected
 			std::string item;							// The item's id; empty for a place
-			std::optional<std::pair<int32_t, int32_t>> cell; // A grid place's cell, column then row
+			std::optional<Point> point;					// A place in a free layout, in its area's pixels
 
 			/** Equal if every member is */
 			bool operator==(const Selection&) const = default;
@@ -80,8 +80,8 @@ namespace UI::Xml
 		/** Select item `id` of `slot` */
 		void select(const std::string& slot, const std::string& id);
 
-		/** Select a place in `slot` to add a widget: grid cell (x, y), or the end of a strip */
-		void selectPlace(const std::string& slot, std::optional<std::pair<int32_t, int32_t>> cell = std::nullopt);
+		/** Select a place in `slot` to add a widget: a point of a free layout's area, or the end of a strip */
+		void selectPlace(const std::string& slot, std::optional<Point> point = std::nullopt);
 
 		/** Select nothing */
 		void clearSelection();
@@ -92,7 +92,7 @@ namespace UI::Xml
 		/** Whether the selected item has settings the user can change: its widget has some, and it isn't locked */
 		bool canConfigure() const;
 
-		/** The slot add() adds to: the selected one, else the first grid slot, else the first slot; empty if none */
+		/** The slot add() adds to: the selected one, else the first free slot, else the first slot; empty if none */
 		std::string targetSlot() const;
 
 		/** Start a drag: the changes until endGesture() are undone as one */
@@ -102,23 +102,18 @@ namespace UI::Xml
 		void endGesture();
 
 		/**
-		 * Put grid item `id` in the w by h cells from (x, y), e.g. when one of its edges is dragged
-		 * @return whether it changed: the size fits its widget, and the cells are in the grid and free
+		 * Put free item `id` at `rect`, e.g. while it is dragged
+		 * @return whether it changed: the size is within its widget's limits, and the place is in the area and free
 		 */
-		bool place(const std::string& slot, const std::string& id, int32_t x, int32_t y, int32_t w, int32_t h);
-
-		/** Move grid item `id` so its top left cell is (x, y). @return whether it fits there and was moved */
-		bool move(const std::string& slot, const std::string& id, int32_t x, int32_t y);
-
-		/** Resize grid item `id` to w by h cells. @return whether that size fits its widget and the grid */
-		bool resize(const std::string& slot, const std::string& id, int32_t w, int32_t h);
+		bool place(const std::string& slot, const std::string& id, const Rect& rect);
 
 		/** Move strip item `id` to position `index` in its strip. @return whether it moved */
 		bool moveTo(const std::string& slot, const std::string& id, size_t index);
 
 		/**
-		 * Add widget `widget` where the selection says (the selected place or slot), at its default size or, if that
-		 * doesn't fit, the first place its smallest size does. The new item is selected.
+		 * Add widget `widget` where the selection says (the selected place or slot): in a free layout at its default
+		 * size, at the selected point or as near to it as there is room, else at its smallest size. The new item is
+		 * selected.
 		 * @return the new item's id, or nullopt if it can't go in the slot or doesn't fit anywhere
 		 */
 		std::optional<std::string> add(const std::string& widget);
@@ -129,8 +124,8 @@ namespace UI::Xml
 		/** Set the selected item's setting `name` to `value`. @return whether it is a value of that setting */
 		bool setSetting(const std::string& name, const nlohmann::json& value);
 
-		/** Change grid `slot` to `columns` by `rows` cells, scaling its items. @return whether it is a grid */
-		bool setGrid(const std::string& slot, int32_t columns, int32_t rows);
+		/** Turn snapping of dragged widgets in free `slot` on or off. @return whether it is a free layout */
+		bool setSnap(const std::string& slot, bool snap);
 
 		/**
 		 * Show `layouts` (e.g. a saved layout) in their slots, as one change. A layout for a slot that isn't being

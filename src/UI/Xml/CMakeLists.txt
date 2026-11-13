@@ -30,11 +30,13 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/WidgetSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ToolSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Geometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Layout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutEditor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutLibrary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutStore.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/PlacementScope.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Snap.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/WidgetCatalogue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp

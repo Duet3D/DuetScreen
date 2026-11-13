@@ -6,7 +6,6 @@
 #include "LayoutStore.h"
 #include "WidgetCatalogue.h"
 #include <algorithm>
-#include <array>
 
 namespace UI::Xml
 {
@@ -97,7 +96,7 @@ namespace UI::Xml
 
 	void LayoutEditor::select(const std::string& slot, const std::string& id)
 	{
-		const Selection selection{.slot = slot, .item = id, .cell = std::nullopt};
+		const Selection selection{.slot = slot, .item = id, .point = std::nullopt};
 		if (m_editing && selection != m_selection)
 		{
 			m_selection = selection;
@@ -105,9 +104,9 @@ namespace UI::Xml
 		}
 	}
 
-	void LayoutEditor::selectPlace(const std::string& slot, std::optional<std::pair<int32_t, int32_t>> cell)
+	void LayoutEditor::selectPlace(const std::string& slot, std::optional<Point> point)
 	{
-		const Selection selection{.slot = slot, .item = {}, .cell = cell};
+		const Selection selection{.slot = slot, .item = {}, .point = point};
 		if (m_editing && selection != m_selection)
 		{
 			m_selection = selection;
@@ -145,7 +144,7 @@ namespace UI::Xml
 		}
 		for (const auto& [slot, layout] : m_drafts)
 		{
-			if (layout.kind == LayoutKind::Grid)
+			if (layout.kind == LayoutKind::Free)
 			{
 				return slot;
 			}
@@ -179,47 +178,31 @@ namespace UI::Xml
 		}
 	}
 
-	bool LayoutEditor::place(const std::string& slot, const std::string& id, int32_t x, int32_t y, int32_t w, int32_t h)
+	bool LayoutEditor::place(const std::string& slot, const std::string& id, const Rect& rect)
 	{
 		Layout* layout = editable(slot);
-		LayoutItem* item = layout && layout->kind == LayoutKind::Grid ? layout->find(id) : nullptr;
-		if (item == nullptr || (item->x == x && item->y == y && item->w == w && item->h == h))
+		LayoutItem* item = layout && layout->kind == LayoutKind::Free ? layout->find(id) : nullptr;
+		if (item == nullptr || item->rect() == rect)
 		{
 			return false;
 		}
 		if (const WidgetDef* widget = WidgetCatalogue::find(item->widget))
 		{
-			if (w < widget->minSize.columns || h < widget->minSize.rows || w > widget->maxSize.columns ||
-				h > widget->maxSize.rows)
+			if (rect.w < widget->minSize.width || rect.h < widget->minSize.height || rect.w > widget->maxSize.width ||
+				rect.h > widget->maxSize.height)
 			{
 				return false;
 			}
 		}
-		if (!GridCells(*layout, id).isFree(x, y, w, h))
+		const std::vector<Rect> others = layout->taken(id);
+		if (!Geometry::isFree(rect, layout->area(), others))
 		{
 			return false;
 		}
 		record();
-		item->x = x;
-		item->y = y;
-		item->w = w;
-		item->h = h;
+		item->setRect(rect);
 		changed(slot);
 		return true;
-	}
-
-	bool LayoutEditor::move(const std::string& slot, const std::string& id, int32_t x, int32_t y)
-	{
-		const Layout* layout = draft(slot);
-		const LayoutItem* item = layout ? layout->find(id) : nullptr;
-		return item != nullptr && place(slot, id, x, y, item->w, item->h);
-	}
-
-	bool LayoutEditor::resize(const std::string& slot, const std::string& id, int32_t w, int32_t h)
-	{
-		const Layout* layout = draft(slot);
-		const LayoutItem* item = layout ? layout->find(id) : nullptr;
-		return item != nullptr && place(slot, id, item->x, item->y, w, h);
 	}
 
 	bool LayoutEditor::moveTo(const std::string& slot, const std::string& id, size_t index)
@@ -262,42 +245,27 @@ namespace UI::Xml
 
 		LayoutItem item{.id = layout->newId(widgetId), .widget = widgetId};
 		auto at = layout->items.end();
-		if (layout->kind == LayoutKind::Grid)
+		if (layout->kind == LayoutKind::Free)
 		{
-			// The selected cell, at the default size or else the smallest; else the first place either fits
-			const GridCells cells(*layout);
-			const std::array sizes{widget->defaultSize, widget->minSize};
-			std::optional<std::pair<int32_t, int32_t>> place;
-			const auto& cell = m_selection.cell;
-			if (cell && m_selection.slot == slot)
+			// At the selected point (or the area's corner), or as near to it as there is room, at the default size or
+			// else the smallest
+			const Point near = m_selection.slot == slot && m_selection.point ? *m_selection.point : Point{};
+			const std::vector<Rect> taken = layout->taken();
+			std::optional<Rect> place;
+			for (const Size& size : {widget->defaultSize, widget->minSize})
 			{
-				for (const CellSize& size : sizes)
-				{
-					if (cells.isFree(cell->first, cell->second, size.columns, size.rows))
-					{
-						place = cell;
-						item.w = size.columns;
-						item.h = size.rows;
-						break;
-					}
-				}
-			}
-			for (const CellSize& size : sizes)
-			{
+				const Size fitted{std::min(size.width, layout->width), std::min(size.height, layout->height)};
+				place = Geometry::findFree(layout->area(), taken, fitted, near, Geometry::gap());
 				if (place)
 				{
 					break;
 				}
-				place = cells.findFree(size.columns, size.rows);
-				item.w = size.columns;
-				item.h = size.rows;
 			}
-			if (!place)
+			if (!place || place->w < widget->minSize.width || place->h < widget->minSize.height)
 			{
 				return std::nullopt;
 			}
-			item.x = place->first;
-			item.y = place->second;
+			item.setRect(*place);
 		}
 		else if (const LayoutItem* selected = selectedItem(); selected != nullptr && m_selection.slot == slot)
 		{
@@ -311,7 +279,7 @@ namespace UI::Xml
 		record();
 		const std::string id = item.id;
 		layout->items.insert(at, std::move(item));
-		m_selection = {.slot = slot, .item = id, .cell = std::nullopt};
+		m_selection = {.slot = slot, .item = id, .point = std::nullopt};
 		changed(slot);
 		return id;
 	}
@@ -353,20 +321,19 @@ namespace UI::Xml
 		return true;
 	}
 
-	bool LayoutEditor::setGrid(const std::string& slot, int32_t columns, int32_t rows)
+	bool LayoutEditor::setSnap(const std::string& slot, bool snap)
 	{
 		Layout* layout = editable(slot);
-		if (layout == nullptr || layout->kind != LayoutKind::Grid)
+		if (layout == nullptr || layout->kind != LayoutKind::Free)
 		{
 			return false;
 		}
-		if (layout->columns == columns && layout->rows == rows)
+		if (layout->snap != snap)
 		{
-			return true;
+			record();
+			layout->snap = snap;
+			changed(slot);
 		}
-		record();
-		Layouts::resizeGrid(*layout, columns, rows);
-		changed(slot);
 		return true;
 	}
 

@@ -1,6 +1,6 @@
 <!--
-  Marks the empty grid cell the user tapped while customising: a new widget goes there. Tapping it opens the widget
-  pool.
+  Marks the empty place the user tapped in a free layout while customising: a new widget goes there, or as near as
+  there is room. Tapping it opens the widget pool.
 -->
 <component>
 	<styles>

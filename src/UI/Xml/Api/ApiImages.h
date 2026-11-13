@@ -7,7 +7,7 @@
  *     and the home screen
  *   - in the active theme: each widget a user can place (Reference::placeable), as placed: its default size in the
  *     first slot it goes in, measured on the home screen, with its widget file's props and default settings (but a row
- *     setting, such as which fan, on its list's first row); a grid widget also at its smallest size
+ *     setting, such as which fan, on its list's first row); a free layout's widget also at its smallest size
  *   - in the active theme: each component that is a view of its own (Component::isView()), with whatever printer
  *     data the Model holds. A view shown by a `<ds_view>` is drawn through a copy of that `<ds_view>`, so it has the
  *     size it is given there; a view that shows in the picture of a view containing it (the status bar in the home
@@ -54,7 +54,7 @@ namespace UI::Xml::Api
 		std::map<std::string, std::string> views;	   // Component name → its own picture
 		std::map<std::string, std::string> components; // Component name → the picture it is seen in
 		std::map<std::string, std::string> placeable;  // Placeable widget id → its picture
-		std::map<std::string, std::string> placeableSmallest; // Grid widget id → its picture at its smallest size
+		std::map<std::string, std::string> placeableSmallest; // Free widget id → its picture at its smallest size
 		std::vector<std::string> files;				   // Every picture, in the order drawn
 	};
 

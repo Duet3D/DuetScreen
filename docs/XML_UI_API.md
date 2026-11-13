@@ -41,7 +41,8 @@ Each row of `console.lines`:
 | `customise.can_remove` | int | 1 if the selected widget can be removed (it isn't locked) |
 | `customise.can_configure` | int | 1 if the selected widget has settings the user can change |
 | `customise.can_undo` | int | 1 if there is a change to undo |
-| `customise.is_grid` | int | 1 if new widgets go into a grid (whose size can be changed) |
+| `customise.is_free` | int | 1 if new widgets go into a free layout, whose widgets can snap |
+| `customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
 | `customise.title` | text | The selected widget's name, translated; empty if none is selected |
 
 ### fans
@@ -406,9 +407,6 @@ Used by `customise`.
 | `confirm_delete` | int | 1 while asking whether to delete a saved layout |
 | `delete_title` | text | That question's title |
 | `delete_text` | text | That question, naming the layout |
-| `grid_open` | int | 1 while the grid's size is shown |
-| `columns` | text | The grid's number of columns |
-| `rows` | text | The grid's number of rows |
 
 Each row of `catalogue`:
 
@@ -464,27 +462,24 @@ Each row of `saved`:
 | `customise.choose` | Set the setting being changed to the value of the row, and close the values |
 | `customise.close_catalogue` | Close the widget pool |
 | `customise.close_delete` | Close the question without deleting |
-| `customise.close_grid` | Close the grid's size |
 | `customise.close_load` | Close the saved layouts |
 | `customise.close_options` | Close the values without changing the setting |
 | `customise.close_save` | Close the question without saving |
 | `customise.close_settings` | Close the settings |
-| `customise.columns` | Ask for the grid's number of columns on the number pad |
 | `customise.configure` | Show the selected widget's settings |
 | `customise.delete_saved` | Delete the saved layout the question is about |
 | `customise.done` | Stop customising and keep the changes |
 | `customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
-| `customise.grid` | Show the grid's size |
 | `customise.keyboard` | Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away |
 | `customise.load` | List the saved layouts, to load one |
 | `customise.load_saved` | Show the saved layout of the row, as one change, and close the list |
 | `customise.remove` | Remove the selected widget |
 | `customise.reset` | Put the selected widget's slot (else the dashboard) back as it was before any customising |
-| `customise.rows` | Ask for the grid's number of rows on the number pad |
 | `customise.save` | Ask for a name, to save every slot's layout as it is now under it |
 | `customise.save_name` | The name being typed changed (the text area's text) |
 | `customise.save_ok` | Save under the name typed |
 | `customise.set_text` | Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is pressed |
+| `customise.snap` | Turn snapping of dragged widgets on or off, in the selected widget's slot (else the dashboard) |
 | `customise.toggle_setting` | Turn the on or off setting of the row the other way |
 | `customise.undo` | Undo the last change |
 
@@ -1419,7 +1414,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_layout
 
-Shows the widgets the layout of a slot places, which the user can change on the screen. The layout comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A grid layout makes this a grid of equal cells; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order.
+Shows the widgets the layout of a slot places, which the user can change on the screen. The layout comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A free layout puts each widget at its rectangle, scaled to this content area; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order.
 
 Also takes every `lv_obj` attribute.
 
@@ -1729,7 +1724,7 @@ Written `<action>` inside any widget: run the named action when the widget raise
 
 ## Layouts
 
-What the user places on the screen, and where; see Layouts in [XML_UI.md](XML_UI.md). A `<ds_layout slot="…">` shows its slot's layout, a file in a bundle's `layouts/`. A grid places widgets in rectangles of cells; a strip shows them one after another. Locked items can be moved but not removed.
+What the user places on the screen, and where; see Layouts in [XML_UI.md](XML_UI.md). A `<ds_layout slot="…">` shows its slot's layout, a file in a bundle's `layouts/`. A free layout places widgets in rectangles of pixels; a strip shows them one after another. Locked items can be moved but not removed.
 
 ### Slots
 
@@ -1737,7 +1732,7 @@ The built-in slots and the layout each shows until the user changes it.
 
 | Slot | Kind | Items (id: widget) |
 | --- | --- | --- |
-| `dashboard` | grid of 20×12 | `tools`: `tools` at 0,0, 12×6; `temperature_graph`: `temperature_graph` at 0,6, 12×6; `files`: `files` at 12,0, 8×12 |
+| `dashboard` | free, 920×561 px | `tools`: `tools` at 0,0, 548×277; `temperature_graph`: `temperature_graph` at 0,282, 548×279; `files`: `files` at 553,0, 367×561 |
 | `sidebar` | strip | `home`: `page_home`; `control`: `page_control`; `files`: `page_files`; `console`: `page_console`; `settings`: `page_settings`, locked; `estop`: `estop`, locked |
 | `status_bar` | strip | none |
 
@@ -1754,17 +1749,17 @@ A placed widget's component can use these as well as its presenter's names and t
 
 ### Placeable widgets
 
-Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings; a grid widget is pictured at its smallest size too.
+Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in pixels, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings; a free layout's widget is pictured at its smallest size too.
 
 #### arc_gauge
 
 **Arc gauge**: One value on an arc, such as a heater's temperature with its target; tap to change it
 
-In Gauges; placed in `dashboard`; component `gauge_arc` ([arc_gauge.json](../assets/ui/widgets/gauges/arc_gauge.json)). In a grid it is 4×4 cells, and at least 3×3.
+In Gauges; placed in `dashboard`; component `gauge_arc` ([arc_gauge.json](../assets/ui/widgets/gauges/arc_gauge.json)). In a free layout it is 180×184 px, and at least 134×136 px.
 
 ![arc_gauge](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge.png)
 
-At its smallest, 3×3:
+At its smallest, 134×136 px:
 
 ![arc_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge_smallest.png)
 
@@ -1776,11 +1771,11 @@ At its smallest, 3×3:
 
 **Axis positions**: Where each axis is
 
-In Motion; placed in `dashboard`; component `dashboard_axes` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a grid it is 8×2 cells, and at least 6×2.
+In Motion; placed in `dashboard`; component `dashboard_axes` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a free layout it is 365×89 px, and at least 272×89 px.
 
 ![axes](../tests/ref_imgs/xml_ui_api/widgets/axes.png)
 
-At its smallest, 6×2:
+At its smallest, 272×89 px:
 
 ![axes at its smallest](../tests/ref_imgs/xml_ui_api/widgets/axes_smallest.png)
 
@@ -1788,11 +1783,11 @@ At its smallest, 6×2:
 
 **Babystepping**: Move Z by small steps while printing
 
-In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a grid it is 6×8 cells, and at least 4×6.
+In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a free layout it is 272×372 px, and at least 180×278 px.
 
 ![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
 
-At its smallest, 4×6:
+At its smallest, 180×278 px:
 
 ![babystep at its smallest](../tests/ref_imgs/xml_ui_api/widgets/babystep_smallest.png)
 
@@ -1800,11 +1795,11 @@ At its smallest, 4×6:
 
 **Bar gauge**: One value on a bar, such as a fan's speed or the job's progress; tap to change it
 
-In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../assets/ui/widgets/gauges/bar_gauge.json)). In a grid it is 6×2 cells, and at least 4×2.
+In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../assets/ui/widgets/gauges/bar_gauge.json)). In a free layout it is 272×89 px, and at least 180×89 px.
 
 ![bar_gauge](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge.png)
 
-At its smallest, 4×2:
+At its smallest, 180×89 px:
 
 ![bar_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge_smallest.png)
 
@@ -1816,11 +1811,11 @@ At its smallest, 4×2:
 
 **Console**: The console: send G-code and read the replies
 
-In Console; placed in `dashboard`; component `console` ([console.json](../assets/ui/widgets/console/console.json)). In a grid it is 14×10 cells, and at least 10×6.
+In Console; placed in `dashboard`; component `console` ([console.json](../assets/ui/widgets/console/console.json)). In a free layout it is 642×467 px, and at least 458×278 px.
 
 ![console](../tests/ref_imgs/xml_ui_api/widgets/console.png)
 
-At its smallest, 10×6:
+At its smallest, 458×278 px:
 
 ![console at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_smallest.png)
 
@@ -1828,11 +1823,11 @@ At its smallest, 10×6:
 
 **Console log**: The printer's latest replies; tap to open the console
 
-In Console; placed in `dashboard`; component `console_log` ([console_log.json](../assets/ui/widgets/console/console_log.json)). In a grid it is 10×6 cells, and at least 6×3.
+In Console; placed in `dashboard`; component `console_log` ([console_log.json](../assets/ui/widgets/console/console_log.json)). In a free layout it is 458×278 px, and at least 272×136 px.
 
 ![console_log](../tests/ref_imgs/xml_ui_api/widgets/console_log.png)
 
-At its smallest, 6×3:
+At its smallest, 272×136 px:
 
 ![console_log at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_log_smallest.png)
 
@@ -1840,7 +1835,7 @@ At its smallest, 6×3:
 
 **E-stop**: Drag across to stop the printer at once
 
-In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)). In a grid it is 1×1 cells, and at least 1×1.
+In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)). In a free layout it is 40×40 px, and at least 40×40 px.
 
 ![estop](../tests/ref_imgs/xml_ui_api/widgets/estop.png)
 
@@ -1848,11 +1843,11 @@ In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.j
 
 **Extrude**: Extrude or retract with the selected tool
 
-In Motion; placed in `dashboard`; component `temperature_extrusion_card` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a grid it is 7×9 cells, and at least 6×8.
+In Motion; placed in `dashboard`; component `temperature_extrusion_card` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a free layout it is 319×420 px, and at least 272×372 px.
 
 ![extrude](../tests/ref_imgs/xml_ui_api/widgets/extrude.png)
 
-At its smallest, 6×8:
+At its smallest, 272×372 px:
 
 ![extrude at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrude_smallest.png)
 
@@ -1860,11 +1855,11 @@ At its smallest, 6×8:
 
 **Fan**: One fan's speed, to change it
 
-In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a grid it is 10×2 cells, and at least 8×2.
+In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a free layout it is 458×89 px, and at least 365×89 px.
 
 ![fan](../tests/ref_imgs/xml_ui_api/widgets/fan.png)
 
-At its smallest, 8×2:
+At its smallest, 365×89 px:
 
 ![fan at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_smallest.png)
 
@@ -1876,11 +1871,11 @@ At its smallest, 8×2:
 
 **Fans**: Every fan's speed, to change them
 
-In Fans; placed in `dashboard`; component `fans` ([fans.json](../assets/ui/widgets/fans/fans.json)). In a grid it is 10×6 cells, and at least 8×4.
+In Fans; placed in `dashboard`; component `fans` ([fans.json](../assets/ui/widgets/fans/fans.json)). In a free layout it is 458×278 px, and at least 365×184 px.
 
 ![fans](../tests/ref_imgs/xml_ui_api/widgets/fans.png)
 
-At its smallest, 8×4:
+At its smallest, 365×184 px:
 
 ![fans at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fans_smallest.png)
 
@@ -1888,11 +1883,11 @@ At its smallest, 8×4:
 
 **Jobs, macros and status**: The jobs, macros and the job's status, as tabs
 
-In Jobs; placed in `dashboard`; component `dashboard_files` ([files.json](../assets/ui/widgets/jobs/files.json)). In a grid it is 8×12 cells, and at least 6×6.
+In Jobs; placed in `dashboard`; component `dashboard_files` ([files.json](../assets/ui/widgets/jobs/files.json)). In a free layout it is 365×561 px, and at least 272×278 px.
 
 ![files](../tests/ref_imgs/xml_ui_api/widgets/files.png)
 
-At its smallest, 6×6:
+At its smallest, 272×278 px:
 
 ![files at its smallest](../tests/ref_imgs/xml_ui_api/widgets/files_smallest.png)
 
@@ -1900,11 +1895,11 @@ At its smallest, 6×6:
 
 **G-code button**: Sends the G-code you choose, e.g. M98 P"0:/macros/name" to run a macro
 
-In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a grid it is 4×2 cells, and at least 2×2.
+In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a free layout it is 180×89 px, and at least 88×89 px.
 
 ![gcode_button](../tests/ref_imgs/xml_ui_api/widgets/gcode_button.png)
 
-At its smallest, 2×2:
+At its smallest, 88×89 px:
 
 ![gcode_button at its smallest](../tests/ref_imgs/xml_ui_api/widgets/gcode_button_smallest.png)
 
@@ -1917,11 +1912,11 @@ At its smallest, 2×2:
 
 **Bed Levelling**: The bed's height map, levelling and probing
 
-In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a grid it is 14×10 cells, and at least 12×8.
+In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a free layout it is 642×467 px, and at least 550×372 px.
 
 ![heightmap](../tests/ref_imgs/xml_ui_api/widgets/heightmap.png)
 
-At its smallest, 12×8:
+At its smallest, 550×372 px:
 
 ![heightmap at its smallest](../tests/ref_imgs/xml_ui_api/widgets/heightmap_smallest.png)
 
@@ -1929,11 +1924,11 @@ At its smallest, 12×8:
 
 **Job progress**: The job's file, progress, time taken and time left
 
-In Jobs; placed in `dashboard`; component `dashboard_job_progress` ([job_progress.json](../assets/ui/widgets/jobs/job_progress.json)). In a grid it is 8×2 cells, and at least 6×2.
+In Jobs; placed in `dashboard`; component `dashboard_job_progress` ([job_progress.json](../assets/ui/widgets/jobs/job_progress.json)). In a free layout it is 365×89 px, and at least 272×89 px.
 
 ![job_progress](../tests/ref_imgs/xml_ui_api/widgets/job_progress.png)
 
-At its smallest, 6×2:
+At its smallest, 272×89 px:
 
 ![job_progress at its smallest](../tests/ref_imgs/xml_ui_api/widgets/job_progress_smallest.png)
 
@@ -1941,7 +1936,7 @@ At its smallest, 6×2:
 
 **Status**: The job's progress, times and controls
 
-In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a grid it is 8×8 cells, and at least 8×8.
+In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a free layout it is 365×372 px, and at least 365×372 px.
 
 ![job_status](../tests/ref_imgs/xml_ui_api/widgets/job_status.png)
 
@@ -1949,11 +1944,11 @@ In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_stat
 
 **Jobs**: The jobs on the printer, to start one
 
-In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../assets/ui/widgets/jobs/jobs.json)). In a grid it is 8×8 cells, and at least 6×4.
+In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../assets/ui/widgets/jobs/jobs.json)). In a free layout it is 365×372 px, and at least 272×184 px.
 
 ![jobs](../tests/ref_imgs/xml_ui_api/widgets/jobs.png)
 
-At its smallest, 6×4:
+At its smallest, 272×184 px:
 
 ![jobs at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jobs_smallest.png)
 
@@ -1961,11 +1956,11 @@ At its smallest, 6×4:
 
 **Jog distance and speed**: How far and how fast every jog goes; hold one to change it
 
-In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a grid it is 12×3 cells, and at least 8×3.
+In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a free layout it is 550×136 px, and at least 365×136 px.
 
 ![jog_choices](../tests/ref_imgs/xml_ui_api/widgets/jog_choices.png)
 
-At its smallest, 8×3:
+At its smallest, 365×136 px:
 
 ![jog_choices at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_choices_smallest.png)
 
@@ -1973,11 +1968,11 @@ At its smallest, 8×3:
 
 **XY jog**: Jog and home X and Y, home all and disable the motors
 
-In Motion; placed in `dashboard`; component `move_xy_card` ([jog_xy.json](../assets/ui/widgets/motion/jog_xy.json)). In a grid it is 6×6 cells, and at least 4×4.
+In Motion; placed in `dashboard`; component `move_xy_card` ([jog_xy.json](../assets/ui/widgets/motion/jog_xy.json)). In a free layout it is 272×278 px, and at least 180×184 px.
 
 ![jog_xy](../tests/ref_imgs/xml_ui_api/widgets/jog_xy.png)
 
-At its smallest, 4×4:
+At its smallest, 180×184 px:
 
 ![jog_xy at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_xy_smallest.png)
 
@@ -1985,11 +1980,11 @@ At its smallest, 4×4:
 
 **Z jog**: Jog Z up and down, home it, or move it to a position
 
-In Motion; placed in `dashboard`; component `move_z_card` ([jog_z.json](../assets/ui/widgets/motion/jog_z.json)). In a grid it is 3×6 cells, and at least 2×5.
+In Motion; placed in `dashboard`; component `move_z_card` ([jog_z.json](../assets/ui/widgets/motion/jog_z.json)). In a free layout it is 134×278 px, and at least 88×231 px.
 
 ![jog_z](../tests/ref_imgs/xml_ui_api/widgets/jog_z.png)
 
-At its smallest, 2×5:
+At its smallest, 88×231 px:
 
 ![jog_z at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_z_smallest.png)
 
@@ -1997,11 +1992,11 @@ At its smallest, 2×5:
 
 **Macros**: The printer's macros, to run one
 
-In Jobs; placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a grid it is 8×8 cells, and at least 6×4.
+In Jobs; placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a free layout it is 365×372 px, and at least 272×184 px.
 
 ![macros](../tests/ref_imgs/xml_ui_api/widgets/macros.png)
 
-At its smallest, 6×4:
+At its smallest, 272×184 px:
 
 ![macros at its smallest](../tests/ref_imgs/xml_ui_api/widgets/macros_smallest.png)
 
@@ -2009,11 +2004,11 @@ At its smallest, 6×4:
 
 **Move**: The Move tab: jog and home every axis, babystep, and choose the jog distance and speed
 
-In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a grid it is 20×10 cells, and at least 20×9.
+In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a free layout it is 920×467 px, and at least 920×420 px.
 
 ![move](../tests/ref_imgs/xml_ui_api/widgets/move.png)
 
-At its smallest, 20×9:
+At its smallest, 920×420 px:
 
 ![move at its smallest](../tests/ref_imgs/xml_ui_api/widgets/move_smallest.png)
 
@@ -2021,11 +2016,11 @@ At its smallest, 20×9:
 
 **Object Cancel**: The job's objects, to cancel one
 
-In Jobs; placed in `dashboard`; component `object_cancel` ([object_cancel.json](../assets/ui/widgets/jobs/object_cancel.json)). In a grid it is 14×10 cells, and at least 10×6.
+In Jobs; placed in `dashboard`; component `object_cancel` ([object_cancel.json](../assets/ui/widgets/jobs/object_cancel.json)). In a free layout it is 642×467 px, and at least 458×278 px.
 
 ![object_cancel](../tests/ref_imgs/xml_ui_api/widgets/object_cancel.png)
 
-At its smallest, 10×6:
+At its smallest, 458×278 px:
 
 ![object_cancel at its smallest](../tests/ref_imgs/xml_ui_api/widgets/object_cancel_smallest.png)
 
@@ -2116,11 +2111,11 @@ In Motion; placed in `status_bar`; component `status_bar_factor_button` ([status
 
 **Temperature graph**: Every heater's temperature over the last minutes
 
-In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a grid it is 12×6 cells, and at least 9×4.
+In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a free layout it is 550×278 px, and at least 411×184 px.
 
 ![temperature_graph](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph.png)
 
-At its smallest, 9×4:
+At its smallest, 411×184 px:
 
 ![temperature_graph at its smallest](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph_smallest.png)
 
@@ -2132,11 +2127,11 @@ At its smallest, 9×4:
 
 **Temperatures**: The Temperature tab: every tool, bed and chamber, filament, and the extruder
 
-In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a grid it is 20×12 cells, and at least 16×10.
+In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a free layout it is 920×561 px, and at least 735×467 px.
 
 ![temperatures](../tests/ref_imgs/xml_ui_api/widgets/temperatures.png)
 
-At its smallest, 16×10:
+At its smallest, 735×467 px:
 
 ![temperatures at its smallest](../tests/ref_imgs/xml_ui_api/widgets/temperatures_smallest.png)
 
@@ -2144,11 +2139,11 @@ At its smallest, 16×10:
 
 **Text**: Text you write, in the size and colour you choose
 
-In Text; placed in `dashboard`; component `dashboard_text` ([text.json](../assets/ui/widgets/text/text.json)). In a grid it is 6×2 cells, and at least 2×1.
+In Text; placed in `dashboard`; component `dashboard_text` ([text.json](../assets/ui/widgets/text/text.json)). In a free layout it is 272×89 px, and at least 88×42 px.
 
 ![text](../tests/ref_imgs/xml_ui_api/widgets/text.png)
 
-At its smallest, 2×1:
+At its smallest, 88×42 px:
 
 ![text at its smallest](../tests/ref_imgs/xml_ui_api/widgets/text_smallest.png)
 
@@ -2164,11 +2159,11 @@ At its smallest, 2×1:
 
 **Tool**: One tool with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a grid it is 12×4 cells, and at least 10×3.
+In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 458×136 px.
 
 ![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
 
-At its smallest, 10×3:
+At its smallest, 458×136 px:
 
 ![tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_smallest.png)
 
@@ -2180,11 +2175,11 @@ At its smallest, 10×3:
 
 **Tools and heaters**: Every tool, bed and chamber with its temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a grid it is 12×6 cells, and at least 6×4.
+In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 272×184 px.
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
 
-At its smallest, 6×4:
+At its smallest, 272×184 px:
 
 ![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
 
@@ -2192,11 +2187,11 @@ At its smallest, 6×4:
 
 **Value**: One value as a large number, such as a temperature or a factor; tap to change it
 
-In Gauges; placed in `dashboard`; component `gauge_value` ([value_gauge.json](../assets/ui/widgets/gauges/value_gauge.json)). In a grid it is 4×2 cells, and at least 3×2.
+In Gauges; placed in `dashboard`; component `gauge_value` ([value_gauge.json](../assets/ui/widgets/gauges/value_gauge.json)). In a free layout it is 180×89 px, and at least 134×89 px.
 
 ![value_gauge](../tests/ref_imgs/xml_ui_api/widgets/value_gauge.png)
 
-At its smallest, 3×2:
+At its smallest, 134×89 px:
 
 ![value_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/value_gauge_smallest.png)
 
@@ -2222,8 +2217,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`customise`](#home) | `customise` |  | `home` | [customise.xml](../assets/ui/components/customise/customise.xml) |
 | `customise_catalogue_category` |  |  | `customise` | [customise_catalogue_category.xml](../assets/ui/components/customise/customise_catalogue_category.xml) |
 | `customise_catalogue_item` |  |  | `customise_catalogue_category` | [customise_catalogue_item.xml](../assets/ui/components/customise/customise_catalogue_item.xml) |
-| [`customise_grid_item`](#customise_grid_item) |  | `key` |  | [customise_grid_item.xml](../assets/ui/components/customise/customise_grid_item.xml) |
-| `customise_item` |  | `key` | `customise_grid_item` | [customise_item.xml](../assets/ui/components/customise/customise_item.xml) |
+| [`customise_free_item`](#customise_free_item) |  | `key` |  | [customise_free_item.xml](../assets/ui/components/customise/customise_free_item.xml) |
+| `customise_guide` |  |  |  | [customise_guide.xml](../assets/ui/components/customise/customise_guide.xml) |
+| `customise_item` |  | `key` | `customise_free_item` | [customise_item.xml](../assets/ui/components/customise/customise_item.xml) |
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
 | `customise_option` |  |  | `customise` | [customise_option.xml](../assets/ui/components/customise/customise_option.xml) |
 | [`customise_place`](#customise_place) |  |  |  | [customise_place.xml](../assets/ui/components/customise/customise_place.xml) |
@@ -2332,9 +2328,9 @@ Also shows `babystep`, `move`.
 
 ![control](../tests/ref_imgs/xml_ui_api/views/control.png)
 
-#### customise_grid_item
+#### customise_free_item
 
-![customise_grid_item](../tests/ref_imgs/xml_ui_api/views/customise_grid_item.png)
+![customise_free_item](../tests/ref_imgs/xml_ui_api/views/customise_free_item.png)
 
 #### customise_missing
 
@@ -2595,6 +2591,7 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 | `#transition_time` | 80 |
 | `#widget_regular_min` | 180 |
 | `#widget_expanded_min` | 400 |
+| `#widget_gap` | 5 |
 
 ### Fonts
 

@@ -9,6 +9,7 @@
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/Snap.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include <array>
 #include <filesystem>
@@ -19,11 +20,12 @@
 #include <unistd.h>
 
 namespace fs = std::filesystem;
-using UI::Xml::CellSize;
 using UI::Xml::Layout;
 using UI::Xml::LayoutItem;
 using UI::Xml::LayoutKind;
+using UI::Xml::Rect;
 using UI::Xml::SettingKind;
+using UI::Xml::Size;
 using UI::Xml::WidgetDef;
 namespace WidgetCatalogue = UI::Xml::WidgetCatalogue;
 namespace Layouts = UI::Xml::Layouts;
@@ -62,27 +64,31 @@ namespace
 		return ss.str();
 	}
 
-	/** A pool of three widgets: a fan (2x1 to 4x2) with a fan setting, a big graph, and a sidebar button */
+	/**
+	 * A pool of three widgets: a fan (200x100 to 400x200 pixels) with a fan setting, a big graph, and a sidebar
+	 * button. Sizes are in hundreds of pixels, so the tests read easily.
+	 */
 	class TestLayouts : public ::testing::Test
 	{
 	  protected:
 		TestLayouts()
 		{
 			WidgetCatalogue::set({
-				widget("fan", R"({"slots": ["dashboard"], "size": {"default": [2, 1], "min": [2, 1], "max": [4, 2]},
+				widget("fan", R"({"slots": ["dashboard"], "size": {"default": [200, 100], "min": [200, 100],
+								 "max": [400, 200]},
 								 "settings": [{"name": "fan", "kind": "int", "min": 0, "max": 9, "default": 0}]})"),
-				widget("graph", R"({"slots": ["dashboard"], "size": {"default": [4, 3], "min": [3, 2]}})"),
+				widget("graph", R"({"slots": ["dashboard"], "size": {"default": [400, 300], "min": [300, 200]}})"),
 				widget("button", R"({"slots": ["sidebar"]})"),
 			});
 		}
 
 		~TestLayouts() override { WidgetCatalogue::set({}); }
 
-		/** A 10x6 dashboard holding `items` */
+		/** A 1000x600 pixel dashboard holding `items` */
 		static Layout dashboard(std::vector<LayoutItem> items)
 		{
 			return Layout{
-				.slot = "dashboard", .kind = LayoutKind::Grid, .columns = 10, .rows = 6, .items = std::move(items)};
+				.slot = "dashboard", .kind = LayoutKind::Free, .width = 1000, .height = 600, .items = std::move(items)};
 		}
 	};
 
@@ -127,7 +133,7 @@ TEST_F(TestLayouts, WidgetFileGivesTheWidgetAndItsSettings)
 {
 	const WidgetDef def = widget("fan", R"({
 		"title_tag": "widget.fan.title", "icon": "fan.png", "slots": ["dashboard", "sidebar"],
-		"size": {"default": [3, 2], "min": [2, 1], "max": [5, 3]},
+		"size": {"default": [300, 200], "min": [200, 100], "max": [500, 300]},
 		"props": {"style": "card", "big": true},
 		"settings": [
 			{"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0},
@@ -139,9 +145,9 @@ TEST_F(TestLayouts, WidgetFileGivesTheWidgetAndItsSettings)
 	EXPECT_EQ(def.titleTag, "widget.fan.title");
 	EXPECT_TRUE(def.fits("sidebar"));
 	EXPECT_FALSE(def.fits("status_bar"));
-	EXPECT_EQ(def.defaultSize, (CellSize{3, 2}));
-	EXPECT_EQ(def.minSize, (CellSize{2, 1}));
-	EXPECT_EQ(def.maxSize, (CellSize{5, 3}));
+	EXPECT_EQ(def.defaultSize, (Size{300, 200}));
+	EXPECT_EQ(def.minSize, (Size{200, 100}));
+	EXPECT_EQ(def.maxSize, (Size{500, 300}));
 	ASSERT_EQ(def.settings.size(), 2u);
 	EXPECT_EQ(def.settings[0].kind, SettingKind::Row);
 	EXPECT_EQ(def.settings[0].list, "fans");
@@ -160,7 +166,7 @@ TEST_F(TestLayouts, InvalidWidgetFilesSayWhatIsWrong)
 	EXPECT_EQ(widgetError(R"([])"), "isn't a JSON object");
 	EXPECT_EQ(widgetError(R"({})"), "\"slots\" must list the layout slots it can be placed in");
 	EXPECT_EQ(widgetError(R"({"slots": ["d"], "size": {"min": [0, 1]}})"),
-			  "size \"min\" must be [columns, rows], each at least 1");
+			  "size \"min\" must be [width, height] in pixels, each at least 1");
 	EXPECT_EQ(widgetError(R"({"slots": ["d"], "size": {"default": [1, 1], "min": [2, 2]}})"),
 			  "the default size must be between the min and max sizes");
 	EXPECT_EQ(widgetError(R"({"slots": ["d"], "settings": [{"name": "x", "kind": "colour", "default": 0}]})"),
@@ -201,12 +207,13 @@ TEST_F(TestLayouts, LayoutFileRoundTrips)
 {
 	std::string error;
 	const auto layout = Layout::fromJson(json(R"({
-		"format": 1, "slot": "dashboard", "kind": "grid", "columns": 12, "rows": 8,
-		"items": [{"id": "a", "widget": "fan", "x": 1, "y": 2, "w": 3, "h": 1, "settings": {"fan": 2}},
+		"format": 1, "slot": "dashboard", "kind": "free", "width": 1200, "height": 800, "snap": false,
+		"items": [{"id": "a", "widget": "fan", "x": 100, "y": 200, "w": 300, "h": 100, "settings": {"fan": 2}},
 				  {"id": "b", "widget": "graph", "locked": true}]})"),
 										 error);
 	ASSERT_TRUE(layout.has_value()) << error;
-	EXPECT_EQ(layout->columns, 12);
+	EXPECT_EQ(layout->width, 1200);
+	EXPECT_FALSE(layout->snap);
 	EXPECT_EQ(layout->items[0].settings["fan"], 2);
 	EXPECT_TRUE(layout->items[1].locked);
 
@@ -221,27 +228,25 @@ TEST_F(TestLayouts, LayoutFilesOfAnUnknownFormatAreRejected)
 	EXPECT_FALSE(Layout::fromJson(json(R"({"format": 2, "slot": "s", "kind": "strip", "items": []})"), error));
 	EXPECT_EQ(error, "format 2 isn't one this firmware reads (1 to 1)");
 	EXPECT_FALSE(Layout::fromJson(json(R"({"format": 1, "slot": "s", "kind": "pile", "items": []})"), error));
-	EXPECT_EQ(error, "\"kind\" must be \"grid\" or \"strip\"");
+	EXPECT_EQ(error, "\"kind\" must be \"free\" or \"strip\"");
+	EXPECT_FALSE(Layout::fromJson(json(R"({"format": 1, "slot": "s", "kind": "free", "items": []})"), error));
+	EXPECT_EQ(error, "a free layout's \"width\" and \"height\" must give its area, in pixels");
 	EXPECT_FALSE(Layout::fromJson(json(R"({"format": 1, "kind": "strip", "items": []})"), error));
 	EXPECT_EQ(error, "\"slot\" must name the slot it is for");
 }
 
-TEST_F(TestLayouts, RepairMovesOverlappingWidgetsAndKeepsThemInTheGrid)
+TEST_F(TestLayouts, RepairMovesOverlappingWidgetsAndKeepsThemInTheArea)
 {
 	Layout layout = dashboard({
-		{.id = "a", .widget = "graph", .x = 0, .y = 0, .w = 4, .h = 3},
-		{.id = "b", .widget = "fan", .x = 2, .y = 1, .w = 2, .h = 1}, // Over a
-		{.id = "c", .widget = "fan", .x = 9, .y = 5, .w = 9, .h = 9}, // Too big for the widget and the grid
+		{.id = "a", .widget = "graph", .x = 0, .y = 0, .w = 400, .h = 300},
+		{.id = "b", .widget = "fan", .x = 300, .y = 250, .w = 200, .h = 100}, // Over a's corner
+		{.id = "c", .widget = "fan", .x = 900, .y = 500, .w = 900, .h = 900}, // Too big for the widget and the area
 	});
 	const auto changes = Layouts::repair(layout);
 
 	EXPECT_EQ(changes, (std::vector<std::string>{"\"b\" overlapped another widget; it is moved"}));
-	EXPECT_EQ(layout.items[1].x, 4); // The first free place, row by row
-	EXPECT_EQ(layout.items[1].y, 0);
-	EXPECT_EQ(layout.items[2].w, 4); // The fan's largest
-	EXPECT_EQ(layout.items[2].h, 2);
-	EXPECT_EQ(layout.items[2].x, 6); // Back inside the grid
-	EXPECT_EQ(layout.items[2].y, 4);
+	EXPECT_EQ(layout.items[1].rect(), (Rect{.x = 300, .y = 300, .w = 200, .h = 100})); // The nearest free place
+	EXPECT_EQ(layout.items[2].rect(), (Rect{.x = 600, .y = 400, .w = 400, .h = 200})); // The fan's largest, inside
 }
 
 TEST_F(TestLayouts, RepairRemovesWhatCantBeShownAndKeepsMissingWidgets)
@@ -249,7 +254,7 @@ TEST_F(TestLayouts, RepairRemovesWhatCantBeShownAndKeepsMissingWidgets)
 	Layout layout = dashboard({
 		{.id = "a", .widget = "button"},		// A sidebar widget
 		{.id = "b", .widget = "not_installed"}, // Kept, for when it is installed again
-		{.id = "b", .widget = "fan", .x = 3, .settings = json(R"({"fan": 99, "later": 1})")},
+		{.id = "b", .widget = "fan", .x = 300, .settings = json(R"({"fan": 99, "later": 1})")},
 	});
 	const auto changes = Layouts::repair(layout);
 
@@ -289,22 +294,61 @@ TEST_F(TestLayouts, RepairPutsLockedItemsBack)
 	EXPECT_FALSE(layout.items[2].locked); // Only the locking layout locks
 }
 
-TEST_F(TestLayouts, ResizingTheGridScalesItsItems)
+TEST(TestGeometry, FreePlacesAreFoundNearestWhereTheyAreWanted)
 {
-	Layout layout = dashboard({
-		{.id = "a", .widget = "fan", .x = 0, .y = 0, .w = 4, .h = 2},
-		{.id = "b", .widget = "fan", .x = 4, .y = 2, .w = 4, .h = 2},
-		{.id = "c", .widget = "graph", .x = 0, .y = 4, .w = 4, .h = 2},
-	});
-	Layouts::resizeGrid(layout, 5, 3);
+	namespace Geometry = UI::Xml::Geometry;
+	const Size area{1000, 600};
+	const std::vector<Rect> taken{{.x = 0, .y = 0, .w = 400, .h = 300}, {.x = 600, .y = 0, .w = 400, .h = 600}};
 
-	EXPECT_EQ(layout.columns, 5);
-	EXPECT_EQ(layout.rows, 3);
-	ASSERT_EQ(layout.items.size(), 2u); // The graph's smallest no longer fits beside the others
-	EXPECT_EQ((std::array{layout.items[0].x, layout.items[0].y, layout.items[0].w, layout.items[0].h}),
-			  (std::array{0, 0, 2, 1})); // Halved
-	EXPECT_EQ((std::array{layout.items[1].x, layout.items[1].y, layout.items[1].w, layout.items[1].h}),
-			  (std::array{2, 1, 2, 1}));
+	// Where it is wanted, if that is free
+	EXPECT_EQ(Geometry::findFree(area, taken, {100, 100}, {450, 200}, 5),
+			  (Rect{.x = 450, .y = 200, .w = 100, .h = 100}));
+	// Else the nearest place, the gap away from what is in the way
+	EXPECT_EQ(Geometry::findFree(area, taken, {150, 100}, {300, 100}, 5),
+			  (Rect{.x = 405, .y = 100, .w = 150, .h = 100}));
+	// The gap is kept wherever there is room for it, even if that is further away
+	EXPECT_EQ(Geometry::findFree(area, taken, {200, 100}, {400, 100}, 5),
+			  (Rect{.x = 395, .y = 305, .w = 200, .h = 100}));
+	// Touching, where only that fits: the 200 pixels between the two, all the way down
+	EXPECT_EQ(Geometry::findFree(area, taken, {200, 600}, {0, 0}, 5), (Rect{.x = 400, .y = 0, .w = 200, .h = 600}));
+	// Nowhere, if nothing fits
+	EXPECT_EQ(Geometry::findFree(area, taken, {300, 400}, {0, 0}, 5), std::nullopt);
+
+	EXPECT_TRUE(Geometry::isFree({.x = 400, .y = 0, .w = 200, .h = 600}, area, taken)); // Touching both
+	EXPECT_FALSE(Geometry::isFree({.x = 399, .y = 0, .w = 200, .h = 100}, area, taken));
+	EXPECT_FALSE(Geometry::isFree({.x = 900, .y = 500, .w = 200, .h = 200}, area, {})); // Off the area
+}
+
+TEST(TestSnap, EdgesSnapToTheAreaAndToOtherWidgets)
+{
+	namespace Snap = UI::Xml::Snap;
+	const Size area{1000, 600};
+	const std::vector<Rect> others{{.x = 100, .y = 100, .w = 300, .h = 200}};
+	const Size minimum{50, 50};
+
+	// Moved whole near the area's corner, it goes into it
+	auto result = Snap::snap({.x = 8, .y = 590 - 100, .w = 100, .h = 100}, {}, area, others, 5, minimum);
+	EXPECT_EQ(result.rect, (Rect{.x = 0, .y = 500, .w = 100, .h = 100}));
+	EXPECT_EQ(result.guides.size(), 2u);
+
+	// Beside another widget, the gap from it, and lined up with its top
+	result = Snap::snap({.x = 410, .y = 96, .w = 100, .h = 100}, {}, area, others, 5, minimum);
+	EXPECT_EQ(result.rect, (Rect{.x = 405, .y = 100, .w = 100, .h = 100}));
+
+	// Far from everything, it stays where it is, with no guides
+	result = Snap::snap({.x = 600, .y = 400, .w = 100, .h = 100}, {}, area, others, 5, minimum);
+	EXPECT_EQ(result.rect, (Rect{.x = 600, .y = 400, .w = 100, .h = 100}));
+	EXPECT_TRUE(result.guides.empty());
+
+	// Resized, only the edges dragged snap: the right edge to the other's left, the gap away
+	result = Snap::snap({.x = 0, .y = 400, .w = 88, .h = 100}, {.right = true}, area, others, 5, minimum);
+	EXPECT_EQ(result.rect, (Rect{.x = 0, .y = 400, .w = 95, .h = 100}));
+	ASSERT_EQ(result.guides.size(), 1u);
+	EXPECT_EQ(result.guides[0], (Snap::Guide{.vertical = true, .at = 95}));
+
+	// A snap that would make it smaller than it can be isn't made
+	result = Snap::snap({.x = 60, .y = 400, .w = 52, .h = 100}, {.left = true}, area, others, 5, minimum);
+	EXPECT_EQ(result.rect.x, 60);
 }
 
 TEST_F(TestLayoutStore, SlotsShowTheLastBundlesLayoutWithTheBuiltinLocks)
@@ -329,27 +373,27 @@ TEST_F(TestLayoutStore, SlotsShowTheLastBundlesLayoutWithTheBuiltinLocks)
 
 TEST_F(TestLayoutStore, SavingWritesTheLocalBundleAndKeepsTheOldCopy)
 {
-	const Layout builtin = dashboard({{.id = "a", .widget = "graph", .w = 4, .h = 3}});
+	const Layout builtin = dashboard({{.id = "a", .widget = "graph", .w = 400, .h = 300}});
 	use({{builtin, "builtin.json"}});
 	RecordingListener listener;
 	Layouts::addListener(&listener);
 
 	Layout mine = builtin;
-	mine.items[0].x = 2;
+	mine.items[0].x = 200;
 	std::string error;
 	ASSERT_TRUE(Layouts::save(mine, error)) << error;
 	EXPECT_EQ(listener.slots, (std::vector<std::string>{"dashboard"}));
-	EXPECT_EQ(Layouts::find("dashboard")->items[0].x, 2);
+	EXPECT_EQ(Layouts::find("dashboard")->items[0].x, 200);
 
 	const fs::path file = m_dir / "layouts" / "dashboard.json";
 	EXPECT_EQ(json(readFile(file)), mine.toJson());
 	EXPECT_TRUE(fs::exists(m_dir / "manifest.json"));
 	EXPECT_FALSE(fs::exists(fs::path(file) += ".bak")); // Nothing before it
 
-	mine.items[0].x = 3;
+	mine.items[0].x = 300;
 	ASSERT_TRUE(Layouts::save(mine, error)) << error;
-	EXPECT_EQ(json(readFile(fs::path(file) += ".bak"))["items"][0]["x"], 2);
-	EXPECT_EQ(json(readFile(file))["items"][0]["x"], 3);
+	EXPECT_EQ(json(readFile(fs::path(file) += ".bak"))["items"][0]["x"], 200);
+	EXPECT_EQ(json(readFile(file))["items"][0]["x"], 300);
 	EXPECT_FALSE(fs::exists(fs::path(file) += ".tmp"));
 
 	// Back to the default: the user's own files go, so later changes to the default show
@@ -376,22 +420,22 @@ TEST_F(TestLayoutStore, SavedLayoutsAreRepaired)
 {
 	use({{dashboard({}), "builtin.json"}});
 	std::string error;
-	ASSERT_TRUE(Layouts::save(dashboard({{.id = "a", .widget = "fan", .x = 9, .w = 1}}), error)) << error;
-	EXPECT_EQ(Layouts::find("dashboard")->items[0].x, 8); // 2 wide at least, so it starts a column earlier
-	EXPECT_EQ(Layouts::find("dashboard")->items[0].w, 2);
+	ASSERT_TRUE(Layouts::save(dashboard({{.id = "a", .widget = "fan", .x = 900, .w = 100, .h = 100}}), error)) << error;
+	EXPECT_EQ(Layouts::find("dashboard")->items[0].x, 800); // 200 wide at least, so it starts further left
+	EXPECT_EQ(Layouts::find("dashboard")->items[0].w, 200);
 }
 
 namespace
 {
-	/** Editing tests: a 10x6 dashboard with a graph at 0,0 (4x3) and a fan at 4,0 (2x1), and a sidebar strip of a
-	 * button, then a locked button */
+	/** Editing tests: a 1000x600 dashboard with a graph at 0,0 (400x300) and a fan at 400,0 (200x100), and a sidebar
+	 * strip of a button, then a locked button */
 	class TestLayoutEditor : public TestLayoutStore
 	{
 	  protected:
 		TestLayoutEditor()
 		{
-			use({{dashboard({{.id = "graph", .widget = "graph", .w = 4, .h = 3},
-							 {.id = "fan", .widget = "fan", .x = 4, .w = 2, .h = 1}}),
+			use({{dashboard({{.id = "graph", .widget = "graph", .w = 400, .h = 300},
+							 {.id = "fan", .widget = "fan", .x = 400, .w = 200, .h = 100}}),
 				  "dashboard.json"},
 				 {Layout{.slot = "sidebar",
 						 .kind = LayoutKind::Strip,
@@ -404,6 +448,24 @@ namespace
 		~TestLayoutEditor() override { editor().cancel(); }
 
 		static UI::Xml::LayoutEditor& editor() { return UI::Xml::LayoutEditor::get(); }
+
+		/** Move free item `id` of the dashboard so its corner is at (x, y). @return whether it fits there */
+		static bool move(std::string_view id, int32_t x, int32_t y)
+		{
+			Rect rect = shown("dashboard", id).rect();
+			rect.x = x;
+			rect.y = y;
+			return editor().place("dashboard", std::string(id), rect);
+		}
+
+		/** Resize free item `id` of the dashboard to w by h. @return whether that fits */
+		static bool resize(std::string_view id, int32_t w, int32_t h)
+		{
+			Rect rect = shown("dashboard", id).rect();
+			rect.w = w;
+			rect.h = h;
+			return editor().place("dashboard", std::string(id), rect);
+		}
 
 		/** The item `id` of `slot` as shown */
 		static const LayoutItem& shown(std::string_view slot, std::string_view id)
@@ -428,52 +490,52 @@ namespace
 
 TEST_F(TestLayoutEditor, ChangesShowAtOnceAndCancelPutsThemBack)
 {
-	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 2));
-	EXPECT_EQ(shown("dashboard", "fan").x, 6);
+	EXPECT_TRUE(move("fan", 600, 200));
+	EXPECT_EQ(shown("dashboard", "fan").x, 600);
 
 	editor().cancel();
-	EXPECT_EQ(shown("dashboard", "fan").x, 4);
+	EXPECT_EQ(shown("dashboard", "fan").x, 400);
 	EXPECT_FALSE(fs::exists(m_dir / "layouts"));
 }
 
 TEST_F(TestLayoutEditor, DoneSavesTheSlotsThatChanged)
 {
-	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 2));
+	EXPECT_TRUE(move("fan", 600, 200));
 	std::string error;
 	ASSERT_TRUE(editor().done(error)) << error;
 	EXPECT_FALSE(editor().isEditing());
 	EXPECT_TRUE(fs::exists(m_dir / "layouts" / "dashboard.json"));
 	EXPECT_FALSE(fs::exists(m_dir / "layouts" / "sidebar.json"));
-	EXPECT_EQ(Layouts::saved("dashboard")->find("fan")->x, 6);
+	EXPECT_EQ(Layouts::saved("dashboard")->find("fan")->x, 600);
 }
 
 TEST_F(TestLayoutEditor, WidgetsOnlyMoveAndGrowWhereTheyFit)
 {
-	EXPECT_FALSE(editor().resize("dashboard", "graph", 5, 3)); // Into the fan
-	EXPECT_FALSE(editor().move("dashboard", "fan", 3, 0));	   // Over the graph
-	EXPECT_FALSE(editor().move("dashboard", "fan", 9, 0));	   // Off the grid
-	EXPECT_TRUE(editor().move("dashboard", "fan", 8, 5));
+	EXPECT_FALSE(resize("graph", 450, 300)); // Into the fan
+	EXPECT_FALSE(move("fan", 350, 0));		 // Over the graph
+	EXPECT_FALSE(move("fan", 850, 0));		 // Off the area
+	EXPECT_TRUE(move("fan", 800, 500));
 
-	EXPECT_FALSE(editor().resize("dashboard", "fan", 5, 1));  // Wider than the fan can be
-	EXPECT_FALSE(editor().resize("dashboard", "fan", 1, 1));  // Narrower than it can be
-	EXPECT_TRUE(editor().resize("dashboard", "graph", 5, 4)); // Now there is room
-	EXPECT_EQ(shown("dashboard", "graph").w, 5);
-	EXPECT_EQ(shown("dashboard", "graph").h, 4);
+	EXPECT_FALSE(resize("fan", 450, 100));	// Wider than the fan can be
+	EXPECT_FALSE(resize("fan", 150, 100));	// Narrower than it can be
+	EXPECT_TRUE(resize("graph", 517, 413)); // Now there is room, to the pixel
+	EXPECT_EQ(shown("dashboard", "graph").w, 517);
+	EXPECT_EQ(shown("dashboard", "graph").h, 413);
 }
 
 TEST_F(TestLayoutEditor, AddedWidgetsGoInTheSelectedPlace)
 {
-	editor().selectPlace("dashboard", std::pair{6, 3});
+	editor().selectPlace("dashboard", UI::Xml::Point{600, 300});
 	ASSERT_EQ(editor().add("fan"), "fan_2");
-	EXPECT_EQ(shown("dashboard", "fan_2").x, 6);
-	EXPECT_EQ(shown("dashboard", "fan_2").y, 3);
+	EXPECT_EQ(shown("dashboard", "fan_2").rect(), (Rect{.x = 600, .y = 300, .w = 200, .h = 100}));
 	EXPECT_EQ(editor().selection().item, "fan_2");
 
-	// Where it doesn't fit, the first place it does
-	editor().selectPlace("dashboard", std::pair{1, 1});
+	// Where it doesn't fit, as near as it does: beside the graph, below the fan
+	editor().selectPlace("dashboard", UI::Xml::Point{350, 50});
 	ASSERT_EQ(editor().add("fan"), "fan_3");
-	EXPECT_EQ(shown("dashboard", "fan_3").x, 6);
-	EXPECT_EQ(shown("dashboard", "fan_3").y, 0);
+	EXPECT_FALSE(shown("dashboard", "fan_3").rect().overlaps(shown("dashboard", "graph").rect()));
+	EXPECT_FALSE(shown("dashboard", "fan_3").rect().overlaps(shown("dashboard", "fan").rect()));
+	EXPECT_LE(std::abs(shown("dashboard", "fan_3").x - 350) + std::abs(shown("dashboard", "fan_3").y - 50), 120);
 
 	// A strip adds after the selected item; a widget for another slot can't be added
 	editor().select("sidebar", "a");
@@ -511,30 +573,30 @@ TEST_F(TestLayoutEditor, SettingsTakeOnlyTheirValues)
 TEST_F(TestLayoutEditor, UndoGoesBackOneChangeAndADragIsOne)
 {
 	editor().beginGesture();
-	EXPECT_TRUE(editor().move("dashboard", "fan", 5, 0));
-	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 0));
-	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 1));
+	EXPECT_TRUE(move("fan", 500, 0));
+	EXPECT_TRUE(move("fan", 600, 0));
+	EXPECT_TRUE(move("fan", 600, 100));
 	editor().endGesture();
-	EXPECT_TRUE(editor().setGrid("dashboard", 12, 8));
-	EXPECT_EQ(Layouts::find("dashboard")->columns, 12);
+	EXPECT_TRUE(editor().setSnap("dashboard", false));
+	EXPECT_FALSE(Layouts::find("dashboard")->snap);
 
 	editor().undo();
-	EXPECT_EQ(Layouts::find("dashboard")->columns, 10);
-	EXPECT_EQ(shown("dashboard", "fan").x, 6);
+	EXPECT_TRUE(Layouts::find("dashboard")->snap);
+	EXPECT_EQ(shown("dashboard", "fan").x, 600);
 	editor().undo();
-	EXPECT_EQ(shown("dashboard", "fan").x, 4);
+	EXPECT_EQ(shown("dashboard", "fan").x, 400);
 	EXPECT_FALSE(editor().canUndo());
 }
 
 TEST_F(TestLayoutEditor, ResetGoesBackToTheDefault)
 {
-	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 2));
+	EXPECT_TRUE(move("fan", 600, 200));
 	std::string error;
 	ASSERT_TRUE(editor().done(error)) << error;
 
 	editor().begin();
 	editor().reset("dashboard");
-	EXPECT_EQ(shown("dashboard", "fan").x, 4);
+	EXPECT_EQ(shown("dashboard", "fan").x, 400);
 	ASSERT_TRUE(editor().done(error)) << error;
 	EXPECT_FALSE(fs::exists(m_dir / "layouts" / "dashboard.json")); // The default needs no file
 }
@@ -542,7 +604,7 @@ TEST_F(TestLayoutEditor, ResetGoesBackToTheDefault)
 TEST_F(TestLayoutStore, SavedLayoutsAreListedLoadedAndDeletedByName)
 {
 	namespace Library = UI::Xml::LayoutLibrary;
-	const Layout layout = dashboard({{.id = "a", .widget = "graph", .w = 4, .h = 3}});
+	const Layout layout = dashboard({{.id = "a", .widget = "graph", .w = 400, .h = 300}});
 	std::string error;
 	Library::setFolder({});
 	EXPECT_FALSE(Library::canSave());
@@ -593,8 +655,8 @@ TEST_F(TestLayoutEditor, ApplyingSavedLayoutsIsOneChange)
 {
 	Layout saved = *editor().draft("dashboard");
 	saved.items.erase(saved.items.begin()); // No graph
-	const Layout otherKind{.slot = "sidebar", .kind = LayoutKind::Grid, .columns = 10, .rows = 6};
-	const Layout notShown{.slot = "elsewhere", .kind = LayoutKind::Grid, .columns = 10, .rows = 6};
+	const Layout otherKind{.slot = "sidebar", .kind = LayoutKind::Free, .width = 1000, .height = 600};
+	const Layout notShown{.slot = "elsewhere", .kind = LayoutKind::Free, .width = 1000, .height = 600};
 
 	EXPECT_EQ(editor().apply({saved, otherKind, notShown}), 1u);
 	EXPECT_EQ(ids("dashboard"), (std::vector<std::string>{"fan"}));

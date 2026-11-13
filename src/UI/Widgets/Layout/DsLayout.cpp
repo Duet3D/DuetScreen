@@ -22,18 +22,21 @@ namespace UI::Xml
 		/** The component that stands in for a widget that isn't installed */
 		constexpr const char* MISSING_COMPONENT = "customise_missing";
 
-		/** The edit overlays: over a strip's widget, and over a grid's, which has a handle to resize it */
+		/** The edit overlays: over a strip's widget, and over a free layout's, which has handles to resize it */
 		constexpr const char* STRIP_OVERLAY = "customise_item";
-		constexpr const char* GRID_OVERLAY = "customise_grid_item";
+		constexpr const char* FREE_OVERLAY = "customise_free_item";
 
-		/** The marker on the grid cell selected to add a widget to */
+		/** The marker on the place selected to add a widget to */
 		constexpr const char* PLACE_MARKER = "customise_place";
 
-		/** `delta` pixels in whole steps of `step` pixels, to the nearest */
-		int32_t steps(int32_t delta, int32_t step)
-		{
-			return step > 0 ? static_cast<int32_t>(std::lround(static_cast<double>(delta) / step)) : 0;
-		}
+		/** A line showing what a dragged widget snapped to */
+		constexpr const char* GUIDE = "customise_guide";
+
+		/** The size of the place marker, in the layout's pixels */
+		constexpr int32_t PLACE_SIZE = 56;
+
+		/** How thick a guide is, in pixels */
+		constexpr int32_t GUIDE_WIDTH = 2;
 
 		/** Whether `point` is in `area`, edges included */
 		bool contains(const lv_area_t& area, const lv_point_t& point)
@@ -41,7 +44,13 @@ namespace UI::Xml
 			return point.x >= area.x1 && point.x <= area.x2 && point.y >= area.y1 && point.y <= area.y2;
 		}
 
-		/** How far in from a selected grid widget's edge a touch grabs that edge, in pixels, at most */
+		/** `value` scaled by `scale`, to the nearest pixel */
+		int32_t scaled(int32_t value, double scale)
+		{
+			return static_cast<int32_t>(std::lround(value * scale));
+		}
+
+		/** How far in from a selected free widget's edge a touch grabs that edge, in pixels, at most */
 		constexpr int32_t GRAB_BAND = 40;
 
 		/** Where the touch now is */
@@ -66,6 +75,7 @@ namespace UI::Xml
 		Layouts::addListener(this);
 		LayoutEditor::get().addListener(this);
 		lv_obj_add_event_cb(m_container, containerClickedCb, LV_EVENT_CLICKED, this);
+		lv_obj_add_event_cb(m_container, containerSizeCb, LV_EVENT_SIZE_CHANGED, this);
 		refresh();
 		onEditorChanged(); // It may be built while the user is customising
 	}
@@ -97,8 +107,9 @@ namespace UI::Xml
 			 .extends = "lv_obj",
 			 .description =
 				 "Shows the widgets the layout of a slot places, which the user can change on the screen. The layout "
-				 "comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A grid layout makes this a "
-				 "grid of equal cells; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order.",
+				 "comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A free layout puts each "
+				 "widget at its rectangle, scaled to this content area; a strip leaves its own layout (e.g. "
+				 "`flex_flow`) to place the widgets in order.",
 			 .example = R"(<ds_layout slot="sidebar" flex_flow="column" width="content" height="100%"/>)",
 			 .exampleHeight =
 				 584, // About the screen's height, as the sidebar is, so every button has room for its label
@@ -172,9 +183,9 @@ namespace UI::Xml
 			LOG_WARN("<ds_layout slot=\"{:s}\">: no bundle has a layout for this slot", m_slot);
 		}
 		const std::vector<LayoutItem> items = layout ? layout->items : std::vector<LayoutItem>{};
-		if (layout && layout->kind == LayoutKind::Grid)
+		if (layout && layout->kind == LayoutKind::Free)
 		{
-			applyGrid(*layout);
+			lv_obj_set_layout(m_container, LV_LAYOUT_NONE); // Each widget is placed where the layout says
 		}
 
 		// Keep the widgets that are still the same, in the new order; build the rest
@@ -210,9 +221,9 @@ namespace UI::Xml
 				m_placements.push_back(build(item, index));
 			}
 
-			if (layout->kind == LayoutKind::Grid && m_placements.back().outer())
+			if (layout->kind == LayoutKind::Free && m_placements.back().outer())
 			{
-				placeInGrid(m_placements.back().outer(), item);
+				placeFree(m_placements.back().outer(), *layout, item);
 			}
 		}
 		for (auto& placement : old)
@@ -222,20 +233,55 @@ namespace UI::Xml
 		showOverlays(); // The widgets built again need theirs
 	}
 
-	void DsLayout::applyGrid(const Layout& layout)
+	void DsLayout::containerSizeCb(lv_event_t* e)
 	{
-		const auto columns = static_cast<size_t>(layout.columns);
-		const auto rows = static_cast<size_t>(layout.rows);
-		if (m_columns.size() == columns + 1 && m_rows.size() == rows + 1)
+		auto* layout = static_cast<DsLayout*>(lv_event_get_user_data(e));
+		const Layout* shown = Layouts::find(layout->m_slot);
+		if (shown == nullptr || shown->kind != LayoutKind::Free)
 		{
 			return;
 		}
-		m_columns.assign(columns, LV_GRID_FR(1));
-		m_columns.push_back(LV_GRID_TEMPLATE_LAST);
-		m_rows.assign(rows, LV_GRID_FR(1));
-		m_rows.push_back(LV_GRID_TEMPLATE_LAST);
-		lv_obj_set_layout(m_container, LV_LAYOUT_GRID);
-		lv_obj_set_grid_dsc_array(m_container, m_columns.data(), m_rows.data());
+		for (const auto& placement : layout->m_placements)
+		{
+			if (placement.outer() != nullptr)
+			{
+				layout->placeFree(placement.outer(), *shown, placement.item);
+			}
+		}
+		layout->showPlace();
+	}
+
+	std::pair<double, double> DsLayout::scaleOf(const Layout& layout) const
+	{
+		const int32_t width = lv_obj_get_content_width(m_container);
+		const int32_t height = lv_obj_get_content_height(m_container);
+		// Before it is laid out it has no size: show the layout as it is until then
+		if (width <= 0 || height <= 0 || layout.width <= 0 || layout.height <= 0)
+		{
+			return {1.0, 1.0};
+		}
+		return {static_cast<double>(width) / layout.width, static_cast<double>(height) / layout.height};
+	}
+
+	lv_area_t DsLayout::toScreen(const Layout& layout, const Rect& rect) const
+	{
+		const auto [sx, sy] = scaleOf(layout);
+		const int32_t x1 = scaled(rect.x, sx);
+		const int32_t y1 = scaled(rect.y, sy);
+		return {.x1 = x1, .y1 = y1, .x2 = scaled(rect.right(), sx) - 1, .y2 = scaled(rect.bottom(), sy) - 1};
+	}
+
+	std::optional<Point> DsLayout::toLayout(const Layout& layout, const lv_point_t& point) const
+	{
+		lv_area_t content;
+		lv_obj_get_content_coords(m_container, &content);
+		if (!contains(content, point))
+		{
+			return std::nullopt;
+		}
+		const auto [sx, sy] = scaleOf(layout);
+		return Point{.x = static_cast<int32_t>(std::lround((point.x - content.x1) / sx)),
+					 .y = static_cast<int32_t>(std::lround((point.y - content.y1) / sy))};
 	}
 
 	DsLayout::Placement DsLayout::build(const LayoutItem& item, uint32_t index)
@@ -248,16 +294,16 @@ namespace UI::Xml
 											: std::map<std::string, std::string>{{"widget", item.widget}},
 							.names = std::make_unique<PlacementScope>()};
 
-		// In a grid, a plain box the grid sizes, which the widget fills (see the file comment)
+		// In a free layout, a plain box the ds_layout places, which the widget fills (see the file comment)
 		const Layout* layout = Layouts::find(m_slot);
 		lv_obj_t* parent = m_container;
-		if (layout != nullptr && layout->kind == LayoutKind::Grid)
+		if (layout != nullptr && layout->kind == LayoutKind::Free)
 		{
 			placement.cell = lv_obj_create(m_container);
 			lv_obj_remove_style_all(placement.cell);
 			lv_obj_remove_flag(placement.cell, LV_OBJ_FLAG_CLICKABLE);
 			lv_obj_remove_flag(placement.cell, LV_OBJ_FLAG_SCROLLABLE);
-			// The widget's shadow or glow shows beyond the cell, as it would without one
+			// The widget's shadow or glow shows beyond the box, as it would without one
 			lv_obj_add_flag(placement.cell, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
 			lv_obj_add_event_cb(placement.cell, cellExtDrawSizeCb, LV_EVENT_REFR_EXT_DRAW_SIZE, nullptr);
 			parent = placement.cell;
@@ -274,8 +320,8 @@ namespace UI::Xml
 		// Forget the placement first, then delete the view
 		lv_obj_add_event_cb(placement.root, viewDeletedCb, LV_EVENT_DELETE, this);
 		deleteWith(placement.root, placement.view);
-		// In a grid, the size classes are the cell's, which the grid alone sizes; a strip's widgets size themselves,
-		// so they aren't measured (see PlacementScope.h)
+		// In a free layout, the size classes are the box's, which the ds_layout alone sizes; a strip's widgets size
+		// themselves, so they aren't measured (see PlacementScope.h)
 		if (placement.cell != nullptr)
 		{
 			placement.names->follow(placement.cell);
@@ -324,11 +370,11 @@ namespace UI::Xml
 	void DsLayout::addOverlay(Placement& placement)
 	{
 		const Layout* layout = Layouts::find(m_slot);
-		const bool grid = layout != nullptr && layout->kind == LayoutKind::Grid;
+		const bool free = layout != nullptr && layout->kind == LayoutKind::Free;
 		const std::string key = fmt::format("{:s}/{:s}", m_slot, placement.item.id);
 		const char* attrs[] = {"name", "customise_overlay", "key", key.c_str(), nullptr, nullptr};
 		lv_obj_t* parent = placement.cell ? placement.cell : placement.root;
-		auto* overlay = static_cast<lv_obj_t*>(lv_xml_create(parent, grid ? GRID_OVERLAY : STRIP_OVERLAY, attrs));
+		auto* overlay = static_cast<lv_obj_t*>(lv_xml_create(parent, free ? FREE_OVERLAY : STRIP_OVERLAY, attrs));
 		if (overlay == nullptr)
 		{
 			LOG_ERROR("<ds_layout slot=\"{:s}\">: no edit overlay component", m_slot);
@@ -397,16 +443,16 @@ namespace UI::Xml
 			{
 				return;
 			}
-			// A grid widget already selected (showing its handles) is resized from near its edges; a first touch
+			// A free widget already selected (showing its handles) is resized from near its edges; a first touch
 			// only selects it, and moves it if dragged
 			const lv_point_t point = touchPoint();
 			const LayoutEditor::Selection& selection = editor.selection();
 			const bool wasSelected = selection.slot == layout->m_slot && selection.item == item->id;
 			editor.select(layout->m_slot, item->id);
-			layout->m_drag = Drag{.id = item->id, .start = point, .from = *item};
-			if (wasSelected && draft->kind == LayoutKind::Grid)
+			layout->m_drag = Drag{.id = item->id, .start = point, .from = *item, .edges = {}};
+			if (wasSelected && draft->kind == LayoutKind::Free)
 			{
-				grabbedEdges(overlay, point, *layout->m_drag);
+				layout->m_drag->edges = grabbedEdges(overlay, point);
 			}
 			editor.beginGesture();
 			break;
@@ -422,6 +468,10 @@ namespace UI::Xml
 			if (layout->m_drag)
 			{
 				layout->m_drag.reset();
+				if (const Layout* draft = editor.draft(layout->m_slot))
+				{
+					layout->showGuides(*draft, {});
+				}
 				editor.endGesture();
 			}
 			break;
@@ -439,9 +489,9 @@ namespace UI::Xml
 		{
 			return;
 		}
-		if (draft->kind == LayoutKind::Grid)
+		if (draft->kind == LayoutKind::Free)
 		{
-			editor.selectPlace(layout->m_slot, layout->cellAt(touchPoint()));
+			editor.selectPlace(layout->m_slot, layout->toLayout(*draft, touchPoint()));
 		}
 		else
 		{
@@ -458,23 +508,9 @@ namespace UI::Xml
 			return;
 		}
 		const Drag& drag = *m_drag;
-		if (draft->kind == LayoutKind::Grid)
+		if (draft->kind == LayoutKind::Free)
 		{
-			const auto [stepX, stepY] = cellStep();
-			const int32_t columns = steps(point.x - drag.start.x, stepX);
-			const int32_t rows = steps(point.y - drag.start.y, stepY);
-			if (!drag.left && !drag.top && !drag.right && !drag.bottom)
-			{
-				editor.move(m_slot, drag.id, drag.from.x + columns, drag.from.y + rows);
-				return;
-			}
-			// The edges dragged follow the touch; the others stay where they were
-			const LayoutItem& from = drag.from;
-			const int32_t x = drag.left ? from.x + columns : from.x;
-			const int32_t y = drag.top ? from.y + rows : from.y;
-			const int32_t right = drag.right ? from.x + from.w + columns : from.x + from.w;
-			const int32_t bottom = drag.bottom ? from.y + from.h + rows : from.y + from.h;
-			editor.place(m_slot, drag.id, x, y, right - x, bottom - y);
+			dragFree(*draft, point);
 			return;
 		}
 
@@ -498,31 +534,97 @@ namespace UI::Xml
 		editor.moveTo(m_slot, drag.id, index);
 	}
 
-	std::pair<int32_t, int32_t> DsLayout::cellStep() const
+	void DsLayout::dragFree(const Layout& layout, const lv_point_t& point)
 	{
-		const Layout* layout = Layouts::find(m_slot);
-		if (layout == nullptr || layout->kind != LayoutKind::Grid)
+		LayoutEditor& editor = LayoutEditor::get();
+		const Drag& drag = *m_drag;
+		const auto [sx, sy] = scaleOf(layout);
+		const auto dx = static_cast<int32_t>(std::lround((point.x - drag.start.x) / sx));
+		const auto dy = static_cast<int32_t>(std::lround((point.y - drag.start.y) / sy));
+		const WidgetDef* widget = WidgetCatalogue::find(drag.from.widget);
+		const Size minimum = widget ? widget->minSize : Size{1, 1};
+		const Snap::Edges& edges = drag.edges;
+		const Rect from = drag.from.rect();
+
+		// The edges dragged follow the touch, the others stay; an edge stops where the widget would be too small
+		Rect rect = from;
+		if (edges.none())
 		{
-			return {0, 0};
+			rect.x += dx;
+			rect.y += dy;
 		}
-		const int32_t gapX = lv_obj_get_style_pad_column(m_container, LV_PART_MAIN);
-		const int32_t gapY = lv_obj_get_style_pad_row(m_container, LV_PART_MAIN);
-		return {(lv_obj_get_content_width(m_container) + gapX) / layout->columns,
-				(lv_obj_get_content_height(m_container) + gapY) / layout->rows};
+		else
+		{
+			const int32_t left = edges.left ? std::min(from.x + dx, from.right() - minimum.width) : from.x;
+			const int32_t top = edges.top ? std::min(from.y + dy, from.bottom() - minimum.height) : from.y;
+			const int32_t right = edges.right ? std::max(from.right() + dx, left + minimum.width) : from.right();
+			const int32_t bottom = edges.bottom ? std::max(from.bottom() + dy, top + minimum.height) : from.bottom();
+			rect = {.x = left, .y = top, .w = right - left, .h = bottom - top};
+		}
+
+		std::vector<Snap::Guide> guides;
+		if (layout.snap)
+		{
+			const std::vector<Rect> others = layout.taken(drag.id);
+			const Snap::Result snapped = Snap::snap(rect, edges, layout.area(), others, Geometry::gap(), minimum);
+			rect = snapped.rect;
+			guides = snapped.guides;
+		}
+
+		// Where it doesn't fit, it slides along what is in the way: across only, or down only
+		const LayoutItem* current = layout.find(drag.id);
+		const Rect now = current ? current->rect() : from;
+		if (rect != now && !editor.place(m_slot, drag.id, rect) && edges.none())
+		{
+			if (!editor.place(m_slot, drag.id, {.x = rect.x, .y = now.y, .w = rect.w, .h = rect.h}))
+			{
+				editor.place(m_slot, drag.id, {.x = now.x, .y = rect.y, .w = rect.w, .h = rect.h});
+			}
+		}
+
+		// Only the guides the widget really lines up with, where it ended up
+		if (const Layout* moved = editor.draft(m_slot); moved != nullptr && moved->find(drag.id) != nullptr)
+		{
+			const Rect at = moved->find(drag.id)->rect();
+			std::erase_if(guides,
+						  [&at](const Snap::Guide& guide)
+						  {
+							  return guide.vertical ? guide.at != at.x && guide.at != at.right()
+													: guide.at != at.y && guide.at != at.bottom();
+						  });
+			showGuides(*moved, guides);
+		}
 	}
 
-	std::optional<std::pair<int32_t, int32_t>> DsLayout::cellAt(const lv_point_t& point) const
+	void DsLayout::showGuides(const Layout& layout, const std::vector<Snap::Guide>& guides)
 	{
-		const Layout* layout = Layouts::find(m_slot);
-		const auto [stepX, stepY] = cellStep();
-		lv_area_t content;
-		lv_obj_get_content_coords(m_container, &content);
-		if (layout == nullptr || stepX <= 0 || stepY <= 0 || !contains(content, point))
+		for (lv_obj_t* guide : m_guides)
 		{
-			return std::nullopt;
+			lv_obj_delete(guide);
 		}
-		return std::pair{std::min((point.x - content.x1) / stepX, layout->columns - 1),
-						 std::min((point.y - content.y1) / stepY, layout->rows - 1)};
+		m_guides.clear();
+		for (const auto& guide : guides)
+		{
+			const char* attrs[] = {"name", "customise_guide", nullptr, nullptr};
+			auto* line = static_cast<lv_obj_t*>(lv_xml_create(m_container, GUIDE, attrs));
+			if (line == nullptr)
+			{
+				LOG_ERROR("<ds_layout slot=\"{:s}\">: no guide component", m_slot);
+				return;
+			}
+			// Across the whole area, centred on the edge it marks
+			const Rect rect = guide.vertical ? Rect{.x = guide.at, .y = 0, .w = 0, .h = layout.height}
+											 : Rect{.x = 0, .y = guide.at, .w = layout.width, .h = 0};
+			const lv_area_t area = toScreen(layout, rect);
+			lv_obj_add_flag(line, LV_OBJ_FLAG_IGNORE_LAYOUT);
+			lv_obj_set_pos(line,
+						   area.x1 - (guide.vertical ? GUIDE_WIDTH / 2 : 0),
+						   area.y1 - (guide.vertical ? 0 : GUIDE_WIDTH / 2));
+			lv_obj_set_size(line,
+							guide.vertical ? GUIDE_WIDTH : lv_area_get_width(&area) + 1,
+							guide.vertical ? lv_area_get_height(&area) + 1 : GUIDE_WIDTH);
+			m_guides.push_back(line);
+		}
 	}
 
 	void DsLayout::showPlace()
@@ -530,8 +632,8 @@ namespace UI::Xml
 		const LayoutEditor& editor = LayoutEditor::get();
 		const LayoutEditor::Selection& selection = editor.selection();
 		const Layout* layout = Layouts::find(m_slot);
-		const bool marked = m_editing && layout != nullptr && layout->kind == LayoutKind::Grid &&
-							selection.slot == m_slot && selection.item.empty() && selection.cell.has_value();
+		const bool marked = m_editing && layout != nullptr && layout->kind == LayoutKind::Free &&
+							selection.slot == m_slot && selection.item.empty() && selection.point.has_value();
 		if (!marked)
 		{
 			if (m_place != nullptr)
@@ -550,12 +652,21 @@ namespace UI::Xml
 				LOG_ERROR("<ds_layout slot=\"{:s}\">: no place marker component", m_slot);
 				return;
 			}
+			lv_obj_add_flag(m_place, LV_OBJ_FLAG_IGNORE_LAYOUT);
 		}
-		lv_obj_set_grid_cell(
-			m_place, LV_GRID_ALIGN_STRETCH, selection.cell->first, 1, LV_GRID_ALIGN_STRETCH, selection.cell->second, 1);
+		// Its corner at the point, inside the area
+		const Point& point = *selection.point;
+		const int32_t size = std::min({PLACE_SIZE, layout->width, layout->height});
+		const Rect rect{.x = std::clamp(point.x, 0, layout->width - size),
+						.y = std::clamp(point.y, 0, layout->height - size),
+						.w = size,
+						.h = size};
+		const lv_area_t area = toScreen(*layout, rect);
+		lv_obj_set_pos(m_place, area.x1, area.y1);
+		lv_obj_set_size(m_place, lv_area_get_width(&area), lv_area_get_height(&area));
 	}
 
-	void DsLayout::grabbedEdges(lv_obj_t* overlay, const lv_point_t& point, Drag& drag)
+	Snap::Edges DsLayout::grabbedEdges(lv_obj_t* overlay, const lv_point_t& point)
 	{
 		// A band along each edge, at most a third of the widget across, so the bands never meet and the middle
 		// always moves the widget, however small it is
@@ -563,10 +674,11 @@ namespace UI::Xml
 		lv_obj_get_coords(overlay, &area);
 		const int32_t bandX = std::min(GRAB_BAND, lv_area_get_width(&area) / 3);
 		const int32_t bandY = std::min(GRAB_BAND, lv_area_get_height(&area) / 3);
-		drag.left = point.x < area.x1 + bandX;
-		drag.right = point.x > area.x2 - bandX;
-		drag.top = point.y < area.y1 + bandY;
-		drag.bottom = point.y > area.y2 - bandY;
+		return {.left = point
+							.x<area.x1 + bandX,
+							   .top = point.y<area.y1 + bandY, .right = point.x> area.x2 - bandX,
+							   .bottom = point.y> area.y2 -
+						bandY};
 	}
 
 	DsLayout::Placement* DsLayout::placementOf(lv_obj_t* overlay)
@@ -577,9 +689,11 @@ namespace UI::Xml
 		return it == m_placements.end() ? nullptr : &*it;
 	}
 
-	void DsLayout::placeInGrid(lv_obj_t* obj, const LayoutItem& item)
+	void DsLayout::placeFree(lv_obj_t* obj, const Layout& layout, const LayoutItem& item) const
 	{
-		lv_obj_set_grid_cell(obj, LV_GRID_ALIGN_STRETCH, item.x, item.w, LV_GRID_ALIGN_STRETCH, item.y, item.h);
+		const lv_area_t area = toScreen(layout, item.rect());
+		lv_obj_set_pos(obj, area.x1, area.y1);
+		lv_obj_set_size(obj, lv_area_get_width(&area), lv_area_get_height(&area));
 	}
 
 	void DsLayout::remove(Placement& placement)

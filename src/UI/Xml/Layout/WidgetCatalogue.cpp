@@ -56,8 +56,8 @@ namespace UI::Xml
 			return it->get<std::string>();
 		}
 
-		/** Read a [columns, rows] size; sets `error` if it is there but isn't one */
-		CellSize sizeOf(const nlohmann::json& json, const char* key, CellSize fallback, std::string& error)
+		/** Read a [width, height] size in pixels; sets `error` if it is there but isn't one */
+		Size sizeOf(const nlohmann::json& json, const char* key, Size fallback, std::string& error)
 		{
 			const auto it = json.find(key);
 			if (it == json.end())
@@ -67,7 +67,7 @@ namespace UI::Xml
 			if (!it->is_array() || it->size() != 2 || !(*it)[0].is_number_integer() || !(*it)[1].is_number_integer() ||
 				(*it)[0].get<int32_t>() < 1 || (*it)[1].get<int32_t>() < 1)
 			{
-				error = fmt::format("size \"{:s}\" must be [columns, rows], each at least 1", key);
+				error = fmt::format("size \"{:s}\" must be [width, height] in pixels, each at least 1", key);
 				return fallback;
 			}
 			return {(*it)[0].get<int32_t>(), (*it)[1].get<int32_t>()};
@@ -340,10 +340,10 @@ namespace UI::Xml
 			{
 				return std::nullopt;
 			}
-			const auto within = [&widget](const CellSize& size)
+			const auto within = [&widget](const Size& size)
 			{
-				return size.columns >= widget.minSize.columns && size.rows >= widget.minSize.rows &&
-					   size.columns <= widget.maxSize.columns && size.rows <= widget.maxSize.rows;
+				return size.width >= widget.minSize.width && size.height >= widget.minSize.height &&
+					   size.width <= widget.maxSize.width && size.height <= widget.maxSize.height;
 			};
 			if (!within(widget.defaultSize))
 			{

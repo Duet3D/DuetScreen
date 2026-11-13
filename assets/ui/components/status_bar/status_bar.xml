@@ -12,8 +12,11 @@
 -->
 <component>
 	<styles>
-		<!-- While customising, the slot has room to be tapped, to add a button, even when it is empty -->
-		<style name="slot_editing" min_width="80" min_height="24"/>
+		<!-- While customising, the slot shows (with the theme's outline_primary), and can be tapped to add a button,
+			 even when it is empty. No taller than the bar's text, with an outline and a larger tap area
+			 (ext_click_area) rather than a border or padding, so the bar doesn't grow: the dashboard below keeps its
+			 size. Its container lets the outline show outside it (overflow_visible, ext_draw_size). -->
+		<style name="slot_editing" min_width="80" min_height="12" outline_pad="0"/>
 	</styles>
 
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">
@@ -24,15 +27,16 @@
 				  style_max_width="40%" style_text_align="center"/>
 
 		<lv_obj name="right" align="right_mid" width="content" height="content" style_max_width="30%"
-				scrollable="false" flex_flow="row" style_flex_cross_place="center" style_flex_track_place="center"
-				style_pad_column="#pad_small">
+				scrollable="false" overflow_visible="true" ext_draw_size="8" flex_flow="row"
+				style_flex_cross_place="center" style_flex_track_place="center" style_pad_column="#pad_small">
 			<style name="pad_zero"/>
 			<ds_layout name="buttons" slot="status_bar" width="content" height="content" scrollable="false"
-					   flex_flow="row" style_flex_cross_place="center" style_flex_track_place="center"
-					   style_pad_column="#pad_small">
+					   ext_click_area="12" flex_flow="row" style_flex_cross_place="center"
+					   style_flex_track_place="center" style_pad_column="#pad_small">
 				<style name="pad_zero"/>
+				<!-- The outline tight, to stay on the screen at its right edge -->
+				<bind_style_if_eq name="outline_primary" subject="customise.editing" ref_value="1"/>
 				<bind_style_if_eq name="slot_editing" subject="customise.editing" ref_value="1"/>
-				<bind_style_if_eq name="border_highlight" subject="customise.editing" ref_value="1"/>
 			</ds_layout>
 
 			<lv_spangroup name="temperatures" width="content" height="content" style_text_align="right">

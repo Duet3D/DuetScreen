@@ -23,7 +23,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | Widget | A DuetScreen XML element backed by C++, e.g. `ds_button`, `ds_list`, `ds_modal`; each registers a spec of its attributes | [Widgets/](../src/UI/Widgets), [reference](XML_UI_API.md#widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Widgets/Layout/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Slot | A place whose widgets the user chooses: `<ds_layout slot="dashboard"/>` | [Widgets/DsLayout.h](../src/UI/Widgets/Layout/DsLayout.h) |
-| Layout | What a slot shows: which widgets, and where (a grid of cells, or a strip) | [Layout/Layout.h](../src/UI/Xml/Layout/Layout.h), `assets/ui/layouts/` |
+| Layout | What a slot shows: which widgets, and where (rectangles of pixels, or a strip) | [Layout/Layout.h](../src/UI/Xml/Layout/Layout.h), `assets/ui/layouts/` |
 | Placeable widget | A component the user can place in a slot, with a widget file saying where it fits, its sizes and its settings | [Layout/WidgetCatalogue.h](../src/UI/Xml/Layout/WidgetCatalogue.h), `widgets/` |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -56,7 +56,8 @@ src/UI/
                CustomiseSource (the state of customising the screen)
     Layout/    WidgetCatalogue (the widgets the user can place), Layout (layout files, and repairing them),
                LayoutStore (the layout each slot shows, and saving the user's), LayoutEditor (customising),
-               PlacementScope (a placed widget's size classes)
+               PlacementScope (a placed widget's size classes), Geometry (rectangles, finding room), Snap (snapping
+               dragged widgets)
   Widgets/     every ds_* widget, beside the C++ class behind it; Widgets.cpp registers them
     Buttons/   ds_button, ds_drag_button, ds_password_toggle
     Inputs/    ds_slider, ds_hue_slider, ds_textarea, ds_keyboard, ds_dropdown, ds_toggle
@@ -308,20 +309,21 @@ A layout is a file in a bundle's `layouts/`, listed by the manifest's `layouts`:
 {
   "format": 1,
   "slot": "dashboard",
-  "kind": "grid",
-  "columns": 20, "rows": 12,
+  "kind": "free",
+  "width": 920, "height": 561,
+  "snap": true,
   "items": [
-    {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 12, "h": 6},
-    {"id": "fan1", "widget": "fan", "x": 12, "y": 8, "w": 8, "h": 2, "settings": {"fan": 1}}
+    {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 548, "h": 277},
+    {"id": "fan1", "widget": "fan", "x": 553, "y": 466, "w": 367, "h": 95, "settings": {"fan": 1}}
   ]
 }
 ```
 
-- A `grid` places each widget in a rectangle of cells (20 by 12 unless it says otherwise; the user can change it). A `strip` shows its widgets one after another, in order, sized by their components and placed by the `<ds_layout>`'s own layout, e.g. `flex_flow="column"`.
+- A `free` layout places each widget in a rectangle of pixels anywhere in an area `width` by `height`: the size of the slot it was made for (the dashboard is 920 by 561 on a 1024x600 screen). A slot of another size shows it scaled to fit. Rectangles may touch but not overlap; the gap between them is the layout's own (the screen leaves the theme's `widget_gap` when it places one). `snap` says whether widgets the user drags snap to the edges near them. A `strip` shows its widgets one after another, in order, sized by their components and placed by the `<ds_layout>`'s own layout, e.g. `flex_flow="column"`.
 - An item names a widget, a unique `id`, and the values of the widget's settings it doesn't leave at their defaults.
 - An item marked `"locked": true` can be moved but not removed or reconfigured. Only the first bundle's layout of a slot can lock (the built-in bundle's, for the built-in slots), and a locked item missing from a later layout is put back: Settings and the E-stop are always on the sidebar.
 - A slot shows the user's own layout (saved by the screen in the local bundle), else the last bundle's. *Reset* on the screen goes back to the last bundle's, so a shared bundle's layout becomes the default.
-- A layout is repaired rather than rejected, and each repair reported like any other problem: an overlapping widget moves, a widget's size keeps to its limits and the grid, a setting it can't take goes back to its default, and a widget that isn't installed keeps its place, showing that it is missing.
+- A layout is repaired rather than rejected, and each repair reported like any other problem: an overlapping widget moves to the nearest free place, a widget's size keeps to its limits and the area, a setting it can't take goes back to its default, and a widget that isn't installed keeps its place, showing that it is missing.
 - `format` is the file's version. An older format is upgraded when it is read; a newer one is rejected.
 
 ### Writing a widget
@@ -336,7 +338,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
   "category_tag": "widget.category_fans",
   "icon": "fine_tune.png",
   "slots": ["dashboard"],
-  "size": {"default": [10, 2], "min": [8, 2]},
+  "size": {"default": [458, 89], "min": [365, 89]},
   "props": {},
   "settings": [
     {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
@@ -345,7 +347,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
 }
 ```
 
-- `slots` are the slots it can be placed in, and `size` its default, smallest and largest size in a grid, in cells (`[columns, rows]`; with no `max`, up to the whole grid).
+- `slots` are the slots it can be placed in, and `size` its default, smallest and largest size in a free layout, in pixels (`[width, height]`; with no `max`, up to the whole area).
 - `title`, `description` (or `title_tag`, `description_tag`, translated) and `icon` show it in the widget pool, under its `category` (or `category_tag`).
 - `props` are always given to the component; one component can be several widgets, as each sidebar page button is `sidebar_page_button` with its own `page`, `label` and `icon`.
 - `settings` are props the user chooses. Each needs a `default`, and a `kind`:
@@ -372,7 +374,7 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 </component>
 ```
 
-- The component's root is a plain `lv_obj` (not a `ds_*` widget, which has a C++ object of its own). In a grid it fills its cells (the `<ds_layout>` makes it, so it needn't set a size); in a strip it sizes itself, as the sidebar's buttons take the sidebar's width and share its height (`width="100%" flex_grow="1"`).
+- The component's root is a plain `lv_obj` (not a `ds_*` widget, which has a C++ object of its own). In a free layout it fills its rectangle (the `<ds_layout>` makes it, so it needn't set a size); in a strip it sizes itself, as the sidebar's buttons take the sidebar's width and share its height (`width="100%" flex_grow="1"`).
 - A widget fits what it shows to the room it is given. Lay it out with `%`, `fr` grid tracks and `flex_grow` first, so it looks right at its default and smallest sizes, scrolling only as a last resort. Where that isn't enough, its place's *size classes* are names it can use: `widget.width_class` and `widget.height_class` (0 compact, 1 regular, 2 expanded), `widget.size_class` (the smaller of the two) and `widget.portrait`. Use them for three things only: hiding secondary parts, a larger font for a value, and orientation, with `bind_flag_if` and `bind_style_if` (not `<if>`, which builds its contents again), and say why in a comment:
 
   ```xml
@@ -382,7 +384,7 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
   </ds_button>
   ```
 
-  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A grid measures each widget's cells, which only the grid sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. A view that isn't a placed widget, such as a page, has a page's room: the names are globals there, always expanded, so a piece shown both on a page and in a widget (a fan's card, a heater's row) can use them. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
+  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A free layout measures each widget's rectangle, which only the layout sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. A view that isn't a placed widget, such as a page, has a page's room: the names are globals there, always expanded, so a piece shown both on a page and in a widget (a fan's card, a heater's row) can use them. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
 - A widget about one of something (a fan, a tool) shows it with a keyed list, so it follows the printer's rows; it shows nothing while the printer has no such one.
 - Printer data is global, so a widget shows it wherever it is placed. A widget may name a presenter, and each placed widget then has one of its own.
 - The lint checks each widget file (its component takes every prop and setting, a `row` setting's list and fields exist, every translation key exists) and each widget's component with its default settings.
@@ -391,14 +393,14 @@ A user bundle adds a widget the same way, and a slot for it to go in if none fit
 
 ### Customising on the screen
 
-*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it a cell at a time or along its strip. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be; files and new folders are flushed to the card before a save counts as done).
+*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it anywhere it fits (sliding along a widget in its way) or along its strip. A tap on an empty place marks it, and a tap on the mark opens the widget pool to add a widget there, or as near as there is room. While *Snap* is on, a dragged edge near another widget's edge (lined up with it, touching it, or the gap away) or the area's snaps to it, and a guide line shows what it snapped to ([Snap.h](../src/UI/Xml/Layout/Snap.h)). The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, turns snapping on or off, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be; files and new folders are flushed to the card before a save counts as done).
 
 The toolbar can also save every slot's layout under a name, typed when saving (letters, digits, spaces, `-` and `_`), and load one of them again, or delete it. A saved layout is one file, `/boot/ui/saved/<name>.json`, holding each slot's layout. Loading it is one change, which can be undone, and is kept only when customising ends with *Done*.
 
 How it is built:
 
 - [LayoutEditor](../src/UI/Xml/Layout/LayoutEditor.h) holds a draft of every slot and makes each change, checking it (a widget only goes where it fits; locked items stay), with undo. The [layout store](../src/UI/Xml/Layout/LayoutStore.h) shows the drafts, and saves them at the end.
-- [`<ds_layout>`](../src/UI/Widgets/Layout/DsLayout.h) puts the edit overlays (XML: `customise_item.xml`, `customise_grid_item.xml`) over its widgets and turns touches into editor calls.
+- [`<ds_layout>`](../src/UI/Widgets/Layout/DsLayout.h) puts the edit overlays (XML: `customise_item.xml`, `customise_free_item.xml`) over its widgets, turns touches into editor calls, snapping them ([Snap.h](../src/UI/Xml/Layout/Snap.h)), and shows the guides (`customise_guide.xml`). [Geometry.h](../src/UI/Xml/Layout/Geometry.h) finds room for a widget.
 - The edit's state is global data, `customise.*` ([CustomiseSource](../src/UI/Xml/Data/CustomiseSource.h)), which the overlays and the toolbar bind to.
 - [LayoutLibrary](../src/UI/Xml/Layout/LayoutLibrary.h) keeps the layouts saved under a name.
 - The toolbar and its dialogs are `customise/customise.xml`, with [CustomisePresenter](../src/UI/Presenters/Customise/CustomisePresenter.h), hosted once by the home screen.

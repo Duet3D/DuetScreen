@@ -3,14 +3,14 @@
  *
  * Behaviour for customising the screen (assets/ui/components/customise/customise.xml): the toolbar shown while the
  * user customises, and its dialogs: the widget pool, by category, a widget's settings (text is typed in them, on the
- * shared keyboard, and the dialog moves above it), the choice of one of a setting's values, the grid's size, and
- * saving the layouts under a name and loading them again (UI/Xml/Layout/LayoutLibrary.h). The edits themselves are the layout editor's
+ * shared keyboard, and the dialog moves above it), the choice of one of a setting's values, and saving the layouts
+ * under a name and loading them again (UI/Xml/Layout/LayoutLibrary.h); and snapping, on or off. The edits themselves are the layout editor's
  * (UI/Xml/Layout/LayoutEditor.h); <ds_layout> turns touches on the widgets into moves, resizes and selections, and the
  * edit's state is global data (`customise.*`, UI/Xml/Data/CustomiseSource.h).
  *
  * The home screen hosts customise.xml once, as `customise`. Any view starts customising with the global action
  * `customise.start` (Settings does), and opens the widget pool with `customise.open_catalogue` (the place marker in
- * a grid does).
+ * a free layout does).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).
@@ -118,9 +118,6 @@ namespace UI
 		/** Set the selected widget's setting `name` to `value`, and show the settings again */
 		void setSetting(const std::string& name, const nlohmann::json& value);
 
-		/** Show the grid's size */
-		void showGrid();
-
 		/** Close every dialog */
 		void closeDialogs();
 
@@ -165,9 +162,6 @@ namespace UI
 		Xml::StringSubject<64> m_deleteTitle;			 // The question's title
 		Xml::StringSubject<96> m_deleteText;			 // The question, naming the layout
 		std::string m_deleting;							 // The saved layout the question is about
-		Xml::IntSubject m_gridOpen;						 // 1 while the grid's size is shown
-		Xml::StringSubject<8> m_columns;				 // The grid's columns
-		Xml::StringSubject<8> m_rows;					 // The grid's rows
 		std::string m_choosing;							 // The setting whose options are shown
 	};
 } // namespace UI

@@ -21,8 +21,8 @@
  * expanded), so XML never compares pixels and a theme with larger fonts moves every breakpoint at once. A theme
  * without them has no breakpoints: everything is regular.
  *
- * Only a grid measures its widgets, and it measures the cells it gives them, which the grid alone sizes, never the
- * widget's content: so what a widget hides or restyles for its size can't change that size, and the layout can't
+ * Only a free layout measures its widgets, and it measures the box it gives each, which the layout alone sizes, never
+ * the widget's content: so what a widget hides or restyles for its size can't change that size, and the layout can't
  * loop. A strip sizes its widgets by their content, so its widgets are always regular, regular, regular, landscape.
  * A view that isn't a placed widget, such as a page, has a page's room: the same names are globals (WidgetSource.h),
  * always expanded, so a piece shared by a page and a widget can use them.
@@ -72,7 +72,7 @@ namespace UI::Xml
 		void fields(FieldVisitor& f) override;
 
 		/**
-		 * Measure `place`, a box sized by its parent's layout alone (a grid's cells), and follow its size, and the
+		 * Measure `place`, a box sized by its parent's layout alone (a free layout's box), and follow its size, and the
 		 * theme's breakpoints, until it is deleted or this scope goes, whichever is first
 		 */
 		void follow(lv_obj_t* place);

@@ -23,7 +23,7 @@ Palette: `chroma=0.02`, `customisable=true`, `dark=true`, `primary_hue=245`, `se
 
 Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 700, bold; huge: 44 px, weight 700, bold; large: 22 px, weight 600, bold; normal: 14 px, weight 400, normal; small: 12 px, weight 400, normal; subdued: 12 px, weight 200, italic; xlarge: 30 px, weight 700, bold
 
-Consts: `#border_width=2`, `#outline_width=3`, `#radius=5`, `#pad_large=10`, `#pad=5`, `#pad_small=2`, `#pad_tiny=1`, `#shadow_offset=3`, `#transition_time=80`, `#widget_regular_min=180`, `#widget_expanded_min=400`
+Consts: `#border_width=2`, `#outline_width=3`, `#radius=5`, `#pad_large=10`, `#pad=5`, `#pad_small=2`, `#pad_tiny=1`, `#shadow_offset=3`, `#transition_time=80`, `#widget_regular_min=180`, `#widget_expanded_min=400`, `#widget_gap=5`
 
 ## 3d
 

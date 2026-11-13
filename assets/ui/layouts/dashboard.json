@@ -1,35 +1,36 @@
 /* The dashboard: the tool list and temperature graph on the left, the jobs, macros and status on the right.
-   A grid of 20x12 cells; the user's own layout (made on the screen) can change its size. */
+   A free layout of the dashboard's area on a 1024x600 screen; the user's own layout (made on the screen) can change it. */
 {
   "format": 1,
   "slot": "dashboard",
-  "kind": "grid",
-  "columns": 20,
-  "rows": 12,
+  "kind": "free",
+  "width": 920,
+  "height": 561,
+  "snap": true,
   "items": [
     {
       "id": "tools",
       "widget": "tools",
       "x": 0,
       "y": 0,
-      "w": 12,
-      "h": 6
+      "w": 548,
+      "h": 277
     },
     {
       "id": "temperature_graph",
       "widget": "temperature_graph",
       "x": 0,
-      "y": 6,
-      "w": 12,
-      "h": 6
+      "y": 282,
+      "w": 548,
+      "h": 279
     },
     {
       "id": "files",
       "widget": "files",
-      "x": 12,
+      "x": 553,
       "y": 0,
-      "w": 8,
-      "h": 12
+      "w": 367,
+      "h": 561
     }
   ]
 }

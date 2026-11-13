@@ -272,55 +272,15 @@ namespace UI
 		action("customise.reset",
 			   "Put the selected widget's slot (else the dashboard) back as it was before any customising",
 			   [](const Xml::ActionArgs&) { editor().reset(editor().targetSlot()); });
-		action("customise.grid",
-			   "Show the grid's size",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   showGrid();
-				   setOpen(m_gridOpen, 1);
-			   });
-		action("customise.close_grid",
-			   "Close the grid's size",
-			   [this](const Xml::ActionArgs&) { setOpen(m_gridOpen, 0); });
-		action("customise.columns",
-			   "Ask for the grid's number of columns on the number pad",
-			   [this](const Xml::ActionArgs&)
+		action("customise.snap",
+			   "Turn snapping of dragged widgets on or off, in the selected widget's slot (else the dashboard)",
+			   [](const Xml::ActionArgs&)
 			   {
 				   const std::string slot = editor().targetSlot();
-				   const Xml::Layout* layout = editor().draft(slot);
-				   Xml::Services::askNumber(
-					   {.header = _("customise.columns"),
-						.min = static_cast<float>(Xml::Layout::MIN_CELLS),
-						.max = static_cast<float>(Xml::Layout::MAX_CELLS),
-						.value = layout ? std::optional(static_cast<float>(layout->columns)) : std::nullopt,
-						.onConfirm = [this, slot](float value)
-						{
-							if (const Xml::Layout* current = editor().draft(slot))
-							{
-								editor().setGrid(slot, static_cast<int32_t>(std::lround(value)), current->rows);
-							}
-							showGrid();
-						}});
-			   });
-		action("customise.rows",
-			   "Ask for the grid's number of rows on the number pad",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   const std::string slot = editor().targetSlot();
-				   const Xml::Layout* layout = editor().draft(slot);
-				   Xml::Services::askNumber(
-					   {.header = _("customise.rows"),
-						.min = static_cast<float>(Xml::Layout::MIN_CELLS),
-						.max = static_cast<float>(Xml::Layout::MAX_CELLS),
-						.value = layout ? std::optional(static_cast<float>(layout->rows)) : std::nullopt,
-						.onConfirm = [this, slot](float value)
-						{
-							if (const Xml::Layout* current = editor().draft(slot))
-							{
-								editor().setGrid(slot, current->columns, static_cast<int32_t>(std::lround(value)));
-							}
-							showGrid();
-						}});
+				   if (const Xml::Layout* layout = editor().draft(slot))
+				   {
+					   editor().setSnap(slot, !layout->snap);
+				   }
 			   });
 		action("customise.cancel",
 			   "Stop customising and throw the changes away",
@@ -354,9 +314,6 @@ namespace UI
 		f.field("confirm_delete", m_confirmDelete, "1 while asking whether to delete a saved layout");
 		f.field("delete_title", m_deleteTitle, "That question's title");
 		f.field("delete_text", m_deleteText, "That question, naming the layout");
-		f.field("grid_open", m_gridOpen, "1 while the grid's size is shown");
-		f.field("columns", m_columns, "The grid's number of columns");
-		f.field("rows", m_rows, "The grid's number of rows");
 	}
 
 	void CustomisePresenter::registerActions()
@@ -505,13 +462,6 @@ namespace UI
 		showSettings();
 	}
 
-	void CustomisePresenter::showGrid()
-	{
-		const Xml::Layout* layout = editor().draft(editor().targetSlot());
-		m_columns.set(layout ? std::to_string(layout->columns) : "");
-		m_rows.set(layout ? std::to_string(layout->rows) : "");
-	}
-
 	void CustomisePresenter::closeDialogs()
 	{
 		m_keyboard.set(0);
@@ -521,7 +471,6 @@ namespace UI
 		setOpen(m_catalogueOpen, 0);
 		setOpen(m_settingsOpen, 0);
 		setOpen(m_optionsOpen, 0);
-		setOpen(m_gridOpen, 0);
 	}
 
 	void CustomisePresenter::askSaveName()
@@ -578,8 +527,8 @@ namespace UI
 	void CustomisePresenter::setOpen(Xml::IntSubject& dialog, bool open)
 	{
 		dialog.set(open ? 1 : 0);
-		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_gridOpen.get() ||
-						 m_saveOpen.get() || m_loadOpen.get();
+		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_saveOpen.get() ||
+						 m_loadOpen.get();
 		m_dialogOpen.set(any ? 1 : 0);
 	}
 

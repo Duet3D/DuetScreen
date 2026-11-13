@@ -7,17 +7,21 @@
  *     {
  *       "format": 1,
  *       "slot": "dashboard",
- *       "kind": "grid",
- *       "columns": 20, "rows": 12,
+ *       "kind": "free",
+ *       "width": 920, "height": 561,
+ *       "snap": true,
  *       "items": [
- *         {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 12, "h": 6},
- *         {"id": "fan1", "widget": "fan", "x": 12, "y": 8, "w": 8, "h": 2, "settings": {"fan": 1}}
+ *         {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 548, "h": 277},
+ *         {"id": "fan1", "widget": "fan", "x": 553, "y": 466, "w": 367, "h": 95, "settings": {"fan": 1}}
  *       ]
  *     }
  *
- * A `grid` places each widget in a rectangle of cells; a `strip` (a sidebar, a row of buttons) shows its widgets one
- * after another in the order listed, sized by their components. An item marked `"locked": true` (the E-stop, the
- * Settings button) can be moved but never removed or reconfigured, whatever later layouts say.
+ * A `free` layout places each widget in a rectangle of pixels of an area `width` by `height`, the size of the slot it
+ * was made for: a slot of another size shows it scaled to fit. Rectangles may touch but not overlap. `snap` says
+ * whether widgets the user drags snap to the edges near them (see Snap.h). A `strip` (a sidebar, a row of buttons)
+ * shows its widgets one after another in the order listed, sized by their components. An item marked
+ * `"locked": true` (the E-stop, the Settings button) can be moved but never removed or reconfigured, whatever later
+ * layouts say.
  *
  * Every layout read is repaired (repair()) rather than rejected, so a hand-edited or outdated file shows as much as it
  * can: what was wrong is reported, and an item whose widget isn't installed keeps its place, as a placeholder.
@@ -28,6 +32,7 @@
 
 #pragma once
 
+#include "Geometry.h"
 #include "WidgetCatalogue.h"
 #include <filesystem>
 #include <nlohmann/json.hpp>
@@ -41,7 +46,7 @@ namespace UI::Xml
 	/** How a layout places its widgets */
 	enum class LayoutKind
 	{
-		Grid, // In rectangles of cells
+		Free, // In rectangles of pixels, anywhere in its area
 		Strip // One after another
 	};
 
@@ -50,12 +55,18 @@ namespace UI::Xml
 	{
 		std::string id{};							   // Unique in its layout
 		std::string widget{};						   // Id of the widget shown
-		int32_t x = 0;							   // Grid: first column
-		int32_t y = 0;							   // Grid: first row
-		int32_t w = 1;							   // Grid: columns spanned
-		int32_t h = 1;							   // Grid: rows spanned
+		int32_t x = 0;							   // Free: left edge, pixels from the area's
+		int32_t y = 0;							   // Free: top edge, pixels from the area's
+		int32_t w = 1;							   // Free: width, pixels
+		int32_t h = 1;							   // Free: height, pixels
 		nlohmann::json settings = nlohmann::json::object(); // Setting values by name, including unknown ones, kept
 		bool locked = false;					   // Can't be removed or reconfigured
+
+		/** Its rectangle in a free layout */
+		Rect rect() const { return {.x = x, .y = y, .w = w, .h = h}; }
+
+		/** Put it at `rect` in a free layout */
+		void setRect(const Rect& rect);
 
 		/** Equal if every member is */
 		bool operator==(const LayoutItem&) const = default;
@@ -67,14 +78,14 @@ namespace UI::Xml
 		/** The current file format */
 		static constexpr int FORMAT = 1;
 
-		/** The smallest and largest number of grid columns or rows */
-		static constexpr int32_t MIN_CELLS = 1;
-		static constexpr int32_t MAX_CELLS = MAX_GRID_CELLS;
+		/** The largest area a free layout can have, pixels each way */
+		static constexpr int32_t MAX_AREA = 4096;
 
 		std::string slot{};					// The slot it is for
-		LayoutKind kind = LayoutKind::Grid; // How it places its widgets
-		int32_t columns = 20;				// Grid: columns
-		int32_t rows = 12;					// Grid: rows
+		LayoutKind kind = LayoutKind::Free; // How it places its widgets
+		int32_t width = 0;					// Free: the area's width, pixels: the slot's it was made for
+		int32_t height = 0;					// Free: the area's height, pixels
+		bool snap = true;					// Free: whether dragged widgets snap to the edges near them
 		std::vector<LayoutItem> items{};		// The widgets, in order
 
 		/** Equal if every member is */
@@ -85,6 +96,12 @@ namespace UI::Xml
 
 		/** The item with this id, or nullptr */
 		LayoutItem* find(std::string_view id);
+
+		/** The free layout's area */
+		Size area() const { return {width, height}; }
+
+		/** The rectangles of every item but `ignore`, e.g. to find room among them */
+		std::vector<Rect> taken(std::string_view ignore = {}) const;
 
 		/** An id no item has yet, made from `base`, e.g. "fan", "fan_2" */
 		std::string newId(std::string_view base) const;
@@ -107,45 +124,20 @@ namespace UI::Xml
 		bool local = false;			// Whether it is in the local bundle (the user's own; see LayoutStore.h)
 	};
 
-	/** Which cells of a grid layout are taken */
-	class GridCells
-	{
-	  public:
-		/** Track the items of `layout`, except the one with id `ignore` */
-		explicit GridCells(const Layout& layout, std::string_view ignore = {});
-
-		/** Whether a widget can go at x, y with size w, h: inside the grid, and over no tracked item */
-		bool isFree(int32_t x, int32_t y, int32_t w, int32_t h) const;
-
-		/** Mark the cells as taken */
-		void take(int32_t x, int32_t y, int32_t w, int32_t h);
-
-		/** The first free place for a w by h widget, row by row, or nullopt if none is free */
-		std::optional<std::pair<int32_t, int32_t>> findFree(int32_t w, int32_t h) const;
-
-	  private:
-		int32_t m_columns;		  // Grid width
-		int32_t m_rows;			  // Grid height
-		std::vector<bool> m_used{}; // Row by row, whether each cell is taken
-	};
-
 	namespace Layouts
 	{
 		/**
 		 * Make `layout` one that can be shown, reporting each change made:
-		 *   - the grid size is limited to MIN_CELLS..MAX_CELLS
+		 *   - a free layout's area is limited to 1..MAX_AREA pixels each way
 		 *   - items without an id, or with one used before, get a new id
 		 *   - an item whose widget doesn't fit the slot is removed; one whose widget isn't installed is kept
 		 *   - settings that aren't values of the widget's settings are removed (unknown ones are kept for later)
-		 *   - grid items are sized within their widget's limits and the grid, and moved to a free place if they
-		 *     overlap one before them; if there is none, they are removed
+		 *   - free items are sized within their widget's limits and the area, and moved to the nearest free place if
+		 *     they overlap one before them (at their smallest size if need be); if there is none, they are removed
 		 *   - every locked item of `locks` is put back, as it is there, if it is missing or was changed
 		 * @param locks The layout whose locked items must be kept, or nullptr
 		 * @return what was changed, one message each
 		 */
 		std::vector<std::string> repair(Layout& layout, const Layout* locks = nullptr);
-
-		/** Change a grid layout's size, moving and shrinking its items to fit; they stay in the same order */
-		void resizeGrid(Layout& layout, int32_t columns, int32_t rows);
 	} // namespace Layouts
 } // namespace UI::Xml

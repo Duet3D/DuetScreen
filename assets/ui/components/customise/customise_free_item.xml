@@ -1,5 +1,5 @@
 <!--
-  The edit overlay over each widget of a grid while the user customises the screen: as customise_item.xml, with
+  The edit overlay over each widget of a free layout while the user customises the screen: as customise_item.xml, with
   crop-tool handles on the selected widget: a bracket on each corner and a bar on each edge. They show where to drag:
   <ds_layout> resizes the widget from a drag that starts anywhere near an edge or corner (see DsLayout.h), so they
   needn't be hit exactly.

@@ -31,7 +31,8 @@ namespace UI::Xml
 		f.field("customise.can_remove", m_canRemove, "1 if the selected widget can be removed (it isn't locked)");
 		f.field("customise.can_configure", m_canConfigure, "1 if the selected widget has settings the user can change");
 		f.field("customise.can_undo", m_canUndo, "1 if there is a change to undo");
-		f.field("customise.is_grid", m_isGrid, "1 if new widgets go into a grid (whose size can be changed)");
+		f.field("customise.is_free", m_isFree, "1 if new widgets go into a free layout, whose widgets can snap");
+		f.field("customise.snap", m_snap, "1 if dragged widgets snap to the edges near them, in that free layout");
 		f.field("customise.title", m_title, "The selected widget's name, translated; empty if none is selected");
 	}
 
@@ -49,7 +50,8 @@ namespace UI::Xml
 		m_canRemove.set(editor.canRemove() ? 1 : 0);
 		m_canConfigure.set(editor.canConfigure() ? 1 : 0);
 		m_canUndo.set(editor.canUndo() ? 1 : 0);
-		m_isGrid.set(target && target->kind == LayoutKind::Grid ? 1 : 0);
+		m_isFree.set(target && target->kind == LayoutKind::Free ? 1 : 0);
+		m_snap.set(target && target->kind == LayoutKind::Free && target->snap ? 1 : 0);
 		if (widget == nullptr)
 		{
 			m_title.set(item ? item->widget : "");

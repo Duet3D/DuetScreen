@@ -14,7 +14,7 @@ namespace UI::Xml
 		/** The name of `kind` in a layout file */
 		std::string_view kindName(LayoutKind kind)
 		{
-			return kind == LayoutKind::Grid ? "grid" : "strip";
+			return kind == LayoutKind::Free ? "free" : "strip";
 		}
 
 		/** `json[key]` as an int if it is one, else `fallback` */
@@ -46,13 +46,28 @@ namespace UI::Xml
 		{
 			return std::min(std::max(value, low), high);
 		}
-
-		/** Scale a grid coordinate from `from` cells to `to` cells */
-		int32_t scale(int32_t value, int32_t from, int32_t to)
-		{
-			return static_cast<int32_t>((static_cast<int64_t>(value) * to + from / 2) / from);
-		}
 	} // namespace
+
+	void LayoutItem::setRect(const Rect& rect)
+	{
+		x = rect.x;
+		y = rect.y;
+		w = rect.w;
+		h = rect.h;
+	}
+
+	std::vector<Rect> Layout::taken(std::string_view ignore) const
+	{
+		std::vector<Rect> rects;
+		for (const auto& item : items)
+		{
+			if (item.id != ignore)
+			{
+				rects.push_back(item.rect());
+			}
+		}
+		return rects;
+	}
 
 	const LayoutItem* Layout::find(std::string_view id) const
 	{
@@ -107,9 +122,17 @@ namespace UI::Xml
 		layout.slot = slot->get<std::string>();
 
 		const std::string kind = json.value("kind", "");
-		if (kind == kindName(LayoutKind::Grid))
+		if (kind == kindName(LayoutKind::Free))
 		{
-			layout.kind = LayoutKind::Grid;
+			layout.kind = LayoutKind::Free;
+			layout.width = intOf(json, "width", 0);
+			layout.height = intOf(json, "height", 0);
+			if (layout.width < 1 || layout.height < 1)
+			{
+				error = "a free layout's \"width\" and \"height\" must give its area, in pixels";
+				return std::nullopt;
+			}
+			layout.snap = json.value("snap", true);
 		}
 		else if (kind == kindName(LayoutKind::Strip))
 		{
@@ -117,11 +140,9 @@ namespace UI::Xml
 		}
 		else
 		{
-			error = "\"kind\" must be \"grid\" or \"strip\"";
+			error = "\"kind\" must be \"free\" or \"strip\"";
 			return std::nullopt;
 		}
-		layout.columns = intOf(json, "columns", layout.columns);
-		layout.rows = intOf(json, "rows", layout.rows);
 
 		const auto items = json.find("items");
 		if (items == json.end() || !items->is_array())
@@ -160,10 +181,11 @@ namespace UI::Xml
 		json["format"] = FORMAT;
 		json["slot"] = slot;
 		json["kind"] = kindName(kind);
-		if (kind == LayoutKind::Grid)
+		if (kind == LayoutKind::Free)
 		{
-			json["columns"] = columns;
-			json["rows"] = rows;
+			json["width"] = width;
+			json["height"] = height;
+			json["snap"] = snap;
 		}
 		nlohmann::json list = nlohmann::json::array();
 		for (const auto& item : items)
@@ -171,7 +193,7 @@ namespace UI::Xml
 			nlohmann::json entry = nlohmann::json::object();
 			entry["id"] = item.id;
 			entry["widget"] = item.widget;
-			if (kind == LayoutKind::Grid)
+			if (kind == LayoutKind::Free)
 			{
 				entry["x"] = item.x;
 				entry["y"] = item.y;
@@ -190,65 +212,6 @@ namespace UI::Xml
 		}
 		json["items"] = std::move(list);
 		return json;
-	}
-
-	GridCells::GridCells(const Layout& layout, std::string_view ignore)
-		: m_columns(layout.columns)
-		, m_rows(layout.rows)
-		, m_used(static_cast<size_t>(std::max(0, layout.columns * layout.rows)), false)
-	{
-		for (const auto& item : layout.items)
-		{
-			if (item.id != ignore)
-			{
-				take(item.x, item.y, item.w, item.h);
-			}
-		}
-	}
-
-	bool GridCells::isFree(int32_t x, int32_t y, int32_t w, int32_t h) const
-	{
-		if (x < 0 || y < 0 || w < 1 || h < 1 || x + w > m_columns || y + h > m_rows)
-		{
-			return false;
-		}
-		for (int32_t row = y; row < y + h; row++)
-		{
-			for (int32_t column = x; column < x + w; column++)
-			{
-				if (m_used[static_cast<size_t>(row * m_columns + column)])
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	void GridCells::take(int32_t x, int32_t y, int32_t w, int32_t h)
-	{
-		for (int32_t row = std::max(0, y); row < std::min(m_rows, y + h); row++)
-		{
-			for (int32_t column = std::max(0, x); column < std::min(m_columns, x + w); column++)
-			{
-				m_used[static_cast<size_t>(row * m_columns + column)] = true;
-			}
-		}
-	}
-
-	std::optional<std::pair<int32_t, int32_t>> GridCells::findFree(int32_t w, int32_t h) const
-	{
-		for (int32_t y = 0; y + h <= m_rows; y++)
-		{
-			for (int32_t x = 0; x + w <= m_columns; x++)
-			{
-				if (isFree(x, y, w, h))
-				{
-					return std::pair{x, y};
-				}
-			}
-		}
-		return std::nullopt;
 	}
 
 	namespace Layouts
@@ -277,7 +240,7 @@ namespace UI::Xml
 						continue;
 					}
 					changes.push_back(fmt::format("\"{:s}\" can't be removed; it is put back", locked.id));
-					// A strip keeps it where it was; a grid finds it a place below, if its own is taken
+					// A strip keeps it where it was; a free layout finds it a place, if its own is taken
 					const size_t at = std::min(i, layout.items.size());
 					layout.items.insert(layout.items.begin() + static_cast<std::ptrdiff_t>(at), locked);
 				}
@@ -334,27 +297,23 @@ namespace UI::Xml
 				}
 			}
 
-			/** Size a grid item within its widget's limits and the grid, and inside the grid */
-			void fitInGrid(LayoutItem& item, const WidgetDef* widget, const Layout& layout)
+			/** Size a free item within its widget's limits and the area, and put it inside the area */
+			void fitInArea(LayoutItem& item, const WidgetDef* widget, const Layout& layout)
 			{
 				if (widget != nullptr)
 				{
-					item.w = limit(item.w, widget->minSize.columns, widget->maxSize.columns);
-					item.h = limit(item.h, widget->minSize.rows, widget->maxSize.rows);
+					item.w = limit(item.w, widget->minSize.width, widget->maxSize.width);
+					item.h = limit(item.h, widget->minSize.height, widget->maxSize.height);
 				}
-				item.w = limit(item.w, 1, layout.columns);
-				item.h = limit(item.h, 1, layout.rows);
-				item.x = limit(item.x, 0, layout.columns - item.w);
-				item.y = limit(item.y, 0, layout.rows - item.h);
+				item.w = limit(item.w, 1, layout.width);
+				item.h = limit(item.h, 1, layout.height);
+				item.x = limit(item.x, 0, layout.width - item.w);
+				item.y = limit(item.y, 0, layout.height - item.h);
 			}
 
-			/** Move grid items that overlap one placed before them (locked items are placed first) */
+			/** Move free items that overlap one placed before them (locked items are placed first) */
 			void resolveOverlaps(Layout& layout, std::vector<std::string>& changes)
 			{
-				Layout empty = layout;
-				empty.items.clear();
-				GridCells cells(empty);
-
 				std::vector<LayoutItem*> order;
 				for (auto& item : layout.items)
 				{
@@ -362,35 +321,32 @@ namespace UI::Xml
 				}
 				std::stable_partition(order.begin(), order.end(), [](const LayoutItem* item) { return item->locked; });
 
+				const int32_t gap = Geometry::gap();
+				std::vector<Rect> placed;
 				std::set<std::string> removed;
 				for (LayoutItem* item : order)
 				{
-					if (cells.isFree(item->x, item->y, item->w, item->h))
+					if (Geometry::isFree(item->rect(), layout.area(), placed))
 					{
-						cells.take(item->x, item->y, item->w, item->h);
+						placed.push_back(item->rect());
 						continue;
 					}
-					std::optional<std::pair<int32_t, int32_t>> place = cells.findFree(item->w, item->h);
-					const WidgetDef* widget = WidgetCatalogue::find(item->widget);
-					if (!place && widget != nullptr)
+					const Point near{item->x, item->y};
+					std::optional<Rect> place =
+						Geometry::findFree(layout.area(), placed, {item->w, item->h}, near, gap);
+					if (const WidgetDef* widget = WidgetCatalogue::find(item->widget); !place && widget != nullptr)
 					{
-						place = cells.findFree(widget->minSize.columns, widget->minSize.rows);
-						if (place)
-						{
-							item->w = widget->minSize.columns;
-							item->h = widget->minSize.rows;
-						}
+						place = Geometry::findFree(layout.area(), placed, widget->minSize, near, gap);
 					}
 					if (!place)
 					{
-						changes.push_back(fmt::format("\"{:s}\" doesn't fit in the grid; it is removed", item->id));
+						changes.push_back(fmt::format("\"{:s}\" doesn't fit in the area; it is removed", item->id));
 						removed.insert(item->id);
 						continue;
 					}
 					changes.push_back(fmt::format("\"{:s}\" overlapped another widget; it is moved", item->id));
-					item->x = place->first;
-					item->y = place->second;
-					cells.take(item->x, item->y, item->w, item->h);
+					item->setRect(*place);
+					placed.push_back(*place);
 				}
 				std::erase_if(layout.items, [&removed](const LayoutItem& item) { return removed.contains(item.id); });
 			}
@@ -399,16 +355,15 @@ namespace UI::Xml
 		std::vector<std::string> repair(Layout& layout, const Layout* locks)
 		{
 			std::vector<std::string> changes;
-			if (layout.kind == LayoutKind::Grid)
+			if (layout.kind == LayoutKind::Free)
 			{
-				const int32_t columns = limit(layout.columns, Layout::MIN_CELLS, Layout::MAX_CELLS);
-				const int32_t rows = limit(layout.rows, Layout::MIN_CELLS, Layout::MAX_CELLS);
-				if (columns != layout.columns || rows != layout.rows)
+				const int32_t width = limit(layout.width, 1, Layout::MAX_AREA);
+				const int32_t height = limit(layout.height, 1, Layout::MAX_AREA);
+				if (width != layout.width || height != layout.height)
 				{
-					changes.push_back(
-						fmt::format("a grid has {:d} to {:d} columns and rows", Layout::MIN_CELLS, Layout::MAX_CELLS));
-					layout.columns = columns;
-					layout.rows = rows;
+					changes.push_back(fmt::format("an area is 1 to {:d} pixels each way", Layout::MAX_AREA));
+					layout.width = width;
+					layout.height = height;
 				}
 			}
 
@@ -446,35 +401,15 @@ namespace UI::Xml
 							  return false;
 						  });
 
-			if (layout.kind == LayoutKind::Grid)
+			if (layout.kind == LayoutKind::Free)
 			{
 				for (auto& item : layout.items)
 				{
-					fitInGrid(item, WidgetCatalogue::find(item.widget), layout);
+					fitInArea(item, WidgetCatalogue::find(item.widget), layout);
 				}
 				resolveOverlaps(layout, changes);
 			}
 			return changes;
-		}
-
-		void resizeGrid(Layout& layout, int32_t columns, int32_t rows)
-		{
-			columns = limit(columns, Layout::MIN_CELLS, Layout::MAX_CELLS);
-			rows = limit(rows, Layout::MIN_CELLS, Layout::MAX_CELLS);
-			for (auto& item : layout.items)
-			{
-				item.x = scale(item.x, layout.columns, columns);
-				item.y = scale(item.y, layout.rows, rows);
-				item.w = std::max(1, scale(item.w, layout.columns, columns));
-				item.h = std::max(1, scale(item.h, layout.rows, rows));
-			}
-			layout.columns = columns;
-			layout.rows = rows;
-
-			// Keep the locks the items have: they came from the layout giving them
-			Layout locks = layout;
-			std::erase_if(locks.items, [](const LayoutItem& item) { return !item.locked; });
-			repair(layout, &locks);
 		}
 	} // namespace Layouts
 } // namespace UI::Xml

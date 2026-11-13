@@ -35,7 +35,7 @@ namespace
 		std::ofstream(path) << text;
 	}
 
-	/* A bundle with a `test` slot: a label widget whose text is a setting, and a 4x2 grid layout of two labels */
+	/* A bundle with a `test` slot: a label widget whose text is a setting, and a free layout of two labels */
 	constexpr std::string_view MANIFEST = R"({"id": "test", "ui_api": "1.0", "components": ["*.xml"],
 		"widgets": ["widgets/*.json"], "layouts": ["*.layout.json"], "themes": ["themes/*.xml"]})";
 
@@ -68,9 +68,9 @@ namespace
 
 	constexpr std::string_view SIZED_WIDGET = R"({"component": "test_sized", "slots": ["test"]})";
 
-	constexpr std::string_view LAYOUT = R"({"format": 1, "slot": "test", "kind": "grid", "columns": 4, "rows": 2,
-		"items": [{"id": "a", "widget": "label", "x": 0, "y": 0, "w": 2, "h": 1},
-				  {"id": "b", "widget": "label", "x": 2, "y": 1, "w": 2, "h": 1, "settings": {"text": "Bye"}}]})";
+	constexpr std::string_view LAYOUT = R"({"format": 1, "slot": "test", "kind": "free", "width": 400, "height": 200,
+		"items": [{"id": "a", "widget": "label", "x": 0, "y": 0, "w": 200, "h": 100},
+				  {"id": "b", "widget": "label", "x": 200, "y": 100, "w": 200, "h": 100, "settings": {"text": "Bye"}}]})";
 
 	constexpr std::string_view SCREEN = R"(
 		<component>
@@ -144,7 +144,7 @@ TEST_F(TestCustomise, LayoutShowsItsWidgetsWithTheirSettings)
 	EXPECT_EQ(text("a"), "Hi"); // The setting's default
 	EXPECT_EQ(text("b"), "Bye");
 
-	// A 4x2 grid of 100x100 cells
+	// At its rectangle, in pixels
 	lv_area_t area;
 	lv_obj_get_coords(item("b"), &area);
 	lv_area_t parent;
@@ -161,7 +161,7 @@ TEST_F(TestCustomise, LayoutRebuildsOnlyWhatChanged)
 	lv_obj_t* b = item("b");
 
 	Layout changed = *Layouts::find("test");
-	changed.items[0].x = 2; // Above b
+	changed.items[0].x = 200; // Above b
 	changed.items[1].settings["text"] = "Again";
 	save(changed);
 	lv_obj_update_layout(layout());
@@ -184,7 +184,7 @@ TEST_F(TestCustomise, LayoutRebuildsOnlyWhatChanged)
 TEST_F(TestCustomise, WidgetsFollowTheSizeClassesOfTheirCells)
 {
 	Layout changed = *Layouts::find("test");
-	changed.items[0].widget = "sized"; // 2x1 cells: 200x100, regular across and compact down
+	changed.items[0].widget = "sized"; // 200x100: regular across and compact down
 	save(changed);
 	lv_obj_update_layout(layout());
 	lv_obj_t* sized = item("a");
@@ -194,8 +194,8 @@ TEST_F(TestCustomise, WidgetsFollowTheSizeClassesOfTheirCells)
 	EXPECT_FALSE(shown(sized, "upright"));
 
 	// Resized, it is kept, and follows its new size: 100x200
-	changed.items[0].w = 1;
-	changed.items[0].h = 2;
+	changed.items[0].w = 100;
+	changed.items[0].h = 200;
 	save(changed);
 	lv_obj_update_layout(layout());
 	EXPECT_EQ(item("a"), sized);
@@ -204,9 +204,9 @@ TEST_F(TestCustomise, WidgetsFollowTheSizeClassesOfTheirCells)
 	EXPECT_TRUE(shown(sized, "upright"));
 
 	// 400x100: expanded across, from the base theme's widget_expanded_min
-	changed.items[0].w = 4;
-	changed.items[0].h = 1;
-	changed.items[1].y = 1; // Out of the way, below
+	changed.items[0].w = 400;
+	changed.items[0].h = 100;
+	changed.items[1].y = 100; // Out of the way, below
 	changed.items[1].x = 0;
 	save(changed);
 	lv_obj_update_layout(layout());
@@ -388,7 +388,7 @@ class TestCustomiseHome : public UiTestSuite
 		return label ? lv_obj_get_parent(label) : nullptr;
 	}
 
-	/** The edit overlay over the placed widget `id` in `slot`: in its cell in a grid, else in the widget */
+	/** The edit overlay over the placed widget `id` in `slot`: in its box in a free layout, else in the widget */
 	static lv_obj_t* overlayOf(const char* slot, const char* id)
 	{
 		lv_obj_t* widget = placed(slot, id);
@@ -397,7 +397,7 @@ class TestCustomiseHome : public UiTestSuite
 			return nullptr;
 		}
 		const Layout* layout = Layouts::find(slot);
-		lv_obj_t* holder = layout && layout->kind == UI::Xml::LayoutKind::Grid ? lv_obj_get_parent(widget) : widget;
+		lv_obj_t* holder = layout && layout->kind == UI::Xml::LayoutKind::Free ? lv_obj_get_parent(widget) : widget;
 		return lv_obj_find_by_name(holder, "customise_overlay");
 	}
 
@@ -463,15 +463,13 @@ TEST_F(TestCustomiseHome, WidgetsAreRemovedMovedAndResizedByTouch)
 	EXPECT_EQ(draftItem("dashboard", "temperature_graph"), nullptr);
 	EXPECT_EQ(placed("dashboard", "temperature_graph"), nullptr);
 
-	// Down four rows: a row is a twelfth of the dashboard
-	lv_obj_t* dashboard = UI::Xml::DsLayout::find("dashboard")->getContainer();
-	const int32_t row = lv_obj_get_content_height(dashboard) / 12;
+	// Down 150 pixels, as the dashboard is shown at the size its layout was made for; nothing is near to snap to
 	const lv_point_t middle = middleOf(placed("dashboard", "tools"));
-	drag(middle, {middle.x, middle.y + 4 * row});
+	drag(middle, {middle.x, middle.y + 150});
 	ASSERT_NE(draftItem("dashboard", "tools"), nullptr);
-	EXPECT_EQ(draftItem("dashboard", "tools")->y, 4);
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 150);
 
-	// The selected widget has a handle on each corner and edge; the bottom one makes it two rows taller
+	// The selected widget has a handle on each corner and edge; the bottom one makes it 100 pixels taller
 	lv_obj_t* overlay = overlayOf("dashboard", "tools");
 	for (const char* handle :
 		 {"handle_nw", "handle_n", "handle_ne", "handle_e", "handle_se", "handle_s", "handle_sw", "handle_w"})
@@ -480,18 +478,18 @@ TEST_F(TestCustomiseHome, WidgetsAreRemovedMovedAndResizedByTouch)
 		EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(overlay, handle), LV_OBJ_FLAG_HIDDEN)) << handle;
 	}
 	const lv_point_t bottom = middleOf(lv_obj_find_by_name(overlay, "handle_s"));
-	drag(bottom, {bottom.x, bottom.y + 2 * row});
-	EXPECT_EQ(draftItem("dashboard", "tools")->y, 4);
-	EXPECT_EQ(draftItem("dashboard", "tools")->h, 8);
+	drag(bottom, {bottom.x, bottom.y + 100});
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 150);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 377);
 
 	tapToolbar("undo");
-	EXPECT_EQ(draftItem("dashboard", "tools")->h, 6);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 277);
 
 	// The top one moves the top edge, so it starts higher and is taller
 	const lv_point_t top = middleOf(lv_obj_find_by_name(overlayOf("dashboard", "tools"), "handle_n"));
-	drag(top, {top.x, top.y - 2 * row});
-	EXPECT_EQ(draftItem("dashboard", "tools")->y, 2);
-	EXPECT_EQ(draftItem("dashboard", "tools")->h, 8);
+	drag(top, {top.x, top.y - 100});
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 50);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 377);
 	EXPECT_EQUAL_SCREENSHOT("customise/handles.png")
 
 	// Other widgets show no handles
@@ -504,14 +502,12 @@ TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
 	tap(middleOf(placed("dashboard", "temperature_graph")));
 	tapToolbar("remove");
 
-	// The empty bottom left cell
+	// Near the bottom left corner, where the graph was
 	lv_obj_t* dashboard = UI::Xml::DsLayout::find("dashboard")->getContainer();
 	lv_area_t area;
 	lv_obj_get_content_coords(dashboard, &area);
-	// The cell at the start of the second row from the bottom, where the 8x2 axis positions fit
-	const int32_t row = lv_obj_get_content_height(dashboard) / 12;
-	tap({area.x1 + 10, area.y2 - row - 10});
-	EXPECT_EQ(UI::Xml::LayoutEditor::get().selection().cell, (std::pair{0, 10}));
+	tap({area.x1 + 10, area.y1 + 400});
+	EXPECT_EQ(UI::Xml::LayoutEditor::get().selection().point, (UI::Xml::Point{10, 400}));
 	ASSERT_NE(lv_obj_find_by_name(dashboard, "customise_place"), nullptr);
 
 	tap(middleOf(lv_obj_find_by_name(dashboard, "customise_place")));
@@ -529,7 +525,7 @@ TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
 	EXPECT_FALSE(shownOnScreen(pool));
 	const auto* added = draftItem("dashboard", "axes");
 	ASSERT_NE(added, nullptr);
-	EXPECT_EQ((std::array{added->x, added->y, added->w, added->h}), (std::array{0, 10, 8, 2}));
+	EXPECT_EQ(added->rect(), (UI::Xml::Rect{.x = 10, .y = 400, .w = 365, .h = 89})); // At its default size
 	EXPECT_NE(placed("dashboard", "axes"), nullptr);
 }
 
@@ -656,7 +652,7 @@ TEST_F(TestCustomiseHome, TextSettingsAreTypedInTheSettingsAboveTheKeyboard)
 	start();
 	editor.select("dashboard", "temperature_graph");
 	editor.removeSelected();
-	editor.selectPlace("dashboard", std::pair{0, 10});
+	editor.selectPlace("dashboard", UI::Xml::Point{0, 470});
 	ASSERT_EQ(editor.add("gcode_button"), "gcode_button");
 	update();
 	tapToolbar("configure");
@@ -690,48 +686,74 @@ TEST_F(TestCustomiseHome, EdgesAreGrabbedAnywhereNearThemEvenOnASmallWidget)
 	start();
 	editor.select("dashboard", "temperature_graph");
 	editor.removeSelected();
-	editor.selectPlace("dashboard", std::pair{4, 8});
-	ASSERT_EQ(editor.add("gcode_button"), "gcode_button"); // 4x2, the smallest default
+	editor.selectPlace("dashboard", UI::Xml::Point{185, 376});
+	ASSERT_EQ(editor.add("gcode_button"), "gcode_button"); // 180x89, the smallest default
 	update();
-	lv_obj_t* dashboard = UI::Xml::DsLayout::find("dashboard")->getContainer();
-	const int32_t column = lv_obj_get_content_width(dashboard) / 20;
-	const int32_t row = lv_obj_get_content_height(dashboard) / 12;
 	const auto area = [&]
 	{
 		lv_area_t coords;
 		lv_obj_get_coords(overlayOf("dashboard", "gcode_button"), &coords);
 		return coords;
 	};
-	const auto rect = []
-	{
-		const auto* item = draftItem("dashboard", "gcode_button");
-		return std::array{item->x, item->y, item->w, item->h};
-	};
+	const auto rect = [] { return draftItem("dashboard", "gcode_button")->rect(); };
+	ASSERT_EQ(rect(), (UI::Xml::Rect{.x = 185, .y = 376, .w = 180, .h = 89}));
 
 	// Near the top right corner, but not on its bracket: both edges move
 	lv_area_t a = area();
-	drag({a.x2 - 20, a.y1 + 20}, {a.x2 - 20 + column, a.y1 + 20 - row});
-	EXPECT_EQ(rect(), (std::array{4, 7, 5, 3}));
+	drag({a.x2 - 20, a.y1 + 20}, {a.x2 - 20 + 50, a.y1 + 20 - 50});
+	EXPECT_EQ(rect(), (UI::Xml::Rect{.x = 185, .y = 326, .w = 230, .h = 139}));
 
 	// Near the bottom edge, well away from its bar: only the bottom moves
 	a = area();
-	drag({a.x1 + 30, a.y2 - 10}, {a.x1 + 30, a.y2 - 10 + row});
-	EXPECT_EQ(rect(), (std::array{4, 7, 5, 4}));
+	drag({a.x1 + 30, a.y2 - 10}, {a.x1 + 30, a.y2 - 10 + 50});
+	EXPECT_EQ(rect(), (UI::Xml::Rect{.x = 185, .y = 326, .w = 230, .h = 189}));
 
 	// The middle moves the whole widget
 	a = area();
 	const lv_point_t middle = {(a.x1 + a.x2) / 2, (a.y1 + a.y2) / 2};
-	drag(middle, {middle.x + column, middle.y});
-	EXPECT_EQ(rect(), (std::array{5, 7, 5, 4}));
+	drag(middle, {middle.x + 50, middle.y});
+	EXPECT_EQ(rect(), (UI::Xml::Rect{.x = 235, .y = 326, .w = 230, .h = 189}));
 
 	// A first touch near an edge of a widget not yet selected selects it; a drag moves it
 	const lv_point_t tools = middleOf(placed("dashboard", "tools"));
 	lv_area_t toolsArea;
 	lv_obj_get_coords(overlayOf("dashboard", "tools"), &toolsArea);
-	drag({tools.x, toolsArea.y2 - 10}, {tools.x, toolsArea.y2 - 10 + row});
+	drag({tools.x, toolsArea.y2 - 10}, {tools.x, toolsArea.y2 - 10 + 30});
 	EXPECT_EQ(editor.selection().item, "tools");
-	EXPECT_EQ(draftItem("dashboard", "tools")->h, 6);
-	EXPECT_EQ(draftItem("dashboard", "tools")->y, 1);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 277);
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 30);
+}
+
+TEST_F(TestCustomiseHome, DraggedWidgetsSnapToTheEdgesNearThem)
+{
+	auto& editor = UI::Xml::LayoutEditor::get();
+	start();
+	editor.select("dashboard", "temperature_graph");
+	editor.removeSelected();
+	editor.select("dashboard", "tools");
+	update();
+
+	// Its bottom dragged to a pixel short of the area's: it snaps there
+	lv_obj_t* overlay = overlayOf("dashboard", "tools");
+	const lv_point_t bottom = middleOf(lv_obj_find_by_name(overlay, "handle_s"));
+	drag(bottom, {bottom.x, bottom.y + 280});
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 561);
+
+	// Moved near the files, it keeps the gap from them
+	editor.select("dashboard", "tools");
+	tapToolbar("undo");
+	update();
+	const lv_point_t middle = middleOf(placed("dashboard", "tools"));
+	drag(middle, {middle.x - 8, middle.y + 30});
+	EXPECT_EQ(draftItem("dashboard", "tools")->x, 0); // Back to the area's edge
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 30);
+
+	// With snapping off, it goes where it is dragged
+	tapToolbar("snap");
+	EXPECT_FALSE(editor.draft("dashboard")->snap);
+	const lv_point_t again = middleOf(placed("dashboard", "tools"));
+	drag(again, {again.x + 3, again.y});
+	EXPECT_EQ(draftItem("dashboard", "tools")->x, 3);
 }
 
 TEST_F(TestCustomiseHome, LayoutsAreSavedUnderANameLoadedAndDeleted)

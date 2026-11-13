@@ -7,7 +7,7 @@
  *     {
  *       "format": 1,
  *       "name": "Printing",
- *       "layouts": [ {"format": 1, "slot": "dashboard", "kind": "grid", …}, {"format": 1, "slot": "sidebar", …} ]
+ *       "layouts": [ {"format": 1, "slot": "dashboard", "kind": "free", …}, {"format": 1, "slot": "sidebar", …} ]
  *     }
  *
  * The file's name is the layout's name, so a name is limited to letters, digits, spaces, `-` and `_`. Files are written

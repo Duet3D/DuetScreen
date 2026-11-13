@@ -11,7 +11,7 @@
  *       "category_tag": "widget.category_fans",    // Its group in the widget pool (or "category": "Fans")
  *       "icon": "fan.png",
  *       "slots": ["dashboard"],                    // The layout slots it can be placed in
- *       "size": {"default": [10, 2], "min": [8, 2], "max": [20, 4]},   // In grid cells: [columns, rows]
+ *       "size": {"default": [456, 90], "min": [364, 90], "max": [920, 190]},  // In pixels: [width, height]
  *       "props": {"style": "card"},                // Props always given to the component
  *       "settings": [                              // Props the user chooses; see SettingDef
  *         {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
@@ -29,6 +29,7 @@
 #pragma once
 
 #include <cstdint>
+#include "Geometry.h"
 #include <filesystem>
 #include <limits>
 #include <map>
@@ -92,18 +93,8 @@ namespace UI::Xml
 		std::vector<SettingOption> choices() const;
 	};
 
-	/** The most columns or rows a grid can have, so the largest any widget can be */
-	inline constexpr int32_t MAX_GRID_CELLS = 24;
-
-	/** A size in grid cells */
-	struct CellSize
-	{
-		int32_t columns = 1; // Width in grid columns
-		int32_t rows = 1;	 // Height in grid rows
-
-		/** Equal if both dimensions are */
-		bool operator==(const CellSize&) const = default;
-	};
+	/** A size no widget's limit reaches: a widget with no `max` can be as large as its layout's area */
+	inline constexpr Size UNBOUNDED{std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max()};
 
 	/** A widget of the pool: a component that can be placed in layout slots, and its settings */
 	struct WidgetDef
@@ -120,9 +111,9 @@ namespace UI::Xml
 		std::string categoryTag{};			   // Translation key of its group; empty for none
 		std::string icon{};				   // Image shown in the widget pool; empty for none
 		std::vector<std::string> slots{};	   // Layout slots it can be placed in
-		CellSize defaultSize{2, 2};		   // Size when added to a grid
-		CellSize minSize{1, 1};			   // Smallest size in a grid
-		CellSize maxSize{MAX_GRID_CELLS, MAX_GRID_CELLS};		   // Largest size in a grid
+		Size defaultSize{40, 40};		   // Size when added to a free layout, pixels; the smallest if not given
+		Size minSize{40, 40};			   // Smallest size in a free layout, pixels
+		Size maxSize{UNBOUNDED};		   // Largest size in a free layout, pixels
 		std::map<std::string, std::string> props{}; // Props always given to the component
 		std::vector<SettingDef> settings{};		  // Props the user chooses
 

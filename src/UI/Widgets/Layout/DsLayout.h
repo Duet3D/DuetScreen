@@ -6,26 +6,27 @@
  *
  * Each placed widget is an XmlView of the widget's component, with the widget's props and settings as the component's
  * props, so a widget with a presenter has one of its own. Its names are its presenter's, then its PlacementScope's (the
- * size classes of its cells in a grid, see UI/Xml/Layout/PlacementScope.h), then the globals. A grid layout makes the ds_layout a grid of equal cells and
- * puts each widget in its rectangle; a strip leaves the ds_layout's own layout (e.g. `flex_flow="column"`) to place
- * them in order.
+ * size classes of its place in a free layout, see UI/Xml/Layout/PlacementScope.h), then the globals. A free layout
+ * puts each widget at its rectangle, scaled if the ds_layout's content area isn't the size the layout was made for; a
+ * strip leaves the ds_layout's own layout (e.g. `flex_flow="column"`) to place them in order.
  *
- * In a grid, each widget is in a box of its own, which the grid sizes, and fills it. The widget can't be the grid's
- * item itself: when something in it changes its content size (a label's text, a bar), LVGL forgets the size the grid
- * gave it, and a widget sized `100%` (as widgets are) would take 100% of the whole grid until the grid's next pass,
- * which in some widgets starts the same again, without end. In its box, 100% is the cell.
+ * In a free layout, each widget is in a box of its own, which the ds_layout sizes, and fills it: so the widget's
+ * content never changes the size its place is measured by, and nothing it shows for its size can make it resize.
  *
  * The ds_layout follows its slot's layout: when it changes (see UI/Xml/Layout/LayoutStore.h) only the widgets that
  * changed are rebuilt. A widget that moved keeps its state; one whose settings changed is built again.
  *
  * While the user customises the screen (UI/Xml/Layout/LayoutEditor.h), each placed widget is covered by an edit
- * overlay, an XML component (customise_item.xml in a strip, customise_grid_item.xml in a grid) that takes its touches:
- * a tap selects the widget, and a drag moves it a cell at a time (in a grid) or along the strip. A selected grid
+ * overlay, an XML component (customise_item.xml in a strip, customise_free_item.xml in a free layout) that takes its
+ * touches: a tap selects the widget, and a drag moves it (along the strip, or anywhere it fits). A selected free
  * widget shows crop-tool handles on its corners and edges, and a drag that starts near an edge (within a band of 40
  * pixels, or a third of the widget across if it is small) moves that edge, and near a corner both: the bands are
- * larger than the handles drawn, so they are easy to hit, and never overlap, so the middle always moves the widget. A tap on an empty part of the ds_layout selects
- * that place to add a widget, and a grid marks the cell with customise_place.xml. Everything is done through the
- * editor, whose drafts the ds_layout then shows like any other layout.
+ * larger than the handles drawn, so they are easy to hit, and never overlap, so the middle always moves the widget.
+ * While the layout snaps, a dragged edge near another widget's edge, or the area's, snaps to it (UI/Xml/Layout/Snap.h)
+ * and a guide (customise_guide.xml) shows what it snapped to. A widget that runs into another stops, sliding along it.
+ * A tap on an empty part of the ds_layout selects that place to add a widget, and a free layout marks it with
+ * customise_place.xml. Everything is done through the editor, whose drafts the ds_layout then shows like any other
+ * layout.
  */
 
 #pragma once
@@ -34,6 +35,7 @@
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/PlacementScope.h"
+#include "UI/Xml/Layout/Snap.h"
 #include "helix_xml.h"
 #include <map>
 #include <memory>
@@ -88,23 +90,20 @@ namespace UI::Xml
 			std::unique_ptr<PlacementScope> names;		// Its place's size classes, searched after its presenter's names
 			XmlView* view = nullptr;					// The view showing it; deleted with its widgets
 			lv_obj_t* root = nullptr;					// The view's root widget; nullptr once deleted
-			lv_obj_t* cell = nullptr;					// Grid: the box the grid sizes, holding root; else nullptr
-			lv_obj_t* overlay = nullptr;				// While customising, its edit overlay (in cell, else root)
+			lv_obj_t* cell = nullptr;					// Free: the box the ds_layout places, holding root; else nullptr
+			lv_obj_t* overlay = nullptr;				// While customising, its edit overlay (in its box, else root)
 
-			/** What the ds_layout places: the cell in a grid, else the widget */
+			/** What the ds_layout places: the box in a free layout, else the widget */
 			lv_obj_t* outer() const { return cell ? cell : root; }
 		};
 
 		/** A drag of a placed widget, while customising */
 		struct Drag
 		{
-			std::string id;		  // The item dragged
-			lv_point_t start{};	  // Where the touch began
-			LayoutItem from;	  // The item as it was then
-			bool left = false;	  // Moving its left edge (it was grabbed near it); no edge: moving it all
-			bool top = false;	  // Moving its top edge
-			bool right = false;	  // Moving its right edge
-			bool bottom = false;  // Moving its bottom edge
+			std::string id;	   // The item dragged
+			lv_point_t start{}; // Where the touch began
+			LayoutItem from;   // The item as it was then
+			Snap::Edges edges; // The edges grabbed (near which it was touched); none moves it whole
 		};
 
 		/** `<ds_layout>` create callback: a plain container */
@@ -113,7 +112,7 @@ namespace UI::Xml
 		/** `<ds_layout>` apply callback: lv_obj attributes, then start showing the slot's layout */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** A grid cell asks how far beyond itself it draws: as far as its widget does */
+		/** A free layout's box asks how far beyond itself it draws: as far as its widget does */
 		static void cellExtDrawSizeCb(lv_event_t* e);
 
 		/** A placed widget's root widget is being deleted: forget it */
@@ -122,14 +121,23 @@ namespace UI::Xml
 		/** Show the slot's current layout, rebuilding only what changed */
 		void refresh();
 
-		/** Make the container a grid of the layout's cells */
-		void applyGrid(const Layout& layout);
+		/** The ds_layout's content area changed size: place every widget of a free layout again, to scale */
+		static void containerSizeCb(lv_event_t* e);
+
+		/** How many screen pixels a pixel of `layout`'s area is, across and down: 1 unless the content area differs */
+		std::pair<double, double> scaleOf(const Layout& layout) const;
+
+		/** `rect` of `layout`'s area on the screen, in the ds_layout's content area */
+		lv_area_t toScreen(const Layout& layout, const Rect& rect) const;
+
+		/** The point of `layout`'s area at screen point `point`, or nullopt if it isn't in the content area */
+		std::optional<Point> toLayout(const Layout& layout, const lv_point_t& point) const;
 
 		/** Build the widget for `item` at position `index` among the placed widgets */
 		Placement build(const LayoutItem& item, uint32_t index);
 
-		/** Put a grid item's widget in its cells */
-		static void placeInGrid(lv_obj_t* obj, const LayoutItem& item);
+		/** Put a free item's box at its rectangle */
+		void placeFree(lv_obj_t* obj, const Layout& layout, const LayoutItem& item) const;
 
 		/** Delete a placed widget */
 		static void remove(Placement& placement);
@@ -155,20 +163,20 @@ namespace UI::Xml
 		/** A tap on the ds_layout itself, while customising: select the place tapped */
 		static void containerClickedCb(lv_event_t* e);
 
-		/** The touch on the dragged widget moved to `point`: move or resize it to where that is in cells */
+		/** The touch on the dragged widget moved to `point`: move or resize it there, snapping if the layout does */
 		void dragTo(const lv_point_t& point);
 
-		/** The grid cell at `point`, or nullopt if it isn't in the grid */
-		std::optional<std::pair<int32_t, int32_t>> cellAt(const lv_point_t& point) const;
+		/** Drag a free item to follow the touch at `point` */
+		void dragFree(const Layout& layout, const lv_point_t& point);
 
-		/** The width and height of a grid cell and its gap, in pixels */
-		std::pair<int32_t, int32_t> cellStep() const;
+		/** Show a guide for each of `guides`, and none once it is empty */
+		void showGuides(const Layout& layout, const std::vector<Snap::Guide>& guides);
 
-		/** Mark the selected place, if it is a cell of this grid */
+		/** Mark the selected place, if it is a place in this free layout */
 		void showPlace();
 
-		/** Which edges a drag from `point` on the selected widget's `overlay` moves, set in `drag` (see the file comment) */
-		static void grabbedEdges(lv_obj_t* overlay, const lv_point_t& point, Drag& drag);
+		/** Which edges a drag from `point` on the selected widget's `overlay` moves (see the file comment) */
+		static Snap::Edges grabbedEdges(lv_obj_t* overlay, const lv_point_t& point);
 
 		/** The placement whose overlay is `overlay`, or nullptr */
 		Placement* placementOf(lv_obj_t* overlay);
@@ -176,11 +184,10 @@ namespace UI::Xml
 		lv_obj_t* m_container;				  // The ds_layout widget
 		std::string m_slot;					  // The slot shown
 		std::vector<Placement> m_placements;  // The placed widgets, in order
-		std::vector<int32_t> m_columns;		  // Grid: column template, kept for LVGL, which doesn't copy it
-		std::vector<int32_t> m_rows;		  // Grid: row template
 		bool m_editing = false;				  // Whether the overlays are shown
 		std::optional<Drag> m_drag;			  // The drag going on, if any
-		lv_obj_t* m_place = nullptr;		  // The marker on the selected cell, or nullptr
+		lv_obj_t* m_place = nullptr;		  // The marker on the selected place, or nullptr
+		std::vector<lv_obj_t*> m_guides;	  // The guides shown while a dragged widget snaps
 
 		static std::vector<DsLayout*> s_live; // Every ds_layout built, for find()
 	};

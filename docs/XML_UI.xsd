@@ -47,7 +47,6 @@
 			<xs:enumeration value="color"/>
 			<xs:enumeration value="colour"/>
 			<xs:enumeration value="colour_shown"/>
-			<xs:enumeration value="columns"/>
 			<xs:enumeration value="command"/>
 			<xs:enumeration value="commands_shown"/>
 			<xs:enumeration value="confirm"/>
@@ -76,8 +75,9 @@
 			<xs:enumeration value="customise.can_undo"/>
 			<xs:enumeration value="customise.editing"/>
 			<xs:enumeration value="customise.has_item"/>
-			<xs:enumeration value="customise.is_grid"/>
+			<xs:enumeration value="customise.is_free"/>
 			<xs:enumeration value="customise.selected"/>
+			<xs:enumeration value="customise.snap"/>
 			<xs:enumeration value="customise.title"/>
 			<xs:enumeration value="dark"/>
 			<xs:enumeration value="date"/>
@@ -134,7 +134,6 @@
 			<xs:enumeration value="gauges"/>
 			<xs:enumeration value="gcode"/>
 			<xs:enumeration value="gcodes"/>
-			<xs:enumeration value="grid_open"/>
 			<xs:enumeration value="has_saved"/>
 			<xs:enumeration value="heater"/>
 			<xs:enumeration value="heater_count"/>
@@ -257,7 +256,6 @@
 			<xs:enumeration value="retract_usable"/>
 			<xs:enumeration value="rotation"/>
 			<xs:enumeration value="rotations"/>
-			<xs:enumeration value="rows"/>
 			<xs:enumeration value="rpm"/>
 			<xs:enumeration value="save_name"/>
 			<xs:enumeration value="save_open"/>
@@ -443,28 +441,25 @@
 			<xs:enumeration value="customise.choose"/>
 			<xs:enumeration value="customise.close_catalogue"/>
 			<xs:enumeration value="customise.close_delete"/>
-			<xs:enumeration value="customise.close_grid"/>
 			<xs:enumeration value="customise.close_load"/>
 			<xs:enumeration value="customise.close_options"/>
 			<xs:enumeration value="customise.close_save"/>
 			<xs:enumeration value="customise.close_settings"/>
-			<xs:enumeration value="customise.columns"/>
 			<xs:enumeration value="customise.configure"/>
 			<xs:enumeration value="customise.delete_saved"/>
 			<xs:enumeration value="customise.done"/>
 			<xs:enumeration value="customise.edit_setting"/>
-			<xs:enumeration value="customise.grid"/>
 			<xs:enumeration value="customise.keyboard"/>
 			<xs:enumeration value="customise.load"/>
 			<xs:enumeration value="customise.load_saved"/>
 			<xs:enumeration value="customise.open_catalogue"/>
 			<xs:enumeration value="customise.remove"/>
 			<xs:enumeration value="customise.reset"/>
-			<xs:enumeration value="customise.rows"/>
 			<xs:enumeration value="customise.save"/>
 			<xs:enumeration value="customise.save_name"/>
 			<xs:enumeration value="customise.save_ok"/>
 			<xs:enumeration value="customise.set_text"/>
+			<xs:enumeration value="customise.snap"/>
 			<xs:enumeration value="customise.start"/>
 			<xs:enumeration value="customise.toggle_setting"/>
 			<xs:enumeration value="customise.undo"/>
@@ -723,7 +718,8 @@
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
-			<xs:enumeration value="customise_grid_item"/>
+			<xs:enumeration value="customise_free_item"/>
+			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_item"/>
 			<xs:enumeration value="customise_missing"/>
 			<xs:enumeration value="customise_option"/>
@@ -837,7 +833,8 @@
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
-			<xs:enumeration value="customise_grid_item"/>
+			<xs:enumeration value="customise_free_item"/>
+			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_item"/>
 			<xs:enumeration value="customise_missing"/>
 			<xs:enumeration value="customise_option"/>
@@ -951,7 +948,8 @@
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
-			<xs:enumeration value="customise_grid_item"/>
+			<xs:enumeration value="customise_free_item"/>
+			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_item"/>
 			<xs:enumeration value="customise_missing"/>
 			<xs:enumeration value="customise_option"/>
@@ -1299,13 +1297,11 @@
 			<xs:enumeration value="customise.add"/>
 			<xs:enumeration value="customise.add_title"/>
 			<xs:enumeration value="customise.bad_name"/>
-			<xs:enumeration value="customise.columns"/>
 			<xs:enumeration value="customise.configure"/>
 			<xs:enumeration value="customise.delete"/>
 			<xs:enumeration value="customise.delete_text"/>
 			<xs:enumeration value="customise.delete_title"/>
 			<xs:enumeration value="customise.done"/>
-			<xs:enumeration value="customise.grid"/>
 			<xs:enumeration value="customise.load"/>
 			<xs:enumeration value="customise.missing"/>
 			<xs:enumeration value="customise.name_hint"/>
@@ -1314,10 +1310,10 @@
 			<xs:enumeration value="customise.not_saved"/>
 			<xs:enumeration value="customise.remove"/>
 			<xs:enumeration value="customise.reset"/>
-			<xs:enumeration value="customise.rows"/>
 			<xs:enumeration value="customise.save"/>
 			<xs:enumeration value="customise.save_title"/>
 			<xs:enumeration value="customise.saved_title"/>
+			<xs:enumeration value="customise.snap"/>
 			<xs:enumeration value="customise.undo"/>
 			<xs:enumeration value="estop.label"/>
 			<xs:enumeration value="estop.message"/>
@@ -2725,7 +2721,7 @@
 			<xs:annotation><xs:documentation>Prop `close` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="customise_grid_item.attributes">
+	<xs:attributeGroup name="customise_free_item.attributes">
 		<xs:attribute name="key" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -5965,7 +5961,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_layout">
-		<xs:annotation><xs:documentation>Shows the widgets the layout of a slot places, which the user can change on the screen. The layout comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A grid layout makes this a grid of equal cells; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Shows the widgets the layout of a slot places, which the user can change on the screen. The layout comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A free layout puts each widget at its rectangle, scaled to this content area; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_layout.attributes"/>
@@ -7357,11 +7353,19 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="customise_grid_item">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_grid_item.xml.</xs:documentation></xs:annotation>
+	<xs:element name="customise_free_item">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_free_item.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="customise_grid_item.attributes"/>
+			<xs:attributeGroup ref="customise_free_item.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_guide">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_guide.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

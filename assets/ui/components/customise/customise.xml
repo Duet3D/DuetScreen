@@ -5,7 +5,7 @@
 
   The bar floats at the bottom of the screen until the user drags it by its grip, on its left, to wherever it is out
   of the way. It adds a widget where the user chose (the widget pool), changes the selected widget's settings, removes
-  it, changes the grid's size, undoes, resets the slot to its default, saves the layouts under a name (asked for) or
+  it, turns snapping on or off, undoes, resets the slot to its default, saves the layouts under a name (asked for) or
   loads a saved one, and ends customising, throwing the changes away or keeping them. Saved layouts are files in the
   screen's user folder (src/UI/Xml/Layout/LayoutLibrary.h). Widgets are selected, moved and resized on the screen
   itself (see src/UI/Widgets/Layout/DsLayout.h).
@@ -46,9 +46,11 @@
 				<bind_state_if_eq subject="customise.can_remove" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="customise.remove"/>
 			</ds_button>
-			<ds_button name="grid" translation_tag="customise.grid" icon="apps.png">
-				<bind_flag_if_eq subject="customise.is_grid" flag="hidden" ref_value="0"/>
-				<action trigger="clicked" name="customise.grid"/>
+			<!-- Checked while dragged widgets snap to the edges near them -->
+			<ds_button name="snap" translation_tag="customise.snap" icon="apps.png">
+				<bind_flag_if_eq subject="customise.is_free" flag="hidden" ref_value="0"/>
+				<bind_state_if_eq subject="customise.snap" state="checked" ref_value="1"/>
+				<action trigger="clicked" name="customise.snap"/>
 			</ds_button>
 			<ds_button name="undo" translation_tag="customise.undo" icon="back.png">
 				<bind_state_if_eq subject="customise.can_undo" state="disabled" ref_value="0"/>
@@ -162,31 +164,5 @@
 		</ds_modal>
 		<question_dialog name="delete_question" open="confirm_delete" title="delete_title" text="delete_text"
 						 confirm="customise.delete_saved" close="customise.close_delete"/>
-
-		<!-- The grid's size, each typed on the number pad -->
-		<ds_modal name="grid_dialog" bind_open="grid_open" width="50%" height="content" flex_flow="column">
-			<action trigger="dismissed" name="customise.close_grid"/>
-			<lv_obj name="header" width="100%" height="content">
-				<style name="bg_color_header"/>
-				<style name="text_header"/>
-				<lv_label name="title" translation_tag="customise.grid"/>
-			</lv_obj>
-			<lv_obj name="columns_row" width="100%" height="content" flex_flow="row"
-					style_flex_cross_place="center">
-				<lv_label translation_tag="customise.columns" flex_grow="1"/>
-				<ds_button name="columns" bind_text="columns" width="80">
-					<action trigger="clicked" name="customise.columns"/>
-				</ds_button>
-			</lv_obj>
-			<lv_obj name="rows_row" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
-				<lv_label translation_tag="customise.rows" flex_grow="1"/>
-				<ds_button name="rows" bind_text="rows" width="80">
-					<action trigger="clicked" name="customise.rows"/>
-				</ds_button>
-			</lv_obj>
-			<ds_button name="close" translation_tag="common.close" width="100%">
-				<action trigger="clicked" name="customise.close_grid"/>
-			</ds_button>
-		</ds_modal>
 	</view>
 </component>
