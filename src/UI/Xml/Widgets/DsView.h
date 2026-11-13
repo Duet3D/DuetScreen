@@ -17,7 +17,8 @@
  *
  * A view starts hidden, like any screen that isn't open. `home="true"` makes it a home screen: shown when nothing
  * else is open. `shown="true"` shows it without taking part in navigation, for always-present parts such as a
- * status bar. Every lv_obj attribute works too (size, grid placement, …), except `hidden`, which navigation owns.
+ * status bar, or the page in a tab: it is shown whenever what it is in is shown, and comes alive (its presenter
+ * active) only then. Every lv_obj attribute works too (size, grid placement, …), except `hidden`, which navigation owns.
  */
 
 #pragma once

@@ -15,7 +15,6 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Control/ControlView.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
@@ -269,7 +268,6 @@ int main(int argc, char** argv)
 				{
 					static size_t index = 0;
 					// Every page in turn, by the names home_screen.xml registers them under
-					auto control = [] { return UI::findView<UI::ControlView>("control"); };
 					// The tabs called `tabs` on the page called `page`
 					auto tabsOn = [](const char* page, const char* tabs) -> UI::TabView*
 					{
@@ -277,6 +275,7 @@ int main(int argc, char** argv)
 						lv_obj_t* obj = view ? lv_obj_find_by_name(view->getRootPtr(), tabs) : nullptr;
 						return obj ? dynamic_cast<UI::TabView*>(UI::LvObj::fromPtr(obj)) : nullptr;
 					};
+					auto control = [=] { return tabsOn("control", "tabs"); };
 					auto files = [=] { return tabsOn("files", "tabs"); };
 					auto settings = [] { return UI::findView<UI::SettingsView>("settings"); };
 					auto dashboard = [=] { return tabsOn("dashboard", "dashboard_tabs"); };
@@ -297,22 +296,22 @@ int main(int argc, char** argv)
 						{
 							UI::openScreen("control", true);
 							if (auto* c = control())
-								c->showMoveView();
+								c->setActiveTab(0); // Move
 						},
 						[=]()
 						{
 							if (auto* c = control())
-								c->showTemperatureView();
+								c->setActiveTab(1); // Temperature
 						},
 						[=]()
 						{
 							if (auto* c = control())
-								c->showHeightmapView();
+								c->setActiveTab(2); // Height map
 						},
 						[=]()
 						{
 							if (auto* c = control())
-								c->showFanView();
+								c->setActiveTab(4); // Fans
 						},
 						[=]()
 						{

@@ -1,0 +1,27 @@
+<!--
+  The Control page: moving the axes, temperatures, the height map, cancelling objects, and fans, in tabs.
+
+  Move, temperature, height map and object cancel are C++ views (src/UI/Screens/XmlScreens.cpp) for now.
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
+		<style name="bg_dark"/>
+		<ds_tabs name="tabs" width="100%" height="100%">
+			<ds_tabs-tab name="move" title_tag="control.move_tab">
+				<ds_view name="move" view="move" shown="true" style_pad_all="0"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="temperature" title_tag="control.temperature_tab">
+				<ds_view name="temperature" view="temperature" shown="true" style_pad_all="0"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="heightmap" title_tag="control.heightmap_tab">
+				<ds_view name="heightmap" view="heightmap" shown="true" style_pad_all="0"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="object_cancel" title_tag="control.object_cancel_tab">
+				<ds_view name="object_cancel" view="object_cancel" shown="true" style_pad_all="0"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="fan" title_tag="control.fan_tab">
+				<ds_view name="fan" view="fan_screen" shown="true"/>
+			</ds_tabs-tab>
+		</ds_tabs>
+	</view>
+</component>

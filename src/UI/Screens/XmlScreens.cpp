@@ -4,14 +4,17 @@
 
 #include "XmlScreens.h"
 #include "Console/ConsolePresenter.h"
-#include "Control/ControlView.h"
 #include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
+#include "Heightmap/HeightmapView.h"
+#include "Move/MoveView.h"
 #include "Notifications/NotificationsPresenter.h"
+#include "ObjectCancel/ObjectCancelView.h"
 #include "Settings/SettingsView.h"
 #include "Status/JobStatusPresenter.h"
 #include "StatusBar/StatusBarPresenter.h"
+#include "Temperature/TemperatureView.h"
 #include "UI/Components/Input/ModalNumberPad.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/BabyStep/BabyStep.h"
@@ -110,7 +113,10 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<ControlView>("control");
+		Xml::NativeViews::add<MoveView>("move");
+		Xml::NativeViews::add<TemperatureView>("temperature");
+		Xml::NativeViews::add<HeightmapView>("heightmap");
+		Xml::NativeViews::add<ObjectCancelView>("object_cancel");
 		Xml::NativeViews::add<SettingsView>("settings");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");

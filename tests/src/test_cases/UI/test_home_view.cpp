@@ -12,9 +12,11 @@
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Control/ControlView.h"
+#include "UI/Screens/Move/MoveView.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
+#include "UI/Screens/ObjectCancel/ObjectCancelView.h"
 #include "UI/Screens/Settings/SettingsView.h"
+#include "UI/Screens/Temperature/TemperatureView.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/TemperatureSource.h"
@@ -76,7 +78,23 @@ class TestHomeView : public UiTestSuite
 		return static_cast<UI::Xml::DsGraph&>(*UI::LvObj::fromPtr(graph));
 	}
 
-	static UI::ControlView& controlPage() { return page<UI::ControlView>("control"); }
+	/** The Control page's tabs, as control_screen.xml builds them */
+	static UI::TabView& controlPage()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("control").getRootPtr(), "tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the Control page has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
+
+	/** Open the Control page on tab `tab` (0 move, 1 temperature, 2 height map, 3 object cancel, 4 fans) */
+	static void openControlTab(size_t tab)
+	{
+		UI::openScreen(std::string_view("control"), false);
+		controlPage().setActiveTab(tab);
+	}
 	/** The widget called `name` on the console page */
 	static lv_obj_t* consolePart(const char* name)
 	{
@@ -214,32 +232,29 @@ TEST_F(TestHomeView, BlankControlView)
 {
 	auto& control = controlPage();
 
-	openScreen(&control);
+	openControlTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
 
-	control.showTemperatureView();
+	control.setActiveTab(1);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_blank.png");
 
-	control.showHeightmapView();
+	control.setActiveTab(2);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_blank.png");
 
-	control.showObjectCancelView();
+	control.setActiveTab(3);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel_blank.png");
 
-	control.showFanView();
+	control.setActiveTab(4);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/fan_blank.png");
 
-	control.showMoveView();
+	control.setActiveTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
 }
 
 TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 {
-	auto& control = controlPage();
-	openScreen(&control);
-	control.showObjectCancelView();
-
-	auto& objectCancel = control.getObjectCancelView();
+	openControlTab(3);
+	auto& objectCancel = page<UI::ObjectCancelView>("object_cancel");
 
 	objectCancel.setCurrentObjectName("gear (Instance 5)");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/set_object_name.png");
@@ -250,11 +265,8 @@ TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 
 TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 {
-	auto& control = controlPage();
-	openScreen(&control);
-	control.showObjectCancelView();
-
-	auto& objectCancel = control.getObjectCancelView();
+	openControlTab(3);
+	auto& objectCancel = page<UI::ObjectCancelView>("object_cancel");
 	auto& modal = objectCancel.getConfirmModal();
 
 	OM::ClearJobObjects();
@@ -791,13 +803,13 @@ TEST_F(TestHomeViewWithData, ControlView)
 	ZoneScoped;
 	auto& control = controlPage();
 
-	openScreen(&control);
+	openControlTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move.png");
 
 	load_model_data_from_file("tests/object_model/test_bench/model_10_axes.json");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
 	{
-		auto btn = control.getMoveView().getChildByName(
+		auto btn = page<UI::MoveView>("move").getChildByName(
 			"central_row.babystep_cont.babystep.button_panel.value_list.list.value_btn_1");
 		ASSERT_NE(btn, nullptr);
 
@@ -805,10 +817,10 @@ TEST_F(TestHomeViewWithData, ControlView)
 		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_babystep_long_press.png");
 	}
 
-	control.showTemperatureView();
+	control.setActiveTab(1);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature.png");
 	{
-		auto& temperature = control.getTemperatureView();
+		auto& temperature = page<UI::TemperatureView>("temperature");
 		auto input =
 			temperature.getChildByName("control_cont.extruder_control.controls.distance_selector.topRow.valueDisplay");
 		ASSERT_NE(input, nullptr);
@@ -816,10 +828,10 @@ TEST_F(TestHomeViewWithData, ControlView)
 		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_distance_input.png");
 	}
 
-	control.showHeightmapView();
+	control.setActiveTab(2);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap.png");
 
-	control.showFanView();
+	control.setActiveTab(4);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/fan.png");
 
 	load_model_data_from_file("tests/object_model/job/model_job_objects.json");
@@ -832,10 +844,10 @@ TEST_F(TestHomeViewWithData, ControlView)
 		y->minPosition = -100.0f;
 		y->maxPosition = 100.0f;
 	}
-	control.showObjectCancelView();
+	control.setActiveTab(3);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel.png");
 
-	control.showMoveView();
+	control.setActiveTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
 }
 

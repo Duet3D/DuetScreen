@@ -27,6 +27,19 @@ namespace UI::Xml::DsView
 			return obj != nullptr ? obj : view.getRootPtr();
 		}
 
+		/** Whether `obj` or anything it is inside is hidden */
+		bool insideHidden(lv_obj_t* obj)
+		{
+			for (; obj != nullptr; obj = lv_obj_get_parent(obj))
+			{
+				if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		/** The ds_view widget is being deleted: forget the view and delete the C++ object */
 		void deletedCb(lv_event_t* e)
 		{
@@ -103,7 +116,16 @@ namespace UI::Xml::DsView
 			}
 			else if (lv_xml_to_bool(attrOr(attrs, "shown", "false")))
 			{
-				object->show();
+				// Shown with whatever it is in: inside something hidden (a closed page, another tab) it comes alive
+				// when that is shown, not before
+				if (insideHidden(parentOf(state)))
+				{
+					object->setFlag(LV_OBJ_FLAG_HIDDEN, false);
+				}
+				else
+				{
+					object->show();
+				}
 			}
 			else
 			{

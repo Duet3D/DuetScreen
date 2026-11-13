@@ -25,7 +25,7 @@
 				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1">
 			<ds_view name="dashboard" view="dashboard" home="true"/>
 			<ds_view name="console" view="console"/>
-			<ds_view name="control" view="control"/>
+			<ds_view name="control" view="control_screen"/>
 			<ds_view name="files" view="files_screen"/>
 			<ds_view name="settings" view="settings"/>
 			<ds_view name="extrusion_factor" view="extrusion_factor"/>
