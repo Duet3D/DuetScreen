@@ -7,6 +7,7 @@
 #include "UI/Core/Model.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "helix_xml.h"
+#include <vector>
 
 namespace UI::Xml
 {
@@ -36,11 +37,15 @@ namespace UI::Xml
 		}
 	} // namespace
 
-	detail::XmlViewState::XmlViewState(std::string componentName, std::string name, std::shared_ptr<XmlPresenter> given)
+	detail::XmlViewState::XmlViewState(std::string componentName,
+									   std::string name,
+									   std::shared_ptr<XmlPresenter> given,
+									   std::map<std::string, std::string> givenProps)
 		: component(std::move(componentName))
 		, objName(std::move(name))
 		, presenter(std::move(given))
 		, presenterGiven(presenter != nullptr)
+		, props(std::move(givenProps))
 	{
 		prepare();
 	}
@@ -87,8 +92,9 @@ namespace UI::Xml
 	XmlView::XmlView(const std::string& name,
 					 lv_obj_t* parent,
 					 std::string componentName,
-					 std::shared_ptr<XmlPresenter> givenPresenter)
-		: XmlViewState(std::move(componentName), name, std::move(givenPresenter))
+					 std::shared_ptr<XmlPresenter> givenPresenter,
+					 std::map<std::string, std::string> givenProps)
+		: XmlViewState(std::move(componentName), name, std::move(givenPresenter), std::move(givenProps))
 		, LvObj([this](lv_obj_t* p) { return build(p, *this); }, name, parent)
 	{
 		ZoneScoped;
@@ -115,8 +121,17 @@ namespace UI::Xml
 	lv_obj_t* XmlView::build(lv_obj_t* parent, detail::XmlViewState& state)
 	{
 		ZoneScoped;
+		// The props as the engine takes attributes: name, value, …, then two nulls
+		std::vector<const char*> attrs;
+		for (const auto& [name, value] : state.props)
+		{
+			attrs.push_back(name.c_str());
+			attrs.push_back(value.c_str());
+		}
+		attrs.push_back(nullptr);
+		attrs.push_back(nullptr);
 		auto* obj = static_cast<lv_obj_t*>(
-			lv_xml_create_with_ctx(parent, state.component.c_str(), nullptr, state.scope->context()));
+			lv_xml_create_with_ctx(parent, state.component.c_str(), attrs.data(), state.scope->context()));
 		if (obj != nullptr)
 		{
 			return obj;

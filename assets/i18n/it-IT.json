@@ -447,6 +447,17 @@
       "chroma": "Cromaticità",
       "dark_mode": "Modalità scura"
     },
+    "customise": { /* Customising the screen */
+      "missing": "Questo widget non è installato"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Apre la dashboard",
+      "page_control": "Apre i controlli: movimento, temperature, ventole",
+      "page_files": "Apre i lavori e le macro",
+      "page_console": "Apre la console; lampeggia quando la stampante risponde",
+      "page_settings": "Apre le impostazioni",
+      "estop": "Trascina per fermare subito la stampante"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

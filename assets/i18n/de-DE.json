@@ -447,6 +447,17 @@
       "chroma": "Farbsättigung",
       "dark_mode": "Dunkelmodus"
     },
+    "customise": { /* Customising the screen */
+      "missing": "Dieses Widget ist nicht installiert"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Öffnet das Dashboard",
+      "page_control": "Öffnet die Steuerung: Bewegen, Temperaturen, Lüfter",
+      "page_files": "Öffnet die Druckaufträge und Makros",
+      "page_console": "Öffnet die Konsole; blinkt bei Antworten des Druckers",
+      "page_settings": "Öffnet die Einstellungen",
+      "estop": "Zum sofortigen Stoppen des Druckers ziehen"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

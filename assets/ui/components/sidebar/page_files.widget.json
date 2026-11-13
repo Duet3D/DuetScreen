@@ -1,0 +1,15 @@
+{
+  "component": "sidebar_page_button",
+  "title_tag": "side_bar.files",
+  "description_tag": "widget.page_files",
+  "icon": "macros.png",
+  "slots": [
+    "sidebar"
+  ],
+  "props": {
+    "page": "files",
+    "action": "nav.open",
+    "label": "side_bar.files",
+    "icon": "macros.png"
+  }
+}

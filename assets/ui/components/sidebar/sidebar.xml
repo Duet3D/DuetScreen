@@ -1,8 +1,11 @@
 <!--
-  The sidebar down the left of the screen: a button per page and the drag-to-stop E-stop.
+  The sidebar down the left of the screen: a button per page and the drag-to-stop E-stop, placed by the sidebar's
+  layout (layouts/sidebar.json) so the user can add, remove and reorder them. The Settings button and the E-stop are
+  locked: they can be moved but not removed.
 
-  Each button opens a page by the name home.xml registers it under, and is checked while that page is open
-  (nav.screen is empty on the home screen). Add a button for any page the same way.
+  Each page button (sidebar_page_button.xml) opens a page by the name home.xml registers it under, and is checked
+  while that page is open (nav.screen is empty on the home screen). A page of a user bundle gets a button by giving it
+  a widget file the same way (sidebar/page_*.widget.json).
 
   The sidebar and its buttons draw beyond their own area so the E-stop stays visible while it is dragged (and
   button shadows aren't clipped at the edge).
@@ -12,52 +15,11 @@
 		<style name="sidebar"/>
 		<style name="pad_zero"/>
 
-		<lv_obj name="buttons" width="100%" height="100%" style_min_width="content" scrollable="false" overflow_visible="true" ext_draw_size="400"
-				flex_flow="column" style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+		<!-- The buttons are the widgets of the sidebar's layout (layouts/sidebar.json), which the user can change -->
+		<ds_layout name="buttons" slot="sidebar" width="100%" height="100%" style_min_width="content" scrollable="false"
+				   overflow_visible="true" ext_draw_size="400" flex_flow="column" style_flex_main_place="start"
+				   style_flex_cross_place="center" style_flex_track_place="center">
 			<style name="bg_dark"/>
-
-			<ds_button name="home" translation_tag="side_bar.home" icon="home.png" width="100%" style_min_width="content"
-					   flex_grow="1" long_mode="clip">
-				<style name="sidebar_btn"/>
-				<bind_state_if_eq subject="nav.screen" state="checked" ref_value=""/>
-				<action trigger="clicked" name="nav.home"/>
-			</ds_button>
-
-			<ds_button name="control" translation_tag="side_bar.control" icon="control.png" width="100%"
-					   style_min_width="content" flex_grow="1" long_mode="clip">
-				<style name="sidebar_btn"/>
-				<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>
-				<action trigger="clicked" name="nav.open" arg="control"/>
-			</ds_button>
-
-			<ds_button name="macros" translation_tag="side_bar.files" icon="macros.png" width="100%"
-					   style_min_width="content" flex_grow="1" long_mode="clip">
-				<style name="sidebar_btn"/>
-				<bind_state_if_eq subject="nav.screen" state="checked" ref_value="files"/>
-				<action trigger="clicked" name="nav.open" arg="files"/>
-			</ds_button>
-
-			<!-- Flashes when the printer replies -->
-			<ds_button name="console" translation_tag="side_bar.console" icon="console.png" width="100%"
-					   style_min_width="content" flex_grow="1" long_mode="clip" flash_on="responses.count">
-				<style name="sidebar_btn"/>
-				<style name="console_btn_anim" selector="user_1"/>
-				<bind_state_if_eq subject="nav.screen" state="checked" ref_value="console"/>
-				<action trigger="clicked" name="nav.open" arg="console"/>
-			</ds_button>
-
-			<ds_button name="settings" translation_tag="side_bar.settings" icon="settings.png" width="100%"
-					   style_min_width="content" flex_grow="1" long_mode="clip">
-				<style name="sidebar_btn"/>
-				<bind_state_if_eq subject="nav.screen" state="checked" ref_value="settings"/>
-				<action trigger="clicked" name="nav.open" arg="settings"/>
-			</ds_button>
-
-			<ds_drag_button name="estop" translation_tag="estop.label" icon="estop.png" hint_tag="estop.prompt"
-							width="80" height="80">
-				<style name="estop"/>
-				<action trigger="value_confirmed" name="estop.dragged"/>
-			</ds_drag_button>
-		</lv_obj>
+		</ds_layout>
 	</view>
 </component>

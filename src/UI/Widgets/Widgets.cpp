@@ -21,6 +21,7 @@
 #include "UI/Widgets/Inputs/DsSlider.h"
 #include "UI/Widgets/Inputs/DsTextarea.h"
 #include "UI/Widgets/Inputs/DsToggle.h"
+#include "UI/Widgets/Layout/DsLayout.h"
 #include "UI/Widgets/Layout/DsList.h"
 #include "UI/Widgets/Layout/DsModal.h"
 #include "UI/Widgets/Layout/DsTabs.h"
@@ -67,6 +68,7 @@ namespace UI::Xml::Widgets
 		DsIcon::registerXml();
 		DsSlider::registerXml();
 		DsKeyboard::registerXml();
+		DsLayout::registerXml();
 		DsList::registerXml();
 		DsModal::registerXml();
 		DsPasswordToggle::registerXml();

@@ -4,11 +4,16 @@
 
      components/ has a folder for each part of the UI, holding its page (named after the part) and the pieces only it
      uses (named <part>_<piece>), the way src/UI/Presenters/ holds their presenters; common/ holds small pieces used in
-     several parts. See "Naming" in docs/XML_UI.md. */
+     several parts. See "Naming" in docs/XML_UI.md.
+
+     A widget file (*.widget.json) beside a component makes it a widget the user can place; layouts/ holds the
+     layout of each slot (a <ds_layout>). See "Layouts" in docs/XML_UI.md. */
   "id": "duetscreen",
   "name": "DuetScreen",
   "version": "1.0.0",
   "ui_api": "1.0",
   "components": ["components/**/*.xml"],
-  "themes": ["themes/*.xml"]
+  "themes": ["themes/*.xml"],
+  "widgets": ["components/**/*.widget.json"],
+  "layouts": ["layouts/*.json"]
 }

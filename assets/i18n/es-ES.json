@@ -447,6 +447,17 @@
       "chroma": "Cromatismo",
       "dark_mode": "Modo oscuro"
     },
+    "customise": { /* Customising the screen */
+      "missing": "Este widget no está instalado"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Abre el panel",
+      "page_control": "Abre los controles: movimiento, temperaturas, ventiladores",
+      "page_files": "Abre los trabajos y macros",
+      "page_console": "Abre la consola; parpadea cuando responde la impresora",
+      "page_settings": "Abre los ajustes",
+      "estop": "Arrastre para detener la impresora de inmediato"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

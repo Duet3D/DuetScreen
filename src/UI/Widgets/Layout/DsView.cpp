@@ -97,16 +97,7 @@ namespace UI::Xml::DsView
 			}
 			else if (lv_xml_to_bool(attrOr(attrs, "shown", "false")))
 			{
-				// Shown with whatever it is in: inside something hidden (a closed page, another tab) it comes alive
-				// when that is shown, not before
-				if (insideHidden(parentOf(state)))
-				{
-					object->setFlag(LV_OBJ_FLAG_HIDDEN, false);
-				}
-				else
-				{
-					object->show();
-				}
+				showWithParent(*object, parentOf(state));
 			}
 			else
 			{
@@ -114,6 +105,19 @@ namespace UI::Xml::DsView
 			}
 		}
 	} // namespace
+
+	void showWithParent(LvObj& view, lv_obj_t* parent)
+	{
+		// Inside something hidden (a closed page, another tab) it comes alive when that is shown, not before
+		if (insideHidden(parent))
+		{
+			view.setFlag(LV_OBJ_FLAG_HIDDEN, false);
+		}
+		else
+		{
+			view.show();
+		}
+	}
 
 	void registerXml()
 	{

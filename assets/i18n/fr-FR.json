@@ -447,6 +447,17 @@
       "chroma": "Chrominance",
       "dark_mode": "Mode sombre"
     },
+    "customise": { /* Customising the screen */
+      "missing": "Ce widget n'est pas installé"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Ouvre le tableau de bord",
+      "page_control": "Ouvre les commandes : mouvements, températures, ventilateurs",
+      "page_files": "Ouvre les travaux et les macros",
+      "page_console": "Ouvre la console ; clignote quand l'imprimante répond",
+      "page_settings": "Ouvre les paramètres",
+      "estop": "Faites glisser pour arrêter l'imprimante immédiatement"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

@@ -1218,6 +1218,22 @@ Also takes every `lv_obj` attribute.
 | `bind_ok_enabled` | Follow an int subject: the OK key works only while it is non-zero |
 | `bind_sign_enabled` | Follow an int subject: the `numberpad` layout's +/- key works only while it is non-zero |
 
+### ds_layout
+
+Shows the widgets the layout of a slot places, which the user can change on the screen. The layout comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A grid layout makes this a grid of equal cells; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_layout slot="sidebar" flex_flow="column" width="content" height="100%"/>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_layout.png)
+
+| Attribute | Description |
+| --- | --- |
+| `slot` | The slot whose layout is shown (required), e.g. `dashboard` |
+
 ### ds_list
 
 A container with one component per row of a list. Each item is built in a scope of its own holding its row's fields, so names are found in the row first, then where the list is written. With `windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of widgets; every item then has the same size, and the list places them itself (its own layout is ignored), with its style_pad_row and style_pad_column as the gaps. With `key` and `value`, only the rows whose `key` field is `value` are shown, e.g. one fan.
@@ -1508,6 +1524,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
 | `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
+| [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
 | `dashboard_axis` |  |  | `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_heater` |  |  | `dashboard_heater_card`, `dashboard_tool` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
@@ -1557,6 +1574,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
 | `settings_wifi_network` |  |  | `settings_wifi` | [settings_wifi_network.xml](../assets/ui/components/settings/settings_wifi_network.xml) |
 | [`sidebar`](#home) |  |  | `home` | [sidebar.xml](../assets/ui/components/sidebar/sidebar.xml) |
+| [`sidebar_estop`](#home) |  |  |  | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
+| [`sidebar_page_button`](#home) |  | `page`, `action`, `label`, `icon`, `flash` |  | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
 | [`status_bar`](#home) | `status_bar` |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | [`temperature`](#temperature) | `temperature` |  | `control` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
@@ -1580,6 +1599,10 @@ The components shown as views of their own, drawn with sample printer data in th
 Also shows `babystep`, `move`.
 
 ![control](../tests/ref_imgs/xml_ui_api/views/control.png)
+
+#### customise_missing
+
+![customise_missing](../tests/ref_imgs/xml_ui_api/views/customise_missing.png)
 
 #### dashboard_job_status
 
@@ -1605,7 +1628,7 @@ Also shows `file_browser`.
 
 #### home
 
-Also shows `dashboard`, `dashboard_tools`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
+Also shows `dashboard`, `dashboard_tools`, `home_main_window`, `notifications`, `sidebar`, `sidebar_estop`, `sidebar_page_button`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 

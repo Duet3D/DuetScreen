@@ -1,6 +1,7 @@
 target_sources(
   DuetScreen.lib
   PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsModal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsTabs.cpp

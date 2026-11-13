@@ -447,6 +447,17 @@
       "chroma": "Cromatismo",
       "dark_mode": "Modo escuro"
     },
+    "customise": { /* Customising the screen */
+      "missing": "Este widget não está instalado"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Abre o painel",
+      "page_control": "Abre os controlos: movimento, temperaturas, ventoinhas",
+      "page_files": "Abre os trabalhos e macros",
+      "page_console": "Abre a consola; pisca quando a impressora responde",
+      "page_settings": "Abre as definições",
+      "estop": "Arraste para parar a impressora de imediato"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

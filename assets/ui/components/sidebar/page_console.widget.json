@@ -1,0 +1,16 @@
+{
+  "component": "sidebar_page_button",
+  "title_tag": "side_bar.console",
+  "description_tag": "widget.page_console",
+  "icon": "console.png",
+  "slots": [
+    "sidebar"
+  ],
+  "props": {
+    "page": "console",
+    "action": "nav.open",
+    "label": "side_bar.console",
+    "icon": "console.png",
+    "flash": "responses.count"
+  }
+}

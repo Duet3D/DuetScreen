@@ -448,6 +448,17 @@
       "chroma": "Chroma",
       "dark_mode": "Dark Mode"
     },
+    "customise": { /* Customising the screen */
+      "missing": "This widget isn't installed"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Opens the dashboard",
+      "page_control": "Opens the controls: moving, temperatures, fans",
+      "page_files": "Opens the jobs and macros",
+      "page_console": "Opens the console; flashes when the printer replies",
+      "page_settings": "Opens the settings",
+      "estop": "Drag across to stop the printer at once"
+    },
     "gcodes": { /* G-code descriptions */
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

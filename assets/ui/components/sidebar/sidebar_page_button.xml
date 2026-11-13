@@ -1,0 +1,24 @@
+<!--
+  A sidebar button that opens a page, checked while that page is open. Each page's button is a widget of its own
+  (sidebar/*.widget.json), which gives this component its props.
+
+  `page` is the name the page is registered under in home.xml ("" for the home screen, opened by `action` nav.home),
+  `label` the button's translation key, `icon` its image, and `flash` a subject that flashes it when it changes.
+-->
+<component>
+	<api>
+		<prop name="page" type="string" default=""/>
+		<prop name="action" type="string" default="nav.open"/>
+		<prop name="label" type="string" default=""/>
+		<prop name="icon" type="string" default=""/>
+		<prop name="flash" type="string" default=""/>
+	</api>
+
+	<view extends="ds_button" translation_tag="$label" icon="$icon" width="100%" style_min_width="content"
+		  flex_grow="1" long_mode="clip" flash_on="$flash">
+		<style name="sidebar_btn"/>
+		<style name="console_btn_anim" selector="user_1"/>
+		<bind_state_if_eq subject="nav.screen" state="checked" ref_value="$page"/>
+		<action trigger="clicked" name="$action" arg="$page"/>
+	</view>
+</component>

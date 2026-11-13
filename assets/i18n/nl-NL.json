@@ -447,6 +447,17 @@
       "chroma": "Chroma",
       "dark_mode": "Donkere modus"
     },
+    "customise": { /* Customising the screen */
+      "missing": "Deze widget is niet geïnstalleerd"
+    },
+    "widget": { /* Widgets that can be placed on the screen */
+      "page_home": "Opent het dashboard",
+      "page_control": "Opent de bediening: bewegen, temperaturen, ventilatoren",
+      "page_files": "Opent de opdrachten en macro's",
+      "page_console": "Opent de console; knippert als de printer antwoordt",
+      "page_settings": "Opent de instellingen",
+      "estop": "Sleep om de printer direct te stoppen"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

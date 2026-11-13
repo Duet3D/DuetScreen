@@ -1,0 +1,10 @@
+<!--
+  The E-stop: drag it across to stop the printer. It is locked in the sidebar's layout, so it can't be removed.
+-->
+<component>
+	<view extends="ds_drag_button" translation_tag="estop.label" icon="estop.png" hint_tag="estop.prompt"
+		  width="80" height="80">
+		<style name="estop"/>
+		<action trigger="value_confirmed" name="estop.dragged"/>
+	</view>
+</component>

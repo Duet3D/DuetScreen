@@ -1,0 +1,9 @@
+{
+  "component": "sidebar_estop",
+  "title_tag": "estop.label",
+  "description_tag": "widget.estop",
+  "icon": "estop.png",
+  "slots": [
+    "sidebar"
+  ]
+}
