@@ -1,0 +1,20 @@
+{
+  "component": "temperature_extrusion_card",
+  "title_tag": "widget.extrude",
+  "description_tag": "widget.extrude_desc",
+  "category_tag": "widget.category_motion",
+  "icon": "extrude.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      7,
+      9
+    ],
+    "min": [
+      6,
+      8
+    ]
+  }
+}

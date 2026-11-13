@@ -11,6 +11,7 @@
 #include "GaugeSource.h"
 #include "HeatSource.h"
 #include "JobSource.h"
+#include "JogSource.h"
 #include "MachineSource.h"
 #include "MoveSource.h"
 #include "NavigationSource.h"
@@ -81,6 +82,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<ToolSource>(),
 			std::make_shared<HeatSource>(),
 			std::make_shared<JobSource>(),
+			std::make_shared<JogSource>(),
 			std::make_shared<MachineSource>(),
 			std::make_shared<MoveSource>(),
 			std::make_shared<NavigationSource>(),

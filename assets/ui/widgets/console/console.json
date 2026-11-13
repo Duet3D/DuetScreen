@@ -1,0 +1,20 @@
+{
+  "component": "console",
+  "title_tag": "side_bar.console",
+  "description_tag": "widget.console_desc",
+  "category_tag": "widget.category_console",
+  "icon": "console.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      14,
+      10
+    ],
+    "min": [
+      10,
+      6
+    ]
+  }
+}

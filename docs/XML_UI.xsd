@@ -101,8 +101,6 @@
 			<xs:enumeration value="distance.choices"/>
 			<xs:enumeration value="distance.title"/>
 			<xs:enumeration value="distance.value"/>
-			<xs:enumeration value="distance_title"/>
-			<xs:enumeration value="distances"/>
 			<xs:enumeration value="duet_ip"/>
 			<xs:enumeration value="duet_password"/>
 			<xs:enumeration value="editable"/>
@@ -125,8 +123,6 @@
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrate.title"/>
 			<xs:enumeration value="feedrate.value"/>
-			<xs:enumeration value="feedrate_title"/>
-			<xs:enumeration value="feedrates"/>
 			<xs:enumeration value="filament_loaded"/>
 			<xs:enumeration value="filament_shown"/>
 			<xs:enumeration value="filament_text"/>
@@ -174,6 +170,10 @@
 			<xs:enumeration value="job.remaining_text"/>
 			<xs:enumeration value="job.resume_control"/>
 			<xs:enumeration value="job.thumbnail"/>
+			<xs:enumeration value="jog.distance_title"/>
+			<xs:enumeration value="jog.distances"/>
+			<xs:enumeration value="jog.feedrate_title"/>
+			<xs:enumeration value="jog.feedrates"/>
 			<xs:enumeration value="jog_usable"/>
 			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="keyboard_layout"/>
@@ -381,17 +381,17 @@
 			<xs:enumeration value="console.lines"/>
 			<xs:enumeration value="crumbs"/>
 			<xs:enumeration value="distance.choices"/>
-			<xs:enumeration value="distances"/>
 			<xs:enumeration value="extruders"/>
 			<xs:enumeration value="extrusion_dialog.factors"/>
 			<xs:enumeration value="failed"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="feedrate.choices"/>
-			<xs:enumeration value="feedrates"/>
 			<xs:enumeration value="files"/>
 			<xs:enumeration value="gauges"/>
 			<xs:enumeration value="gcodes"/>
 			<xs:enumeration value="heaters"/>
+			<xs:enumeration value="jog.distances"/>
+			<xs:enumeration value="jog.feedrates"/>
 			<xs:enumeration value="maps"/>
 			<xs:enumeration value="move.axes"/>
 			<xs:enumeration value="networks"/>
@@ -714,6 +714,7 @@
 			<xs:enumeration value="console"/>
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="console_log"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
@@ -773,7 +774,11 @@
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
 			<xs:enumeration value="move_feedrate"/>
+			<xs:enumeration value="move_jog_choices"/>
 			<xs:enumeration value="move_xy"/>
+			<xs:enumeration value="move_xy_card"/>
+			<xs:enumeration value="move_z"/>
+			<xs:enumeration value="move_z_card"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
@@ -803,6 +808,7 @@
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
+			<xs:enumeration value="temperature_extrusion_card"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
@@ -822,6 +828,7 @@
 			<xs:enumeration value="console"/>
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="console_log"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
@@ -881,7 +888,11 @@
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
 			<xs:enumeration value="move_feedrate"/>
+			<xs:enumeration value="move_jog_choices"/>
 			<xs:enumeration value="move_xy"/>
+			<xs:enumeration value="move_xy_card"/>
+			<xs:enumeration value="move_z"/>
+			<xs:enumeration value="move_z_card"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
@@ -911,6 +922,7 @@
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
+			<xs:enumeration value="temperature_extrusion_card"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
@@ -930,6 +942,7 @@
 			<xs:enumeration value="console"/>
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="console_log"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
@@ -1040,7 +1053,11 @@
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
 			<xs:enumeration value="move_feedrate"/>
+			<xs:enumeration value="move_jog_choices"/>
 			<xs:enumeration value="move_xy"/>
+			<xs:enumeration value="move_xy_card"/>
+			<xs:enumeration value="move_z"/>
+			<xs:enumeration value="move_z_card"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
@@ -1071,6 +1088,7 @@
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
+			<xs:enumeration value="temperature_extrusion_card"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
@@ -1922,6 +1940,7 @@
 			<xs:enumeration value="widget.bar_gauge"/>
 			<xs:enumeration value="widget.bar_gauge_desc"/>
 			<xs:enumeration value="widget.category_commands"/>
+			<xs:enumeration value="widget.category_console"/>
 			<xs:enumeration value="widget.category_fans"/>
 			<xs:enumeration value="widget.category_gauges"/>
 			<xs:enumeration value="widget.category_jobs"/>
@@ -1937,10 +1956,17 @@
 			<xs:enumeration value="widget.colour_success"/>
 			<xs:enumeration value="widget.colour_text"/>
 			<xs:enumeration value="widget.colour_warning"/>
+			<xs:enumeration value="widget.console_desc"/>
+			<xs:enumeration value="widget.console_log"/>
+			<xs:enumeration value="widget.console_log_desc"/>
 			<xs:enumeration value="widget.estop"/>
 			<xs:enumeration value="widget.estop_desc"/>
+			<xs:enumeration value="widget.extrude"/>
+			<xs:enumeration value="widget.extrude_desc"/>
 			<xs:enumeration value="widget.fan"/>
 			<xs:enumeration value="widget.fan_desc"/>
+			<xs:enumeration value="widget.fans"/>
+			<xs:enumeration value="widget.fans_desc"/>
 			<xs:enumeration value="widget.files"/>
 			<xs:enumeration value="widget.files_desc"/>
 			<xs:enumeration value="widget.gauge_rpm"/>
@@ -1948,11 +1974,20 @@
 			<xs:enumeration value="widget.gauge_target"/>
 			<xs:enumeration value="widget.gcode_button"/>
 			<xs:enumeration value="widget.gcode_button_desc"/>
+			<xs:enumeration value="widget.heightmap_desc"/>
 			<xs:enumeration value="widget.job_progress"/>
 			<xs:enumeration value="widget.job_progress_desc"/>
 			<xs:enumeration value="widget.job_status_desc"/>
 			<xs:enumeration value="widget.jobs_desc"/>
+			<xs:enumeration value="widget.jog_choices"/>
+			<xs:enumeration value="widget.jog_choices_desc"/>
+			<xs:enumeration value="widget.jog_xy"/>
+			<xs:enumeration value="widget.jog_xy_desc"/>
+			<xs:enumeration value="widget.jog_z"/>
+			<xs:enumeration value="widget.jog_z_desc"/>
 			<xs:enumeration value="widget.macros_desc"/>
+			<xs:enumeration value="widget.move_desc"/>
+			<xs:enumeration value="widget.object_cancel_desc"/>
 			<xs:enumeration value="widget.page_console_desc"/>
 			<xs:enumeration value="widget.page_control_desc"/>
 			<xs:enumeration value="widget.page_files_desc"/>
@@ -1985,6 +2020,8 @@
 			<xs:enumeration value="widget.temperature_graph"/>
 			<xs:enumeration value="widget.temperature_graph_desc"/>
 			<xs:enumeration value="widget.temperature_graph_seconds"/>
+			<xs:enumeration value="widget.temperatures"/>
+			<xs:enumeration value="widget.temperatures_desc"/>
 			<xs:enumeration value="widget.text"/>
 			<xs:enumeration value="widget.text_desc"/>
 			<xs:enumeration value="widget.tool"/>
@@ -7276,6 +7313,14 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="console_log">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_log.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="control">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/control.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -9302,8 +9347,40 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="move_jog_choices">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_jog_choices.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="move_xy">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_xy.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_xy_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_xy_card.xml, with presenter move.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_z">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_z.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_z_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_z_card.xml, with presenter move.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -10571,6 +10648,14 @@
 	</xs:element>
 	<xs:element name="temperature_extrusion">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extrusion.xml, with presenter temperature_extrusion.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_extrusion_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extrusion_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

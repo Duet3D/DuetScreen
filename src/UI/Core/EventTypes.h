@@ -95,6 +95,7 @@ namespace UI
 	XX(NavigationCurrentScreen, UI::LvObj*)                                                                            \
 	XX(Filaments, std::vector<std::string>)                                                                            \
 	XX(ThemeChanged)                                                                                                   \
+	XX(JogChoice)                                                                                                      \
 	XX(WifiNetworks)                                                                                                   \
 	XX(WifiConnectResult, std::string, NetworkHelper::ConnectResult)
 

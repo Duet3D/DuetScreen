@@ -1,0 +1,20 @@
+{
+  "component": "move_jog_choices",
+  "title_tag": "widget.jog_choices",
+  "description_tag": "widget.jog_choices_desc",
+  "category_tag": "widget.category_motion",
+  "icon": "fine_tune.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      12,
+      3
+    ],
+    "min": [
+      8,
+      2
+    ]
+  }
+}

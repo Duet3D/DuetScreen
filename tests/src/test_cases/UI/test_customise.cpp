@@ -606,7 +606,8 @@ TEST_F(TestCustomiseHome, EveryWidgetCanBeAddedToEverySlotItFits)
 		EXPECT_TRUE(editor.removeSelected());
 	}
 
-	// Each lays out and settles: a widget sized 100% once kept the layout from ever settling (see DsLayout.h)
+	// Each is added, lays out and settles (a widget sized 100% once kept the layout from ever settling, see
+	// DsLayout.h), and is removed again, so the next has the room
 	for (const auto& [id, widget] : UI::Xml::WidgetCatalogue::all())
 	{
 		for (const auto& slot : widget.slots)
@@ -614,14 +615,13 @@ TEST_F(TestCustomiseHome, EveryWidgetCanBeAddedToEverySlotItFits)
 			editor.selectPlace(slot);
 			const auto added = editor.add(id);
 			update();
-			if (added)
-			{
-				EXPECT_NE(placed(slot.c_str(), added->c_str()), nullptr) << id << " in " << slot;
-			}
+			ASSERT_TRUE(added.has_value()) << id << " in " << slot;
+			EXPECT_NE(placed(slot.c_str(), added->c_str()), nullptr) << id << " in " << slot;
+			editor.select(slot, *added);
+			EXPECT_TRUE(editor.removeSelected()) << id << " in " << slot;
+			update();
 		}
 	}
-	EXPECT_NE(placed("dashboard", "job_progress"), nullptr);
-	EXPECT_NE(placed("status_bar", "status_speed"), nullptr);
 }
 
 TEST_F(TestCustomiseHome, TheToolbarIsDraggedByItsGrip)

@@ -7,6 +7,7 @@
 #include "Console/ConsolePresenter.h"
 #include "Control/Fans/FanPresenter.h"
 #include "Control/Heightmap/HeightmapPresenter.h"
+#include "Control/Move/JogActions.h"
 #include "Control/Move/MovePresenter.h"
 #include "Control/ObjectCancel/ObjectCancelPresenter.h"
 #include "Control/Temperature/ExtruderPresenter.h"
@@ -45,6 +46,7 @@ namespace UI
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
 		GaugeActions::registerAll();
+		JogActions::registerAll();
 		FactorsPresenter::registerActions();
 		EStopAction::registerAll();
 		JobActions::registerAll();

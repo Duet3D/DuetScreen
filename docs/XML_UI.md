@@ -51,7 +51,8 @@ src/UI/
     Theme/     ThemeStyles (theme styles and fonts made available to XML)
     Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
                ConsoleSource, JobSource, MachineSource, MoveSource, NavigationSource, ResponseSource,
-               TemperatureSource, and CustomiseSource (the state of customising the screen)
+               TemperatureSource, GaugeSource (every value a gauge can show), JogSource (the jog distance and speed
+               every view shares), and CustomiseSource (the state of customising the screen)
     Layout/    WidgetCatalogue (the widgets the user can place), Layout (layout files, and repairing them),
                LayoutStore (the layout each slot shows, and saving the user's), LayoutEditor (customising),
                PlacementScope (a placed widget's size classes)

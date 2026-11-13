@@ -1,0 +1,20 @@
+{
+  "component": "move_xy_card",
+  "title_tag": "widget.jog_xy",
+  "description_tag": "widget.jog_xy_desc",
+  "category_tag": "widget.category_motion",
+  "icon": "move.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      6,
+      6
+    ],
+    "min": [
+      4,
+      4
+    ]
+  }
+}

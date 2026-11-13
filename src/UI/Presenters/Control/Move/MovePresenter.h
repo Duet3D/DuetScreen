@@ -1,8 +1,9 @@
 /*
  * MovePresenter.h
  *
- * Behaviour for the Move tab (assets/ui/components/control/move/move.xml): jog and home each axis, set an axis'
- * position, disable the motors, and choose the distance and speed of a jog.
+ * Behaviour for the Move tab (assets/ui/components/control/move/move.xml) and its pieces placed as widgets: jog and
+ * home each axis, set an axis' position and disable the motors. A jog goes as far and as fast as chosen in the global
+ * jog.* (src/UI/Xml/Data/JogSource.h), which every view shares.
  *
  * Every control's `*_usable` field already allows for the printer being disconnected or busy, so the view only binds.
  *
@@ -34,17 +35,6 @@ namespace UI
 		Xml::IntSubject homed;			// 1 when homed
 		Xml::IntSubject jogUsable;		// 1 if it can be jogged
 		Xml::IntSubject homeUsable;		// 1 if it can be homed
-	};
-
-	/** One jog distance or speed */
-	class MoveChoiceRow : public Xml::Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(Xml::FieldVisitor& f) override;
-
-		Xml::StringSubject<16> text; // E.g. "0.1"
-		Xml::IntSubject selected;	 // 1 for the one in use
 	};
 
 	class MovePresenter : public Xml::XmlPresenter
@@ -79,9 +69,6 @@ namespace UI
 		/** Show every axis' position and what can be done with it */
 		void showAxes();
 
-		/** Show the distances and speeds, with the chosen one selected */
-		void showChoices();
-
 		/** Do `action`, asking first with `title` and `text` if confirmations are on */
 		void confirmThen(std::string title, std::string text, std::function<void()> action);
 
@@ -97,10 +84,6 @@ namespace UI
 		/** The axis letter an action is about: its `arg`'s first character, or its axes row's */
 		static char axisOf(const Xml::ActionArgs& args);
 
-		std::vector<float> m_distances;	   // Jog distances, as stored
-		std::vector<uint32_t> m_feedrates; // Jog speeds
-		size_t m_distance = 4;			   // Index of the chosen distance
-		size_t m_feedrate = 3;			   // Index of the chosen speed
 		std::function<void()> m_confirmed; // What the question's Yes does
 
 		Xml::IntSubject m_connected;				 // 1 while connected
@@ -113,10 +96,6 @@ namespace UI
 		Xml::IntSubject m_disableMotorsUsable;		 // 1 if the motors can be disabled
 		Xml::List<MoveAxisRow> m_axes;				 // The other axes
 		Xml::IntSubject m_axesShown;				 // 1 if there are other axes
-		Xml::StringSubject<48> m_distanceTitle;		 // Distance row title
-		Xml::StringSubject<48> m_feedrateTitle;		 // Speed row title
-		Xml::List<MoveChoiceRow> m_distanceChoices;	 // Jog distances
-		Xml::List<MoveChoiceRow> m_feedrateChoices;	 // Jog speeds
 		Xml::IntSubject m_confirm;					 // 1 while asking
 		Xml::StringSubject<64> m_confirmTitle;		 // Question title
 		Xml::StringSubject<128> m_confirmText;		 // Question

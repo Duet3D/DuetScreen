@@ -182,6 +182,31 @@ Each row of `chambers`:
 | `job.print_again_control` | int | Printing the last job again (job.print_again): 0 hidden, 1 disabled, 2 usable |
 | `job.cancel_control` | int | Cancelling the job: 0 hidden, 1 disabled, 2 usable |
 
+### jog
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `jog.distance_title` | text | The distances' title, with the unit, e.g. "Move Distance (mm)" |
+| `jog.feedrate_title` | text | The speeds' title, with the unit |
+| `jog.distances` | list | The jog distances to choose from (move.distance, move.edit_distance) |
+| `jog.feedrates` | list | The jog speeds to choose from (move.feedrate, move.edit_feedrate) |
+
+Each row of `jog.distances`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `text` | text | The value, e.g. "0.1" |
+| `selected` | int | 1 for the one in use |
+
+Each row of `jog.feedrates`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `text` | text | The value, e.g. "0.1" |
+| `selected` | int | 1 for the one in use |
+
 ### machine
 
 | Name | Type | Description |
@@ -265,6 +290,10 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 | `job.pause` | Pause the job |
 | `job.print_again` | Start the last job again |
 | `job.resume` | Resume the paused job |
+| `move.distance` | Use that jog distance. From a row of `jog.distances`. |
+| `move.edit_distance` | Ask for a new value for that jog distance with a number pad, and use it. From a row of `jog.distances`. |
+| `move.edit_feedrate` | Ask for a new value for that jog speed with a number pad, and use it. From a row of `jog.feedrates`. |
+| `move.feedrate` | Use that jog speed. From a row of `jog.feedrates`. |
 | `nav.back` | Close the top modal, or else go back a screen |
 | `nav.home` | Close every screen and show the home screens |
 | `nav.open` | Open the screen registered as `arg`, e.g. `arg="control"` |
@@ -672,7 +701,7 @@ Used by `job_cancel`.
 
 ### move
 
-Used by `move`.
+Used by `move`, `move_xy_card`, `move_z_card`.
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -695,10 +724,6 @@ Used by `move`.
 | `disable_motors_usable` | int | 1 if the motors can be disabled |
 | `axes` | list | The axes other than X, Y and Z |
 | `axes_shown` | int | 1 if there are other axes |
-| `distance_title` | text | Distance row title, e.g. "Move Distance (mm)" |
-| `feedrate_title` | text | Speed row title |
-| `distances` | list | The jog distances to choose from |
-| `feedrates` | list | The jog speeds to choose from |
 | `confirm` | int | 1 while asking before homing or disabling the motors |
 | `confirm_title` | text | The question's title |
 | `confirm_text` | text | The question |
@@ -714,31 +739,11 @@ Each row of `axes`:
 | `jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
 | `home_usable` | int | 1 if it can be homed |
 
-Each row of `distances`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The value |
-| `selected` | int | 1 for the one in use |
-
-Each row of `feedrates`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The value |
-| `selected` | int | 1 for the one in use |
-
 | Action | Description |
 | --- | --- |
 | `move.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
 | `move.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
 | `move.disable_motors` | Disable the motors (M18), asking first if confirmations are on |
-| `move.distance` | Use that jog distance. From a row of `distances`. |
-| `move.edit_distance` | Ask for a new value for that jog distance with a number pad. From a row of `distances`. |
-| `move.edit_feedrate` | Ask for a new value for that jog speed with a number pad. From a row of `feedrates`. |
-| `move.feedrate` | Use that jog speed. From a row of `feedrates`. |
 | `move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if confirmations are on. |
 | `move.jog` | Jog by the chosen distance at the chosen speed. `arg` is `X+`, `Z-`, …; from a row of `axes`, `+` or `-`. |
 | `move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `axes`. |
@@ -1782,6 +1787,22 @@ In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../ass
 | --- | --- | --- | --- |
 | `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `bed.0` |
 
+#### console
+
+**Console**: The console: send G-code and read the replies
+
+In Console; placed in `dashboard`; component `console` ([console.json](../assets/ui/widgets/console/console.json)). In a grid it is 14×10 cells, and at least 10×6.
+
+![console](../tests/ref_imgs/xml_ui_api/widgets/console.png)
+
+#### console_log
+
+**Console log**: The printer's latest replies; tap to open the console
+
+In Console; placed in `dashboard`; component `console_log` ([console_log.json](../assets/ui/widgets/console/console_log.json)). In a grid it is 10×6 cells, and at least 6×3.
+
+![console_log](../tests/ref_imgs/xml_ui_api/widgets/console_log.png)
+
 #### estop
 
 **E-stop**: Drag across to stop the printer at once
@@ -1789,6 +1810,14 @@ In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../ass
 In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)). In a grid it is 1×1 cells, and at least 1×1.
 
 ![estop](../tests/ref_imgs/xml_ui_api/widgets/estop.png)
+
+#### extrude
+
+**Extrude**: Extrude or retract with the selected tool
+
+In Motion; placed in `dashboard`; component `temperature_extrusion_card` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a grid it is 7×9 cells, and at least 6×8.
+
+![extrude](../tests/ref_imgs/xml_ui_api/widgets/extrude.png)
 
 #### fan
 
@@ -1801,6 +1830,14 @@ In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `fan` | Fan | a row of `fans`, by its `number`, shown by its `name` | `0` |
+
+#### fans
+
+**Fans**: Every fan's speed, to change them
+
+In Fans; placed in `dashboard`; component `fans` ([fans.json](../assets/ui/widgets/fans/fans.json)). In a grid it is 10×6 cells, and at least 8×4.
+
+![fans](../tests/ref_imgs/xml_ui_api/widgets/fans.png)
 
 #### files
 
@@ -1822,6 +1859,14 @@ In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_b
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `Home` |
 | `gcode` | G-code | text, up to 120 bytes | `G28` |
+
+#### heightmap
+
+**Bed Levelling**: The bed's height map, levelling and probing
+
+In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a grid it is 14×10 cells, and at least 10×7.
+
+![heightmap](../tests/ref_imgs/xml_ui_api/widgets/heightmap.png)
 
 #### job_progress
 
@@ -1847,6 +1892,30 @@ In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../
 
 ![jobs](../tests/ref_imgs/xml_ui_api/widgets/jobs.png)
 
+#### jog_choices
+
+**Jog distance and speed**: How far and how fast every jog goes; hold one to change it
+
+In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a grid it is 12×3 cells, and at least 8×2.
+
+![jog_choices](../tests/ref_imgs/xml_ui_api/widgets/jog_choices.png)
+
+#### jog_xy
+
+**XY jog**: Jog and home X and Y, home all and disable the motors
+
+In Motion; placed in `dashboard`; component `move_xy_card` ([jog_xy.json](../assets/ui/widgets/motion/jog_xy.json)). In a grid it is 6×6 cells, and at least 4×4.
+
+![jog_xy](../tests/ref_imgs/xml_ui_api/widgets/jog_xy.png)
+
+#### jog_z
+
+**Z jog**: Jog Z up and down, home it, or move it to a position
+
+In Motion; placed in `dashboard`; component `move_z_card` ([jog_z.json](../assets/ui/widgets/motion/jog_z.json)). In a grid it is 3×6 cells, and at least 2×5.
+
+![jog_z](../tests/ref_imgs/xml_ui_api/widgets/jog_z.png)
+
 #### macros
 
 **Macros**: The printer's macros, to run one
@@ -1854,6 +1923,22 @@ In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../
 In Jobs; placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a grid it is 8×8 cells, and at least 6×4.
 
 ![macros](../tests/ref_imgs/xml_ui_api/widgets/macros.png)
+
+#### move
+
+**Move**: The Move tab: jog and home every axis, babystep, and choose the jog distance and speed
+
+In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a grid it is 20×8 cells, and at least 14×7.
+
+![move](../tests/ref_imgs/xml_ui_api/widgets/move.png)
+
+#### object_cancel
+
+**Object Cancel**: The job's objects, to cancel one
+
+In Jobs; placed in `dashboard`; component `object_cancel` ([object_cancel.json](../assets/ui/widgets/jobs/object_cancel.json)). In a grid it is 14×10 cells, and at least 10×6.
+
+![object_cancel](../tests/ref_imgs/xml_ui_api/widgets/object_cancel.png)
 
 #### page_console
 
@@ -1950,6 +2035,14 @@ In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` 
 | --- | --- | --- | --- |
 | `seconds` | Time shown | one of `30`, `60`, `120`, `300`, `600` | `60` |
 
+#### temperatures
+
+**Temperatures**: The Temperature tab: every tool, bed and chamber, filament, and the extruder
+
+In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a grid it is 20×10 cells, and at least 12×6.
+
+![temperatures](../tests/ref_imgs/xml_ui_api/widgets/temperatures.png)
+
 #### text
 
 **Text**: Text you write, in the size and colour you choose
@@ -2008,9 +2101,10 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `babystep_dialog` | `babystep_dialog` |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
 | `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_cancel` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
-| [`console`](#console) | `console` |  | `home` | [console.xml](../assets/ui/components/console/console.xml) |
+| [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
-| `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
+| `console_line` |  |  | `console`, `console_log` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
+| `console_log` |  |  | `console_log` | [console_log.xml](../assets/ui/components/console/console_log.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
 | [`customise`](#home) | `customise` |  | `home` | [customise.xml](../assets/ui/components/customise/customise.xml) |
 | `customise_catalogue_category` |  |  | `customise` | [customise_catalogue_category.xml](../assets/ui/components/customise/customise_catalogue_category.xml) |
@@ -2045,7 +2139,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `factors_dialog` |  | `dialog`, `open`, `title`, `factors`, `pad_shown`, `pad`, `pad_header`, `pad_text`, `pad_accepted`, `pad_confirmable`, `pad_signed` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
-| [`fans`](#fans) | `fans` |  | `control` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
+| [`fans`](#fans) | `fans` |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
 | `file_browser_dialog` |  |  | `file_browser` | [file_browser_dialog.xml](../assets/ui/components/file_browser/file_browser_dialog.xml) |
@@ -2061,25 +2155,29 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_value_face` |  |  | `gauge_value` | [gauge_value_face.xml](../assets/ui/components/gauge/gauge_value_face.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
-| [`heightmap`](#heightmap) | `heightmap` |  | `control` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
+| [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | `job_cancel` | `job_cancel` |  | `home` | [job_cancel.xml](../assets/ui/components/modals/job_cancel.xml) |
-| [`move`](#control) | `move` |  | `control` | [move.xml](../assets/ui/components/control/move/move.xml) |
+| [`move`](#control) | `move` |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
-| `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
-| `move_feedrate` |  |  | `move` | [move_feedrate.xml](../assets/ui/components/control/move/move_feedrate.xml) |
-| `move_xy` |  |  | `move` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
+| `move_distance` |  |  | `move_jog_choices` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
+| `move_feedrate` |  |  | `move_jog_choices` | [move_feedrate.xml](../assets/ui/components/control/move/move_feedrate.xml) |
+| `move_jog_choices` |  |  | `move`, `jog_choices` | [move_jog_choices.xml](../assets/ui/components/control/move/move_jog_choices.xml) |
+| `move_xy` |  |  | `move`, `move_xy_card` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
+| `move_xy_card` | `move` |  | `jog_xy` | [move_xy_card.xml](../assets/ui/components/control/move/move_xy_card.xml) |
+| `move_z` |  |  | `move`, `move_z_card` | [move_z.xml](../assets/ui/components/control/move/move_z.xml) |
+| `move_z_card` | `move` |  | `jog_z` | [move_z_card.xml](../assets/ui/components/control/move/move_z_card.xml) |
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
 | `numberpad` | `numberpad` |  | `home` | [numberpad.xml](../assets/ui/components/modals/numberpad.xml) |
 | `numberpad_panel` |  | `entry`, `header`, `text`, `accepted`, `confirmable`, `signed` | `factors_dialog`, `numberpad` | [numberpad_panel.xml](../assets/ui/components/modals/numberpad_panel.xml) |
-| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
+| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control`, `object_cancel` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
-| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `customise`, `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
+| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `customise`, `move`, `move_xy_card`, `move_z_card`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
 | [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
@@ -2097,9 +2195,10 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
 | `status_bar_gcode_button` |  | `label`, `gcode` | `status_gcode` | [status_bar_gcode_button.xml](../assets/ui/components/status_bar/status_bar_gcode_button.xml) |
-| [`temperature`](#temperature) | `temperature` |  | `control` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
+| [`temperature`](#temperature) | `temperature` |  | `control`, `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
-| [`temperature_extrusion`](#temperature) | `temperature_extrusion` |  | `temperature` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
+| [`temperature_extrusion`](#temperature) | `temperature_extrusion` |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
+| `temperature_extrusion_card` |  |  | `extrude` | [temperature_extrusion_card.xml](../assets/ui/components/control/temperature/temperature_extrusion_card.xml) |
 | `temperature_heater` |  |  | `temperature_heater_card`, `temperature_tool` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
 | `temperature_heater_card` |  |  | `temperature` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |

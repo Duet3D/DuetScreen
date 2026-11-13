@@ -1,0 +1,20 @@
+{
+  "component": "object_cancel",
+  "title_tag": "control.object_cancel_tab",
+  "description_tag": "widget.object_cancel_desc",
+  "category_tag": "widget.category_jobs",
+  "icon": "cancel.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      14,
+      10
+    ],
+    "min": [
+      10,
+      6
+    ]
+  }
+}

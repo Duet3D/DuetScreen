@@ -7,6 +7,7 @@
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/JogSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -54,12 +55,6 @@ namespace UI
 		f.field("homed", homed, "1 when homed");
 		f.field("jog_usable", jogUsable, "1 if the axis can be jogged or set (homed, or moves before homing allowed)");
 		f.field("home_usable", homeUsable, "1 if it can be homed");
-	}
-
-	void MoveChoiceRow::fields(Xml::FieldVisitor& f)
-	{
-		f.field("text", text, "The value");
-		f.field("selected", selected, "1 for the one in use");
 	}
 
 	MovePresenter::MovePresenter()
@@ -120,69 +115,6 @@ namespace UI
 					   askPosition(letter);
 				   }
 			   });
-		action("move.distance",
-			   "Use that jog distance. From a row of `distances`.",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   if (const auto* row = args.row<MoveChoiceRow>())
-				   {
-					   m_distance = static_cast<size_t>(row->index.get());
-					   showChoices();
-				   }
-			   });
-		action("move.feedrate",
-			   "Use that jog speed. From a row of `feedrates`.",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   if (const auto* row = args.row<MoveChoiceRow>())
-				   {
-					   m_feedrate = static_cast<size_t>(row->index.get());
-					   showChoices();
-				   }
-			   });
-		action("move.edit_distance",
-			   "Ask for a new value for that jog distance with a number pad. From a row of `distances`.",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   const auto* row = args.row<MoveChoiceRow>();
-				   if (row == nullptr)
-				   {
-					   return;
-				   }
-				   const auto i = static_cast<size_t>(row->index.get());
-				   Xml::Services::askNumber(
-					   {.header = _("move.distance_adjust_header", Units::getDisplayedDistanceUnit()),
-						.min = 0.01f,
-						.max = 1000.0f,
-						.value = m_distances.at(i),
-						.onConfirm = [this, i](float value)
-						{
-							m_distances.at(i) = value;
-							StorageHelper::setData(ID_MOVE_DISTANCES, m_distances);
-							showChoices();
-						}});
-			   });
-		action("move.edit_feedrate",
-			   "Ask for a new value for that jog speed with a number pad. From a row of `feedrates`.",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   const auto* row = args.row<MoveChoiceRow>();
-				   if (row == nullptr)
-				   {
-					   return;
-				   }
-				   const auto i = static_cast<size_t>(row->index.get());
-				   Xml::Services::askNumber({.header = _("move.feedrate_adjust_header", Units::getDisplayedSpeedUnit()),
-											 .min = 0.01f,
-											 .max = 1000.0f,
-											 .value = static_cast<float>(m_feedrates.at(i)),
-											 .onConfirm = [this, i](float value)
-											 {
-												 m_feedrates.at(i) = static_cast<uint32_t>(std::lround(value));
-												 StorageHelper::setData(ID_MOVE_FEEDRATES, m_feedrates);
-												 showChoices();
-											 }});
-			   });
 		action("move.confirm",
 			   "Answer yes to the question (`confirm`): close it and do what it asked",
 			   [this](const Xml::ActionArgs&)
@@ -217,10 +149,6 @@ namespace UI
 		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
 		f.list("axes", m_axes, "The axes other than X, Y and Z");
 		f.field("axes_shown", m_axesShown, "1 if there are other axes");
-		f.field("distance_title", m_distanceTitle, "Distance row title, e.g. \"Move Distance (mm)\"");
-		f.field("feedrate_title", m_feedrateTitle, "Speed row title");
-		f.list("distances", m_distanceChoices, "The jog distances to choose from");
-		f.list("feedrates", m_feedrateChoices, "The jog speeds to choose from");
 		f.field("confirm", m_confirm, "1 while asking before homing or disabling the motors");
 		f.field("confirm_title", m_confirmTitle, "The question's title");
 		f.field("confirm_text", m_confirmText, "The question");
@@ -230,21 +158,11 @@ namespace UI
 	{
 		registerEventListener<EventType::AxesData>([this]() { showAxes(); });
 		registerEventListener<EventType::Status>([this](const OM::PrinterStatus&) { showAxes(); });
-
-		if (auto distances = StorageHelper::getData(ID_MOVE_DISTANCES); !distances.empty())
-		{
-			m_distances = std::move(distances);
-		}
-		if (auto feedrates = StorageHelper::getData(ID_MOVE_FEEDRATES); !feedrates.empty())
-		{
-			m_feedrates = std::move(feedrates);
-		}
 	}
 
 	void MovePresenter::onActivate()
 	{
 		m_confirm.set(0);
-		showChoices();
 		showAxes();
 	}
 
@@ -306,26 +224,6 @@ namespace UI
 		m_axesShown.set(others.empty() ? 0 : 1);
 	}
 
-	void MovePresenter::showChoices()
-	{
-		m_distanceTitle.set(_("move.distance", Units::getDisplayedDistanceUnit()));
-		m_feedrateTitle.set(_("move.feedrate", Units::getDisplayedSpeedUnit()));
-		m_distance = std::min(m_distance, m_distances.empty() ? 0 : m_distances.size() - 1);
-		m_feedrate = std::min(m_feedrate, m_feedrates.empty() ? 0 : m_feedrates.size() - 1);
-		m_distanceChoices.sync(m_distances.size(),
-							   [this](MoveChoiceRow& row, size_t i)
-							   {
-								   row.text.set(fmt::format("{}", m_distances[i]));
-								   row.selected.set(i == m_distance ? 1 : 0);
-							   });
-		m_feedrateChoices.sync(m_feedrates.size(),
-							   [this](MoveChoiceRow& row, size_t i)
-							   {
-								   row.text.set(fmt::format("{}", m_feedrates[i]));
-								   row.selected.set(i == m_feedrate ? 1 : 0);
-							   });
-	}
-
 	void MovePresenter::confirmThen(std::string title, std::string text, std::function<void()> action)
 	{
 		if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
@@ -350,14 +248,16 @@ namespace UI
 
 	void MovePresenter::jog(char letter, bool forward)
 	{
-		if (m_distances.empty() || m_feedrates.empty())
+		const auto distance = Xml::JogSource::distance();
+		const auto feedrate = Xml::JogSource::feedrate();
+		if (!distance || !feedrate)
 		{
 			return;
 		}
 		MODEL_LOCK();
 		if (auto axis = OM::Move::GetAxisByLetter(letter))
 		{
-			axis->MoveRelative((forward ? 1.0f : -1.0f) * m_distances[m_distance], m_feedrates[m_feedrate]);
+			axis->MoveRelative((forward ? 1.0f : -1.0f) * *distance, *feedrate);
 		}
 	}
 
@@ -365,7 +265,8 @@ namespace UI
 	{
 		MODEL_LOCK();
 		auto axis = OM::Move::GetAxisByLetter(letter);
-		if (axis == nullptr || m_feedrates.empty())
+		const auto feedrate = Xml::JogSource::feedrate();
+		if (axis == nullptr || !feedrate)
 		{
 			return;
 		}
@@ -375,12 +276,12 @@ namespace UI
 								  .max = axis->maxPosition,
 								  .value = Units::convertDistanceToCurrentDisplayedUnit(machine ? axis->machinePosition
 																								: axis->userPosition),
-								  .onConfirm = [this, letter, machine](float value)
+								  .onConfirm = [letter, machine, feedrate](float value)
 								  {
 									  MODEL_LOCK();
 									  if (auto axis = OM::Move::GetAxisByLetter(letter))
 									  {
-										  axis->MoveAbsolute(value, m_feedrates[m_feedrate], machine);
+										  axis->MoveAbsolute(value, *feedrate, machine);
 									  }
 								  }});
 	}

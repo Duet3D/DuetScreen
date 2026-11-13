@@ -1,0 +1,20 @@
+{
+  "component": "move",
+  "title_tag": "control.move_tab",
+  "description_tag": "widget.move_desc",
+  "category_tag": "widget.category_motion",
+  "icon": "move.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      20,
+      8
+    ],
+    "min": [
+      14,
+      7
+    ]
+  }
+}
