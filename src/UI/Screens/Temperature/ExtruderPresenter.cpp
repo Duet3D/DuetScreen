@@ -85,7 +85,9 @@ namespace UI
 		bool canRetract = canExtrude;
 		if (tool != nullptr)
 		{
-			// Every heater of the tool must be hot enough
+			// Every heater of the tool must be hot enough. A limit of 0 is how the Duet reports cold extrusion
+			// allowed (M302 P1): it then checks no temperature at all, so neither does this, even a heater whose
+			// sensor reads nothing (-273°C).
 			const float coldExtrude = OM::Heat::GetColdExtrudeTemperature();
 			const float coldRetract = OM::Heat::GetColdRetractTemperature();
 			tool->IterateHeaters(
@@ -95,8 +97,8 @@ namespace UI
 					{
 						return;
 					}
-					canExtrude = canExtrude && heater->heater->current >= coldExtrude;
-					canRetract = canRetract && heater->heater->current >= coldRetract;
+					canExtrude = canExtrude && (coldExtrude <= 0.0f || heater->heater->current >= coldExtrude);
+					canRetract = canRetract && (coldRetract <= 0.0f || heater->heater->current >= coldRetract);
 				});
 		}
 		m_extrudeUsable.set(canExtrude ? 1 : 0);
