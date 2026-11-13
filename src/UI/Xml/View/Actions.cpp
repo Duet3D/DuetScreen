@@ -264,6 +264,18 @@ namespace UI::Xml
 		return value;
 	}
 
+	std::optional<lv_point_t> ActionArgs::point() const
+	{
+		lv_indev_t* indev = event != nullptr ? lv_event_get_indev(event) : nullptr;
+		if (indev == nullptr)
+		{
+			return std::nullopt;
+		}
+		lv_point_t point;
+		lv_indev_get_point(indev, &point);
+		return point;
+	}
+
 	std::string ActionArgs::text() const
 	{
 		if (target != nullptr && lv_obj_check_type(target, &lv_textarea_class))

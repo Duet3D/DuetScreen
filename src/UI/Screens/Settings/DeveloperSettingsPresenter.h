@@ -23,7 +23,10 @@
 
 namespace UI
 {
-	class HardwareTest;
+	namespace Xml
+	{
+		class XmlView;
+	}
 
 	class DeveloperSettingsPresenter : public Xml::XmlPresenter
 	{
@@ -55,8 +58,8 @@ namespace UI
 		/** Start the hardware test, without asking for a serial number */
 		void startHardwareTest();
 
-		/** The hardware test: a C++ view of its own (src/UI/Widgets/HardwareTest) until it is written in XML */
-		std::unique_ptr<HardwareTest> m_hardwareTest;
+		/** The hardware test (hardware_test.xml) over the whole screen, once it has been opened */
+		std::unique_ptr<Xml::XmlView> m_hardwareTest;
 
 		Xml::StringSubject<256> m_debugLevels;		  // Log levels offered
 		Xml::IntSubject m_debugLevel;				  // Index of the one in use

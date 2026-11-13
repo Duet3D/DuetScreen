@@ -14,7 +14,6 @@ The UI is split into multiple sections, each of which is responsible for a diffe
 - [Core](./Core/README.md)
 - [Screens](./Screens/README.md)
 - [Styles](./Styles/README.md)
-- [Widgets](./Widgets/README.md)
 
 ## Components
 These are reusable components that can be used in multiple screens.

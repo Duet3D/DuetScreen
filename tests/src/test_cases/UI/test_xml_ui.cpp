@@ -1128,3 +1128,21 @@ TEST_F(TestXmlUi, FlashingButtonCanBeDeleted)
 		lv_timer_handler();
 	}
 }
+
+TEST_F(TestXmlUi, UnknownStylePropertyIsOnlyWarnedAbout)
+{
+	// A misspelt property in bind_style_prop used to end the program: it is skipped, and the rest is built
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/style_prop_screen.xml"), R"(
+		<component presenter="test_dialog">
+			<view extends="lv_obj" width="100%" height="100%">
+				<lv_obj name="moved">
+					<bind_style_prop prop="no_such_property" subject="busy"/>
+				</lv_obj>
+				<lv_label name="after" text="Built"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	auto& view = makeView("style_prop_screen");
+	EXPECT_NE(lv_obj_find_by_name(view.getRootPtr(), "after"), nullptr);
+}

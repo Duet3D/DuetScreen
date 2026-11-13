@@ -11,8 +11,9 @@
 #include "ObjectModel/Directories.h"
 #include "Storage.h"
 #include "UI/Core/Model.h"
+#include "UI/Screens/HardwareTest/HardwareTestPresenter.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Widgets/HardwareTest/HardwareTest.h"
+#include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/SystemHelper.h"
@@ -264,14 +265,14 @@ namespace UI
 		ZoneScoped;
 		if (m_hardwareTest == nullptr)
 		{
-			m_hardwareTest = std::make_unique<HardwareTest>();
+			auto presenter = std::make_shared<HardwareTestPresenter>();
+			presenter->setOnExit([this]() { m_hardwareTest->hide(); });
+			m_hardwareTest =
+				std::make_unique<Xml::XmlView>("hardware_test", lv_screen_active(), "hardware_test", presenter);
 		}
 		m_hardwareTest->show(true);
 
-		// Skip the serial number entry screen since the end user won't know this
-		auto presenter = m_hardwareTest->getPresenter();
-		presenter->m_serialNumber = "unknown";
-		presenter->createLogFile();
-		presenter->nextTest();
+		// Without the serial number, which the user won't know
+		static_cast<HardwareTestPresenter&>(*m_hardwareTest->getPresenter()).startWithoutSerialNumber();
 	}
 } // namespace UI

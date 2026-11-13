@@ -1,0 +1,179 @@
+<!--
+  The factory hardware test, over the whole screen: a serial number, then each test in turn, then the results. One
+  stage is shown at a time, the one `stage` names.
+
+  The text is English only: the test is run at the factory.
+
+  Fields and actions: src/UI/Screens/HardwareTest/HardwareTestPresenter.h
+-->
+<component presenter="hardware_test">
+	<styles>
+		<!-- Not plain black: the panel drops the low bits, and content fades away on black -->
+		<style name="hardware_test_bg" bg_color="0x111111" bg_opa="100%"/>
+		<style name="hardware_test_stage" width="100%" height="100%" pad_all="0" border_width="0" radius="0"/>
+		<style name="hardware_test_yes" bg_color="0x4caf50" bg_grad_dir="none"/>
+		<style name="hardware_test_no" bg_color="0xf44336" bg_grad_dir="none"/>
+	</styles>
+
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="text"/>
+		<style name="hardware_test_bg"/>
+		<style name="hardware_test_stage"/>
+
+		<!-- The serial number, typed on the keyboard -->
+		<lv_obj name="serial_stage" flex_flow="column">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="serial"/>
+			<lv_label name="version" bind_text="version"/>
+			<ds_textarea name="serial_input" bind_text="serial" one_line="true" keyboard="none"
+						 placeholder="Enter serial number" width="100%" height="content">
+				<action trigger="ready" name="hardware_test.serial"/>
+			</ds_textarea>
+			<lv_label name="warning" text="Invalid serial number" width="100%">
+				<bind_flag_if_eq subject="serial_invalid" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<lv_obj name="space" width="100%" flex_grow="1" style_bg_opa="0" style_border_width="0"/>
+			<ds_keyboard name="keyboard" mode="text_upper" textarea="serial_input" width="100%" height="50%"/>
+		</lv_obj>
+
+		<!-- Touch: tap each target in turn -->
+		<lv_obj name="touch_stage" style_bg_color="0x2196f3" style_bg_opa="100%">
+			<style name="hardware_test_stage"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="touch"/>
+			<action trigger="clicked" name="hardware_test.touched"/>
+			<lv_label name="hint" text="Tap the target" x="10%"/>
+			<ds_icon name="target" folder="hardware_test" icon="touch_target.png" width="50" height="50"
+					 floating="true" style_image_recolor="0xffffff" style_image_recolor_opa="100%">
+				<bind_style_prop prop="translate_x" subject="target_x"/>
+				<bind_style_prop prop="translate_y" subject="target_y"/>
+			</ds_icon>
+		</lv_obj>
+
+		<!-- Dead pixels: each colour fills the screen; tap the right half for none, the left half for some -->
+		<lv_obj name="colours_stage" flex_flow="row">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="colours"/>
+			<lv_obj name="fail_half" height="100%" flex_grow="1" style_bg_opa="0" style_border_width="0">
+				<lv_label name="hint" text="Check for dead pixels" align="top_left"/>
+				<lv_label name="fail" text="Fail" align="center"/>
+			</lv_obj>
+			<lv_obj name="divider" width="2" height="100%" style_bg_color="0xffffff" style_bg_opa="100%"
+					style_border_width="0" style_radius="0"/>
+			<lv_obj name="pass_half" height="100%" flex_grow="1" style_bg_opa="0" style_border_width="0">
+				<lv_label name="pass" text="Pass" align="center"/>
+			</lv_obj>
+			<ds_button name="start" text="Start" width="20%" height="20%" floating="true" align="center">
+				<action trigger="clicked" name="hardware_test.start_colours"/>
+			</ds_button>
+			<lv_obj name="colour" floating="true" style_bg_opa="100%">
+				<style name="hardware_test_stage"/>
+				<bind_style_prop prop="bg_color" subject="colour"/>
+				<bind_flag_if_eq subject="colour_shown" flag="hidden" ref_value="0"/>
+				<action trigger="clicked" name="hardware_test.colour_tapped"/>
+			</lv_obj>
+		</lv_obj>
+
+		<!-- Memory and WiFi: what the test runs and what it writes -->
+		<lv_obj name="command_stage" flex_flow="column" style_flex_main_place="center"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="command"/>
+			<lv_label name="message" bind_text="message"/>
+			<ds_textarea name="output" bind_text="output" keyboard="none" clickable="false" style_text_align="left" width="70%"
+						 flex_grow="1" style_max_height="70%"/>
+		</lv_obj>
+
+		<!-- USB: each port in turn, as asked -->
+		<lv_obj name="usb_stage" flex_flow="column" style_flex_main_place="center"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="usb"/>
+			<lv_label name="message" bind_text="message"/>
+			<ds_textarea name="drives" bind_text="usb_drives" keyboard="none" clickable="false" style_text_align="left" width="70%"
+						 flex_grow="1" style_max_height="70%"/>
+			<ds_button name="continue" bind_text="usb_button" width="30%" height="content">
+				<bind_flag_if_eq subject="usb_button_shown" flag="hidden" ref_value="0"/>
+				<action trigger="clicked" name="hardware_test.usb_continue"/>
+			</ds_button>
+		</lv_obj>
+
+		<!-- Buzzer: was it heard? -->
+		<lv_obj name="buzzer_stage" flex_flow="column" style_flex_main_place="center"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="buzzer"/>
+			<lv_label name="question" text="Did you hear a sound?"/>
+			<lv_obj name="answers" width="50%" height="50%" flex_flow="row" style_bg_opa="0" style_border_width="0">
+				<ds_button name="no" text="No" height="100%" flex_grow="1">
+					<style name="hardware_test_no"/>
+					<action trigger="clicked" name="hardware_test.buzzer_heard" arg="0"/>
+				</ds_button>
+				<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
+					<style name="hardware_test_yes"/>
+					<action trigger="clicked" name="hardware_test.buzzer_heard" arg="1"/>
+				</ds_button>
+			</lv_obj>
+			<ds_button name="play_again" text="Play Again" width="30%" height="20%">
+				<action trigger="clicked" name="hardware_test.play_buzzer"/>
+			</ds_button>
+		</lv_obj>
+
+		<!-- Speaker: play a tone, then say whether it was heard -->
+		<lv_obj name="speaker_stage" flex_flow="column" style_flex_main_place="center"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="speaker"/>
+			<lv_label name="message" bind_text="message"/>
+			<ds_textarea name="output" bind_text="output" keyboard="none" clickable="false" style_text_align="left" width="70%"
+						 flex_grow="3"/>
+			<lv_obj name="answers" width="50%" flex_grow="1" flex_flow="row" style_bg_opa="0"
+					style_border_width="0">
+				<ds_button name="no" text="No" height="100%" flex_grow="1">
+					<style name="hardware_test_no"/>
+					<bind_state_if_eq subject="speaker_answerable" state="disabled" ref_value="0"/>
+					<action trigger="clicked" name="hardware_test.speaker_heard" arg="0"/>
+				</ds_button>
+				<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
+					<style name="hardware_test_yes"/>
+					<bind_state_if_eq subject="speaker_answerable" state="disabled" ref_value="0"/>
+					<action trigger="clicked" name="hardware_test.speaker_heard" arg="1"/>
+				</ds_button>
+			</lv_obj>
+			<ds_button name="play_sound" text="Play Sound" width="30%" height="20%">
+				<action trigger="clicked" name="hardware_test.play_speaker"/>
+			</ds_button>
+		</lv_obj>
+
+		<!-- The results: what passed and what failed -->
+		<lv_obj name="results_stage" flex_flow="column" style_flex_main_place="center"
+				style_flex_cross_place="center" style_flex_track_place="start">
+			<style name="hardware_test_stage"/>
+			<style name="hardware_test_bg"/>
+			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="results"/>
+			<lv_label name="title" text="Test Results"/>
+			<lv_label name="version" bind_text="version"/>
+			<lv_label name="passed_title" text="Passed Tests" width="100%"/>
+			<ds_list name="passed" list="passed" item="hardware_test_result" width="100%" flex_grow="1"
+					 flex_flow="row"/>
+			<lv_label name="failed_title" text="Failed Tests" width="100%"/>
+			<ds_list name="failed" list="failed" item="hardware_test_result" width="100%" flex_grow="1"
+					 flex_flow="row"/>
+			<lv_obj name="buttons" width="50%" height="content" flex_flow="row" style_bg_opa="0"
+					style_border_width="0">
+				<ds_button name="restart" text="Restart" height="content" flex_grow="1">
+					<action trigger="clicked" name="hardware_test.restart"/>
+				</ds_button>
+				<ds_button name="exit" text="Exit" height="content" flex_grow="1">
+					<bind_flag_if_eq subject="exit_shown" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="hardware_test.exit"/>
+				</ds_button>
+			</lv_obj>
+		</lv_obj>
+	</view>
+</component>

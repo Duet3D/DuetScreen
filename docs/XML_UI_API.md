@@ -405,6 +405,62 @@ Used by `fans`.
 | --- | --- |
 | `fans.set_speed` | Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `fans`. |
 
+### hardware_test
+
+Used by `hardware_test`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `stage` | text | The stage shown: `serial`, `touch`, `colours`, `command`, `usb`, `buzzer`, `speaker` or `results` |
+| `version` | text | The firmware version and build date |
+| `serial` | text | The serial number to start with |
+| `serial_invalid` | int | 1 if the serial number typed isn't valid |
+| `target_x` | int | Left of the touch target, to be centred on the point to tap |
+| `target_y` | int | Top of the touch target |
+| `colour_shown` | int | 1 while the screen is filled with a test colour |
+| `colour` | colour | The test colour |
+| `message` | text | What the memory, WiFi, USB or speaker test is doing or asks for |
+| `output` | text | What the memory, WiFi or speaker test's commands wrote |
+| `usb_drives` | text | The mounted USB drives and the one in use |
+| `usb_button_shown` | int | 1 while the USB test waits for the user |
+| `usb_button` | text | What the USB test's button says |
+| `speaker_answerable` | int | 1 once the speaker has played, so it can be answered |
+| `passed` | list | The tests that passed, each with `name` and `output` |
+| `failed` | list | The tests that failed, each with `name` and `output` |
+| `exit_shown` | int | 1 if the results can be left with Exit |
+
+Each row of `passed`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `name` | text | The test, e.g. "UsbTest" |
+| `output` | text | What it found, as JSON |
+| `passed` | int | 1 if it passed |
+
+Each row of `failed`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `name` | text | The test, e.g. "UsbTest" |
+| `output` | text | What it found, as JSON |
+| `passed` | int | 1 if it passed |
+
+| Action | Description |
+| --- | --- |
+| `hardware_test.buzzer_heard` | Whether the buzzer was heard: `arg` 1 for yes, 0 for no |
+| `hardware_test.colour_tapped` | The screen was tapped while showing a colour (`clicked`): the right half for no dead pixels, the left for some |
+| `hardware_test.exit` | Leave the hardware test |
+| `hardware_test.play_buzzer` | Sound the buzzer again |
+| `hardware_test.play_speaker` | Play a tone on the speaker; then it can be said whether it was heard |
+| `hardware_test.restart` | Run every test again, from the serial number |
+| `hardware_test.serial` | Use the serial number typed in the box (`ready`) and start the tests, else say it is invalid |
+| `hardware_test.speaker_heard` | Whether the speaker was heard: `arg` 1 for yes, 0 for no |
+| `hardware_test.start_colours` | Fill the screen with each test colour in turn |
+| `hardware_test.touched` | The screen was tapped during the touch test: record where (`clicked`) |
+| `hardware_test.usb_continue` | The user has done what the USB test asked |
+
 ### heightmap
 
 Used by `heightmap`.
@@ -1141,6 +1197,7 @@ Also takes every `lv_image` attribute.
 | Attribute | Description |
 | --- | --- |
 | `icon` | Icon file from the icon set, e.g. "folder.png" |
+| `folder` | Take `icon` from this folder of assets/icons instead, whatever the icon set, e.g. "hardware_test" |
 
 ### ds_keyboard
 
@@ -1467,6 +1524,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
+| [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
+| `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
@@ -1533,6 +1592,10 @@ Also shows `babystep`, `move`.
 Also shows `file_browser`.
 
 ![files](../tests/ref_imgs/xml_ui_api/views/files.png)
+
+#### hardware_test
+
+![hardware_test](../tests/ref_imgs/xml_ui_api/views/hardware_test.png)
 
 #### heightmap
 

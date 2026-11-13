@@ -3,6 +3,7 @@
  */
 
 #include "DsIcon.h"
+#include "UI/Styles/Styles.h"
 #include "WidgetSupport.h"
 #include "Widgets.h"
 #include "src/xml/parsers/lv_xml_image_parser.h"
@@ -28,7 +29,10 @@ namespace UI::Xml
 					  .description = "An icon from the icon set chosen in the settings, coloured by the theme. It "
 									 "follows icon set changes.",
 					  .example = R"(<ds_icon icon="folder.png" width="72" height="72"/>)",
-					  .attributes = {{"icon", "Icon file from the icon set, e.g. \"folder.png\""}}},
+					  .attributes = {{"icon", "Icon file from the icon set, e.g. \"folder.png\""},
+									 {"folder",
+									  "Take `icon` from this folder of assets/icons instead, whatever the icon set, "
+									  "e.g. \"hardware_test\""}}},
 					 xmlCreate,
 					 xmlApply);
 	}
@@ -45,7 +49,15 @@ namespace UI::Xml
 		lv_xml_image_apply(state, attrs);
 		if (const char* icon = lv_xml_get_value_of(attrs, "icon"))
 		{
-			static_cast<DsIcon&>(*LvObj::fromPtr(itemOf(state))).setIcon(icon);
+			auto& item = static_cast<DsIcon&>(*LvObj::fromPtr(itemOf(state)));
+			if (const char* folder = lv_xml_get_value_of(attrs, "folder"))
+			{
+				item.setFixedIcon(Themes::getFixedIconPath(folder, icon));
+			}
+			else
+			{
+				item.setIcon(icon);
+			}
 		}
 	}
 } // namespace UI::Xml

@@ -18,7 +18,6 @@
 #include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Widgets/HardwareTest/HardwareTest.h"
 #include "UI/Xml/Runtime/HotReload.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
@@ -154,8 +153,9 @@ int main(int argc, char** argv)
 	home.show();
 
 #if HARDWARE_TEST
-	UI::HardwareTest hw_test;
-	hw_test.show(true);
+	// The factory hardware test, over the home screen, from start-up: assets/ui/components/hardware_test/
+	UI::Xml::XmlView hardwareTest("hardware_test", lv_screen_active(), "hardware_test");
+	hardwareTest.show(true);
 #endif
 
 	Model::get().startEventLoop();

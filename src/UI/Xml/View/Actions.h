@@ -55,6 +55,9 @@ namespace UI::Xml
 		 * `value_changed`), else `arg` */
 		std::string text() const;
 
+		/** Where on the screen the widget was touched, for an event from a touch such as `clicked`, else nothing */
+		std::optional<lv_point_t> point() const;
+
 		/** The innermost list row the widget is in, or nullptr */
 		Row* row() const;
 

@@ -7,6 +7,7 @@
 #include "Console/ConsolePresenter.h"
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
+#include "HardwareTest/HardwareTestPresenter.h"
 #include "Heightmap/HeightmapPresenter.h"
 #include "Modals/FactorsPresenter.h"
 #include "Modals/NumberPadPresenter.h"
@@ -45,6 +46,7 @@ namespace UI
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
+		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 		Xml::Presenters::add<JobStatusPresenter>("dashboard_job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");

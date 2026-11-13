@@ -44,6 +44,8 @@
 			<xs:enumeration value="change_text"/>
 			<xs:enumeration value="chroma"/>
 			<xs:enumeration value="color"/>
+			<xs:enumeration value="colour"/>
+			<xs:enumeration value="colour_shown"/>
 			<xs:enumeration value="command"/>
 			<xs:enumeration value="commands_shown"/>
 			<xs:enumeration value="confirm"/>
@@ -86,6 +88,7 @@
 			<xs:enumeration value="duet_password"/>
 			<xs:enumeration value="elapsed"/>
 			<xs:enumeration value="error_notifications_stay"/>
+			<xs:enumeration value="exit_shown"/>
 			<xs:enumeration value="extrude_usable"/>
 			<xs:enumeration value="extruders"/>
 			<xs:enumeration value="extrusion_dialog.factors"/>
@@ -98,6 +101,7 @@
 			<xs:enumeration value="extrusion_dialog.pad_shown"/>
 			<xs:enumeration value="extrusion_dialog.title"/>
 			<xs:enumeration value="factor"/>
+			<xs:enumeration value="failed"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="fault"/>
 			<xs:enumeration value="feedrate.choices"/>
@@ -163,6 +167,7 @@
 			<xs:enumeration value="machine_position_mode"/>
 			<xs:enumeration value="maps"/>
 			<xs:enumeration value="max"/>
+			<xs:enumeration value="message"/>
 			<xs:enumeration value="min"/>
 			<xs:enumeration value="mode"/>
 			<xs:enumeration value="mode_icon"/>
@@ -176,11 +181,13 @@
 			<xs:enumeration value="number"/>
 			<xs:enumeration value="objects"/>
 			<xs:enumeration value="open"/>
+			<xs:enumeration value="output"/>
 			<xs:enumeration value="pad.accepted"/>
 			<xs:enumeration value="pad.confirmable"/>
 			<xs:enumeration value="pad.header"/>
 			<xs:enumeration value="pad.signed"/>
 			<xs:enumeration value="pad.text"/>
+			<xs:enumeration value="passed"/>
 			<xs:enumeration value="password"/>
 			<xs:enumeration value="password_open"/>
 			<xs:enumeration value="password_title"/>
@@ -216,6 +223,8 @@
 			<xs:enumeration value="secondary_hue"/>
 			<xs:enumeration value="selected"/>
 			<xs:enumeration value="selected_tool"/>
+			<xs:enumeration value="serial"/>
+			<xs:enumeration value="serial_invalid"/>
 			<xs:enumeration value="shell"/>
 			<xs:enumeration value="shell_available"/>
 			<xs:enumeration value="signal"/>
@@ -223,6 +232,7 @@
 			<xs:enumeration value="sort_date"/>
 			<xs:enumeration value="sort_name"/>
 			<xs:enumeration value="sort_size"/>
+			<xs:enumeration value="speaker_answerable"/>
 			<xs:enumeration value="speed_dialog.factors"/>
 			<xs:enumeration value="speed_dialog.open"/>
 			<xs:enumeration value="speed_dialog.pad.accepted"/>
@@ -238,6 +248,7 @@
 			<xs:enumeration value="speed_top"/>
 			<xs:enumeration value="ssh"/>
 			<xs:enumeration value="ssid"/>
+			<xs:enumeration value="stage"/>
 			<xs:enumeration value="standby"/>
 			<xs:enumeration value="state"/>
 			<xs:enumeration value="stats.area"/>
@@ -254,6 +265,8 @@
 			<xs:enumeration value="system_logging"/>
 			<xs:enumeration value="system_monitor"/>
 			<xs:enumeration value="system_monitor_shown"/>
+			<xs:enumeration value="target_x"/>
+			<xs:enumeration value="target_y"/>
 			<xs:enumeration value="temperatures"/>
 			<xs:enumeration value="temperatures.limit"/>
 			<xs:enumeration value="text"/>
@@ -273,9 +286,13 @@
 			<xs:enumeration value="update.text"/>
 			<xs:enumeration value="update.title"/>
 			<xs:enumeration value="usable"/>
+			<xs:enumeration value="usb_button"/>
+			<xs:enumeration value="usb_button_shown"/>
+			<xs:enumeration value="usb_drives"/>
 			<xs:enumeration value="usb_mode"/>
 			<xs:enumeration value="usb_modes"/>
 			<xs:enumeration value="value"/>
+			<xs:enumeration value="version"/>
 			<xs:enumeration value="x.home_usable"/>
 			<xs:enumeration value="x.homed"/>
 			<xs:enumeration value="x.jog_usable"/>
@@ -316,6 +333,7 @@
 			<xs:enumeration value="distances"/>
 			<xs:enumeration value="extruders"/>
 			<xs:enumeration value="extrusion_dialog.factors"/>
+			<xs:enumeration value="failed"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrates"/>
@@ -325,6 +343,7 @@
 			<xs:enumeration value="maps"/>
 			<xs:enumeration value="networks"/>
 			<xs:enumeration value="objects"/>
+			<xs:enumeration value="passed"/>
 			<xs:enumeration value="speed_dialog.factors"/>
 			<xs:enumeration value="steps"/>
 			<xs:enumeration value="swatches"/>
@@ -374,6 +393,17 @@
 			<xs:enumeration value="files.sort"/>
 			<xs:enumeration value="files.toggle_mode"/>
 			<xs:enumeration value="gcode"/>
+			<xs:enumeration value="hardware_test.buzzer_heard"/>
+			<xs:enumeration value="hardware_test.colour_tapped"/>
+			<xs:enumeration value="hardware_test.exit"/>
+			<xs:enumeration value="hardware_test.play_buzzer"/>
+			<xs:enumeration value="hardware_test.play_speaker"/>
+			<xs:enumeration value="hardware_test.restart"/>
+			<xs:enumeration value="hardware_test.serial"/>
+			<xs:enumeration value="hardware_test.speaker_heard"/>
+			<xs:enumeration value="hardware_test.start_colours"/>
+			<xs:enumeration value="hardware_test.touched"/>
+			<xs:enumeration value="hardware_test.usb_continue"/>
 			<xs:enumeration value="heaters.set_active"/>
 			<xs:enumeration value="heaters.set_standby"/>
 			<xs:enumeration value="heaters.toggle"/>
@@ -565,6 +595,7 @@
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
+			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="notifications"/>
@@ -611,6 +642,8 @@
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="hardware_test"/>
+			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
@@ -681,6 +714,8 @@
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="hardware_test"/>
+			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
@@ -774,6 +809,8 @@
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="hardware_test"/>
+			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
@@ -2453,6 +2490,9 @@
 	<xs:attributeGroup name="ds_icon.attributes">
 		<xs:attribute name="icon" type="xs:string">
 			<xs:annotation><xs:documentation>Icon file from the icon set, e.g. &quot;folder.png&quot;</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="folder" type="xs:string">
+			<xs:annotation><xs:documentation>Take `icon` from this folder of assets/icons instead, whatever the icon set, e.g. &quot;hardware_test&quot;</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_keyboard.attributes">
@@ -6857,6 +6897,22 @@
 	</xs:element>
 	<xs:element name="files">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/files/files.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="hardware_test">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/hardware_test/hardware_test.xml, with presenter hardware_test.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="hardware_test_result">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/hardware_test/hardware_test_result.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

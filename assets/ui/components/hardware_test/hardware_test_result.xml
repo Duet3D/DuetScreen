@@ -1,0 +1,20 @@
+<!--
+  One finished test in the hardware test's results: its name and what it found, green if it passed, red if not.
+
+  Fields:   a passed or failed row: name, output, passed (src/UI/Screens/HardwareTest/HardwareTestPresenter.h)
+-->
+<component>
+	<styles>
+		<style name="hardware_test_passed" bg_color="0x4caf50" bg_opa="100%"/>
+		<style name="hardware_test_failed" bg_color="0xf44336" bg_opa="100%"/>
+	</styles>
+
+	<view extends="lv_obj" height="100%" flex_grow="1" style_min_width="20%" flex_flow="column"
+		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
+		<bind_style name="hardware_test_passed" subject="passed" ref_value="1"/>
+		<bind_style name="hardware_test_failed" subject="passed" ref_value="0"/>
+		<lv_label name="name" bind_text="name"/>
+		<ds_textarea name="output" bind_text="output" keyboard="none" width="100%" flex_grow="1"
+					 style_text_align="left"/>
+	</view>
+</component>
