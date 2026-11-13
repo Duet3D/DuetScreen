@@ -26,7 +26,7 @@
 			<ds_view name="dashboard" view="dashboard" home="true"/>
 			<ds_view name="console" view="console"/>
 			<ds_view name="control" view="control"/>
-			<ds_view name="files" view="files"/>
+			<ds_view name="files" view="files_screen"/>
 			<ds_view name="settings" view="settings"/>
 			<ds_view name="extrusion_factor" view="extrusion_factor"/>
 			<ds_view name="numberpad" view="numberpad"/>

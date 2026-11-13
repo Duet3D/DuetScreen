@@ -12,10 +12,10 @@
 #include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
+#include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Control/ControlView.h"
 #include "UI/Screens/Dashboard/DashboardTabs.h"
-#include "UI/Screens/File/FilesScreen.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
@@ -270,7 +270,12 @@ int main(int argc, char** argv)
 					static size_t index = 0;
 					// Every page in turn, by the names home_screen.xml registers them under
 					auto control = [] { return UI::findView<UI::ControlView>("control"); };
-					auto files = [] { return UI::findView<UI::FilesScreen>("files"); };
+					auto files = []() -> UI::TabView*
+					{
+						UI::LvObj* page = UI::findView("files");
+						lv_obj_t* tabs = page ? lv_obj_find_by_name(page->getRootPtr(), "tabs") : nullptr;
+						return tabs ? dynamic_cast<UI::TabView*>(UI::LvObj::fromPtr(tabs)) : nullptr;
+					};
 					auto settings = [] { return UI::findView<UI::SettingsView>("settings"); };
 					auto dashboard = [] { return UI::findView<UI::DashboardTabs>("dashboard_tabs"); };
 					static const std::function<void()> cbs[] = {

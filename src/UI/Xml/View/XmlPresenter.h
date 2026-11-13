@@ -28,7 +28,9 @@
 
 namespace UI::Xml
 {
-	class XmlPresenter : public BasePresenter, public FieldProvider
+	class XmlPresenter : public BasePresenter,
+						 public FieldProvider,
+						 public std::enable_shared_from_this<XmlPresenter>
 	{
 	  public:
 		/** @param name The name the presenter is registered under, used in logs */

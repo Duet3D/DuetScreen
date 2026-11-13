@@ -1,0 +1,30 @@
+<!--
+  One file or folder in the file browser's grid: its thumbnail (or a folder icon) above its name. Tap to open it. The
+  list sets its size.
+
+  Fields:   a files row: name, thumbnail, is_folder (src/UI/Screens/File/FileBrowserPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="150" height="170" scrollable="false" flex_flow="column"
+		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="start">
+		<style name="file"/>
+		<style name="folder" selector="checked"/>
+		<bind_state_if_eq subject="is_folder" state="checked" ref_value="1"/>
+		<action trigger="clicked" name="files.open"/>
+
+		<lv_obj name="thumb_box" width="100%" height="72" flex_grow="1" style_pad_all="0" scrollable="false">
+			<bind_flag_if_eq subject="is_folder" flag="hidden" ref_value="1"/>
+			<lv_image name="thumb" bind_src="thumbnail" inner_align="contain" width="100%" height="100%">
+				<bind_flag_if_eq subject="thumbnail" flag="hidden" ref_value=""/>
+			</lv_image>
+		</lv_obj>
+		<ds_icon name="folder_icon" icon="folder.png" width="100%" height="72" flex_grow="1">
+			<bind_flag_if_eq subject="is_folder" flag="hidden" ref_value="0"/>
+		</ds_icon>
+		<lv_label name="label" bind_text="name" width="100%" height="content" long_mode="dots" flex_grow="1"
+				  style_max_height="content" style_text_align="center">
+			<style name="text_emphasis" selector="checked"/>
+			<bind_state_if_eq subject="is_folder" state="checked" ref_value="1"/>
+		</lv_label>
+	</view>
+</component>

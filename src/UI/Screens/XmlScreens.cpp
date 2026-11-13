@@ -8,7 +8,7 @@
 #include "Dashboard/DashboardTabs.h"
 #include "Dashboard/ToolListPresenter.h"
 #include "Fan/FanPresenter.h"
-#include "File/FilesScreen.h"
+#include "File/FileBrowserPresenter.h"
 #include "Notifications/NotificationsView.h"
 #include "Settings/SettingsView.h"
 #include "StatusBar/StatusBarPresenter.h"
@@ -43,6 +43,13 @@ namespace UI
 		return keyboard;
 	}
 
+	/** Make a file browser presenter with `settings` available as `name` */
+	static void addFileBrowser(std::string name, FileBrowserPresenter::Settings settings)
+	{
+		Xml::Presenters::add(name,
+							 [name, settings]() { return std::make_shared<FileBrowserPresenter>(name, settings); });
+	}
+
 	void registerXmlScreens()
 	{
 		/* Presenters */
@@ -50,13 +57,37 @@ namespace UI
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
 		Xml::Presenters::add<ToolListPresenter>("tool_list");
 
+		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
+		using Browser = FileBrowserPresenter;
+		using SortBy = Browser::SortBy;
+		using Mode = Browser::DisplayMode;
+		addFileBrowser("dashboard_jobs",
+					   {.folder = Browser::BaseFolder::GCODES,
+						.sortBy = {"ui:dashboard:file:jobs:sort_by", SortBy::DATE},
+						.sortDescending = {"ui:dashboard:file:jobs:sort_descending", true},
+						.displayMode = {"ui:dashboard:file:jobs:display_mode", Mode::List}});
+		addFileBrowser("dashboard_macros",
+					   {.folder = Browser::BaseFolder::MACROS,
+						.sortBy = {"ui:dashboard:file:macros:sort_by", SortBy::NAME},
+						.sortDescending = {"ui:dashboard:file:macros:sort_descending", false},
+						.displayMode = {"ui:dashboard:file:macros:display_mode", Mode::List}});
+		addFileBrowser("files_macros",
+					   {.folder = Browser::BaseFolder::MACROS,
+						.sortBy = {"ui:home:file:macros:sort_by", SortBy::NAME},
+						.sortDescending = {"ui:home:file:macros:sort_descending", false},
+						.displayMode = {"ui:home:file:macros:display_mode", Mode::List}});
+		addFileBrowser("files_jobs",
+					   {.folder = Browser::BaseFolder::GCODES,
+						.sortBy = {"ui:home:file:jobs:sort_by", SortBy::DATE},
+						.sortDescending = {"ui:home:file:jobs:sort_descending", true},
+						.displayMode = {"ui:home:file:jobs:display_mode", Mode::Tile}});
+
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
 		Xml::NativeViews::add<DashboardTabs>("dashboard_tabs");
 		Xml::NativeViews::add<ConsoleView>("console");
 		Xml::NativeViews::add<ControlView>("control");
-		Xml::NativeViews::add<FilesScreen>("files");
 		Xml::NativeViews::add<SettingsView>("settings");
 		Xml::NativeViews::add<NotificationsView>("notifications");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");

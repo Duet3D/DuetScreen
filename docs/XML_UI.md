@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_slider`, `ds_list`, `ds_graph`, `ds_tabs`, `ds_modal`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -38,7 +38,7 @@ src/UI/Xml/
              Translations, GlobalActions
   Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History
   View/      XmlView, XmlPresenter (and the presenter registry), Actions
-  Widgets/   DsButton, DsSlider, DsList, DsGraph, DsView
+  Widgets/   DsButton, DsIcon, DsSlider, DsList, DsGraph, DsTabs, DsModal, DsView
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
              MachineSource, NavigationSource, ResponseSource, TemperatureSource
@@ -196,6 +196,7 @@ These are in addition to the standard `lv_*` widgets.
 | Widget | Attributes |
 | --- | --- |
 | `<ds_button>` | `text`, `translation_tag`, `bind_text`, `icon`, `checkable`, `long_mode`, `flash_on` (flash whenever a subject changes) |
+| `<ds_icon>` | `icon`: an icon from the icon set chosen in the settings, e.g. `icon="folder.png"`; follows icon set changes |
 | `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |

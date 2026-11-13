@@ -5,6 +5,7 @@
 #include "Widgets.h"
 #include "DsButton.h"
 #include "DsGraph.h"
+#include "DsIcon.h"
 #include "DsList.h"
 #include "DsModal.h"
 #include "DsSlider.h"
@@ -17,6 +18,7 @@ namespace UI::Xml::Widgets
 	{
 		DsButton::registerXml();
 		DsGraph::registerXml();
+		DsIcon::registerXml();
 		DsSlider::registerXml();
 		DsList::registerXml();
 		DsModal::registerXml();

@@ -13,8 +13,6 @@
 #include "UI/Screens/Console/ConsoleView.h"
 #include "UI/Screens/Control/ControlView.h"
 #include "UI/Screens/Dashboard/DashboardTabs.h"
-#include "UI/Screens/File/FileView.h"
-#include "UI/Screens/File/FilesScreen.h"
 #include "UI/Screens/Notifications/NotificationsView.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
@@ -67,7 +65,87 @@ class TestHomeView : public UiTestSuite
 
 	static UI::ControlView& controlPage() { return page<UI::ControlView>("control"); }
 	static UI::ConsoleView& consolePage() { return page<UI::ConsoleView>("console"); }
-	static UI::FilesScreen& filesPage() { return page<UI::FilesScreen>("files"); }
+
+	/** The Files page's tabs, as files_screen.xml builds them */
+	static UI::TabView& filesPage()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("files").getRootPtr(), "tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the Files page has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
+
+	/** Open the Files page on tab `tab` (0 macros, 1 jobs) */
+	static void openFilesTab(size_t tab)
+	{
+		UI::openScreen(std::string_view("files"), false);
+		filesPage().setActiveTab(tab);
+	}
+
+	/**
+	 * Show `listing` (an rr_filelist reply) in the file browser registered as `browser`, as if the printer had
+	 * replied to its refresh button
+	 */
+	static lv_obj_t* showListing(const char* browser, const char* listing)
+	{
+		load_model_data_from_file("tests/object_model/test_bench/model_directories_v.json");
+		lv_obj_t* root = page<UI::LvObj>(browser).getRootPtr();
+		lv_obj_send_event(lv_obj_find_by_name(root, "refresh"), LV_EVENT_CLICKED, nullptr);
+		load_model_data_from_file(listing);
+		return root;
+	}
+
+	/** The item showing the file called `name` in a file browser, in whichever list (rows or tiles) is shown */
+	static lv_obj_t* fileItem(lv_obj_t* browser, std::string_view name)
+	{
+		for (const char* listName : {"rows", "tiles"})
+		{
+			lv_obj_t* list = lv_obj_find_by_name(browser, listName);
+			if (list == nullptr || lv_obj_has_flag(list, LV_OBJ_FLAG_HIDDEN))
+			{
+				continue;
+			}
+			for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+			{
+				lv_obj_t* item = lv_obj_get_child(list, static_cast<int32_t>(i));
+				lv_obj_t* label = lv_obj_find_by_name(item, "label");
+				if (label != nullptr && lv_label_get_text(label) == name)
+				{
+					return item;
+				}
+			}
+		}
+		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
+	}
+
+	/** The open file dialog (each file browser has one, in the modal host), or nullptr */
+	static lv_obj_t* openFileDialog()
+	{
+		lv_obj_t* host = UI::getModalHost()->getRootPtr();
+		for (uint32_t i = 0; i < lv_obj_get_child_count(host); i++)
+		{
+			lv_obj_t* backdrop = lv_obj_get_child(host, static_cast<int32_t>(i));
+			lv_obj_t* dialog = lv_obj_find_by_name(backdrop, "file_dialog");
+			if (dialog != nullptr && !lv_obj_has_flag(backdrop, LV_OBJ_FLAG_HIDDEN) &&
+				!lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN))
+			{
+				return dialog;
+			}
+		}
+		return nullptr;
+	}
+
+	static std::string_view labelText(lv_obj_t* parent, const char* name)
+	{
+		return lv_label_get_text(lv_obj_find_by_name(parent, name));
+	}
+
+	static bool isHidden(lv_obj_t* parent, const char* name)
+	{
+		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
+	}
 	static UI::SettingsView& settingsPage() { return page<UI::SettingsView>("settings"); }
 	static UI::NotificationsView& notificationsPage() { return page<UI::NotificationsView>("notifications"); }
 
@@ -160,89 +238,87 @@ TEST_F(TestHomeView, BlankConsoleView)
 
 TEST_F(TestHomeView, BlankMacroView)
 {
-	auto& files = filesPage();
-	openScreen(&files, false);
-	files.setActiveTab(0);
+	openFilesTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/macros_blank.png");
 }
 
 TEST_F(TestHomeView, BlankJobView)
 {
-	auto& files = filesPage();
-	openScreen(&files, false);
-	files.setActiveTab(1);
+	openFilesTab(1);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/jobs_blank.png");
 }
 
 TEST_F(TestHomeView, JobModalShowsDeleteButton)
 {
-	auto& files = filesPage();
-	openScreen(&files, false);
-	files.setActiveTab(1);
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
 
-	auto* tab = files.getTab(1);
-	ASSERT_NE(tab, nullptr);
-	auto& jobsView = static_cast<UI::FileView&>(*tab->getChild(0));
-
-	jobsView.confirmStartPrint("test.gcode", std::filesystem::path{});
-	auto& modal = jobsView.getConfirmModal();
-
-	EXPECT_TRUE(modal.isVisible());
-	auto* deleteBtn = modal.getChildByName("footer.delete");
-	ASSERT_NE(deleteBtn, nullptr);
-	EXPECT_TRUE(deleteBtn->isVisible());
+	lv_obj_t* dialog = openFileDialog();
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_EQ(labelText(dialog, "title"), "Start Print");
+	EXPECT_EQ(labelText(dialog, "text"), "File: test.gcode");
+	EXPECT_FALSE(isHidden(dialog, "delete"));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/start_print_modal.png");
 
-	modal.cancel();
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
 TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 {
-	auto& files = filesPage();
-	openScreen(&files, false);
-	files.setActiveTab(0);
+	openFilesTab(0);
+	lv_obj_t* browser = showListing("files_macros", "tests/object_model/rr_filelist/macros.json");
+	lv_obj_send_event(fileItem(browser, "test.g"), LV_EVENT_CLICKED, nullptr); // "01_test.g", ordering prefix hidden
 
-	auto* tab = files.getTab(0);
-	ASSERT_NE(tab, nullptr);
-	auto& macrosView = static_cast<UI::FileView&>(*tab->getChild(0));
-
-	macrosView.confirmRunMacro("test.g");
-	auto& modal = macrosView.getConfirmModal();
-
-	EXPECT_TRUE(modal.isVisible());
-	auto* deleteBtn = modal.getChildByName("footer.delete");
-	ASSERT_NE(deleteBtn, nullptr);
-	EXPECT_FALSE(deleteBtn->isVisible());
+	lv_obj_t* dialog = openFileDialog();
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_EQ(labelText(dialog, "title"), "Run Macro");
+	EXPECT_TRUE(isHidden(dialog, "delete"));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/run_macro_modal.png");
 
-	modal.cancel();
+	UI::closeAllModals();
+	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
 TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 {
-	auto& files = filesPage();
-	openScreen(&files, false);
-	files.setActiveTab(1);
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
 
-	auto* tab = files.getTab(1);
-	ASSERT_NE(tab, nullptr);
-	auto& jobsView = static_cast<UI::FileView&>(*tab->getChild(0));
+	lv_obj_t* dialog = openFileDialog();
+	ASSERT_NE(dialog, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "delete"), LV_EVENT_CLICKED, nullptr);
 
-	jobsView.confirmStartPrint("test.gcode", std::filesystem::path{});
-	auto& modal = jobsView.getConfirmModal();
-
-	auto* deleteBtn = modal.getChildByName("footer.delete");
-	ASSERT_NE(deleteBtn, nullptr);
-	ASSERT_TRUE(deleteBtn->isVisible());
-
-	deleteBtn->sendEvent(LV_EVENT_CLICKED, nullptr);
-
-	EXPECT_EQ(std::string(modal.getTitle().getText()), "Delete File");
-	EXPECT_EQ(std::string(modal.getText().getText()), "Are you sure you want to delete test.gcode?");
-	EXPECT_FALSE(deleteBtn->isVisible());
+	ASSERT_EQ(openFileDialog(), dialog) << "the same dialog asks again";
+	EXPECT_EQ(labelText(dialog, "title"), "Delete File");
+	EXPECT_EQ(labelText(dialog, "text"), "Are you sure you want to delete test.gcode?");
+	EXPECT_TRUE(isHidden(dialog, "delete"));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/confirm_delete_modal.png");
 
-	modal.cancel();
+	UI::closeAllModals();
+}
+
+TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_t* crumbs = lv_obj_find_by_name(browser, "breadcrumb_container");
+	ASSERT_EQ(lv_obj_get_child_count(crumbs), 1u);
+
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(openFileDialog(), nullptr) << "a folder opens, it doesn't ask";
+	ASSERT_EQ(lv_obj_get_child_count(crumbs), 2u);
+	lv_obj_t* base = lv_obj_get_child(crumbs, 0);
+	lv_obj_t* folder = lv_obj_get_child(crumbs, 1);
+	EXPECT_FALSE(isHidden(base, "folder")) << "the base folder can be tapped";
+	EXPECT_EQ(labelText(lv_obj_find_by_name(base, "folder"), "label"), "0:/gcodes");
+	EXPECT_EQ(labelText(folder, "open_folder"), "Folder");
+	EXPECT_FALSE(isHidden(folder, "separator"));
+
+	lv_obj_send_event(lv_obj_find_by_name(base, "folder"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(crumbs), 1u);
 }
 
 TEST_F(TestHomeView, BlankStatusView)
@@ -375,10 +451,14 @@ TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 	auto& files = filesPage();
 	ASSERT_NE(files.getTabButton(1), nullptr);
 
-	filesPage().getPresenter()->newStatus(OM::PrinterStatus::processing);
-	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
+	Model::get().post<EventType::Status>(OM::PrinterStatus::paused);
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED)) << "a paused job can't be replaced either";
 
-	filesPage().getPresenter()->newStatus(OM::PrinterStatus::idle);
+	Model::get().post<EventType::Status>(OM::PrinterStatus::idle);
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
 	EXPECT_FALSE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
@@ -703,9 +783,7 @@ TEST_F(TestHomeViewWithData, ControlView)
 
 TEST_F(TestHomeViewWithData, MacroView)
 {
-	auto& files = filesPage();
-	openScreen(&files, false);
-	files.setActiveTab(0);
+	openFilesTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/macros.png")
 }
 

@@ -28,7 +28,6 @@
 #include "UI/Components/MessageBox/AlertMessageBox.h"
 #include "UI/Components/MessageBox/MessageBox.h"
 #include "UI/Components/Theme/ThemePreview.h"
-#include "UI/Screens/File/FileView.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
@@ -135,6 +134,33 @@ static std::unique_ptr<LvLabel> createLabel(const std::string& text, LvObj& pare
 }
 
 /** Two made-up tools for the widget gallery. Its lists shadow the printer's in the tool list's scope. */
+/** One made-up file or folder, for file_row.xml (it binds to `name`, `date`, `thumbnail` and `is_folder`) */
+class GalleryFile : public Xml::XmlPresenter
+{
+  public:
+	GalleryFile(std::string_view name, std::string_view date, bool isFolder)
+		: XmlPresenter("gallery_file")
+	{
+		m_name.set(name);
+		m_date.set(date);
+		m_isFolder.set(isFolder ? 1 : 0);
+	}
+
+	void fields(Xml::FieldVisitor& f) override
+	{
+		f.field("name", m_name, "Name");
+		f.field("date", m_date, "Date");
+		f.field("thumbnail", m_thumbnail, "No thumbnail");
+		f.field("is_folder", m_isFolder, "File or folder");
+	}
+
+  private:
+	Xml::StringSubject<32> m_name;
+	Xml::StringSubject<32> m_date;
+	Xml::StringSubject<8> m_thumbnail;
+	Xml::IntSubject m_isFolder;
+};
+
 class GalleryTools : public Xml::XmlPresenter
 {
   public:
@@ -304,34 +330,19 @@ TEST_F(TestTheme, Widgets)
 	file_folder_cont.setFlexGrow(1);
 	file_folder_cont.setFlexFlow(LV_FLEX_FLOW_ROW);
 
-	FileView file_view("files",
-					   file_folder_cont,
-					   FileView::StorageKeys{.sortBy = {"file_sort_by", FilePresenter::SortBy::DATE},
-											 .sortDescending = {"file_sort_descending", true},
-											 .displayMode = {"file_display_mode", FileView::DisplayMode::List}});
-	file_view.hide();
-
-	FileView::FileItem file_item("file_item", file_folder_cont);
+	Xml::XmlView file_item("file_item",
+						   file_folder_cont,
+						   "file_row",
+						   std::make_shared<GalleryFile>("File name", "2025-08-20 12:37:10", false));
 	file_item.setHeight(80);
 	file_item.setFlexGrow(1);
-	// file_item.setHeight(LV_PCT(100));
-	file_item.setType(false);
-	file_item.setFileLabel("File name");
-	file_item.setFileDate("2025-08-20 12:37:10");
-#if SHOW_FILE_ITEM_SIZE
-	file_item.setFileSize("671 KB");
-#endif
 
-	FileView::FileItem folder_item("folder_item", file_folder_cont);
+	Xml::XmlView folder_item("folder_item",
+							 file_folder_cont,
+							 "file_row",
+							 std::make_shared<GalleryFile>("Folder name", "2025-08-20 12:39:59", true));
 	folder_item.setHeight(80);
 	folder_item.setFlexGrow(1);
-	// folder_item.setHeight(LV_PCT(100));
-	folder_item.setType(true);
-	folder_item.setFileLabel("Folder name");
-	folder_item.setFileDate("2025-08-20 12:39:59");
-#if SHOW_FILE_ITEM_SIZE
-	folder_item.setFileSize("0 B");
-#endif
 
 	/* Graph */
 	Graph graph("graph", cont);

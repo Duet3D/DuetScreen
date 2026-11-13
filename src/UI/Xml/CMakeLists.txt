@@ -28,6 +28,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsIcon.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsModal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp

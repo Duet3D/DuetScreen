@@ -1,0 +1,23 @@
+<!--
+  One folder of the file browser's path: a separator before all but the first, then the folder's name, which can be
+  tapped to go back up to it unless it is the open folder.
+
+  Fields:   a crumbs row: name, last (src/UI/Screens/File/FileBrowserPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="content" height="content" flex_flow="row" style_pad_all="0"
+		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="pad_tiny"/>
+
+		<lv_label name="separator" translation_tag="file.crumb_separator">
+			<bind_flag_if_eq subject="index" flag="hidden" ref_value="0"/>
+		</lv_label>
+		<ds_button name="folder" bind_text="name">
+			<bind_flag_if_eq subject="last" flag="hidden" ref_value="1"/>
+			<action trigger="clicked" name="files.crumb"/>
+		</ds_button>
+		<lv_label name="open_folder" bind_text="name">
+			<bind_flag_if_eq subject="last" flag="hidden" ref_value="0"/>
+		</lv_label>
+	</view>
+</component>

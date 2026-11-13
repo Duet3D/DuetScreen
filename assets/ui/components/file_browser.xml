@@ -1,0 +1,64 @@
+<!--
+  Browse a folder of jobs or macros: sort buttons and display mode at the top, the folder's path, then its files as a
+  list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in file_dialog.
+
+  Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
+  e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Screens/XmlScreens.cpp).
+
+  Fields and actions: src/UI/Screens/File/FileBrowserPresenter.h
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="bg_dark"/>
+		<style name="card"/>
+
+		<lv_obj name="sidebar" width="100%" height="content" flex_flow="row"
+				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+			<ds_button name="sort_name" bind_text="sort_name" width="content" height="content">
+				<bind_state_if_eq subject="sort" state="checked" ref_value="0"/>
+				<action trigger="clicked" name="files.sort" arg="name"/>
+			</ds_button>
+			<ds_button name="sort_date" bind_text="sort_date" width="content" height="content">
+				<bind_state_if_eq subject="sort" state="checked" ref_value="1"/>
+				<action trigger="clicked" name="files.sort" arg="date"/>
+			</ds_button>
+			<ds_button name="sort_size" bind_text="sort_size" width="content" height="content">
+				<bind_state_if_eq subject="sort" state="checked" ref_value="2"/>
+				<action trigger="clicked" name="files.sort" arg="size"/>
+			</ds_button>
+			<lv_obj name="pad" width="content" height="content" flex_grow="1"/>
+			<ds_button name="display_mode" bind_text="mode_icon" width="content" height="content">
+				<bind_state_if_eq subject="tiles" state="checked" ref_value="1"/>
+				<action trigger="clicked" name="files.toggle_mode"/>
+			</ds_button>
+			<ds_button name="refresh" translation_tag="file.refresh" width="content" height="content">
+				<action trigger="clicked" name="files.refresh"/>
+			</ds_button>
+		</lv_obj>
+
+		<lv_obj name="list" width="100%" flex_grow="1" flex_flow="column">
+			<!-- The folder's path; folders above the open one can be tapped -->
+			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="bg_color_header"/>
+				<lv_label name="breadcrumb_prefix" translation_tag="file.header_prefix" width="content" height="content"/>
+				<ds_list name="breadcrumb_container" list="crumbs" item="file_crumb" height="content" flex_grow="1"
+						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="center"
+						 style_flex_track_place="start">
+					<style name="pad_tiny"/>
+				</ds_list>
+			</lv_obj>
+
+			<ds_list name="rows" list="files" item="file_row" windowed="true" item_height="90"
+					 width="100%" height="100%" flex_grow="1" scroll_dir="ver">
+				<bind_flag_if_eq subject="tiles" flag="hidden" ref_value="1"/>
+			</ds_list>
+			<ds_list name="tiles" list="files" item="file_tile" windowed="true" item_width="150" item_height="170"
+					 flow="row_wrap" width="100%" height="100%" flex_grow="1" scroll_dir="ver">
+				<bind_flag_if_eq subject="tiles" flag="hidden" ref_value="0"/>
+			</ds_list>
+		</lv_obj>
+
+		<file_dialog/>
+	</view>
+</component>

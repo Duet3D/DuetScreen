@@ -11,8 +11,8 @@
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Presenter.h"
 #include "UI/Core/View.h"
-#include "UI/Screens/File/FileView.h"
 #include "UI/Screens/Status/StatusView.h"
+#include "UI/Xml/View/XmlView.h"
 
 namespace UI
 {
@@ -50,9 +50,6 @@ namespace UI
 		/** Enable or disable the Jobs tab */
 		void disableJobsTab(bool disable) { disableTab(JOBS_TAB, disable); }
 
-		/** The Jobs file list */
-		FileView& getFileView() { return m_fileView; }
-
 		/** The Status tab */
 		StatusView& getStatusView() { return m_statusView; }
 
@@ -64,19 +61,11 @@ namespace UI
 		static constexpr size_t JOBS_TAB = 0;	// Index of the Jobs tab
 		static constexpr size_t STATUS_TAB = 2; // Index of the Status tab
 
-		FileView m_fileView{
-			"files",
-			addTab(_("file.jobs")),
-			FileView::StorageKeys{.sortBy = {"ui:dashboard:file:jobs:sort_by", OM::FileSystem::SortBy::DATE},
-								  .sortDescending = {"ui:dashboard:file:jobs:sort_descending", true},
-								  .displayMode = {"ui:dashboard:file:jobs:display_mode", FileView::DisplayMode::List}}};
-		FileView m_macroView{
-			"macros",
-			addTab(_("file.macros")),
-			FileView::StorageKeys{
-				.sortBy = {"ui:dashboard:file:macros:sort_by", OM::FileSystem::SortBy::NAME},
-				.sortDescending = {"ui:dashboard:file:macros:sort_descending", false},
-				.displayMode = {"ui:dashboard:file:macros:display_mode", FileView::DisplayMode::List}}};
+		// File browsers (file_browser.xml) with the dashboard's own settings (see Screens/XmlScreens.cpp)
+		Xml::XmlView m_jobsView{
+			"dashboard_jobs", addTab(_("file.jobs")), "file_browser", Xml::Presenters::create("dashboard_jobs")};
+		Xml::XmlView m_macrosView{
+			"dashboard_macros", addTab(_("file.macros")), "file_browser", Xml::Presenters::create("dashboard_macros")};
 		StatusView m_statusView{"status", addTab(_("app_drawer.status"))}; // Print status
 	};
 } // namespace UI

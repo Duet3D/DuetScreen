@@ -34,9 +34,6 @@ namespace UI
 		: View(name, parent)
 	{
 		ZoneScoped;
-		m_fileView.addStyle(Themes::getLvglStyles().card);
-		m_macroView.addStyle(Themes::getLvglStyles().card);
-		m_macroView.getPresenter()->setBaseFolder(FilePresenter::BaseFolder::MACROS);
 		setActiveTab(JOBS_TAB);
 	}
 
