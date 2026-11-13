@@ -1,0 +1,65 @@
+<!--
+  The screen's WiFi: its IP address, how the last connection attempt went, and the networks around it, scanned for
+  every few seconds while shown. Joining a new network asks for its password, typed on the shared keyboard.
+
+  Fields and actions: src/UI/Screens/Settings/WifiPresenter.h
+-->
+<component presenter="wifi">
+	<styles>
+		<!-- Out of the on-screen keyboard's way -->
+		<style name="above_keyboard" align="top_mid" translate_y="50"/>
+	</styles>
+
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+		<lv_obj name="header" width="100%" height="content">
+			<lv_label name="status_message" bind_text="status" align="right_mid"/>
+			<lv_label name="ip_address" bind_text="ip" align="left_mid"/>
+		</lv_obj>
+
+		<lv_obj name="wifi_list" width="100%" height="content" flex_flow="column">
+			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
+					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="bg_color_header"/>
+				<style name="list_header"/>
+				<lv_label name="title" translation_tag="settings.network.available_wifi" width="content"
+						  height="content" flex_grow="1">
+					<style name="list_title"/>
+				</lv_label>
+				<ds_button name="refresh" translation_tag="settings.network.refresh">
+					<action trigger="clicked" name="wifi.refresh"/>
+				</ds_button>
+			</lv_obj>
+			<ds_list name="list" list="networks" item="wifi_network" width="100%" height="content" flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+
+		<ds_modal name="wifi_password_modal" bind_open="password_open" width="80%" height="content" flex_flow="column">
+			<bind_style name="above_keyboard" subject="keyboard" ref_value="1"/>
+			<action trigger="dismissed" name="wifi.close_password"/>
+
+			<lv_obj name="header" width="100%" height="content" flex_flow="row">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="password_title"/>
+			</lv_obj>
+
+			<ds_textarea name="wifi_password_input" bind_text="password" one_line="true" password_mode="true"
+						 placeholder_tag="settings.network.enter_password_hint" width="100%" height="content">
+				<action trigger="value_changed" name="wifi.password"/>
+				<action trigger="focused" name="wifi.keyboard" arg="1"/>
+				<action trigger="defocused" name="wifi.keyboard" arg="0"/>
+				<action trigger="ready" name="wifi.keyboard" arg="0"/>
+			</ds_textarea>
+
+			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+				<ds_button name="cancel" translation_tag="common.cancel" height="content" flex_grow="1">
+					<action trigger="clicked" name="wifi.close_password"/>
+				</ds_button>
+				<ds_button name="ok" translation_tag="common.ok" height="content" flex_grow="1">
+					<style name="actionBtn"/>
+					<action trigger="clicked" name="wifi.join"/>
+				</ds_button>
+			</lv_obj>
+		</ds_modal>
+	</view>
+</component>

@@ -918,6 +918,33 @@ TEST_F(TestHomeViewWithData, SettingsView)
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
 }
 
+TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
+{
+	UI::openScreen(std::string_view("settings"));
+	settingsPage().setActiveTab(1);
+	lv_obj_t* wifi = UI::findView("wifi_selector")->getRootPtr();
+	lv_obj_t* networks = lv_obj_find_by_name(wifi, "list");
+	ASSERT_NE(networks, nullptr);
+	for (int i = 0; i < 50 && lv_obj_get_child_count(networks) == 0; i++) // Scanned on a thread of its own
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	}
+	ASSERT_GT(lv_obj_get_child_count(networks), 0u);
+
+	// The last network found isn't known, so connecting to it asks for its password
+	lv_obj_t* unknown = lv_obj_get_child(networks, -1);
+	ASSERT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(unknown, "forget"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "wifi_password_modal");
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(lv_obj_find_by_name(unknown, "connect"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+}
+
 TEST_F(TestHomeViewWithData, StatusView)
 {
 	dashboardTabs().setActiveTab(STATUS_TAB);

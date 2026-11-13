@@ -38,6 +38,21 @@ namespace UI::Xml::Services
 	 */
 	bool askNumber(lv_obj_t* asker, NumberRequest request);
 
+	/** Text typed on a number pad, such as an IP address (see askText()) */
+	struct TextRequest
+	{
+		std::string header;								// Shown above the keys
+		std::string text;								// Shown to start with
+		std::function<void(std::string_view)> onConfirm; // Called with the text the user confirms
+	};
+
+	/**
+	 * Ask the user for digits and dots, such as an IP address, with the number pad nearest `asker`, found as for
+	 * askNumber()
+	 * @return false if there is no number pad
+	 */
+	bool askText(lv_obj_t* asker, TextRequest request);
+
 	/** Send a line of G-code to the printer. A newline is added if missing. */
 	void sendGcode(std::string_view gcode);
 

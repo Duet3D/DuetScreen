@@ -4,21 +4,12 @@
 
 namespace UI
 {
-	class ConnectionSettings;
 	class DisplaySettings;
 	class DeveloperSettings;
 	class NetworkSettingsView;
 
 
 
-	class ConnectionSettingsPresenter : public Presenter<ConnectionSettings>
-	{
-	  public:
-		PRESENTER_CONSTRUCTOR(ConnectionSettingsPresenter, ConnectionSettings)
-
-	  private:
-		void onInit() override;
-	};
 
 	class DisplaySettingsPresenter : public Presenter<DisplaySettings>
 	{

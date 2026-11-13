@@ -15,7 +15,6 @@
 #include "UI/Components/Theme/ThemePreview.h"
 #include "UI/Core/View.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
-#include "UI/Widgets/Network/WifiSelector.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -39,39 +38,6 @@ namespace UI
 		std::array<std::unique_ptr<LvLabel>, m_maxRowCount> m_labels;
 		std::array<int32_t, 3> m_colDsc;
 		std::array<int32_t, m_maxRowCount + 1> m_rowDsc;
-	};
-
-	class ConnectionSettings : public View<ConnectionSettingsPresenter, SettingsTab>
-	{
-	  public:
-		ConnectionSettings(const std::string& name, LvObj& parent);
-
-		void setKeyboard(LvKeyboard* keyboard);
-
-	  private:
-		void showConnectionMethodSettings(const Comm::CommunicationType method);
-
-		void onInit() override;
-		void onShow() override;
-
-		DropdownMenu m_connectionMethod{"connection_method", getRoot()};
-		DropdownMenu m_usbMode{"usb_mode", getRoot()};
-		Slider m_pollInterval{"poll_interval", getRoot()};
-
-		/* USB Settings */
-		// None
-
-		/* Wifi Settings */
-		TextBox m_duetIpAddress{"duet_ip_address", getRoot()};
-		TextBox m_duetPassword{"duet_password", getRoot()};
-
-		/* UART Settings */
-		// None
-
-		/* Network */
-		WifiSelector m_wifiSelector{"wifi_selector", getRoot()};
-
-		LvKeyboard* m_keyboard;
 	};
 
 	class DisplaySettings : public View<DisplaySettingsPresenter, SettingsTab>

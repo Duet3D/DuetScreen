@@ -17,7 +17,6 @@
 #include "version.h"
 #include <ranges>
 
-#define USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS 1
 #define ENABLE_90_ROTATION 0
 
 namespace UI
@@ -38,15 +37,6 @@ namespace UI
 		ScreenRotationOption{"settings.screen_rotation_options.rotation_270", DisplayRotation::ROTATION_270},
 #endif
 	};
-
-	static void onTextareaEvent(lv_event_t* e, TextBox& text_box, lv_keyboard_mode_t mode);
-
-	static void setSliderNumberpadLabel(Slider& slider, std::string_view label)
-	{
-		ZoneScoped;
-		slider.setLabel(label);
-		slider.getLabel().hide();
-	}
 
 	SettingsTab::SettingsTab(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent, layout_t(0, 0, 100, 100))
@@ -148,157 +138,6 @@ namespace UI
 			label->setVisible(show);
 		}
 		obj.setVisible(show);
-	}
-
-	ConnectionSettings::ConnectionSettings(const std::string& name, LvObj& parent)
-		: View(name, parent)
-	{
-		ZoneScoped;
-		/* Connection method */
-		createRow(_("settings.duet_connection_method"), m_connectionMethod);
-		std::vector<std::string> options;
-		for (const auto& method : Comm::duetCommunicationTypeNames)
-		{
-			options.push_back(_(method.data()));
-		}
-		m_connectionMethod.setHeight(LV_SIZE_CONTENT);
-		m_connectionMethod.setOptions<std::string>(options);
-		m_connectionMethod.addEventCallback(
-			[this](lv_event_t*)
-			{
-				auto comm_type = (Comm::CommunicationType)(m_connectionMethod.getSelected());
-				Comm::DUET.SetCommunicationType(comm_type);
-				switch (comm_type)
-				{
-				case Comm::CommunicationType::uart:
-				case Comm::CommunicationType::usb:
-					setUsbMode(Comm::UsbMode::Host);
-					break;
-				case Comm::CommunicationType::network:
-					setUsbMode(Comm::UsbMode::InternalWiFi);
-					break;
-				default:
-					break;
-				}
-				m_usbMode.setSelected(static_cast<uint32_t>(Comm::getUsbMode()));
-				showConnectionMethodSettings(Comm::DUET.GetCommunicationType());
-			},
-			LV_EVENT_VALUE_CHANGED);
-
-		/* USB mode */
-		createRow(_("settings.usb_mode"), m_usbMode);
-		m_usbMode.setHeight(LV_SIZE_CONTENT);
-		{
-			std::array usbModeOptions = {
-				_("settings.usb_mode_host"),
-				_("settings.usb_mode_device"),
-				_("settings.usb_mode_internal_wifi"),
-			};
-			m_usbMode.setOptions<std::string>(usbModeOptions);
-		}
-		m_usbMode.setSelectedCallback([this](uint32_t index, std::string_view /* option */)
-									  { setUsbMode(Comm::UsbMode(index)); });
-
-		/* Poll Interval */
-		createRow(_("settings.duet_poll_interval"), m_pollInterval);
-		setSliderNumberpadLabel(m_pollInterval, _("settings.duet_poll_interval"));
-		m_pollInterval.setHeight(LV_SIZE_CONTENT);
-		m_pollInterval.setOutOfRangeMode(Slider::OutOfRange::UPPER);
-		m_pollInterval.setRange(MIN_PRINTER_POLL_INTERVAL.count(), 2000);
-		m_pollInterval.setValueChangedCallback(
-			[](float value) { Comm::DUET.SetPollInterval(std::chrono::milliseconds(static_cast<int32_t>(value))); });
-
-		/* Wifi settings */
-		createRow(_("settings.duet_ip_address"), m_duetIpAddress);
-		m_duetIpAddress.setHeight(LV_SIZE_CONTENT);
-		m_duetIpAddress.setOneLine(true);
-		m_duetIpAddress.setPlaceholderText(_("settings.duet_ip_address_prompt"));
-		m_duetIpAddress.setAcceptedChars("0123456789.");
-#if USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS
-		m_duetIpAddress.getTextarea().addEventCallback(
-			[this](lv_event_t*)
-			{
-				if (auto np = m_duetIpAddress.getNumberPad())
-				{
-					np->setHeader(_("settings.duet_ip_address_prompt"));
-				}
-			},
-			LV_EVENT_CLICKED);
-#else
-		m_duetIpAddress.getTextarea().addEventCallback(
-			[this](lv_event_t* e) { onTextareaEvent(e, m_duetIpAddress, LV_KEYBOARD_MODE_NUMBER); }, LV_EVENT_ALL);
-#endif
-
-// A bit gross but the callback is the same and this way it means it can't accidentally do different things if updated
-// in the future
-#if USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS
-		m_duetIpAddress.addEventCallback
-#else
-		m_duetIpAddress.addConfirmEventCallback
-#endif
-			([this](lv_event_t*) { Comm::DUET.SetIPAddress(m_duetIpAddress.getText()); }
-#if USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS
-			 ,
-			 LV_EVENT_VALUE_CHANGED
-#endif
-			);
-
-		createRow(_("settings.duet_password"), m_duetPassword);
-		m_duetPassword.setHeight(LV_SIZE_CONTENT);
-		m_duetPassword.setOneLine(true);
-		m_duetPassword.setPlaceholderText(_("settings.duet_password_prompt"));
-		m_duetPassword.setPasswordMode(true);
-		m_duetPassword.getTextarea().addEventCallback(
-			[this](lv_event_t* e) { onTextareaEvent(e, m_duetPassword, LV_KEYBOARD_MODE_TEXT_LOWER); }, LV_EVENT_ALL);
-		m_duetPassword.addConfirmEventCallback([this](lv_event_t*)
-											   { Comm::DUET.SetPassword(m_duetPassword.getText()); });
-
-		createHeader(_("settings.headers.screen_networking"));
-		createSpanRow(m_wifiSelector);
-		m_wifiSelector.setHeight(LV_SIZE_CONTENT);
-	}
-
-	void ConnectionSettings::setKeyboard(LvKeyboard* keyboard)
-	{
-		ZoneScoped;
-		m_keyboard = keyboard;
-#if !USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS
-		m_duetIpAddress.setKeyboard(m_keyboard);
-#endif
-		m_duetPassword.setKeyboard(m_keyboard);
-		m_wifiSelector.setKeyboard(m_keyboard);
-	}
-
-	void ConnectionSettings::showConnectionMethodSettings(const Comm::CommunicationType method)
-	{
-		ZoneScoped;
-		UI_LOCK();
-
-		setRowVisibility(m_duetIpAddress, method == Comm::CommunicationType::network);
-		setRowVisibility(m_duetPassword, method == Comm::CommunicationType::network);
-	}
-
-	void ConnectionSettings::onInit()
-	{
-		setKeyboard(findView<LvKeyboard>("keyboard"));
-		ZoneScoped;
-		m_pollInterval.setNumberPad(findView<ModalNumberPad>("numberpad"));
-#if USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS
-		m_duetIpAddress.setNumberPad(findView<ModalNumberPad>("numberpad"));
-#endif
-	}
-
-	void ConnectionSettings::onShow()
-	{
-		ZoneScoped;
-		// Update USB mode selection
-		auto communicationType = Comm::DUET.GetCommunicationType();
-		m_connectionMethod.setSelected(static_cast<uint32_t>(communicationType));
-		m_usbMode.setSelected(static_cast<uint32_t>(Comm::getUsbMode()));
-		m_pollInterval.setValue(static_cast<float>(Comm::DUET.GetPollInterval().count()));
-		m_duetIpAddress.setText(Comm::DUET.GetIPAddress());
-		m_duetPassword.setText(Comm::DUET.GetPassword());
-		showConnectionMethodSettings(communicationType);
 	}
 
 	DisplaySettings::DisplaySettings(const std::string& name, LvObj& parent)
@@ -660,38 +499,5 @@ namespace UI
 		m_enableSystemMonitor.setChecked(StorageHelper::getData(ID_SYSTEM_MONITOR_ENABLED));
 #endif
 		m_systemLogging.setChecked(StorageHelper::getData(ID_ENABLE_UI_LOGGING));
-	}
-
-	static void onTextareaEvent(lv_event_t* e, TextBox& text_box, lv_keyboard_mode_t mode)
-	{
-		ZoneScoped;
-		UI_LOCK();
-
-		lv_event_code_t code = lv_event_get_code(e);
-		if (code != LV_EVENT_FOCUSED && code != LV_EVENT_DEFOCUSED && code != LV_EVENT_READY)
-		{
-			return;
-		}
-
-		LvKeyboard* kb = text_box.getKeyboard();
-		if (!kb)
-		{
-			LOG_WARN("Keyboard not set");
-			return;
-		}
-
-		switch (code)
-		{
-		case LV_EVENT_FOCUSED:
-			kb->setMode(mode);
-			kb->show(true);
-			break;
-		case LV_EVENT_DEFOCUSED:
-		case LV_EVENT_READY:
-			kb->hide();
-			break;
-		default:
-			break;
-		}
 	}
 } // namespace UI

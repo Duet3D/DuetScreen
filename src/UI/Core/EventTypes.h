@@ -22,6 +22,11 @@ namespace UpgradeHelper
 	struct UpgradeInfo;
 } // namespace UpgradeHelper
 
+namespace NetworkHelper
+{
+	enum class ConnectResult;
+} // namespace NetworkHelper
+
 namespace Log
 {
 	enum class DebugLevel;
@@ -88,7 +93,9 @@ namespace UI
 	XX(NavigationHomeEnable, bool)                                                                                     \
 	XX(NavigationBackEnable, bool)                                                                                     \
 	XX(NavigationCurrentScreen, UI::LvObj*)                                                                            \
-	XX(Filaments, std::vector<std::string>)
+	XX(Filaments, std::vector<std::string>)                                                                            \
+	XX(WifiNetworks)                                                                                                   \
+	XX(WifiConnectResult, std::string, NetworkHelper::ConnectResult)
 
 enum class EventType
 {

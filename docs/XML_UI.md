@@ -208,7 +208,7 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_heatmap>` | `bind_surface`, `bind_title`, `resolution`: a colour map of a `Surface` (a grid of samples over an X/Y area, see [Surface.h](../src/UI/Xml/Binding/Surface.h)), e.g. a bed's height map, with its scale |
 | `<ds_plot>` | `title`/`title_tag`/`bind_title`, `title_style`, `bind_detail`, `x_min`… /`bind_x_min`…, `resolution`: an X/Y area with scales and a grid, such as the bed. `<ds_plot_layer>`s inside it are kept over its drawing area, and `<ds_plot_rect>`s (`x1`, `y1`, `x2`, `y2` or `bind_x1`…) inside a layer at their bounds, e.g. the objects of a job (see [object_cancel.xml](../assets/ui/screens/object_cancel.xml)) |
 | `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, `bind_disabled` (disabled while an integer subject is non-zero) and `select_on` (selected whenever a subject is set, e.g. the status tab when a job starts); its children are the tab's content. |
-| `<ds_textarea>` | `bind_text`, `bind_accepted_chars`, `keyboard_mode`/`bind_keyboard_mode`, `keyboard`, `hide_keyboard_on_ready`, `hide_keyboard_on_defocus`, `one_line`, `placeholder`/`placeholder_tag`: a text box that brings up an on-screen keyboard while edited (the shared one, or a `<ds_keyboard>` named by `keyboard`); handlers read edits with `ActionArgs::text()` |
+| `<ds_textarea>` | `bind_text`, `bind_accepted_chars`, `keyboard_mode`/`bind_keyboard_mode`, `keyboard`, `hide_keyboard_on_ready`, `hide_keyboard_on_defocus`, `one_line`, `password_mode`, `placeholder`/`placeholder_tag`: a text box that brings up an on-screen keyboard while edited (the shared one, a `<ds_keyboard>` named by `keyboard`, or none with `keyboard="none"` for a box edited on a number pad); handlers read edits with `ActionArgs::text()` |
 | `<ds_keyboard>` | `mode`: DuetScreen's on-screen keyboard, e.g. one inside a page's own layout |
 | `<ds_modal>` | `bind_open`, `open_value`, `blocking`, `in_place`: a dialog over the main window, open while its subject is set (or equals `open_value`). Raises `dismissed` when the user closes it. See Dialogs. |
 | `<ds_view>` | `name`, `view`, `presenter`, `home`, `shown`: a page (see Hosting a view) |
@@ -239,7 +239,7 @@ For a plain question, `confirm_dialog.xml` is ready-made:
 
 A value with - and + and a row of presets, such as the extruder's feed distance, is `value_selector.xml`, backed by a `ValueSelector` the presenter owns ([ValueSelector.h](../src/UI/Xml/View/ValueSelector.h)), which also stores the presets and the value.
 
-A presenter asks for a number with `Services::askNumber(args.target, {...})`: the number pad nearest the widget that was tapped answers, so a page can host its own (`<ds_view name="move_numberpad" view="numberpad"/>`) to keep it over the page, else the shared one does.
+A presenter asks for digits and dots, such as an IP address, with `Services::askText(args.target, {...})`, and for a number with `Services::askNumber(args.target, {...})`: the number pad nearest the widget that was tapped answers, so a page can host its own (`<ds_view name="move_numberpad" view="numberpad"/>`) to keep it over the page, else the shared one does.
 
 When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
 

@@ -70,6 +70,19 @@ namespace UI::Xml::Services
 			}
 			return nullptr;
 		}
+
+		/** The number pad nearest `asker`: each enclosing widget in turn, then the shared one; or nullptr */
+		ModalNumberPad* nearestNumberPad(lv_obj_t* asker)
+		{
+			for (lv_obj_t* scope = asker; scope != nullptr; scope = lv_obj_get_parent(scope))
+			{
+				if (auto* pad = numberPadIn(scope))
+				{
+					return pad;
+				}
+			}
+			return findView<ModalNumberPad>("numberpad");
+		}
 	} // namespace
 
 	bool askNumber(std::string_view numberPad, NumberRequest request)
@@ -86,16 +99,29 @@ namespace UI::Xml::Services
 
 	bool askNumber(lv_obj_t* asker, NumberRequest request)
 	{
-		// The nearest: each enclosing widget in turn, so a number pad beside the asker wins over one further out
-		for (lv_obj_t* scope = asker; scope != nullptr; scope = lv_obj_get_parent(scope))
+		auto* pad = nearestNumberPad(asker);
+		if (pad == nullptr)
 		{
-			if (auto* pad = numberPadIn(scope))
-			{
-				ask(*pad, std::move(request));
-				return true;
-			}
+			LOG_WARN("No number pad to ask for {:s}", request.header);
+			return false;
 		}
-		return askNumber("numberpad", std::move(request));
+		ask(*pad, std::move(request));
+		return true;
+	}
+
+	bool askText(lv_obj_t* asker, TextRequest request)
+	{
+		auto* pad = nearestNumberPad(asker);
+		if (pad == nullptr)
+		{
+			LOG_WARN("No number pad to ask for {:s}", request.header);
+			return false;
+		}
+		pad->setHeader(request.header);
+		pad->setConfirmCallback(std::move(request.onConfirm));
+		pad->setText(request.text);
+		openModal(pad);
+		return true;
 	}
 
 	void setGcodeSender(std::function<void(std::string_view)> sender)

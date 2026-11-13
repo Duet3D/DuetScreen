@@ -61,6 +61,10 @@ namespace UI::Xml
 		{
 			lv_textarea_set_one_line(root, lv_xml_to_bool(oneLine));
 		}
+		if (const char* password = lv_xml_get_value_of(attrs, "password_mode"))
+		{
+			lv_textarea_set_password_mode(root, lv_xml_to_bool(password));
+		}
 		if (const char* tag = lv_xml_get_value_of(attrs, "placeholder_tag"))
 		{
 			lv_textarea_set_placeholder_text(root, _(tag).c_str());
@@ -115,6 +119,10 @@ namespace UI::Xml
 
 	lv_obj_t* DsTextarea::findKeyboard() const
 	{
+		if (m_keyboard == "none")
+		{
+			return nullptr;
+		}
 		// The nearest one of that name: in the same view before any other
 		for (lv_obj_t* scope = lv_obj_get_parent(getRootPtr()); scope != nullptr; scope = lv_obj_get_parent(scope))
 		{

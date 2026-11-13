@@ -28,8 +28,8 @@
 			<ds_button name="decrement" icon="decrement.png" height="100%" style_min_height="content">
 				<action trigger="clicked" name="selector.decrement" arg="$selector"/>
 			</ds_button>
-			<ds_textarea name="value" bind_text="$value" one_line="true" height="content" flex_grow="1"
-						 style_text_align="center">
+			<ds_textarea name="value" bind_text="$value" one_line="true" keyboard="none" height="content"
+						 flex_grow="1" style_text_align="center">
 				<action trigger="clicked" name="selector.edit" arg="$selector"/>
 			</ds_textarea>
 			<ds_button name="increment" icon="increment.png" height="100%" style_min_height="content">

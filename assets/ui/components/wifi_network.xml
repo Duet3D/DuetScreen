@@ -1,0 +1,22 @@
+<!--
+  One WiFi network in the WiFi selector: its name and signal, a button to connect (or disconnect, or join), and one to
+  forget it once it is known.
+
+  Fields and actions: a networks row (src/UI/Screens/Settings/WifiPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row"
+		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="start">
+		<lv_label name="ssid" bind_text="ssid" long_mode="scroll_circular" flex_grow="2"/>
+		<lv_label name="signal" bind_text="signal" flex_grow="1"/>
+		<ds_button name="connect" bind_text="connect_text" width="content" height="content"
+				   style_min_width="content" flex_grow="1">
+			<action trigger="clicked" name="wifi.connect"/>
+		</ds_button>
+		<ds_button name="forget" translation_tag="settings.network.forget" width="content" height="content"
+				   style_min_width="content" flex_grow="1">
+			<bind_flag_if_eq subject="known" flag="hidden" ref_value="0"/>
+			<action trigger="clicked" name="wifi.forget"/>
+		</ds_button>
+	</view>
+</component>

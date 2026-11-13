@@ -15,10 +15,12 @@
  *   keyboard_mode             `number`, `text` (default) or `text_upper`: the keyboard layout to show
  *   bind_keyboard_mode        a string subject, as keyboard_mode
  *   keyboard                  the keyboard to use: the nearest lv_keyboard of that name around the text box (e.g. one
- *                             in the same view), else the view of that name (default `keyboard`, the shared one)
+ *                             in the same view), else the view of that name (default `keyboard`, the shared one);
+ *                             `none` for a box edited another way, such as on a number pad when it is tapped
  *   hide_keyboard_on_ready    put the keyboard away when its OK key is pressed (default true)
  *   hide_keyboard_on_defocus  put the keyboard away when the box loses focus (default true)
  *   one_line                  a single line of text
+ *   password_mode             show dots for the characters, e.g. for a password
  *   placeholder               shown while the box is empty; or placeholder_tag, translated
  *
  * The keyboard's own close key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit

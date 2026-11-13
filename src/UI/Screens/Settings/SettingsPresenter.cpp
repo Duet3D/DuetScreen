@@ -9,8 +9,6 @@
 
 namespace UI
 {
-	void ConnectionSettingsPresenter::onInit() {}
-
 	void DeveloperSettingsPresenter::startHardwareTest()
 	{
 		ZoneScoped;
