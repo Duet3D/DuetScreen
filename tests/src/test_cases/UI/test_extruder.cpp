@@ -4,6 +4,8 @@
  * The extruder panel (assets/ui/components/extruder.xml, src/UI/Screens/Temperature/ExtruderPresenter.h).
  */
 
+#include "ObjectModel/Heat.h"
+#include "UI/Core/Model.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
@@ -25,6 +27,19 @@ class TestExtruder : public UiTestSuite
 		return found ? lv_obj_find_by_name(found, name) : nullptr;
 	}
 
+	/** Whether the button called `name` is disabled */
+	bool disabled(const char* name)
+	{
+		return lv_obj_has_state(lv_obj_find_by_name(panel.getRootPtr(), name), LV_STATE_DISABLED);
+	}
+
+	/** Run the Model's queued events, as the main loop would */
+	static void runEvents()
+	{
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	}
+
 	/** The value the selector called `selector` shows */
 	std::string_view valueOf(const char* selector) { return lv_textarea_get_text(part(selector, "value")); }
 
@@ -38,8 +53,36 @@ TEST_F(TestExtruder, Basic)
 
 TEST_F(TestExtruder, NeedsAToolToExtrude)
 {
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(panel.getRootPtr(), "extrude"), LV_STATE_DISABLED));
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(panel.getRootPtr(), "retract"), LV_STATE_DISABLED));
+	EXPECT_TRUE(disabled("extrude"));
+	EXPECT_TRUE(disabled("retract"));
+}
+
+TEST_F(TestExtruder, ColdExtrusionAllowedNeedsNoHeat)
+{
+	// The test bench allows cold extrusion (both limits 0) and has tool 0 selected. Its heater (2) reads nothing, as
+	// one with no sensor does.
+	load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_state_vn.json");
+	{
+		MODEL_LOCK();
+		auto heater = OM::Heat::GetHeater(2);
+		ASSERT_NE(heater, nullptr);
+		heater->current = -273.15f;
+	}
+	Model::get().post<EventType::HeaterData>();
+	runEvents();
+	ASSERT_EQ(OM::Heat::GetColdExtrudeTemperature(), 0.0f);
+	EXPECT_FALSE(disabled("extrude"));
+	EXPECT_FALSE(disabled("retract"));
+
+	// With limits, the heater is too cold for either
+	OM::Heat::SetColdExtrudeTemperature(160.0f);
+	OM::Heat::SetColdRetractTemperature(90.0f);
+	Model::get().post<EventType::HeaterData>();
+	runEvents();
+	EXPECT_TRUE(disabled("extrude"));
+	EXPECT_TRUE(disabled("retract"));
 }
 
 TEST_F(TestExtruder, SelectorsStepAndPick)

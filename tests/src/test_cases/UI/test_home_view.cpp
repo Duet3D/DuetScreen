@@ -1296,3 +1296,18 @@ TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
 	UI::closeAllModals();
 }
+
+TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
+{
+	// The extruder panel is inside a plain <lv_obj> of the Temperature tab, which has nothing to pass a show on
+	auto* extruder = UI::findView<UI::Xml::XmlView>("extruder_control");
+	ASSERT_NE(extruder, nullptr);
+	ASSERT_NE(extruder->getPresenter(), nullptr);
+	EXPECT_FALSE(extruder->getPresenter()->isActive()) << "the Control page isn't open yet";
+
+	openControlTab(1);
+	EXPECT_TRUE(extruder->getPresenter()->isActive());
+
+	UI::home();
+	EXPECT_FALSE(extruder->getPresenter()->isActive()) << "nothing listens while its page is closed";
+}

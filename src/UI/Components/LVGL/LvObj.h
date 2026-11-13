@@ -286,6 +286,13 @@ namespace UI
 		virtual void showInner();
 		virtual void hideInner();
 
+		/**
+		 * Call `func` with each LvObj nested in `obj`: its children that are LvObjs, and those inside its plain widgets
+		 * (an XML <lv_obj>, say), which have no LvObj to pass a show or hide on. Unless `throughHidden`, hidden plain
+		 * widgets are skipped, as nothing in them is shown.
+		 */
+		static void forEachNested(lv_obj_t* obj, bool throughHidden, const std::function<void(LvObj&)>& func);
+
 		lv_obj_t* m_root;
 		std::string m_name;
 

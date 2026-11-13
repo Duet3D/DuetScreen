@@ -97,6 +97,22 @@ namespace UI
 				layout.h == LV_SIZE_CONTENT ? LV_SIZE_CONTENT : LV_PCT(layout.h));
 	}
 
+	void LvObj::forEachNested(lv_obj_t* obj, bool throughHidden, const std::function<void(LvObj&)>& func)
+	{
+		for (uint32_t i = 0; i < lv_obj_get_child_count(obj); i++)
+		{
+			lv_obj_t* child = lv_obj_get_child(obj, static_cast<int32_t>(i));
+			if (LvObj* nested = fromPtr(child))
+			{
+				func(*nested); // It passes the show or hide on to what is inside it
+			}
+			else if (throughHidden || !lv_obj_has_flag(child, LV_OBJ_FLAG_HIDDEN))
+			{
+				forEachNested(child, throughHidden, func);
+			}
+		}
+	}
+
 	LvObj* LvObj::fromPtr(lv_obj_t* obj)
 	{
 		ZoneScoped;
@@ -1035,12 +1051,13 @@ namespace UI
 
 		m_showing = 1;
 #if LV_NESTED_SHOW_HIDE
-		iterateChildren(
-			[](size_t /* index */, LvObj& child)
-			{
-				if (child.isVisible())
-					child.showInner();
-			});
+		forEachNested(getRootPtr(),
+					  false,
+					  [](LvObj& child)
+					  {
+						  if (child.isVisible())
+							  child.showInner();
+					  });
 #endif
 
 		onShow();
@@ -1087,16 +1104,17 @@ namespace UI
 
 		m_hidding = 1;
 #if LV_NESTED_SHOW_HIDE
-		iterateChildren(
-			[](size_t, LvObj& child)
-			{
-				if (child.isVisible())
-				{
-					/* want to run `deactivate` on any children with presenters, and onHide(), but also want the child
-					 * to be visible again when obj is shown */
-					child.hideInner();
-				}
-			});
+		forEachNested(getRootPtr(),
+					  true,
+					  [](LvObj& child)
+					  {
+						  if (child.isVisible())
+						  {
+							  /* want to run `deactivate` on any children with presenters, and onHide(), but also want
+							   * the child to be visible again when obj is shown */
+							  child.hideInner();
+						  }
+					  });
 #endif
 
 		onHide();

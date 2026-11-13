@@ -43,12 +43,16 @@ namespace UI
 
 	void ExtruderPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("extrude_usable",
-				m_extrudeUsable,
-				"1 if the selected tool can extrude: there is one, it is hot enough, and no job is running");
-		f.field("retract_usable",
-				m_retractUsable,
-				"1 if the selected tool can retract: there is one, it is hot enough, and no job is running");
+		f.field(
+			"extrude_usable",
+			m_extrudeUsable,
+			"1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no "
+			"job is running");
+		f.field(
+			"retract_usable",
+			m_retractUsable,
+			"1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no "
+			"job is running");
 		m_distance.fields(f);
 		m_feedrate.fields(f);
 	}

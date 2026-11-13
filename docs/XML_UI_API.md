@@ -299,8 +299,8 @@ Used by `extruder`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough, and no job is running |
-| `retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough, and no job is running |
+| `extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
 | `distance.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `distance.value` | text | The value, e.g. "0.1" |
 | `distance.choices` | list | The presets, each with `text` |
