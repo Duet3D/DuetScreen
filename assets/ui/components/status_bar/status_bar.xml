@@ -1,9 +1,11 @@
 <!--
   The status bar across the top of the screen: connection and state on the left, the printer's name in the middle,
-  and the current tool's temperatures on the right.
+  and on the right the status bar's buttons, then the current tool's temperatures. The buttons are the widgets of its
+  layout (layouts/status_bar.json, none by default), which the user can change.
 
-  The name is at most 40% wide and centred, and the temperatures at most 30% wide, so they never overlap. The
-  temperatures are spans so the tool and the temperatures share a baseline whatever the theme's fonts.
+  The name is at most 40% wide and centred, and the right side (buttons and temperatures) at most 30% wide, so they
+  never overlap. The temperatures are spans so the tool and the temperatures share a baseline whatever the theme's
+  fonts.
 
   Fields:   status, name, has_tool, tool, heaters, fault (see src/UI/Presenters/StatusBar/StatusBarPresenter.h)
 -->
@@ -15,12 +17,22 @@
 		<lv_label name="name" bind_text="name" align="center" long_mode="scroll_circular"
 				  style_max_width="40%" style_text_align="center"/>
 
-		<lv_spangroup name="temperatures" align="right_mid" width="content" height="content" style_max_width="30%"
-					  style_text_align="right">
-			<bind_flag_if_eq subject="has_tool" flag="hidden" ref_value="0"/>
-			<bind_style_if_eq name="text_warning" subject="fault" ref_value="1"/>
-			<lv_spangroup-span bind_text="tool" style="text_emphasis"/>
-			<lv_spangroup-span bind_text="heaters"/>
-		</lv_spangroup>
+		<lv_obj name="right" align="right_mid" width="content" height="content" style_max_width="30%"
+				scrollable="false" flex_flow="row" style_flex_cross_place="center" style_flex_track_place="center"
+				style_pad_column="#pad_small">
+			<style name="pad_zero"/>
+			<ds_layout name="buttons" slot="status_bar" width="content" height="content" scrollable="false"
+					   flex_flow="row" style_flex_cross_place="center" style_flex_track_place="center"
+					   style_pad_column="#pad_small">
+				<style name="pad_zero"/>
+			</ds_layout>
+
+			<lv_spangroup name="temperatures" width="content" height="content" style_text_align="right">
+				<bind_flag_if_eq subject="has_tool" flag="hidden" ref_value="0"/>
+				<bind_style_if_eq name="text_warning" subject="fault" ref_value="1"/>
+				<lv_spangroup-span bind_text="tool" style="text_emphasis"/>
+				<lv_spangroup-span bind_text="heaters"/>
+			</lv_spangroup>
+		</lv_obj>
 	</view>
 </component>

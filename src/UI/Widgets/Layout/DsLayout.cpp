@@ -21,16 +21,20 @@ namespace UI::Xml
 		constexpr const char* MISSING_COMPONENT = "customise_missing";
 	} // namespace
 
+	std::vector<DsLayout*> DsLayout::s_live;
+
 	DsLayout::DsLayout(lv_obj_t* container, std::string slot)
 		: m_container(container)
 		, m_slot(std::move(slot))
 	{
+		s_live.push_back(this);
 		Layouts::addListener(this);
 		refresh();
 	}
 
 	DsLayout::~DsLayout()
 	{
+		std::erase(s_live, this);
 		Layouts::removeListener(this);
 		// The views are deleted with their widgets, which LVGL deletes next
 		for (auto& placement : m_placements)
@@ -91,6 +95,13 @@ namespace UI::Xml
 									 m_placements.end(),
 									 [id](const Placement& placement) { return placement.item.id == id; });
 		return it == m_placements.end() ? nullptr : it->root;
+	}
+
+	DsLayout* DsLayout::find(std::string_view slot)
+	{
+		const auto it = std::find_if(
+			s_live.begin(), s_live.end(), [slot](const DsLayout* layout) { return layout->m_slot == slot; });
+		return it == s_live.end() ? nullptr : *it;
 	}
 
 	void DsLayout::viewDeletedCb(lv_event_t* e)

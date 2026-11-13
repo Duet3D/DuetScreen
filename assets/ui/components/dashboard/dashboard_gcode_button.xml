@@ -1,0 +1,17 @@
+<!--
+  A button that sends G-code (`gcode`), labelled `label`: the dashboard's `gcode_button` widget
+  (gcode_button.widget.json). A macro is run with M98 P"0:/macros/name".
+-->
+<component>
+	<api>
+		<prop name="label" type="string" default=""/>
+		<prop name="gcode" type="string" default=""/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_button name="button" text="$label" width="100%" height="100%" long_mode="wrap">
+			<action trigger="clicked" name="gcode" arg="$gcode"/>
+		</ds_button>
+	</view>
+</component>

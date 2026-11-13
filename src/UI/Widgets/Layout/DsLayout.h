@@ -53,6 +53,9 @@ namespace UI::Xml
 		/** The root widget of the placed item `id`, or nullptr */
 		lv_obj_t* findItem(std::string_view id) const;
 
+		/** A live ds_layout showing `slot`, or nullptr if none is built */
+		static DsLayout* find(std::string_view slot);
+
 	  private:
 		/** One placed widget */
 		struct Placement
@@ -93,5 +96,7 @@ namespace UI::Xml
 		std::vector<Placement> m_placements;  // The placed widgets, in order
 		std::vector<int32_t> m_columns;		  // Grid: column template, kept for LVGL, which doesn't copy it
 		std::vector<int32_t> m_rows;		  // Grid: row template
+
+		static std::vector<DsLayout*> s_live; // Every ds_layout built, for find()
 	};
 } // namespace UI::Xml

@@ -12,6 +12,7 @@
 #include "helix_xml.h"
 #include <array>
 #include <charconv>
+#include <cstdio>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -35,6 +36,9 @@ namespace UI::Xml
 		 * @return false if `text` isn't a value of this type
 		 */
 		virtual bool equals(std::string_view text) const = 0;
+
+		/** The value as XML writes one, e.g. "2" for an int; empty for a value XML can't write */
+		virtual std::string text() const = 0;
 	};
 
 	/** A whole number, e.g. a fan number, a percentage or a 0/1 flag */
@@ -71,6 +75,9 @@ namespace UI::Xml
 			return error == std::errc() && ptr == end && value == get();
 		}
 
+		/** The value in decimal */
+		std::string text() const override { return std::to_string(get()); }
+
 	  private:
 		LvSubject m_subject; // The LVGL subject
 	};
@@ -105,6 +112,15 @@ namespace UI::Xml
 		{
 			const std::string terminated(text);
 			return lv_color_eq(lv_xml_to_color(terminated.c_str()), get());
+		}
+
+		/** The colour as XML writes one, e.g. "0xff0000" */
+		std::string text() const override
+		{
+			std::array<char, 9> buffer{};
+			const auto colour = get();
+			std::snprintf(buffer.data(), buffer.size(), "0x%02x%02x%02x", colour.red, colour.green, colour.blue);
+			return buffer.data();
 		}
 
 	  private:
@@ -150,6 +166,9 @@ namespace UI::Xml
 
 		/** Whether the text held is `text` */
 		bool equals(std::string_view text) const override { return get() == text; }
+
+		/** The text held */
+		std::string text() const override { return std::string(get()); }
 
 	  private:
 		/** Cut `value` to what fits in the buffer */

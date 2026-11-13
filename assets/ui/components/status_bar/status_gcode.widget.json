@@ -1,0 +1,25 @@
+{
+  "component": "status_bar_gcode_button",
+  "title_tag": "widget.gcode_button",
+  "description_tag": "widget.status_gcode_desc",
+  "icon": "send.png",
+  "slots": [
+    "status_bar"
+  ],
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "widget.setting_label",
+      "default": "G28",
+      "max_length": 32
+    },
+    {
+      "name": "gcode",
+      "kind": "text",
+      "title_tag": "widget.setting_gcode",
+      "default": "G28",
+      "max_length": 120
+    }
+  ]
+}

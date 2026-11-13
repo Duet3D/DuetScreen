@@ -8,6 +8,7 @@
 #include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
@@ -187,6 +188,10 @@ namespace UI::Xml::Api
 			for (const auto& [name, root] : roots)
 			{
 				collectUses(root, name, names, uses);
+			}
+			for (const auto& [id, widget] : WidgetCatalogue::all())
+			{
+				uses[widget.component].push_back({.by = id, .as = Use::As::Widget, .presenter = ""});
 			}
 			for (auto& component : result)
 			{
@@ -396,6 +401,17 @@ namespace UI::Xml::Api
 		}
 		reference.lvglElements = lvglElements();
 		reference.components = components();
+		for (const auto& [id, widget] : WidgetCatalogue::all())
+		{
+			reference.placeable.push_back(widget);
+		}
+		for (const auto& slot : Layouts::slots())
+		{
+			if (const Layout* layout = Layouts::defaultFor(slot))
+			{
+				reference.layouts.push_back(*layout);
+			}
+		}
 		describeTheme(reference);
 		reference.themes = themes(reference.rootTheme);
 		for (const auto name : ThemeStyles::fontNames())

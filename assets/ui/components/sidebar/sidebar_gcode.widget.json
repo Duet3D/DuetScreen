@@ -1,0 +1,97 @@
+{
+  "component": "sidebar_gcode_button",
+  "title_tag": "widget.gcode_button",
+  "description_tag": "widget.sidebar_gcode_desc",
+  "icon": "send.png",
+  "slots": [
+    "sidebar"
+  ],
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "widget.setting_label",
+      "default": "Home",
+      "max_length": 32
+    },
+    {
+      "name": "icon",
+      "kind": "choice",
+      "title_tag": "widget.setting_icon",
+      "default": "send.png",
+      "options": [
+        {
+          "value": "send.png",
+          "title": "send"
+        },
+        {
+          "value": "home_axis.png",
+          "title": "home axis"
+        },
+        {
+          "value": "macros.png",
+          "title": "macros"
+        },
+        {
+          "value": "move.png",
+          "title": "move"
+        },
+        {
+          "value": "extrude.png",
+          "title": "extrude"
+        },
+        {
+          "value": "retract.png",
+          "title": "retract"
+        },
+        {
+          "value": "temperature.png",
+          "title": "temperature"
+        },
+        {
+          "value": "fine_tune.png",
+          "title": "fine tune"
+        },
+        {
+          "value": "heightmap.png",
+          "title": "heightmap"
+        },
+        {
+          "value": "babystep.png",
+          "title": "babystep"
+        },
+        {
+          "value": "disable_motors.png",
+          "title": "disable motors"
+        },
+        {
+          "value": "pause.png",
+          "title": "pause"
+        },
+        {
+          "value": "resume.png",
+          "title": "resume"
+        },
+        {
+          "value": "cancel.png",
+          "title": "cancel"
+        },
+        {
+          "value": "print_again.png",
+          "title": "print again"
+        },
+        {
+          "value": "status.png",
+          "title": "status"
+        }
+      ]
+    },
+    {
+      "name": "gcode",
+      "kind": "text",
+      "title_tag": "widget.setting_gcode",
+      "default": "G28",
+      "max_length": 120
+    }
+  ]
+}

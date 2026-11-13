@@ -1,0 +1,13 @@
+{
+  "component": "status_bar_factor_button",
+  "title_tag": "widget.status_extrusion",
+  "description_tag": "widget.status_extrusion_desc",
+  "icon": "extrude.png",
+  "slots": [
+    "status_bar"
+  ],
+  "props": {
+    "value": "move.extrusion_factor",
+    "action": "factors.extrusion"
+  }
+}

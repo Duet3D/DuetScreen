@@ -3,6 +3,7 @@
  */
 
 #include "ApiMarkdown.h"
+#include "i18n/i18n.h"
 #include <algorithm>
 #include <filesystem>
 #include <fmt/format.h>
@@ -251,6 +252,138 @@ namespace UI::Xml::Api
 			}
 		}
 
+		/** Text shown for `tag` translated, or `fallback` if there is no tag */
+		std::string shown(const std::string& tag, const std::string& fallback)
+		{
+			return tag.empty() ? fallback : std::string(_(tag.c_str()));
+		}
+
+		/** What values a setting takes, e.g. "int, 10 to 600 s" */
+		std::string settingKind(const SettingDef& setting)
+		{
+			switch (setting.kind)
+			{
+			case SettingKind::Int:
+				return fmt::format("int, {:d} to {:d}{:s}{:s}",
+								   setting.min,
+								   setting.max,
+								   setting.unit.empty() ? "" : " ",
+								   setting.unit);
+			case SettingKind::Bool:
+				return "on or off";
+			case SettingKind::Text:
+				return fmt::format("text, up to {:d} bytes", setting.maxLength);
+			case SettingKind::Choice:
+			{
+				std::vector<std::string> values;
+				for (const auto& option : setting.options)
+				{
+					values.push_back(code(option.value));
+				}
+				return fmt::format("one of {:s}", fmt::join(values, ", "));
+			}
+			case SettingKind::Row:
+				return fmt::format("a row of {:s}, by its {:s}, shown by its {:s}",
+								   code(setting.list),
+								   code(setting.key),
+								   code(setting.label));
+			}
+			return "";
+		}
+
+		/** A size in cells, e.g. "3×2" */
+		std::string cells(const CellSize& size)
+		{
+			return fmt::format("{:d}×{:d}", size.columns, size.rows);
+		}
+
+		/** The layouts section: each slot's default layout, then every widget a user can place */
+		void writeLayouts(std::string& out, const Reference& reference, const Pictures& pictures)
+		{
+			out += "## Layouts\n\n"
+				   "What the user places on the screen, and where; see Layouts in [XML_UI.md](XML_UI.md). A "
+				   "`<ds_layout slot=\"…\">` shows its slot's layout, a file in a bundle's `layouts/`. A grid places "
+				   "widgets in rectangles of cells; a strip shows them one after another. Locked items can be moved "
+				   "but not removed.\n\n"
+				   "### Slots\n\n"
+				   "The built-in slots and the layout each shows until the user changes it.\n\n"
+				   "| Slot | Kind | Items (id: widget) |\n| --- | --- | --- |\n";
+			for (const auto& layout : reference.layouts)
+			{
+				std::vector<std::string> items;
+				for (const auto& item : layout.items)
+				{
+					std::string text = fmt::format("{:s}: {:s}", code(item.id), code(item.widget));
+					if (layout.kind == LayoutKind::Grid)
+					{
+						text += fmt::format(" at {:d},{:d}, {:d}×{:d}", item.x, item.y, item.w, item.h);
+					}
+					if (item.locked)
+					{
+						text += ", locked";
+					}
+					items.push_back(std::move(text));
+				}
+				fmt::format_to(std::back_inserter(out),
+							   "| {:s} | {:s} | {:s} |\n",
+							   code(layout.slot),
+							   layout.kind == LayoutKind::Grid
+								   ? fmt::format("grid of {:d}×{:d}", layout.columns, layout.rows)
+								   : std::string("strip"),
+							   items.empty() ? std::string("none") : fmt::format("{:s}", fmt::join(items, "; ")));
+			}
+
+			out +=
+				"\n### Placeable widgets\n\n"
+				"Each widget is a component (with its props) and a widget file beside it, which says where it can be "
+				"placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is "
+				"pictured as placed, at its default size in its first slot, with its default settings.\n\n";
+			for (const auto& widget : reference.placeable)
+			{
+				fmt::format_to(std::back_inserter(out),
+							   "#### {:s}\n\n**{:s}**: {:s}\n\n"
+							   "Placed in {:s}; component {:s} ({:s}).",
+							   widget.id,
+							   shown(widget.titleTag, widget.title),
+							   shown(widget.descriptionTag, widget.description),
+							   codeList(widget.slots),
+							   code(widget.component),
+							   fileLink(widget.source.generic_string()));
+				if (std::any_of(reference.layouts.begin(),
+								reference.layouts.end(),
+								[&](const Layout& layout)
+								{ return layout.kind == LayoutKind::Grid && widget.fits(layout.slot); }))
+				{
+					const bool unbounded = widget.maxSize == CellSize{MAX_GRID_CELLS, MAX_GRID_CELLS};
+					fmt::format_to(
+						std::back_inserter(out),
+						" In a grid it is {:s} cells, and {:s}.",
+						cells(widget.defaultSize),
+						unbounded ? fmt::format("at least {:s}", cells(widget.minSize))
+								  : fmt::format("from {:s} to {:s}", cells(widget.minSize), cells(widget.maxSize)));
+				}
+				out += "\n\n";
+				if (auto it = pictures.images.placeable.find(widget.id); it != pictures.images.placeable.end())
+				{
+					fmt::format_to(std::back_inserter(out), "{:s}\n\n", pictures.image(widget.id, it->second));
+				}
+				if (!widget.settings.empty())
+				{
+					out += "| Setting | Shown as | Takes | Default |\n| --- | --- | --- | --- |\n";
+					for (const auto& setting : widget.settings)
+					{
+						fmt::format_to(std::back_inserter(out),
+									   "| {:s} | {:s} | {:s} | {:s} |\n",
+									   code(setting.name),
+									   cell(shown(setting.titleTag, setting.title)),
+									   cell(settingKind(setting)),
+									   code(SettingDef::toProp(setting.fallback)));
+					}
+					out += "\n";
+				}
+			}
+		}
+
 		/** The components section */
 		void writeComponents(std::string& out, const Reference& reference, const Pictures& pictures)
 		{
@@ -414,6 +547,7 @@ namespace UI::Xml::Api
 			"- [Global actions](#global-actions)\n"
 			"- [Presenters](#presenters)\n"
 			"- [Widgets](#widgets)\n"
+			"- [Layouts](#layouts)\n"
 			"- [Components](#components)\n"
 			"- [Theme](#theme)\n\n",
 			reference.apiVersion);
@@ -422,6 +556,7 @@ namespace UI::Xml::Api
 		writePresenters(out, reference);
 		const Pictures pictures{.images = images, .root = std::string(imageRoot)};
 		writeWidgets(out, reference, pictures);
+		writeLayouts(out, reference, pictures);
 		writeComponents(out, reference, pictures);
 		writeTheme(out, reference, pictures);
 		while (out.ends_with("\n\n"))

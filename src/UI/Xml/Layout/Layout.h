@@ -69,7 +69,7 @@ namespace UI::Xml
 
 		/** The smallest and largest number of grid columns or rows */
 		static constexpr int32_t MIN_CELLS = 1;
-		static constexpr int32_t MAX_CELLS = 24;
+		static constexpr int32_t MAX_CELLS = MAX_GRID_CELLS;
 
 		std::string slot{};					// The slot it is for
 		LayoutKind kind = LayoutKind::Grid; // How it places its widgets

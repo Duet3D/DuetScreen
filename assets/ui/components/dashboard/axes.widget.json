@@ -1,0 +1,19 @@
+{
+  "component": "dashboard_axes",
+  "title_tag": "widget.axes",
+  "description_tag": "widget.axes_desc",
+  "icon": "move.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      4,
+      1
+    ],
+    "min": [
+      3,
+      1
+    ]
+  }
+}

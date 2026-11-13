@@ -1,0 +1,11 @@
+<!--
+  Every axis' position: the `axes` widget (axes.widget.json).
+
+  Data:     move.axes (src/UI/Xml/Data/MoveSource.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" style_flex_main_place="center">
+		<style name="card"/>
+		<ds_list name="list" list="move.axes" item="dashboard_axis" width="100%" height="content" flex_flow="row"/>
+	</view>
+</component>

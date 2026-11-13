@@ -8,6 +8,7 @@ Every name the firmware provides to XML, for UI API version 1.0. How to write XM
 - [Global actions](#global-actions)
 - [Presenters](#presenters)
 - [Widgets](#widgets)
+- [Layouts](#layouts)
 - [Components](#components)
 - [Theme](#theme)
 
@@ -409,7 +410,7 @@ Each row of `extrusion_dialog.factors`:
 
 ### fans
 
-Used by `fans`.
+Used by `dashboard_fan`, `fans`.
 
 | Action | Description |
 | --- | --- |
@@ -1521,13 +1522,235 @@ Written `<action>` inside any widget: run the named action when the widget raise
 | `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `<ds_slider numberpad="own">`'s value was tapped to type one) or `dismissed` (a `<ds_modal>` was closed by the user) |
 | `arg` | Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `<action>` is written |
 
+## Layouts
+
+What the user places on the screen, and where; see Layouts in [XML_UI.md](XML_UI.md). A `<ds_layout slot="…">` shows its slot's layout, a file in a bundle's `layouts/`. A grid places widgets in rectangles of cells; a strip shows them one after another. Locked items can be moved but not removed.
+
+### Slots
+
+The built-in slots and the layout each shows until the user changes it.
+
+| Slot | Kind | Items (id: widget) |
+| --- | --- | --- |
+| `dashboard` | grid of 10×6 | `tools`: `tools` at 0,0, 6×3; `temperature_graph`: `temperature_graph` at 0,3, 6×3; `files`: `files` at 6,0, 4×6 |
+| `sidebar` | strip | `home`: `page_home`; `control`: `page_control`; `files`: `page_files`; `console`: `page_console`; `settings`: `page_settings`, locked; `estop`: `estop`, locked |
+| `status_bar` | strip | none |
+
+### Placeable widgets
+
+Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings.
+
+#### axes
+
+**Axis positions**: Where each axis is
+
+Placed in `dashboard`; component `dashboard_axes` ([axes.widget.json](../assets/ui/components/dashboard/axes.widget.json)). In a grid it is 4×1 cells, and at least 3×1.
+
+![axes](../tests/ref_imgs/xml_ui_api/widgets/axes.png)
+
+#### babystep
+
+**Babystepping**: Move Z by small steps while printing
+
+Placed in `dashboard`; component `dashboard_babystep` ([babystep.widget.json](../assets/ui/components/dashboard/babystep.widget.json)). In a grid it is 3×4 cells, and at least 2×3.
+
+![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
+
+#### estop
+
+**E-stop**: Drag across to stop the printer at once
+
+Placed in `sidebar`; component `sidebar_estop` ([estop.widget.json](../assets/ui/components/sidebar/estop.widget.json)).
+
+![estop](../tests/ref_imgs/xml_ui_api/widgets/estop.png)
+
+#### fan
+
+**Fan**: One fan's speed, to change it
+
+Placed in `dashboard`; component `dashboard_fan` ([fan.widget.json](../assets/ui/components/dashboard/fan.widget.json)). In a grid it is 5×1 cells, and at least 4×1.
+
+![fan](../tests/ref_imgs/xml_ui_api/widgets/fan.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `fan` | Fan | a row of `fans`, by its `number`, shown by its `name` | `0` |
+
+#### files
+
+**Jobs, macros and status**: The jobs, macros and the job's status, as tabs
+
+Placed in `dashboard`; component `dashboard_files` ([files.widget.json](../assets/ui/components/dashboard/files.widget.json)). In a grid it is 4×6 cells, and at least 3×3.
+
+![files](../tests/ref_imgs/xml_ui_api/widgets/files.png)
+
+#### gcode_button
+
+**G-code button**: Sends the G-code you choose, e.g. M98 P"0:/macros/name" to run a macro
+
+Placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.widget.json](../assets/ui/components/dashboard/gcode_button.widget.json)). In a grid it is 2×1 cells, and at least 1×1.
+
+![gcode_button](../tests/ref_imgs/xml_ui_api/widgets/gcode_button.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `label` | Label | text, up to 32 bytes | `Home` |
+| `gcode` | G-code | text, up to 120 bytes | `G28` |
+
+#### job_progress
+
+**Job progress**: The job's file, progress, time taken and time left
+
+Placed in `dashboard`; component `dashboard_job_progress` ([job_progress.widget.json](../assets/ui/components/dashboard/job_progress.widget.json)). In a grid it is 4×1 cells, and at least 3×1.
+
+![job_progress](../tests/ref_imgs/xml_ui_api/widgets/job_progress.png)
+
+#### job_status
+
+**Status**: The job's progress, times and controls
+
+Placed in `dashboard`; component `dashboard_job_status_card` ([job_status.widget.json](../assets/ui/components/dashboard/job_status.widget.json)). In a grid it is 4×4 cells, and at least 3×3.
+
+![job_status](../tests/ref_imgs/xml_ui_api/widgets/job_status.png)
+
+#### jobs
+
+**Jobs**: The jobs on the printer, to start one
+
+Placed in `dashboard`; component `dashboard_jobs_card` ([jobs.widget.json](../assets/ui/components/dashboard/jobs.widget.json)). In a grid it is 4×4 cells, and at least 3×2.
+
+![jobs](../tests/ref_imgs/xml_ui_api/widgets/jobs.png)
+
+#### macros
+
+**Macros**: The printer's macros, to run one
+
+Placed in `dashboard`; component `dashboard_macros_card` ([macros.widget.json](../assets/ui/components/dashboard/macros.widget.json)). In a grid it is 4×4 cells, and at least 3×2.
+
+![macros](../tests/ref_imgs/xml_ui_api/widgets/macros.png)
+
+#### page_console
+
+**Console**: Opens the console; flashes when the printer replies
+
+Placed in `sidebar`; component `sidebar_page_button` ([page_console.widget.json](../assets/ui/components/sidebar/page_console.widget.json)).
+
+![page_console](../tests/ref_imgs/xml_ui_api/widgets/page_console.png)
+
+#### page_control
+
+**Control**: Opens the controls: moving, temperatures, fans
+
+Placed in `sidebar`; component `sidebar_page_button` ([page_control.widget.json](../assets/ui/components/sidebar/page_control.widget.json)).
+
+![page_control](../tests/ref_imgs/xml_ui_api/widgets/page_control.png)
+
+#### page_files
+
+**Files**: Opens the jobs and macros
+
+Placed in `sidebar`; component `sidebar_page_button` ([page_files.widget.json](../assets/ui/components/sidebar/page_files.widget.json)).
+
+![page_files](../tests/ref_imgs/xml_ui_api/widgets/page_files.png)
+
+#### page_home
+
+**Dashboard**: Opens the dashboard
+
+Placed in `sidebar`; component `sidebar_page_button` ([page_home.widget.json](../assets/ui/components/sidebar/page_home.widget.json)).
+
+![page_home](../tests/ref_imgs/xml_ui_api/widgets/page_home.png)
+
+#### page_settings
+
+**Settings**: Opens the settings
+
+Placed in `sidebar`; component `sidebar_page_button` ([page_settings.widget.json](../assets/ui/components/sidebar/page_settings.widget.json)).
+
+![page_settings](../tests/ref_imgs/xml_ui_api/widgets/page_settings.png)
+
+#### sidebar_gcode
+
+**G-code button**: A sidebar button that sends the G-code you choose
+
+Placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gcode.widget.json](../assets/ui/components/sidebar/sidebar_gcode.widget.json)).
+
+![sidebar_gcode](../tests/ref_imgs/xml_ui_api/widgets/sidebar_gcode.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `label` | Label | text, up to 32 bytes | `Home` |
+| `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `fine_tune.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `status.png` | `send.png` |
+| `gcode` | G-code | text, up to 120 bytes | `G28` |
+
+#### status_extrusion
+
+**Extrusion factor**: Shows the extrusion factor; tap to change it
+
+Placed in `status_bar`; component `status_bar_factor_button` ([status_extrusion.widget.json](../assets/ui/components/status_bar/status_extrusion.widget.json)).
+
+![status_extrusion](../tests/ref_imgs/xml_ui_api/widgets/status_extrusion.png)
+
+#### status_gcode
+
+**G-code button**: A small button that sends the G-code you choose
+
+Placed in `status_bar`; component `status_bar_gcode_button` ([status_gcode.widget.json](../assets/ui/components/status_bar/status_gcode.widget.json)).
+
+![status_gcode](../tests/ref_imgs/xml_ui_api/widgets/status_gcode.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `label` | Label | text, up to 32 bytes | `G28` |
+| `gcode` | G-code | text, up to 120 bytes | `G28` |
+
+#### status_speed
+
+**Speed factor**: Shows the speed factor; tap to change it
+
+Placed in `status_bar`; component `status_bar_factor_button` ([status_speed.widget.json](../assets/ui/components/status_bar/status_speed.widget.json)).
+
+![status_speed](../tests/ref_imgs/xml_ui_api/widgets/status_speed.png)
+
+#### temperature_graph
+
+**Temperature graph**: Every heater's temperature over the last minutes
+
+Placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.widget.json](../assets/ui/components/dashboard/temperature_graph.widget.json)). In a grid it is 6×3 cells, and at least 3×2.
+
+![temperature_graph](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `seconds` | Time shown | one of `30`, `60`, `120`, `300`, `600` | `60` |
+
+#### tool
+
+**Tool**: One tool with its heaters' temperatures
+
+Placed in `dashboard`; component `dashboard_tool_card` ([tool.widget.json](../assets/ui/components/dashboard/tool.widget.json)). In a grid it is 6×2 cells, and at least 4×1.
+
+![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `tool` | Tool | a row of `tools`, by its `number`, shown by its `name` | `0` |
+
+#### tools
+
+**Tools and heaters**: Every tool, bed and chamber with its temperatures
+
+Placed in `dashboard`; component `dashboard_tools` ([tools.widget.json](../assets/ui/components/dashboard/tools.widget.json)). In a grid it is 6×3 cells, and at least 3×2.
+
+![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
+
 ## Components
 
 The components of the built-in bundle. A user bundle replaces one by giving its own the same name; a component is used as an element (`<fan_card/>`) or as a list's `item`.
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| [`babystep`](#control) | `babystep` |  | `dashboard_job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| [`babystep`](#control) | `babystep` |  | `dashboard_babystep`, `dashboard_job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
 | `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `dashboard_job_status` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
 | [`console`](#console) | `console` |  | `home` | [console.xml](../assets/ui/components/console/console.xml) |
@@ -1536,23 +1759,29 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
-| `dashboard_axis` |  |  | `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
-| [`dashboard_files`](#home) |  |  |  | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
+| `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
+| `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
+| `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
+| `dashboard_fan` | `fans` | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
+| `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
+| `dashboard_gcode_button` |  | `label`, `gcode` | `gcode_button` | [dashboard_gcode_button.xml](../assets/ui/components/dashboard/dashboard_gcode_button.xml) |
 | `dashboard_heater` |  |  | `dashboard_heater_card`, `dashboard_tool` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
 | `dashboard_heater_card` |  |  | `dashboard_tools` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
-| [`dashboard_job_status`](#dashboard_job_status_card) | `dashboard_job_status` |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
-| [`dashboard_job_status_card`](#dashboard_job_status_card) |  |  |  | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
-| [`dashboard_jobs_card`](#dashboard_jobs_card) |  |  |  | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
-| [`dashboard_macros_card`](#dashboard_macros_card) |  |  |  | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
-| [`dashboard_temperature_graph`](#home) |  | `seconds` |  | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
-| `dashboard_tool` |  |  | `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
-| [`dashboard_tools`](#home) |  |  |  | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
+| [`dashboard_job_status`](#dashboard_job_status) | `dashboard_job_status` |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
+| `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
+| `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
+| `dashboard_temperature_graph` |  | `seconds` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
+| `dashboard_tool` |  |  | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
+| `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
+| `dashboard_tools` |  |  | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
 | `factors` | `factors` |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `dialog`, `open`, `title`, `factors`, `pad_shown`, `pad`, `pad_header`, `pad_text`, `pad_accepted`, `pad_confirmable`, `pad_signed` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
-| `fan_card` |  |  | `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
+| `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
 | [`fans`](#fans) | `fans` |  | `control` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
-| [`file_browser`](#dashboard_jobs_card) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
+| [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
 | `file_browser_dialog` |  |  | `file_browser` | [file_browser_dialog.xml](../assets/ui/components/file_browser/file_browser_dialog.xml) |
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
@@ -1589,9 +1818,12 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
 | `settings_wifi_network` |  |  | `settings_wifi` | [settings_wifi_network.xml](../assets/ui/components/settings/settings_wifi_network.xml) |
 | [`sidebar`](#home) |  |  | `home` | [sidebar.xml](../assets/ui/components/sidebar/sidebar.xml) |
-| [`sidebar_estop`](#home) |  |  |  | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
-| [`sidebar_page_button`](#home) |  | `page`, `action`, `label`, `icon`, `flash` |  | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
+| `sidebar_estop` |  |  | `estop` | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
+| `sidebar_gcode_button` |  | `label`, `icon`, `gcode` | `sidebar_gcode` | [sidebar_gcode_button.xml](../assets/ui/components/sidebar/sidebar_gcode_button.xml) |
+| `sidebar_page_button` |  | `page`, `action`, `label`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
 | [`status_bar`](#home) | `status_bar` |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
+| `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
+| `status_bar_gcode_button` |  | `label`, `gcode` | `status_gcode` | [status_bar_gcode_button.xml](../assets/ui/components/status_bar/status_bar_gcode_button.xml) |
 | [`temperature`](#temperature) | `temperature` |  | `control` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
 | [`temperature_extrusion`](#temperature) | `temperature_extrusion` |  | `temperature` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
@@ -1619,27 +1851,17 @@ Also shows `babystep`, `move`.
 
 ![customise_missing](../tests/ref_imgs/xml_ui_api/views/customise_missing.png)
 
-#### dashboard_job_status_card
+#### dashboard_job_status
 
-Also shows `dashboard_job_status`.
-
-![dashboard_job_status_card](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status_card.png)
-
-#### dashboard_jobs_card
-
-Also shows `file_browser`.
-
-![dashboard_jobs_card](../tests/ref_imgs/xml_ui_api/views/dashboard_jobs_card.png)
-
-#### dashboard_macros_card
-
-![dashboard_macros_card](../tests/ref_imgs/xml_ui_api/views/dashboard_macros_card.png)
+![dashboard_job_status](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status.png)
 
 #### fans
 
 ![fans](../tests/ref_imgs/xml_ui_api/views/fans.png)
 
 #### files
+
+Also shows `file_browser`.
 
 ![files](../tests/ref_imgs/xml_ui_api/views/files.png)
 
@@ -1653,7 +1875,7 @@ Also shows `file_browser`.
 
 #### home
 
-Also shows `dashboard`, `dashboard_files`, `dashboard_temperature_graph`, `dashboard_tools`, `home_main_window`, `notifications`, `sidebar`, `sidebar_estop`, `sidebar_page_button`, `status_bar`.
+Also shows `dashboard`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 

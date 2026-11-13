@@ -11,6 +11,8 @@
 #pragma once
 
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Layout/Layout.h"
+#include "UI/Xml/Layout/WidgetCatalogue.h"
 #include <string>
 #include <vector>
 
@@ -80,9 +82,10 @@ namespace UI::Xml::Api
 			Item,	 // As a list's item: `<ds_list item="fan_card">`
 			View,	 // As a view: `<ds_view view="fans">`
 			Base,	 // As the base of a view: `<view extends="fan_card">`
+			Widget,	 // As a widget the user places: its widget file names it (see Layout/WidgetCatalogue.h)
 		};
 
-		std::string by;		   // The component that uses it
+		std::string by;		   // The component that uses it; for a widget, the widget's id
 		As as = As::Element;   // How
 		std::string presenter; // For a view, the presenter `<ds_view presenter="…">` gives it; else empty
 	};
@@ -126,6 +129,8 @@ namespace UI::Xml::Api
 		std::vector<WidgetSpec> widgets;		  // DuetScreen widgets and elements, in name order
 		std::vector<std::string> lvglElements;	  // The XML engine's own widgets and elements, in name order
 		std::vector<Component> components;		  // In name order
+		std::vector<WidgetDef> placeable;		  // The widgets a user can place in a layout, in id order
+		std::vector<Layout> layouts;			  // The layout each slot shows by default, in slot order
 		std::vector<Theme> themes;				  // Every loaded theme, the root first, then in name order
 		std::string rootTheme;					  // The theme that styles, consts and fonts are described from
 		std::vector<Style> styles;				  // Theme styles

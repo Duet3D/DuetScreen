@@ -3,6 +3,9 @@
  */
 
 #include "WidgetCatalogue.h"
+#include "UI/Xml/Binding/Fields.h"
+#include "UI/Xml/Binding/Globals.h"
+#include "UI/Xml/Binding/List.h"
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -240,6 +243,31 @@ namespace UI::Xml
 			return value.get<bool>() ? "true" : "false";
 		}
 		return value.dump();
+	}
+
+	std::vector<SettingOption> SettingDef::choices() const
+	{
+		if (kind == SettingKind::Choice)
+		{
+			return options;
+		}
+		std::vector<SettingOption> rows;
+		ListBase* rowList = kind == SettingKind::Row ? Globals::findList(list) : nullptr;
+		for (size_t i = 0; rowList != nullptr && i < rowList->size(); i++)
+		{
+			FieldFinder keyField(key);
+			FieldFinder labelField(label);
+			rowList->row(i).allFields(keyField);
+			rowList->row(i).allFields(labelField);
+			if (keyField.foundSubject != nullptr)
+			{
+				const std::string value = keyField.foundSubject->text();
+				rows.push_back({.value = value,
+								.title = labelField.foundSubject ? labelField.foundSubject->text() : value,
+								.titleTag = ""});
+			}
+		}
+		return rows;
 	}
 
 	const SettingDef* WidgetDef::setting(std::string_view name) const

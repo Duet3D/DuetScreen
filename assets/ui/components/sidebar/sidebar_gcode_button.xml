@@ -1,0 +1,21 @@
+<!--
+  A sidebar button that sends G-code (`gcode`), with an icon and a label: the sidebar's `sidebar_gcode` widget
+  (sidebar_gcode.widget.json). It sits in a plain container like the page buttons (sidebar_page_button.xml).
+-->
+<component>
+	<api>
+		<prop name="label" type="string" default=""/>
+		<prop name="icon" type="string" default="send.png"/>
+		<prop name="gcode" type="string" default=""/>
+	</api>
+
+	<view extends="lv_obj" width="100%" style_min_width="content" flex_grow="1" scrollable="false"
+		  overflow_visible="true" ext_draw_size="400">
+		<style name="pad_zero"/>
+		<ds_button name="button" text="$label" icon="$icon" width="100%" height="100%" style_min_width="content"
+				   long_mode="clip">
+			<style name="sidebar_btn"/>
+			<action trigger="clicked" name="gcode" arg="$gcode"/>
+		</ds_button>
+	</view>
+</component>

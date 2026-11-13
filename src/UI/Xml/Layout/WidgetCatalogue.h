@@ -83,7 +83,16 @@ namespace UI::Xml
 
 		/** `value` (an accepted one) as XML writes a prop value: "5", "true", "Bed" */
 		static std::string toProp(const nlohmann::json& value);
+
+		/**
+		 * What the user chooses from: a Choice's options, or a Row's list as it is now, one option per row (its key
+		 * as the value, its label as the title); empty for the other kinds, or a list that isn't published
+		 */
+		std::vector<SettingOption> choices() const;
 	};
+
+	/** The most columns or rows a grid can have, so the largest any widget can be */
+	inline constexpr int32_t MAX_GRID_CELLS = 24;
 
 	/** A size in grid cells */
 	struct CellSize
@@ -110,7 +119,7 @@ namespace UI::Xml
 		std::vector<std::string> slots{};	   // Layout slots it can be placed in
 		CellSize defaultSize{2, 2};		   // Size when added to a grid
 		CellSize minSize{1, 1};			   // Smallest size in a grid
-		CellSize maxSize{100, 100};		   // Largest size in a grid
+		CellSize maxSize{MAX_GRID_CELLS, MAX_GRID_CELLS};		   // Largest size in a grid
 		std::map<std::string, std::string> props{}; // Props always given to the component
 		std::vector<SettingDef> settings{};		  // Props the user chooses
 

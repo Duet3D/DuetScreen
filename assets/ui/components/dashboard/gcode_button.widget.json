@@ -1,0 +1,35 @@
+{
+  "component": "dashboard_gcode_button",
+  "title_tag": "widget.gcode_button",
+  "description_tag": "widget.gcode_button_desc",
+  "icon": "send.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      2,
+      1
+    ],
+    "min": [
+      1,
+      1
+    ]
+  },
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "widget.setting_label",
+      "default": "Home",
+      "max_length": 32
+    },
+    {
+      "name": "gcode",
+      "kind": "text",
+      "title_tag": "widget.setting_gcode",
+      "default": "G28",
+      "max_length": 120
+    }
+  ]
+}

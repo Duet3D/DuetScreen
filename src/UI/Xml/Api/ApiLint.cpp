@@ -11,6 +11,7 @@
 #include <deque>
 #include <fmt/format.h>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <optional>
 #include <set>
@@ -109,7 +110,7 @@ namespace UI::Xml::Api
 				for (const auto& component : m_reference.components)
 				{
 					auto found = m_components.find(component.name);
-					if (!component.uses.empty() || found == m_components.end())
+					if (found == m_components.end())
 					{
 						continue;
 					}
@@ -120,10 +121,28 @@ namespace UI::Xml::Api
 						scope.fields.push_back(&presenter->fields);
 						scope.handlers.push_back(presenter);
 					}
-					const std::map<std::string, std::string> noProps;
-					instance(def, scope, noProps);
+					if (component.uses.empty())
+					{
+						const std::map<std::string, std::string> noProps;
+						instance(def, scope, noProps);
+					}
+					// A placed widget is a view of its own too, given its widget's props and default settings
+					for (const auto& use : component.uses)
+					{
+						if (use.as != Use::As::Widget)
+						{
+							continue;
+						}
+						if (const WidgetDef* widget = placeable(use.by))
+						{
+							const auto props = widget->propsFor(nlohmann::json::object());
+							scope.where = "widget " + widget->id;
+							instance(def, scope, props);
+						}
+					}
 				}
 				examples();
+				widgetFiles();
 
 				std::sort(m_issues.begin(),
 						  m_issues.end(),
@@ -134,6 +153,95 @@ namespace UI::Xml::Api
 			}
 
 		  private:
+			/** The placeable widget `id`, or nullptr */
+			const WidgetDef* placeable(const std::string& id) const
+			{
+				const auto& widgets = m_reference.placeable;
+				const auto it = std::find_if(
+					widgets.begin(), widgets.end(), [&id](const WidgetDef& widget) { return widget.id == id; });
+				return it == widgets.end() ? nullptr : &*it;
+			}
+
+			/**
+			 * Check each widget file: its component exists and takes every prop and setting it gives; a row setting's
+			 * list is a global list whose rows have its key and label; and every translation key exists
+			 */
+			void widgetFiles()
+			{
+				for (const auto& widget : m_reference.placeable)
+				{
+					const std::string file = widget.source.generic_string();
+					const auto report = [&](std::string message)
+					{ m_issues.push_back({.file = file, .line = 0, .message = std::move(message)}); };
+					const auto translation = [&](const std::string& key)
+					{
+						if (!key.empty() && !m_translations.contains(key))
+						{
+							report(fmt::format("no translation key `{:s}`", key));
+						}
+					};
+					translation(widget.titleTag);
+					translation(widget.descriptionTag);
+
+					auto component = m_components.find(widget.component);
+					if (component == m_components.end())
+					{
+						report(fmt::format("no component `{:s}`", widget.component));
+						continue;
+					}
+					const auto& props = component->second.props;
+					for (const auto& [name, value] : widget.props)
+					{
+						if (!props.contains(name))
+						{
+							report(fmt::format("`{:s}` takes no prop `{:s}`", widget.component, name));
+						}
+					}
+					for (const auto& setting : widget.settings)
+					{
+						if (!props.contains(setting.name))
+						{
+							report(fmt::format(
+								"`{:s}` takes no prop `{:s}` for its setting", widget.component, setting.name));
+						}
+						translation(setting.titleTag);
+						for (const auto& option : setting.options)
+						{
+							translation(option.titleTag);
+						}
+						if (setting.kind == SettingKind::Row)
+						{
+							rowSetting(setting, report);
+						}
+					}
+				}
+			}
+
+			/** Check a row setting's list is a global list whose rows have its key and label */
+			void rowSetting(const SettingDef& setting, const std::function<void(std::string)>& report) const
+			{
+				const auto list = std::find_if(
+					m_globals.begin(), m_globals.end(), [&](const Field& field) { return field.name == setting.list; });
+				if (list == m_globals.end() || list->rowFields.empty())
+				{
+					report(fmt::format("setting `{:s}`: no global list `{:s}`", setting.name, setting.list));
+					return;
+				}
+				for (const std::string* field : {&setting.key, &setting.label})
+				{
+					const bool found = std::any_of(list->rowFields.begin(),
+												   list->rowFields.end(),
+												   [field](const Field& row) { return row.name == *field; });
+					if (!found)
+					{
+						report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
+										   setting.name,
+										   setting.list,
+										   *field));
+					}
+				}
+			}
+
 			/** Read `component`'s file and what it declares */
 			void load(const Component& component)
 			{

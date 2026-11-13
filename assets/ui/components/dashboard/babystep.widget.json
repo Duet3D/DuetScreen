@@ -1,0 +1,19 @@
+{
+  "component": "dashboard_babystep",
+  "title_tag": "widget.babystep",
+  "description_tag": "widget.babystep_desc",
+  "icon": "babystep.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      3,
+      4
+    ],
+    "min": [
+      2,
+      3
+    ]
+  }
+}

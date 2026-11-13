@@ -1,0 +1,30 @@
+{
+  "component": "dashboard_tool_card",
+  "title_tag": "widget.tool",
+  "description_tag": "widget.tool_desc",
+  "icon": "temperature.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      6,
+      2
+    ],
+    "min": [
+      4,
+      1
+    ]
+  },
+  "settings": [
+    {
+      "name": "tool",
+      "kind": "row",
+      "list": "tools",
+      "key": "number",
+      "label": "name",
+      "default": 0,
+      "title_tag": "widget.setting_tool"
+    }
+  ]
+}

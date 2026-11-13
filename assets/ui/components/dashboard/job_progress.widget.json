@@ -1,0 +1,19 @@
+{
+  "component": "dashboard_job_progress",
+  "title_tag": "widget.job_progress",
+  "description_tag": "widget.job_progress_desc",
+  "icon": "status.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      4,
+      1
+    ],
+    "min": [
+      3,
+      1
+    ]
+  }
+}

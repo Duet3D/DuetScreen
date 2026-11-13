@@ -1,0 +1,13 @@
+{
+  "component": "status_bar_factor_button",
+  "title_tag": "widget.status_speed",
+  "description_tag": "widget.status_speed_desc",
+  "icon": "fine_tune.png",
+  "slots": [
+    "status_bar"
+  ],
+  "props": {
+    "value": "move.speed_factor",
+    "action": "factors.speed"
+  }
+}

@@ -6,6 +6,8 @@
 #include "Debug.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Widgets/Layout/DsLayout.h"
+#include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "XmlTree.h"
@@ -191,6 +193,7 @@ namespace UI::Xml::Api
 					active->setThemeActive();
 				}
 				views();
+				placeable();
 				return std::move(m_images);
 			}
 
@@ -531,6 +534,108 @@ namespace UI::Xml::Api
 							m_images.components[note.component] = file;
 						}
 					}
+				}
+			}
+
+			/** The size a placed widget has in a slot: its default cells in a grid, its own size in a strip */
+			struct PlacedSize
+			{
+				int32_t width = LV_SIZE_CONTENT;  // In pixels, or LV_SIZE_CONTENT
+				int32_t height = LV_SIZE_CONTENT; // In pixels, or LV_SIZE_CONTENT
+			};
+
+			/** How big `widget` is placed in its first slot, as the home screen lays that slot out */
+			static PlacedSize placedSize(const WidgetDef& widget)
+			{
+				const std::string& slot = widget.slots.front();
+				const DsLayout* live = DsLayout::find(slot);
+				const Layout* layout = Layouts::find(slot);
+				if (live == nullptr || layout == nullptr)
+				{
+					return {}; // Not on the home screen: its own size
+				}
+				lv_obj_t* container = live->getContainer();
+				if (layout->kind == LayoutKind::Strip)
+				{
+					// A column (the sidebar) gives its widgets its width; a row (the status bar) its height
+					if (lv_obj_get_style_flex_flow(container, LV_PART_MAIN) == LV_FLEX_FLOW_COLUMN)
+					{
+						return {.width = lv_obj_get_content_width(container)};
+					}
+					return {};
+				}
+				const auto span = [](int32_t space, int32_t gap, int32_t cells, int32_t used)
+				{
+					const int32_t cell = (space - gap * (cells - 1)) / cells;
+					return cell * used + gap * (used - 1);
+				};
+				return {.width = span(lv_obj_get_content_width(container),
+									  lv_obj_get_style_pad_column(container, LV_PART_MAIN),
+									  layout->columns,
+									  widget.defaultSize.columns),
+						.height = span(lv_obj_get_content_height(container),
+									   lv_obj_get_style_pad_row(container, LV_PART_MAIN),
+									   layout->rows,
+									   widget.defaultSize.rows)};
+			}
+
+			/**
+			 * The settings `widget` is pictured with: its defaults, but a row setting (a fan, a tool) on the first row
+			 * of its list, as the user would choose one that the printer has
+			 */
+			static nlohmann::json sampleSettings(const WidgetDef& widget)
+			{
+				nlohmann::json settings = nlohmann::json::object();
+				for (const auto& setting : widget.settings)
+				{
+					if (setting.kind != SettingKind::Row)
+					{
+						continue;
+					}
+					if (const auto rows = setting.choices(); !rows.empty())
+					{
+						settings[setting.name] = rows.front().value;
+					}
+				}
+				return settings;
+			}
+
+			/** Each widget a user can place, as placed: see the file comment of ApiImages.h */
+			void placeable()
+			{
+				// The home screen, to measure the slots
+				lv_obj_t* screenFrame = frame(LV_PCT(100), LV_PCT(100));
+				lv_obj_set_pos(screenFrame, 0, 0);
+				std::map<std::string, PlacedSize> sizes;
+				{
+					XmlView home("api_view", screenFrame, "home");
+					home.show();
+					m_settle();
+					lv_obj_update_layout(lv_screen_active());
+					for (const auto& widget : m_reference.placeable)
+					{
+						sizes[widget.id] = placedSize(widget);
+					}
+				}
+				lv_obj_delete(screenFrame);
+
+				for (const auto& widget : m_reference.placeable)
+				{
+					const PlacedSize size = sizes[widget.id];
+					lv_obj_t* area = frame(size.width, size.height);
+					{
+						XmlView view(
+							widget.id, area, widget.component, nullptr, widget.propsFor(sampleSettings(widget)));
+						view.show();
+						m_settle();
+						lv_obj_update_layout(lv_screen_active());
+						const std::string file = picture(grown(areaOf(area), MARGIN), "widgets/" + widget.id);
+						if (!file.empty())
+						{
+							m_images.placeable[widget.id] = file;
+						}
+					}
+					lv_obj_delete(area);
 				}
 			}
 
