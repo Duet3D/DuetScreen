@@ -13,6 +13,9 @@
  *   <ds_keyboard>     see DsKeyboard.h
  *   <ds_list>         see DsList.h
  *   <ds_modal>        see DsModal.h
+ *   <ds_plot>         see DsPlot.h
+ *   <ds_plot_layer>   see DsPlotLayer.h
+ *   <ds_plot_rect>    see DsPlotRect.h
  *   <ds_slider>       see DsSlider.h
  *   <ds_tabs>         see DsTabs.h
  *   <ds_textarea>     see DsTextarea.h

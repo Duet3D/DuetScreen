@@ -1,0 +1,15 @@
+<!--
+  One of the job's objects in the Object Cancel tab's list: tap it to cancel it, or resume it if cancelled.
+  Highlighted while it is being printed, and marked once cancelled.
+
+  Fields and actions: an objects row (src/UI/Screens/ObjectCancel/ObjectCancelPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content">
+		<bind_style name="object_cancel_cancelled" subject="cancelled" ref_value="1"/>
+		<bind_style name="object_cancel_current" subject="current" ref_value="1"/>
+		<action trigger="clicked" name="object_cancel.select"/>
+
+		<lv_label name="label" bind_text="label" width="100%" height="content"/>
+	</view>
+</component>

@@ -17,7 +17,6 @@
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
-#include "UI/Screens/ObjectCancel/ObjectCancelView.h"
 #include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
@@ -256,21 +255,33 @@ TEST_F(TestHomeView, BlankControlView)
 TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 {
 	openControlTab(3);
-	auto& objectCancel = page<UI::ObjectCancelView>("object_cancel");
 
-	objectCancel.setCurrentObjectName("gear (Instance 5)");
+	OM::ClearJobObjects();
+	auto object = OM::GetOrCreateJobObject(0);
+	ASSERT_NE(object, nullptr);
+	object->index = 0;
+	object->name = "gear (Instance 5)";
+	object->bounds.x[0] = 100;
+	object->bounds.x[1] = 150;
+	object->bounds.y[0] = 100;
+	object->bounds.y[1] = 150;
+	OM::SetCurrentJobObject(0);
+	Model::get().post<EventType::JobCurrentObject>();
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/set_object_name.png");
 
-	objectCancel.setCurrentObjectName("");
+	OM::SetCurrentJobObject(-1);
+	Model::get().post<EventType::JobCurrentObject>();
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/clear_object_name.png");
+
+	OM::ClearJobObjects();
 }
 
 TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 {
-	openControlTab(3);
-	auto& objectCancel = page<UI::ObjectCancelView>("object_cancel");
-	auto& modal = objectCancel.getConfirmModal();
-
 	OM::ClearJobObjects();
 	auto object = OM::GetOrCreateJobObject(0);
 	ASSERT_NE(object, nullptr);
@@ -279,15 +290,34 @@ TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 	OM::SetCurrentJobObject(0);
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
-	objectCancel.getCancelCurrentButton().sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(modal.isVisible());
-	EXPECT_EQ(std::string(modal.getTitle().getText()), _("object_cancel.confirm_cancel_current_title"));
-	EXPECT_NE(std::string(modal.getText().getText()).find("gear (Instance 1)"), std::string::npos);
-	modal.close();
+	openControlTab(3);
+	lv_obj_t* page = UI::findView("object_cancel")->getRootPtr();
+	lv_obj_t* dialog = lv_obj_find_by_name(page, "confirm_object_cancel");
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "title"))),
+			  _("object_cancel.confirm_cancel_current_title"));
+	EXPECT_NE(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "text"))).find("gear (Instance 1)"),
+			  std::string::npos);
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// Pressing the object on the bed asks to cancel it
+	lv_obj_t* rects = lv_obj_find_by_name(page, "objects");
+	ASSERT_NE(rects, nullptr);
+	ASSERT_EQ(lv_obj_get_child_count(rects), 1u);
+	lv_obj_send_event(lv_obj_get_child(rects, 0), LV_EVENT_PRESSED, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "title"))),
+			  _("object_cancel.confirm_cancel_title"));
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, false);
-	objectCancel.getCancelCurrentButton().sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_FALSE(modal.isVisible());
+	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "cancelled without asking";
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 	OM::SetCurrentJobObject(-1);

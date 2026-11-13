@@ -1,0 +1,15 @@
+<!--
+  One of the job's objects on the Object Cancel tab's bed: its outline at its bounds. Press it to cancel it, or resume
+  it if cancelled. Highlighted while it is being printed, and marked once cancelled.
+
+  Fields and actions: an objects row (src/UI/Screens/ObjectCancel/ObjectCancelPresenter.h)
+-->
+<component>
+	<view extends="ds_plot_rect" bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2" style_pad_all="0"
+		  style_radius="2" style_border_width="1" style_border_color="0x9E9E9E">
+		<style name="object_cancel_base"/>
+		<bind_style name="object_cancel_cancelled" subject="cancelled" ref_value="1"/>
+		<bind_style name="object_cancel_current" subject="current" ref_value="1"/>
+		<action trigger="pressed" name="object_cancel.select"/>
+	</view>
+</component>

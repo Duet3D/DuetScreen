@@ -40,6 +40,9 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsKeyboard.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsModal.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPlot.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPlotLayer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPlotRect.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTabs.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTextarea.cpp

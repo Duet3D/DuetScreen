@@ -13,6 +13,9 @@
 #include "DsKeyboard.h"
 #include "DsList.h"
 #include "DsModal.h"
+#include "DsPlot.h"
+#include "DsPlotLayer.h"
+#include "DsPlotRect.h"
 #include "DsSlider.h"
 #include "DsTabs.h"
 #include "DsTextarea.h"
@@ -34,6 +37,9 @@ namespace UI::Xml::Widgets
 		DsKeyboard::registerXml();
 		DsList::registerXml();
 		DsModal::registerXml();
+		DsPlot::registerXml();
+		DsPlotLayer::registerXml();
+		DsPlotRect::registerXml();
 		DsTabs::registerXml();
 		DsTextarea::registerXml();
 		DsThumbnail::registerXml();

@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_bar_marker`, `ds_dropdown`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_heatmap`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_bar_marker`, `ds_dropdown`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_heatmap`, `ds_plot`, `ds_plot_layer`, `ds_plot_rect`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -205,6 +205,7 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list; `windowed` (see Lists); `follow_end` keeps a log-like list showing its newest rows |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
 | `<ds_heatmap>` | `bind_surface`, `bind_title`, `resolution`: a colour map of a `Surface` (a grid of samples over an X/Y area, see [Surface.h](../src/UI/Xml/Binding/Surface.h)), e.g. a bed's height map, with its scale |
+| `<ds_plot>` | `title`/`title_tag`/`bind_title`, `title_style`, `bind_detail`, `x_min`… /`bind_x_min`…, `resolution`: an X/Y area with scales and a grid, such as the bed. `<ds_plot_layer>`s inside it are kept over its drawing area, and `<ds_plot_rect>`s (`x1`, `y1`, `x2`, `y2` or `bind_x1`…) inside a layer at their bounds, e.g. the objects of a job (see [object_cancel.xml](../assets/ui/screens/object_cancel.xml)) |
 | `<ds_tabs>` | A row of tab buttons over the selected tab. Each `<ds_tabs-tab>` has `title_tag` or `title`, `bind_disabled` (disabled while an integer subject is non-zero) and `select_on` (selected whenever a subject is set, e.g. the status tab when a job starts); its children are the tab's content. |
 | `<ds_textarea>` | `bind_text`, `bind_accepted_chars`, `keyboard_mode`/`bind_keyboard_mode`, `keyboard`, `hide_keyboard_on_ready`, `hide_keyboard_on_defocus`, `one_line`, `placeholder`/`placeholder_tag`: a text box that brings up an on-screen keyboard while edited (the shared one, or a `<ds_keyboard>` named by `keyboard`); handlers read edits with `ActionArgs::text()` |
 | `<ds_keyboard>` | `mode`: DuetScreen's on-screen keyboard, e.g. one inside a page's own layout |
