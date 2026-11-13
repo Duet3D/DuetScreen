@@ -5,6 +5,7 @@
   "category_tag": "widget.category_safety",
   "icon": "estop.png",
   "slots": [
-    "sidebar"
+    "sidebar",
+    "dashboard"
   ]
 }

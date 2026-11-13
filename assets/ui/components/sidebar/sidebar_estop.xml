@@ -9,7 +9,7 @@
 		  ext_draw_size="1024">
 		<style name="pad_zero"/>
 		<ds_drag_button name="button" translation_tag="estop.label" icon="estop.png" hint_tag="estop.prompt"
-						width="80" height="80">
+						style_min_width="80" style_min_height="80" width="60%" height="60%" align="center">
 			<style name="estop"/>
 			<action trigger="value_confirmed" name="estop.dragged"/>
 		</ds_drag_button>
