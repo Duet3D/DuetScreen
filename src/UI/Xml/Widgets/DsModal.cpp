@@ -60,7 +60,8 @@ namespace UI::Xml
 </ds_modal>)",
 			 .attributes =
 				 {{"bind_open",
-				   "Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it"},
+				   "Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it",
+				   AttributeKind::Subject},
 				  {"open_value", "The value `bind_open` must have for the dialog to be open"},
 				  {"blocking", "\"true\" so that tapping outside doesn't close it (default false)"},
 				  {"in_place",

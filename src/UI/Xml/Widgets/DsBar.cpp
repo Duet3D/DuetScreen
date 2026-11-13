@@ -23,19 +23,22 @@ namespace UI::Xml
 
 	void DsBar::registerXml()
 	{
-		Widgets::add(
-			{.name = "ds_bar",
-			 .extends = "lv_obj",
-			 .description = "A progress bar that draws its value as text, inside the filled part when it fits",
-			 .example = R"(<ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>)",
-			 .attributes = {{"min", "Bottom of the range (default 0)"},
-							{"max", "Top of the range (default 100)"},
-							{"bind_min", "Follow an int subject for the bottom of the range, e.g. a heater's minimum"},
-							{"bind_max", "Follow an int subject for the top of the range, e.g. a heater's maximum"},
-							{"bind_value", "Follow an int subject for the value"},
-							{"label_format", "fmt format for the value's text (default \"{}\")"}}},
-			xmlCreate,
-			xmlApply);
+		Widgets::add({.name = "ds_bar",
+					  .extends = "lv_obj",
+					  .description = "A progress bar that draws its value as text, inside the filled part when it fits",
+					  .example = R"(<ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>)",
+					  .attributes = {{"min", "Bottom of the range (default 0)"},
+									 {"max", "Top of the range (default 100)"},
+									 {"bind_min",
+									  "Follow an int subject for the bottom of the range, e.g. a heater's minimum",
+									  AttributeKind::Subject},
+									 {"bind_max",
+									  "Follow an int subject for the top of the range, e.g. a heater's maximum",
+									  AttributeKind::Subject},
+									 {"bind_value", "Follow an int subject for the value", AttributeKind::Subject},
+									 {"label_format", "fmt format for the value's text (default \"{}\")"}}},
+					 xmlCreate,
+					 xmlApply);
 	}
 
 	void* DsBar::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

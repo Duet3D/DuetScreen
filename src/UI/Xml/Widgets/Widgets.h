@@ -14,11 +14,27 @@
 
 namespace UI::Xml
 {
+	/** What an attribute's value names, so XML using it can be checked (see Api/ApiLint.h) */
+	enum class AttributeKind
+	{
+		Text,		 // A plain value: a number, a flag, text, …
+		Subject,	 // A subject (or list), looked up like any binding
+		List,		 // A list, e.g. `<ds_list list="…">`
+		Component,	 // A component
+		View,		 // A component, or a C++ view (see View/NativeViews.h)
+		Presenter,	 // A registered presenter
+		Style,		 // A theme or component style
+		Translation, // A translation key
+		Action,		 // An action
+		ActionArg,	 // An action's argument: `{name}` placeholders name subjects
+	};
+
 	/** One attribute a widget takes */
 	struct WidgetAttribute
 	{
-		std::string name;		 // As written, e.g. "bind_value"
-		std::string description; // What it does and the values it takes
+		std::string name;						  // As written, e.g. "bind_value"
+		std::string description;				  // What it does and the values it takes
+		AttributeKind kind = AttributeKind::Text; // What its value names
 	};
 
 	/** What a widget is, for the UI API reference */

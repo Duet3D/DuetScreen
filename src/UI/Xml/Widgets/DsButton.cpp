@@ -30,8 +30,10 @@ namespace UI::Xml
 </ds_button>)",
 			 .attributes =
 				 {{"text", "The text shown, if there is no `translation_tag`"},
-				  {"translation_tag", "Translation key for the text; follows language changes"},
-				  {"bind_text", "Follow a text or int subject for the text"},
+				  {"translation_tag",
+				   "Translation key for the text; follows language changes",
+				   AttributeKind::Translation},
+				  {"bind_text", "Follow a text or int subject for the text", AttributeKind::Subject},
 				  {"bind_text-fmt",
 				   "printf format for `bind_text`, e.g. \"%d°C\" (default \"%s\" for text, \"%d\" for an int)"},
 				  {"icon", "Icon file from the icon set, e.g. \"fan.png\""},
@@ -40,7 +42,8 @@ namespace UI::Xml
 				   "What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip"},
 				  {"flash_on",
 				   "Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. "
-				   "`responses.count`; style the flash with `<style … selector=\"user_1\"/>`"}}},
+				   "`responses.count`; style the flash with `<style … selector=\"user_1\"/>`",
+				   AttributeKind::Subject}}},
 			xmlCreate,
 			xmlApply);
 	}

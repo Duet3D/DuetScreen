@@ -11,7 +11,10 @@
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
+#include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
+#include "i18n/i18n.h"
+#include <algorithm>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 
@@ -181,6 +184,7 @@ namespace UI::Xml::Api
 			reference.widgets.push_back(*spec);
 		}
 		reference.components = components();
+		reference.nativeViews = NativeViews::names();
 		describeTheme(reference);
 		for (const auto name : ThemeStyles::fontNames())
 		{
@@ -190,6 +194,9 @@ namespace UI::Xml::Api
 		{
 			reference.images.emplace_back(name);
 		}
+		i18n::forEachTranslation([&](std::string_view key, std::string_view)
+								 { reference.translationKeys.emplace_back(key); });
+		std::sort(reference.translationKeys.begin(), reference.translationKeys.end());
 		return reference;
 	}
 } // namespace UI::Xml::Api

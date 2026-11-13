@@ -310,7 +310,7 @@ namespace UI::Xml
 								"trigger event. The action is looked for in the presenters of the views the widget is "
 								"in, innermost first, then in the global actions.",
 				 .example = R"(<action trigger="value_confirmed" name="gcode" arg="M106 P{number} S{value}"/>)",
-				 .attributes = {{"name", "The action to run (required)"},
+				 .attributes = {{"name", "The action to run (required)", AttributeKind::Action},
 								{"trigger",
 								 "The event that runs it (default `clicked`): an LVGL event name such as "
 								 "`value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is "
@@ -318,7 +318,8 @@ namespace UI::Xml
 								{"arg",
 								 "Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by "
 								 "the current value of the subject `name`, looked up from where the `<action>` is "
-								 "written"}}},
+								 "written",
+								 AttributeKind::ActionArg}}},
 				actionCreate,
 				actionApply);
 		}

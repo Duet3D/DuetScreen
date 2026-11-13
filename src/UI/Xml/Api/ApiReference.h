@@ -74,18 +74,20 @@ namespace UI::Xml::Api
 	/** Everything the XML UI provides to XML */
 	struct Reference
 	{
-		std::string apiVersion;			   // UI API version, "major.minor"
-		std::vector<Source> sources;	   // Global data, by data source
-		std::vector<Action> globalActions; // Actions every view can raise
-		std::vector<Presenter> presenters; // In name order
-		std::vector<WidgetSpec> widgets;   // DuetScreen widgets and elements, in name order
-		std::vector<Component> components; // In name order
-		std::string rootTheme;			   // The theme that styles, consts and fonts are described from
-		std::vector<Style> styles;		   // Theme styles
-		std::vector<std::string> colours;  // Palette colour names, for `#name`
-		std::vector<Const> consts;		   // Theme consts
-		std::vector<std::string> fonts;	   // Font names
-		std::vector<std::string> images;   // Image names
+		std::string apiVersion;					  // UI API version, "major.minor"
+		std::vector<Source> sources;			  // Global data, by data source
+		std::vector<Action> globalActions;		  // Actions every view can raise
+		std::vector<Presenter> presenters;		  // In name order
+		std::vector<WidgetSpec> widgets;		  // DuetScreen widgets and elements, in name order
+		std::vector<Component> components;		  // In name order
+		std::vector<std::string> nativeViews;	  // C++ views `<ds_view view="…">` can show, in name order
+		std::string rootTheme;					  // The theme that styles, consts and fonts are described from
+		std::vector<Style> styles;				  // Theme styles
+		std::vector<std::string> colours;		  // Palette colour names, for `#name`
+		std::vector<Const> consts;				  // Theme consts
+		std::vector<std::string> fonts;			  // Font names
+		std::vector<std::string> images;		  // Image names
+		std::vector<std::string> translationKeys; // Keys of the current language, sorted; not in the Markdown
 	};
 
 	/**

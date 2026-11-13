@@ -41,7 +41,8 @@ src/UI/Xml/
   Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History
   View/      XmlView, XmlPresenter (and the presenter registry), Actions
   Widgets/   one Ds* class per ds_* element; Widgets (registration and the widget specs)
-  Api/       ApiReference (everything XML can use, gathered from the running UI), ApiMarkdown (docs/XML_UI_API.md)
+  Api/       ApiReference (everything XML can use, gathered from the running UI), ApiMarkdown (docs/XML_UI_API.md),
+             ApiLint (checks every name the components use against the reference)
   Theme/     ThemeStyles (theme styles and fonts made available to XML)
   Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
              ConsoleSource, JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
@@ -291,6 +292,7 @@ The declaration is used to bind the names into a scope, to publish them globally
 - **Tests.**
   - [test_xml_ui.cpp](../tests/src/test_cases/UI/test_xml_ui.cpp) covers loading, overrides, per-row and nested-list bindings, actions, reload and themes.
   - [test_xml_ui_api.cpp](../tests/src/test_cases/UI/test_xml_ui_api.cpp) checks that every action and widget attribute is described, and that [XML_UI_API.md](XML_UI_API.md) matches the code. When it doesn't, the test rewrites the file and fails: review the change in `git diff` and commit it with the code.
+    It also lints the built-in bundle ([ApiLint.h](../src/UI/Xml/Api/ApiLint.h)): every subject, list, action, style, `#const`, font, translation key, component and presenter a component uses must exist where the component is used, so a typo fails the test with the file, line and the path of components that led there, e.g. `heater_row.xml:21: no subject `currentx` (in home_screen › dashboard › tool_list › tool_card › heater_row)`.
   - Every theme is checked pixel by pixel by the dashboard and widget screenshots (`home_view/dashboard/theme_*.png`, `theme/*`).
   - Converted screens must still match their existing screenshots in `tests/ref_imgs`.
   - Engine changes belong in helix-xml with tests there (`cmake -S tests -B build` in `libraries/helix-xml`).
@@ -299,4 +301,5 @@ The declaration is used to bind the names into a scope, to publish them globally
 
 - **No float subjects.** `LV_USE_FLOAT` would also switch all of LVGL's drawing maths to float, which existing widgets aren't written for. Use integers (percent, tenths) or preformatted text (heaters publish `current` as text with one decimal place).
 - **LVGL 9.5 compatibility shim.** helix-xml targets LVGL 9.6. `libraries/helix-xml-compat` bridges the differences until LVGL is upgraded.
-- **Engine warnings don't fail tests.** Unknown attributes and unresolved bindings are logged, but LVGL logging is compiled out of the Test preset. Check the simulator log, and add structural assertions in tests.
+- **Engine warnings don't fail tests.** Unknown attributes are only logged by the engine, and LVGL logging is compiled out of the Test preset; check the simulator log. Unknown *names* (subjects, actions, styles, …) are caught by the lint above.
+- **The UI API is the same in every build.** A feature a build lacks keeps its actions and fields, and says so through a field (e.g. `developer_mode`, `shell_available`) that the XML hides its controls with, so the reference and the lint hold for every build.

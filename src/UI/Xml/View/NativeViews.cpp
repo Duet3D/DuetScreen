@@ -29,4 +29,14 @@ namespace UI::Xml::NativeViews
 		auto it = registry().find(view);
 		return it == registry().end() ? nullptr : it->second(name, parent);
 	}
+
+	std::vector<std::string> names()
+	{
+		std::vector<std::string> result;
+		for (const auto& [name, factory] : registry())
+		{
+			result.push_back(name);
+		}
+		return result;
+	}
 } // namespace UI::Xml::NativeViews

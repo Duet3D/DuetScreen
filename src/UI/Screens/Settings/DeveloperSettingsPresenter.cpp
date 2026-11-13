@@ -70,37 +70,54 @@ namespace UI
 				   StorageHelper::setData(ID_ENABLE_UI_LOGGING, on);
 				   Log::EnableUiLogging(on);
 			   });
-#if DEBUG_BORDERS
+		// Registered in every build, so the UI API is the same in all; `debug_borders_shown` and `developer_mode` say
+		// whether they do anything
 		toggle("settings.debug_borders",
 			   "Show debug borders if the edited value is 1, else hide them (builds with debug borders)",
 			   m_debugBorders,
-			   [](bool on)
+			   []([[maybe_unused]] bool on)
 			   {
+#if DEBUG_BORDERS
 				   StorageHelper::setData(ID_DEBUG_BORDERS, on);
 				   Themes::showDebugBorders(lv_screen_active(), on);
-			   });
+#else
+				   LOG_WARN("settings.debug_borders: this build has no debug borders");
 #endif
-#if DEVELOPER_MODE
+			   });
 		toggle("settings.ssh",
 			   "Turn SSH on (edited value 1) or off (0) (developer mode builds)",
 			   m_ssh,
-			   [](bool on)
+			   []([[maybe_unused]] bool on)
 			   {
+#if DEVELOPER_MODE
 				   on ? SystemHelper::enableService(SystemHelper::Services::SSH)
 					  : SystemHelper::disableService(SystemHelper::Services::SSH);
+#else
+				   LOG_WARN("settings.ssh: only in developer mode builds");
+#endif
 			   });
 		toggle("settings.adb",
 			   "Turn ADB on (edited value 1) or off (0) (developer mode builds)",
 			   m_adb,
-			   [](bool on)
+			   []([[maybe_unused]] bool on)
 			   {
+#if DEVELOPER_MODE
 				   on ? SystemHelper::enableService(SystemHelper::Services::ADB)
 					  : SystemHelper::disableService(SystemHelper::Services::ADB);
+#else
+				   LOG_WARN("settings.adb: only in developer mode builds");
+#endif
 			   });
 		action("settings.buildroot_setup",
 			   "Restart the system's setup service (developer mode builds)",
-			   [](const Xml::ActionArgs&) { SystemHelper::restartService(SystemHelper::Services::SETUP); });
+			   [](const Xml::ActionArgs&)
+			   {
+#if DEVELOPER_MODE
+				   SystemHelper::restartService(SystemHelper::Services::SETUP);
+#else
+				   LOG_WARN("settings.buildroot_setup: only in developer mode builds");
 #endif
+			   });
 		toggle("settings.system_monitor",
 			   "Show the system monitor if the edited value is 1, else hide it",
 			   m_systemMonitor,

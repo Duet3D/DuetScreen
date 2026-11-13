@@ -34,11 +34,13 @@ namespace UI::Xml
 	<action trigger="value_changed" name="temperature.pick_filament"/>
 </ds_dropdown>)",
 			 .attributes =
-				 {{"bind_options", "Follow a text subject holding the options, one per line"},
+				 {{"bind_options", "Follow a text subject holding the options, one per line", AttributeKind::Subject},
 				  {"bind_text",
-				   "Follow a text subject shown on the button instead of the chosen option, e.g. what is loaded"},
+				   "Follow a text subject shown on the button instead of the chosen option, e.g. what is loaded",
+				   AttributeKind::Subject},
 				  {"bind_selected",
-				   "Follow an int subject for the index of the option shown chosen, kept when the options change"}}},
+				   "Follow an int subject for the index of the option shown chosen, kept when the options change",
+				   AttributeKind::Subject}}},
 			xmlCreate,
 			xmlApply);
 	}

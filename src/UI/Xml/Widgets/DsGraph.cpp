@@ -36,14 +36,16 @@ namespace UI::Xml
 				 R"(<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"/>)",
 			 .attributes = {{"history",
 							 "The history shown (required), looked up like a list: the enclosing rows, the view's "
-							 "presenter, then the globals"},
+							 "presenter, then the globals",
+							 AttributeKind::List},
 							{"seconds",
 							 "The X axis shows the last this-many seconds, labelled -seconds to 0 (default 60)"},
 							{"y_min", "Bottom of the Y axis (default 0)"},
 							{"y_max", "Top of the Y axis (default 100)"},
 							{"bind_y_max",
 							 "Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a "
-							 "heater's limit"}}},
+							 "heater's limit",
+							 AttributeKind::Subject}}},
 			xmlCreate,
 			xmlApply);
 	}

@@ -15,6 +15,7 @@
 #include <functional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace UI::Xml::NativeViews
 {
@@ -45,4 +46,7 @@ namespace UI::Xml::NativeViews
 
 	/** A new `view` inside `parent`, or nullptr if there is no such view */
 	LvObj* create(std::string_view view, const std::string& name, lv_obj_t* parent);
+
+	/** The names of every registered view, in order */
+	std::vector<std::string> names();
 } // namespace UI::Xml::NativeViews

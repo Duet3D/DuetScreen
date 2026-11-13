@@ -147,10 +147,12 @@ namespace UI::Xml::DsView
 			 .example = R"(<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs"/>)",
 			 .attributes =
 				 {{"view",
-				   "The XML component shown (with its presenter), or if there is no such component, a C++ view"},
+				   "The XML component shown (with its presenter), or if there is no such component, a C++ view",
+				   AttributeKind::View},
 				  {"presenter",
 				   "Show the component with this registered presenter instead of the one it names, so one component "
-				   "can show different data in different places"},
+				   "can show different data in different places",
+				   AttributeKind::Presenter},
 				  {"home", "\"true\" to make it a home screen: shown when nothing else is open (default false)"},
 				  {"shown",
 				   "\"true\" to show it without taking part in navigation, for always-present parts such as a status "

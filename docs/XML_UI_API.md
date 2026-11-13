@@ -643,8 +643,11 @@ Used by `settings_developer`.
 
 | Action | Description |
 | --- | --- |
+| `settings.adb` | Turn ADB on (edited value 1) or off (0) (developer mode builds) |
 | `settings.advanced_settings` | Show advanced settings if the edited value is 1, else hide them |
+| `settings.buildroot_setup` | Restart the system's setup service (developer mode builds) |
 | `settings.clear_cache` | Delete the cached settings and file information, then show the storage used again |
+| `settings.debug_borders` | Show debug borders if the edited value is 1, else hide them (builds with debug borders) |
 | `settings.debug_level` | Log at the level at the edited index of `debug_levels` |
 | `settings.erase_and_restart` | Erase every setting, then restart |
 | `settings.hardware_test` | Open the hardware test |
@@ -652,6 +655,7 @@ Used by `settings_developer`.
 | `settings.restart` | Restart the DuetScreen program |
 | `settings.second_usb_channel` | Use the second USB channel if the edited value is 1, else not |
 | `settings.send_config` | Upload the screen's settings to the Duet as duetscreen.json in its system directory |
+| `settings.ssh` | Turn SSH on (edited value 1) or off (0) (developer mode builds) |
 | `settings.system_logging` | Log system messages to the console if the edited value is 1, else not |
 | `settings.system_monitor` | Show the system monitor if the edited value is 1, else hide it |
 | `settings.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start |
@@ -1332,6 +1336,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `value_selector` |  | [value_selector.xml](../assets/ui/components/value_selector.xml) |
 | `wifi_network` |  | [wifi_network.xml](../assets/ui/components/wifi_network.xml) |
 | `wifi_selector` | `wifi` | [wifi_selector.xml](../assets/ui/components/wifi_selector.xml) |
+
+C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `numberpad`, `speed_factor`
 
 ## Theme
 

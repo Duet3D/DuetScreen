@@ -35,10 +35,10 @@ namespace UI::Xml
 									 {"y1", "Y of that corner"},
 									 {"x2", "X of the opposite corner"},
 									 {"y2", "Y of the opposite corner"},
-									 {"bind_x1", "Follow an int subject for `x1`"},
-									 {"bind_y1", "Follow an int subject for `y1`"},
-									 {"bind_x2", "Follow an int subject for `x2`"},
-									 {"bind_y2", "Follow an int subject for `y2`"}}},
+									 {"bind_x1", "Follow an int subject for `x1`", AttributeKind::Subject},
+									 {"bind_y1", "Follow an int subject for `y1`", AttributeKind::Subject},
+									 {"bind_x2", "Follow an int subject for `x2`", AttributeKind::Subject},
+									 {"bind_y2", "Follow an int subject for `y2`", AttributeKind::Subject}}},
 					 xmlCreate,
 					 xmlApply);
 	}

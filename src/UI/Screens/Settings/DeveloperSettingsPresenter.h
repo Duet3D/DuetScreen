@@ -6,8 +6,9 @@
  * is shown and applied as soon as it is changed.
  *
  * There is one action per setting, given the value from the widget (an index, or 1/0 for a toggle), and one per
- * command. settings.debug_borders is only in builds with debug borders, and settings.ssh, settings.adb and
- * settings.buildroot_setup only in developer mode builds.
+ * command. Every build has them all, so the UI API is the same in every build: settings.debug_borders only does
+ * something in builds with debug borders (`debug_borders_shown`), and settings.ssh, settings.adb and
+ * settings.buildroot_setup only in developer mode builds (`developer_mode`).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).

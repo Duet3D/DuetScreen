@@ -54,8 +54,11 @@ namespace UI::Xml
 				 R"(<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"/>)",
 			 .attributes =
 				 {{"bind_lightness",
-				   "Follow an int subject for the OKLCH lightness the hues are shown at, in thousandths (0.65 is 650)"},
-				  {"bind_chroma", "Follow an int subject for the OKLCH chroma the hues are shown at, in thousandths"}}},
+				   "Follow an int subject for the OKLCH lightness the hues are shown at, in thousandths (0.65 is 650)",
+				   AttributeKind::Subject},
+				  {"bind_chroma",
+				   "Follow an int subject for the OKLCH chroma the hues are shown at, in thousandths",
+				   AttributeKind::Subject}}},
 			xmlCreate,
 			xmlApply);
 	}

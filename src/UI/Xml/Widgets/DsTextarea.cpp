@@ -57,10 +57,15 @@ namespace UI::Xml
 				 {{"bind_text",
 				   "Follow a text subject: the box shows its value whenever it changes to something other than what is "
 				   "in the box, so a presenter that keeps the subject equal to the edits can replace the text at any "
-				   "time"},
-				  {"bind_accepted_chars", "Follow a text subject for the characters that may be typed; empty for any"},
+				   "time",
+				   AttributeKind::Subject},
+				  {"bind_accepted_chars",
+				   "Follow a text subject for the characters that may be typed; empty for any",
+				   AttributeKind::Subject},
 				  {"keyboard_mode", "Keyboard layout to show: `text` (default), `text_upper` or `number`"},
-				  {"bind_keyboard_mode", "Follow a text subject for the keyboard layout, as `keyboard_mode`"},
+				  {"bind_keyboard_mode",
+				   "Follow a text subject for the keyboard layout, as `keyboard_mode`",
+				   AttributeKind::Subject},
 				  {"keyboard",
 				   "The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same "
 				   "view), else the view of that name (default `keyboard`, the shared one); `none` for a box edited "
@@ -70,7 +75,9 @@ namespace UI::Xml
 				  {"one_line", "\"true\" for a single line of text"},
 				  {"password_mode", "\"true\" to show dots for the characters, e.g. for a password"},
 				  {"placeholder", "Text shown while the box is empty"},
-				  {"placeholder_tag", "Translation key for the placeholder, instead of `placeholder`"}}},
+				  {"placeholder_tag",
+				   "Translation key for the placeholder, instead of `placeholder`",
+				   AttributeKind::Translation}}},
 			xmlCreate,
 			xmlApply);
 	}

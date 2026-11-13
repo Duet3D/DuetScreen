@@ -62,9 +62,9 @@ namespace UI::Xml
 							 "width (e.g. width=\"100%\"), as the marker is placed by percentages of that width"},
 							{"min", "Bottom of the scale the value is on (default 0)"},
 							{"max", "Top of the scale the value is on (default 100)"},
-							{"bind_min", "Follow an int subject for the bottom of the scale"},
-							{"bind_max", "Follow an int subject for the top of the scale"},
-							{"bind_value", "Follow an int subject for the value marked"},
+							{"bind_min", "Follow an int subject for the bottom of the scale", AttributeKind::Subject},
+							{"bind_max", "Follow an int subject for the top of the scale", AttributeKind::Subject},
+							{"bind_value", "Follow an int subject for the value marked", AttributeKind::Subject},
 							{"label_format", "fmt format for the value's text (default \"{}\")"}}},
 			xmlCreate,
 			xmlApply);

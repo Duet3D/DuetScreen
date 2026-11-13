@@ -77,8 +77,9 @@ namespace UI::Xml
 			 .attributes =
 				 {{"list",
 				   "The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can "
-				   "show `list=\"heaters\"`), then the view's presenter, then the globals"},
-				  {"item", "The component built for each row (required)"},
+				   "show `list=\"heaters\"`), then the view's presenter, then the globals",
+				   AttributeKind::List},
+				  {"item", "The component built for each row (required)", AttributeKind::Component},
 				  {"windowed",
 				   "\"true\" to build only the rows on screen, building and deleting rows as the list scrolls (default "
 				   "false)"},

@@ -56,18 +56,22 @@ namespace UI::Xml
 </ds_tabs>)"},
 					 xmlCreate,
 					 xmlApply);
-		Widgets::add({.name = "ds_tabs-tab",
-					  .extends = "lv_obj",
-					  .description = "One tab of a `<ds_tabs>`, written inside it. Its content is the tab's page; the "
-									 "lv_obj attributes apply to that page.",
-					  .attributes = {{"title", "The tab button's text, if there is no `title_tag`"},
-									 {"title_tag", "Translation key for the tab button's text"},
-									 {"bind_disabled", "Disable the tab's button while this int subject is non-zero"},
-									 {"select_on",
-									  "Select the tab whenever this subject changes to a non-empty text or non-zero "
-									  "int, e.g. the status tab when a job starts: `select_on=\"job.file\"`"}}},
-					 xmlCreateTab,
-					 xmlApplyTab);
+		Widgets::add(
+			{.name = "ds_tabs-tab",
+			 .extends = "lv_obj",
+			 .description = "One tab of a `<ds_tabs>`, written inside it. Its content is the tab's page; the "
+							"lv_obj attributes apply to that page.",
+			 .attributes = {{"title", "The tab button's text, if there is no `title_tag`"},
+							{"title_tag", "Translation key for the tab button's text", AttributeKind::Translation},
+							{"bind_disabled",
+							 "Disable the tab's button while this int subject is non-zero",
+							 AttributeKind::Subject},
+							{"select_on",
+							 "Select the tab whenever this subject changes to a non-empty text or non-zero "
+							 "int, e.g. the status tab when a job starts: `select_on=\"job.file\"`",
+							 AttributeKind::Subject}}},
+			xmlCreateTab,
+			xmlApplyTab);
 	}
 
 	void* DsTabs::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

@@ -2,6 +2,7 @@
 target_sources(
   DuetScreen.lib
   PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiLint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiMarkdown.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiReference.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Globals.cpp
