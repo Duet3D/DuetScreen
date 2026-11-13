@@ -16,6 +16,7 @@
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
@@ -127,6 +128,7 @@ namespace UI::Xml
 		HotReload::setPeriod(0);
 		HotReload::watch({});
 		i18n::setLanguageChangedCallback(nullptr);
+		LayoutEditor::get().cancel();
 		DataSources::stop();
 		Layouts::clear();
 		WidgetCatalogue::set({});
@@ -170,6 +172,9 @@ namespace UI::Xml
 		{
 			return;
 		}
+		// Customising edits the layouts being replaced: it ends, and its changes are lost
+		LayoutEditor::get().cancel();
+
 		// Only the outermost views: taking one down deletes the views inside it (its <ds_view>s), and building it
 		// again builds them afresh
 		std::vector<XmlView*> outermost;

@@ -31,6 +31,19 @@ Each row of `console.lines`:
 | `command` | text | A command sent, e.g. "> M115"; empty for a response |
 | `text` | text | A response or log message; empty for a command |
 
+### customise
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `customise.editing` | int | 1 while the user is customising the screen, else 0 |
+| `customise.selected` | text | The selected widget, as "slot/id" (e.g. "dashboard/tools"), or empty if none is |
+| `customise.has_item` | int | 1 if a widget is selected, else 0 |
+| `customise.can_remove` | int | 1 if the selected widget can be removed (it isn't locked) |
+| `customise.can_configure` | int | 1 if the selected widget has settings the user can change |
+| `customise.can_undo` | int | 1 if there is a change to undo |
+| `customise.is_grid` | int | 1 if new widgets go into a grid (whose size can be changed) |
+| `customise.title` | text | The selected widget's name, translated; empty if none is selected |
+
 ### fans
 
 | Name | Type | Description |
@@ -214,6 +227,8 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 | Action | Description |
 | --- | --- |
 | `babystep.open` | Open the shared babystepping dialog |
+| `customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose |
+| `customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed |
 | `estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it |
 | `factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's |
 | `factors.speed` | Open the dialog to change the speed factor |
@@ -302,6 +317,82 @@ Each row of `gcodes`:
 | `console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code |
 | `console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
 | `console.toggle_commands` | Show or fold away the G-code list, and remember which |
+
+### customise
+
+Used by `customise`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `at_top` | int | 1 if the toolbar is at the top of the screen, else 0 (at the bottom) |
+| `dialog_open` | int | 1 while any of the dialogs below is open, else 0 |
+| `catalogue` | list | The widgets that can be added where the user chose, by name |
+| `catalogue_open` | int | 1 while the widget pool is open |
+| `settings` | list | The selected widget's settings |
+| `settings_open` | int | 1 while the selected widget's settings are open |
+| `options` | list | The values the setting being changed can take |
+| `options_open` | int | 1 while they are shown |
+| `options_title` | text | The name of the setting they are for |
+| `text_title` | text | The name of the setting being typed |
+| `text_value` | text | Its text, as typed so far |
+| `text_open` | int | 1 while it is being typed |
+| `grid_open` | int | 1 while the grid's size is shown |
+| `columns` | text | The grid's number of columns |
+| `rows` | text | The grid's number of rows |
+
+Each row of `catalogue`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `id` | text | The widget's id |
+| `title` | text | Its name, translated |
+| `description` | text | What it shows, translated |
+| `icon` | text | Its icon, e.g. "fan.png"; empty for none |
+
+Each row of `settings`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `name` | text | The setting's name |
+| `title` | text | Its name as shown, translated |
+| `kind` | text | How it is chosen: int, bool, text, choice or row |
+| `value` | text | Its value as shown, e.g. "Fan 1" |
+| `on` | int | For a bool, 1 when on, else 0 |
+
+Each row of `options`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `value` | text | The value |
+| `title` | text | The value as shown, translated |
+| `chosen` | int | 1 for the setting's current value, else 0 |
+
+| Action | Description |
+| --- | --- |
+| `customise.add` | Add the widget of the widget pool's row where it was asked for, and close the pool |
+| `customise.cancel` | Stop customising and throw the changes away |
+| `customise.choose` | Set the setting being changed to the value of the row, and close the values |
+| `customise.close_catalogue` | Close the widget pool |
+| `customise.close_grid` | Close the grid's size |
+| `customise.close_options` | Close the values without changing the setting |
+| `customise.close_settings` | Close the settings |
+| `customise.close_text` | Close the box without changing the setting |
+| `customise.columns` | Ask for the grid's number of columns on the number pad |
+| `customise.configure` | Show the selected widget's settings |
+| `customise.done` | Stop customising and keep the changes |
+| `customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
+| `customise.grid` | Show the grid's size |
+| `customise.move_toolbar` | Move the toolbar to the other end of the screen |
+| `customise.remove` | Remove the selected widget |
+| `customise.reset` | Put the selected widget's slot (else the dashboard) back as it was before any customising |
+| `customise.rows` | Ask for the grid's number of rows on the number pad |
+| `customise.text_edit` | The text being typed changed (the text area's text) |
+| `customise.text_ok` | Set the setting being typed to the text, and close the box |
+| `customise.toggle_setting` | Turn the on or off setting of the row the other way |
+| `customise.undo` | Undo the last change |
 
 ### dashboard_jobs, dashboard_macros, files_jobs, files_macros
 
@@ -1763,7 +1854,14 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
 | `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
+| [`customise`](#home) | `customise` |  | `home` | [customise.xml](../assets/ui/components/customise/customise.xml) |
+| `customise_catalogue_item` |  |  | `customise` | [customise_catalogue_item.xml](../assets/ui/components/customise/customise_catalogue_item.xml) |
+| [`customise_grid_item`](#customise_grid_item) |  | `key` |  | [customise_grid_item.xml](../assets/ui/components/customise/customise_grid_item.xml) |
+| `customise_item` |  | `key` | `customise_grid_item` | [customise_item.xml](../assets/ui/components/customise/customise_item.xml) |
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
+| `customise_option` |  |  | `customise` | [customise_option.xml](../assets/ui/components/customise/customise_option.xml) |
+| [`customise_place`](#customise_place) |  |  |  | [customise_place.xml](../assets/ui/components/customise/customise_place.xml) |
+| `customise_setting` |  |  | `customise` | [customise_setting.xml](../assets/ui/components/customise/customise_setting.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
 | `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
 | `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
@@ -1854,9 +1952,17 @@ Also shows `babystep`, `move`.
 
 ![control](../tests/ref_imgs/xml_ui_api/views/control.png)
 
+#### customise_grid_item
+
+![customise_grid_item](../tests/ref_imgs/xml_ui_api/views/customise_grid_item.png)
+
 #### customise_missing
 
 ![customise_missing](../tests/ref_imgs/xml_ui_api/views/customise_missing.png)
+
+#### customise_place
+
+![customise_place](../tests/ref_imgs/xml_ui_api/views/customise_place.png)
 
 #### dashboard_job_status
 
@@ -1882,7 +1988,7 @@ Also shows `file_browser`.
 
 #### home
 
-Also shows `dashboard`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
+Also shows `customise`, `dashboard`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 

@@ -360,7 +360,9 @@
         "success": "Succès",
         "warning": "Avertissement",
         "error": "Erreur"
-      }
+      },
+      "customise": "Écran d'accueil",
+      "customise_start": "Personnaliser"
     },
     "side_bar": {
       "back": "Retour",
@@ -448,7 +450,18 @@
       "dark_mode": "Mode sombre"
     },
     "customise": { /* Customising the screen */
-      "missing": "Ce widget n'est pas installé"
+      "missing": "Ce widget n'est pas installé",
+      "add": "Ajouter",
+      "add_title": "Ajouter un widget",
+      "configure": "Réglages",
+      "remove": "Retirer",
+      "grid": "Grille",
+      "columns": "Colonnes",
+      "rows": "Lignes",
+      "undo": "Annuler",
+      "reset": "Réinitialiser",
+      "done": "Terminé",
+      "not_saved": "Les modifications de l'écran n'ont pas pu être enregistrées"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Ouvre le tableau de bord",

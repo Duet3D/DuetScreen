@@ -15,6 +15,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Scope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ConsoleSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/CustomiseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/FanSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/HeaterRow.cpp

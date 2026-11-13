@@ -360,7 +360,9 @@
         "success": "Geslaagd",
         "warning": "Waarschuwing",
         "error": "Fout"
-      }
+      },
+      "customise": "Startscherm",
+      "customise_start": "Aanpassen"
     },
     "side_bar": {
       "back": "Terug",
@@ -448,7 +450,18 @@
       "dark_mode": "Donkere modus"
     },
     "customise": { /* Customising the screen */
-      "missing": "Deze widget is niet geïnstalleerd"
+      "missing": "Deze widget is niet geïnstalleerd",
+      "add": "Toevoegen",
+      "add_title": "Widget toevoegen",
+      "configure": "Instellingen",
+      "remove": "Verwijderen",
+      "grid": "Raster",
+      "columns": "Kolommen",
+      "rows": "Rijen",
+      "undo": "Ongedaan maken",
+      "reset": "Herstellen",
+      "done": "Klaar",
+      "not_saved": "De wijzigingen aan het scherm konden niet worden opgeslagen"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Opent het dashboard",

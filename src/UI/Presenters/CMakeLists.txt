@@ -3,6 +3,7 @@ target_sources(DuetScreen.lib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Presenters.cpp
 add_subdirectory(Common)
 add_subdirectory(Console)
 add_subdirectory(Control)
+add_subdirectory(Customise)
 add_subdirectory(Dashboard)
 add_subdirectory(FileBrowser)
 add_subdirectory(HardwareTest)

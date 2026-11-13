@@ -10,6 +10,8 @@
 #include "UI/Xml/View/XmlView.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
+#include <cmath>
+#include <fmt/format.h>
 
 namespace UI::Xml
 {
@@ -19,6 +21,36 @@ namespace UI::Xml
 	{
 		/** The component that stands in for a widget that isn't installed */
 		constexpr const char* MISSING_COMPONENT = "customise_missing";
+
+		/** The edit overlays: over a strip's widget, and over a grid's, which has a handle to resize it */
+		constexpr const char* STRIP_OVERLAY = "customise_item";
+		constexpr const char* GRID_OVERLAY = "customise_grid_item";
+
+		/** The marker on the grid cell selected to add a widget to */
+		constexpr const char* PLACE_MARKER = "customise_place";
+
+		/** `delta` pixels in whole steps of `step` pixels, to the nearest */
+		int32_t steps(int32_t delta, int32_t step)
+		{
+			return step > 0 ? static_cast<int32_t>(std::lround(static_cast<double>(delta) / step)) : 0;
+		}
+
+		/** Whether `point` is in `area`, edges included */
+		bool contains(const lv_area_t& area, const lv_point_t& point)
+		{
+			return point.x >= area.x1 && point.x <= area.x2 && point.y >= area.y1 && point.y <= area.y2;
+		}
+
+		/** Where the touch now is */
+		lv_point_t touchPoint()
+		{
+			lv_point_t point{};
+			if (lv_indev_t* indev = lv_indev_active())
+			{
+				lv_indev_get_point(indev, &point);
+			}
+			return point;
+		}
 	} // namespace
 
 	std::vector<DsLayout*> DsLayout::s_live;
@@ -29,19 +61,27 @@ namespace UI::Xml
 	{
 		s_live.push_back(this);
 		Layouts::addListener(this);
+		LayoutEditor::get().addListener(this);
+		lv_obj_add_event_cb(m_container, containerClickedCb, LV_EVENT_CLICKED, this);
 		refresh();
+		onEditorChanged(); // It may be built while the user is customising
 	}
 
 	DsLayout::~DsLayout()
 	{
 		std::erase(s_live, this);
 		Layouts::removeListener(this);
+		LayoutEditor::get().removeListener(this);
 		// The views are deleted with their widgets, which LVGL deletes next
 		for (auto& placement : m_placements)
 		{
 			if (placement.root)
 			{
 				lv_obj_remove_event_cb_with_user_data(placement.root, viewDeletedCb, this);
+				if (placement.overlay)
+				{
+					lv_obj_remove_event_cb_with_user_data(placement.root, overlayFitCb, placement.overlay);
+				}
 			}
 		}
 	}
@@ -175,6 +215,7 @@ namespace UI::Xml
 		{
 			remove(placement);
 		}
+		showOverlays(); // The widgets built again need theirs
 	}
 
 	void DsLayout::applyGrid(const Layout& layout)
@@ -210,6 +251,265 @@ namespace UI::Xml
 		lv_obj_move_to_index(placement.root, static_cast<int32_t>(index));
 		DsView::showWithParent(*placement.view, m_container);
 		return placement;
+	}
+
+	void DsLayout::onEditorChanged()
+	{
+		const bool editing = LayoutEditor::get().isEditing();
+		if (editing != m_editing)
+		{
+			m_editing = editing;
+			m_drag.reset();
+			showOverlays();
+		}
+		showPlace();
+	}
+
+	void DsLayout::showOverlays()
+	{
+		for (auto& placement : m_placements)
+		{
+			if (m_editing && placement.overlay == nullptr && placement.root != nullptr)
+			{
+				addOverlay(placement);
+			}
+			else if (!m_editing && placement.overlay != nullptr)
+			{
+				removeOverlay(placement);
+			}
+		}
+	}
+
+	void DsLayout::addOverlay(Placement& placement)
+	{
+		const Layout* layout = Layouts::find(m_slot);
+		const bool grid = layout != nullptr && layout->kind == LayoutKind::Grid;
+		const std::string key = fmt::format("{:s}/{:s}", m_slot, placement.item.id);
+		const char* attrs[] = {"name", "customise_overlay", "key", key.c_str(), nullptr, nullptr};
+		auto* overlay =
+			static_cast<lv_obj_t*>(lv_xml_create(placement.root, grid ? GRID_OVERLAY : STRIP_OVERLAY, attrs));
+		if (overlay == nullptr)
+		{
+			LOG_ERROR("<ds_layout slot=\"{:s}\">: no edit overlay component", m_slot);
+			return;
+		}
+		// Over the whole widget, in front, taking every touch: nothing scrolls, the widget underneath gets nothing
+		lv_obj_add_flag(overlay, LV_OBJ_FLAG_FLOATING);
+		lv_obj_add_flag(overlay, LV_OBJ_FLAG_CLICKABLE);
+		lv_obj_add_flag(overlay, LV_OBJ_FLAG_PRESS_LOCK);
+		lv_obj_remove_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
+		lv_obj_remove_flag(overlay, LV_OBJ_FLAG_SCROLL_CHAIN);
+		lv_obj_remove_flag(overlay, LV_OBJ_FLAG_GESTURE_BUBBLE);
+		lv_obj_add_event_cb(overlay, overlayEventCb, LV_EVENT_ALL, this);
+		lv_obj_add_event_cb(placement.root, overlayFitCb, LV_EVENT_SIZE_CHANGED, overlay);
+		lv_obj_add_event_cb(placement.root, overlayFitCb, LV_EVENT_STYLE_CHANGED, overlay);
+		placement.overlay = overlay;
+		fitOverlay(overlay);
+	}
+
+	void DsLayout::removeOverlay(Placement& placement)
+	{
+		if (placement.root != nullptr)
+		{
+			lv_obj_remove_event_cb_with_user_data(placement.root, overlayFitCb, placement.overlay);
+		}
+		lv_obj_delete(placement.overlay);
+		placement.overlay = nullptr;
+	}
+
+	void DsLayout::fitOverlay(lv_obj_t* overlay)
+	{
+		// Positions are from the parent's content area, inside its border and padding
+		lv_obj_t* parent = lv_obj_get_parent(overlay);
+		const int32_t border = lv_obj_get_style_border_width(parent, LV_PART_MAIN);
+		lv_obj_set_pos(overlay,
+					   -(lv_obj_get_style_pad_left(parent, LV_PART_MAIN) + border),
+					   -(lv_obj_get_style_pad_top(parent, LV_PART_MAIN) + border));
+		lv_obj_set_size(overlay, lv_obj_get_width(parent), lv_obj_get_height(parent));
+	}
+
+	void DsLayout::overlayFitCb(lv_event_t* e)
+	{
+		fitOverlay(static_cast<lv_obj_t*>(lv_event_get_user_data(e)));
+	}
+
+	void DsLayout::overlayEventCb(lv_event_t* e)
+	{
+		auto* layout = static_cast<DsLayout*>(lv_event_get_user_data(e));
+		auto* overlay = static_cast<lv_obj_t*>(lv_event_get_current_target(e));
+		LayoutEditor& editor = LayoutEditor::get();
+		switch (lv_event_get_code(e))
+		{
+		case LV_EVENT_PRESSED:
+		{
+			const Placement* placement = layout->placementOf(overlay);
+			const Layout* draft = editor.draft(layout->m_slot);
+			const LayoutItem* item = placement && draft ? draft->find(placement->item.id) : nullptr;
+			if (item == nullptr)
+			{
+				return;
+			}
+			const lv_point_t point = touchPoint();
+			lv_area_t handle{};
+			lv_obj_t* handleObj = lv_obj_find_by_name(overlay, "handle");
+			bool onHandle = false;
+			if (handleObj != nullptr)
+			{
+				lv_obj_get_coords(handleObj, &handle);
+				// The handle shows only on the selected widget, so a first touch there selects rather than resizes
+				onHandle = !lv_obj_has_flag(handleObj, LV_OBJ_FLAG_HIDDEN) && contains(handle, point);
+			}
+			editor.select(layout->m_slot, item->id);
+			layout->m_drag = Drag{.id = item->id, .start = point, .from = *item, .resize = onHandle};
+			editor.beginGesture();
+			break;
+		}
+		case LV_EVENT_PRESSING:
+			if (layout->m_drag)
+			{
+				layout->dragTo(touchPoint());
+			}
+			break;
+		case LV_EVENT_RELEASED:
+		case LV_EVENT_PRESS_LOST:
+			if (layout->m_drag)
+			{
+				layout->m_drag.reset();
+				editor.endGesture();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	void DsLayout::containerClickedCb(lv_event_t* e)
+	{
+		auto* layout = static_cast<DsLayout*>(lv_event_get_user_data(e));
+		LayoutEditor& editor = LayoutEditor::get();
+		const Layout* draft = editor.draft(layout->m_slot);
+		if (!editor.isEditing() || draft == nullptr)
+		{
+			return;
+		}
+		if (draft->kind == LayoutKind::Grid)
+		{
+			editor.selectPlace(layout->m_slot, layout->cellAt(touchPoint()));
+		}
+		else
+		{
+			editor.selectPlace(layout->m_slot);
+		}
+	}
+
+	void DsLayout::dragTo(const lv_point_t& point)
+	{
+		LayoutEditor& editor = LayoutEditor::get();
+		const Layout* draft = editor.draft(m_slot);
+		if (draft == nullptr)
+		{
+			return;
+		}
+		const Drag& drag = *m_drag;
+		if (draft->kind == LayoutKind::Grid)
+		{
+			const auto [stepX, stepY] = cellStep();
+			const int32_t columns = steps(point.x - drag.start.x, stepX);
+			const int32_t rows = steps(point.y - drag.start.y, stepY);
+			if (drag.resize)
+			{
+				editor.resize(m_slot, drag.id, std::max(1, drag.from.w + columns), std::max(1, drag.from.h + rows));
+			}
+			else
+			{
+				editor.move(m_slot, drag.id, drag.from.x + columns, drag.from.y + rows);
+			}
+			return;
+		}
+
+		// Along the strip: before every other widget whose middle the touch is past
+		const bool column = lv_obj_get_style_flex_flow(m_container, LV_PART_MAIN) == LV_FLEX_FLOW_COLUMN;
+		size_t index = 0;
+		for (const auto& placement : m_placements)
+		{
+			if (placement.item.id == drag.id || placement.root == nullptr)
+			{
+				continue;
+			}
+			lv_area_t area;
+			lv_obj_get_coords(placement.root, &area);
+			const int32_t middle = column ? (area.y1 + area.y2) / 2 : (area.x1 + area.x2) / 2;
+			if ((column ? point.y : point.x) > middle)
+			{
+				index++;
+			}
+		}
+		editor.moveTo(m_slot, drag.id, index);
+	}
+
+	std::pair<int32_t, int32_t> DsLayout::cellStep() const
+	{
+		const Layout* layout = Layouts::find(m_slot);
+		if (layout == nullptr || layout->kind != LayoutKind::Grid)
+		{
+			return {0, 0};
+		}
+		const int32_t gapX = lv_obj_get_style_pad_column(m_container, LV_PART_MAIN);
+		const int32_t gapY = lv_obj_get_style_pad_row(m_container, LV_PART_MAIN);
+		return {(lv_obj_get_content_width(m_container) + gapX) / layout->columns,
+				(lv_obj_get_content_height(m_container) + gapY) / layout->rows};
+	}
+
+	std::optional<std::pair<int32_t, int32_t>> DsLayout::cellAt(const lv_point_t& point) const
+	{
+		const Layout* layout = Layouts::find(m_slot);
+		const auto [stepX, stepY] = cellStep();
+		lv_area_t content;
+		lv_obj_get_content_coords(m_container, &content);
+		if (layout == nullptr || stepX <= 0 || stepY <= 0 || !contains(content, point))
+		{
+			return std::nullopt;
+		}
+		return std::pair{std::min((point.x - content.x1) / stepX, layout->columns - 1),
+						 std::min((point.y - content.y1) / stepY, layout->rows - 1)};
+	}
+
+	void DsLayout::showPlace()
+	{
+		const LayoutEditor& editor = LayoutEditor::get();
+		const LayoutEditor::Selection& selection = editor.selection();
+		const Layout* layout = Layouts::find(m_slot);
+		const bool marked = m_editing && layout != nullptr && layout->kind == LayoutKind::Grid &&
+							selection.slot == m_slot && selection.item.empty() && selection.cell.has_value();
+		if (!marked)
+		{
+			if (m_place != nullptr)
+			{
+				lv_obj_delete(m_place);
+				m_place = nullptr;
+			}
+			return;
+		}
+		if (m_place == nullptr)
+		{
+			const char* attrs[] = {"name", "customise_place", nullptr, nullptr};
+			m_place = static_cast<lv_obj_t*>(lv_xml_create(m_container, PLACE_MARKER, attrs));
+			if (m_place == nullptr)
+			{
+				LOG_ERROR("<ds_layout slot=\"{:s}\">: no place marker component", m_slot);
+				return;
+			}
+		}
+		lv_obj_set_grid_cell(
+			m_place, LV_GRID_ALIGN_STRETCH, selection.cell->first, 1, LV_GRID_ALIGN_STRETCH, selection.cell->second, 1);
+	}
+
+	DsLayout::Placement* DsLayout::placementOf(lv_obj_t* overlay)
+	{
+		const auto it = std::find_if(m_placements.begin(),
+									 m_placements.end(),
+									 [overlay](const Placement& placement) { return placement.overlay == overlay; });
+		return it == m_placements.end() ? nullptr : &*it;
 	}
 
 	void DsLayout::placeInGrid(lv_obj_t* obj, const LayoutItem& item)

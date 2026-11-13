@@ -361,7 +361,9 @@
         "success": "Success",
         "warning": "Warning",
         "error": "Error"
-      }
+      },
+      "customise": "Home screen",
+      "customise_start": "Customise"
     },
     "side_bar": { /* Side bar buttons */
       "back": "Back",
@@ -449,7 +451,18 @@
       "dark_mode": "Dark Mode"
     },
     "customise": { /* Customising the screen */
-      "missing": "This widget isn't installed"
+      "missing": "This widget isn't installed",
+      "add": "Add",
+      "add_title": "Add a widget",
+      "configure": "Settings",
+      "remove": "Remove",
+      "grid": "Grid",
+      "columns": "Columns",
+      "rows": "Rows",
+      "undo": "Undo",
+      "reset": "Reset",
+      "done": "Done",
+      "not_saved": "The changes to the screen couldn't be saved"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Opens the dashboard",

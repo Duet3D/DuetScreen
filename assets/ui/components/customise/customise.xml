@@ -1,0 +1,154 @@
+<!--
+  Customising the screen: the toolbar shown while the user customises, and its dialogs. The home screen hosts it over
+  the pages, sidebar and status bar; it lets touches through but on its bar, which hides while one of its dialogs is
+  open.
+
+  The bar adds a widget where the user chose (the widget pool), changes the selected widget's settings, removes it,
+  changes the grid's size, undoes, resets the slot to its default, moves itself to the other end of the screen, and
+  ends customising, throwing the changes away or keeping them. Widgets are selected, moved and resized on the screen
+  itself (see src/UI/Widgets/Layout/DsLayout.h).
+
+  Data:     customise.* (src/UI/Xml/Data/CustomiseSource.h)
+  Fields and actions: src/UI/Presenters/Customise/CustomisePresenter.h
+-->
+<component presenter="customise">
+	<styles>
+		<style name="at_top" flex_main_place="start"/>
+	</styles>
+
+	<!-- The view itself is always shown (navigation owns its hidden flag); what is in it shows while customising -->
+	<view extends="lv_obj" width="100%" height="100%" floating="true" clickable="false" scrollable="false">
+		<style name="pad_zero"/>
+
+		<lv_obj name="toolbar" width="100%" height="100%" clickable="false" scrollable="false" flex_flow="column"
+				style_flex_main_place="end" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="pad_small"/>
+		<bind_style_if_eq name="at_top" subject="at_top" ref_value="1"/>
+		<bind_flag_if_eq subject="customise.editing" flag="hidden" ref_value="0"/>
+
+		<lv_obj name="bar" width="content" height="content" scrollable="false" flex_flow="row"
+				style_flex_cross_place="center" style_pad_column="#pad_small">
+			<style name="card"/>
+			<bind_flag_if_eq subject="dialog_open" flag="hidden" ref_value="1"/>
+			<ds_button name="add" translation_tag="customise.add" icon="increment.png">
+				<action trigger="clicked" name="customise.open_catalogue"/>
+			</ds_button>
+			<ds_button name="configure" translation_tag="customise.configure" icon="settings.png">
+				<bind_state_if_eq subject="customise.can_configure" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="customise.configure"/>
+			</ds_button>
+			<ds_button name="remove" translation_tag="customise.remove" icon="clear.png">
+				<bind_state_if_eq subject="customise.can_remove" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="customise.remove"/>
+			</ds_button>
+			<ds_button name="grid" translation_tag="customise.grid" icon="apps.png">
+				<bind_flag_if_eq subject="customise.is_grid" flag="hidden" ref_value="0"/>
+				<action trigger="clicked" name="customise.grid"/>
+			</ds_button>
+			<ds_button name="undo" translation_tag="customise.undo" icon="back.png">
+				<bind_state_if_eq subject="customise.can_undo" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="customise.undo"/>
+			</ds_button>
+			<ds_button name="reset" translation_tag="customise.reset" icon="print_again.png">
+				<action trigger="clicked" name="customise.reset"/>
+			</ds_button>
+			<ds_button name="move_toolbar" icon="move.png">
+				<action trigger="clicked" name="customise.move_toolbar"/>
+			</ds_button>
+			<ds_button name="cancel" translation_tag="common.cancel" icon="close.png">
+				<action trigger="clicked" name="customise.cancel"/>
+			</ds_button>
+			<ds_button name="done" translation_tag="customise.done" icon="send.png">
+				<style name="action_btn"/>
+				<action trigger="clicked" name="customise.done"/>
+			</ds_button>
+		</lv_obj>
+		</lv_obj>
+
+		<!-- The widget pool: the widgets that can go where the user chose -->
+		<ds_modal name="catalogue_dialog" bind_open="catalogue_open" width="70%" height="80%" flex_flow="column">
+			<action trigger="dismissed" name="customise.close_catalogue"/>
+			<lv_obj name="header" width="100%" height="content">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" translation_tag="customise.add_title"/>
+			</lv_obj>
+			<ds_list name="list" list="catalogue" item="customise_catalogue_item" width="100%" flex_grow="1"
+					 flex_flow="column"/>
+		</ds_modal>
+
+		<!-- The selected widget's settings -->
+		<ds_modal name="settings_dialog" bind_open="settings_open" width="70%" height="content" flex_flow="column">
+			<action trigger="dismissed" name="customise.close_settings"/>
+			<lv_obj name="header" width="100%" height="content">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="customise.title"/>
+			</lv_obj>
+			<ds_list name="list" list="settings" item="customise_setting" width="100%" height="content"
+					 flex_flow="column"/>
+			<ds_button name="close" translation_tag="common.close" width="100%">
+				<action trigger="clicked" name="customise.close_settings"/>
+			</ds_button>
+		</ds_modal>
+
+		<!-- The values a choice (or a row of a list) can take -->
+		<ds_modal name="options_dialog" bind_open="options_open" width="50%" height="80%" flex_flow="column">
+			<action trigger="dismissed" name="customise.close_options"/>
+			<lv_obj name="header" width="100%" height="content">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="options_title"/>
+			</lv_obj>
+			<ds_list name="list" list="options" item="customise_option" width="100%" flex_grow="1" flex_flow="column"/>
+		</ds_modal>
+
+		<!-- Typing a text setting, on the shared keyboard -->
+		<ds_modal name="text_dialog" bind_open="text_open" width="80%" height="content" flex_flow="column">
+			<action trigger="dismissed" name="customise.close_text"/>
+			<lv_obj name="header" width="100%" height="content">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" bind_text="text_title"/>
+			</lv_obj>
+			<ds_textarea name="text" bind_text="text_value" one_line="true" width="100%">
+				<action trigger="value_changed" name="customise.text_edit"/>
+			</ds_textarea>
+			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+				<ds_button name="cancel" translation_tag="common.cancel" flex_grow="1">
+					<action trigger="clicked" name="customise.close_text"/>
+				</ds_button>
+				<ds_button name="ok" translation_tag="common.ok" flex_grow="1">
+					<style name="action_btn"/>
+					<action trigger="clicked" name="customise.text_ok"/>
+				</ds_button>
+			</lv_obj>
+		</ds_modal>
+
+		<!-- The grid's size, each typed on the number pad -->
+		<ds_modal name="grid_dialog" bind_open="grid_open" width="50%" height="content" flex_flow="column">
+			<action trigger="dismissed" name="customise.close_grid"/>
+			<lv_obj name="header" width="100%" height="content">
+				<style name="bg_color_header"/>
+				<style name="text_header"/>
+				<lv_label name="title" translation_tag="customise.grid"/>
+			</lv_obj>
+			<lv_obj name="columns_row" width="100%" height="content" flex_flow="row"
+					style_flex_cross_place="center">
+				<lv_label translation_tag="customise.columns" flex_grow="1"/>
+				<ds_button name="columns" bind_text="columns" width="80">
+					<action trigger="clicked" name="customise.columns"/>
+				</ds_button>
+			</lv_obj>
+			<lv_obj name="rows_row" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
+				<lv_label translation_tag="customise.rows" flex_grow="1"/>
+				<ds_button name="rows" bind_text="rows" width="80">
+					<action trigger="clicked" name="customise.rows"/>
+				</ds_button>
+			</lv_obj>
+			<ds_button name="close" translation_tag="common.close" width="100%">
+				<action trigger="clicked" name="customise.close_grid"/>
+			</ds_button>
+		</ds_modal>
+	</view>
+</component>

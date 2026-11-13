@@ -1,0 +1,16 @@
+<!--
+  Marks the empty grid cell the user tapped while customising: a new widget goes there. Tapping it opens the widget
+  pool.
+-->
+<component>
+	<styles>
+		<style name="place" bg_color="#highlight" bg_opa="30%" border_color="#highlight" border_width="2"
+			   border_opa="100%" radius="#radius"/>
+	</styles>
+
+	<view extends="lv_obj" scrollable="false">
+		<style name="place"/>
+		<lv_label name="plus" text="+" align="center" style_text_font="font_header"/>
+		<action trigger="clicked" name="customise.open_catalogue"/>
+	</view>
+</component>

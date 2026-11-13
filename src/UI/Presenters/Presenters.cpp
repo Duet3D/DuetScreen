@@ -12,6 +12,7 @@
 #include "Control/Temperature/ExtruderPresenter.h"
 #include "Control/Temperature/HeaterActions.h"
 #include "Control/Temperature/TemperaturePresenter.h"
+#include "Customise/CustomisePresenter.h"
 #include "Dashboard/JobActions.h"
 #include "FileBrowser/FileBrowserPresenter.h"
 #include "HardwareTest/HardwareTestPresenter.h"
@@ -47,6 +48,7 @@ namespace UI
 		JobActions::registerAll();
 		JobCancelPresenter::registerActions();
 		BabystepDialogPresenter::registerActions();
+		CustomisePresenter::registerActions();
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
@@ -56,6 +58,7 @@ namespace UI
 		Xml::Presenters::add<FactorsPresenter>("factors");
 		Xml::Presenters::add<JobCancelPresenter>("job_cancel");
 		Xml::Presenters::add<BabystepDialogPresenter>("babystep_dialog");
+		Xml::Presenters::add<CustomisePresenter>("customise");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");

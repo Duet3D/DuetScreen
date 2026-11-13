@@ -1,0 +1,15 @@
+<!--
+  One widget of the widget pool: its name and what it shows. Tapping it adds it.
+
+  Fields:   a catalogue row: id, title, description, icon (src/UI/Presenters/Customise/CustomisePresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+		<style name="card"/>
+		<lv_label name="title" bind_text="title" width="100%">
+			<style name="text_emphasis"/>
+		</lv_label>
+		<lv_label name="description" bind_text="description" width="100%" long_mode="wrap"/>
+		<action trigger="clicked" name="customise.add"/>
+	</view>
+</component>

@@ -1,0 +1,14 @@
+<!--
+  One of the values a setting can take, checked if it is the current one. Tapping it chooses it.
+
+  Fields:   an options row: value, title, chosen (src/UI/Presenters/Customise/CustomisePresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_button name="option" bind_text="title" width="100%">
+			<bind_state_if_eq subject="chosen" state="checked" ref_value="1"/>
+			<action trigger="clicked" name="customise.choose"/>
+		</ds_button>
+	</view>
+</component>

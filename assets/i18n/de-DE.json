@@ -360,7 +360,9 @@
         "success": "Erfolg",
         "warning": "Warnung",
         "error": "Fehler"
-      }
+      },
+      "customise": "Startbildschirm",
+      "customise_start": "Anpassen"
     },
     "side_bar": {
       "back": "Zurück",
@@ -448,7 +450,18 @@
       "dark_mode": "Dunkelmodus"
     },
     "customise": { /* Customising the screen */
-      "missing": "Dieses Widget ist nicht installiert"
+      "missing": "Dieses Widget ist nicht installiert",
+      "add": "Hinzufügen",
+      "add_title": "Widget hinzufügen",
+      "configure": "Einstellungen",
+      "remove": "Entfernen",
+      "grid": "Raster",
+      "columns": "Spalten",
+      "rows": "Zeilen",
+      "undo": "Rückgängig",
+      "reset": "Zurücksetzen",
+      "done": "Fertig",
+      "not_saved": "Die Änderungen am Bildschirm konnten nicht gespeichert werden"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Öffnet das Dashboard",

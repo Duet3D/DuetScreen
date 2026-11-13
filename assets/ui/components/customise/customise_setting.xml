@@ -1,0 +1,21 @@
+<!--
+  One setting of the selected widget: its name and its value. On or off settings are a switch; tapping the value of
+  any other opens what changes it (the number pad, a choice of values, the keyboard).
+
+  Fields:   a settings row: name, title, kind, value, on (src/UI/Presenters/Customise/CustomisePresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
+		<style name="pad_zero"/>
+		<lv_label name="title" bind_text="title" flex_grow="1"/>
+		<ds_button name="value" bind_text="value" width="50%" long_mode="dots">
+			<bind_flag_if_eq subject="kind" flag="hidden" ref_value="bool"/>
+			<action trigger="clicked" name="customise.edit_setting"/>
+		</ds_button>
+		<ds_toggle name="toggle">
+			<bind_flag_if_not_eq subject="kind" flag="hidden" ref_value="bool"/>
+			<bind_state_if_eq subject="on" state="checked" ref_value="1"/>
+			<action trigger="value_changed" name="customise.toggle_setting"/>
+		</ds_toggle>
+	</view>
+</component>

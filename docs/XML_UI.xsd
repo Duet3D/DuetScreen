@@ -29,6 +29,7 @@
 			<xs:enumeration value="alert.title"/>
 			<xs:enumeration value="alert.warning"/>
 			<xs:enumeration value="animations"/>
+			<xs:enumeration value="at_top"/>
 			<xs:enumeration value="axes"/>
 			<xs:enumeration value="axes_shown"/>
 			<xs:enumeration value="beds"/>
@@ -36,13 +37,17 @@
 			<xs:enumeration value="buildroot"/>
 			<xs:enumeration value="cache_size"/>
 			<xs:enumeration value="cancelled"/>
+			<xs:enumeration value="catalogue"/>
+			<xs:enumeration value="catalogue_open"/>
 			<xs:enumeration value="chambers"/>
 			<xs:enumeration value="change_shown"/>
 			<xs:enumeration value="change_text"/>
+			<xs:enumeration value="chosen"/>
 			<xs:enumeration value="chroma"/>
 			<xs:enumeration value="color"/>
 			<xs:enumeration value="colour"/>
 			<xs:enumeration value="colour_shown"/>
+			<xs:enumeration value="columns"/>
 			<xs:enumeration value="command"/>
 			<xs:enumeration value="commands_shown"/>
 			<xs:enumeration value="confirm"/>
@@ -64,6 +69,14 @@
 			<xs:enumeration value="current_tool.label"/>
 			<xs:enumeration value="current_tool.shown"/>
 			<xs:enumeration value="current_value"/>
+			<xs:enumeration value="customise.can_configure"/>
+			<xs:enumeration value="customise.can_remove"/>
+			<xs:enumeration value="customise.can_undo"/>
+			<xs:enumeration value="customise.editing"/>
+			<xs:enumeration value="customise.has_item"/>
+			<xs:enumeration value="customise.is_grid"/>
+			<xs:enumeration value="customise.selected"/>
+			<xs:enumeration value="customise.title"/>
 			<xs:enumeration value="dark"/>
 			<xs:enumeration value="date"/>
 			<xs:enumeration value="debug_borders"/>
@@ -76,6 +89,7 @@
 			<xs:enumeration value="dialog_can_delete"/>
 			<xs:enumeration value="dialog_has_image"/>
 			<xs:enumeration value="dialog_image"/>
+			<xs:enumeration value="dialog_open"/>
 			<xs:enumeration value="dialog_text"/>
 			<xs:enumeration value="dialog_title"/>
 			<xs:enumeration value="disable_motors_usable"/>
@@ -117,14 +131,17 @@
 			<xs:enumeration value="fonts"/>
 			<xs:enumeration value="gcode"/>
 			<xs:enumeration value="gcodes"/>
+			<xs:enumeration value="grid_open"/>
 			<xs:enumeration value="heater"/>
 			<xs:enumeration value="heater_count"/>
 			<xs:enumeration value="heaters"/>
 			<xs:enumeration value="home_all_usable"/>
 			<xs:enumeration value="home_usable"/>
 			<xs:enumeration value="homed"/>
+			<xs:enumeration value="icon"/>
 			<xs:enumeration value="icon_set"/>
 			<xs:enumeration value="icon_sets"/>
+			<xs:enumeration value="id"/>
 			<xs:enumeration value="index"/>
 			<xs:enumeration value="info_date"/>
 			<xs:enumeration value="info_generated_by"/>
@@ -153,6 +170,7 @@
 			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="keyboard_layout"/>
 			<xs:enumeration value="keyboard_layouts"/>
+			<xs:enumeration value="kind"/>
 			<xs:enumeration value="known"/>
 			<xs:enumeration value="label"/>
 			<xs:enumeration value="language"/>
@@ -197,7 +215,11 @@
 			<xs:enumeration value="notification_timeout"/>
 			<xs:enumeration value="number"/>
 			<xs:enumeration value="objects"/>
+			<xs:enumeration value="on"/>
 			<xs:enumeration value="open"/>
+			<xs:enumeration value="options"/>
+			<xs:enumeration value="options_open"/>
+			<xs:enumeration value="options_title"/>
 			<xs:enumeration value="output"/>
 			<xs:enumeration value="pad.accepted"/>
 			<xs:enumeration value="pad.confirmable"/>
@@ -226,6 +248,7 @@
 			<xs:enumeration value="retract_usable"/>
 			<xs:enumeration value="rotation"/>
 			<xs:enumeration value="rotations"/>
+			<xs:enumeration value="rows"/>
 			<xs:enumeration value="rpm"/>
 			<xs:enumeration value="scale_max"/>
 			<xs:enumeration value="scale_min"/>
@@ -238,6 +261,8 @@
 			<xs:enumeration value="selected_tool"/>
 			<xs:enumeration value="serial"/>
 			<xs:enumeration value="serial_invalid"/>
+			<xs:enumeration value="settings"/>
+			<xs:enumeration value="settings_open"/>
 			<xs:enumeration value="shell"/>
 			<xs:enumeration value="shell_available"/>
 			<xs:enumeration value="signal"/>
@@ -279,7 +304,10 @@
 			<xs:enumeration value="temperatures"/>
 			<xs:enumeration value="temperatures.limit"/>
 			<xs:enumeration value="text"/>
+			<xs:enumeration value="text_open"/>
 			<xs:enumeration value="text_style"/>
+			<xs:enumeration value="text_title"/>
+			<xs:enumeration value="text_value"/>
 			<xs:enumeration value="theme"/>
 			<xs:enumeration value="themes"/>
 			<xs:enumeration value="thermostatic"/>
@@ -335,6 +363,7 @@
 			<xs:enumeration value="alert.choices"/>
 			<xs:enumeration value="axes"/>
 			<xs:enumeration value="beds"/>
+			<xs:enumeration value="catalogue"/>
 			<xs:enumeration value="chambers"/>
 			<xs:enumeration value="console.lines"/>
 			<xs:enumeration value="crumbs"/>
@@ -353,7 +382,9 @@
 			<xs:enumeration value="move.axes"/>
 			<xs:enumeration value="networks"/>
 			<xs:enumeration value="objects"/>
+			<xs:enumeration value="options"/>
 			<xs:enumeration value="passed"/>
+			<xs:enumeration value="settings"/>
 			<xs:enumeration value="speed_dialog.factors"/>
 			<xs:enumeration value="steps"/>
 			<xs:enumeration value="swatches"/>
@@ -386,6 +417,29 @@
 			<xs:enumeration value="console.send"/>
 			<xs:enumeration value="console.shell"/>
 			<xs:enumeration value="console.toggle_commands"/>
+			<xs:enumeration value="customise.add"/>
+			<xs:enumeration value="customise.cancel"/>
+			<xs:enumeration value="customise.choose"/>
+			<xs:enumeration value="customise.close_catalogue"/>
+			<xs:enumeration value="customise.close_grid"/>
+			<xs:enumeration value="customise.close_options"/>
+			<xs:enumeration value="customise.close_settings"/>
+			<xs:enumeration value="customise.close_text"/>
+			<xs:enumeration value="customise.columns"/>
+			<xs:enumeration value="customise.configure"/>
+			<xs:enumeration value="customise.done"/>
+			<xs:enumeration value="customise.edit_setting"/>
+			<xs:enumeration value="customise.grid"/>
+			<xs:enumeration value="customise.move_toolbar"/>
+			<xs:enumeration value="customise.open_catalogue"/>
+			<xs:enumeration value="customise.remove"/>
+			<xs:enumeration value="customise.reset"/>
+			<xs:enumeration value="customise.rows"/>
+			<xs:enumeration value="customise.start"/>
+			<xs:enumeration value="customise.text_edit"/>
+			<xs:enumeration value="customise.text_ok"/>
+			<xs:enumeration value="customise.toggle_setting"/>
+			<xs:enumeration value="customise.undo"/>
 			<xs:enumeration value="estop.dragged"/>
 			<xs:enumeration value="extruder.extrude"/>
 			<xs:enumeration value="extruder.retract"/>
@@ -599,6 +653,7 @@
 			<xs:enumeration value="babystep"/>
 			<xs:enumeration value="babystep_dialog"/>
 			<xs:enumeration value="console"/>
+			<xs:enumeration value="customise"/>
 			<xs:enumeration value="dashboard_jobs"/>
 			<xs:enumeration value="dashboard_macros"/>
 			<xs:enumeration value="factors"/>
@@ -635,7 +690,14 @@
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="control"/>
+			<xs:enumeration value="customise"/>
+			<xs:enumeration value="customise_catalogue_item"/>
+			<xs:enumeration value="customise_grid_item"/>
+			<xs:enumeration value="customise_item"/>
 			<xs:enumeration value="customise_missing"/>
+			<xs:enumeration value="customise_option"/>
+			<xs:enumeration value="customise_place"/>
+			<xs:enumeration value="customise_setting"/>
 			<xs:enumeration value="dashboard"/>
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
@@ -726,7 +788,14 @@
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="control"/>
+			<xs:enumeration value="customise"/>
+			<xs:enumeration value="customise_catalogue_item"/>
+			<xs:enumeration value="customise_grid_item"/>
+			<xs:enumeration value="customise_item"/>
 			<xs:enumeration value="customise_missing"/>
+			<xs:enumeration value="customise_option"/>
+			<xs:enumeration value="customise_place"/>
+			<xs:enumeration value="customise_setting"/>
 			<xs:enumeration value="dashboard"/>
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
@@ -817,7 +886,14 @@
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="control"/>
+			<xs:enumeration value="customise"/>
+			<xs:enumeration value="customise_catalogue_item"/>
+			<xs:enumeration value="customise_grid_item"/>
+			<xs:enumeration value="customise_item"/>
 			<xs:enumeration value="customise_missing"/>
+			<xs:enumeration value="customise_option"/>
+			<xs:enumeration value="customise_place"/>
+			<xs:enumeration value="customise_setting"/>
 			<xs:enumeration value="dashboard"/>
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
@@ -1126,7 +1202,18 @@
 			<xs:enumeration value="control.move_tab"/>
 			<xs:enumeration value="control.object_cancel_tab"/>
 			<xs:enumeration value="control.temperature_tab"/>
+			<xs:enumeration value="customise.add"/>
+			<xs:enumeration value="customise.add_title"/>
+			<xs:enumeration value="customise.columns"/>
+			<xs:enumeration value="customise.configure"/>
+			<xs:enumeration value="customise.done"/>
+			<xs:enumeration value="customise.grid"/>
 			<xs:enumeration value="customise.missing"/>
+			<xs:enumeration value="customise.not_saved"/>
+			<xs:enumeration value="customise.remove"/>
+			<xs:enumeration value="customise.reset"/>
+			<xs:enumeration value="customise.rows"/>
+			<xs:enumeration value="customise.undo"/>
 			<xs:enumeration value="estop.label"/>
 			<xs:enumeration value="estop.message"/>
 			<xs:enumeration value="estop.prompt"/>
@@ -1529,6 +1616,8 @@
 			<xs:enumeration value="settings.buildroot_version"/>
 			<xs:enumeration value="settings.clear_duetscreen_cache"/>
 			<xs:enumeration value="settings.connectivity_header"/>
+			<xs:enumeration value="settings.customise"/>
+			<xs:enumeration value="settings.customise_start"/>
 			<xs:enumeration value="settings.debug_borders"/>
 			<xs:enumeration value="settings.debug_level"/>
 			<xs:enumeration value="settings.dev_header"/>
@@ -2461,6 +2550,16 @@
 		</xs:attribute>
 		<xs:attribute name="close" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `close` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="customise_grid_item.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="customise_item.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="customise_missing.attributes">
@@ -6966,11 +7065,69 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="customise">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise.xml, with presenter customise.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_catalogue_item">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_catalogue_item.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_grid_item">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_grid_item.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="customise_grid_item.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_item">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_item.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="customise_item.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="customise_missing">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_missing.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="customise_missing.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_option">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_option.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_place">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_place.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_setting">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_setting.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

@@ -11,6 +11,12 @@
             (src/UI/Xml/Data/ToolSource.h)
 -->
 <component>
+	<styles>
+		<!-- While customising, the slot has room to be tapped, to add a button, even when it is empty -->
+		<style name="slot_editing" min_width="80" min_height="24" border_color="#highlight" border_width="1"
+			   border_opa="60%"/>
+	</styles>
+
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">
 		<lv_label name="status" bind_text="machine.summary" align="left_mid"/>
 
@@ -26,6 +32,7 @@
 					   flex_flow="row" style_flex_cross_place="center" style_flex_track_place="center"
 					   style_pad_column="#pad_small">
 				<style name="pad_zero"/>
+				<bind_style_if_eq name="slot_editing" subject="customise.editing" ref_value="1"/>
 			</ds_layout>
 
 			<lv_spangroup name="temperatures" width="content" height="content" style_text_align="right">
