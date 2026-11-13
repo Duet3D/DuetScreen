@@ -1,0 +1,22 @@
+<!--
+  One colour of the theme in the theme preview: a box of the colour over the style's name. The text styles' names are
+  shown in those styles.
+
+  Fields:   a swatches row: label, color, text_style (src/UI/Screens/Settings/ThemePreviewPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="content" height="content" style_max_width="100%" flex_flow="column"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<lv_obj name="color_box" width="100%" flex_grow="1" style_min_height="20" style_min_width="20"
+				style_bg_opa="255">
+			<style name="border"/>
+			<bind_style_prop prop="bg_color" subject="color"/>
+		</lv_obj>
+		<lv_label name="label" bind_text="label" width="content" height="content" style_min_width="content"
+				  style_text_align="center">
+			<bind_style name="text_muted" subject="text_style" ref_value="1"/>
+			<bind_style name="text_emphasis" subject="text_style" ref_value="2"/>
+			<bind_style name="text_header" subject="text_style" ref_value="3"/>
+		</lv_label>
+	</view>
+</component>

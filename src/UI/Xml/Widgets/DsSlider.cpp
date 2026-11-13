@@ -9,6 +9,8 @@
 #include "WidgetSupport.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
+#include <algorithm>
+#include <cstdlib>
 
 namespace UI::Xml
 {
@@ -64,12 +66,12 @@ namespace UI::Xml
 		const char* max = lv_xml_get_value_of(attrs, "max");
 		if (min || max)
 		{
-			slider.setRangeQuietly(min ? static_cast<float>(lv_xml_atoi(min)) : slider.getMin(),
-								   max ? static_cast<float>(lv_xml_atoi(max)) : slider.getMax());
+			slider.setRangeQuietly(min ? std::strtof(min, nullptr) : slider.getMin(),
+								   max ? std::strtof(max, nullptr) : slider.getMax());
 		}
 		if (const char* increment = lv_xml_get_value_of(attrs, "increment"))
 		{
-			slider.setIncrementValue(static_cast<float>(lv_xml_atoi(increment)));
+			slider.setIncrementValue(std::strtof(increment, nullptr));
 		}
 		if (const char* decimals = lv_xml_get_value_of(attrs, "decimals"))
 		{
@@ -82,6 +84,10 @@ namespace UI::Xml
 		else if (const char* label = lv_xml_get_value_of(attrs, "label"))
 		{
 			slider.setLabel(label);
+		}
+		if (const char* scale = lv_xml_get_value_of(attrs, "value_scale"))
+		{
+			slider.m_valueScale = std::max(1.0f, std::strtof(scale, nullptr));
 		}
 		if (!lv_xml_to_bool(attrOr(attrs, "label_shown", "true")))
 		{
@@ -132,7 +138,7 @@ namespace UI::Xml
 		// Don't fight the user while they are typing a value
 		if (!slider->isFocused())
 		{
-			slider->setValueQuietly(static_cast<float>(lv_subject_get_int(subject)));
+			slider->setValueQuietly(static_cast<float>(lv_subject_get_int(subject)) / slider->m_valueScale);
 		}
 	}
 } // namespace UI::Xml

@@ -11,6 +11,7 @@
 #include "UI/Components/Canvas/Canvas.h"
 #include "UI/Components/Graph/Graph.h"
 #include "UI/Components/Input/NumberPad.h"
+#include "UI/Components/Input/Slider.h"
 #include "UI/Components/LVGL/LvArc.h"
 #include "UI/Components/LVGL/LvArclabel.h"
 #include "UI/Components/LVGL/LvBar.h"
@@ -25,7 +26,8 @@
 #include "UI/Components/LVGL/LvSlider.h"
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Components/MessageBox/MessageBox.h"
-#include "UI/Components/Theme/ThemePreview.h"
+#include "UI/Core/Model.h"
+#include "UI/Screens/Settings/ThemePreviewPresenter.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
@@ -97,26 +99,38 @@ TEST_F(TestTheme, DefaultTheme)
 	theme->resetPalette();
 	theme->setThemeActive();
 
-	ThemePreview themePreview("theme_preview", screen);
+	Xml::XmlView themePreview("theme_preview", screen, "theme_preview");
 	themePreview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
-
+	themePreview.show();
 	EXPECT_TRUE(Themes::getCurrentTheme() == theme);
-	themePreview.setDarkMode(darkMode);
-	themePreview.setPrimaryHue(primaryHue);
-	themePreview.setSecondaryHue(secondaryHue);
-	themePreview.setChroma(chroma);
+
+	// Changed as the user would: the sliders keep the values within their ranges
+	auto set = [&](const char* name, float value)
+	{
+		auto& slider = static_cast<Slider&>(*LvObj::fromPtr(lv_obj_find_by_name(themePreview.getRootPtr(), name)));
+		slider.setValue(value);
+	};
+	auto setDark = [&](bool dark)
+	{
+		lv_obj_t* toggle = lv_obj_find_by_name(themePreview.getRootPtr(), "dark_mode");
+		lv_obj_set_state(toggle, LV_STATE_CHECKED, dark);
+		lv_obj_send_event(toggle, LV_EVENT_VALUE_CHANGED, nullptr);
+	};
+	auto change = [&](bool dark, uint16_t primary, uint16_t secondary, float chromaValue)
+	{
+		setDark(dark);
+		set("primary_hue_slider", primary);
+		set("secondary_hue_slider", secondary);
+		set("chroma_slider", chromaValue);
+	};
+
+	change(darkMode, primaryHue, secondaryHue, chroma);
 	EXPECT_EQUAL_SCREENSHOT("theme/example_1.png");
 
-	themePreview.setDarkMode(false);
-	themePreview.setPrimaryHue(25);
-	themePreview.setSecondaryHue(150);
-	themePreview.setChroma(0.5f);
+	change(false, 25, 150, 0.5f);
 	EXPECT_EQUAL_SCREENSHOT("theme/example_2.png");
 
-	themePreview.setDarkMode(true);
-	themePreview.setPrimaryHue(300);
-	themePreview.setSecondaryHue(50);
-	themePreview.setChroma(0.5f);
+	change(true, 300, 50, 0.5f);
 	EXPECT_EQUAL_SCREENSHOT("theme/example_3.png");
 }
 
@@ -290,9 +304,10 @@ TEST_F(TestTheme, Widgets)
 {
 	screen.setFlexFlow(LV_FLEX_FLOW_COLUMN);
 
-	ThemePreview preview("theme_preview", screen);
+	// The swatches only
+	Xml::XmlView preview("theme_preview", screen, "theme_preview", std::make_shared<ThemePreviewPresenter>(false));
 	preview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
-	preview.showControls(false);
+	preview.show();
 
 	LvContainer cont("container", screen);
 	cont.setWidth(LV_PCT(100));
@@ -542,7 +557,7 @@ TEST_F(TestTheme, Widgets)
 		}
 		LOG_INFO("Testing theme: {}", theme->getName());
 		theme->setThemeActive();
-		preview.updateSwatches();
+		Model::get().post<EventType::ThemeChanged>(); // As the Display settings do; the preview shows it
 
 		cont.scrollToX(0, LV_ANIM_OFF);
 

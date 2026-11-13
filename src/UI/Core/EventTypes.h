@@ -94,6 +94,7 @@ namespace UI
 	XX(NavigationBackEnable, bool)                                                                                     \
 	XX(NavigationCurrentScreen, UI::LvObj*)                                                                            \
 	XX(Filaments, std::vector<std::string>)                                                                            \
+	XX(ThemeChanged)                                                                                                   \
 	XX(WifiNetworks)                                                                                                   \
 	XX(WifiConnectResult, std::string, NetworkHelper::ConnectResult)
 

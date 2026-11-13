@@ -52,6 +52,32 @@ namespace UI::Xml
 		LvSubject m_subject; // The LVGL subject
 	};
 
+	/** A colour, e.g. for `<bind_style_prop prop="bg_color" subject="…"/>` */
+	class ColorSubject : public Subject
+	{
+	  public:
+		/** Create the subject holding black */
+		ColorSubject() { m_subject.initColor(lv_color_black()); }
+
+		/** Set the colour; observers are only notified if it changed */
+		void set(lv_color_t color)
+		{
+			if (!lv_color_eq(m_subject.getColor(), color))
+			{
+				m_subject.setColor(color);
+			}
+		}
+
+		/** The current colour */
+		lv_color_t get() const { return m_subject.getColor(); }
+
+		/** The LVGL subject that widgets bind to */
+		lv_subject_t* raw() override { return m_subject; }
+
+	  private:
+		LvSubject m_subject; // The LVGL subject
+	};
+
 	/**
 	 * Text, e.g. a name or a preformatted temperature
 	 * @tparam N Buffer size including the terminator. Longer values are truncated.

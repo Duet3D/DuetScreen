@@ -6,6 +6,7 @@
 
 #include "ObjectModel/Job.h"
 #include "Storage.h"
+#include "UI/Styles/Theme.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
@@ -80,4 +81,35 @@ TEST_F(TestGeneralSettings, ALanguageIsOnlyChangedAfterAsking)
 	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQ(lv_dropdown_get_selected(language), current) << "No shows the language in use again";
+}
+
+class TestDisplaySettings : public UiTestSuite
+{
+  protected:
+	TestDisplaySettings()
+	{
+		tab.setSize(800, 600);
+		tab.show();
+	}
+
+	UI::Xml::XmlView tab{"display_settings", screen, "settings_display"};
+};
+
+TEST_F(TestDisplaySettings, PickingAThemeUsesAndStoresIt)
+{
+	lv_obj_t* themes = lv_obj_find_by_name(lv_obj_find_by_name(tab.getRootPtr(), "theme"), "dropdown");
+	ASSERT_NE(themes, nullptr);
+	ASSERT_GE(lv_dropdown_get_option_count(themes), 2u);
+	const uint32_t original = lv_dropdown_get_selected(themes);
+	const uint32_t other = original == 0 ? 1 : 0;
+
+	lv_dropdown_set_selected(themes, other);
+	lv_obj_send_event(themes, LV_EVENT_VALUE_CHANGED, nullptr);
+	ASSERT_NE(UI::Themes::getTheme(other), nullptr);
+	EXPECT_EQ(UI::Themes::getCurrentTheme(), UI::Themes::getTheme(other));
+	EXPECT_EQ(StorageHelper::getData(ID_THEME), UI::Themes::getTheme(other)->getName());
+
+	lv_dropdown_set_selected(themes, original);
+	lv_obj_send_event(themes, LV_EVENT_VALUE_CHANGED, nullptr);
+	EXPECT_EQ(UI::Themes::getCurrentTheme(), UI::Themes::getTheme(original));
 }

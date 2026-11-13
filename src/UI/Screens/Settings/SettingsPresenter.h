@@ -4,20 +4,12 @@
 
 namespace UI
 {
-	class DisplaySettings;
 	class DeveloperSettings;
 	class NetworkSettingsView;
 
 
 
 
-	class DisplaySettingsPresenter : public Presenter<DisplaySettings>
-	{
-	  public:
-		PRESENTER_CONSTRUCTOR(DisplaySettingsPresenter, DisplaySettings)
-
-	  private:
-	};
 
 	class DeveloperSettingsPresenter : public Presenter<DeveloperSettings>
 	{

@@ -36,6 +36,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsDropdown.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsHeatmap.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsHueSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsIcon.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsKeyboard.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp

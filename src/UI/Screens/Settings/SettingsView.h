@@ -12,7 +12,6 @@
 #include "UI/Components/LVGL/LvSwitch.h"
 #include "UI/Components/MessageBox/MessageBox.h"
 #include "UI/Components/Modal/Modal.h"
-#include "UI/Components/Theme/ThemePreview.h"
 #include "UI/Core/View.h"
 #include "UI/Widgets/HardwareTest/HardwareTest.h"
 #include "i18n/i18n.h"
@@ -38,25 +37,6 @@ namespace UI
 		std::array<std::unique_ptr<LvLabel>, m_maxRowCount> m_labels;
 		std::array<int32_t, 3> m_colDsc;
 		std::array<int32_t, m_maxRowCount + 1> m_rowDsc;
-	};
-
-	class DisplaySettings : public View<DisplaySettingsPresenter, SettingsTab>
-	{
-	  public:
-		DisplaySettings(const std::string& name, LvObj& parent);
-
-	  private:
-		void updateThemePreview();
-
-		void onInit() override;
-		void onShow() override;
-
-		DropdownMenu m_theme{"theme", getRoot()};
-		DropdownMenu m_font{"font", getRoot()};
-		DropdownMenu m_icons{"icons", getRoot()};
-		ThemePreview m_themePreview{"theme_preview", getRoot()};
-		LvSettingsToggle m_enableAnimations{"enable_animations", getRoot()};
-		DropdownMenu m_screenRotation{"screen_rotation", getRoot()};
 	};
 
 	class DeveloperSettings : public View<DeveloperSettingsPresenter, SettingsTab>

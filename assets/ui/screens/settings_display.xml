@@ -1,0 +1,52 @@
+<!--
+  The Display settings tab: the theme, font and icons, a preview of the theme (theme_preview.xml), animations and the
+  screen's rotation. Each is applied as soon as it is changed.
+
+  Fields and actions: src/UI/Screens/Settings/DisplaySettingsPresenter.h
+-->
+<component presenter="settings_display">
+	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"
+		  style_grid_column_dsc_array="content fr(1)"
+		  style_grid_row_dsc_array="content content content content content content">
+		<style name="card"/>
+
+		<lv_label name="row_label_0" translation_tag="settings.theme"
+				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
+				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
+		<setting_dropdown name="theme" options="themes" selected="theme" action="settings.theme"
+						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
+		<lv_label name="row_label_1" translation_tag="settings.font"
+				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
+				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
+		<setting_dropdown name="font" options="fonts" selected="font" action="settings.font"
+						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
+		<lv_label name="row_label_2" translation_tag="settings.icons"
+				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
+				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
+		<setting_dropdown name="icons" options="icon_sets" selected="icon_set" action="settings.icon_set"
+						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
+
+		<ds_view name="theme_preview" view="theme_preview" shown="true" height="content"
+				 style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
+				 style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
+
+		<lv_label name="row_label_4" translation_tag="settings.enable_animations"
+				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
+				  style_grid_cell_row_pos="4" style_grid_cell_y_align="center"/>
+		<ds_toggle name="enable_animations"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
+			<bind_state_if_eq subject="animations" state="checked" ref_value="1"/>
+			<action trigger="value_changed" name="settings.animations"/>
+		</ds_toggle>
+		<lv_label name="row_label_5" translation_tag="settings.screen_rotation"
+				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
+				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
+		<setting_dropdown name="screen_rotation" options="rotations" selected="rotation" action="settings.rotation"
+						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
+	</view>
+</component>

@@ -9,7 +9,9 @@
  *         <action trigger="value_confirmed" name="…"/>
  *     </ds_slider>
  *
- * `label_shown="false"` hides the label, which still heads the number pad. `out_of_range` ("upper", "lower" or "both")
+ * `min`, `max` and `increment` may have fractions (e.g. increment="0.01"). `bind_value` is an integer subject; for a
+ * value with a fraction, give it scaled and say by how much with `value_scale`, e.g. a chroma of 0.02 as 2 with
+ * value_scale="100". `label_shown="false"` hides the label, which still heads the number pad. `out_of_range` ("upper", "lower" or "both")
  * lets a typed value go past the slider's end, e.g. a timeout longer than the slider reaches.
  *
  * The slider raises `value_confirmed` when the user finishes an edit (releases it, presses -/+ or types a value), or
@@ -41,12 +43,13 @@ namespace UI::Xml
 		/** Set the range without raising `value_confirmed` */
 		void setRangeQuietly(float min, float max);
 
+	  protected:
+		/** `<ds_slider>` apply callback: apply lv_obj attributes, then the slider's own. Also for widgets extending it. */
+		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
+
 	  private:
 		/** `<ds_slider>` create callback: create the C++ slider, deleted with its widget */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
-
-		/** `<ds_slider>` apply callback: apply lv_obj attributes, then the slider's own */
-		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** `bind_label` observer */
 		static void labelObserverCb(lv_observer_t* observer, lv_subject_t* subject);
@@ -55,5 +58,6 @@ namespace UI::Xml
 		static void valueObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
 		bool m_settingQuietly = false; // True while a value is written by code rather than edited
+		float m_valueScale = 1.0f;	   // `bind_value`'s subject holds the value times this
 	};
 } // namespace UI::Xml

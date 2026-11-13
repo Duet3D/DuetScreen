@@ -1,7 +1,7 @@
 <!--
   The Settings page: general, connection, display and developer settings, in tabs.
 
-  The display and developer tabs are C++ views (src/UI/Screens/XmlScreens.cpp) for now.
+  The developer tab is a C++ view (src/UI/Screens/XmlScreens.cpp) for now.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
@@ -14,7 +14,7 @@
 				<ds_view name="connection_settings" view="settings_connection" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="display" title_tag="settings.tabs.display">
-				<ds_view name="display_settings" view="display_settings" shown="true"/>
+				<ds_view name="display_settings" view="settings_display" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="developer" title_tag="settings.tabs.developer">
 				<ds_view name="developer_settings" view="developer_settings" shown="true"/>
