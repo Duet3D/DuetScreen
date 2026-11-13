@@ -6,6 +6,7 @@
  */
 
 #include "UI/Xml/Layout/Layout.h"
+#include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include <array>
@@ -365,4 +366,162 @@ TEST_F(TestLayoutStore, SavedLayoutsAreRepaired)
 	ASSERT_TRUE(Layouts::save(dashboard({{.id = "a", .widget = "fan", .x = 9, .w = 1}}), error)) << error;
 	EXPECT_EQ(Layouts::find("dashboard")->items[0].x, 8); // 2 wide at least, so it starts a column earlier
 	EXPECT_EQ(Layouts::find("dashboard")->items[0].w, 2);
+}
+
+namespace
+{
+	/** Editing tests: a 10x6 dashboard with a graph at 0,0 (4x3) and a fan at 4,0 (2x1), and a sidebar strip of a
+	 * button, then a locked button */
+	class TestLayoutEditor : public TestLayoutStore
+	{
+	  protected:
+		TestLayoutEditor()
+		{
+			use({{dashboard({{.id = "graph", .widget = "graph", .w = 4, .h = 3},
+							 {.id = "fan", .widget = "fan", .x = 4, .w = 2, .h = 1}}),
+				  "dashboard.json"},
+				 {Layout{.slot = "sidebar",
+						 .kind = LayoutKind::Strip,
+						 .items = {{.id = "a", .widget = "button"},
+								   {.id = "settings", .widget = "button", .locked = true}}},
+				  "sidebar.json"}});
+			editor().begin();
+		}
+
+		~TestLayoutEditor() override { editor().cancel(); }
+
+		static UI::Xml::LayoutEditor& editor() { return UI::Xml::LayoutEditor::get(); }
+
+		/** The item `id` of `slot` as shown */
+		static const LayoutItem& shown(std::string_view slot, std::string_view id)
+		{
+			static const LayoutItem none;
+			const LayoutItem* item = Layouts::find(slot) ? Layouts::find(slot)->find(id) : nullptr;
+			return item ? *item : none;
+		}
+
+		/** The ids of `slot`'s items as shown, in order */
+		static std::vector<std::string> ids(std::string_view slot)
+		{
+			std::vector<std::string> result;
+			for (const auto& item : Layouts::find(slot)->items)
+			{
+				result.push_back(item.id);
+			}
+			return result;
+		}
+	};
+} // namespace
+
+TEST_F(TestLayoutEditor, ChangesShowAtOnceAndCancelPutsThemBack)
+{
+	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 2));
+	EXPECT_EQ(shown("dashboard", "fan").x, 6);
+
+	editor().cancel();
+	EXPECT_EQ(shown("dashboard", "fan").x, 4);
+	EXPECT_FALSE(fs::exists(m_dir / "layouts"));
+}
+
+TEST_F(TestLayoutEditor, DoneSavesTheSlotsThatChanged)
+{
+	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 2));
+	std::string error;
+	ASSERT_TRUE(editor().done(error)) << error;
+	EXPECT_FALSE(editor().isEditing());
+	EXPECT_TRUE(fs::exists(m_dir / "layouts" / "dashboard.json"));
+	EXPECT_FALSE(fs::exists(m_dir / "layouts" / "sidebar.json"));
+	EXPECT_EQ(Layouts::saved("dashboard")->find("fan")->x, 6);
+}
+
+TEST_F(TestLayoutEditor, WidgetsOnlyMoveAndGrowWhereTheyFit)
+{
+	EXPECT_FALSE(editor().resize("dashboard", "graph", 5, 3)); // Into the fan
+	EXPECT_FALSE(editor().move("dashboard", "fan", 3, 0));	   // Over the graph
+	EXPECT_FALSE(editor().move("dashboard", "fan", 9, 0));	   // Off the grid
+	EXPECT_TRUE(editor().move("dashboard", "fan", 8, 5));
+
+	EXPECT_FALSE(editor().resize("dashboard", "fan", 5, 1));  // Wider than the fan can be
+	EXPECT_FALSE(editor().resize("dashboard", "fan", 1, 1));  // Narrower than it can be
+	EXPECT_TRUE(editor().resize("dashboard", "graph", 5, 4)); // Now there is room
+	EXPECT_EQ(shown("dashboard", "graph").w, 5);
+	EXPECT_EQ(shown("dashboard", "graph").h, 4);
+}
+
+TEST_F(TestLayoutEditor, AddedWidgetsGoInTheSelectedPlace)
+{
+	editor().selectPlace("dashboard", std::pair{6, 3});
+	ASSERT_EQ(editor().add("fan"), "fan_2");
+	EXPECT_EQ(shown("dashboard", "fan_2").x, 6);
+	EXPECT_EQ(shown("dashboard", "fan_2").y, 3);
+	EXPECT_EQ(editor().selection().item, "fan_2");
+
+	// Where it doesn't fit, the first place it does
+	editor().selectPlace("dashboard", std::pair{1, 1});
+	ASSERT_EQ(editor().add("fan"), "fan_3");
+	EXPECT_EQ(shown("dashboard", "fan_3").x, 6);
+	EXPECT_EQ(shown("dashboard", "fan_3").y, 0);
+
+	// A strip adds after the selected item; a widget for another slot can't be added
+	editor().select("sidebar", "a");
+	ASSERT_EQ(editor().add("button"), "button");
+	EXPECT_EQ(ids("sidebar"), (std::vector<std::string>{"a", "button", "settings"}));
+	EXPECT_EQ(editor().add("graph"), std::nullopt);
+}
+
+TEST_F(TestLayoutEditor, LockedItemsMoveButStay)
+{
+	editor().select("sidebar", "settings");
+	EXPECT_FALSE(editor().canRemove());
+	EXPECT_FALSE(editor().removeSelected());
+	EXPECT_TRUE(editor().moveTo("sidebar", "settings", 0));
+	EXPECT_EQ(ids("sidebar"), (std::vector<std::string>{"settings", "a"}));
+
+	editor().select("sidebar", "a");
+	EXPECT_TRUE(editor().removeSelected());
+	EXPECT_EQ(ids("sidebar"), (std::vector<std::string>{"settings"}));
+}
+
+TEST_F(TestLayoutEditor, SettingsTakeOnlyTheirValues)
+{
+	editor().select("dashboard", "fan");
+	EXPECT_TRUE(editor().canConfigure());
+	EXPECT_FALSE(editor().setSetting("fan", 12)); // 0 to 9
+	EXPECT_FALSE(editor().setSetting("speed", 1));
+	EXPECT_TRUE(editor().setSetting("fan", 3));
+	EXPECT_EQ(shown("dashboard", "fan").settings["fan"], 3);
+
+	editor().select("dashboard", "graph");
+	EXPECT_FALSE(editor().canConfigure()); // It has none
+}
+
+TEST_F(TestLayoutEditor, UndoGoesBackOneChangeAndADragIsOne)
+{
+	editor().beginGesture();
+	EXPECT_TRUE(editor().move("dashboard", "fan", 5, 0));
+	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 0));
+	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 1));
+	editor().endGesture();
+	EXPECT_TRUE(editor().setGrid("dashboard", 12, 8));
+	EXPECT_EQ(Layouts::find("dashboard")->columns, 12);
+
+	editor().undo();
+	EXPECT_EQ(Layouts::find("dashboard")->columns, 10);
+	EXPECT_EQ(shown("dashboard", "fan").x, 6);
+	editor().undo();
+	EXPECT_EQ(shown("dashboard", "fan").x, 4);
+	EXPECT_FALSE(editor().canUndo());
+}
+
+TEST_F(TestLayoutEditor, ResetGoesBackToTheDefault)
+{
+	EXPECT_TRUE(editor().move("dashboard", "fan", 6, 2));
+	std::string error;
+	ASSERT_TRUE(editor().done(error)) << error;
+
+	editor().begin();
+	editor().reset("dashboard");
+	EXPECT_EQ(shown("dashboard", "fan").x, 4);
+	ASSERT_TRUE(editor().done(error)) << error;
+	EXPECT_FALSE(fs::exists(m_dir / "layouts" / "dashboard.json")); // The default needs no file
 }

@@ -23,7 +23,8 @@ namespace UI::Xml::Layouts
 		{
 			std::optional<Layout> locks;	// The built-in layout, giving the locked items
 			std::optional<Layout> fallback; // The default: the last bundle's layout but the user's own
-			std::optional<Layout> shown;	// What is shown: the user's own, or the default
+			std::optional<Layout> saved;	// The user's own, or the default
+			std::optional<Layout> shown;	// What is shown: the saved layout, or one being previewed
 		};
 
 		std::map<std::string, SlotLayouts, std::less<>> s_slots; // Every slot's layouts, by slot
@@ -185,13 +186,14 @@ namespace UI::Xml::Layouts
 			}
 			if (auto it = local.find(name); it != local.end())
 			{
-				slot.shown = it->second->layout;
-				repairInto(*slot.shown, locks, it->second->file, issues);
+				slot.saved = it->second->layout;
+				repairInto(*slot.saved, locks, it->second->file, issues);
 			}
 			else
 			{
-				slot.shown = slot.fallback;
+				slot.saved = slot.fallback;
 			}
+			slot.shown = slot.saved;
 		}
 		for (const auto& [name, slot] : s_slots)
 		{
@@ -239,6 +241,7 @@ namespace UI::Xml::Layouts
 		SlotLayouts& slot = s_slots[layout.slot];
 		repair(layout, slot.locks ? &*slot.locks : nullptr);
 		const bool isDefault = slot.fallback && layout == *slot.fallback;
+		slot.saved = layout;
 		slot.shown = layout;
 		notify(layout.slot);
 
@@ -263,6 +266,35 @@ namespace UI::Xml::Layouts
 			return false;
 		}
 		return ensureLocalManifest(error) && writeSafely(file, layout.toJson().dump(2) + "\n", error);
+	}
+
+	void preview(Layout layout)
+	{
+		SlotLayouts& slot = s_slots[layout.slot];
+		repair(layout, slot.locks ? &*slot.locks : nullptr);
+		if (slot.shown && *slot.shown == layout)
+		{
+			return;
+		}
+		slot.shown = std::move(layout);
+		notify(slot.shown->slot);
+	}
+
+	void revert(std::string_view name)
+	{
+		const auto it = s_slots.find(name);
+		if (it == s_slots.end() || it->second.shown == it->second.saved)
+		{
+			return;
+		}
+		it->second.shown = it->second.saved;
+		notify(name);
+	}
+
+	const Layout* saved(std::string_view name)
+	{
+		const auto it = s_slots.find(name);
+		return it == s_slots.end() || !it->second.saved ? nullptr : &*it->second.saved;
 	}
 
 	void addListener(LayoutListener* listener)

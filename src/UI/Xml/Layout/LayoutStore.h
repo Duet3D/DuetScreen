@@ -75,6 +75,18 @@ namespace UI::Xml
 		 */
 		bool save(Layout layout, std::string& error);
 
+		/**
+		 * Show `layout` in its slot without saving it, e.g. a layout being edited. It is repaired first. Listeners are
+		 * told. revert() goes back to the slot's saved layout.
+		 */
+		void preview(Layout layout);
+
+		/** Show `slot`'s saved layout again after preview(). Listeners are told if it changes. */
+		void revert(std::string_view slot);
+
+		/** The layout `slot` shows when nothing is being previewed: the user's own, else the default; or nullptr */
+		const Layout* saved(std::string_view slot);
+
 		/** Tell `listener` about changes until it is removed */
 		void addListener(LayoutListener* listener);
 
