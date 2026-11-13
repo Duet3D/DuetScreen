@@ -13,9 +13,9 @@
 #include "Control/Temperature/HeaterActions.h"
 #include "Control/Temperature/TemperaturePresenter.h"
 #include "Dashboard/JobActions.h"
-#include "Dashboard/JobStatusPresenter.h"
 #include "FileBrowser/FileBrowserPresenter.h"
 #include "HardwareTest/HardwareTestPresenter.h"
+#include "Modals/BabystepDialogPresenter.h"
 #include "Modals/FactorsPresenter.h"
 #include "Modals/JobCancelPresenter.h"
 #include "Modals/NumberPadPresenter.h"
@@ -46,15 +46,16 @@ namespace UI
 		EStopAction::registerAll();
 		JobActions::registerAll();
 		JobCancelPresenter::registerActions();
+		BabystepDialogPresenter::registerActions();
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
-		Xml::Presenters::add<JobStatusPresenter>("dashboard_job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<NumberPadPresenter>("numberpad");
 		Xml::Presenters::add<FactorsPresenter>("factors");
 		Xml::Presenters::add<JobCancelPresenter>("job_cancel");
+		Xml::Presenters::add<BabystepDialogPresenter>("babystep_dialog");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");

@@ -31,7 +31,6 @@
 			<xs:enumeration value="animations"/>
 			<xs:enumeration value="axes"/>
 			<xs:enumeration value="axes_shown"/>
-			<xs:enumeration value="babystep_open"/>
 			<xs:enumeration value="beds"/>
 			<xs:enumeration value="brightness"/>
 			<xs:enumeration value="buildroot"/>
@@ -374,8 +373,10 @@
 			<xs:enumeration value="alert.jog"/>
 			<xs:enumeration value="alert.keyboard"/>
 			<xs:enumeration value="alert.ok"/>
+			<xs:enumeration value="babystep.close"/>
 			<xs:enumeration value="babystep.down"/>
 			<xs:enumeration value="babystep.edit"/>
+			<xs:enumeration value="babystep.open"/>
 			<xs:enumeration value="babystep.reset"/>
 			<xs:enumeration value="babystep.select"/>
 			<xs:enumeration value="babystep.up"/>
@@ -422,9 +423,7 @@
 			<xs:enumeration value="heightmap.show"/>
 			<xs:enumeration value="heightmap.toggle"/>
 			<xs:enumeration value="job.ask_cancel"/>
-			<xs:enumeration value="job.babystep"/>
 			<xs:enumeration value="job.cancel"/>
-			<xs:enumeration value="job.close_babystep"/>
 			<xs:enumeration value="job.close_cancel"/>
 			<xs:enumeration value="job.pause"/>
 			<xs:enumeration value="job.print_again"/>
@@ -598,8 +597,8 @@
 	<xs:simpleType name="presenter.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_dialog"/>
 			<xs:enumeration value="console"/>
-			<xs:enumeration value="dashboard_job_status"/>
 			<xs:enumeration value="dashboard_jobs"/>
 			<xs:enumeration value="dashboard_macros"/>
 			<xs:enumeration value="factors"/>
@@ -629,6 +628,7 @@
 	<xs:simpleType name="component.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_dialog"/>
 			<xs:enumeration value="babystep_step"/>
 			<xs:enumeration value="confirm_dialog"/>
 			<xs:enumeration value="console"/>
@@ -719,6 +719,7 @@
 	<xs:simpleType name="view.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_dialog"/>
 			<xs:enumeration value="babystep_step"/>
 			<xs:enumeration value="confirm_dialog"/>
 			<xs:enumeration value="console"/>
@@ -809,6 +810,7 @@
 	<xs:simpleType name="widget.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_dialog"/>
 			<xs:enumeration value="babystep_step"/>
 			<xs:enumeration value="confirm_dialog"/>
 			<xs:enumeration value="console"/>
@@ -6392,6 +6394,14 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="babystep_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/babystep_dialog.xml, with presenter babystep_dialog.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="babystep_step">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/common/babystep_step.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -7049,7 +7059,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="dashboard_job_status">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_job_status.xml, with presenter dashboard_job_status.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_job_status.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

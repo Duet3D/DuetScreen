@@ -213,6 +213,7 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 
 | Action | Description |
 | --- | --- |
+| `babystep.open` | Open the shared babystepping dialog |
 | `estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it |
 | `factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's |
 | `factors.speed` | Open the dialog to change the speed factor |
@@ -261,6 +262,18 @@ Each row of `steps`:
 | `babystep.select` | Use that step. From a row of `steps`. |
 | `babystep.up` | Move Z up by the chosen step (M290) |
 
+### babystep_dialog
+
+Used by `babystep_dialog`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `open` | int | 1 while the dialog is open |
+
+| Action | Description |
+| --- | --- |
+| `babystep.close` | Close the babystepping dialog |
+
 ### console
 
 Used by `console`.
@@ -289,19 +302,6 @@ Each row of `gcodes`:
 | `console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code |
 | `console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
 | `console.toggle_commands` | Show or fold away the G-code list, and remember which |
-
-### dashboard_job_status
-
-Used by `dashboard_job_status`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `babystep_open` | int | 1 while the babystepping dialog is open |
-
-| Action | Description |
-| --- | --- |
-| `job.babystep` | Open the babystepping dialog (sets `babystep_open`) |
-| `job.close_babystep` | Close the babystepping dialog |
 
 ### dashboard_jobs, dashboard_macros, files_jobs, files_macros
 
@@ -1755,7 +1755,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| [`babystep`](#control) | `babystep` |  | `dashboard_babystep`, `dashboard_job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| [`babystep`](#control) | `babystep` |  | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| `babystep_dialog` | `babystep_dialog` |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
 | `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_cancel` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
 | [`console`](#console) | `console` |  | `home` | [console.xml](../assets/ui/components/console/console.xml) |
@@ -1773,7 +1774,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_heater` |  |  | `dashboard_heater_card`, `dashboard_tool` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
 | `dashboard_heater_card` |  |  | `dashboard_tools` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
-| [`dashboard_job_status`](#dashboard_job_status) | `dashboard_job_status` |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| [`dashboard_job_status`](#dashboard_job_status) |  |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
 | `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |

@@ -2,16 +2,16 @@
   The job status panel: the current (or last) job with its progress and thumbnail; the tool position, speed, flow,
   babystepping and times; and pause, resume, print again and cancel.
 
-  Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens
-  babystep.xml in a dialog.
+  Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens the
+  shared babystepping dialog (babystep_dialog.xml).
 
   Data:     job.* (src/UI/Xml/Data/JobSource.h): the latest job, its progress, thumbnail and controls; move.*
             (src/UI/Xml/Data/MoveSource.h): positions, overrides, babystep, speeds and flow
   Actions:  job.pause, job.resume, job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h) and
-            job.ask_cancel (global: the shared question, src/UI/Presenters/Modals/JobCancelPresenter.h)
-  Fields and actions: src/UI/Presenters/Dashboard/JobStatusPresenter.h
+            job.ask_cancel and babystep.open (global: the shared dialogs, src/UI/Presenters/Modals/)
+  It has no presenter: everything it shows and does is global.
 -->
-<component presenter="dashboard_job_status">
+<component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="pad_zero"/>
 		<style name="pad_gap"/>
@@ -142,7 +142,7 @@
 				</lv_label>
 				<ds_button name="babystep_button" bind_text="move.babystep" width="100%" height="content"
 						   style_min_width="content">
-					<action trigger="clicked" name="job.babystep"/>
+					<action trigger="clicked" name="babystep.open"/>
 				</ds_button>
 			</lv_obj>
 		</lv_obj>
@@ -178,10 +178,5 @@
 				<action trigger="clicked" name="job.ask_cancel"/>
 			</ds_button>
 		</lv_obj>
-
-		<ds_modal name="babystep_dialog" bind_open="babystep_open" width="40%" height="70%">
-			<action trigger="dismissed" name="job.close_babystep"/>
-			<ds_view name="job_babystep" view="babystep" shown="true" width="100%" height="100%" style_pad_all="0"/>
-		</ds_modal>
 	</view>
 </component>
