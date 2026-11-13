@@ -319,7 +319,8 @@ namespace UI::Themes
 		/* Placed widgets */
 		Style widget_title;		  // A widget's title
 		Style widget_value;		  // A widget's main value
-		Style widget_value_large; // A widget's main value, in a large widget
+		Style widget_value_large; // A widget's main value, in a regular-sized widget
+		Style widget_value_huge;  // A widget's main value, in an expanded widget
 		Style widget_detail;	  // Anything else a widget shows beside its value, e.g. a target
 
 		/* Gauges */
@@ -330,6 +331,7 @@ namespace UI::Themes
 		Style gauge_bar_indic;	// A bar gauge's value
 		Style gauge_bar_target; // A bar gauge's target, under its value
 		Style gauge_standby;	// A gauge's value while its heater is on standby
+		Style gauge_standby_target; // A gauge's target while its heater is on standby
 		Style gauge_off;		// A gauge's value while its heater is off
 		Style gauge_fault;		// A gauge's value while its heater has a fault
 

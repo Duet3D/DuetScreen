@@ -1167,6 +1167,28 @@ Each row of `feedrate.choices`:
 
 DuetScreen's own elements, in addition to LVGL's `lv_*` widgets and the helix-xml elements (see [helix-xml's README](../libraries/helix-xml/README.md)). An element registered as `parent-child` is written inside a `parent`; `lv_obj-child` is written `<child>` inside any widget.
 
+### ds_arc
+
+An arc that shows a value, such as a gauge's: a read-only lv_arc, without a knob, whose value and range follow subjects. The track is the main part's arc, the value the indicator's. Takes every lv_arc attribute but `bind_value`, which this replaces.
+
+Also takes every `lv_arc` attribute.
+
+```xml
+<ds_arc bind_value="temperature" bind_max="limit" bg_start_angle="135" bg_end_angle="45"
+		width="120" height="120">
+	<style name="gauge_arc"/>
+	<style name="gauge_arc_indic" selector="indicator"/>
+</ds_arc>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_arc.png)
+
+| Attribute | Description |
+| --- | --- |
+| `bind_value` | Follow an int subject for the value |
+| `bind_min` | Follow an int subject for the bottom of the range, e.g. a heater's minimum |
+| `bind_max` | Follow an int subject for the top of the range, e.g. a heater's maximum |
+
 ### ds_bar
 
 A progress bar that draws its value as text, inside the filled part when it fits
@@ -1186,7 +1208,7 @@ Also takes every `lv_obj` attribute.
 | `bind_min` | Follow an int subject for the bottom of the range, e.g. a heater's minimum |
 | `bind_max` | Follow an int subject for the top of the range, e.g. a heater's maximum |
 | `bind_value` | Follow an int subject for the value |
-| `label_format` | fmt format for the value's text (default "{}") |
+| `label_format` | fmt format for the value's text (default "{}"); empty for no text, e.g. under a value shown beside it |
 
 ### ds_bar_marker
 
@@ -1713,11 +1735,24 @@ A placed widget's component can use these as well as its presenter's names and t
 | --- | --- | --- |
 | `widget.width_class` | int | How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints (widget_regular_min, widget_expanded_min); always 1 in a strip |
 | `widget.height_class` | int | How tall the widget's place is, as `widget.width_class` |
+| `widget.size_class` | int | The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, such as an arc, can be |
 | `widget.portrait` | int | 1 if the widget's place is taller than it is wide, else 0 |
 
 ### Placeable widgets
 
 Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings.
+
+#### arc_gauge
+
+**Arc gauge**: One value on an arc, such as a heater's temperature with its target; tap to change it
+
+In Gauges; placed in `dashboard`; component `gauge_arc` ([arc_gauge.json](../assets/ui/widgets/gauges/arc_gauge.json)). In a grid it is 4×4 cells, and at least 3×3.
+
+![arc_gauge](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `tool.0.0` |
 
 #### axes
 
@@ -1735,11 +1770,23 @@ In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json
 
 ![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
 
+#### bar_gauge
+
+**Bar gauge**: One value on a bar, such as a fan's speed or the job's progress; tap to change it
+
+In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../assets/ui/widgets/gauges/bar_gauge.json)). In a grid it is 6×2 cells, and at least 4×2.
+
+![bar_gauge](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `bed.0` |
+
 #### estop
 
 **E-stop**: Drag across to stop the printer at once
 
-In Safety; placed in `sidebar`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)).
+In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)). In a grid it is 1×1 cells, and at least 1×1.
 
 ![estop](../tests/ref_imgs/xml_ui_api/widgets/estop.png)
 
@@ -1903,6 +1950,22 @@ In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` 
 | --- | --- | --- | --- |
 | `seconds` | Time shown | one of `30`, `60`, `120`, `300`, `600` | `60` |
 
+#### text
+
+**Text**: Text you write, in the size and colour you choose
+
+In Text; placed in `dashboard`; component `dashboard_text` ([text.json](../assets/ui/widgets/text/text.json)). In a grid it is 6×2 cells, and at least 2×1.
+
+![text](../tests/ref_imgs/xml_ui_api/widgets/text.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `text` | Text | text, up to 120 bytes | `Printer` |
+| `size` | Text size | one of `small`, `normal`, `emphasis`, `header`, `large`, `xlarge`, `huge` | `header` |
+| `colour` | Colour | one of `text`, `text_muted`, `primary`, `secondary`, `success`, `warning`, `error` | `text` |
+| `align` | Alignment | one of `left`, `center`, `right` | `center` |
+| `background` | Background | one of `card`, `base` | `card` |
+
 #### tool
 
 **Tool**: One tool with its heaters' temperatures
@@ -1922,6 +1985,18 @@ In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.j
 In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a grid it is 12×6 cells, and at least 6×4.
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
+
+#### value_gauge
+
+**Value**: One value as a large number, such as a temperature or a factor; tap to change it
+
+In Gauges; placed in `dashboard`; component `gauge_value` ([value_gauge.json](../assets/ui/widgets/gauges/value_gauge.json)). In a grid it is 4×2 cells, and at least 3×2.
+
+![value_gauge](../tests/ref_imgs/xml_ui_api/widgets/value_gauge.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `job.progress` |
 
 ## Components
 
@@ -1962,6 +2037,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
 | `dashboard_temperature_graph` |  | `seconds` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
+| `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
 | `dashboard_tool` |  |  | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
 | `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
 | `dashboard_tools` |  |  | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
@@ -1976,6 +2052,13 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
+| `gauge_arc` |  | `source` | `arc_gauge` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
+| `gauge_arc_face` |  |  | `gauge_arc` | [gauge_arc_face.xml](../assets/ui/components/gauge/gauge_arc_face.xml) |
+| `gauge_bar` |  | `source` | `bar_gauge` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
+| `gauge_bar_face` |  |  | `gauge_bar` | [gauge_bar_face.xml](../assets/ui/components/gauge/gauge_bar_face.xml) |
+| `gauge_reading` |  |  | `gauge_arc_face`, `gauge_bar_face`, `gauge_value_face` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
+| `gauge_value` |  | `source` | `value_gauge` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
+| `gauge_value_face` |  |  | `gauge_value` | [gauge_value_face.xml](../assets/ui/components/gauge/gauge_value_face.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
@@ -2257,7 +2340,8 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `bar_label` |  | *(not set)* |
 | `widget_title` | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_title.png) | text_color=#text_muted text_font=font_emphasis |
 | `widget_value` | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value.png) | text_color=#text text_font=font_large |
-| `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | text_font=font_huge |
+| `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | text_font=font_xlarge |
+| `widget_value_huge` | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_huge.png) | text_font=font_huge |
 | `widget_detail` | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_detail.png) | text_color=#text_muted text_font=font_small |
 | `gauge_arc` |  | arc_color=#bg_light arc_width=10dpx arc_rounded=true bg_opa=0 pad_all=0 |
 | `gauge_arc_indic` |  | arc_color=#primary arc_width=10dpx arc_rounded=true |
@@ -2266,6 +2350,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `gauge_bar_indic` | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/gauge_bar_indic.png) | bg_color=#primary bg_opa=100% radius=#radius |
 | `gauge_bar_target` |  | bg_color=#primary_muted |
 | `gauge_standby` |  | arc_color=#secondary bg_color=#secondary |
+| `gauge_standby_target` |  | arc_color=#secondary_muted bg_color=#secondary_muted |
 | `gauge_off` |  | arc_color=#text_muted bg_color=#text_muted |
 | `gauge_fault` |  | arc_color=#error bg_color=#error |
 | `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=50% |

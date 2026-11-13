@@ -136,11 +136,13 @@ namespace UI::Xml::Api
 						}
 						if (const WidgetDef* widget = placeable(use.by))
 						{
-							const auto props = widget->propsFor(nlohmann::json::object());
 							Scope placed = scope;
 							placed.fields.push_back(&m_reference.placedFields);
 							placed.where = "widget " + widget->id;
-							instance(def, placed, props);
+							for (const auto& settings : settingsToCheck(*widget))
+							{
+								instance(def, placed, widget->propsFor(settings));
+							}
 						}
 					}
 				}
@@ -156,6 +158,26 @@ namespace UI::Xml::Api
 			}
 
 		  private:
+			/**
+			 * The settings a widget's component is checked with: the defaults, then each option of each choice setting
+			 * in turn (the others at their defaults), as a choice can name a font or style (`font_${size}`)
+			 */
+			static std::vector<nlohmann::json> settingsToCheck(const WidgetDef& widget)
+			{
+				std::vector<nlohmann::json> all{nlohmann::json::object()};
+				for (const auto& setting : widget.settings)
+				{
+					for (const auto& option : setting.choices())
+					{
+						if (setting.kind == SettingKind::Choice)
+						{
+							all.push_back({{setting.name, option.value}});
+						}
+					}
+				}
+				return all;
+			}
+
 			/** The placeable widget `id`, or nullptr */
 			const WidgetDef* placeable(const std::string& id) const
 			{
@@ -750,14 +772,42 @@ namespace UI::Xml::Api
 				return raw ? resolve(*raw, element, context) : std::nullopt;
 			}
 
-			/** `raw` with a `$prop` replaced by the value given; nullopt if that leaves nothing to check */
+			/**
+			 * `raw` with its props replaced by the values given: a whole `$prop`, or each `${prop}` inside a longer
+			 * value; nullopt if that leaves nothing to check
+			 */
 			std::optional<std::string> resolve(const std::string& raw, const Element& element, const Context& context)
 			{
-				if (!raw.starts_with('$'))
+				if (raw.starts_with('$') && !raw.starts_with("${"))
 				{
-					return raw.empty() ? std::nullopt : std::optional<std::string>(raw);
+					return propValue(raw.substr(1), element, context);
 				}
-				const std::string prop = raw.substr(1);
+				std::string result;
+				size_t from = 0;
+				for (size_t start = raw.find("${"); start != std::string::npos; start = raw.find("${", from))
+				{
+					const size_t end = raw.find('}', start);
+					if (end == std::string::npos)
+					{
+						break;
+					}
+					const auto value = propValue(raw.substr(start + 2, end - start - 2), element, context);
+					if (!value)
+					{
+						return std::nullopt;
+					}
+					result += raw.substr(from, start - from) + *value;
+					from = end + 1;
+				}
+				result += raw.substr(from);
+				return result.empty() ? std::nullopt : std::optional<std::string>(result);
+			}
+
+			/** The value of prop `prop` given where `context` is used, else its default; nullopt if none or empty */
+			std::optional<std::string> propValue(const std::string& prop,
+												 const Element& element,
+												 const Context& context)
+			{
 				auto declared = context.def->props.find(prop);
 				if (declared == context.def->props.end())
 				{

@@ -50,6 +50,10 @@ namespace UI
 		}
 		case LV_EVENT_GET_SELF_SIZE:
 		{
+			if (self.m_labelFmt.empty())
+			{
+				break; // No text: the bar needs no room of its own
+			}
 			lv_point_t* p = static_cast<lv_point_t*>(lv_event_get_param(e));
 
 			[[maybe_unused]] const lv_coord_t indic_pad_top =
@@ -106,6 +110,10 @@ namespace UI
 	{
 		ZoneScoped;
 		Bar& self = *static_cast<Bar*>(lv_event_get_user_data(e));
+		if (self.m_labelFmt.empty())
+		{
+			return;
+		}
 		lv_layer_t* layer = lv_event_get_layer(e);
 
 		[[maybe_unused]] const lv_coord_t indic_pad_top =

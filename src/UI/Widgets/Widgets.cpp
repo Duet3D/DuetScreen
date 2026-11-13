@@ -6,6 +6,7 @@
 #include "UI/Widgets/Buttons/DsButton.h"
 #include "UI/Widgets/Buttons/DsDragButton.h"
 #include "UI/Widgets/Buttons/DsPasswordToggle.h"
+#include "UI/Widgets/Display/DsArc.h"
 #include "UI/Widgets/Display/DsBar.h"
 #include "UI/Widgets/Display/DsBarMarker.h"
 #include "UI/Widgets/Display/DsGraph.h"
@@ -58,6 +59,7 @@ namespace UI::Xml::Widgets
 
 	void registerAll()
 	{
+		DsArc::registerXml();
 		DsBar::registerXml();
 		DsBarMarker::registerXml();
 		DsButton::registerXml();

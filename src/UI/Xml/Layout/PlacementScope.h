@@ -8,19 +8,22 @@
  *     <ds_button name="standby" bind_text="standby">
  *         <bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>
  *     </ds_button>
- *     <!-- A big gauge shows its value in a larger font -->
+ *     <!-- A bigger gauge shows its value in a larger font -->
  *     <lv_label name="value" bind_text="text">
- *         <bind_style_if name="widget_value_large" cond="widget.height_class ge 2"/>
+ *         <style name="widget_value"/>
+ *         <bind_style_if name="widget_value_large" cond="widget.size_class eq 1"/>
+ *         <bind_style_if name="widget_value_huge" cond="widget.size_class eq 2"/>
  *     </lv_label>
  *
- * Each of the place's width and height is compact (0), regular (1) or expanded (2), by the active theme's breakpoints,
+ * Each of the place's width and height is compact (0), regular (1) or expanded (2), and `widget.size_class` is the
+ * smaller of the two (for something that needs both, such as an arc), by the active theme's breakpoints,
  * the consts `widget_regular_min` (a length below it is compact) and `widget_expanded_min` (a length from it is
  * expanded), so XML never compares pixels and a theme with larger fonts moves every breakpoint at once. A theme
  * without them has no breakpoints: everything is regular.
  *
  * Only a grid measures its widgets, and it measures the cells it gives them, which the grid alone sizes, never the
  * widget's content: so what a widget hides or restyles for its size can't change that size, and the layout can't
- * loop. A strip sizes its widgets by their content, so its widgets are always regular, regular, landscape.
+ * loop. A strip sizes its widgets by their content, so its widgets are always regular, regular, regular, landscape.
  *
  * Lay a widget out with `%`, `fr` and `flex_grow` first: it must look right at its default and smallest sizes without
  * these. Use them to hide secondary parts, to step a value's font, and for orientation, with `bind_flag_if` and
@@ -93,6 +96,7 @@ namespace UI::Xml
 		size_t m_themeListener;	   // Our id with the theme (see UI::Themes::addThemeListener)
 		IntSubject m_widthClass{static_cast<int32_t>(SizeClass::Regular)};  // SizeClass of the place's width
 		IntSubject m_heightClass{static_cast<int32_t>(SizeClass::Regular)}; // SizeClass of the place's height
+		IntSubject m_sizeClass{static_cast<int32_t>(SizeClass::Regular)};  // The smaller of the two classes
 		IntSubject m_portrait;	   // 1 if the place is taller than it is wide, else 0
 	};
 } // namespace UI::Xml

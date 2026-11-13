@@ -18,12 +18,13 @@ namespace UI
 	  public:
 		Bar(const std::string& name, LvObj& parent);
 
+		/** Draw the value as text with fmt format `fmt`, e.g. "{}%"; empty draws no text */
 		void setLabelFormat(const std::string& fmt);
 
 	  private:
 		static void barEvent(lv_event_t* e);
 		static void drawLabel(lv_event_t* e);
 
-		std::string m_labelFmt{"{}"};
+		std::string m_labelFmt{"{}"}; // fmt format of the value's text; empty for none
 	};
 } // namespace UI

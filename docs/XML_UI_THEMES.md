@@ -45,6 +45,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_button.png) |
@@ -78,6 +79,7 @@ Extends `base`. Its file is [duetscreen.xml](../assets/ui/themes/duetscreen.xml)
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_button.png) |
@@ -113,6 +115,7 @@ Palette: `chroma=0`, `dark=true`, `primary_hue=80`, `secondary_hue=30`
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_button.png) |
@@ -150,6 +153,7 @@ Colour adjustments: `primary chroma=0`, `primary_muted chroma=0`, `secondary chr
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_button.png) |
@@ -187,6 +191,7 @@ Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 800, bold; norma
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_button.png) |
@@ -226,6 +231,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_button.png) |
@@ -263,6 +269,7 @@ Fonts: emphasis: 15 px, weight 700, bold; header: 20 px, weight 800, bold; norma
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_button.png) |
@@ -300,6 +307,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 600, bold; norma
 
 | Widget | Its example |
 | --- | --- |
+| [`ds_arc`](XML_UI_API.md#ds_arc) | ![ds_arc](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_arc.png) |
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_button.png) |
@@ -462,6 +470,7 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `widget_title` | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_title.png) | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_title.png) |
 | `widget_value` | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_value.png) | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_value.png) |
 | `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_value_large.png) |
+| `widget_value_huge` | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_value_huge.png) |
 | `widget_detail` | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_detail.png) |
 | `gauge_arc` |  |  |  |  |  |  |  |  |
 | `gauge_arc_indic` |  |  |  |  |  |  |  |  |
@@ -470,6 +479,7 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `gauge_bar_indic` | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/3d/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/flat/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/grey/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/neon/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/retro/styles/gauge_bar_indic.png) | ![gauge_bar_indic](../tests/ref_imgs/xml_ui_api/themes/soft/styles/gauge_bar_indic.png) |
 | `gauge_bar_target` |  |  |  |  |  |  |  |  |
 | `gauge_standby` |  |  |  |  |  |  |  |  |
+| `gauge_standby_target` |  |  |  |  |  |  |  |  |
 | `gauge_off` |  |  |  |  |  |  |  |  |
 | `gauge_fault` |  |  |  |  |  |  |  |  |
 | `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/3d/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/flat/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/grey/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/neon/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/retro/styles/object_cancel_base.png) | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/soft/styles/object_cancel_base.png) |

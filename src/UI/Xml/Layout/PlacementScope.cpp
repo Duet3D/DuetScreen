@@ -4,6 +4,7 @@
 
 #include "PlacementScope.h"
 #include "UI/Styles/Theme.h"
+#include <algorithm>
 #include <charconv>
 #include <optional>
 #include <string_view>
@@ -52,6 +53,11 @@ namespace UI::Xml
 				"How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints "
 				"(widget_regular_min, widget_expanded_min); always 1 in a strip");
 		f.field("widget.height_class", m_heightClass, "How tall the widget's place is, as `widget.width_class`");
+		f.field(
+			"widget.size_class",
+			m_sizeClass,
+			"The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, such "
+			"as an arc, can be");
 		f.field("widget.portrait", m_portrait, "1 if the widget's place is taller than it is wide, else 0");
 	}
 
@@ -108,6 +114,7 @@ namespace UI::Xml
 		const int32_t height = lv_obj_get_height(m_place);
 		m_widthClass.set(static_cast<int32_t>(classify(width)));
 		m_heightClass.set(static_cast<int32_t>(classify(height)));
+		m_sizeClass.set(std::min(m_widthClass.get(), m_heightClass.get()));
 		m_portrait.set(height > width ? 1 : 0);
 	}
 } // namespace UI::Xml

@@ -111,9 +111,10 @@ namespace UI::Xml
 		id.set(values.id);
 		name.set(values.name);
 		kind.set(values.kind);
-		value.set(values.value);
+		// The range first: a bar or arc clamps a value outside the range it has
 		min.set(values.min);
 		max.set(values.max);
+		value.set(values.value);
 		text.set(values.text);
 		unit.set(values.unit);
 		target.set(values.target);

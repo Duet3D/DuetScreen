@@ -263,14 +263,17 @@
 		<style name="object_cancel_current" bg_color="#primary" bg_opa="100%"/>
 
 		<!-- Placed widgets (assets/ui/widgets): each is a card, headed by its title, its main value large and
-			 anything else in the detail style. Larger widgets use widget_value_large (see PlacementScope.h). -->
+			 anything else in the detail style. The value is larger in a regular widget (widget_value_large) and
+			 larger still in an expanded one (widget_value_huge): see PlacementScope.h. -->
 		<style name="widget_title" text_color="#text_muted" text_font="font_emphasis"/>
 		<style name="widget_value" text_color="#text" text_font="font_large"/>
-		<style name="widget_value_large" text_font="font_huge"/>
+		<style name="widget_value_large" text_font="font_xlarge"/>
+		<style name="widget_value_huge" text_font="font_huge"/>
 		<style name="widget_detail" text_color="#text_muted" text_font="font_small"/>
 
 		<!-- Gauges: a track, the target filled in muted colour and the value over it. The value's colour says the
-			 heater's state: primary when active, secondary on standby, muted when off, error on a fault. -->
+			 heater's state: primary when active, secondary on standby (its target muted secondary), muted when off,
+			 error on a fault. -->
 		<style name="gauge_arc" arc_color="#bg_light" arc_width="10dpx" arc_rounded="true" bg_opa="0" pad_all="0"/>
 		<style name="gauge_arc_indic" arc_color="#primary" arc_width="10dpx" arc_rounded="true"/>
 		<style name="gauge_arc_target" arc_color="#primary_muted"/>
@@ -278,6 +281,7 @@
 		<style name="gauge_bar_indic" bg_color="#primary" bg_opa="100%" radius="#radius"/>
 		<style name="gauge_bar_target" bg_color="#primary_muted"/>
 		<style name="gauge_standby" arc_color="#secondary" bg_color="#secondary"/>
+		<style name="gauge_standby_target" arc_color="#secondary_muted" bg_color="#secondary_muted"/>
 		<style name="gauge_off" arc_color="#text_muted" bg_color="#text_muted"/>
 		<style name="gauge_fault" arc_color="#error" bg_color="#error"/>
 

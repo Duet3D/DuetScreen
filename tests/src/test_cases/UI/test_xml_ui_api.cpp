@@ -232,8 +232,9 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	const fs::path userDir = fs::temp_directory_path() / fmt::format("duetscreen-xml-ui-api-{:d}", getpid());
 	fs::remove_all(userDir);
 	fs::create_directories(userDir / "test" / "components");
+	fs::create_directories(userDir / "test" / "widgets");
 	std::ofstream(userDir / "test" / "manifest.json")
-		<< R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"]})";
+		<< R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "widgets": ["widgets/*.json"]})";
 
 	// A screen, nothing uses it, so it is a view of its own, with the fans presenter
 	std::ofstream(userDir / "test" / "components" / "lint_screen.xml") << R"(<component presenter="fans">
@@ -277,6 +278,19 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	</view>
 </component>)";
 
+	// A placed widget: it can use its place's size classes, and it is checked with each option of its choice
+	// settings, which here make a font's name, one of them wrong
+	std::ofstream(userDir / "test" / "components" / "lint_sized.xml") << R"(<component>
+	<api><prop name="size" type="string" default="normal"/></api>
+	<view extends="lv_obj">
+		<lv_label style_text_font="font_${size}"><bind_flag_if cond="widget.width_class eq 0" flag="hidden"/></lv_label>
+	</view>
+</component>)";
+	std::ofstream(userDir / "test" / "widgets" / "lint_sized.json")
+		<< R"({"component": "lint_sized", "slots": ["dashboard"],
+		"settings": [{"name": "size", "kind": "choice", "default": "normal",
+					  "options": [{"value": "normal", "title": "Normal"}, {"value": "giant", "title": "Giant"}]}]})";
+
 	UI::Xml::deinit();
 	UI::Xml::init(UI::Xml::Paths{.builtin = "assets/ui", .user = userDir});
 	const auto issues = UI::Xml::Api::lint(UI::Xml::Api::build());
@@ -306,6 +320,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:13: no subject `no_such_operand` (in lint_screen)",
 		"lint_screen.xml:14: rows of `fans` have no field `numbr` (in lint_screen)",
 		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
+		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
 }

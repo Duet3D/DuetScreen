@@ -17,8 +17,9 @@
  * place (its size, Reference::placedFields) between the two. `<ds_view view="x">` starts a new view, with
  * the presenter it names, or else x's own. `<ds_list list="l" item="x">` builds x in a row of l, so l's row fields
  * come first. A component used as an element is built in the scope it is written in, with its `$props` replaced by
- * the values given there. Actions are looked for in the presenters of every enclosing view, then the global actions.
- * A component used in several places is checked in each.
+ * the values given there (`$prop`, or `${prop}` inside a longer value). A placed widget's component is checked with
+ * its default settings, and with each option of each of its choice settings. Actions are looked for in the presenters
+ * of every enclosing view, then the global actions. A component used in several places is checked in each.
  *
  * Each widget's example (WidgetSpec::example) is checked too, as it is documentation and the source of its picture.
  * It is a snippet from somewhere in the UI, so its names may be any presenter's as well as its sample subjects'.

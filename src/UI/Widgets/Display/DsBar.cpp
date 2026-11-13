@@ -36,7 +36,9 @@ namespace UI::Xml
 									  "Follow an int subject for the top of the range, e.g. a heater's maximum",
 									  AttributeKind::Subject},
 									 {"bind_value", "Follow an int subject for the value", AttributeKind::Subject},
-									 {"label_format", "fmt format for the value's text (default \"{}\")"}},
+									 {"label_format",
+									  "fmt format for the value's text (default \"{}\"); empty for no text, e.g. under "
+									  "a value shown beside it"}},
 					  .exampleSubjects = {{"progress", "int", "42"}}},
 					 xmlCreate,
 					 xmlApply);
@@ -62,10 +64,12 @@ namespace UI::Xml
 			bar.setRange(min ? lv_xml_atoi(min) : lv_bar_get_min_value(root),
 						 max ? lv_xml_atoi(max) : lv_bar_get_max_value(root));
 		}
-		if (const char* format = lv_xml_get_value_of(attrs, "label_format"))
+		if (const char* format = lv_xml_get_value_of(attrs, "label_format"); format != nullptr)
 		{
 			bar.setLabelFormat(format);
 		}
+		// A new range clamps the value, so the range's observers show the bound value again
+		bar.m_value = findSubject(state, attrs, "bind_value");
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_min"))
 		{
 			lv_subject_add_observer_obj(subject, minObserverCb, root, &bar);
@@ -74,9 +78,9 @@ namespace UI::Xml
 		{
 			lv_subject_add_observer_obj(subject, maxObserverCb, root, &bar);
 		}
-		if (lv_subject_t* subject = findSubject(state, attrs, "bind_value"))
+		if (bar.m_value != nullptr)
 		{
-			lv_bar_bind_value(root, subject);
+			lv_bar_bind_value(root, bar.m_value);
 		}
 	}
 
@@ -84,11 +88,21 @@ namespace UI::Xml
 	{
 		auto& bar = *static_cast<DsBar*>(lv_observer_get_user_data(observer));
 		bar.setMinValue(lv_subject_get_int(subject));
+		bar.showValue();
 	}
 
 	void DsBar::maxObserverCb(lv_observer_t* observer, lv_subject_t* subject)
 	{
 		auto& bar = *static_cast<DsBar*>(lv_observer_get_user_data(observer));
 		bar.setMaxValue(lv_subject_get_int(subject));
+		bar.showValue();
+	}
+
+	void DsBar::showValue()
+	{
+		if (m_value != nullptr)
+		{
+			lv_bar_set_value(getRootPtr(), lv_subject_get_int(m_value), LV_ANIM_OFF);
+		}
 	}
 } // namespace UI::Xml

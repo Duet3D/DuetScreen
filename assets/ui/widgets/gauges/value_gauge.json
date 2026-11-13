@@ -1,0 +1,31 @@
+{
+  "component": "gauge_value",
+  "title_tag": "widget.value_gauge",
+  "description_tag": "widget.value_gauge_desc",
+  "category_tag": "widget.category_gauges",
+  "icon": "status.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      4,
+      2
+    ],
+    "min": [
+      3,
+      2
+    ]
+  },
+  "settings": [
+    {
+      "name": "source",
+      "kind": "row",
+      "list": "gauges",
+      "key": "id",
+      "label": "name",
+      "default": "job.progress",
+      "title_tag": "widget.setting_source"
+    }
+  ]
+}

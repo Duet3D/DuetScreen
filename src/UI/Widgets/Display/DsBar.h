@@ -37,5 +37,10 @@ namespace UI::Xml
 
 		/** `bind_max` observer: make the subject's value the top of the range */
 		static void maxObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** Show the bound value again after the range changed, which clamps it */
+		void showValue();
+
+		lv_subject_t* m_value = nullptr; // The subject bound to the value; nullptr for none
 	};
 } // namespace UI::Xml

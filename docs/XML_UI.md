@@ -371,7 +371,7 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 ```
 
 - The component's root is a plain `lv_obj` (not a `ds_*` widget, which has a C++ object of its own). In a grid it fills its cells (the `<ds_layout>` makes it, so it needn't set a size); in a strip it sizes itself, as the sidebar's buttons take the sidebar's width and share its height (`width="100%" flex_grow="1"`).
-- A widget fits what it shows to the room it is given. Lay it out with `%`, `fr` grid tracks and `flex_grow` first, so it looks right at its default and smallest sizes, scrolling only as a last resort. Where that isn't enough, its place's *size classes* are names it can use: `widget.width_class` and `widget.height_class` (0 compact, 1 regular, 2 expanded) and `widget.portrait`. Use them for three things only: hiding secondary parts, a larger font for a value, and orientation, with `bind_flag_if` and `bind_style_if` (not `<if>`, which builds its contents again), and say why in a comment:
+- A widget fits what it shows to the room it is given. Lay it out with `%`, `fr` grid tracks and `flex_grow` first, so it looks right at its default and smallest sizes, scrolling only as a last resort. Where that isn't enough, its place's *size classes* are names it can use: `widget.width_class` and `widget.height_class` (0 compact, 1 regular, 2 expanded), `widget.size_class` (the smaller of the two) and `widget.portrait`. Use them for three things only: hiding secondary parts, a larger font for a value, and orientation, with `bind_flag_if` and `bind_style_if` (not `<if>`, which builds its contents again), and say why in a comment:
 
   ```xml
   <!-- The standby target goes when the row is too narrow for it -->
