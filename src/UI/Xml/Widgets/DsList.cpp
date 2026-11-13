@@ -32,6 +32,8 @@ namespace UI::Xml
 		{
 			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_SCROLL_END, this);
 			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_LAYOUT_CHANGED, this);
+			m_display = lv_obj_get_display(m_container);
+			lv_display_add_event_cb(m_display, layoutCompletedEventCb, LV_EVENT_UPDATE_LAYOUT_COMPLETED, this);
 		}
 		if (!m_window)
 		{
@@ -56,6 +58,10 @@ namespace UI::Xml
 		if (m_list)
 		{
 			m_list->removeListener(this);
+		}
+		if (m_display)
+		{
+			lv_display_remove_event_cb_with_user_data(m_display, layoutCompletedEventCb, this);
 		}
 		m_entries.clear();
 		m_shown.clear();
@@ -246,7 +252,22 @@ namespace UI::Xml
 		{
 			list->m_atEnd = lv_obj_get_scroll_bottom(list->m_container) <= 0;
 		}
-		else if (list->m_atEnd && lv_obj_get_scroll_bottom(list->m_container) > 0)
+		else
+		{
+			list->m_laidOut = true;
+		}
+	}
+
+	void DsList::layoutCompletedEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (!list->m_laidOut)
+		{
+			return;
+		}
+		list->m_laidOut = false;
+		// Also brings back a list left past its end, e.g. by rows that became shorter: the scroll is bounded
+		if (list->m_atEnd && lv_obj_get_scroll_bottom(list->m_container) != 0)
 		{
 			lv_obj_scroll_to_y(list->m_container, LV_COORD_MAX, LV_ANIM_OFF);
 		}

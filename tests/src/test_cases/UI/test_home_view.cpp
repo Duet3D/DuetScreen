@@ -30,6 +30,7 @@
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
+#include <fmt/format.h>
 #include <fstream>
 #include <gtest/gtest.h>
 
@@ -832,6 +833,34 @@ TEST_F(TestHomeViewWithData, ConsoleNarrowsTheGcodesAndSends)
 	lv_obj_send_event(consolePart("enter"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(sent, (std::vector<std::string>{"M115 P1\n"}));
 	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, ConsoleFollowsNewLines)
+{
+	UI::openScreen(std::string_view("console"));
+	lv_obj_t* output = consolePart("output");
+	ASSERT_NE(output, nullptr);
+
+	// More than a screenful, arriving one at a time, some wrapping
+	for (int i = 0; i < 40; i++)
+	{
+		Model::get().post<EventType::Response>(
+			ResponseType::INFO,
+			fmt::format("response {:d}{:s}", i, i % 3 == 0 ? std::string(150, 'x') : std::string("\nsecond line")));
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+		lv_refr_now(nullptr);
+
+		lv_obj_t* last = lv_obj_get_child(output, -1);
+		lv_area_t lastArea;
+		lv_area_t outputArea;
+		lv_obj_get_coords(last, &lastArea);
+		lv_obj_get_content_coords(output, &outputArea);
+		EXPECT_GE(lv_obj_get_scroll_top(output), 0) << "line " << i;
+		EXPECT_LE(lv_obj_get_scroll_bottom(output), 0) << "line " << i;
+		EXPECT_LE(lastArea.y2, outputArea.y2) << "line " << i << ": the newest line is below the view";
+		EXPECT_GE(lastArea.y1, outputArea.y1) << "line " << i << ": the newest line is above the view";
+	}
 }
 
 TEST_F(TestHomeViewWithData, ControlView)

@@ -71,8 +71,18 @@ namespace UI::Xml
 		/** A windowed list scrolled or changed size: show the items now on screen */
 		static void windowEventCb(lv_event_t* e);
 
-		/** follow_end: scrolled (note whether the user left the end) or laid out (go back to the end) */
+		/**
+		 * follow_end: scrolled (note whether the user left the end) or laid out (go back to the end once every size
+		 * is final)
+		 */
 		static void followEndEventCb(lv_event_t* e);
+
+		/**
+		 * follow_end: the display finished laying out, so the content's size is final: go back to the end if the
+		 * list's layout changed. Scrolling while the layout is still running would use sizes not yet worked out,
+		 * e.g. a new wrapped line as tall as it would be one character wide, and leave the list past its end.
+		 */
+		static void layoutCompletedEventCb(lv_event_t* e);
 
 		/** Position and size row `index`'s item for the window */
 		void placeItem(lv_obj_t* obj, size_t index, int32_t perLine) const;
@@ -116,5 +126,7 @@ namespace UI::Xml
 		size_t m_count = 0;				 // Windowed: rows to show (the list's length as last told)
 		bool m_followEnd = false;		 // Keep showing the last rows
 		bool m_atEnd = true;			 // follow_end: the user hasn't scrolled away from the end
+		bool m_laidOut = false;			 // follow_end: laid out since the display last finished laying out
+		lv_display_t* m_display = nullptr; // follow_end: the display telling us when layout is done
 	};
 } // namespace UI::Xml
