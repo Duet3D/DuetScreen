@@ -8,6 +8,7 @@
  *       "component": "dashboard_fan",              // The XML component shown; default "widget_<id>"
  *       "title_tag": "widget.fan.title",           // Its name in the widget pool (or "title": "Fan")
  *       "description_tag": "widget.fan.description",
+ *       "category_tag": "widget.category_fans",    // Its group in the widget pool (or "category": "Fans")
  *       "icon": "fan.png",
  *       "slots": ["dashboard"],                    // The layout slots it can be placed in
  *       "size": {"default": [10, 2], "min": [8, 2], "max": [20, 4]},   // In grid cells: [columns, rows]
@@ -115,6 +116,8 @@ namespace UI::Xml
 		std::string titleTag{};			   // Translation key of the shown name; empty for none
 		std::string description{};		   // What it shows, if there is no translation
 		std::string descriptionTag{};		   // Translation key of the description; empty for none
+		std::string category{};				   // Its group in the widget pool, if there is no translation
+		std::string categoryTag{};			   // Translation key of its group; empty for none
 		std::string icon{};				   // Image shown in the widget pool; empty for none
 		std::vector<std::string> slots{};	   // Layout slots it can be placed in
 		CellSize defaultSize{2, 2};		   // Size when added to a grid

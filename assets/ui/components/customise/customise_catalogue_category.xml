@@ -1,0 +1,15 @@
+<!--
+  One category of the widget pool: its name, then its widgets.
+
+  Fields:   a catalogue row: title, widgets (src/UI/Presenters/Customise/CustomisePresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<lv_label name="title" bind_text="title" width="100%">
+			<style name="list_title"/>
+		</lv_label>
+		<ds_list name="list" list="widgets" item="customise_catalogue_item" width="100%" height="content"
+				 flex_flow="column"/>
+	</view>
+</component>

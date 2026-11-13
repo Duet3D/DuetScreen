@@ -2,6 +2,7 @@
   "component": "dashboard_tools",
   "title_tag": "widget.tools",
   "description_tag": "widget.tools_desc",
+  "category_tag": "widget.category_temperature",
   "icon": "control.png",
   "slots": [
     "dashboard"

@@ -503,7 +503,14 @@
       "setting_icon": "Icono",
       "setting_fan": "Ventilador",
       "setting_tool": "Herramienta",
-      "estop": "Parada de emergencia"
+      "estop": "Parada de emergencia",
+      "category_navigation": "Navegación",
+      "category_safety": "Seguridad",
+      "category_temperature": "Temperaturas",
+      "category_jobs": "Trabajos",
+      "category_motion": "Movimiento",
+      "category_fans": "Ventiladores",
+      "category_commands": "Comandos"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

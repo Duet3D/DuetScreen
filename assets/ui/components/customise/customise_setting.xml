@@ -1,19 +1,28 @@
 <!--
-  One setting of the selected widget: its name and its value. On or off settings are a switch; tapping the value of
-  any other opens what changes it (the number pad, a choice of values, the keyboard).
+  One setting of the selected widget: its name and its value. Text is typed in place, on the shared keyboard (the
+  dialog moves above it); on or off settings are a switch; tapping the value of any other opens what changes it (the
+  number pad, or a choice of values).
 
-  Fields:   a settings row: name, title, kind, value, on (src/UI/Presenters/Customise/CustomisePresenter.h)
+  Fields:   a settings row: name, title, kind, control, value, on (src/UI/Presenters/Customise/CustomisePresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
 		<style name="pad_zero"/>
 		<lv_label name="title" bind_text="title" flex_grow="1"/>
 		<ds_button name="value" bind_text="value" width="50%" long_mode="dots">
-			<bind_flag_if_eq subject="kind" flag="hidden" ref_value="bool"/>
+			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="button"/>
 			<action trigger="clicked" name="customise.edit_setting"/>
 		</ds_button>
+		<ds_textarea name="text" bind_text="value" one_line="true" width="50%">
+			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="text"/>
+			<action trigger="ready" name="customise.set_text"/>
+			<action trigger="defocused" name="customise.set_text"/>
+			<action trigger="focused" name="customise.keyboard" arg="1"/>
+			<action trigger="defocused" name="customise.keyboard" arg="0"/>
+			<action trigger="ready" name="customise.keyboard" arg="0"/>
+		</ds_textarea>
 		<ds_toggle name="toggle">
-			<bind_flag_if_not_eq subject="kind" flag="hidden" ref_value="bool"/>
+			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="switch"/>
 			<bind_state_if_eq subject="on" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="customise.toggle_setting"/>
 		</ds_toggle>

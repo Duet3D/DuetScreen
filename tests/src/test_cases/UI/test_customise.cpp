@@ -266,6 +266,31 @@ class TestCustomiseHome : public UiTestSuite
 		return layout ? layout->findItem(id) : nullptr;
 	}
 
+	/** The label in `root` showing `text`, or nullptr */
+	static lv_obj_t* labelWithText(lv_obj_t* root, std::string_view text)
+	{
+		for (uint32_t i = 0; i < lv_obj_get_child_count(root); i++)
+		{
+			lv_obj_t* child = lv_obj_get_child(root, static_cast<int32_t>(i));
+			if (lv_obj_check_type(child, &lv_label_class) && std::string_view(lv_label_get_text(child)) == text)
+			{
+				return child;
+			}
+			if (lv_obj_t* found = labelWithText(child, text))
+			{
+				return found;
+			}
+		}
+		return nullptr;
+	}
+
+	/** The widget pool's item whose title is `title`, or nullptr */
+	static lv_obj_t* itemTitled(lv_obj_t* pool, std::string_view title)
+	{
+		lv_obj_t* label = labelWithText(pool, title);
+		return label ? lv_obj_get_parent(label) : nullptr;
+	}
+
 	/** The edit overlay over the placed widget `id` in `slot`: in its cell in a grid, else in the widget */
 	static lv_obj_t* overlayOf(const char* slot, const char* id)
 	{
@@ -397,18 +422,12 @@ TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
 	ASSERT_TRUE(shownOnScreen(pool));
 	EXPECT_EQUAL_SCREENSHOT("customise/widget_pool.png")
 
-	// The pool lists the dashboard's widgets by name
-	lv_obj_t* list = lv_obj_find_by_name(pool, "list");
-	lv_obj_t* axes = nullptr;
-	for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
-	{
-		lv_obj_t* item = lv_obj_get_child(list, static_cast<int32_t>(i));
-		if (std::string_view(lv_label_get_text(lv_obj_find_by_name(item, "title"))) == "Axis positions")
-		{
-			axes = item;
-		}
-	}
+	// The pool lists the dashboard's widgets by category, then name
+	lv_obj_t* axes = itemTitled(pool, "Axis positions");
+	EXPECT_NE(labelWithText(pool, "Motion"), nullptr);
 	ASSERT_NE(axes, nullptr);
+	lv_obj_scroll_to_view_recursive(axes, LV_ANIM_OFF); // As the user scrolls to it
+	update();
 	tap(middleOf(axes));
 	EXPECT_FALSE(shownOnScreen(pool));
 	const auto* added = draftItem("dashboard", "axes");
@@ -532,4 +551,38 @@ TEST_F(TestCustomiseHome, TheToolbarIsDraggedByItsGrip)
 	EXPECT_EQ(after.x1, screenArea.x1);
 	EXPECT_EQ(after.y1, screenArea.y1);
 	EXPECT_EQUAL_SCREENSHOT("customise/toolbar_moved.png")
+}
+
+TEST_F(TestCustomiseHome, TextSettingsAreTypedInTheSettingsAboveTheKeyboard)
+{
+	auto& editor = UI::Xml::LayoutEditor::get();
+	start();
+	editor.select("dashboard", "temperature_graph");
+	editor.removeSelected();
+	editor.selectPlace("dashboard", std::pair{0, 10});
+	ASSERT_EQ(editor.add("gcode_button"), "gcode_button");
+	update();
+	tapToolbar("configure");
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "settings_dialog");
+	ASSERT_TRUE(shownOnScreen(dialog));
+
+	// The label is typed in its row: the dialog moves above the keyboard while it is
+	lv_obj_t* label = lv_obj_find_by_name(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0), "text");
+	ASSERT_NE(label, nullptr);
+	ASSERT_TRUE(shownOnScreen(label));
+	lv_area_t before;
+	lv_obj_get_coords(dialog, &before);
+	lv_obj_send_event(label, LV_EVENT_FOCUSED, nullptr);
+	update();
+	lv_area_t above;
+	lv_obj_get_coords(dialog, &above);
+	EXPECT_LT(above.y1, before.y1);
+	lv_textarea_set_text(label, "Level");
+	EXPECT_EQUAL_SCREENSHOT("customise/text_setting.png")
+	lv_obj_send_event(label, LV_EVENT_READY, nullptr);
+	update();
+	EXPECT_EQ(draftItem("dashboard", "gcode_button")->settings["label"], "Level");
+	lv_area_t after;
+	lv_obj_get_coords(dialog, &after);
+	EXPECT_EQ(after.y1, before.y1);
 }

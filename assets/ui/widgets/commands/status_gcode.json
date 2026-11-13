@@ -2,6 +2,7 @@
   "component": "status_bar_gcode_button",
   "title_tag": "widget.gcode_button",
   "description_tag": "widget.status_gcode_desc",
+  "category_tag": "widget.category_commands",
   "icon": "send.png",
   "slots": [
     "status_bar"

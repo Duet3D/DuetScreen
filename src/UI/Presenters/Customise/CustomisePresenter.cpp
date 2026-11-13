@@ -12,7 +12,9 @@
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
+#include <algorithm>
 #include <cmath>
+#include <map>
 
 namespace UI
 {
@@ -95,11 +97,21 @@ namespace UI
 		f.field("icon", icon, "Its icon, e.g. \"fan.png\"; empty for none");
 	}
 
+	void CategoryRow::fields(Xml::FieldVisitor& f)
+	{
+		f.field("title", title, "The category's name, translated");
+		f.list("widgets", widgets, "Its widgets that fit where one is being added, by name");
+	}
+
 	void SettingRow::fields(Xml::FieldVisitor& f)
 	{
 		f.field("name", name, "The setting's name");
 		f.field("title", title, "Its name as shown, translated");
 		f.field("kind", kind, "How it is chosen: int, bool, text, choice or row");
+		f.field("control",
+				control,
+				"What changes it: `button` (showing the value; it opens the number pad or the values), `switch` or "
+				"`text` (typed in place)");
 		f.field("value", value, "Its value as shown, e.g. \"Fan 1\"");
 		f.field("on", on, "For a bool, 1 when on, else 0");
 	}
@@ -138,7 +150,11 @@ namespace UI
 			   });
 		action("customise.close_settings",
 			   "Close the settings",
-			   [this](const Xml::ActionArgs&) { setOpen(m_settingsOpen, 0); });
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_keyboard.set(0);
+				   setOpen(m_settingsOpen, 0);
+			   });
 		action("customise.edit_setting",
 			   "Change the setting of the row: on the number pad, a choice of its values, or typed",
 			   [this](const Xml::ActionArgs& args)
@@ -170,19 +186,19 @@ namespace UI
 		action("customise.close_options",
 			   "Close the values without changing the setting",
 			   [this](const Xml::ActionArgs&) { setOpen(m_optionsOpen, 0); });
-		action("customise.text_edit",
-			   "The text being typed changed (the text area's text)",
-			   [this](const Xml::ActionArgs& args) { m_textValue.set(args.text()); });
-		action("customise.text_ok",
-			   "Set the setting being typed to the text, and close the box",
-			   [this](const Xml::ActionArgs&)
+		action("customise.set_text",
+			   "Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is "
+			   "pressed",
+			   [this](const Xml::ActionArgs& args)
 			   {
-				   setOpen(m_textOpen, 0);
-				   setSetting(m_choosing, std::string(m_textValue.get()));
+				   if (const auto* row = args.row<SettingRow>())
+				   {
+					   setSetting(std::string(row->name.get()), args.text());
+				   }
 			   });
-		action("customise.close_text",
-			   "Close the box without changing the setting",
-			   [this](const Xml::ActionArgs&) { setOpen(m_textOpen, 0); });
+		action("customise.keyboard",
+			   "Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away",
+			   [this](const Xml::ActionArgs& args) { m_keyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
 		action("customise.remove",
 			   "Remove the selected widget",
 			   [](const Xml::ActionArgs&) { editor().removeSelected(); });
@@ -254,16 +270,14 @@ namespace UI
 	void CustomisePresenter::fields(Xml::FieldVisitor& f)
 	{
 		f.field("dialog_open", m_dialogOpen, "1 while any of the dialogs below is open, else 0");
-		f.list("catalogue", m_catalogue, "The widgets that can be added where the user chose, by name");
+		f.list("catalogue", m_catalogue, "The widgets that can be added where the user chose, by category");
 		f.field("catalogue_open", m_catalogueOpen, "1 while the widget pool is open");
 		f.list("settings", m_settings, "The selected widget's settings");
 		f.field("settings_open", m_settingsOpen, "1 while the selected widget's settings are open");
 		f.list("options", m_options, "The values the setting being changed can take");
 		f.field("options_open", m_optionsOpen, "1 while they are shown");
 		f.field("options_title", m_optionsTitle, "The name of the setting they are for");
-		f.field("text_title", m_textTitle, "The name of the setting being typed");
-		f.field("text_value", m_textValue, "Its text, as typed so far");
-		f.field("text_open", m_textOpen, "1 while it is being typed");
+		f.field("keyboard", m_keyboard, "1 while the keyboard is up for a text setting, so the settings move above it");
 		f.field("grid_open", m_gridOpen, "1 while the grid's size is shown");
 		f.field("columns", m_columns, "The grid's number of columns");
 		f.field("rows", m_rows, "The grid's number of rows");
@@ -304,27 +318,38 @@ namespace UI
 		{
 			return;
 		}
+		// The widgets that fit, by category, each in name order
 		const std::string slot = editor().targetSlot();
-		std::vector<const Xml::WidgetDef*> widgets;
+		std::map<std::string, std::vector<const Xml::WidgetDef*>> byCategory;
 		for (const auto& [id, widget] : Xml::WidgetCatalogue::all())
 		{
 			if (widget.fits(slot))
 			{
-				widgets.push_back(&widget);
+				byCategory[shown(widget.categoryTag, widget.category.empty() ? "?" : widget.category)].push_back(
+					&widget);
 			}
 		}
-		std::sort(widgets.begin(),
-				  widgets.end(),
-				  [](const Xml::WidgetDef* a, const Xml::WidgetDef* b)
-				  { return shown(a->titleTag, a->title) < shown(b->titleTag, b->title); });
-		m_catalogue.sync(widgets.size(),
-						 [&widgets](CatalogueRow& row, size_t index)
+		std::vector<std::pair<std::string, std::vector<const Xml::WidgetDef*>>> categories(byCategory.begin(),
+																						   byCategory.end());
+		m_catalogue.sync(categories.size(),
+						 [&categories](CategoryRow& row, size_t index)
 						 {
-							 const Xml::WidgetDef& widget = *widgets[index];
-							 row.id.set(widget.id);
-							 row.title.set(shown(widget.titleTag, widget.title));
-							 row.description.set(shown(widget.descriptionTag, widget.description));
-							 row.icon.set(widget.icon);
+							 auto& [title, widgets] = categories[index];
+							 std::sort(widgets.begin(),
+									   widgets.end(),
+									   [](const Xml::WidgetDef* a, const Xml::WidgetDef* b)
+									   { return shown(a->titleTag, a->title) < shown(b->titleTag, b->title); });
+							 row.title.set(title);
+							 row.widgets.sync(widgets.size(),
+											  [&widgets](CatalogueRow& item, size_t i)
+											  {
+												  const Xml::WidgetDef& widget = *widgets[i];
+												  item.id.set(widget.id);
+												  item.title.set(shown(widget.titleTag, widget.title));
+												  item.description.set(
+													  shown(widget.descriptionTag, widget.description));
+												  item.icon.set(widget.icon);
+											  });
 						 });
 		setOpen(m_catalogueOpen, 1);
 	}
@@ -341,6 +366,9 @@ namespace UI
 							row.name.set(setting.name);
 							row.title.set(shown(setting.titleTag, setting.title));
 							row.kind.set(Xml::WidgetCatalogue::kindName(setting.kind));
+							row.control.set(setting.kind == Xml::SettingKind::Bool	 ? "switch"
+											: setting.kind == Xml::SettingKind::Text ? "text"
+																					 : "button");
 							row.value.set(shownValue(setting, value));
 							row.on.set(value.is_boolean() && value.get<bool>() ? 1 : 0);
 						});
@@ -374,10 +402,7 @@ namespace UI
 			setSetting(setting->name, !(value.is_boolean() && value.get<bool>()));
 			break;
 		case Xml::SettingKind::Text:
-			m_textTitle.set(title);
-			m_textValue.set(value.is_string() ? value.get<std::string>() : "");
-			setOpen(m_textOpen, 1);
-			break;
+			break; // Typed in its row
 		case Xml::SettingKind::Choice:
 		case Xml::SettingKind::Row:
 		{
@@ -412,18 +437,17 @@ namespace UI
 
 	void CustomisePresenter::closeDialogs()
 	{
+		m_keyboard.set(0);
 		setOpen(m_catalogueOpen, 0);
 		setOpen(m_settingsOpen, 0);
 		setOpen(m_optionsOpen, 0);
-		setOpen(m_textOpen, 0);
 		setOpen(m_gridOpen, 0);
 	}
 
 	void CustomisePresenter::setOpen(Xml::IntSubject& dialog, bool open)
 	{
 		dialog.set(open ? 1 : 0);
-		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_textOpen.get() ||
-						 m_gridOpen.get();
+		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_gridOpen.get();
 		m_dialogOpen.set(any ? 1 : 0);
 	}
 

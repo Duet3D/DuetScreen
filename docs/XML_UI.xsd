@@ -59,6 +59,7 @@
 			<xs:enumeration value="connection_method"/>
 			<xs:enumeration value="connection_methods"/>
 			<xs:enumeration value="console.lines"/>
+			<xs:enumeration value="control"/>
 			<xs:enumeration value="controls_shown"/>
 			<xs:enumeration value="crumbs"/>
 			<xs:enumeration value="current"/>
@@ -303,10 +304,7 @@
 			<xs:enumeration value="temperatures"/>
 			<xs:enumeration value="temperatures.limit"/>
 			<xs:enumeration value="text"/>
-			<xs:enumeration value="text_open"/>
 			<xs:enumeration value="text_style"/>
-			<xs:enumeration value="text_title"/>
-			<xs:enumeration value="text_value"/>
 			<xs:enumeration value="theme"/>
 			<xs:enumeration value="themes"/>
 			<xs:enumeration value="thermostatic"/>
@@ -329,6 +327,7 @@
 			<xs:enumeration value="value"/>
 			<xs:enumeration value="version"/>
 			<xs:enumeration value="visible"/>
+			<xs:enumeration value="widgets"/>
 			<xs:enumeration value="x.home_usable"/>
 			<xs:enumeration value="x.homed"/>
 			<xs:enumeration value="x.jog_usable"/>
@@ -389,6 +388,7 @@
 			<xs:enumeration value="swatches"/>
 			<xs:enumeration value="temperatures"/>
 			<xs:enumeration value="tools"/>
+			<xs:enumeration value="widgets"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="list">
@@ -423,19 +423,18 @@
 			<xs:enumeration value="customise.close_grid"/>
 			<xs:enumeration value="customise.close_options"/>
 			<xs:enumeration value="customise.close_settings"/>
-			<xs:enumeration value="customise.close_text"/>
 			<xs:enumeration value="customise.columns"/>
 			<xs:enumeration value="customise.configure"/>
 			<xs:enumeration value="customise.done"/>
 			<xs:enumeration value="customise.edit_setting"/>
 			<xs:enumeration value="customise.grid"/>
+			<xs:enumeration value="customise.keyboard"/>
 			<xs:enumeration value="customise.open_catalogue"/>
 			<xs:enumeration value="customise.remove"/>
 			<xs:enumeration value="customise.reset"/>
 			<xs:enumeration value="customise.rows"/>
+			<xs:enumeration value="customise.set_text"/>
 			<xs:enumeration value="customise.start"/>
-			<xs:enumeration value="customise.text_edit"/>
-			<xs:enumeration value="customise.text_ok"/>
 			<xs:enumeration value="customise.toggle_setting"/>
 			<xs:enumeration value="customise.undo"/>
 			<xs:enumeration value="estop.dragged"/>
@@ -689,6 +688,7 @@
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
+			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
 			<xs:enumeration value="customise_grid_item"/>
 			<xs:enumeration value="customise_item"/>
@@ -787,6 +787,7 @@
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
+			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
 			<xs:enumeration value="customise_grid_item"/>
 			<xs:enumeration value="customise_item"/>
@@ -885,6 +886,7 @@
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
+			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
 			<xs:enumeration value="customise_grid_item"/>
 			<xs:enumeration value="customise_item"/>
@@ -1828,6 +1830,13 @@
 			<xs:enumeration value="widget.axes_desc"/>
 			<xs:enumeration value="widget.babystep"/>
 			<xs:enumeration value="widget.babystep_desc"/>
+			<xs:enumeration value="widget.category_commands"/>
+			<xs:enumeration value="widget.category_fans"/>
+			<xs:enumeration value="widget.category_jobs"/>
+			<xs:enumeration value="widget.category_motion"/>
+			<xs:enumeration value="widget.category_navigation"/>
+			<xs:enumeration value="widget.category_safety"/>
+			<xs:enumeration value="widget.category_temperature"/>
 			<xs:enumeration value="widget.estop"/>
 			<xs:enumeration value="widget.estop_desc"/>
 			<xs:enumeration value="widget.fan"/>
@@ -7074,6 +7083,14 @@
 	</xs:element>
 	<xs:element name="customise">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise.xml, with presenter customise.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_catalogue_category">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_catalogue_category.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

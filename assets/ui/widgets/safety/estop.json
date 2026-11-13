@@ -2,6 +2,7 @@
   "component": "sidebar_estop",
   "title_tag": "widget.estop",
   "description_tag": "widget.estop_desc",
+  "category_tag": "widget.category_safety",
   "icon": "estop.png",
   "slots": [
     "sidebar"

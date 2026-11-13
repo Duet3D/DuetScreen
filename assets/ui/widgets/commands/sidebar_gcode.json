@@ -2,6 +2,7 @@
   "component": "sidebar_gcode_button",
   "title_tag": "widget.gcode_button",
   "description_tag": "widget.sidebar_gcode_desc",
+  "category_tag": "widget.category_commands",
   "icon": "send.png",
   "slots": [
     "sidebar"

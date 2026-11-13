@@ -2,6 +2,7 @@
   "component": "dashboard_jobs_card",
   "title_tag": "file.jobs",
   "description_tag": "widget.jobs_desc",
+  "category_tag": "widget.category_jobs",
   "icon": "macros.png",
   "slots": [
     "dashboard"

@@ -2,6 +2,7 @@
   "component": "sidebar_page_button",
   "title_tag": "side_bar.console",
   "description_tag": "widget.page_console_desc",
+  "category_tag": "widget.category_navigation",
   "icon": "console.png",
   "slots": [
     "sidebar"

@@ -13,6 +13,10 @@
   Fields and actions: src/UI/Presenters/Customise/CustomisePresenter.h
 -->
 <component presenter="customise">
+	<styles>
+		<style name="above_keyboard" align="top_mid" translate_y="50"/>
+	</styles>
+
 	<!-- The view itself is always shown (navigation owns its hidden flag); what is in it shows while customising -->
 	<view extends="lv_obj" width="100%" height="100%" floating="true" clickable="false" scrollable="false">
 		<style name="pad_zero"/>
@@ -62,7 +66,7 @@
 		</lv_obj>
 		</lv_obj>
 
-		<!-- The widget pool: the widgets that can go where the user chose -->
+		<!-- The widget pool: the widgets that can go where the user chose, by category -->
 		<ds_modal name="catalogue_dialog" bind_open="catalogue_open" width="70%" height="80%" flex_flow="column">
 			<action trigger="dismissed" name="customise.close_catalogue"/>
 			<lv_obj name="header" width="100%" height="content">
@@ -70,12 +74,13 @@
 				<style name="text_header"/>
 				<lv_label name="title" translation_tag="customise.add_title"/>
 			</lv_obj>
-			<ds_list name="list" list="catalogue" item="customise_catalogue_item" width="100%" flex_grow="1"
+			<ds_list name="list" list="catalogue" item="customise_catalogue_category" width="100%" flex_grow="1"
 					 flex_flow="column"/>
 		</ds_modal>
 
-		<!-- The selected widget's settings -->
+		<!-- The selected widget's settings; above the keyboard while a text setting is typed -->
 		<ds_modal name="settings_dialog" bind_open="settings_open" width="70%" height="content" flex_flow="column">
+			<bind_style name="above_keyboard" subject="keyboard" ref_value="1"/>
 			<action trigger="dismissed" name="customise.close_settings"/>
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
@@ -98,28 +103,6 @@
 				<lv_label name="title" bind_text="options_title"/>
 			</lv_obj>
 			<ds_list name="list" list="options" item="customise_option" width="100%" flex_grow="1" flex_flow="column"/>
-		</ds_modal>
-
-		<!-- Typing a text setting, on the shared keyboard -->
-		<ds_modal name="text_dialog" bind_open="text_open" width="80%" height="content" flex_flow="column">
-			<action trigger="dismissed" name="customise.close_text"/>
-			<lv_obj name="header" width="100%" height="content">
-				<style name="bg_color_header"/>
-				<style name="text_header"/>
-				<lv_label name="title" bind_text="text_title"/>
-			</lv_obj>
-			<ds_textarea name="text" bind_text="text_value" one_line="true" width="100%">
-				<action trigger="value_changed" name="customise.text_edit"/>
-			</ds_textarea>
-			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
-				<ds_button name="cancel" translation_tag="common.cancel" flex_grow="1">
-					<action trigger="clicked" name="customise.close_text"/>
-				</ds_button>
-				<ds_button name="ok" translation_tag="common.ok" flex_grow="1">
-					<style name="action_btn"/>
-					<action trigger="clicked" name="customise.text_ok"/>
-				</ds_button>
-			</lv_obj>
 		</ds_modal>
 
 		<!-- The grid's size, each typed on the number pad -->

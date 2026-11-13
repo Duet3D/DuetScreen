@@ -503,7 +503,14 @@
       "setting_icon": "Ícone",
       "setting_fan": "Ventoinha",
       "setting_tool": "Ferramenta",
-      "estop": "Paragem de emergência"
+      "estop": "Paragem de emergência",
+      "category_navigation": "Navegação",
+      "category_safety": "Segurança",
+      "category_temperature": "Temperaturas",
+      "category_jobs": "Trabalhos",
+      "category_motion": "Movimento",
+      "category_fans": "Ventoinhas",
+      "category_commands": "Comandos"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

@@ -2,6 +2,7 @@
   "component": "dashboard_fan",
   "title_tag": "widget.fan",
   "description_tag": "widget.fan_desc",
+  "category_tag": "widget.category_fans",
   "icon": "fine_tune.png",
   "slots": [
     "dashboard"

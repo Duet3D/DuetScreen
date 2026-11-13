@@ -504,7 +504,14 @@
       "setting_icon": "Icon",
       "setting_fan": "Fan",
       "setting_tool": "Tool",
-      "estop": "E-stop"
+      "estop": "E-stop",
+      "category_navigation": "Navigation",
+      "category_safety": "Safety",
+      "category_temperature": "Temperatures",
+      "category_jobs": "Jobs",
+      "category_motion": "Motion",
+      "category_fans": "Fans",
+      "category_commands": "Commands"
     },
     "gcodes": { /* G-code descriptions */
       "gcode_G0_desc": "Rapid move",

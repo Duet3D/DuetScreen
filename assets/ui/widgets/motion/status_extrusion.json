@@ -2,6 +2,7 @@
   "component": "status_bar_factor_button",
   "title_tag": "widget.status_extrusion",
   "description_tag": "widget.status_extrusion_desc",
+  "category_tag": "widget.category_motion",
   "icon": "extrude.png",
   "slots": [
     "status_bar"

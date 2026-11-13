@@ -2,6 +2,7 @@
   "component": "dashboard_job_status_card",
   "title_tag": "app_drawer.status",
   "description_tag": "widget.job_status_desc",
+  "category_tag": "widget.category_jobs",
   "icon": "home.png",
   "slots": [
     "dashboard"

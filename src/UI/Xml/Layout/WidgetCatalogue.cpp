@@ -315,6 +315,8 @@ namespace UI::Xml
 			widget.titleTag = stringOf(json, "title_tag", error);
 			widget.description = stringOf(json, "description", error);
 			widget.descriptionTag = stringOf(json, "description_tag", error);
+			widget.category = stringOf(json, "category", error);
+			widget.categoryTag = stringOf(json, "category_tag", error);
 			widget.icon = stringOf(json, "icon", error);
 			if (!error.empty())
 			{

@@ -325,21 +325,27 @@ Used by `customise`.
 | Name | Type | Description |
 | --- | --- | --- |
 | `dialog_open` | int | 1 while any of the dialogs below is open, else 0 |
-| `catalogue` | list | The widgets that can be added where the user chose, by name |
+| `catalogue` | list | The widgets that can be added where the user chose, by category |
 | `catalogue_open` | int | 1 while the widget pool is open |
 | `settings` | list | The selected widget's settings |
 | `settings_open` | int | 1 while the selected widget's settings are open |
 | `options` | list | The values the setting being changed can take |
 | `options_open` | int | 1 while they are shown |
 | `options_title` | text | The name of the setting they are for |
-| `text_title` | text | The name of the setting being typed |
-| `text_value` | text | Its text, as typed so far |
-| `text_open` | int | 1 while it is being typed |
+| `keyboard` | int | 1 while the keyboard is up for a text setting, so the settings move above it |
 | `grid_open` | int | 1 while the grid's size is shown |
 | `columns` | text | The grid's number of columns |
 | `rows` | text | The grid's number of rows |
 
 Each row of `catalogue`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `title` | text | The category's name, translated |
+| `widgets` | list | Its widgets that fit where one is being added, by name |
+
+Each row of `catalogue` › `widgets`:
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -357,6 +363,7 @@ Each row of `settings`:
 | `name` | text | The setting's name |
 | `title` | text | Its name as shown, translated |
 | `kind` | text | How it is chosen: int, bool, text, choice or row |
+| `control` | text | What changes it: `button` (showing the value; it opens the number pad or the values), `switch` or `text` (typed in place) |
 | `value` | text | Its value as shown, e.g. "Fan 1" |
 | `on` | int | For a bool, 1 when on, else 0 |
 
@@ -378,17 +385,16 @@ Each row of `options`:
 | `customise.close_grid` | Close the grid's size |
 | `customise.close_options` | Close the values without changing the setting |
 | `customise.close_settings` | Close the settings |
-| `customise.close_text` | Close the box without changing the setting |
 | `customise.columns` | Ask for the grid's number of columns on the number pad |
 | `customise.configure` | Show the selected widget's settings |
 | `customise.done` | Stop customising and keep the changes |
 | `customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
 | `customise.grid` | Show the grid's size |
+| `customise.keyboard` | Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away |
 | `customise.remove` | Remove the selected widget |
 | `customise.reset` | Put the selected widget's slot (else the dashboard) back as it was before any customising |
 | `customise.rows` | Ask for the grid's number of rows on the number pad |
-| `customise.text_edit` | The text being typed changed (the text area's text) |
-| `customise.text_ok` | Set the setting being typed to the text, and close the box |
+| `customise.set_text` | Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is pressed |
 | `customise.toggle_setting` | Turn the on or off setting of the row the other way |
 | `customise.undo` | Undo the last change |
 
@@ -1655,7 +1661,7 @@ Each widget is a component (with its props) and a widget file beside it, which s
 
 **Axis positions**: Where each axis is
 
-Placed in `dashboard`; component `dashboard_axes` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a grid it is 8×2 cells, and at least 6×2.
+In Motion; placed in `dashboard`; component `dashboard_axes` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a grid it is 8×2 cells, and at least 6×2.
 
 ![axes](../tests/ref_imgs/xml_ui_api/widgets/axes.png)
 
@@ -1663,7 +1669,7 @@ Placed in `dashboard`; component `dashboard_axes` ([axes.json](../assets/ui/widg
 
 **Babystepping**: Move Z by small steps while printing
 
-Placed in `dashboard`; component `dashboard_babystep` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a grid it is 6×8 cells, and at least 4×6.
+In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a grid it is 6×8 cells, and at least 4×6.
 
 ![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
 
@@ -1671,7 +1677,7 @@ Placed in `dashboard`; component `dashboard_babystep` ([babystep.json](../assets
 
 **E-stop**: Drag across to stop the printer at once
 
-Placed in `sidebar`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)).
+In Safety; placed in `sidebar`; component `sidebar_estop` ([estop.json](../assets/ui/widgets/safety/estop.json)).
 
 ![estop](../tests/ref_imgs/xml_ui_api/widgets/estop.png)
 
@@ -1679,7 +1685,7 @@ Placed in `sidebar`; component `sidebar_estop` ([estop.json](../assets/ui/widget
 
 **Fan**: One fan's speed, to change it
 
-Placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a grid it is 10×2 cells, and at least 8×2.
+In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a grid it is 10×2 cells, and at least 8×2.
 
 ![fan](../tests/ref_imgs/xml_ui_api/widgets/fan.png)
 
@@ -1691,7 +1697,7 @@ Placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widget
 
 **Jobs, macros and status**: The jobs, macros and the job's status, as tabs
 
-Placed in `dashboard`; component `dashboard_files` ([files.json](../assets/ui/widgets/jobs/files.json)). In a grid it is 8×12 cells, and at least 6×6.
+In Jobs; placed in `dashboard`; component `dashboard_files` ([files.json](../assets/ui/widgets/jobs/files.json)). In a grid it is 8×12 cells, and at least 6×6.
 
 ![files](../tests/ref_imgs/xml_ui_api/widgets/files.png)
 
@@ -1699,7 +1705,7 @@ Placed in `dashboard`; component `dashboard_files` ([files.json](../assets/ui/wi
 
 **G-code button**: Sends the G-code you choose, e.g. M98 P"0:/macros/name" to run a macro
 
-Placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a grid it is 4×2 cells, and at least 2×2.
+In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a grid it is 4×2 cells, and at least 2×2.
 
 ![gcode_button](../tests/ref_imgs/xml_ui_api/widgets/gcode_button.png)
 
@@ -1712,7 +1718,7 @@ Placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](.
 
 **Job progress**: The job's file, progress, time taken and time left
 
-Placed in `dashboard`; component `dashboard_job_progress` ([job_progress.json](../assets/ui/widgets/jobs/job_progress.json)). In a grid it is 8×2 cells, and at least 6×2.
+In Jobs; placed in `dashboard`; component `dashboard_job_progress` ([job_progress.json](../assets/ui/widgets/jobs/job_progress.json)). In a grid it is 8×2 cells, and at least 6×2.
 
 ![job_progress](../tests/ref_imgs/xml_ui_api/widgets/job_progress.png)
 
@@ -1720,7 +1726,7 @@ Placed in `dashboard`; component `dashboard_job_progress` ([job_progress.json](.
 
 **Status**: The job's progress, times and controls
 
-Placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a grid it is 8×8 cells, and at least 6×6.
+In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a grid it is 8×8 cells, and at least 6×6.
 
 ![job_status](../tests/ref_imgs/xml_ui_api/widgets/job_status.png)
 
@@ -1728,7 +1734,7 @@ Placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](
 
 **Jobs**: The jobs on the printer, to start one
 
-Placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../assets/ui/widgets/jobs/jobs.json)). In a grid it is 8×8 cells, and at least 6×4.
+In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../assets/ui/widgets/jobs/jobs.json)). In a grid it is 8×8 cells, and at least 6×4.
 
 ![jobs](../tests/ref_imgs/xml_ui_api/widgets/jobs.png)
 
@@ -1736,7 +1742,7 @@ Placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../assets/ui
 
 **Macros**: The printer's macros, to run one
 
-Placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a grid it is 8×8 cells, and at least 6×4.
+In Jobs; placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a grid it is 8×8 cells, and at least 6×4.
 
 ![macros](../tests/ref_imgs/xml_ui_api/widgets/macros.png)
 
@@ -1744,7 +1750,7 @@ Placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../asset
 
 **Console**: Opens the console; flashes when the printer replies
 
-Placed in `sidebar`; component `sidebar_page_button` ([page_console.json](../assets/ui/widgets/navigation/page_console.json)).
+In Navigation; placed in `sidebar`; component `sidebar_page_button` ([page_console.json](../assets/ui/widgets/navigation/page_console.json)).
 
 ![page_console](../tests/ref_imgs/xml_ui_api/widgets/page_console.png)
 
@@ -1752,7 +1758,7 @@ Placed in `sidebar`; component `sidebar_page_button` ([page_console.json](../ass
 
 **Control**: Opens the controls: moving, temperatures, fans
 
-Placed in `sidebar`; component `sidebar_page_button` ([page_control.json](../assets/ui/widgets/navigation/page_control.json)).
+In Navigation; placed in `sidebar`; component `sidebar_page_button` ([page_control.json](../assets/ui/widgets/navigation/page_control.json)).
 
 ![page_control](../tests/ref_imgs/xml_ui_api/widgets/page_control.png)
 
@@ -1760,7 +1766,7 @@ Placed in `sidebar`; component `sidebar_page_button` ([page_control.json](../ass
 
 **Files**: Opens the jobs and macros
 
-Placed in `sidebar`; component `sidebar_page_button` ([page_files.json](../assets/ui/widgets/navigation/page_files.json)).
+In Navigation; placed in `sidebar`; component `sidebar_page_button` ([page_files.json](../assets/ui/widgets/navigation/page_files.json)).
 
 ![page_files](../tests/ref_imgs/xml_ui_api/widgets/page_files.png)
 
@@ -1768,7 +1774,7 @@ Placed in `sidebar`; component `sidebar_page_button` ([page_files.json](../asset
 
 **Dashboard**: Opens the dashboard
 
-Placed in `sidebar`; component `sidebar_page_button` ([page_home.json](../assets/ui/widgets/navigation/page_home.json)).
+In Navigation; placed in `sidebar`; component `sidebar_page_button` ([page_home.json](../assets/ui/widgets/navigation/page_home.json)).
 
 ![page_home](../tests/ref_imgs/xml_ui_api/widgets/page_home.png)
 
@@ -1776,7 +1782,7 @@ Placed in `sidebar`; component `sidebar_page_button` ([page_home.json](../assets
 
 **Settings**: Opens the settings
 
-Placed in `sidebar`; component `sidebar_page_button` ([page_settings.json](../assets/ui/widgets/navigation/page_settings.json)).
+In Navigation; placed in `sidebar`; component `sidebar_page_button` ([page_settings.json](../assets/ui/widgets/navigation/page_settings.json)).
 
 ![page_settings](../tests/ref_imgs/xml_ui_api/widgets/page_settings.png)
 
@@ -1784,7 +1790,7 @@ Placed in `sidebar`; component `sidebar_page_button` ([page_settings.json](../as
 
 **G-code button**: A sidebar button that sends the G-code you choose
 
-Placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gcode.json](../assets/ui/widgets/commands/sidebar_gcode.json)).
+In Commands; placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gcode.json](../assets/ui/widgets/commands/sidebar_gcode.json)).
 
 ![sidebar_gcode](../tests/ref_imgs/xml_ui_api/widgets/sidebar_gcode.png)
 
@@ -1798,7 +1804,7 @@ Placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gcode.json](../a
 
 **Extrusion factor**: Shows the extrusion factor; tap to change it
 
-Placed in `status_bar`; component `status_bar_factor_button` ([status_extrusion.json](../assets/ui/widgets/motion/status_extrusion.json)).
+In Motion; placed in `status_bar`; component `status_bar_factor_button` ([status_extrusion.json](../assets/ui/widgets/motion/status_extrusion.json)).
 
 ![status_extrusion](../tests/ref_imgs/xml_ui_api/widgets/status_extrusion.png)
 
@@ -1806,7 +1812,7 @@ Placed in `status_bar`; component `status_bar_factor_button` ([status_extrusion.
 
 **G-code button**: A small button that sends the G-code you choose
 
-Placed in `status_bar`; component `status_bar_gcode_button` ([status_gcode.json](../assets/ui/widgets/commands/status_gcode.json)).
+In Commands; placed in `status_bar`; component `status_bar_gcode_button` ([status_gcode.json](../assets/ui/widgets/commands/status_gcode.json)).
 
 ![status_gcode](../tests/ref_imgs/xml_ui_api/widgets/status_gcode.png)
 
@@ -1819,7 +1825,7 @@ Placed in `status_bar`; component `status_bar_gcode_button` ([status_gcode.json]
 
 **Speed factor**: Shows the speed factor; tap to change it
 
-Placed in `status_bar`; component `status_bar_factor_button` ([status_speed.json](../assets/ui/widgets/motion/status_speed.json)).
+In Motion; placed in `status_bar`; component `status_bar_factor_button` ([status_speed.json](../assets/ui/widgets/motion/status_speed.json)).
 
 ![status_speed](../tests/ref_imgs/xml_ui_api/widgets/status_speed.png)
 
@@ -1827,7 +1833,7 @@ Placed in `status_bar`; component `status_bar_factor_button` ([status_speed.json
 
 **Temperature graph**: Every heater's temperature over the last minutes
 
-Placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a grid it is 12×6 cells, and at least 6×4.
+In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a grid it is 12×6 cells, and at least 6×4.
 
 ![temperature_graph](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph.png)
 
@@ -1839,7 +1845,7 @@ Placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_gra
 
 **Tool**: One tool with its heaters' temperatures
 
-Placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a grid it is 12×4 cells, and at least 8×2.
+In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a grid it is 12×4 cells, and at least 8×2.
 
 ![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
 
@@ -1851,7 +1857,7 @@ Placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui
 
 **Tools and heaters**: Every tool, bed and chamber with its temperatures
 
-Placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a grid it is 12×6 cells, and at least 6×4.
+In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a grid it is 12×6 cells, and at least 6×4.
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
 
@@ -1870,7 +1876,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
 | [`customise`](#home) | `customise` |  | `home` | [customise.xml](../assets/ui/components/customise/customise.xml) |
-| `customise_catalogue_item` |  |  | `customise` | [customise_catalogue_item.xml](../assets/ui/components/customise/customise_catalogue_item.xml) |
+| `customise_catalogue_category` |  |  | `customise` | [customise_catalogue_category.xml](../assets/ui/components/customise/customise_catalogue_category.xml) |
+| `customise_catalogue_item` |  |  | `customise_catalogue_category` | [customise_catalogue_item.xml](../assets/ui/components/customise/customise_catalogue_item.xml) |
 | [`customise_grid_item`](#customise_grid_item) |  | `key` |  | [customise_grid_item.xml](../assets/ui/components/customise/customise_grid_item.xml) |
 | `customise_item` |  | `key` | `customise_grid_item` | [customise_item.xml](../assets/ui/components/customise/customise_item.xml) |
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |

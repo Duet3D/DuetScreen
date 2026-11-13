@@ -342,10 +342,11 @@ namespace UI::Xml::Api
 			{
 				fmt::format_to(std::back_inserter(out),
 							   "#### {:s}\n\n**{:s}**: {:s}\n\n"
-							   "Placed in {:s}; component {:s} ({:s}).",
+							   "In {:s}; placed in {:s}; component {:s} ({:s}).",
 							   widget.id,
 							   shown(widget.titleTag, widget.title),
 							   shown(widget.descriptionTag, widget.description),
+							   shown(widget.categoryTag, widget.category.empty() ? "no category" : widget.category),
 							   codeList(widget.slots),
 							   code(widget.component),
 							   fileLink(widget.source.generic_string()));

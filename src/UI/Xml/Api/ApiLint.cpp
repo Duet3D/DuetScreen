@@ -182,6 +182,7 @@ namespace UI::Xml::Api
 					};
 					translation(widget.titleTag);
 					translation(widget.descriptionTag);
+					translation(widget.categoryTag);
 
 					auto component = m_components.find(widget.component);
 					if (component == m_components.end())

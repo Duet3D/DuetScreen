@@ -328,6 +328,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
   "component": "dashboard_fan",
   "title_tag": "widget.fan",
   "description_tag": "widget.fan_desc",
+  "category_tag": "widget.category_fans",
   "icon": "fine_tune.png",
   "slots": ["dashboard"],
   "size": {"default": [10, 2], "min": [8, 2]},
@@ -340,7 +341,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
 ```
 
 - `slots` are the slots it can be placed in, and `size` its default, smallest and largest size in a grid, in cells (`[columns, rows]`; with no `max`, up to the whole grid).
-- `title`, `description` (or `title_tag`, `description_tag`, translated) and `icon` show it in the widget pool.
+- `title`, `description` (or `title_tag`, `description_tag`, translated) and `icon` show it in the widget pool, under its `category` (or `category_tag`).
 - `props` are always given to the component; one component can be several widgets, as each sidebar page button is `sidebar_page_button` with its own `page`, `label` and `icon`.
 - `settings` are props the user chooses. Each needs a `default`, and a `kind`:
 
@@ -348,7 +349,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
 | --- | --- | --- |
 | `int` | a number, on the number pad | `min`, `max`, `unit` |
 | `bool` | on or off, with a switch | |
-| `text` | text, on the keyboard | `max_length` (default 64) |
+| `text` | text, typed in the settings on the keyboard | `max_length` (default 64) |
 | `choice` | one of `options` (`[{"value": 30, "title": "30 s"}]`, or `title_tag`) | |
 | `row` | a row of a global list, as the printer has them now: which fan, which tool | `list`, `key` (the field stored), `label` (the field shown) |
 

@@ -503,7 +503,14 @@
       "setting_icon": "Pictogram",
       "setting_fan": "Ventilator",
       "setting_tool": "Gereedschap",
-      "estop": "Noodstop"
+      "estop": "Noodstop",
+      "category_navigation": "Navigatie",
+      "category_safety": "Veiligheid",
+      "category_temperature": "Temperaturen",
+      "category_jobs": "Opdrachten",
+      "category_motion": "Beweging",
+      "category_fans": "Ventilatoren",
+      "category_commands": "Opdrachten sturen"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

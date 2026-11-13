@@ -2,6 +2,7 @@
   "component": "status_bar_factor_button",
   "title_tag": "widget.status_speed",
   "description_tag": "widget.status_speed_desc",
+  "category_tag": "widget.category_motion",
   "icon": "fine_tune.png",
   "slots": [
     "status_bar"

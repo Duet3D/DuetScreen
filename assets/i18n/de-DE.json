@@ -503,7 +503,14 @@
       "setting_icon": "Symbol",
       "setting_fan": "Lüfter",
       "setting_tool": "Werkzeug",
-      "estop": "Not-Aus"
+      "estop": "Not-Aus",
+      "category_navigation": "Navigation",
+      "category_safety": "Sicherheit",
+      "category_temperature": "Temperaturen",
+      "category_jobs": "Aufträge",
+      "category_motion": "Bewegung",
+      "category_fans": "Lüfter",
+      "category_commands": "Befehle"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

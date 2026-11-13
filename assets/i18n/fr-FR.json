@@ -503,7 +503,14 @@
       "setting_icon": "Icône",
       "setting_fan": "Ventilateur",
       "setting_tool": "Outil",
-      "estop": "Arrêt d'urgence"
+      "estop": "Arrêt d'urgence",
+      "category_navigation": "Navigation",
+      "category_safety": "Sécurité",
+      "category_temperature": "Températures",
+      "category_jobs": "Travaux",
+      "category_motion": "Mouvement",
+      "category_fans": "Ventilateurs",
+      "category_commands": "Commandes"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

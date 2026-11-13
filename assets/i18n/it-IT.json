@@ -503,7 +503,14 @@
       "setting_icon": "Icona",
       "setting_fan": "Ventola",
       "setting_tool": "Utensile",
-      "estop": "Arresto di emergenza"
+      "estop": "Arresto di emergenza",
+      "category_navigation": "Navigazione",
+      "category_safety": "Sicurezza",
+      "category_temperature": "Temperature",
+      "category_jobs": "Lavori",
+      "category_motion": "Movimento",
+      "category_fans": "Ventole",
+      "category_commands": "Comandi"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

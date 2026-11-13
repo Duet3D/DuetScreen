@@ -2,6 +2,7 @@
   "component": "dashboard_temperature_graph",
   "title_tag": "widget.temperature_graph",
   "description_tag": "widget.temperature_graph_desc",
+  "category_tag": "widget.category_temperature",
   "icon": "control.png",
   "slots": [
     "dashboard"
