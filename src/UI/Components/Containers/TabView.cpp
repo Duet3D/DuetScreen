@@ -9,6 +9,7 @@
 #include "Debug.h"
 #include "UI/Components/LVGL/LvAnim.h"
 #include "UI/Components/LVGL/Transitions.h"
+#include "lvgl/src/lvgl_private.h"
 #include "utils/StorageHelper.h"
 
 namespace UI
@@ -25,9 +26,19 @@ namespace UI
 			obj->setX(static_cast<lv_coord_t>(value));
 		}
 
+		/**
+		 * The tab an animation moves, unless it is being deleted: LVGL ends a deleted widget's animations after its
+		 * C++ wrapper has let go of it (or been destroyed), so there is nothing left to tidy
+		 */
+		LvObj* animatedTab(lv_anim_t* anim)
+		{
+			auto* tab = static_cast<lv_obj_t*>(anim->var);
+			return tab->is_deleting ? nullptr : LvObj::fromPtr(tab);
+		}
+
 		static void outgoingTabDeletedCb(lv_anim_t* anim)
 		{
-			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(anim->var));
+			LvObj* obj = animatedTab(anim);
 			if (obj == nullptr)
 			{
 				return;
@@ -39,7 +50,7 @@ namespace UI
 
 		static void incomingTabDeletedCb(lv_anim_t* anim)
 		{
-			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(anim->var));
+			LvObj* obj = animatedTab(anim);
 			if (obj == nullptr)
 			{
 				return;
@@ -121,10 +132,10 @@ namespace UI
 			},
 			this);
 
-		// If this is the first tab, activate it
-		if (m_tabs.size() == 1)
+		// Select the new tab if none is selected: it is the first, or every earlier one is disabled
+		if (m_currentTabIndex >= m_tabs.size() - 1)
 		{
-			setActiveTab(0);
+			setActiveTab(m_tabs.size() - 1);
 		}
 		else
 		{

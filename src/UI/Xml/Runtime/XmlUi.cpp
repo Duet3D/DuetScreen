@@ -157,24 +157,27 @@ namespace UI::Xml
 		{
 			return;
 		}
-		loadBundles();
-
-		// Rebuild the outermost views only: rebuilding one builds the views inside it (its <ds_view>s) afresh
+		// Only the outermost views: taking one down deletes the views inside it (its <ds_view>s), and building it
+		// again builds them afresh
 		std::vector<XmlView*> outermost;
 		for (XmlView* view : s_views)
 		{
-			if (!isInsideAnotherView(*view))
+			if (view->getRootPtr() != nullptr && !isInsideAnotherView(*view))
 			{
 				outermost.push_back(view);
 			}
 		}
+
+		// Every widget goes before the definitions are replaced: a component's styles are freed with its old
+		// definition, and loading the bundles restyles and refreshes everything still on screen
 		for (XmlView* view : outermost)
 		{
-			// A rebuild destroys the views inside it, and may destroy other outermost views' parents
-			if (std::find(s_views.begin(), s_views.end(), view) != s_views.end())
-			{
-				view->rebuild();
-			}
+			view->takeDown();
+		}
+		loadBundles();
+		for (XmlView* view : outermost)
+		{
+			view->buildAgain();
 		}
 	}
 

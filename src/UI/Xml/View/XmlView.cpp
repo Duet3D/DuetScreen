@@ -135,6 +135,12 @@ namespace UI::Xml
 
 	void XmlView::rebuild()
 	{
+		takeDown();
+		buildAgain();
+	}
+
+	void XmlView::takeDown()
+	{
 		ZoneScoped;
 		UI_LOCK();
 		lv_obj_t* old = getRootPtr();
@@ -143,25 +149,37 @@ namespace UI::Xml
 			return;
 		}
 
-		lv_obj_t* parent = lv_obj_get_parent(old);
-		const int32_t index = lv_obj_get_index(old);
-		const bool hidden = lv_obj_has_flag(old, LV_OBJ_FLAG_HIDDEN);
+		m_placement = Placement{.parent = lv_obj_get_parent(old),
+								.index = lv_obj_get_index(old),
+								.hidden = lv_obj_has_flag(old, LV_OBJ_FLAG_HIDDEN)};
 
-		// The old widgets go first: they may be bound to the scope (and presenter) about to be replaced.
+		// The widgets may be bound to the scope (and presenter) about to be replaced.
 		// Deleting the root nulls m_root (LvObj registers lv_obj_null_on_delete).
 		disconnectPresenter();
 		lv_obj_delete(old);
-		prepare();
+	}
 
-		m_root = build(parent, *this);
-		lv_obj_move_to_index(m_root, index);
-		lv_obj_set_flag(m_root, LV_OBJ_FLAG_HIDDEN, hidden);
+	void XmlView::buildAgain()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (getRootPtr() != nullptr || !m_placement)
+		{
+			return;
+		}
+		const Placement placement = *m_placement;
+		m_placement.reset();
+
+		prepare();
+		m_root = build(placement.parent, *this);
+		lv_obj_move_to_index(m_root, placement.index);
+		lv_obj_set_flag(m_root, LV_OBJ_FLAG_HIDDEN, placement.hidden);
 		lv_obj_set_name(m_root, objName.c_str());
 		lv_obj_set_user_data(m_root, static_cast<LvObj*>(this));
 		lv_obj_null_on_delete(&m_root);
 		registerActions();
 
-		if (!hidden)
+		if (!placement.hidden)
 		{
 			connectPresenter();
 		}

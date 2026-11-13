@@ -118,21 +118,23 @@ namespace UI::Xml
 	void DsButton::flash()
 	{
 		ZoneScoped;
+		// The animation works on the widget, not this object: LVGL stops it when the widget is deleted
 		LvAnim anim;
 		anim.setDuration(500);
 		anim.setValues(0, 100);
-		anim.setExecCb([](void* var, int32_t value)
-					   { static_cast<DsButton*>(var)->setStyleRecolorOpa(static_cast<lv_opa_t>(value)); });
+		anim.setExecCb(
+			[](void* var, int32_t value)
+			{ lv_obj_set_style_recolor_opa(static_cast<lv_obj_t*>(var), static_cast<lv_opa_t>(value), LV_PART_MAIN); });
 		anim.setCompletedCb(
 			[](lv_anim_t* a)
 			{
-				auto* button = static_cast<DsButton*>(a->var);
-				button->setStyleRecolorOpa(LV_OPA_0);
-				button->setState(LV_STATE_USER_1, false);
+				auto* obj = static_cast<lv_obj_t*>(a->var);
+				lv_obj_set_style_recolor_opa(obj, LV_OPA_0, LV_PART_MAIN);
+				lv_obj_remove_state(obj, LV_STATE_USER_1);
 			});
 		anim.setPathCb(lv_anim_path_ease_in_out);
 		anim.setRepeatCount(1);
-		anim.setVar(this);
+		anim.setVar(getRootPtr());
 		anim.setReverseDuration(200);
 		setState(LV_STATE_USER_1, true);
 		anim.start();

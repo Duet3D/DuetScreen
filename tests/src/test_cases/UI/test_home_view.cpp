@@ -18,6 +18,7 @@
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/TemperatureSource.h"
+#include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "UI/Xml/Widgets/DsGraph.h"
 #include "helix_xml.h"
@@ -845,4 +846,52 @@ TEST_F(TestHomeViewWithData, StatusView)
 
 	click("babystep_button");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
+}
+
+TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
+{
+	// Bundles are reloaded whatever is showing: every page, and an open dialog
+	const char* pages[] = {"control", "console", "settings", "files"};
+	for (int round = 0; round < 3; round++)
+	{
+		for (const char* name : pages)
+		{
+			UI::openScreen(std::string_view(name), false);
+			UI::Xml::reload();
+			ASSERT_NE(UI::findView(name), nullptr) << name << " is registered again after a reload";
+		}
+
+		openFilesTab(1);
+		lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+		lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
+		ASSERT_NE(openFileDialog(), nullptr);
+		UI::Xml::reload();
+		EXPECT_EQ(openFileDialog(), nullptr) << "the dialog goes with its browser";
+
+		UI::home();
+		dashboardTabs().setActiveTab(STATUS_TAB);
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+		UI::Xml::reload();
+		lv_refr_now(nullptr);
+	}
+
+	// Rebuilt from scratch, showing the printer as before
+	UI::home();
+	ASSERT_EQ(dashboardTabs().getTabCount(), 3u);
+	lv_obj_t* tools = lv_obj_find_by_name(UI::findView("tool_list")->getRootPtr(), "tools");
+	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 4u) << "the test bench's four tools";
+}
+
+TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
+{
+	// Built while a job runs, the dashboard's Jobs tab is disabled from the start
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+	UI::Xml::reload();
+
+	auto& tabs = dashboardTabs();
+	EXPECT_TRUE(tabs.getTabButton(0)->hasState(LV_STATE_DISABLED));
+	EXPECT_EQ(tabs.getActiveTabIndex(), 1u) << "the first tab that isn't disabled";
 }

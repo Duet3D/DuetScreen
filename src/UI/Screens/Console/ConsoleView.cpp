@@ -183,6 +183,11 @@ namespace UI
 		}
 	}
 
+	ConsoleView::~ConsoleView()
+	{
+		lv_anim_delete(this, nullptr);
+	}
+
 	void ConsoleView::showCommandList(bool show, bool animate)
 	{
 		ZoneScoped;

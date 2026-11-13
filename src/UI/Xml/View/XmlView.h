@@ -17,6 +17,7 @@
 #include "UI/Xml/Binding/Scope.h"
 #include "XmlPresenter.h"
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace UI::Xml
@@ -77,10 +78,20 @@ namespace UI::Xml
 		XmlPresenter* getPresenter() const { return presenter.get(); }
 
 		/**
-		 * Rebuild from the component's current definition, e.g. after a bundle reload. The presenter, and so the
-		 * current state, is kept unless the new definition names a different one.
+		 * Rebuild from the component's current definition. The presenter, and so the current state, is kept unless
+		 * the new definition names a different one.
 		 */
 		void rebuild();
+
+		/**
+		 * The first half of rebuild(): delete the widgets, remembering where they were. Call before the component's
+		 * definition is replaced: its styles are freed with the old definition, so its widgets must go first.
+		 * Until buildAgain(), the view has no widgets.
+		 */
+		void takeDown();
+
+		/** The second half of rebuild(): build the component's current definition where takeDown() removed it */
+		void buildAgain();
 
 	  protected:
 		/** Activate the presenter and connect it to the Model, then show */
@@ -90,6 +101,14 @@ namespace UI::Xml
 		void hideInner() override;
 
 	  private:
+		/** Where the view's widgets were before takeDown() */
+		struct Placement
+		{
+			lv_obj_t* parent; // Parent widget
+			int32_t index;	  // Position among the parent's children
+			bool hidden;	  // Whether the view was hidden
+		};
+
 		/** Build the component inside `parent`, or a placeholder saying it couldn't be loaded */
 		static lv_obj_t* build(lv_obj_t* parent, detail::XmlViewState& state);
 
@@ -101,5 +120,7 @@ namespace UI::Xml
 
 		/** Deactivate the presenter and disconnect it from the Model */
 		void disconnectPresenter();
+
+		std::optional<Placement> m_placement; // Set between takeDown() and buildAgain()
 	};
 } // namespace UI::Xml

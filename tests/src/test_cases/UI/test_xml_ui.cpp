@@ -1044,3 +1044,54 @@ TEST_F(TestXmlUi, TabSelectedWhenItsSubjectIsSet)
 	presenter.job.set("b.gcode");
 	EXPECT_EQ(tabs.getActiveTabIndex(), 2u) << "each time it is set";
 }
+
+TEST_F(TestXmlUi, ReloadDropsWidgetsBeforeTheirComponentStyles)
+{
+	// A component's own styles are freed when it is loaded again, so its widgets must already be gone
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/styled_screen.xml"), R"(
+		<component>
+			<styles>
+				<style name="marked" bg_color="0xff0000" bg_opa="100%" border_width="3"/>
+			</styles>
+			<view extends="lv_obj" width="100%" height="100%">
+				<lv_obj name="box" width="100" height="100">
+					<style name="marked"/>
+				</lv_obj>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	auto& view = makeView("styled_screen");
+	for (int i = 0; i < 3; i++)
+	{
+		UI::Xml::reload();
+		lv_refr_now(nullptr);
+	}
+	lv_obj_t* box = find(view, "box");
+	ASSERT_NE(box, nullptr);
+	EXPECT_EQ(lv_obj_get_style_border_width(box, LV_PART_MAIN), 3);
+}
+
+TEST_F(TestXmlUi, FlashingButtonCanBeDeleted)
+{
+	// The flash animation must end with the button, not carry on with a deleted one
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/flash_screen.xml"), R"(
+		<component presenter="test_dialog">
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_button name="flasher" text="Flash" flash_on="busy"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	auto& view = makeView("flash_screen");
+	static_cast<DialogPresenter&>(*view.getPresenter()).busy.set(1);
+	lv_tick_inc(100);
+	lv_timer_handler();
+
+	m_views.clear();
+	for (int i = 0; i < 10; i++)
+	{
+		lv_tick_inc(100);
+		lv_timer_handler();
+	}
+}

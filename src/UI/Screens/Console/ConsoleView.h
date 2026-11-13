@@ -56,6 +56,9 @@ namespace UI
 
 		ConsoleView(const std::string& name, LvObj& parent);
 
+		/** Stop the command list animation, which works on this object */
+		~ConsoleView() override;
+
 		void clear();
 		void addCommand(std::string_view resp);
 		void addResponse(const std::string& resp, const bool emphasize = false);
