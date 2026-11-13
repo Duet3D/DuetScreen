@@ -2900,6 +2900,9 @@
 		<xs:attribute name="bind_y_max" type="subject">
 			<xs:annotation><xs:documentation>Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a heater's limit</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="legend_min_width" type="xs:string">
+			<xs:annotation><xs:documentation>Show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown)</xs:documentation></xs:annotation>
+		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_heatmap.attributes">
 		<xs:attribute name="bind_surface" type="subject">

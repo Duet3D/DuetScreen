@@ -1,7 +1,8 @@
 <!--
   The dashboard's temperature graph: every heater over the last `seconds`. The axis reaches at least 300°C, or the
-  highest heater limit. It is the `temperature_graph` widget (widgets/temperature/temperature_graph.json), in a plain container
-  because a placed widget's root can't be a DuetScreen widget (see XmlView.h).
+  highest heater limit. Narrower than 400 pixels, it has no legend, so the plot keeps its room. It is the
+  `temperature_graph` widget (widgets/temperature/temperature_graph.json), in a plain container because a placed
+  widget's root can't be a DuetScreen widget (see XmlView.h).
 -->
 <component>
 	<api>
@@ -10,8 +11,10 @@
 
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
 		<style name="pad_zero"/>
+		<!-- The legend goes where it would leave the plot too little room: below 400 pixels wide, the theme's
+			 widget_expanded_min -->
 		<ds_graph name="graph" history="temperatures" seconds="$seconds" y_min="0" y_max="300"
-				  bind_y_max="temperatures.limit" width="100%" height="100%">
+				  bind_y_max="temperatures.limit" legend_min_width="400" width="100%" height="100%">
 			<style name="card"/>
 		</ds_graph>
 	</view>

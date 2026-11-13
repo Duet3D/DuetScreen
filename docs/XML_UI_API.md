@@ -1339,6 +1339,7 @@ Also takes every `lv_obj` attribute.
 | `y_min` | Bottom of the Y axis (default 0) |
 | `y_max` | Top of the Y axis (default 100) |
 | `bind_y_max` | Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a heater's limit |
+| `legend_min_width` | Show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown) |
 
 ### ds_heatmap
 
@@ -2111,11 +2112,11 @@ In Motion; placed in `status_bar`; component `status_bar_factor_button` ([status
 
 **Temperature graph**: Every heater's temperature over the last minutes
 
-In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a free layout it is 550×278 px, and at least 411×184 px.
+In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a free layout it is 550×278 px, and at least 272×184 px.
 
 ![temperature_graph](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph.png)
 
-At its smallest, 411×184 px:
+At its smallest, 272×184 px:
 
 ![temperature_graph at its smallest](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph_smallest.png)
 
@@ -2159,11 +2160,11 @@ At its smallest, 88×42 px:
 
 **Tool**: One tool with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 458×136 px.
+In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 458×100 px.
 
 ![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
 
-At its smallest, 458×136 px:
+At its smallest, 458×100 px:
 
 ![tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_smallest.png)
 
@@ -2175,11 +2176,11 @@ At its smallest, 458×136 px:
 
 **Tools and heaters**: Every tool, bed and chamber with its temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 272×184 px.
+In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 272×100 px.
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
 
-At its smallest, 272×184 px:
+At its smallest, 272×100 px:
 
 ![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
 

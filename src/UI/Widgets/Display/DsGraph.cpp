@@ -46,7 +46,10 @@ namespace UI::Xml
 							{"bind_y_max",
 							 "Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a "
 							 "heater's limit",
-							 AttributeKind::Subject}}},
+							 AttributeKind::Subject},
+							{"legend_min_width",
+							 "Show the legend only while the graph is at least this many pixels wide, so a narrow "
+							 "graph keeps its room for the plot (default 0: always shown)"}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -96,6 +99,12 @@ namespace UI::Xml
 		{
 			lv_subject_add_observer_obj(subject, yMaxObserverCb, root, &graph);
 		}
+		if (const char* width = lv_xml_get_value_of(attrs, "legend_min_width"))
+		{
+			graph.m_legendMinWidth = std::max(0, lv_xml_atoi(width));
+			lv_obj_add_event_cb(root, sizeChangedCb, LV_EVENT_SIZE_CHANGED, &graph);
+			graph.fitLegend();
+		}
 
 		const char* historyName = lv_xml_get_value_of(attrs, "history");
 		if (historyName == nullptr)
@@ -110,6 +119,18 @@ namespace UI::Xml
 		}
 		const int32_t seconds = lv_xml_atoi(attrOr(attrs, "seconds", "60"));
 		graph.showHistory(*history, static_cast<uint32_t>(std::max(seconds, 1)));
+	}
+
+	void DsGraph::sizeChangedCb(lv_event_t* e)
+	{
+		static_cast<DsGraph*>(lv_event_get_user_data(e))->fitLegend();
+	}
+
+	void DsGraph::fitLegend()
+	{
+		// Before it is laid out it has no width: the legend shows until it has one
+		const int32_t width = lv_obj_get_width(getRootPtr());
+		showLegend(width == 0 || width >= m_legendMinWidth);
 	}
 
 	void DsGraph::nameObserverCb(lv_observer_t* observer, lv_subject_t* subject)
