@@ -14,7 +14,7 @@ namespace UI::Xml::Services
 {
 	/**
 	 * Ask the user for a number on the shared number pad: the view registered as `numberpad`
-	 * (assets/ui/components/numberpad/numberpad.xml). Replaces any question it was showing.
+	 * (assets/ui/components/modals/numberpad.xml). Replaces any question it was showing.
 	 * @return false if there is no number pad
 	 */
 	bool askNumber(NumberRequest request);

@@ -1,0 +1,22 @@
+<!--
+  The shared speed and extrusion factor dialogs. Any view opens them with the global actions `factors.speed` and
+  `factors.extrusion` (the tool's extruders from a row of a list of tools, else every extruder).
+
+  Fields and actions: src/UI/Screens/Modals/FactorsPresenter.h
+-->
+<component presenter="factors">
+	<!-- Takes no room: its dialogs open over the main window -->
+	<view extends="lv_obj" width="0" height="0" floating="true">
+		<factors_dialog name="speed_dialog" dialog="speed_dialog" open="speed_dialog.open" title="speed_dialog.title"
+						factors="speed_dialog.factors" pad_shown="speed_dialog.pad_shown" pad="speed_dialog.pad"
+						pad_header="speed_dialog.pad.header" pad_text="speed_dialog.pad.text"
+						pad_accepted="speed_dialog.pad.accepted" pad_confirmable="speed_dialog.pad.confirmable"
+						pad_signed="speed_dialog.pad.signed"/>
+		<factors_dialog name="extrusion_dialog" dialog="extrusion_dialog" open="extrusion_dialog.open"
+						title="extrusion_dialog.title" factors="extrusion_dialog.factors"
+						pad_shown="extrusion_dialog.pad_shown" pad="extrusion_dialog.pad"
+						pad_header="extrusion_dialog.pad.header" pad_text="extrusion_dialog.pad.text"
+						pad_accepted="extrusion_dialog.pad.accepted" pad_confirmable="extrusion_dialog.pad.confirmable"
+						pad_signed="extrusion_dialog.pad.signed"/>
+	</view>
+</component>

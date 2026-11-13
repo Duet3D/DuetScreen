@@ -3,10 +3,11 @@
   Xml::Services::askNumber() or askText() (src/UI/Xml/Runtime/Services.h); a slider with numberpad="true" asks it when
   its value is tapped. Confirming answers and closes it.
 
-  Fields and actions: src/UI/Screens/NumberPad/NumberPadPresenter.h
+  Fields and actions: src/UI/Screens/Modals/NumberPadPresenter.h
 -->
 <component presenter="numberpad">
-	<view extends="lv_obj" width="0" height="0">
+	<!-- Takes no room: its dialogs open over the main window -->
+	<view extends="lv_obj" width="0" height="0" floating="true">
 		<ds_modal name="numberpad_dialog" bind_open="open" width="50%" height="70%" scrollable="false">
 			<action trigger="dismissed" name="numberpad.close"/>
 			<numberpad_panel name="panel" entry="pad" header="pad.header" text="pad.text" accepted="pad.accepted"

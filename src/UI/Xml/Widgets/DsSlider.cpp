@@ -34,11 +34,13 @@ namespace UI::Xml
 		Widgets::add(
 			{.name = "ds_slider",
 			 .extends = "lv_obj",
-			 .description = "A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises "
-							"`value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ "
-							"or types a value), or with `send=\"change\"` on every movement. Values written by "
-							"`bind_value` are not edits and raise nothing, so a view can show live data and send "
-							"changes without echoing the data back to the printer.",
+			 .description =
+				 "A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises "
+				 "`value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ "
+				 "or types a value), or with `send=\"change\"` on every movement. Values written by "
+				 "`bind_value` are not edits and raise nothing, so a view can show live data and send "
+				 "changes without echoing the data back to the printer. Also raises `value_changed` as it is "
+				 "dragged.",
 			 .example =
 				 R"(<ds_slider label_tag="settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
 		   numberpad="true" send="change" width="100%">
@@ -64,8 +66,18 @@ namespace UI::Xml
 							 "Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a "
 							 "timeout longer than the slider reaches"},
 							{"numberpad",
-							 "\"true\" to type the value on the shared number pad when the value is tapped "
-							 "(default false)"}},
+							 "What tapping the value does: `true` types it on the shared number pad, `own` raises "
+							 "`value_tapped` with the value for the view to show its own, `false` types it in place "
+							 "(default)"},
+							{"default",
+							 "A value to go back to: a Reset button shows while the value is anything else, and "
+							 "raises `value_confirmed` with it"},
+							{"bind_min",
+							 "Follow an int subject for the bottom of the range (scaled by `value_scale`)",
+							 AttributeKind::Subject},
+							{"bind_max",
+							 "Follow an int subject for the top of the range (scaled by `value_scale`)",
+							 AttributeKind::Subject}},
 			 .exampleSubjects = {{"brightness", "int", "60"}}},
 			xmlCreate,
 			xmlApply);
@@ -87,11 +99,20 @@ namespace UI::Xml
 
 	bool DsSlider::askForValue()
 	{
-		if (!m_usesNumberPad)
+		switch (m_numberPad)
 		{
+		case NumberPad::NONE:
 			return false;
+		case NumberPad::OWN:
+		{
+			float value = getValue();
+			lv_obj_send_event(getRootPtr(), Actions::valueTappedEvent(), &value);
+			return true;
 		}
-		// The request goes with the slider: a reload may delete it while the number pad is open
+		case NumberPad::SHARED:
+			break;
+		}
+		// The request goes with the slider: a fan going while its number pad is open takes the slider with it
 		return Services::askNumber({.header = std::string(getLabelText()),
 									.min = lowestTypable(),
 									.max = highestTypable(),
@@ -164,11 +185,29 @@ namespace UI::Xml
 				slider.setOutOfRangeMode(OutOfRange::BOTH);
 			}
 		}
-		slider.m_usesNumberPad = lv_xml_to_bool(attrOr(attrs, "numberpad", "false"));
+		// Applied again for each placement of a component extending it, so only what is written changes anything
+		if (const char* numberPad = lv_xml_get_value_of(attrs, "numberpad"))
+		{
+			slider.m_numberPad = lv_streq(numberPad, "own")	 ? NumberPad::OWN
+								 : lv_xml_to_bool(numberPad) ? NumberPad::SHARED
+															 : NumberPad::NONE;
+		}
+		if (const char* value = lv_xml_get_value_of(attrs, "default"))
+		{
+			slider.setDefaultValue(std::strtof(value, nullptr));
+		}
 
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_label"))
 		{
 			lv_subject_add_observer_obj(subject, labelObserverCb, root, &slider);
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_min"))
+		{
+			lv_subject_add_observer_obj(subject, minObserverCb, root, &slider);
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_max"))
+		{
+			lv_subject_add_observer_obj(subject, maxObserverCb, root, &slider);
 		}
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_value"))
 		{
@@ -179,6 +218,20 @@ namespace UI::Xml
 	void DsSlider::labelObserverCb(lv_observer_t* observer, lv_subject_t* subject)
 	{
 		static_cast<DsSlider*>(lv_observer_get_user_data(observer))->setLabel(lv_subject_get_string(subject));
+	}
+
+	void DsSlider::minObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* slider = static_cast<DsSlider*>(lv_observer_get_user_data(observer));
+		slider->setRangeQuietly(static_cast<float>(lv_subject_get_int(subject)) / slider->m_valueScale,
+								slider->getMax());
+	}
+
+	void DsSlider::maxObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* slider = static_cast<DsSlider*>(lv_observer_get_user_data(observer));
+		slider->setRangeQuietly(slider->getMin(),
+								static_cast<float>(lv_subject_get_int(subject)) / slider->m_valueScale);
 	}
 
 	void DsSlider::valueObserverCb(lv_observer_t* observer, lv_subject_t* subject)

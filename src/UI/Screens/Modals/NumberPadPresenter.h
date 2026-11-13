@@ -1,7 +1,7 @@
 /*
  * NumberPadPresenter.h
  *
- * Behaviour for the shared number pad (assets/ui/components/numberpad/numberpad.xml): a dialog asking for one number,
+ * Behaviour for the shared number pad (assets/ui/components/modals/numberpad.xml): a dialog asking for one number,
  * or for digits and dots, at a time. Code asks it with Xml::Services::askNumber() or askText(), never directly.
  *
  * Its names and actions, including those of its NumberEntry, are declared in fields() and its constructor, and listed

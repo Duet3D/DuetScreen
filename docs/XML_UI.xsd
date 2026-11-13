@@ -88,6 +88,15 @@
 			<xs:enumeration value="error_notifications_stay"/>
 			<xs:enumeration value="extrude_usable"/>
 			<xs:enumeration value="extruders"/>
+			<xs:enumeration value="extrusion_dialog.factors"/>
+			<xs:enumeration value="extrusion_dialog.open"/>
+			<xs:enumeration value="extrusion_dialog.pad.accepted"/>
+			<xs:enumeration value="extrusion_dialog.pad.confirmable"/>
+			<xs:enumeration value="extrusion_dialog.pad.header"/>
+			<xs:enumeration value="extrusion_dialog.pad.signed"/>
+			<xs:enumeration value="extrusion_dialog.pad.text"/>
+			<xs:enumeration value="extrusion_dialog.pad_shown"/>
+			<xs:enumeration value="extrusion_dialog.title"/>
 			<xs:enumeration value="factor"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="fault"/>
@@ -153,6 +162,8 @@
 			<xs:enumeration value="machine.status"/>
 			<xs:enumeration value="machine_position_mode"/>
 			<xs:enumeration value="maps"/>
+			<xs:enumeration value="max"/>
+			<xs:enumeration value="min"/>
 			<xs:enumeration value="mode"/>
 			<xs:enumeration value="mode_icon"/>
 			<xs:enumeration value="name"/>
@@ -212,6 +223,15 @@
 			<xs:enumeration value="sort_date"/>
 			<xs:enumeration value="sort_name"/>
 			<xs:enumeration value="sort_size"/>
+			<xs:enumeration value="speed_dialog.factors"/>
+			<xs:enumeration value="speed_dialog.open"/>
+			<xs:enumeration value="speed_dialog.pad.accepted"/>
+			<xs:enumeration value="speed_dialog.pad.confirmable"/>
+			<xs:enumeration value="speed_dialog.pad.header"/>
+			<xs:enumeration value="speed_dialog.pad.signed"/>
+			<xs:enumeration value="speed_dialog.pad.text"/>
+			<xs:enumeration value="speed_dialog.pad_shown"/>
+			<xs:enumeration value="speed_dialog.title"/>
 			<xs:enumeration value="speed_factor"/>
 			<xs:enumeration value="speed_requested"/>
 			<xs:enumeration value="speed_text"/>
@@ -255,6 +275,7 @@
 			<xs:enumeration value="usable"/>
 			<xs:enumeration value="usb_mode"/>
 			<xs:enumeration value="usb_modes"/>
+			<xs:enumeration value="value"/>
 			<xs:enumeration value="x.home_usable"/>
 			<xs:enumeration value="x.homed"/>
 			<xs:enumeration value="x.jog_usable"/>
@@ -294,6 +315,7 @@
 			<xs:enumeration value="distance.choices"/>
 			<xs:enumeration value="distances"/>
 			<xs:enumeration value="extruders"/>
+			<xs:enumeration value="extrusion_dialog.factors"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrates"/>
@@ -303,6 +325,7 @@
 			<xs:enumeration value="maps"/>
 			<xs:enumeration value="networks"/>
 			<xs:enumeration value="objects"/>
+			<xs:enumeration value="speed_dialog.factors"/>
 			<xs:enumeration value="steps"/>
 			<xs:enumeration value="swatches"/>
 			<xs:enumeration value="temperatures"/>
@@ -334,6 +357,12 @@
 			<xs:enumeration value="console.toggle_commands"/>
 			<xs:enumeration value="extruder.extrude"/>
 			<xs:enumeration value="extruder.retract"/>
+			<xs:enumeration value="factor.close"/>
+			<xs:enumeration value="factor.dragged"/>
+			<xs:enumeration value="factor.edit"/>
+			<xs:enumeration value="factor.set"/>
+			<xs:enumeration value="factors.extrusion"/>
+			<xs:enumeration value="factors.speed"/>
 			<xs:enumeration value="fans.set_speed"/>
 			<xs:enumeration value="files.ask_delete"/>
 			<xs:enumeration value="files.close_dialog"/>
@@ -355,11 +384,9 @@
 			<xs:enumeration value="job.cancel"/>
 			<xs:enumeration value="job.close_babystep"/>
 			<xs:enumeration value="job.close_dialog"/>
-			<xs:enumeration value="job.flow_factor"/>
 			<xs:enumeration value="job.pause"/>
 			<xs:enumeration value="job.print_again"/>
 			<xs:enumeration value="job.resume"/>
-			<xs:enumeration value="job.speed_factor"/>
 			<xs:enumeration value="move.close_dialog"/>
 			<xs:enumeration value="move.confirm"/>
 			<xs:enumeration value="move.disable_motors"/>
@@ -432,7 +459,6 @@
 			<xs:enumeration value="settings.upgrade_from_github"/>
 			<xs:enumeration value="settings.usb_mode"/>
 			<xs:enumeration value="temperature.change_filament"/>
-			<xs:enumeration value="temperature.extrusion_factor"/>
 			<xs:enumeration value="temperature.pick_filament"/>
 			<xs:enumeration value="temperature.unload_filament"/>
 			<xs:enumeration value="tools.toggle"/>
@@ -520,6 +546,7 @@
 			<xs:enumeration value="triple_clicked"/>
 			<xs:enumeration value="value_changed"/>
 			<xs:enumeration value="value_confirmed"/>
+			<xs:enumeration value="value_tapped"/>
 			<xs:enumeration value="vsync"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -533,6 +560,7 @@
 			<xs:enumeration value="dashboard_job_status"/>
 			<xs:enumeration value="dashboard_jobs"/>
 			<xs:enumeration value="dashboard_macros"/>
+			<xs:enumeration value="factors"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
@@ -571,6 +599,9 @@
 			<xs:enumeration value="dashboard_job_status"/>
 			<xs:enumeration value="dashboard_tool"/>
 			<xs:enumeration value="dashboard_tools"/>
+			<xs:enumeration value="factors"/>
+			<xs:enumeration value="factors_dialog"/>
+			<xs:enumeration value="factors_slider"/>
 			<xs:enumeration value="fan_card"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
@@ -639,7 +670,9 @@
 			<xs:enumeration value="dashboard_tool"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="estop"/>
-			<xs:enumeration value="extrusion_factor"/>
+			<xs:enumeration value="factors"/>
+			<xs:enumeration value="factors_dialog"/>
+			<xs:enumeration value="factors_slider"/>
 			<xs:enumeration value="fan_card"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
@@ -651,7 +684,6 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
-			<xs:enumeration value="job_extrusion_factor"/>
 			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
@@ -678,7 +710,6 @@
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
-			<xs:enumeration value="speed_factor"/>
 			<xs:enumeration value="status_bar"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
@@ -731,6 +762,9 @@
 			<xs:enumeration value="ds_thumbnail"/>
 			<xs:enumeration value="ds_toggle"/>
 			<xs:enumeration value="ds_view"/>
+			<xs:enumeration value="factors"/>
+			<xs:enumeration value="factors_dialog"/>
+			<xs:enumeration value="factors_slider"/>
 			<xs:enumeration value="fan_card"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
@@ -2566,7 +2600,16 @@
 			<xs:annotation><xs:documentation>Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="numberpad" type="xs:string">
-			<xs:annotation><xs:documentation>&quot;true&quot; to type the value on the shared number pad when the value is tapped (default false)</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>What tapping the value does: `true` types it on the shared number pad, `own` raises `value_tapped` with the value for the view to show its own, `false` types it in place (default)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="default" type="xs:string">
+			<xs:annotation><xs:documentation>A value to go back to: a Reset button shows while the value is anything else, and raises `value_confirmed` with it</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_min" type="subject">
+			<xs:annotation><xs:documentation>Follow an int subject for the bottom of the range (scaled by `value_scale`)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_max" type="subject">
+			<xs:annotation><xs:documentation>Follow an int subject for the top of the range (scaled by `value_scale`)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_tabs-tab.attributes">
@@ -2635,6 +2678,41 @@
 		</xs:attribute>
 		<xs:attribute name="shown" type="xs:string">
 			<xs:annotation><xs:documentation>&quot;true&quot; to show it without taking part in navigation, for always-present parts such as a status bar or the page in a tab: shown, and its presenter active, whenever what it is in is shown (default false)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="factors_dialog.attributes">
+		<xs:attribute name="dialog" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `dialog` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="open" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `open` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="factors" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `factors` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad_shown" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad_shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad_header" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad_header` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad_text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad_text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad_accepted" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad_accepted` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad_confirmable" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad_confirmable` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad_signed" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad_signed` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_arc.attributes">
@@ -3416,7 +3494,7 @@
 			<xs:annotation><xs:documentation>The action to run (required)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="trigger" type="trigger">
-			<xs:annotation><xs:documentation>The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished) or `dismissed` (a `&lt;ds_modal&gt;` was closed by the user)</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `&lt;ds_slider numberpad=&quot;own&quot;&gt;`'s value was tapped to type one) or `dismissed` (a `&lt;ds_modal&gt;` was closed by the user)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="arg" type="xs:string">
 			<xs:annotation><xs:documentation>Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `&lt;action&gt;` is written</xs:documentation></xs:annotation>
@@ -5326,7 +5404,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_slider">
-		<xs:annotation><xs:documentation>A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send=&quot;change&quot;` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send=&quot;change&quot;` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also raises `value_changed` as it is dragged. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_slider.attributes"/>
@@ -6661,6 +6739,33 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tools.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="factors">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/factors.xml, with presenter factors.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="factors_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/factors_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="factors_dialog.attributes"/>
+			<xs:attributeGroup ref="ds_modal.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="factors_slider">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/factors_slider.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_slider.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8358,7 +8463,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="numberpad">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/numberpad/numberpad.xml, with presenter numberpad.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/numberpad.xml, with presenter numberpad.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -8366,7 +8471,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="numberpad_panel">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/numberpad/numberpad_panel.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/numberpad_panel.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="numberpad_panel.attributes"/>

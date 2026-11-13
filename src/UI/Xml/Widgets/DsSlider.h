@@ -16,6 +16,14 @@ namespace UI::Xml
 	class DsSlider : public Slider
 	{
 	  public:
+		/** What tapping the value does (`numberpad`) */
+		enum class NumberPad
+		{
+			NONE,	// Type it in place
+			SHARED, // Type it on the shared number pad
+			OWN,	// Raise `value_tapped`, for the view's own number pad
+		};
+
 		/** Create a slider inside `parent` */
 		DsSlider(const std::string& name, lv_obj_t* parent);
 
@@ -43,11 +51,17 @@ namespace UI::Xml
 		/** `bind_label` observer */
 		static void labelObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
+		/** `bind_min` observer */
+		static void minObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** `bind_max` observer */
+		static void maxObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
 		/** `bind_value` observer; ignores updates while the user is editing */
 		static void valueObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
 		bool m_settingQuietly = false;	// True while a value is written by code rather than edited
-		bool m_usesNumberPad = false;	// `numberpad="true"`: the value is typed on a number pad
+		NumberPad m_numberPad = NumberPad::NONE; // What tapping the value does
 		float m_valueScale = 1.0f;	   // `bind_value`'s subject holds the value times this
 	};
 } // namespace UI::Xml

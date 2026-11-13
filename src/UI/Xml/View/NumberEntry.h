@@ -28,7 +28,6 @@
 #include "UI/Xml/Binding/Subjects.h"
 #include "lvgl/lvgl.h"
 #include <functional>
-#include <initializer_list>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -100,7 +99,7 @@ namespace UI::Xml
 		};
 
 		/** The entry actions (see the file comment) of any of `entries`, to register */
-		static std::vector<Action> actions(std::initializer_list<NumberEntry*> entries);
+		static std::vector<Action> actions(const std::vector<NumberEntry*>& entries);
 
 	  private:
 		/** Show `text` as typed, and whether it can be confirmed */

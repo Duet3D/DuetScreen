@@ -28,17 +28,16 @@
 			<ds_view name="control" view="control"/>
 			<ds_view name="files" view="files"/>
 			<ds_view name="settings" view="settings"/>
-			<ds_view name="extrusion_factor" view="extrusion_factor"/>
-			<ds_view name="numberpad" view="numberpad"/>
-			<!-- The job status panel's dialogs -->
-			<ds_view name="speed_factor" view="speed_factor"/>
-			<ds_view name="job_extrusion_factor" view="job_extrusion_factor"/>
 		</ds_view>
 
 		<!-- After the main window, so a dragged E-stop passes over it -->
 		<ds_view name="sidebar" view="sidebar" shown="true" width="content"
 				 style_grid_cell_x_align="start" style_grid_cell_column_pos="0" style_grid_cell_column_span="1"
 				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="0" style_grid_cell_row_span="2"/>
+
+		<!-- The shared dialogs, which open over the main window: the number pad, and speed and extrusion factors -->
+		<ds_view name="numberpad" view="numberpad" shown="true"/>
+		<ds_view name="factors" view="factors" shown="true"/>
 
 		<!-- Over everything: responses, alerts and update prompts, then the keyboard -->
 		<ds_view name="notifications" view="notifications" shown="true"/>

@@ -168,6 +168,8 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 
 | Action | Description |
 | --- | --- |
+| `factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's |
+| `factors.speed` | Open the dialog to change the speed factor |
 | `gcode` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{value}"` |
 | `heaters.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `heaters.toggle`. |
 | `heaters.set_standby` | As `heaters.set_active`, for the standby temperature |
@@ -177,7 +179,7 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 | `nav.open` | Open the screen registered as `arg`, e.g. `arg="control"` |
 | `tools.toggle` | Select the tool, or deselect it if selected. From a row of `tools`. |
 
-An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
+An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`, `value_tapped`
 
 ## Presenters
 
@@ -280,11 +282,9 @@ Each row of `axes`:
 | `job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
 | `job.close_babystep` | Close the babystepping dialog |
 | `job.close_dialog` | Close the question without cancelling the job |
-| `job.flow_factor` | Open the dialog to change the extrusion override |
 | `job.pause` | Pause the job |
 | `job.print_again` | Start the last job again |
 | `job.resume` | Resume the paused job |
-| `job.speed_factor` | Open the dialog to change the speed override |
 
 ### dashboard_jobs, dashboard_macros, files_jobs, files_macros
 
@@ -340,6 +340,61 @@ Each row of `crumbs`:
 | `files.refresh` | Close the dialog and read the folder again |
 | `files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
 | `files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
+
+### factors
+
+Used by `factors`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `speed_dialog.open` | int | 1 while the dialog is open |
+| `speed_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
+| `speed_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
+| `speed_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
+| `speed_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
+| `speed_dialog.pad.text` | text | What has been typed |
+| `speed_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `speed_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `speed_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
+| `extrusion_dialog.open` | int | 1 while the dialog is open |
+| `extrusion_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
+| `extrusion_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
+| `extrusion_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
+| `extrusion_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
+| `extrusion_dialog.pad.text` | text | What has been typed |
+| `extrusion_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `extrusion_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `extrusion_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
+
+Each row of `speed_dialog.factors`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `label` | text | What it is, e.g. "Extruder 0" |
+| `value` | int | The percentage, e.g. 100 |
+| `min` | int | The bottom of its slider |
+| `max` | int | The top of its slider |
+
+Each row of `extrusion_dialog.factors`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `label` | text | What it is, e.g. "Extruder 0" |
+| `value` | int | The percentage, e.g. 100 |
+| `min` | int | The bottom of its slider |
+| `max` | int | The top of its slider |
+
+| Action | Description |
+| --- | --- |
+| `factor.close` | Close the dialog named by `arg` (its id), e.g. when it is dismissed |
+| `factor.dragged` | The slider moved (`value_changed`): the number pad follows it if it is for that factor. From a row of `factors`. |
+| `factor.edit` | Type a percentage for the factor on the dialog's number pad (`value_tapped`). From a row of `factors`. |
+| `factor.set` | Use the slider's edited percentage (`value_confirmed`) for its factor. From a row of `factors`. |
+| `numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
+| `numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
+| `numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
 
 ### fans
 
@@ -846,7 +901,6 @@ Each row of `tools` › `extruders`:
 | Action | Description |
 | --- | --- |
 | `temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `tools`. |
-| `temperature.extrusion_factor` | Open the dialog to change the tool's extrusion factors. From a row of `tools`. |
 | `temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`. |
 | `temperature.unload_filament` | Unload the tool's filament. From a row of `tools`. |
 
@@ -1204,7 +1258,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_slider
 
-A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send="change"` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer.
+A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send="change"` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also raises `value_changed` as it is dragged.
 
 Also takes every `lv_obj` attribute.
 
@@ -1231,7 +1285,10 @@ Also takes every `lv_obj` attribute.
 | `value_scale` | How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 held as 2 with value_scale="100" (default 1) |
 | `send` | `confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` on every movement, for a setting seen as it changes such as brightness |
 | `out_of_range` | Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches |
-| `numberpad` | "true" to type the value on the shared number pad when the value is tapped (default false) |
+| `numberpad` | What tapping the value does: `true` types it on the shared number pad, `own` raises `value_tapped` with the value for the view to show its own, `false` types it in place (default) |
+| `default` | A value to go back to: a Reset button shows while the value is anything else, and raises `value_confirmed` with it |
+| `bind_min` | Follow an int subject for the bottom of the range (scaled by `value_scale`) |
+| `bind_max` | Follow an int subject for the top of the range (scaled by `value_scale`) |
 
 ### ds_tabs
 
@@ -1351,7 +1408,7 @@ Written `<action>` inside any widget: run the named action when the widget raise
 | Attribute | Description |
 | --- | --- |
 | `name` | The action to run (required) |
-| `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished) or `dismissed` (a `<ds_modal>` was closed by the user) |
+| `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `<ds_slider numberpad="own">`'s value was tapped to type one) or `dismissed` (a `<ds_modal>` was closed by the user) |
 | `arg` | Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `<action>` is written |
 
 ## Components
@@ -1374,6 +1431,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`dashboard_job_status`](#dashboard_job_status) | `dashboard_job_status` |  | `dashboard` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_tool` |  |  | `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
 | [`dashboard_tools`](#home) |  |  | `dashboard` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| `factors` | `factors` |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
+| `factors_dialog` |  | `dialog`, `open`, `title`, `factors`, `pad_shown`, `pad`, `pad_header`, `pad_text`, `pad_accepted`, `pad_confirmable`, `pad_signed` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
+| `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
 | [`fans`](#fans) | `fans` |  | `control` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
@@ -1393,8 +1453,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
-| `numberpad` | `numberpad` |  | `home` | [numberpad.xml](../assets/ui/components/numberpad/numberpad.xml) |
-| `numberpad_panel` |  | `entry`, `header`, `text`, `accepted`, `confirmable`, `signed` | `numberpad` | [numberpad_panel.xml](../assets/ui/components/numberpad/numberpad_panel.xml) |
+| `numberpad` | `numberpad` |  | `home` | [numberpad.xml](../assets/ui/components/modals/numberpad.xml) |
+| `numberpad_panel` |  | `entry`, `header`, `text`, `accepted`, `confirmable`, `signed` | `factors_dialog`, `numberpad` | [numberpad_panel.xml](../assets/ui/components/modals/numberpad_panel.xml) |
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
@@ -1420,7 +1480,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
-C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `speed_factor`
+C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `keyboard`
 
 ### Views
 

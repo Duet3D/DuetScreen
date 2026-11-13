@@ -1,0 +1,13 @@
+<!--
+  One percentage of a factors_dialog, on a slider. Tap the value to type it on the dialog's number pad.
+
+  Fields:   a factors row: label, value, min, max (src/UI/Screens/Modals/FactorDialog.h)
+-->
+<component>
+	<view extends="ds_slider" bind_label="label" bind_value="value" bind_min="min" bind_max="max" min="0" max="200"
+		  increment="1" decimals="0" default="100" out_of_range="both" numberpad="own" width="100%" height="content">
+		<action trigger="value_confirmed" name="factor.set"/>
+		<action trigger="value_changed" name="factor.dragged"/>
+		<action trigger="value_tapped" name="factor.edit"/>
+	</view>
+</component>

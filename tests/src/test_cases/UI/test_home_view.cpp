@@ -1335,3 +1335,35 @@ TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
 	runEvents();
 	EXPECT_EQ(openNumberPad(), nullptr);
 }
+
+TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactor)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
+	runEvents();
+	dashboardTabs().setActiveTab(STATUS_TAB);
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "flow_multiplier"),
+					  LV_EVENT_CLICKED,
+					  nullptr);
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "extrusion_dialog");
+	ASSERT_NE(dialog, nullptr);
+	ASSERT_TRUE(shownOnScreen(dialog));
+	lv_obj_t* pad = lv_obj_find_by_name(dialog, "numberpad");
+	EXPECT_TRUE(shownOnScreen(pad)) << "the number pad starts on the first extruder";
+	EXPECT_EQ(labelText(pad, "header"), "Extruder 0");
+
+	// Tap the second extruder's value: the pad is for it now
+	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
+	ASSERT_EQ(lv_obj_get_child_count(rows), 2u);
+	auto& second = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(rows, 1)));
+	lv_obj_send_event(second.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(labelText(pad, "header"), "Extruder 1");
+
+	// Type 95 and confirm: sent, and the dialog closes
+	lv_textarea_set_text(lv_obj_find_by_name(pad, "text"), "95");
+	lv_obj_send_event(lv_obj_find_by_name(pad, "keys"), LV_EVENT_READY, nullptr);
+	ASSERT_EQ(sent.size(), 1u);
+	EXPECT_EQ(sent[0], "M221 D1 S95\n");
+	EXPECT_FALSE(shownOnScreen(dialog));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}

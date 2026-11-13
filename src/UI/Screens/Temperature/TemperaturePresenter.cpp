@@ -8,8 +8,6 @@
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
-#include "UI/Core/Navigation.h"
-#include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
 #include "i18n/i18n.h"
 #include <fmt/format.h>
 
@@ -75,19 +73,6 @@ namespace UI
 	TemperaturePresenter::TemperaturePresenter()
 		: XmlPresenter("temperature")
 	{
-		action("temperature.extrusion_factor",
-			   "Open the dialog to change the tool's extrusion factors. From a row of `tools`.",
-			   [](const Xml::ActionArgs& args)
-			   {
-				   auto tool = toolOf(args);
-				   auto* dialog = findView<ModalExtrusionFactor>("extrusion_factor");
-				   if (tool == nullptr || dialog == nullptr)
-				   {
-					   return;
-				   }
-				   dialog->getExtrusionFactor().getPresenter()->setTool(tool);
-				   openModal(dialog);
-			   });
 		action("temperature.pick_filament",
 			   "Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)

@@ -149,7 +149,7 @@ namespace UI::Xml
 		}
 	}
 
-	std::vector<NumberEntry::Action> NumberEntry::actions(std::initializer_list<NumberEntry*> entries)
+	std::vector<NumberEntry::Action> NumberEntry::actions(const std::vector<NumberEntry*>& entries)
 	{
 		const std::vector<NumberEntry*> all(entries);
 

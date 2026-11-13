@@ -1,0 +1,50 @@
+<!--
+  A dialog of percentages, such as the speed factor or each extruder's extrusion factor, each on a slider, with a
+  number pad beside them for the one being typed. Tapping a slider's value types it on the pad; confirming it uses it
+  and closes the dialog.
+
+      <factors_dialog dialog="speed" open="speed.open" title="speed.title" factors="speed.factors"
+                     pad_shown="speed.pad_shown" pad="speed.pad" pad_header="speed.pad.header"
+                     pad_text="speed.pad.text" pad_accepted="speed.pad.accepted"
+                     pad_confirmable="speed.pad.confirmable" pad_signed="speed.pad.signed"/>
+
+  `dialog` is the dialog's id, the arg of its actions, and `pad` its number pad's; the others name its fields. The
+  presenter showing it owns a FactorDialog, which declares those fields and handles the actions
+  (src/UI/Screens/Modals/FactorDialog.h).
+-->
+<component>
+	<api>
+		<prop name="dialog" type="string"/>
+		<prop name="open" type="string"/>
+		<prop name="title" type="string"/>
+		<prop name="factors" type="string"/>
+		<prop name="pad_shown" type="string"/>
+		<prop name="pad" type="string"/>
+		<prop name="pad_header" type="string"/>
+		<prop name="pad_text" type="string"/>
+		<prop name="pad_accepted" type="string"/>
+		<prop name="pad_confirmable" type="string"/>
+		<prop name="pad_signed" type="string"/>
+	</api>
+
+	<view extends="ds_modal" bind_open="$open" width="80%" height="content" flex_flow="row" scrollable="false"
+		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
+		<action trigger="dismissed" name="factor.close" arg="$dialog"/>
+
+		<lv_obj name="factors" height="content" flex_grow="1" flex_flow="column">
+			<lv_label name="title" bind_text="$title" width="100%" height="content">
+				<style name="bg_color_header"/>
+				<style name="list_header"/>
+				<style name="list_title"/>
+			</lv_label>
+			<ds_list name="list" list="$factors" item="factors_slider" width="100%" height="content"
+					 flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+
+		<numberpad_panel name="numberpad" entry="$pad" header="$pad_header" text="$pad_text" accepted="$pad_accepted"
+						 confirmable="$pad_confirmable" signed="$pad_signed" width="50%" height="400">
+			<bind_flag_if_eq subject="$pad_shown" flag="hidden" ref_value="0"/>
+		</numberpad_panel>
+	</view>
+</component>

@@ -57,6 +57,7 @@ assets/ui/                                the built-in bundle
   components/<part>/                      each part of the UI (home, dashboard, control/move, settings, …): its page
                                           and the pieces only it uses; mirrors src/UI/Screens/ (see Naming below)
   components/common/                      small pieces used by several parts (dialogs, value selector, babystepping)
+  components/modals/                      the dialogs every part shares: the number pad, speed and extrusion factors
   themes/                                 the built-in themes
 ```
 
@@ -229,7 +230,7 @@ A value with - and + and a row of presets, such as the extruder's feed distance,
 
 Numbers are typed on the number pad. There is one, shared by the whole UI: `numberpad.xml`, hosted in the home screen as `<ds_view name="numberpad" view="numberpad"/>`. A presenter asks it for a number with `Services::askNumber({.header, .min, .max, .value, .onConfirm})`, or for digits and dots, such as an IP address, with `Services::askText({...})` ([Services.h](../src/UI/Xml/Runtime/Services.h)); a `ds_slider` with `numberpad="true"` asks it when its value is tapped. It answers one question at a time, and closes when the user confirms, dismisses it, or changes tab.
 
-A dialog that keeps a number pad beside its own controls, as the speed and extrusion factor dialogs do, places `numberpad_panel.xml` and owns a `NumberEntry` for it ([NumberEntry.h](../src/UI/Xml/View/NumberEntry.h)), as a value selector owns a `ValueSelector`.
+A dialog that keeps a number pad beside its own controls, as the speed and extrusion factor dialogs (`factors_dialog.xml`) do, places `numberpad_panel.xml` and owns a `NumberEntry` for it ([NumberEntry.h](../src/UI/Xml/View/NumberEntry.h)), as a value selector owns a `ValueSelector`. Any view opens those dialogs with the global actions `factors.speed` and `factors.extrusion`.
 
 When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
 
@@ -245,7 +246,7 @@ An action is resolved like a name: first the presenter of the nearest enclosing 
 
 `arg` may contain placeholders: `{value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{number} S{value}"`.
 
-The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program; the tool and heater actions are in [HeaterActions.cpp](../src/UI/Screens/Temperature/HeaterActions.cpp).
+The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program; the tool and heater actions are in [HeaterActions.cpp](../src/UI/Screens/Temperature/HeaterActions.cpp), and `factors.speed` and `factors.extrusion`, which open the shared speed and extrusion factor dialogs, in [FactorsPresenter.cpp](../src/UI/Screens/Modals/FactorsPresenter.cpp).
 
 ## Themes
 
@@ -282,7 +283,7 @@ Every name is `snake_case`: components, views, widgets, styles, presenters. Comp
 
 - **A page is named after its part**, which is also the folder it is in: `dashboard`, `control`, `move`, `fans`, `settings`. The `<ds_view>` showing a component has the component's name too (`<ds_view name="move" view="move"/>`), and so does a presenter written for one component (`presenter="move"`). A component shown several ways names each view and presenter after where it is shown: the file browser is `dashboard_jobs`, `dashboard_macros`, `files_jobs` and `files_macros`.
 - **Anything else starts with its part's name**, then says what it is: `move_axis`, `dashboard_tool`, `settings_wifi`, `notifications_alert_choice`. A list's item is named for the one thing it shows (`temperature_heater`, `console_line`), or for how it shows it when there is more than one way (`file_browser_row`, `file_browser_tile`).
-- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`).
+- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`). The dialogs the whole UI shares, hosted once by the home screen, go in `modals/`, each named for what it is (`numberpad`, `factors`) with its pieces prefixed (`numberpad_panel`, `factors_dialog`); their presenters are in `src/UI/Screens/Modals/`.
 
 Tabs of a page live in their own folder inside it when they are parts in their own right (`control/move/`), or beside the page with its prefix when they are not (`settings/settings_general.xml`).
 

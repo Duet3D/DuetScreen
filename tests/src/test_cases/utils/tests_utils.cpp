@@ -49,3 +49,14 @@ TEST(Utils, Format)
 	EXPECT_EQ(fmt::format("Named arg: {name:s}, {value:d}", fmt::arg("name", "Count"), fmt::arg("value", 5)),
 			  "Named arg: Count, 5");
 }
+
+TEST(Utils, FormatFloat)
+{
+	EXPECT_EQ(utils::formatFloat(100.0, 0), "100");
+	EXPECT_EQ(utils::formatFloat(120.0), "120");
+	EXPECT_EQ(utils::formatFloat(0.1), "0.1");
+	EXPECT_EQ(utils::formatFloat(2.50, 2), "2.5");
+	EXPECT_EQ(utils::formatFloat(3.0, 2), "3");
+	EXPECT_EQ(utils::formatFloat(0.0, 0), "0");
+	EXPECT_EQ(utils::formatFloat(1.26, 1), "1.3");
+}

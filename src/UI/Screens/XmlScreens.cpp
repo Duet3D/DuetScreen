@@ -7,9 +7,10 @@
 #include "Fan/FanPresenter.h"
 #include "File/FileBrowserPresenter.h"
 #include "Heightmap/HeightmapPresenter.h"
+#include "Modals/FactorsPresenter.h"
+#include "Modals/NumberPadPresenter.h"
 #include "Move/MovePresenter.h"
 #include "Notifications/NotificationsPresenter.h"
-#include "NumberPad/NumberPadPresenter.h"
 #include "ObjectCancel/ObjectCancelPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
 #include "Settings/DeveloperSettingsPresenter.h"
@@ -24,8 +25,6 @@
 #include "Temperature/TemperaturePresenter.h"
 #include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/BabyStep/BabyStepPresenter.h"
-#include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
-#include "UI/Widgets/Control/SpeedFactor/SpeedFactor.h"
 #include "UI/Widgets/EStop/EStop.h"
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
@@ -54,16 +53,6 @@ namespace UI
 		return keyboard;
 	}
 
-	/** A dialog of type M, 80% wide and as tall as it needs */
-	template <typename M>
-	static LvObj* createFactorDialog(const std::string& name, lv_obj_t* parent)
-	{
-		LvObjRef parentRef(parent);
-		auto* dialog = new M(name, parentRef);
-		dialog->setSize(LV_PCT(80), LV_SIZE_CONTENT);
-		return dialog;
-	}
-
 	/** Make a file browser presenter with `settings` available as `name` */
 	static void addFileBrowser(std::string name, FileBrowserPresenter::Settings settings)
 	{
@@ -75,6 +64,7 @@ namespace UI
 	{
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
+		FactorsPresenter::registerActions();
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
@@ -82,6 +72,7 @@ namespace UI
 		Xml::Presenters::add<JobStatusPresenter>("dashboard_job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<NumberPadPresenter>("numberpad");
+		Xml::Presenters::add<FactorsPresenter>("factors");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");
@@ -124,9 +115,6 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add("extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
-		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);
-		Xml::NativeViews::add("job_extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
 		Xml::NativeViews::add("keyboard", createKeyboard);
 	}
 } // namespace UI

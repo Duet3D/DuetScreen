@@ -11,9 +11,6 @@
 #include "ObjectModel/Job.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
-#include "UI/Core/Navigation.h"
-#include "UI/Widgets/Control/ExtrusionFactor/ExtrusionFactor.h"
-#include "UI/Widgets/Control/SpeedFactor/SpeedFactor.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
@@ -63,24 +60,6 @@ namespace UI
 		action("job.close_dialog",
 			   "Close the question without cancelling the job",
 			   [this](const Xml::ActionArgs&) { m_confirmCancel.set(0); });
-		action("job.speed_factor",
-			   "Open the dialog to change the speed override",
-			   [](const Xml::ActionArgs&)
-			   {
-				   if (auto* modal = findView<ModalSpeedFactor>("speed_factor"))
-				   {
-					   modal->open();
-				   }
-			   });
-		action("job.flow_factor",
-			   "Open the dialog to change the extrusion override",
-			   [](const Xml::ActionArgs&)
-			   {
-				   if (auto* modal = findView<ModalExtrusionFactor>("job_extrusion_factor"))
-				   {
-					   modal->open();
-				   }
-			   });
 		action("job.babystep",
 			   "Open the babystepping dialog (sets `babystep_open`)",
 			   [this](const Xml::ActionArgs&) { m_babystepOpen.set(1); });

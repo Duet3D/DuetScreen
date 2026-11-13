@@ -5,6 +5,6 @@
 -->
 <component>
 	<view extends="ds_button" bind_text="factor" width="content" height="content">
-		<action trigger="clicked" name="temperature.extrusion_factor"/>
+		<action trigger="clicked" name="factors.extrusion"/>
 	</view>
 </component>

@@ -2,8 +2,8 @@
   The job status panel: the current (or last) job with its progress and thumbnail; the tool position, speed, flow,
   babystepping and times; and pause, resume, print again and cancel.
 
-  Tapping the speed or flow value opens the dialog to change it (speed_factor and job_extrusion_factor, which the
-  screen showing this panel hosts); tapping babystepping opens babystep.xml in a dialog.
+  Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens
+  babystep.xml in a dialog.
 
   Fields and actions: src/UI/Screens/Status/JobStatusPresenter.h
 -->
@@ -69,7 +69,7 @@
 				<ds_button name="speed_multiplier" bind_text="speed_factor" width="content" height="content"
 						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<action trigger="clicked" name="job.speed_factor"/>
+					<action trigger="clicked" name="factors.speed"/>
 				</ds_button>
 				<lv_bar name="requested_speed" max_value="1000" bind_value="speed_requested" height="content"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
@@ -102,7 +102,7 @@
 				<ds_button name="flow_multiplier" bind_text="flow_factor" width="content" height="content"
 						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<action trigger="clicked" name="job.flow_factor"/>
+					<action trigger="clicked" name="factors.extrusion"/>
 				</ds_button>
 				<lv_bar name="extruder_feedrate" max_value="1000" bind_value="flow" height="content"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"

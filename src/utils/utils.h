@@ -40,6 +40,7 @@ namespace utils
 	void replaceSubstring(std::string& nString, const std::string& target, const std::string& replacement);
 	std::vector<std::string> splitString(const std::string& str, const std::string& delimiter);
 	size_t findInstance(std::string_view str, std::string_view target, size_t instance);
+	/** `value` with at most `maxDecimals` decimals and no trailing zeros in them, e.g. 2.50 is "2.5" and 100 "100" */
 	std::string formatFloat(double value, int maxDecimals = 6);
 
 	std::string readFileToString(std::filesystem::path file);

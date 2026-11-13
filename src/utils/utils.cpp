@@ -137,13 +137,17 @@ namespace utils
 		}
 
 		std::string_view text(buffer.data(), static_cast<size_t>(endPtr - buffer.data()));
-		while (!text.empty() && text.back() == '0')
+		// Only the decimals' trailing zeros go: 100 stays 100
+		if (text.find('.') != std::string_view::npos)
 		{
-			text.remove_suffix(1);
-		}
-		if (!text.empty() && text.back() == '.')
-		{
-			text.remove_suffix(1);
+			while (text.back() == '0')
+			{
+				text.remove_suffix(1);
+			}
+			if (text.back() == '.')
+			{
+				text.remove_suffix(1);
+			}
 		}
 		if (text == "-0")
 		{
