@@ -48,16 +48,16 @@ namespace UI
 
 	void FileRow::fields(Xml::FieldVisitor& f)
 	{
-		f.field("name", name, "Shown name");
-		f.field("date", date, "Modification date");
-		f.field("thumbnail", thumbnail, "Thumbnail path, or empty");
-		f.field("is_folder", isFolder, "1 for a folder");
+		f.field("name", name, "Shown name; a macro's \"12_\" ordering prefix is left out");
+		f.field("date", date, "Modification date, e.g. \"2025-03-18 18:21:58\"");
+		f.field("thumbnail", thumbnail, "Thumbnail image path, or empty if there is none (yet)");
+		f.field("is_folder", isFolder, "1 for a folder, else 0");
 	}
 
 	void CrumbRow::fields(Xml::FieldVisitor& f)
 	{
-		f.field("name", name, "Folder name");
-		f.field("last", last, "1 for the open folder");
+		f.field("name", name, "The folder's name");
+		f.field("last", last, "1 for the open folder, else 0 (the others can be tapped to go back up)");
 	}
 
 	FileBrowserPresenter::FileBrowserPresenter(std::string name, Settings settings)
@@ -65,6 +65,7 @@ namespace UI
 		, m_settings(std::move(settings))
 	{
 		action("files.open",
+			   "Open the folder, or ask to start the job or run the macro. From a row of `files`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<FileRow>())
@@ -73,6 +74,7 @@ namespace UI
 				   }
 			   });
 		action("files.crumb",
+			   "Open that folder. From a row of `crumbs`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<CrumbRow>())
@@ -81,6 +83,7 @@ namespace UI
 				   }
 			   });
 		action("files.sort",
+			   "Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   SortBy by = SortBy::NAME;
@@ -99,36 +102,50 @@ namespace UI
 				   showFiles();
 			   });
 		action("files.toggle_mode",
+			   "Show tiles instead of a list, or the other way round. Remembered.",
 			   [this](const Xml::ActionArgs&)
 			   { setDisplayMode(m_tiles.get() != 0 ? DisplayMode::List : DisplayMode::Tile); });
 		action("files.refresh",
+			   "Close the dialog and read the folder again",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   closeDialog();
 				   requestFiles();
 			   });
-		action("files.confirm", [this](const Xml::ActionArgs&) { confirm(); });
-		action("files.ask_delete", [this](const Xml::ActionArgs&) { askDelete(); });
-		action("files.close_dialog", [this](const Xml::ActionArgs&) { closeDialog(); });
+		action("files.confirm",
+			   "Do what the dialog asks (start the job, run the macro or delete the file), and close it",
+			   [this](const Xml::ActionArgs&) { confirm(); });
+		action("files.ask_delete",
+			   "Ask to delete the file the dialog is about",
+			   [this](const Xml::ActionArgs&) { askDelete(); });
+		action("files.close_dialog",
+			   "Close the dialog without doing anything",
+			   [this](const Xml::ActionArgs&) { closeDialog(); });
 	}
 
 	void FileBrowserPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.list("files", m_files, "Files and folders in the open folder");
-		f.list("crumbs", m_crumbs, "The open folder's path");
+		f.list("files", m_files, "One row per file and folder in the open folder, in the chosen order");
+		f.list("crumbs", m_crumbs, "The open folder's path from the base folder down, e.g. \"0:/gcodes\", \"parts\"");
 		f.field("sort", m_sort, "Order: 0 by name, 1 by date, 2 by size");
-		f.field("sort_name", m_sortName, "Name-order button text");
-		f.field("sort_date", m_sortDate, "Date-order button text");
-		f.field("sort_size", m_sortSize, "Size-order button text");
-		f.field("tiles", m_tiles, "1 when files are shown as tiles");
+		f.field("sort_name",
+				m_sortName,
+				"The name-order button's text, with an arrow showing the direction when it is in use");
+		f.field("sort_date", m_sortDate, "As `sort_name`, for the date order");
+		f.field("sort_size", m_sortSize, "As `sort_name`, for the size order");
+		f.field("tiles", m_tiles, "1 when files are shown as tiles, 0 as a list");
 		f.field("mode_icon", m_modeIcon, "Symbol for the other way of showing files");
-		f.field("dialog", m_dialog, "What the dialog asks, or empty");
+		f.field("dialog",
+				m_dialog,
+				"What the dialog asks: \"start_print\", \"run_macro\" or \"delete\"; empty when it is closed");
 		f.field("dialog_title", m_dialogTitle, "Dialog title");
 		f.field("dialog_text", m_dialogText, "Dialog message");
 		f.field("dialog_image", m_dialogImage, "Thumbnail shown in the dialog, or empty");
-		f.field("dialog_has_image", m_dialogHasImage, "1 if the dialog shows a thumbnail");
-		f.field("dialog_can_delete", m_dialogCanDelete, "1 if the dialog offers to delete the file");
-		f.field("info_shown", m_infoShown, "1 if the job's details are known");
+		f.field("dialog_has_image", m_dialogHasImage, "1 if there is a thumbnail, else 0");
+		f.field("dialog_can_delete",
+				m_dialogCanDelete,
+				"1 if the dialog offers to delete the file (starting a job does), else 0");
+		f.field("info_shown", m_infoShown, "1 if the job's details (the info_* fields) are known, else 0");
 		f.field("info_date", m_infoDate, "Job modification date");
 		f.field("info_size", m_infoSize, "Job size");
 		f.field("info_generated_by", m_infoGeneratedBy, "Slicer");

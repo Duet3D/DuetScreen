@@ -1,15 +1,8 @@
 /*
  * DsHueSlider.h
  *
- * <ds_hue_slider>: a <ds_slider> for a hue, 0 to 360, whose track shows every hue at a lightness and chroma, so the
- * slider is a colour picker, e.g. for a theme's primary colour.
- *
- *     <ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"/>
- *
- *   bind_lightness, bind_chroma   integer subjects: the OKLCH lightness and chroma the hues are shown at, in
- *                                 thousandths (a lightness of 0.65 is 650)
- *
- * Takes every <ds_slider> attribute; min and max default to 0 and 360.
+ * <ds_hue_slider>: a <ds_slider> for a hue, 0 to 360, whose track shows every hue, so the slider is a colour picker.
+ * Its attributes are in registerXml().
  */
 
 #pragma once

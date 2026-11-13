@@ -4,28 +4,11 @@
  * Behaviour for the General settings tab (assets/ui/screens/settings_general.xml). Each setting is read when the tab
  * is shown and stored (and applied) as soon as it is changed.
  *
- * Fields
- *   firmware, buildroot         the versions, as text
- *   languages                   the languages, one per line; language is the index of the one in use
- *   keyboard_layouts            the USB keyboard layouts, one per line; keyboard_layout is the one in use
- *   brightness                  0-100
- *   screensaver_timeout         seconds
- *   confirmations               1 if actions are confirmed first
- *   machine_position_mode       1 if absolute moves use machine coordinates (G53)
- *   progress_sources            how a job's progress is worked out, one per line; progress_source is the one used
- *   connected_message           1 if a message is shown on connecting
- *   notification_levels         the levels, one per line; notification_level is the lowest shown
- *   notification_timeout        ms before a notification closes itself
- *   error_notifications_stay    1 if error notifications stay until closed
- *   language_confirm            1 while asking whether to restart in another language
- *   language_confirm_title, language_confirm_text   that question
+ * There is one action per setting, given the value from the widget (an index, a number, or 1/0 for a toggle), and
+ * the answers to the language question.
  *
- * Actions (the value from the widget: an index, a number, or 1/0 for a toggle)
- *   settings.language, settings.keyboard_layout, settings.brightness, settings.screensaver_timeout,
- *   settings.confirmations, settings.machine_position_mode, settings.progress_source, settings.connected_message,
- *   settings.notification_level, settings.notification_timeout, settings.error_notifications_stay
- *   settings.restart_in_language    answer yes: store the language picked and restart
- *   settings.keep_language          answer no: keep the language in use
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once
@@ -51,8 +34,8 @@ namespace UI
 		void onActivate() override;
 
 	  private:
-		/** Register an action that stores the value the widget gives with `store` */
-		void setting(std::string name, std::function<void(float value)> store);
+		/** Register an action, described by `description`, that stores the value the widget gives with `store` */
+		void setting(std::string name, std::string description, std::function<void(float value)> store);
 
 		/** Ask whether to restart in the language at `index` */
 		void askLanguage(size_t index);

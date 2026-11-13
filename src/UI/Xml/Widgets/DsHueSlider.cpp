@@ -5,6 +5,7 @@
 #include "DsHueSlider.h"
 #include "UI/Styles/Color.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 
 namespace UI::Xml
 {
@@ -43,7 +44,20 @@ namespace UI::Xml
 
 	void DsHueSlider::registerXml()
 	{
-		lv_xml_register_widget("ds_hue_slider", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_hue_slider",
+			 .extends = "ds_slider",
+			 .description =
+				 "A `<ds_slider>` for a hue, 0 to 360, whose track shows every hue at a lightness and chroma, so the "
+				 "slider is a colour picker, e.g. for a theme's primary colour. `min` and `max` default to 0 and 360.",
+			 .example =
+				 R"(<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"/>)",
+			 .attributes =
+				 {{"bind_lightness",
+				   "Follow an int subject for the OKLCH lightness the hues are shown at, in thousandths (0.65 is 650)"},
+				  {"bind_chroma", "Follow an int subject for the OKLCH chroma the hues are shown at, in thousandths"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsHueSlider::setColour(float lightness, float chroma)

@@ -28,6 +28,8 @@ namespace UI
 								   _("settings.usb_mode_internal_wifi")));
 
 		action("settings.connection_method",
+			   "Connect to the Duet by the method at the edited index of `connection_methods`, setting the USB-C mode "
+			   "to suit",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto value = args.value();
@@ -53,6 +55,7 @@ namespace UI
 				   showMethod();
 			   });
 		action("settings.usb_mode",
+			   "Use the USB-C port in the mode at the edited index of `usb_modes`",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto value = args.value())
@@ -62,6 +65,7 @@ namespace UI
 				   }
 			   });
 		action("settings.poll_interval",
+			   "Poll the Duet every edited value ms",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto value = args.value())
@@ -71,6 +75,7 @@ namespace UI
 				   }
 			   });
 		action("settings.duet_ip",
+			   "Ask for the Duet's IP address with the nearest number pad, and use it",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   Xml::Services::askText(args.target,
@@ -83,6 +88,7 @@ namespace UI
 										   }});
 			   });
 		action("settings.duet_password",
+			   "Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const std::string password = args.text();
@@ -93,12 +99,14 @@ namespace UI
 
 	void ConnectionSettingsPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("connection_methods", m_methods, "Connection methods offered, one per line");
-		f.field("connection_method", m_method, "Index of the one in use");
-		f.field("usb_modes", m_usbModes, "USB-C modes offered, one per line");
-		f.field("usb_mode", m_usbMode, "Index of the one in use");
+		f.field("connection_methods", m_methods, "Connection methods offered (USB, UART or network), one per line");
+		f.field("connection_method", m_method, "Index of the one in use, in `connection_methods`");
+		f.field("usb_modes", m_usbModes, "Modes of the USB-C port offered, one per line");
+		f.field("usb_mode", m_usbMode, "Index of the one in use, in `usb_modes`");
 		f.field("poll_interval", m_pollInterval, "ms between polls of the Duet");
-		f.field("network_shown", m_networkShown, "1 if the Duet is reached over the network");
+		f.field("network_shown",
+				m_networkShown,
+				"1 if the Duet is reached over the network, so its IP address and password are shown");
 		f.field("duet_ip", m_ip, "The Duet's IP address");
 		f.field("duet_password", m_password, "The Duet's password");
 	}

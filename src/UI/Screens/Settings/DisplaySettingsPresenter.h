@@ -5,13 +5,10 @@
  * preview (theme_preview.xml, ThemePreviewPresenter.h), animations and screen rotation. Each setting is read when the
  * tab is shown and applied as soon as it is changed.
  *
- * Fields
- *   themes, fonts, icon_sets, rotations   the choices, one per line
- *   theme, font, icon_set, rotation       the index of the one in use
- *   animations                            1 if the UI animates
+ * There is one action per setting, given the value from the widget (an index, or 1/0 for a toggle).
  *
- * Actions (the value from the widget: an index, or 1/0 for a toggle)
- *   settings.theme, settings.font, settings.icon_set, settings.rotation, settings.animations
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

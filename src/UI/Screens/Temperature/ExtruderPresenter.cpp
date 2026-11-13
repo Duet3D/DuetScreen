@@ -30,19 +30,25 @@ namespace UI
 		m_feedrate.setTitle(_("extrude.feed_rate", Units::getDisplayedSpeedUnit()));
 
 		action("extruder.extrude",
+			   "Extrude the chosen distance at the chosen feed rate with the selected tool",
 			   [this](const Xml::ActionArgs&) { OM::Move::Extrude(m_distance.value(), m_feedrate.value()); });
 		action("extruder.retract",
+			   "Retract the chosen distance at the chosen feed rate with the selected tool",
 			   [this](const Xml::ActionArgs&) { OM::Move::Extrude(-m_distance.value(), m_feedrate.value()); });
-		for (auto& [name, handler] : Xml::ValueSelector::actions({&m_distance, &m_feedrate}))
+		for (auto& [name, description, handler] : Xml::ValueSelector::actions({&m_distance, &m_feedrate}))
 		{
-			action(name, handler);
+			action(name, description, handler);
 		}
 	}
 
 	void ExtruderPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("extrude_usable", m_extrudeUsable, "1 if the selected tool can extrude");
-		f.field("retract_usable", m_retractUsable, "1 if the selected tool can retract");
+		f.field("extrude_usable",
+				m_extrudeUsable,
+				"1 if the selected tool can extrude: there is one, it is hot enough, and no job is running");
+		f.field("retract_usable",
+				m_retractUsable,
+				"1 if the selected tool can retract: there is one, it is hot enough, and no job is running");
 		m_distance.fields(f);
 		m_feedrate.fields(f);
 	}

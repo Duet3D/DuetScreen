@@ -1,23 +1,8 @@
 /*
  * DsSlider.h
  *
- * <ds_slider>: DuetScreen's Slider (label, value, -/+ buttons, optional number pad) in XML. `numberpad="true"` uses
- * the view registered as `numberpad` (see Navigation.h).
- *
- *     <ds_slider min="0" max="100" increment="1" decimals="0" label="…" label_tag="…"
- *                bind_label="subject" bind_value="subject" numberpad="true">
- *         <action trigger="value_confirmed" name="…"/>
- *     </ds_slider>
- *
- * `min`, `max` and `increment` may have fractions (e.g. increment="0.01"). `bind_value` is an integer subject; for a
- * value with a fraction, give it scaled and say by how much with `value_scale`, e.g. a chroma of 0.02 as 2 with
- * value_scale="100". `label_shown="false"` hides the label, which still heads the number pad. `out_of_range` ("upper", "lower" or "both")
- * lets a typed value go past the slider's end, e.g. a timeout longer than the slider reaches.
- *
- * The slider raises `value_confirmed` when the user finishes an edit (releases it, presses -/+ or types a value), or
- * with `send="change"` on every movement, for a setting seen as it changes, such as brightness.
- * Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes
- * without echoing the data back to the printer.
+ * <ds_slider>: DuetScreen's Slider (label, value, -/+ buttons, optional number pad) in XML. Its attributes are in
+ * registerXml().
  */
 
 #pragma once
@@ -44,7 +29,8 @@ namespace UI::Xml
 		void setRangeQuietly(float min, float max);
 
 	  protected:
-		/** `<ds_slider>` apply callback: apply lv_obj attributes, then the slider's own. Also for widgets extending it. */
+		/** `<ds_slider>` apply callback: apply lv_obj attributes, then the slider's own. Also for widgets extending it.
+		 */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 	  private:

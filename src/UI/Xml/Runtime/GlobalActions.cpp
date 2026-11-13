@@ -29,9 +29,12 @@ namespace UI::Xml::GlobalActions
 
 	void registerAll()
 	{
-		Actions::addGlobal("gcode", gcode);
-		Actions::addGlobal("nav.open", navOpen);
-		Actions::addGlobal("nav.home", [](const ActionArgs&) { home(); });
-		Actions::addGlobal("nav.back", [](const ActionArgs&) { back(); });
+		Actions::addGlobal(
+			"gcode", "Send `arg` to the printer as G-code, e.g. `arg=\"M106 P{number} S{value}\"`", gcode);
+		Actions::addGlobal("nav.open", "Open the screen registered as `arg`, e.g. `arg=\"control\"`", navOpen);
+		Actions::addGlobal(
+			"nav.home", "Close every screen and show the home screens", [](const ActionArgs&) { home(); });
+		Actions::addGlobal(
+			"nav.back", "Close the top modal, or else go back a screen", [](const ActionArgs&) { back(); });
 	}
 } // namespace UI::Xml::GlobalActions

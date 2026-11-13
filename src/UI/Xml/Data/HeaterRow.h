@@ -1,18 +1,8 @@
 /*
  * HeaterRow.h
  *
- * The fields every heater row has, whether the heater belongs to a tool, a bed or a chamber:
- *
- *     heater          heater number
- *     name            display name, e.g. "Heater 1" or "Bed"
- *     state           status key: active, standby, off, fault, tuning, offline or unknown
- *     status          status, translated for display
- *     current         current temperature as text, one decimal place, e.g. "21.2"
- *     current_value   current temperature, whole °C, for a bar
- *     scale_min       bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0
- *     scale_max       top of a temperature scale, °C: the heater's maximum
- *     active          active target temperature, °C
- *     standby         standby target temperature, °C
+ * The fields every heater row has, whether the heater belongs to a tool, a bed or a chamber. They are declared in
+ * fields(), and listed in the UI API reference (docs/XML_UI_API.md) under each list of heaters.
  */
 
 #pragma once

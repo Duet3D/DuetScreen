@@ -5,6 +5,7 @@
 #include "DsBarMarker.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
 #include <cmath>
@@ -40,7 +41,33 @@ namespace UI::Xml
 
 	void DsBarMarker::registerXml()
 	{
-		lv_xml_register_widget("ds_bar_marker", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_bar_marker",
+			 .extends = "lv_obj",
+			 .description =
+				 "A value marked on a bar, such as a heater's target temperature above its current-temperature bar: a "
+				 "button showing the value, placed along the bar where the value falls and pointing at it with a "
+				 "triangle (the indicator part's background colour). Its x position is set from the value; set its y "
+				 "with `align` and `y`. Drag it along the bar to choose a value, raising `value_confirmed` with it "
+				 "when released (the marker shows the dragged value until the subject changes), or tap it to raise "
+				 "`clicked`; a drag doesn't raise `clicked`.",
+			 .example =
+				 R"(<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
+               label_format="{} °C" align="left_mid" y="-30">
+	<action trigger="clicked" name="heaters.set_active"/>
+	<action trigger="value_confirmed" name="heaters.set_active"/>
+</ds_bar_marker>)",
+			 .attributes = {{"bar",
+							 "Name of the sibling bar it marks, written before the marker. The bar spans its parent's "
+							 "width (e.g. width=\"100%\"), as the marker is placed by percentages of that width"},
+							{"min", "Bottom of the scale the value is on (default 0)"},
+							{"max", "Top of the scale the value is on (default 100)"},
+							{"bind_min", "Follow an int subject for the bottom of the scale"},
+							{"bind_max", "Follow an int subject for the top of the scale"},
+							{"bind_value", "Follow an int subject for the value marked"},
+							{"label_format", "fmt format for the value's text (default \"{}\")"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsBarMarker::setValue(int32_t value)

@@ -1,13 +1,9 @@
 /*
  * HeatSource.h
  *
- * Publishes the object model's beds and chambers.
+ * Publishes the object model's beds and chambers. Each row is a HeaterRow (see HeaterRow.h) with a number.
  *
- *   beds              list, one row per bed in slot order
- *     index           position in the list
- *     number          bed number, as used by M140 P
- *     (heater fields: see HeaterRow.h; `name` is "Bed", or "Bed 1" when there are several)
- *   chambers          list, one row per chamber, as for beds (M141 P)
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

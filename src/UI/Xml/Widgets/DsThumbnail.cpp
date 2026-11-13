@@ -4,6 +4,7 @@
 
 #include "DsThumbnail.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_image_parser.h"
 
 namespace UI::Xml
@@ -29,7 +30,16 @@ namespace UI::Xml
 
 	void DsThumbnail::registerXml()
 	{
-		lv_xml_register_widget("ds_thumbnail", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_thumbnail",
+			 .extends = "lv_image",
+			 .description = "An image as tall as its parent's content and as wide as its aspect ratio needs, so a "
+							"thumbnail beside some text is as large as it can be without making the row taller. With "
+							"no image it takes no width.",
+			 .example = R"(<ds_thumbnail bind_src="thumbnail" height="100%"/>)",
+			 .attributes = {{"bind_src", "Follow a text subject holding an image path; empty shows no image"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsThumbnail::setImage(std::string_view path)

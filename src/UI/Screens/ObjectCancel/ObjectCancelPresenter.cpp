@@ -27,10 +27,10 @@ namespace UI
 	{
 		f.field("number", number, "Object number");
 		f.field("label", label, "E.g. \"[2]: gear (Instance 37)\"");
-		f.field("x1", x1, "Lowest X, mm");
-		f.field("y1", y1, "Lowest Y, mm");
-		f.field("x2", x2, "Highest X, mm");
-		f.field("y2", y2, "Highest Y, mm");
+		f.field("x1", x1, "Lowest X of its bounds, whole mm");
+		f.field("y1", y1, "Lowest Y of its bounds, whole mm");
+		f.field("x2", x2, "Highest X of its bounds, whole mm");
+		f.field("y2", y2, "Highest Y of its bounds, whole mm");
 		f.field("current", current, "1 if it is being printed");
 		f.field("cancelled", cancelled, "1 if it has been cancelled");
 	}
@@ -39,6 +39,7 @@ namespace UI
 		: XmlPresenter("object_cancel")
 	{
 		action("object_cancel.select",
+			   "Cancel the object, or resume it if cancelled, asking first. From a row of `objects`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<JobObjectRow>();
@@ -64,6 +65,7 @@ namespace UI
 				   }
 			   });
 		action("object_cancel.cancel_current",
+			   "Cancel the object being printed, asking first if confirmations are on",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
@@ -81,6 +83,7 @@ namespace UI
 					   []() { OM::CancelCurrentJobObject(); });
 			   });
 		action("object_cancel.confirm",
+			   "Answer yes to the question (`confirm`): close it and do what it asked",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_confirm.set(0);
@@ -90,6 +93,7 @@ namespace UI
 				   }
 			   });
 		action("object_cancel.close_dialog",
+			   "Answer no to the question (`confirm`): close it without doing anything",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_confirm.set(0);
@@ -101,13 +105,16 @@ namespace UI
 	void ObjectCancelPresenter::fields(Xml::FieldVisitor& f)
 	{
 		f.field("current_object", m_currentObject, "Name of the object being printed, or \"None\"");
-		f.field("x_min", m_xMin, "Lowest X of the bed, mm");
-		f.field("x_max", m_xMax, "Highest X of the bed, mm");
-		f.field("y_min", m_yMin, "Lowest Y of the bed, mm");
-		f.field("y_max", m_yMax, "Highest Y of the bed, mm");
+		f.field("x_min",
+				m_xMin,
+				"Lowest X of the bed, whole mm: the X axis' travel allowing for the tool's offset, or the objects' "
+				"bounds with a margin if the axes aren't known");
+		f.field("x_max", m_xMax, "Highest X of the bed, whole mm; as `x_min`");
+		f.field("y_min", m_yMin, "Lowest Y of the bed, whole mm; as `x_min`");
+		f.field("y_max", m_yMax, "Highest Y of the bed, whole mm; as `x_min`");
 		f.list("objects", m_objects, "The job's objects");
-		f.field("confirmations", m_confirmations, "1 if actions are confirmed first");
-		f.field("confirm", m_confirm, "1 while asking");
+		f.field("confirmations", m_confirmations, "1 if actions are confirmed first (the setting)");
+		f.field("confirm", m_confirm, "1 while asking; `confirm_title` and `confirm_text` are the question");
 		f.field("confirm_title", m_confirmTitle, "Question title");
 		f.field("confirm_text", m_confirmText, "Question");
 	}

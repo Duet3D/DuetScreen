@@ -4,6 +4,7 @@
 
 #include "DsKeyboard.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
 namespace UI::Xml
@@ -22,7 +23,16 @@ namespace UI::Xml
 
 	void DsKeyboard::registerXml()
 	{
-		lv_xml_register_widget("ds_keyboard", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_keyboard",
+			 .extends = "lv_obj",
+			 .description = "An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and "
+							"types into it.",
+			 .example =
+				 R"(<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="40%" hidden="true"/>)",
+			 .attributes = {{"mode", "Key layout: `text` (default), `text_upper` or `number`"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void* DsKeyboard::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

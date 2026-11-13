@@ -7,23 +7,15 @@
  *
  *     MyPresenter::MyPresenter() : XmlPresenter("my")
  *     {
- *         for (auto& [name, handler] : Xml::ValueSelector::actions({&m_distance}))
- *             action(name, handler);
+ *         for (auto& [name, description, handler] : Xml::ValueSelector::actions({&m_distance}))
+ *             action(name, description, handler);
  *     }
  *     void MyPresenter::fields(Xml::FieldVisitor& f) { m_distance.fields(f); }
  *
  *     <value_selector selector="distance" title="distance.title" value="distance.value" choices="distance.choices"/>
  *
- * Fields, under the selector's id (e.g. "distance")
- *   <id>.title       the title, e.g. "Feed Distance (mm)"
- *   <id>.value       the value, e.g. "0.1"
- *   <id>.choices     list of the presets, each with `text`
- *
- * Actions
- *   selector.decrement, selector.increment   arg the id: step the value down or up
- *   selector.edit                            arg the id: ask for a value with the nearest number pad
- *   selector.pick                            (in a choices row) use that preset
- *   selector.edit_choice                     (in a choices row) ask for a new value for that preset, and use it
+ * Its fields are named under the selector's id (e.g. "distance.title"). They are declared in fields(), and its
+ * actions in actions(); both are listed in the UI API reference (docs/XML_UI_API.md).
  *
  * The presets and the value are kept in storage under the selector's storage key, so they survive a restart.
  */
@@ -84,9 +76,16 @@ namespace UI::Xml
 		/** Use `value`, kept within the limits, and store it */
 		void setValue(float value);
 
-		/** The handlers for the selector actions (see the file comment) of any of `selectors`, to register */
-		static std::vector<std::pair<std::string, ActionHandler>> actions(
-			std::initializer_list<ValueSelector*> selectors);
+		/** One selector action, to register with XmlPresenter::action() */
+		struct Action
+		{
+			std::string name;		 // Action name, e.g. "selector.edit"
+			std::string description; // What it does, for the UI API reference
+			ActionHandler handler;	 // Runs it
+		};
+
+		/** The selector actions (see the file comment) of any of `selectors`, to register */
+		static std::vector<Action> actions(std::initializer_list<ValueSelector*> selectors);
 
 	  private:
 		/** Change preset `index` to `value`, and store the presets */

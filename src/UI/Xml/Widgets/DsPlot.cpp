@@ -6,6 +6,7 @@
 #include "DsPlotLayer.h"
 #include "DsPlotRect.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "i18n/i18n.h"
 #include "src/xml/lv_xml_style.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -35,7 +36,36 @@ namespace UI::Xml
 
 	void DsPlot::registerXml()
 	{
-		lv_xml_register_widget("ds_plot", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_plot",
+			 .extends = "lv_obj",
+			 .description = "An X/Y area with scales and a grid, such as the bed with its objects, whose content is "
+							"widgets placed by X/Y position. `<ds_plot_layer>`s written inside it are kept over its "
+							"drawing area, and `<ds_plot_rect>`s inside a layer are kept at their X/Y bounds.",
+			 .example =
+				 R"(<ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
+         bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max">
+	<ds_plot_layer name="layer">
+		<ds_list list="objects" item="object_rect" width="100%" height="100%"/>
+	</ds_plot_layer>
+</ds_plot>)",
+			 .attributes = {{"title", "The title above the area, if there is no `title_tag`"},
+							{"title_tag", "Translation key for the title"},
+							{"bind_title", "Follow a text subject for the title"},
+							{"title_style", "A theme style for the title, e.g. `text_emphasis`"},
+							{"bind_detail", "Follow a text subject shown after the title"},
+							{"x_min", "Left of the span (default 0)"},
+							{"x_max", "Right of the span (default 100)"},
+							{"y_min", "Bottom of the span (default 0)"},
+							{"y_max", "Top of the span (default 100)"},
+							{"bind_x_min", "Follow an int subject for `x_min`"},
+							{"bind_x_max", "Follow an int subject for `x_max`"},
+							{"bind_y_min", "Follow an int subject for `y_min`"},
+							{"bind_y_max", "Follow an int subject for `y_max`"},
+							{"resolution",
+							 "Pixels the grid is drawn with along each side, scaled to fit (default 200)"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	bool DsPlot::toWidget(float x, float y, lv_point_t& point) const

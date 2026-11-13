@@ -1,16 +1,10 @@
 /*
  * TemperatureSource.h
  *
- * Records recent temperatures, for graphs.
+ * Records recent temperatures, for graphs: a history (see Binding/History.h) and the highest temperature a graph's
+ * axis needs to reach, e.g. `<ds_graph bind_y_max="temperatures.limit"/>`.
  *
- *   temperatures        history (see Binding/History.h), one series per heater in slot order, sampled every model
- *                       tick. Heaters sharing a sensor are shown once.
- *     index             position in the list
- *     name              heater name, or "Heater N" if it has none
- *   temperatures.limit  highest maximum temperature of any heater, °C (0 with no heaters), so a graph's axis can
- *                       reach it: `<ds_graph bind_y_max="temperatures.limit"/>`
- *
- * Values are whole degrees Celsius.
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

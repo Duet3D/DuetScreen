@@ -4,16 +4,8 @@
  * Behaviour for the extruder panel (assets/ui/components/extruder.xml): extrude or retract with the selected tool,
  * by a distance and at a speed chosen with two value selectors (src/UI/Xml/View/ValueSelector.h).
  *
- * Fields
- *   extrude_usable     1 if the selected tool can extrude: there is one, it is hot enough, and no job is running
- *   retract_usable     1 if it can retract, likewise
- *   distance.*         the feed distance selector: title, value, choices
- *   feedrate.*         the feed rate selector: title, value, choices
- *
- * Actions
- *   extruder.extrude   extrude by the chosen distance at the chosen speed
- *   extruder.retract   retract likewise
- *   selector.*         change the distance or speed (see ValueSelector.h)
+ * Its names and actions, including those of its two ValueSelectors, are declared in fields() and its constructor,
+ * and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

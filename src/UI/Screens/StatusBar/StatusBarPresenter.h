@@ -4,13 +4,7 @@
  * Behaviour for the status bar (assets/ui/components/status_bar.xml): the connection and printer state, the
  * printer's name, and the current tool's temperatures.
  *
- * Fields
- *   status            connection and state, e.g. "USB - Idle"
- *   name              the printer's name
- *   has_tool          1 if there is a current tool with heaters, else 0
- *   tool              the current tool, e.g. "T0:", or empty if it has no heaters
- *   heaters           the current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C"
- *   fault             1 if any of the current tool's heaters has a fault, else 0
+ * The names it provides are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

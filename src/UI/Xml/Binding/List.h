@@ -17,6 +17,7 @@
 #include "Subjects.h"
 #include <concepts>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace UI::Xml
@@ -25,6 +26,13 @@ namespace UI::Xml
 	class Row : public FieldProvider
 	{
 	  public:
+		/** Declare `index`, which every row has, then the row's own fields */
+		void allFields(FieldVisitor& f)
+		{
+			f.field("index", index, "Position in the list, from 0");
+			fields(f);
+		}
+
 		IntSubject index; // Position in the list, available to XML as `index`
 	};
 
@@ -58,6 +66,12 @@ namespace UI::Xml
 
 		/** The row at `index`, which must be less than size() */
 		virtual Row& row(size_t index) = 0;
+
+		/** Declare the fields every row has (see Row::allFields()), whether or not the list has rows */
+		virtual void rowFields(FieldVisitor& f) const = 0;
+
+		/** What the list holds, as the UI API reference names it: "list" */
+		virtual std::string_view typeName() const { return "list"; }
 
 		/** Start telling `listener` about length changes. Adding twice has no effect. */
 		void addListener(Listener* listener);
@@ -96,6 +110,13 @@ namespace UI::Xml
 
 		/** The row at `index`, which must be less than size() */
 		R& operator[](size_t index) { return *m_rows.at(index); }
+
+		/** Declare the fields of an R, from a row made for the purpose */
+		void rowFields(FieldVisitor& f) const override
+		{
+			R example;
+			example.allFields(f);
+		}
 
 		/**
 		 * Make the list `count` rows long and call `update(row, index)` on every row. New rows are filled in before

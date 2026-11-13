@@ -7,49 +7,8 @@
  * Responses are queued and shown one at a time, each closing itself after the notification timeout. They wait while
  * an alert is open, and aren't shown at all while the console (which shows them itself) is open.
  *
- * Fields
- *   response.open           1 while a response is showing
- *   response.title          "Info", "Success", "Warning" or "Error"
- *   response.text           the response
- *   response.type           0 info, 1 success, 2 warning, 3 error
- *   response.progress       time left before it closes itself, 0-100
- *
- *   update.open             1 while an update is offered, or its result shown
- *   update.title, update.text, update.ok_text
- *   update.can_cancel       1 if the update can be declined
- *
- *   alert.open              1 while an M291 alert is showing
- *   alert.title, alert.text
- *   alert.ok                the OK button: 0 hidden, 1 disabled (the input isn't valid), 2 usable
- *   alert.ok_text           "Ok", or "Close" for a message that only needs closing
- *   alert.cancel            the Cancel button: 0 hidden, 2 usable
- *   alert.footer_shown      1 if there is an OK or Cancel button
- *   alert.choices           list of the choices offered, each with `text`
- *   alert.choices_shown     1 if choices are offered
- *   alert.axes              list of the axes the user may jog, each with `label` (e.g. "X = 0.00") and `homed`
- *   alert.axes_shown        1 if there are axes to jog
- *   alert.input_shown       1 if a value is asked for
- *   alert.input             the value to start with
- *   alert.accepted_chars    the characters the value may contain; empty for any
- *   alert.keyboard_mode     "number" or "text"
- *   alert.min, alert.max    the limits shown beside the value; empty if there are none
- *   alert.warning           why the value isn't valid; empty if it is
- *   alert.keyboard          1 while the keyboard is up, so the alert moves out of its way
- *   alert.progress          time left before the alert closes itself, 0-100
- *   alert.progress_shown    1 if it closes itself
- *
- * Actions
- *   response.close          close it and show the next
- *   response.open_console   forget every response and open the console
- *   update.confirm          install the update (nothing for a result)
- *   update.close
- *   alert.ok                send the answer, with the value if one was asked for
- *   alert.cancel            send Cancel
- *   alert.choose            (in an alert.choices row) send that choice
- *   alert.jog               (in an alert.axes row) arg distance: move that axis
- *   alert.input             (value_changed on the value) check it
- *   alert.keyboard          arg 1 or 0: the keyboard came up or went away
- *   alert.dismissed         the alert was closed without an answer (the back button)
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

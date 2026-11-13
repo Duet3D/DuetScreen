@@ -89,8 +89,15 @@ namespace UI::Xml
 	class ActionHandlerSet
 	{
 	  public:
-		/** Handle actions called `name` with `handler`, replacing any earlier handler */
-		void add(std::string name, ActionHandler handler) { m_handlers[std::move(name)] = std::move(handler); }
+		/**
+		 * Handle actions called `name` with `handler`, replacing any earlier handler
+		 * @param description What the action does and what it takes (`arg`, the edited value, the row it is in), for
+		 * the UI API reference
+		 */
+		void add(std::string name, std::string description, ActionHandler handler)
+		{
+			m_handlers[std::move(name)] = Entry{std::move(description), std::move(handler)};
+		}
 
 		/** @return whether there is a handler for `name` */
 		bool has(std::string_view name) const { return m_handlers.find(name) != m_handlers.end(); }
@@ -98,8 +105,24 @@ namespace UI::Xml
 		/** Run the handler for `args.name`. @return whether there was one */
 		bool dispatch(const ActionArgs& args) const;
 
+		/** Call `fn(name, description)` for every action, in name order */
+		void forEach(const std::function<void(std::string_view name, std::string_view description)>& fn) const
+		{
+			for (const auto& [name, entry] : m_handlers)
+			{
+				fn(name, entry.description);
+			}
+		}
+
 	  private:
-		std::map<std::string, ActionHandler, std::less<>> m_handlers; // Handlers by action name
+		/** One action */
+		struct Entry
+		{
+			std::string description; // What it does, for the UI API reference
+			ActionHandler handler;	 // Runs it
+		};
+
+		std::map<std::string, Entry, std::less<>> m_handlers; // Actions by name
 	};
 
 	namespace Actions
@@ -124,14 +147,17 @@ namespace UI::Xml
 
 		/**
 		 * Actions (and rows) from `obj` and the widgets inside it are looked for outwards from `owner` instead of from
-		 * `obj`'s parent: for widgets written in one view but shown elsewhere, such as a dialog moved to the modal host.
-		 * `owner` must outlive `obj`. Until `obj` is deleted.
+		 * `obj`'s parent: for widgets written in one view but shown elsewhere, such as a dialog moved to the modal
+		 * host. `owner` must outlive `obj`. Until `obj` is deleted.
 		 */
 		void setOwner(lv_obj_t* obj, lv_obj_t* owner);
 
-		/** Handle `name` everywhere it isn't handled by a presenter, replacing any earlier handler. Lasts for the life of
-		 * the program, so it may be called before init(). */
-		void addGlobal(std::string name, ActionHandler handler);
+		/** Handle `name` everywhere it isn't handled by a presenter, replacing any earlier handler. Lasts for the life
+		 * of the program, so it may be called before init(). `description` is as for ActionHandlerSet::add(). */
+		void addGlobal(std::string name, std::string description, ActionHandler handler);
+
+		/** The global actions (see addGlobal()) */
+		const ActionHandlerSet& globals();
 
 		/**
 		 * Resolve and run an action as if an `<action>` on `from` had fired (placeholders in `arg` are not filled in)

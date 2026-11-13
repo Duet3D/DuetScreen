@@ -16,7 +16,7 @@ namespace UI::Xml
 		f.field("name", name, "Display name, e.g. \"Heater 1\" or \"Bed\"");
 		f.field("state", state, "Status key: active, standby, off, fault, tuning, offline or unknown");
 		f.field("status", status, "Status, translated for display");
-		f.field("current", current, "Current temperature as text, one decimal place");
+		f.field("current", current, "Current temperature as text, one decimal place, e.g. \"21.2\"");
 		f.field("current_value", currentValue, "Current temperature, whole °C, for a bar");
 		f.field(
 			"scale_min", scaleMin, "Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0");

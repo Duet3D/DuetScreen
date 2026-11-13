@@ -10,7 +10,7 @@ namespace UI::Xml
 {
 	void SeriesRow::fields(FieldVisitor& f)
 	{
-		f.field("name", name, "Name of the series");
+		f.field("name", name, "Name of the series, e.g. for a legend");
 	}
 
 	History::History(uint32_t samplesPerSecond, size_t capacity)

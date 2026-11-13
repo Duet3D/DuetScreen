@@ -1,12 +1,8 @@
 /*
  * DsKeyboard.h
  *
- * <ds_keyboard>: DuetScreen's on-screen keyboard (LVGL's, with its own key layouts) in XML. A <ds_textarea> brings it
- * up and types into it.
- *
- *     <ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="40%" hidden="true"/>
- *
- * `mode` is `text` (default), `text_upper` or `number`. Takes every lv_obj attribute.
+ * <ds_keyboard>: DuetScreen's on-screen keyboard (LVGL's, with its own key layouts) in XML. Its attributes are in
+ * registerXml().
  */
 
 #pragma once

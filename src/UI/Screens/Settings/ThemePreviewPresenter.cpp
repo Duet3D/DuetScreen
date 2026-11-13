@@ -64,9 +64,11 @@ namespace UI
 
 	void SwatchRow::fields(Xml::FieldVisitor& f)
 	{
-		f.field("label", label, "The style's name");
-		f.field("color", color, "Its colour");
-		f.field("text_style", textStyle, "For the text styles: 1 muted, 2 emphasis, 3 header; else 0");
+		f.field("label", label, "The style's name, e.g. \"Primary\"");
+		f.field("color", color, "Its colour, e.g. for `<bind_style_prop>`");
+		f.field("text_style",
+				textStyle,
+				"For the text styles, so their names show them: 1 muted, 2 emphasis, 3 header; else 0");
 	}
 
 	ThemePreviewPresenter::ThemePreviewPresenter(bool controls)
@@ -74,24 +76,28 @@ namespace UI
 		, m_controls(controls)
 	{
 		action("preview.primary_hue",
+			   "Set the palette's primary hue to the edited value, 0-360",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto hue = static_cast<uint16_t>(args.value().value_or(0));
 				   changePalette([hue](Themes::PaletteInputs& palette) { palette.primaryHue = hue; });
 			   });
 		action("preview.secondary_hue",
+			   "Set the palette's secondary hue to the edited value, 0-360",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto hue = static_cast<uint16_t>(args.value().value_or(0));
 				   changePalette([hue](Themes::PaletteInputs& palette) { palette.secondaryHue = hue; });
 			   });
 		action("preview.chroma",
+			   "Set the palette's chroma to the edited value, e.g. 0.02",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const float chroma = args.value().value_or(0.0f);
 				   changePalette([chroma](Themes::PaletteInputs& palette) { palette.chroma = chroma; });
 			   });
 		action("preview.dark",
+			   "Use the dark palette if the edited value is 1, else the light one",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const bool dark = args.value().value_or(0.0f) != 0.0f;
@@ -105,12 +111,19 @@ namespace UI
 		f.field("controls_shown", m_controlsShown, "1 if the palette can be changed here");
 		f.field("primary_hue", m_primaryHue, "Primary hue, 0-360");
 		f.field("secondary_hue", m_secondaryHue, "Secondary hue, 0-360");
-		f.field("chroma", m_chroma, "Chroma, 0-0.4, in hundredths");
+		f.field("chroma", m_chroma, "Chroma, 0-0.4, in hundredths (0.02 is 2)");
 		f.field("dark", m_dark, "1 in dark mode");
-		f.field("primary.lightness", m_primaryLightness, "The primary colour's OKLCH lightness, in thousandths");
-		f.field("primary.chroma", m_primaryChroma, "The primary colour's OKLCH chroma, in thousandths");
-		f.field("secondary.lightness", m_secondaryLightness, "The secondary colour's OKLCH lightness, in thousandths");
-		f.field("secondary.chroma", m_secondaryChroma, "The secondary colour's OKLCH chroma, in thousandths");
+		f.field("primary.lightness",
+				m_primaryLightness,
+				"The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`)");
+		f.field(
+			"primary.chroma", m_primaryChroma, "The primary colour's OKLCH chroma, in thousandths, to show hues at");
+		f.field("secondary.lightness",
+				m_secondaryLightness,
+				"The secondary colour's OKLCH lightness, in thousandths, to show hues at");
+		f.field("secondary.chroma",
+				m_secondaryChroma,
+				"The secondary colour's OKLCH chroma, in thousandths, to show hues at");
 	}
 
 	void ThemePreviewPresenter::onInit()

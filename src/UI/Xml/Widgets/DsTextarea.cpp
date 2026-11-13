@@ -5,6 +5,7 @@
 #include "DsTextarea.h"
 #include "UI/Core/Navigation.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
@@ -41,7 +42,37 @@ namespace UI::Xml
 
 	void DsTextarea::registerXml()
 	{
-		lv_xml_register_widget("ds_textarea", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_textarea",
+			 .extends = "lv_obj",
+			 .description =
+				 "A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close "
+				 "key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and "
+				 "ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text().",
+			 .example =
+				 R"(<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode">
+	<action trigger="value_changed" name="alert.input"/>
+</ds_textarea>)",
+			 .attributes =
+				 {{"bind_text",
+				   "Follow a text subject: the box shows its value whenever it changes to something other than what is "
+				   "in the box, so a presenter that keeps the subject equal to the edits can replace the text at any "
+				   "time"},
+				  {"bind_accepted_chars", "Follow a text subject for the characters that may be typed; empty for any"},
+				  {"keyboard_mode", "Keyboard layout to show: `text` (default), `text_upper` or `number`"},
+				  {"bind_keyboard_mode", "Follow a text subject for the keyboard layout, as `keyboard_mode`"},
+				  {"keyboard",
+				   "The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same "
+				   "view), else the view of that name (default `keyboard`, the shared one); `none` for a box edited "
+				   "another way, such as a number pad"},
+				  {"hide_keyboard_on_ready", "Put the keyboard away when its OK key is pressed (default true)"},
+				  {"hide_keyboard_on_defocus", "Put the keyboard away when the box loses focus (default true)"},
+				  {"one_line", "\"true\" for a single line of text"},
+				  {"password_mode", "\"true\" to show dots for the characters, e.g. for a password"},
+				  {"placeholder", "Text shown while the box is empty"},
+				  {"placeholder_tag", "Translation key for the placeholder, instead of `placeholder`"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void* DsTextarea::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

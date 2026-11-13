@@ -1,20 +1,7 @@
 /*
  * DsButton.h
  *
- * <ds_button>: DuetScreen's Button (text and/or icon) in XML.
- *
- *     <ds_button text="…" translation_tag="…" bind_text="subject" icon="file.png" checkable="true"
- *                long_mode="clip" flash_on="subject"/>
- *
- * `translation_tag` sets the text from the translation table and follows language changes; `bind_text` follows a
- * string or integer subject, formatted with `bind_text-fmt` if given (e.g. "%d°C"). `long_mode` is the label's (wrap, dots, scroll, scroll_circular, clip). `flash_on` briefly
- * flashes the button, in its `user_1` state, whenever a subject changes, e.g. on every response from the printer:
- *
- *     <ds_button flash_on="responses.count">
- *         <style name="console_btn_anim" selector="user_1"/>
- *     </ds_button>
- *
- * Every lv_obj attribute (width, flex_grow, style_*, hidden, …) works too.
+ * <ds_button>: DuetScreen's Button (text and/or icon) in XML. Its attributes are in registerXml().
  */
 
 #pragma once

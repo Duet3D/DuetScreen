@@ -5,35 +5,8 @@
  * progress and thumbnail, the tool position, speed, flow, babystepping and times, and pause, resume, print again and
  * cancel.
  *
- * Fields
- *   file               the current job's file, else the last job's
- *   finished           1 when showing the last job (none is running), else 0
- *   progress           0-100
- *   thumbnail          the job's thumbnail path, or empty until it arrives
- *   axes               list, one row per axis
- *     index            position in the list
- *     text             letter and user position on two lines, e.g. "X\n0.00"
- *   speed_factor       speed override, e.g. "100%"
- *   speed_text         current and requested speed, e.g. "0/0 mm/s"
- *   speed_top          current move's top speed, in thousandths of the fastest axis' maximum (0-1000)
- *   speed_requested    requested speed, likewise
- *   flow_factor        extrusion override, e.g. "100%"
- *   flow_text          volumetric flow, e.g. "0.0 mm³/s"
- *   flow               volumetric flow, in thousandths of the fastest extruder's maximum (0-1000)
- *   babystep           Z babystep, e.g. "0 mm"
- *   elapsed            e.g. "Elapsed: 00:03:43"
- *   remaining          e.g. "Remaining: 00:45:03"
- *   pause, resume, print_again, cancel   each control's state: 0 hidden, 1 disabled, 2 usable
- *   confirm_cancel     1 while asking whether to cancel the job
- *   babystep_open      1 while the babystepping dialog is open
- *
- * Actions
- *   job.pause, job.resume, job.print_again
- *   job.ask_cancel     ask whether to cancel the job
- *   job.cancel         cancel it (from the question)
- *   job.close_dialog   don't
- *   job.speed_factor, job.flow_factor   open the dialog to change them
- *   job.babystep, job.close_babystep    open or close the babystepping dialog
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

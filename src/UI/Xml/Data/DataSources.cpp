@@ -69,7 +69,7 @@ namespace UI::Xml::DataSources
 			return;
 		}
 
-		// The printer data available to XML. Keep this list in step with docs/XML_UI.md.
+		// The printer data available to XML
 		s_sources = {
 			std::make_shared<ConsoleSource>(),
 			std::make_shared<FanSource>(),

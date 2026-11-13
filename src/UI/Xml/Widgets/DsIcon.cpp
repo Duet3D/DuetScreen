@@ -4,6 +4,7 @@
 
 #include "DsIcon.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_image_parser.h"
 
 namespace UI::Xml
@@ -22,7 +23,14 @@ namespace UI::Xml
 
 	void DsIcon::registerXml()
 	{
-		lv_xml_register_widget("ds_icon", xmlCreate, xmlApply);
+		Widgets::add({.name = "ds_icon",
+					  .extends = "lv_image",
+					  .description = "An icon from the icon set chosen in the settings, coloured by the theme. It "
+									 "follows icon set changes.",
+					  .example = R"(<ds_icon icon="folder.png" width="72" height="72"/>)",
+					  .attributes = {{"icon", "Icon file from the icon set, e.g. \"folder.png\""}}},
+					 xmlCreate,
+					 xmlApply);
 	}
 
 	void* DsIcon::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

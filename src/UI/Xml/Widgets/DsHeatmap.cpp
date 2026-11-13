@@ -5,6 +5,7 @@
 #include "DsHeatmap.h"
 #include "UI/Xml/Binding/Surface.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <cmath>
 
@@ -28,7 +29,17 @@ namespace UI::Xml
 
 	void DsHeatmap::registerXml()
 	{
-		lv_xml_register_widget("ds_heatmap", xmlCreate, xmlApply);
+		Widgets::add({.name = "ds_heatmap",
+					  .extends = "lv_obj",
+					  .description = "A colour map of a surface, such as a bed's height map, with X and Y scales, a "
+									 "grid, a title, and the colour scale beside it",
+					  .example = R"(<ds_heatmap bind_surface="surface" bind_title="title" resolution="200"/>)",
+					  .attributes = {{"bind_surface", "The surface subject to show; redrawn whenever it changes"},
+									 {"bind_title", "Follow a text subject for the title shown above the map"},
+									 {"resolution",
+									  "Pixels the map is drawn with along each side, scaled to fit (default 200)"}}},
+					 xmlCreate,
+					 xmlApply);
 	}
 
 	void DsHeatmap::show(const Surface& surface)

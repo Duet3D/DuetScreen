@@ -1,23 +1,8 @@
 /*
  * DsModal.h
  *
- * <ds_modal>: a dialog over the main window (Navigation's modal host, see getModalHost()) with a dimmed backdrop.
- *
- *     <ds_modal name="file_dialog" bind_open="dialog" width="70%" height="content">
- *         <action trigger="dismissed" name="files.close_dialog"/>
- *         …the dialog's content…
- *     </ds_modal>
- *
- * Its subject alone decides whether it is open, so a presenter opens and closes a dialog by setting a subject:
- *   bind_open   open while this subject is non-zero (integer) or non-empty (string), or, with open_value, equal to it
- *   open_value  the value bind_open must have for the dialog to be open
- *   blocking    tapping outside doesn't close it (default false)
- *   in_place    stay in the widget it is written in rather than move to the main window, so the backdrop covers
- *               that widget instead (default false); e.g. alerts that cover the whole screen
- *
- * Closed any other way (tapped outside, the back button, navigation closing every modal), it raises `dismissed`, so
- * the presenter can update the subject; closing it by its subject raises nothing. The content is laid out in the
- * dialog's card, which takes every lv_obj attribute.
+ * <ds_modal>: a dialog over the main window (Navigation's modal host, see getModalHost()) with a dimmed backdrop. Its
+ * attributes are in registerXml().
  *
  * Unless in_place, the dialog lives in the modal host but belongs to where it is written: it is deleted with the
  * widget it was written in (e.g. when that view is rebuilt), or with the modal host, whichever goes first.

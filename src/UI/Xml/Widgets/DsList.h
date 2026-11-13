@@ -1,30 +1,7 @@
 /*
  * DsList.h
  *
- * <ds_list>: one component per row of a List (see Binding/List.h).
- *
- *     <ds_list list="tools" item="tool_card" flex_flow="column"/>
- *
- * `list` is looked up like a subject: the enclosing rows first (so a tool card can show `list="heaters"`, its own
- * tool's heaters), then the view's presenter, then the globals. Each `item` is built in a scope of its own holding
- * its row's fields, whose parent is the scope the list was built in. The ds_list itself is a plain lv_obj container
- * and takes every lv_obj attribute.
- *
- * Long lists: windowed="true" builds only the rows that are on screen, and builds and deletes rows as the list
- * scrolls, so a folder of a thousand files costs a screenful of widgets. Every item has the same size, which the list
- * sets, and the list places them itself (its own layout is ignored):
- *
- *     <ds_list list="files" item="file_row" windowed="true" item_height="90" flow="column"/>
- *     <ds_list list="files" item="file_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
- *
- *   item_width   pixels; `content` for each item's own width (column flow only; the list scrolls sideways to show
- *                wide items); the list's full width if not given
- *   item_height  pixels (required)
- *   flow         `column`: one item per line (default); `row_wrap`: as many per line as fit
- * The gaps between items are the list's style_pad_row and style_pad_column.
- *
- * follow_end="true" keeps a list (not a windowed one) that scrolls showing its last rows as rows are added, like a log, unless the user
- * has scrolled back to read earlier ones.
+ * <ds_list>: one component per row of a List (see Binding/List.h). Its attributes are in registerXml().
  */
 
 #pragma once
@@ -35,8 +12,8 @@
 #include <map>
 #include <memory>
 #include <optional>
-#include <utility>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace UI::Xml
@@ -81,7 +58,7 @@ namespace UI::Xml
 		/** A row's widget and the scope it was built in */
 		struct Entry
 		{
-			lv_obj_t* obj;				 // Root widget of the item component, or nullptr if it failed to build
+			lv_obj_t* obj;				  // Root widget of the item component, or nullptr if it failed to build
 			std::unique_ptr<Scope> scope; // The row's fields
 		};
 
@@ -133,11 +110,11 @@ namespace UI::Xml
 		lv_xml_subject_ctx_t* m_parentContext; // Context the list was built in; holds a reference
 		std::vector<Entry> m_entries;		   // Eager: one per row shown
 
-		std::optional<Window> m_window;		   // Windowed: how items are placed; nullopt if eager
-		std::map<size_t, Entry> m_shown;	   // Windowed: the items built, by row
-		lv_obj_t* m_sizer = nullptr;		   // Windowed: invisible widget giving the scrollable area its size
-		size_t m_count = 0;					   // Windowed: rows to show (the list's length as last told)
-		bool m_followEnd = false;			   // Keep showing the last rows
-		bool m_atEnd = true;				   // follow_end: the user hasn't scrolled away from the end
+		std::optional<Window> m_window;	 // Windowed: how items are placed; nullopt if eager
+		std::map<size_t, Entry> m_shown; // Windowed: the items built, by row
+		lv_obj_t* m_sizer = nullptr;	 // Windowed: invisible widget giving the scrollable area its size
+		size_t m_count = 0;				 // Windowed: rows to show (the list's length as last told)
+		bool m_followEnd = false;		 // Keep showing the last rows
+		bool m_atEnd = true;			 // follow_end: the user hasn't scrolled away from the end
 	};
 } // namespace UI::Xml

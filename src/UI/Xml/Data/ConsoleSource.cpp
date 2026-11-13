@@ -41,9 +41,9 @@ namespace UI::Xml
 
 	void ConsoleLineRow::fields(FieldVisitor& f)
 	{
-		f.field("time", time, "When it arrived");
-		f.field("command", command, "A command sent, or empty");
-		f.field("text", text, "A response or message, or empty");
+		f.field("time", time, "When it arrived, e.g. \"[12:34:56]   \"");
+		f.field("command", command, "A command sent, e.g. \"> M115\"; empty for a response");
+		f.field("text", text, "A response or log message; empty for a command");
 	}
 
 	ConsoleSource::ConsoleSource()
@@ -53,7 +53,7 @@ namespace UI::Xml
 
 	void ConsoleSource::fields(FieldVisitor& f)
 	{
-		f.list("console.lines", m_rows, "What the console shows, oldest first");
+		f.list("console.lines", m_rows, "What the console shows, oldest first, at most MAX_RESPONSE_LINES");
 	}
 
 	void ConsoleSource::onInit()

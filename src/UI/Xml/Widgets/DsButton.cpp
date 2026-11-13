@@ -5,6 +5,7 @@
 #include "DsButton.h"
 #include "UI/Components/LVGL/LvAnim.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "i18n/i18n.h"
 #include "src/xml/lv_xml_base_types.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -20,7 +21,28 @@ namespace UI::Xml
 
 	void DsButton::registerXml()
 	{
-		lv_xml_register_widget("ds_button", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_button",
+			 .extends = "lv_obj",
+			 .description = "A button showing text, an icon or both",
+			 .example = R"(<ds_button translation_tag="fan.max" icon="fan.png">
+	<action trigger="clicked" name="fans.set_speed" arg="100"/>
+</ds_button>)",
+			 .attributes =
+				 {{"text", "The text shown, if there is no `translation_tag`"},
+				  {"translation_tag", "Translation key for the text; follows language changes"},
+				  {"bind_text", "Follow a text or int subject for the text"},
+				  {"bind_text-fmt",
+				   "printf format for `bind_text`, e.g. \"%d°C\" (default \"%s\" for text, \"%d\" for an int)"},
+				  {"icon", "Icon file from the icon set, e.g. \"fan.png\""},
+				  {"checkable", "\"true\" to make the button toggle its `checked` state when clicked"},
+				  {"long_mode",
+				   "What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip"},
+				  {"flash_on",
+				   "Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. "
+				   "`responses.count`; style the flash with `<style … selector=\"user_1\"/>`"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void* DsButton::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

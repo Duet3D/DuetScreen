@@ -2,15 +2,10 @@
  * ConsoleSource.h
  *
  * Records what the console shows: commands sent from it, responses from the Duet, and log messages. It keeps
- * recording while the console isn't showing, so they are there when it is opened.
+ * recording while the console isn't showing, so they are there when it is opened. Commands are recorded from the
+ * ConsoleCommand event, which whatever sends them posts.
  *
- *   console.lines     list, oldest first, at most MAX_RESPONSE_LINES
- *     index           position in the list
- *     time            when it arrived, e.g. "[12:34:56]   "
- *     command         a command sent, e.g. "> M115"; empty for a response
- *     text            a response or log message; empty for a command
- *
- * Commands are recorded from the ConsoleCommand event, which whatever sends them posts.
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

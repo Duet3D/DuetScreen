@@ -1,15 +1,9 @@
 /*
  * ToolSource.h
  *
- * Publishes the object model's tools, each with its heaters.
+ * Publishes the object model's tools, each with its heaters (see HeaterRow.h).
  *
- *   tools             list, one row per tool in slot order
- *     index           position in the list
- *     number          tool number, as used by T
- *     name            display name
- *     selected        1 if this is the active tool, else 0
- *     heater_count    number of heaters
- *     heaters         list, one row per heater of the tool (fields: see HeaterRow.h)
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

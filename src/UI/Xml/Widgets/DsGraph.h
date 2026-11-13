@@ -1,17 +1,8 @@
 /*
  * DsGraph.h
  *
- * <ds_graph>: a line graph of a History (see Binding/History.h), with a legend whose buttons show and hide series.
- *
- *     <ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"/>
- *
- *   history       the history shown, looked up like a list: the enclosing rows, the view's presenter, the globals
- *   seconds       the X axis shows the last this-many seconds, labelled -seconds to 0 (default 60)
- *   y_min, y_max  the Y axis range (default 0 to 100)
- *   bind_y_max    an integer subject that raises the top of the Y axis above y_max, e.g. to fit a heater's limit
- *
- * plus every lv_obj attribute. Series are coloured by position from LVGL's palette (red, pink, purple, …). The graph
- * starts with the history recorded before it was built, and follows series being added, removed and renamed.
+ * <ds_graph>: a line graph of a History (see Binding/History.h), with a legend whose buttons show and hide series. Its
+ * attributes are in registerXml().
  */
 
 #pragma once
@@ -79,10 +70,10 @@ namespace UI::Xml
 		/** Set the Y axis from the configured range and the bound limit */
 		void applyYAxis();
 
-		History* m_history = nullptr;				// The history shown, or nullptr
-		size_t m_points = 0;						// Values shown across the X axis
+		History* m_history = nullptr;				 // The history shown, or nullptr
+		size_t m_points = 0;						 // Values shown across the X axis
 		std::vector<lv_observer_t*> m_nameObservers; // One per series, on its row's name
-		range_t m_yAxis{0, 100};					// Configured Y range
-		int32_t m_yLimit = 0;						// Value of the bind_y_max subject, or 0
+		range_t m_yAxis{0, 100};					 // Configured Y range
+		int32_t m_yLimit = 0;						 // Value of the bind_y_max subject, or 0
 	};
 } // namespace UI::Xml

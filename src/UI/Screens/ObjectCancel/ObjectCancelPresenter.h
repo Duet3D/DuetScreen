@@ -4,24 +4,8 @@
  * Behaviour for the Object Cancel tab (assets/ui/screens/object_cancel.xml): the job's objects drawn on the bed and
  * listed, the one being printed, and cancelling (or resuming) objects.
  *
- * Fields
- *   current_object        the name of the object being printed, or "None"
- *   x_min, x_max, y_min, y_max   the bed's span, whole mm: the X and Y axes' travel allowing for the tool's offset, or
- *                         the objects' bounds with a margin if the axes aren't known
- *   objects               list of the job's objects, each with
- *     number              the object's number
- *     label               e.g. "[2]: gear (Instance 37)"
- *     x1, y1, x2, y2      its bounds, whole mm
- *     current             1 if it is being printed
- *     cancelled           1 if it has been cancelled
- *   confirmations         1 if actions are confirmed first (the setting)
- *   confirm               1 while asking; confirm_title and confirm_text are the question
- *
- * Actions
- *   object_cancel.select          (in an objects row) cancel the object, or resume it if cancelled, asking first
- *   object_cancel.cancel_current  cancel the object being printed, asking first if confirmations are on
- *   object_cancel.confirm         answer yes
- *   object_cancel.close_dialog    answer no
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

@@ -660,6 +660,11 @@ namespace UI::Themes
 		lv_obj_invalidate(lv_screen_active());
 	}
 
+	std::vector<const ThemeFile*> getThemeChain(std::string_view name)
+	{
+		return chainOf(name);
+	}
+
 	void setThemeFiles(std::vector<ThemeFile> files,
 					   std::vector<std::pair<std::filesystem::path, std::string>>* problems)
 	{

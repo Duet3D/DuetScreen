@@ -4,6 +4,7 @@
 
 #include "DsDropdown.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_dropdown_parser.h"
 #include <vector>
 
@@ -23,7 +24,23 @@ namespace UI::Xml
 
 	void DsDropdown::registerXml()
 	{
-		lv_xml_register_widget("ds_dropdown", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_dropdown",
+			 .extends = "lv_dropdown",
+			 .description =
+				 "A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` "
+				 "action as its text (ActionArgs::text()) and its index (ActionArgs::value()).",
+			 .example = R"(<ds_dropdown bind_options="filaments" bind_text="filament_text">
+	<action trigger="value_changed" name="temperature.pick_filament"/>
+</ds_dropdown>)",
+			 .attributes =
+				 {{"bind_options", "Follow a text subject holding the options, one per line"},
+				  {"bind_text",
+				   "Follow a text subject shown on the button instead of the chosen option, e.g. what is loaded"},
+				  {"bind_selected",
+				   "Follow an int subject for the index of the option shown chosen, kept when the options change"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void* DsDropdown::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

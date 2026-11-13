@@ -37,6 +37,7 @@ namespace UI
 		m_systemMonitorShown.set(LV_USE_SYSMON ? 1 : 0);
 
 		action("settings.debug_level",
+			   "Log at the level at the edited index of `debug_levels`",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto value = args.value())
@@ -46,9 +47,11 @@ namespace UI
 				   }
 			   });
 		toggle("settings.advanced_settings",
+			   "Show advanced settings if the edited value is 1, else hide them",
 			   m_advancedSettings,
 			   [](bool on) { StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, on); });
 		toggle("settings.second_usb_channel",
+			   "Use the second USB channel if the edited value is 1, else not",
 			   m_secondUsbChannel,
 			   [](bool on)
 			   {
@@ -60,6 +63,7 @@ namespace UI
 				   }
 			   });
 		toggle("settings.system_logging",
+			   "Log system messages to the console if the edited value is 1, else not",
 			   m_systemLogging,
 			   [](bool on)
 			   {
@@ -68,6 +72,7 @@ namespace UI
 			   });
 #if DEBUG_BORDERS
 		toggle("settings.debug_borders",
+			   "Show debug borders if the edited value is 1, else hide them (builds with debug borders)",
 			   m_debugBorders,
 			   [](bool on)
 			   {
@@ -77,6 +82,7 @@ namespace UI
 #endif
 #if DEVELOPER_MODE
 		toggle("settings.ssh",
+			   "Turn SSH on (edited value 1) or off (0) (developer mode builds)",
 			   m_ssh,
 			   [](bool on)
 			   {
@@ -84,6 +90,7 @@ namespace UI
 					  : SystemHelper::disableService(SystemHelper::Services::SSH);
 			   });
 		toggle("settings.adb",
+			   "Turn ADB on (edited value 1) or off (0) (developer mode builds)",
 			   m_adb,
 			   [](bool on)
 			   {
@@ -91,9 +98,11 @@ namespace UI
 					  : SystemHelper::disableService(SystemHelper::Services::ADB);
 			   });
 		action("settings.buildroot_setup",
+			   "Restart the system's setup service (developer mode builds)",
 			   [](const Xml::ActionArgs&) { SystemHelper::restartService(SystemHelper::Services::SETUP); });
 #endif
 		toggle("settings.system_monitor",
+			   "Show the system monitor if the edited value is 1, else hide it",
 			   m_systemMonitor,
 			   [](bool on)
 			   {
@@ -106,11 +115,16 @@ namespace UI
 #endif
 			   });
 
-		action("settings.restart", [](const Xml::ActionArgs&) { Restart(); });
-		action("settings.erase_and_restart", [](const Xml::ActionArgs&) { EraseAndRestart(); });
-		action("settings.reboot", [](const Xml::ActionArgs&) { Reboot(); });
-		action("settings.hardware_test", [this](const Xml::ActionArgs&) { startHardwareTest(); });
+		action("settings.restart", "Restart the DuetScreen program", [](const Xml::ActionArgs&) { Restart(); });
+		action("settings.erase_and_restart",
+			   "Erase every setting, then restart",
+			   [](const Xml::ActionArgs&) { EraseAndRestart(); });
+		action("settings.reboot", "Reboot the screen", [](const Xml::ActionArgs&) { Reboot(); });
+		action("settings.hardware_test",
+			   "Open the hardware test",
+			   [this](const Xml::ActionArgs&) { startHardwareTest(); });
 		action("settings.clear_cache",
+			   "Delete the cached settings and file information, then show the storage used again",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   if (std::filesystem::exists(NVS_FOLDER))
@@ -121,6 +135,7 @@ namespace UI
 				   showStorage();
 			   });
 		action("settings.upgrade_from_github",
+			   "Upgrade to the latest release on GitHub, reporting an error if it fails to start",
 			   [](const Xml::ActionArgs&)
 			   {
 				   LOG_INFO("User requested upgrade from GitHub latest release");
@@ -132,6 +147,7 @@ namespace UI
 				   }
 			   });
 		action("settings.send_config",
+			   "Upload the screen's settings to the Duet as duetscreen.json in its system directory",
 			   [](const Xml::ActionArgs&)
 			   {
 				   Comm::DUET.UploadFile(fmt::format("{:s}/duetscreen.json", OM::Directories::GetSystemDirectory()),
@@ -144,19 +160,19 @@ namespace UI
 	void DeveloperSettingsPresenter::fields(Xml::FieldVisitor& f)
 	{
 		f.field("debug_levels", m_debugLevels, "Log levels offered, one per line");
-		f.field("debug_level", m_debugLevel, "Index of the one in use");
+		f.field("debug_level", m_debugLevel, "Index of the one in use, in `debug_levels`");
 		f.field("advanced_settings", m_advancedSettings, "1 if advanced settings are shown");
 		f.field("second_usb_channel", m_secondUsbChannel, "1 if the second USB channel is used");
 		f.field("system_logging", m_systemLogging, "1 if system messages are logged to the console");
 		f.field("debug_borders_shown", m_debugBordersShown, "1 if the build has debug borders");
-		f.field("debug_borders", m_debugBorders, "1 if debug borders are on");
+		f.field("debug_borders", m_debugBorders, "1 if debug borders are on (builds with debug borders)");
 		f.field("developer_mode", m_developerMode, "1 in developer mode (SSH, ADB, setup)");
-		f.field("ssh", m_ssh, "1 if SSH is on");
-		f.field("adb", m_adb, "1 if ADB is on");
+		f.field("ssh", m_ssh, "1 if SSH is on (developer mode builds)");
+		f.field("adb", m_adb, "1 if ADB is on (developer mode builds)");
 		f.field("system_monitor_shown", m_systemMonitorShown, "1 if the build has the system monitor");
 		f.field("system_monitor", m_systemMonitor, "1 if the system monitor is on");
-		f.field("storage_info", m_storageInfo, "Storage used");
-		f.field("cache_size", m_cacheSize, "Size of the cache");
+		f.field("storage_info", m_storageInfo, "Storage used, e.g. \"256.00 MB / 16.00 GB (1%)\"");
+		f.field("cache_size", m_cacheSize, "Size of the cache, e.g. \"10.00 KB (100 files)\"");
 	}
 
 	void DeveloperSettingsPresenter::onActivate()
@@ -177,10 +193,12 @@ namespace UI
 	}
 
 	void DeveloperSettingsPresenter::toggle(std::string name,
+											std::string description,
 											Xml::IntSubject& shown,
 											std::function<void(bool on)> apply)
 	{
 		action(std::move(name),
+			   std::move(description),
 			   [&shown, apply = std::move(apply)](const Xml::ActionArgs& args)
 			   {
 				   const bool on = args.value().value_or(0.0f) != 0.0f;

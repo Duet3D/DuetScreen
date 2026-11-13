@@ -5,6 +5,7 @@
 #include "DsGraph.h"
 #include "UI/Xml/Binding/Scope.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
 
@@ -24,7 +25,27 @@ namespace UI::Xml
 
 	void DsGraph::registerXml()
 	{
-		lv_xml_register_widget("ds_graph", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_graph",
+			 .extends = "lv_obj",
+			 .description =
+				 "A line graph of a history, with a legend whose buttons show and hide series. Series are coloured by "
+				 "position from LVGL's palette (red, pink, purple, …). The graph starts with what was recorded before "
+				 "it was built, and follows series being added, removed and renamed.",
+			 .example =
+				 R"(<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"/>)",
+			 .attributes = {{"history",
+							 "The history shown (required), looked up like a list: the enclosing rows, the view's "
+							 "presenter, then the globals"},
+							{"seconds",
+							 "The X axis shows the last this-many seconds, labelled -seconds to 0 (default 60)"},
+							{"y_min", "Bottom of the Y axis (default 0)"},
+							{"y_max", "Top of the Y axis (default 100)"},
+							{"bind_y_max",
+							 "Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a "
+							 "heater's limit"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsGraph::showHistory(History& history, uint32_t seconds)

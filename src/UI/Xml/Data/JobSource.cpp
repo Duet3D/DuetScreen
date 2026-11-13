@@ -15,7 +15,7 @@ namespace UI::Xml
 
 	void JobSource::fields(FieldVisitor& f)
 	{
-		f.field("job.file", m_file, "The current job's file; empty when there is none");
+		f.field("job.file", m_file, "The current job's file, e.g. \"0:/gcodes/part.gcode\"; empty when there is none");
 	}
 
 	void JobSource::onInit()

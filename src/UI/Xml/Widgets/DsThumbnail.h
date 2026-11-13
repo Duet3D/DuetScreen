@@ -1,13 +1,8 @@
 /*
  * DsThumbnail.h
  *
- * <ds_thumbnail>: an image as tall as its parent's content, as wide as its aspect ratio needs, so a thumbnail beside
- * some text is as large as it can be without making the row taller. With no image it takes no width.
- *
- *     <ds_thumbnail bind_src="thumbnail" height="100%"/>
- *
- * `bind_src` is a string subject holding an image path; an empty string shows no image. Takes every lv_image
- * attribute.
+ * <ds_thumbnail>: an image as tall as its parent's content and as wide as its aspect ratio needs. Its attributes are in
+ * registerXml().
  */
 
 #pragma once
@@ -52,7 +47,7 @@ namespace UI::Xml
 		/** Set the width for the parent's content height and the image's aspect ratio */
 		void fit();
 
-		lv_obj_t* m_parent;	   // The parent, whose changes are followed
-		std::string m_path;	   // Shown image path; LVGL keeps a pointer to it
+		lv_obj_t* m_parent; // The parent, whose changes are followed
+		std::string m_path; // Shown image path; LVGL keeps a pointer to it
 	};
 } // namespace UI::Xml

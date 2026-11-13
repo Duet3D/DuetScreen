@@ -5,26 +5,9 @@
  * extrusion factors, filament and heaters; the beds and chambers (the global `beds` and `chambers` lists,
  * src/UI/Xml/Data/HeatSource.h); and the extruder panel (extruder.xml).
  *
- * Fields
- *   tools               list of the tools with heaters, each with the fields of the global tools list (see
- *                       src/UI/Xml/Data/ToolSource.h: number, name, selected, heater_count, heaters) and
- *     state             status key, e.g. active, standby, off
- *     status            status, translated for display
- *     extruders         list of the tool's extruders, each with `factor` (e.g. "100%")
- *     filament_shown    1 if the tool takes filament
- *     filament_text     the filament picked or loaded, or "No Filament Loaded"
- *     filament_loaded   1 if filament is loaded, so it can be unloaded
- *     change_shown      1 if a filament other than the loaded one has been picked
- *     change_text       "Load", or "Change" when filament is loaded
- *   filaments           the filaments the printer knows, one per line
- *   selected_tool       e.g. "Selected Tool: Tool 0"
- *
- * Actions (from a tools row)
- *   temperature.extrusion_factor   open the dialog to change the tool's extrusion factors
- *   temperature.pick_filament      (value_changed on a dropdown) pick that filament
- *   temperature.change_filament    load the filament picked
- *   temperature.unload_filament    unload the filament
- * Tool selection and heater states and temperatures use the global actions in HeaterActions.h.
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md). Tool selection and heater states and temperatures use the global actions in
+ * HeaterActions.h.
  */
 
 #pragma once

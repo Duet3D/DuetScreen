@@ -16,7 +16,10 @@ namespace UI
 	FanPresenter::FanPresenter()
 		: XmlPresenter("fans")
 	{
-		action("fans.set_speed", [this](const Xml::ActionArgs& args) { setSpeed(args); });
+		action(
+			"fans.set_speed",
+			"Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `fans`.",
+			[this](const Xml::ActionArgs& args) { setSpeed(args); });
 	}
 
 	void FanPresenter::setSpeed(const Xml::ActionArgs& args)

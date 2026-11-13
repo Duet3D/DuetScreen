@@ -24,8 +24,34 @@
 #include "DsToggle.h"
 #include "DsView.h"
 
+#include <map>
+
 namespace UI::Xml::Widgets
 {
+	/** Specs by element name. Registrations last for the life of the program, like the engine's. */
+	static std::map<std::string, WidgetSpec, std::less<>>& registry()
+	{
+		static std::map<std::string, WidgetSpec, std::less<>> s_specs;
+		return s_specs;
+	}
+
+	void add(WidgetSpec spec, lv_xml_widget_create_cb_t create, lv_xml_widget_apply_cb_t apply)
+	{
+		std::string name = spec.name;
+		lv_xml_register_widget(name.c_str(), create, apply);
+		registry().insert_or_assign(std::move(name), std::move(spec));
+	}
+
+	std::vector<const WidgetSpec*> specs()
+	{
+		std::vector<const WidgetSpec*> result;
+		for (const auto& [name, spec] : registry())
+		{
+			result.push_back(&spec);
+		}
+		return result;
+	}
+
 	void registerAll()
 	{
 		DsBar::registerXml();

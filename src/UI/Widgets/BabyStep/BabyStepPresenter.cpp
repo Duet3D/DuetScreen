@@ -30,10 +30,14 @@ namespace UI
 				Xml::Services::sendGcode(fmt::format("M290 S{:g}", sign * m_steps[m_selected]));
 			}
 		};
-		action("babystep.up", [step](const Xml::ActionArgs&) { step(1.0f); });
-		action("babystep.down", [step](const Xml::ActionArgs&) { step(-1.0f); });
-		action("babystep.reset", [](const Xml::ActionArgs&) { Xml::Services::sendGcode("M290 R0 S0"); });
+		action("babystep.up", "Move Z up by the chosen step (M290)", [step](const Xml::ActionArgs&) { step(1.0f); });
+		action(
+			"babystep.down", "Move Z down by the chosen step (M290)", [step](const Xml::ActionArgs&) { step(-1.0f); });
+		action("babystep.reset",
+			   "Undo all babystepping",
+			   [](const Xml::ActionArgs&) { Xml::Services::sendGcode("M290 R0 S0"); });
 		action("babystep.select",
+			   "Use that step. From a row of `steps`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<BabyStepRow>())
@@ -43,6 +47,7 @@ namespace UI
 				   }
 			   });
 		action("babystep.edit",
+			   "Ask for a new size for that step with a number pad, and remember it. From a row of `steps`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<BabyStepRow>();
@@ -67,8 +72,8 @@ namespace UI
 
 	void BabyStepPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("usable", m_usable, "1 if babystepping is possible");
-		f.field("reset_text", m_resetText, "Reset button text, with the current offset");
+		f.field("usable", m_usable, "1 if there is a Z axis and the printer is connected");
+		f.field("reset_text", m_resetText, "The reset button's text, with the current offset, e.g. \"Reset 0.02 mm\"");
 		f.list("steps", m_stepRows, "Step sizes");
 	}
 

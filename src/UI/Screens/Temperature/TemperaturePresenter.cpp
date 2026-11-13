@@ -76,6 +76,7 @@ namespace UI
 		: XmlPresenter("temperature")
 	{
 		action("temperature.extrusion_factor",
+			   "Open the dialog to change the tool's extrusion factors. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   auto tool = toolOf(args);
@@ -88,6 +89,7 @@ namespace UI
 				   openModal(dialog);
 			   });
 		action("temperature.pick_filament",
+			   "Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   if (auto* row = args.row<TemperatureToolRow>())
@@ -96,6 +98,7 @@ namespace UI
 				   }
 			   });
 		action("temperature.change_filament",
+			   "Load the filament picked, unloading any loaded first. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<TemperatureToolRow>();
@@ -105,6 +108,7 @@ namespace UI
 				   }
 			   });
 		action("temperature.unload_filament",
+			   "Unload the tool's filament. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   if (auto tool = toolOf(args))
@@ -116,7 +120,7 @@ namespace UI
 
 	void TemperaturePresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.list("tools", m_tools, "The tools with heaters");
+		f.list("tools", m_tools, "The tools with heaters; each row also has the fields of a global `tools` row");
 		f.field("filaments", m_filaments, "The filaments the printer knows, one per line");
 		f.field("selected_tool", m_selectedTool, "E.g. \"Selected Tool: Tool 0\"");
 	}

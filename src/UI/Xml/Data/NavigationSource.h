@@ -1,10 +1,10 @@
 /*
  * NavigationSource.h
  *
- * Publishes which screen is open, so navigation controls can show it.
+ * Publishes which screen is open, so navigation controls can show it, e.g.
+ * `<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>`
  *
- *   nav.screen        name of the open screen (see Navigation.h), or empty when the home screens are showing,
- *                     e.g. `<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>`
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

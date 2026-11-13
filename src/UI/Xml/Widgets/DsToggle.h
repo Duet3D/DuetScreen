@@ -2,15 +2,7 @@
  * DsToggle.h
  *
  * <ds_toggle>: an on/off setting, drawn as the build's toggle (a check box, or a switch if built with
- * DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET=LvSwitch), so every setting looks the same.
- *
- *     <ds_toggle>
- *         <bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
- *         <action trigger="value_changed" name="settings.confirmations"/>
- *     </ds_toggle>
- *
- * A `value_changed` action gets 1 when it is turned on and 0 when off (ActionArgs::value()). Takes every lv_obj
- * attribute.
+ * DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET=LvSwitch). Its attributes are in registerXml().
  */
 
 #pragma once

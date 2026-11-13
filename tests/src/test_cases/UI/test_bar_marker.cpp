@@ -22,8 +22,10 @@ class MarkerPresenter : public UI::Xml::XmlPresenter
 		: XmlPresenter("test_marker")
 	{
 		target.set(0);
-		action("test.tapped", [this](const UI::Xml::ActionArgs&) { taps++; });
-		action("test.set", [this](const UI::Xml::ActionArgs& args) { values.push_back(args.value().value_or(-1)); });
+		action("test.tapped", "Count a tap", [this](const UI::Xml::ActionArgs&) { taps++; });
+		action("test.set",
+			   "Record the edited value",
+			   [this](const UI::Xml::ActionArgs& args) { values.push_back(args.value().value_or(-1)); });
 	}
 
 	void fields(UI::Xml::FieldVisitor& f) override { f.field("target", target, "The value marked"); }

@@ -1,18 +1,7 @@
 /*
  * DsDropdown.h
  *
- * <ds_dropdown>: an lv_dropdown whose options and text follow subjects.
- *
- *     <ds_dropdown bind_options="filaments" bind_text="filament_text">
- *         <action trigger="value_changed" name="temperature.pick_filament"/>
- *     </ds_dropdown>
- *
- *   bind_options   a string subject holding the options, one per line
- *   bind_text      a string subject shown on the button instead of the chosen option, e.g. what is loaded
- *   bind_selected  an integer subject: the index of the option shown chosen, kept when the options change
- *
- * The option chosen reaches a `value_changed` action as its text (ActionArgs::text()) and its index
- * (ActionArgs::value()). Takes every lv_dropdown attribute too.
+ * <ds_dropdown>: an lv_dropdown whose options and text follow subjects. Its attributes are in registerXml().
  */
 
 #pragma once
@@ -51,7 +40,7 @@ namespace UI::Xml
 		/** `bind_selected` observer: choose the subject's option */
 		static void selectedObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		std::string m_text;				   // The text shown, kept here because lv_dropdown_set_text() doesn't copy it
+		std::string m_text;					// The text shown, kept here because lv_dropdown_set_text() doesn't copy it
 		lv_subject_t* m_selected = nullptr; // `bind_selected`'s subject, or nullptr
 	};
 } // namespace UI::Xml

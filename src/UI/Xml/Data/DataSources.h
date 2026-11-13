@@ -2,7 +2,7 @@
  * DataSources.h
  *
  * Starts and stops the data sources (see DataSource.h). The set of sources is fixed: it is the list in
- * DataSources.cpp, which is also the index of the printer data the UI API provides.
+ * DataSources.cpp. What they publish is listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

@@ -6,28 +6,8 @@
  *
  * Every control's `*_usable` field already allows for the printer being disconnected or busy, so the view only binds.
  *
- * Fields
- *   connected                1 while connected
- *   x.label, y.label, z.label  e.g. "X: 0.00", in the displayed unit
- *   x.homed, y.homed, z.homed  1 when homed
- *   x.jog_usable, …          1 if the axis can be jogged or set (homed, or moves before homing allowed)
- *   x.home_usable, …         1 if the axis can be homed
- *   xy.homed, xy.home_usable  both X and Y
- *   home_all_usable, disable_motors_usable
- *   axes                     list of the other axes, each with letter, label, homed, jog_usable, home_usable
- *   axes_shown               1 if there are other axes
- *   distance_title, feedrate_title  e.g. "Move Distance (mm)"
- *   distances, feedrates     lists of the jog choices, each with `text` and `selected`
- *   confirm, confirm_title, confirm_text   the question asked before homing or disabling the motors
- *
- * Actions
- *   move.jog          arg "X+", "Z-" … or, in an axes row, "+" or "-": jog by the chosen distance at the chosen speed
- *   move.home         arg "X", "Y", "Z", "XY" or "all", or in an axes row: home (asking first if confirmations are on)
- *   move.disable_motors
- *   move.set_position arg the axis letter, or in an axes row: ask for a position and move there
- *   move.distance, move.feedrate             (in a row) choose it
- *   move.edit_distance, move.edit_feedrate   (in a row) ask for a new value for it
- *   move.confirm, move.close_dialog          answer the question
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

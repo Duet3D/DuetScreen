@@ -8,42 +8,8 @@
  * registers a presenter of its own (see Screens/XmlScreens.cpp) and names it: `<ds_view view="file_browser"
  * presenter="dashboard_jobs"/>`.
  *
- * Fields
- *   files              list, one row per file and folder in the open folder, in the chosen order
- *     index            position in the list
- *     name             shown name (a macro's "12_" ordering prefix is left out)
- *     date             modification date, e.g. "2025-03-18 18:21:58"
- *     thumbnail        thumbnail image path, or empty if there is none (yet)
- *     is_folder        1 for a folder, else 0
- *   crumbs             list, the open folder's path from the base folder down, e.g. "0:/gcodes", "parts"; set when
- *                      a folder is opened or its listing arrives
- *     index            position in the path
- *     name             the folder's name
- *     last             1 for the open folder, else 0 (the others can be tapped to go back up)
- *   sort               the order: 0 by name, 1 by date, 2 by size
- *   sort_name          the name-order button's text, with an arrow showing the direction when it is in use
- *   sort_date          as sort_name, for the date order
- *   sort_size          as sort_name, for the size order
- *   tiles              1 when files are shown as tiles, 0 as a list
- *   mode_icon          the symbol for the other way of showing files
- *   dialog             what the dialog asks: "start_print", "run_macro" or "delete"; empty when it is closed
- *   dialog_title       its title
- *   dialog_text        its message
- *   dialog_image       the file's thumbnail, or empty
- *   dialog_has_image   1 if there is a thumbnail, else 0
- *   dialog_can_delete  1 if the dialog offers to delete the file (starting a job does), else 0
- *   info_shown         1 if the job's details below are known, else 0
- *   info_date, info_size, info_generated_by, info_print_time, info_height, info_layer_height   the job's details
- *
- * Actions
- *   files.open         (in a files row) open the folder, or ask to start the job or run the macro
- *   files.crumb        (in a crumbs row) open that folder
- *   files.sort         arg name, date or size: sort that way; choosing the order in use reverses it
- *   files.toggle_mode  show tiles instead of a list, or the other way round
- *   files.refresh      read the folder again
- *   files.confirm      do what the dialog asks, and close it
- *   files.ask_delete   ask to delete the file the dialog is about
- *   files.close_dialog close the dialog without doing anything
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

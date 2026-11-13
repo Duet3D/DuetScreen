@@ -66,6 +66,9 @@ namespace UI::Xml
 		/** Values kept per series */
 		size_t capacity() const { return m_capacity; }
 
+		/** "history": shown with `<ds_graph history="…">`, or as a list of its series */
+		std::string_view typeName() const override { return "history"; }
+
 		/**
 		 * Add one value to every series, then tell the sample listeners. A series added since the last call has fewer
 		 * values than the others; the newest values of every series line up.

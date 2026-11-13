@@ -202,6 +202,11 @@ namespace UI::Xml
 		return it == s_loaded.components.end() ? nullptr : &it->second;
 	}
 
+	const std::map<std::string, ComponentInfo, std::less<>>& getComponents()
+	{
+		return s_loaded.components;
+	}
+
 	void addView(XmlView* view)
 	{
 		s_views.push_back(view);

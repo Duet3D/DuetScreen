@@ -5,19 +5,8 @@
  * Duet. The screen's own WiFi is wifi_selector.xml (WifiPresenter.h). Each setting is read when the tab is shown and
  * applied as soon as it is changed.
  *
- * Fields
- *   connection_methods  USB, UART or network, one per line; connection_method is the one in use
- *   usb_modes           the USB-C port's modes, one per line; usb_mode is the one in use
- *   poll_interval       ms between polls of the Duet
- *   network_shown       1 if the Duet is reached over the network, so its IP address and password are shown
- *   duet_ip             the Duet's IP address
- *   duet_password       the Duet's password
- *
- * Actions
- *   settings.connection_method, settings.usb_mode   (an index) use that one
- *   settings.poll_interval                          (a number) poll that often
- *   settings.duet_ip                                ask for the IP address on the nearest number pad
- *   settings.duet_password                          (the text, from its text box) use that password
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

@@ -8,6 +8,7 @@
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlView.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
 namespace UI::Xml::DsView
@@ -136,6 +137,26 @@ namespace UI::Xml::DsView
 
 	void registerXml()
 	{
-		lv_xml_register_widget("ds_view", create, apply);
+		Widgets::add(
+			{.name = "ds_view",
+			 .extends = "lv_obj",
+			 .description =
+				 "A view inside a screen, e.g. a page of the home screen, registered with navigation as its `name` "
+				 "(default: its `view`) so it can be opened with `nav.open`. A view starts hidden, like any screen "
+				 "that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns.",
+			 .example = R"(<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs"/>)",
+			 .attributes =
+				 {{"view",
+				   "The XML component shown (with its presenter), or if there is no such component, a C++ view"},
+				  {"presenter",
+				   "Show the component with this registered presenter instead of the one it names, so one component "
+				   "can show different data in different places"},
+				  {"home", "\"true\" to make it a home screen: shown when nothing else is open (default false)"},
+				  {"shown",
+				   "\"true\" to show it without taking part in navigation, for always-present parts such as a status "
+				   "bar or the page in a tab: shown, and its presenter active, whenever what it is in is shown "
+				   "(default false)"}}},
+			create,
+			apply);
 	}
 } // namespace UI::Xml::DsView

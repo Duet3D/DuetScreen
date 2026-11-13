@@ -23,7 +23,7 @@ namespace UI
 	void HeightmapFileRow::fields(Xml::FieldVisitor& f)
 	{
 		f.field("name", name, "File name");
-		f.field("loaded", loaded, "1 if the printer is using it");
+		f.field("loaded", loaded, "1 for the one the printer is using");
 		f.field("load_text", loadText, "\"Load\", or \"Unload\" for the one in use");
 	}
 
@@ -31,6 +31,7 @@ namespace UI
 		: XmlPresenter("heightmap")
 	{
 		action("heightmap.show",
+			   "Show that height map. From a row of `maps`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (auto file = fileOf(args))
@@ -39,6 +40,7 @@ namespace UI
 				   }
 			   });
 		action("heightmap.toggle",
+			   "Make the printer use that height map, or stop using it, and show it. From a row of `maps`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (auto file = fileOf(args))
@@ -48,6 +50,7 @@ namespace UI
 				   }
 			   });
 		action("heightmap.mode",
+			   "Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range)",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   m_mode = args.arg == "auto" ? RenderMode::Auto : RenderMode::Fixed;
@@ -64,17 +67,19 @@ namespace UI
 
 	void HeightmapPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("surface", m_surface, "The height map shown");
+		f.field("surface", m_surface, "The height map shown, sampled for <ds_heatmap>");
 		f.field("title", m_title, "E.g. \"Heightmap: heightmap.csv\"");
 		f.list("maps", m_maps, "The height map files");
-		f.field("stats.points", m_points, "Number of points, as text");
+		f.field("stats.points", m_points, "Number of points, as text, e.g. \"Number of points: 0;\"");
 		f.field("stats.area", m_area, "Probed area, as text");
 		f.field("stats.min", m_min, "Lowest deviation, as text");
 		f.field("stats.max", m_max, "Highest deviation, as text");
 		f.field("stats.mean", m_mean, "Mean error, as text");
 		f.field("stats.rms", m_rms, "RMS error, as text");
-		f.field("mode", m_modeSubject, "0 fixed, 1 auto");
-		f.field("levelling_usable", m_levellingUsable, "1 if the bed can be levelled or probed");
+		f.field("mode", m_modeSubject, "How values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range)");
+		f.field("levelling_usable",
+				m_levellingUsable,
+				"1 if the bed can be levelled or probed: connected and no job running");
 	}
 
 	void HeightmapPresenter::onInit()

@@ -5,22 +5,8 @@
  * knows, narrowed to those that start with what has been typed. What was sent and what came back is the global
  * `console.lines` (src/UI/Xml/Data/ConsoleSource.h).
  *
- * Fields
- *   input              what is typed (kept equal to the text box, so picking a G-code can replace it)
- *   commands_shown     1 when the G-code list is showing, 0 when it is folded away (remembered)
- *   shell_available    1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds)
- *   shell              1 while what is sent goes to the shell instead of the Duet
- *   gcodes             list, the G-codes starting with the first word typed
- *     gcode            e.g. "G28"
- *     description      e.g. "Home"
- *
- * Actions
- *   console.input            (value_changed on the text box) what is typed changed
- *   console.send             send what is typed
- *   console.clear            empty the text box
- *   console.pick             (in a gcodes row) put that G-code in the text box
- *   console.toggle_commands  show or fold away the G-code list
- *   console.shell            (value_changed on a checkbox) send to the shell while checked
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

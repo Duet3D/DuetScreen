@@ -6,6 +6,7 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
 namespace UI::Xml
@@ -44,7 +45,29 @@ namespace UI::Xml
 
 	void DsModal::registerXml()
 	{
-		lv_xml_register_widget("ds_modal", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_modal",
+			 .extends = "lv_obj",
+			 .description = "A dialog over the main window with a dimmed backdrop. Its subject alone decides whether "
+							"it is open, so a presenter opens and closes it by setting a subject. Closed any other way "
+							"(tapped outside, the back button, navigation closing every modal), it raises `dismissed` "
+							"so the presenter can update the subject; closing it by its subject raises nothing. The "
+							"content is laid out in the dialog's card, which the lv_obj attributes apply to. Unless "
+							"`in_place`, it is deleted with the widget it was written in.",
+			 .example = R"(<ds_modal name="file_dialog" bind_open="dialog" width="70%" height="content">
+	<action trigger="dismissed" name="files.close_dialog"/>
+	…the dialog's content…
+</ds_modal>)",
+			 .attributes =
+				 {{"bind_open",
+				   "Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it"},
+				  {"open_value", "The value `bind_open` must have for the dialog to be open"},
+				  {"blocking", "\"true\" so that tapping outside doesn't close it (default false)"},
+				  {"in_place",
+				   "\"true\" to stay in the widget it is written in rather than move to the main window, so the "
+				   "backdrop covers only that widget, e.g. alerts covering the whole screen (default false)"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsModal::onHide()

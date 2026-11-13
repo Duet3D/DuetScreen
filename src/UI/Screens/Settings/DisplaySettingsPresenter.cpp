@@ -74,6 +74,7 @@ namespace UI
 		m_rotations.set(rotations);
 
 		action("settings.theme",
+			   "Use the theme at the edited index of `themes`",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   auto* theme = Themes::getTheme(static_cast<size_t>(args.value().value_or(-1)));
@@ -88,6 +89,7 @@ namespace UI
 				   Model::get().post<EventType::ThemeChanged>();
 			   });
 		action("settings.font",
+			   "Use the typeface at the edited index of `fonts`",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto index = static_cast<size_t>(args.value().value_or(-1));
@@ -98,6 +100,7 @@ namespace UI
 				   }
 			   });
 		action("settings.icon_set",
+			   "Use the icon set at the edited index of `icon_sets`",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto index = static_cast<size_t>(args.value().value_or(-1));
@@ -109,6 +112,7 @@ namespace UI
 				   }
 			   });
 		action("settings.animations",
+			   "Turn UI animations on (edited value 1) or off (0)",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const bool enabled = args.value().value_or(0.0f) != 0.0f;
@@ -116,6 +120,7 @@ namespace UI
 				   StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, enabled);
 			   });
 		action("settings.rotation",
+			   "Rotate the screen as the edited index of `rotations` says",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto index = static_cast<size_t>(args.value().value_or(-1));

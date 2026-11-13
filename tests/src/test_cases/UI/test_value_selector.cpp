@@ -20,9 +20,9 @@ class SelectorPresenter : public UI::Xml::XmlPresenter
 		: XmlPresenter("test_selector")
 	{
 		m_selector.setTitle("Selector");
-		for (auto& [name, handler] : UI::Xml::ValueSelector::actions({&m_selector}))
+		for (auto& [name, description, handler] : UI::Xml::ValueSelector::actions({&m_selector}))
 		{
-			action(name, handler);
+			action(name, description, handler);
 		}
 	}
 

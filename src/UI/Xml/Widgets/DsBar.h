@@ -2,12 +2,7 @@
  * DsBar.h
  *
  * <ds_bar>: DuetScreen's Bar (a progress bar that draws its value as text, inside the filled part when it fits) in
- * XML.
- *
- *     <ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>
- *
- * `label_format` is an fmt format for the value (default "{}"). `bind_min` and `bind_max` follow integer subjects for
- * the range, e.g. a heater's. Takes every lv_obj attribute.
+ * XML. Its attributes are in registerXml().
  */
 
 #pragma once

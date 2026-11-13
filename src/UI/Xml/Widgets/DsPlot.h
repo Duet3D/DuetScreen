@@ -1,24 +1,8 @@
 /*
  * DsPlot.h
  *
- * <ds_plot>: an X/Y area with scales and a grid, such as the bed with its objects, whose content is widgets placed by
- * X/Y position. Layers (<ds_plot_layer>) written inside it are kept over its drawing area, and rectangles
- * (<ds_plot_rect>) inside a layer are kept at their X/Y bounds:
- *
- *     <ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
- *              bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max">
- *         <ds_plot_layer name="layer">
- *             <ds_list list="objects" item="object_rect" width="100%" height="100%"/>
- *         </ds_plot_layer>
- *     </ds_plot>
- *
- *   title, title_tag, bind_title   the title above the area
- *   title_style                    a theme style for the title, e.g. text_emphasis
- *   bind_detail                    a string subject shown after the title
- *   x_min, x_max, y_min, y_max     the area's span (default 0 to 100), or bind_x_min … to follow integer subjects
- *   resolution                     pixels the grid is drawn with along each side (default 200), scaled to fit
- *
- * Takes every lv_obj attribute.
+ * <ds_plot>: an X/Y area with scales and a grid, whose content is widgets placed by X/Y position. Its attributes are in
+ * registerXml().
  */
 
 #pragma once

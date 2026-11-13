@@ -1,10 +1,10 @@
 /*
  * JobSource.h
  *
- * Publishes the current job.
+ * Publishes the current job. E.g. the dashboard shows its status tab whenever a job starts:
+ * `<ds_tabs-tab select_on="job.file"/>`
  *
- *   job.file   the current job's file, e.g. "0:/gcodes/part.gcode"; empty when there is none. E.g. the dashboard
- *              shows its status tab whenever a job starts: `<ds_tabs-tab select_on="job.file"/>`
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

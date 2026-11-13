@@ -50,9 +50,9 @@ namespace UI
 	void MoveAxisRow::fields(Xml::FieldVisitor& f)
 	{
 		f.field("letter", letter, "Axis letter");
-		f.field("label", label, "E.g. \"U: 0.00\"");
+		f.field("label", label, "Position in the displayed unit, e.g. \"U: 0.00\"");
 		f.field("homed", homed, "1 when homed");
-		f.field("jog_usable", jogUsable, "1 if it can be jogged");
+		f.field("jog_usable", jogUsable, "1 if the axis can be jogged or set (homed, or moves before homing allowed)");
 		f.field("home_usable", homeUsable, "1 if it can be homed");
 	}
 
@@ -65,15 +65,19 @@ namespace UI
 	MovePresenter::MovePresenter()
 		: XmlPresenter("move")
 	{
-		action("move.jog",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   if (const char letter = axisOf(args))
-				   {
-					   jog(letter, !args.arg.ends_with('-'));
-				   }
-			   });
+		action(
+			"move.jog",
+			"Jog by the chosen distance at the chosen speed. `arg` is `X+`, `Z-`, …; from a row of `axes`, `+` or `-`.",
+			[this](const Xml::ActionArgs& args)
+			{
+				if (const char letter = axisOf(args))
+				{
+					jog(letter, !args.arg.ends_with('-'));
+				}
+			});
 		action("move.home",
+			   "Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if "
+			   "confirmations are on.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (args.arg == "all")
@@ -100,6 +104,7 @@ namespace UI
 				   }
 			   });
 		action("move.disable_motors",
+			   "Disable the motors (M18), asking first if confirmations are on",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   confirmThen(_("move.disable_motors_confirm.title"),
@@ -107,6 +112,7 @@ namespace UI
 							   []() { Xml::Services::sendGcode("M18"); });
 			   });
 		action("move.set_position",
+			   "Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `axes`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const char letter = axisOf(args))
@@ -115,6 +121,7 @@ namespace UI
 				   }
 			   });
 		action("move.distance",
+			   "Use that jog distance. From a row of `distances`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<MoveChoiceRow>())
@@ -124,6 +131,7 @@ namespace UI
 				   }
 			   });
 		action("move.feedrate",
+			   "Use that jog speed. From a row of `feedrates`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<MoveChoiceRow>())
@@ -133,6 +141,7 @@ namespace UI
 				   }
 			   });
 		action("move.edit_distance",
+			   "Ask for a new value for that jog distance with a number pad. From a row of `distances`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<MoveChoiceRow>();
@@ -155,6 +164,7 @@ namespace UI
 						}});
 			   });
 		action("move.edit_feedrate",
+			   "Ask for a new value for that jog speed with a number pad. From a row of `feedrates`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<MoveChoiceRow>();
@@ -176,6 +186,7 @@ namespace UI
 											 }});
 			   });
 		action("move.confirm",
+			   "Answer yes to the question (`confirm`): close it and do what it asked",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_confirm.set(0);
@@ -184,7 +195,9 @@ namespace UI
 					   m_confirmed();
 				   }
 			   });
-		action("move.close_dialog", [this](const Xml::ActionArgs&) { m_confirm.set(0); });
+		action("move.close_dialog",
+			   "Answer no to the question (`confirm`): close it without doing anything",
+			   [this](const Xml::ActionArgs&) { m_confirm.set(0); });
 	}
 
 	void MovePresenter::fields(Xml::FieldVisitor& f)
@@ -193,9 +206,11 @@ namespace UI
 		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}, {"z", &m_z}};
 		for (const auto& [prefix, axis] : named)
 		{
-			f.field(fmt::format("{}.label", prefix), axis->label, "E.g. \"X: 0.00\"");
+			f.field(fmt::format("{}.label", prefix), axis->label, "Position in the displayed unit, e.g. \"X: 0.00\"");
 			f.field(fmt::format("{}.homed", prefix), axis->homed, "1 when homed");
-			f.field(fmt::format("{}.jog_usable", prefix), axis->jogUsable, "1 if it can be jogged");
+			f.field(fmt::format("{}.jog_usable", prefix),
+					axis->jogUsable,
+					"1 if the axis can be jogged or set (homed, or moves before homing allowed)");
 			f.field(fmt::format("{}.home_usable", prefix), axis->homeUsable, "1 if it can be homed");
 		}
 		f.field("xy.homed", m_xyHomed, "1 when X and Y are homed");
@@ -204,10 +219,10 @@ namespace UI
 		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
 		f.list("axes", m_axes, "The axes other than X, Y and Z");
 		f.field("axes_shown", m_axesShown, "1 if there are other axes");
-		f.field("distance_title", m_distanceTitle, "Distance row title");
+		f.field("distance_title", m_distanceTitle, "Distance row title, e.g. \"Move Distance (mm)\"");
 		f.field("feedrate_title", m_feedrateTitle, "Speed row title");
-		f.list("distances", m_distanceChoices, "Jog distances");
-		f.list("feedrates", m_feedrateChoices, "Jog speeds");
+		f.list("distances", m_distanceChoices, "The jog distances to choose from");
+		f.list("feedrates", m_feedrateChoices, "The jog speeds to choose from");
 		f.field("confirm", m_confirm, "1 while asking before homing or disabling the motors");
 		f.field("confirm_title", m_confirmTitle, "The question's title");
 		f.field("confirm_text", m_confirmText, "The question");

@@ -1,16 +1,8 @@
 /*
  * DsHeatmap.h
  *
- * <ds_heatmap>: a colour map of a Surface (see Binding/Surface.h), such as a bed's height map, with X and Y scales,
- * a grid, a title, and the colour scale beside it.
- *
- *     <ds_heatmap bind_surface="surface" bind_title="title" resolution="200"/>
- *
- *   bind_surface   the Surface to show; redrawn whenever it changes
- *   bind_title     a string subject shown above the map
- *   resolution     pixels the map is drawn with along each side (default 200), scaled to fit
- *
- * Takes every lv_obj attribute.
+ * <ds_heatmap>: a colour map of a Surface (see Binding/Surface.h), such as a bed's height map. Its attributes are in
+ * registerXml().
  */
 
 #pragma once

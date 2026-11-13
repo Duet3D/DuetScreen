@@ -5,27 +5,8 @@
  * leaving and forgetting them, and its IP address. Networks are scanned for every few seconds while the view is shown
  * (see WifiScanner.h).
  *
- * Fields
- *   ip                  e.g. "IP Address: 192.168.1.100"
- *   status              how the last connection attempt went, or empty
- *   networks            list of the networks found, each with
- *     ssid              the network's name
- *     signal            e.g. "75 dBm"
- *     known             1 if the screen has joined it before, so it can be forgotten
- *     connected         1 if the screen is on it
- *     connect_text      "Disconnect", "Connect" (known) or "Join"
- *   password_open       1 while asking for a network's password; password_title is the question
- *   password            the password typed
- *   keyboard            1 while the keyboard is up, so the question moves out of its way
- *
- * Actions
- *   wifi.refresh        scan now
- *   wifi.connect        (in a networks row) disconnect from it, connect to it, or ask for its password to join it
- *   wifi.forget         (in a networks row) forget it
- *   wifi.password       (value_changed on the password's text box) the password typed
- *   wifi.join           join the network asked about with the password typed
- *   wifi.close_password stop asking
- *   wifi.keyboard       arg 1 or 0: the keyboard came up or went away
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

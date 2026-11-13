@@ -5,24 +5,12 @@
  * options, restarting, the hardware test, the cache, upgrades, and the storage used. Each setting is read when the tab
  * is shown and applied as soon as it is changed.
  *
- * Fields
- *   debug_levels              the log levels, one per line; debug_level is the one in use
- *   advanced_settings         1 if advanced settings are shown
- *   second_usb_channel        1 if the second USB channel is used
- *   system_logging            1 if system messages are logged to the console
- *   debug_borders_shown, developer_mode, system_monitor_shown
- *                             1 if the build has debug borders, developer mode (SSH, ADB, setup) or the system monitor
- *   debug_borders, ssh, adb, system_monitor   1 if on
- *   storage_info              e.g. "256.00 MB / 16.00 GB (1%)"
- *   cache_size                e.g. "10.00 KB (100 files)"
+ * There is one action per setting, given the value from the widget (an index, or 1/0 for a toggle), and one per
+ * command. settings.debug_borders is only in builds with debug borders, and settings.ssh, settings.adb and
+ * settings.buildroot_setup only in developer mode builds.
  *
- * Actions (the value from the widget: an index, or 1/0 for a toggle)
- *   settings.debug_level, settings.advanced_settings, settings.second_usb_channel, settings.system_logging,
- *   settings.system_monitor
- *   settings.restart, settings.erase_and_restart, settings.reboot, settings.hardware_test, settings.clear_cache,
- *   settings.upgrade_from_github, settings.send_config
- *   settings.debug_borders                                (builds with debug borders)
- *   settings.ssh, settings.adb, settings.buildroot_setup   (developer mode)
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once
@@ -53,8 +41,12 @@ namespace UI
 		void onActivate() override;
 
 	  private:
-		/** Register an action that applies the 1/0 a toggle gives with `apply`, and shows it in `shown` */
-		void toggle(std::string name, Xml::IntSubject& shown, std::function<void(bool on)> apply);
+		/** Register an action, described by `description`, that applies the 1/0 a toggle gives with `apply`, and shows
+		 * it in `shown` */
+		void toggle(std::string name,
+					std::string description,
+					Xml::IntSubject& shown,
+					std::function<void(bool on)> apply);
 
 		/** Show the storage used and the size of the cache */
 		void showStorage();

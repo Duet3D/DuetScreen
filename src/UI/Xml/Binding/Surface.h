@@ -35,11 +35,11 @@ namespace UI::Xml
 		/** What a surface shows */
 		struct Values
 		{
-			Range x{0.0f, 100.0f};	   // The area's X span
-			Range y{0.0f, 100.0f};	   // The area's Y span
-			Range scale{-1.0f, 1.0f};  // The values mapped to the colour scale; outside it they are clamped
-			size_t columns = 0;		   // Samples along X
-			size_t rows = 0;		   // Samples along Y
+			Range x{0.0f, 100.0f};		// The area's X span
+			Range y{0.0f, 100.0f};		// The area's Y span
+			Range scale{-1.0f, 1.0f};	// The values mapped to the colour scale; outside it they are clamped
+			size_t columns = 0;			// Samples along X
+			size_t rows = 0;			// Samples along Y
 			std::vector<float> samples; // columns x rows samples, row by row from the lowest y; NaN for none
 		};
 
@@ -61,8 +61,11 @@ namespace UI::Xml
 		/** The LVGL subject that widgets bind to: a pointer subject pointing at this Surface */
 		lv_subject_t* raw() override { return m_subject; }
 
+		/** "surface" */
+		std::string_view typeName() const override { return "surface"; }
+
 	  private:
-		Values m_values;	  // What it shows
+		Values m_values;	 // What it shows
 		LvSubject m_subject; // Pointer subject whose value is this Surface
 	};
 } // namespace UI::Xml

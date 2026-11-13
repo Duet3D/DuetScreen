@@ -19,6 +19,8 @@
 
 #include "Bundles.h"
 #include <cstdint>
+#include <map>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -58,6 +60,9 @@ namespace UI::Xml
 
 	/** The loaded definition of a component, or nullptr */
 	const ComponentInfo* findComponent(std::string_view name);
+
+	/** Every loaded component, by name */
+	const std::map<std::string, ComponentInfo, std::less<>>& getComponents();
 
 	/** Rebuild `view` on reload. Called by XmlView. */
 	void addView(XmlView* view);

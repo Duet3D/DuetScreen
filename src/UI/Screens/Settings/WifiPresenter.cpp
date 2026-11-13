@@ -13,16 +13,18 @@ namespace UI
 	{
 		f.field("ssid", ssid, "Network name");
 		f.field("signal", signal, "Signal level, e.g. \"75 dBm\"");
-		f.field("known", known, "1 if the screen has joined it before");
+		f.field("known", known, "1 if the screen has joined it before, so it can be forgotten");
 		f.field("connected", connected, "1 if the screen is on it");
-		f.field("connect_text", connectText, "\"Disconnect\", \"Connect\" or \"Join\"");
+		f.field("connect_text", connectText, "\"Disconnect\" (connected), \"Connect\" (known) or \"Join\"");
 	}
 
 	WifiPresenter::WifiPresenter()
 		: XmlPresenter("wifi")
 	{
-		action("wifi.refresh", [this](const Xml::ActionArgs&) { m_scanner.scanNow(); });
+		action("wifi.refresh", "Scan for networks now", [this](const Xml::ActionArgs&) { m_scanner.scanNow(); });
 		action("wifi.connect",
+			   "Disconnect from the network if on it, connect to it if known, else ask for its password to join it. "
+			   "From a row of `networks`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = networkOf(args);
@@ -51,6 +53,7 @@ namespace UI
 				   }
 			   });
 		action("wifi.forget",
+			   "Forget the network. From a row of `networks`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = networkOf(args))
@@ -59,16 +62,22 @@ namespace UI
 					   m_scanner.scanNow();
 				   }
 			   });
-		action("wifi.password", [this](const Xml::ActionArgs& args) { m_password.set(args.text()); });
+		action("wifi.password",
+			   "Store the text edited (`value_changed` on the password's text box) as the password",
+			   [this](const Xml::ActionArgs& args) { m_password.set(args.text()); });
 		action("wifi.join",
+			   "Join the network asked about with the password typed",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_passwordOpen.set(0);
 				   m_status.set(_("settings.network.status_connecting", m_joining));
 				   m_scanner.connect(m_joining, std::string(m_password.get()));
 			   });
-		action("wifi.close_password", [this](const Xml::ActionArgs&) { m_passwordOpen.set(0); });
+		action("wifi.close_password",
+			   "Stop asking for a password",
+			   [this](const Xml::ActionArgs&) { m_passwordOpen.set(0); });
 		action("wifi.keyboard",
+			   "Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away",
 			   [this](const Xml::ActionArgs& args) { m_keyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
 		m_ip.set(_("settings.network.ip_address", "-"));
 	}
@@ -78,10 +87,10 @@ namespace UI
 		f.field("ip", m_ip, "E.g. \"IP Address: 192.168.1.100\"");
 		f.field("status", m_status, "How the last connection attempt went, or empty");
 		f.list("networks", m_networks, "The networks found");
-		f.field("password_open", m_passwordOpen, "1 while asking for a password");
-		f.field("password_title", m_passwordTitle, "The question");
+		f.field("password_open", m_passwordOpen, "1 while asking for a network's password");
+		f.field("password_title", m_passwordTitle, "The password question");
 		f.field("password", m_password, "The password typed");
-		f.field("keyboard", m_keyboard, "1 while the keyboard is up");
+		f.field("keyboard", m_keyboard, "1 while the keyboard is up, so the question moves out of its way");
 	}
 
 	void WifiPresenter::onInit()

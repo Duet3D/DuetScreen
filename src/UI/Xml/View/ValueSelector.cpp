@@ -118,8 +118,7 @@ namespace UI::Xml
 							 .onConfirm = std::move(onConfirm)});
 	}
 
-	std::vector<std::pair<std::string, ActionHandler>> ValueSelector::actions(
-		std::initializer_list<ValueSelector*> selectors)
+	std::vector<ValueSelector::Action> ValueSelector::actions(std::initializer_list<ValueSelector*> selectors)
 	{
 		const std::vector<ValueSelector*> all(selectors);
 
@@ -142,6 +141,7 @@ namespace UI::Xml
 
 		return {
 			{"selector.decrement",
+			 "Step the selector named by `arg` (its id) down",
 			 [selectorOf](const ActionArgs& args)
 			 {
 				 if (auto* s = selectorOf(args))
@@ -150,6 +150,7 @@ namespace UI::Xml
 				 }
 			 }},
 			{"selector.increment",
+			 "Step the selector named by `arg` (its id) up",
 			 [selectorOf](const ActionArgs& args)
 			 {
 				 if (auto* s = selectorOf(args))
@@ -158,6 +159,7 @@ namespace UI::Xml
 				 }
 			 }},
 			{"selector.edit",
+			 "Ask for a value for the selector named by `arg` (its id) with a number pad",
 			 [selectorOf](const ActionArgs& args)
 			 {
 				 if (auto* s = selectorOf(args))
@@ -169,6 +171,7 @@ namespace UI::Xml
 				 }
 			 }},
 			{"selector.pick",
+			 "Use the preset. From a row of a selector's `choices`.",
 			 [](const ActionArgs& args)
 			 {
 				 const auto* row = args.row<ValueChoiceRow>();
@@ -185,6 +188,7 @@ namespace UI::Xml
 				 }
 			 }},
 			{"selector.edit_choice",
+			 "Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`.",
 			 [](const ActionArgs& args)
 			 {
 				 const auto* row = args.row<ValueChoiceRow>();

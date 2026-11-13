@@ -29,4 +29,14 @@ namespace UI::Xml::Presenters
 		auto it = registry().find(name);
 		return it == registry().end() ? nullptr : it->second();
 	}
+
+	std::vector<std::string> names()
+	{
+		std::vector<std::string> result;
+		for (const auto& [name, factory] : registry())
+		{
+			result.push_back(name);
+		}
+		return result;
+	}
 } // namespace UI::Xml::Presenters

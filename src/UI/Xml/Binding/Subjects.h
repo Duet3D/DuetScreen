@@ -24,6 +24,9 @@ namespace UI::Xml
 
 		/** The LVGL subject that widgets bind to */
 		virtual lv_subject_t* raw() = 0;
+
+		/** What the subject holds, as the UI API reference names it, e.g. "int" or "text" */
+		virtual std::string_view typeName() const = 0;
 	};
 
 	/** A whole number, e.g. a fan number, a percentage or a 0/1 flag */
@@ -47,6 +50,9 @@ namespace UI::Xml
 
 		/** The LVGL subject that widgets bind to */
 		lv_subject_t* raw() override { return m_subject; }
+
+		/** "int" */
+		std::string_view typeName() const override { return "int"; }
 
 	  private:
 		LvSubject m_subject; // The LVGL subject
@@ -73,6 +79,9 @@ namespace UI::Xml
 
 		/** The LVGL subject that widgets bind to */
 		lv_subject_t* raw() override { return m_subject; }
+
+		/** "colour" */
+		std::string_view typeName() const override { return "colour"; }
 
 	  private:
 		LvSubject m_subject; // The LVGL subject
@@ -111,6 +120,9 @@ namespace UI::Xml
 
 		/** The LVGL subject that widgets bind to */
 		lv_subject_t* raw() override { return m_subject; }
+
+		/** "text" */
+		std::string_view typeName() const override { return "text"; }
 
 	  private:
 		/** Cut `value` to what fits in the buffer */

@@ -4,16 +4,8 @@
  * Behaviour for the babystepping panel (assets/ui/components/babystep.xml): nudge Z by a chosen step while printing,
  * or reset it.
  *
- * Fields
- *   usable       1 if there is a Z axis and the printer is connected
- *   reset_text   the reset button's text, with the current offset, e.g. "Reset 0.02 mm"
- *   steps        list of the step sizes, each with `text` (e.g. "0.01 mm") and `selected`
- *
- * Actions
- *   babystep.up, babystep.down   move Z up or down by the chosen step
- *   babystep.reset               undo all babystepping
- *   babystep.select              (in a steps row) use that step
- *   babystep.edit                (in a steps row) ask for a new size for it (remembered)
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  */
 
 #pragma once

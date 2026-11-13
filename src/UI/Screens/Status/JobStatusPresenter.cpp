@@ -39,24 +39,32 @@ namespace UI
 
 	void AxisPositionRow::fields(Xml::FieldVisitor& f)
 	{
-		f.field("text", text, "Letter and position on two lines");
+		f.field("text", text, "Letter and user position on two lines, e.g. \"X\\n0.00\"");
 	}
 
 	JobStatusPresenter::JobStatusPresenter()
 		: XmlPresenter("job_status")
 	{
-		action("job.pause", [](const Xml::ActionArgs&) { OM::FileSystem::PausePrint(); });
-		action("job.resume", [](const Xml::ActionArgs&) { OM::FileSystem::ResumePrint(); });
-		action("job.print_again", [](const Xml::ActionArgs&) { OM::FileSystem::PrintAgain(); });
-		action("job.ask_cancel", [this](const Xml::ActionArgs&) { m_confirmCancel.set(1); });
+		action("job.pause", "Pause the job", [](const Xml::ActionArgs&) { OM::FileSystem::PausePrint(); });
+		action("job.resume", "Resume the paused job", [](const Xml::ActionArgs&) { OM::FileSystem::ResumePrint(); });
+		action("job.print_again",
+			   "Start the last job again",
+			   [](const Xml::ActionArgs&) { OM::FileSystem::PrintAgain(); });
+		action("job.ask_cancel",
+			   "Ask whether to cancel the job (sets `confirm_cancel`)",
+			   [this](const Xml::ActionArgs&) { m_confirmCancel.set(1); });
 		action("job.cancel",
+			   "Cancel the job, which also turns the heaters off, and close the question",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_confirmCancel.set(0);
 				   OM::FileSystem::StopPrint(); // Also turns the heaters off
 			   });
-		action("job.close_dialog", [this](const Xml::ActionArgs&) { m_confirmCancel.set(0); });
+		action("job.close_dialog",
+			   "Close the question without cancelling the job",
+			   [this](const Xml::ActionArgs&) { m_confirmCancel.set(0); });
 		action("job.speed_factor",
+			   "Open the dialog to change the speed override",
 			   [](const Xml::ActionArgs&)
 			   {
 				   if (auto* modal = findView<ModalSpeedFactor>("speed_factor"))
@@ -65,6 +73,7 @@ namespace UI
 				   }
 			   });
 		action("job.flow_factor",
+			   "Open the dialog to change the extrusion override",
 			   [](const Xml::ActionArgs&)
 			   {
 				   if (auto* modal = findView<ModalExtrusionFactor>("job_extrusion_factor"))
@@ -72,33 +81,41 @@ namespace UI
 					   modal->open();
 				   }
 			   });
-		action("job.babystep", [this](const Xml::ActionArgs&) { m_babystepOpen.set(1); });
-		action("job.close_babystep", [this](const Xml::ActionArgs&) { m_babystepOpen.set(0); });
+		action("job.babystep",
+			   "Open the babystepping dialog (sets `babystep_open`)",
+			   [this](const Xml::ActionArgs&) { m_babystepOpen.set(1); });
+		action("job.close_babystep",
+			   "Close the babystepping dialog",
+			   [this](const Xml::ActionArgs&) { m_babystepOpen.set(0); });
 	}
 
 	void JobStatusPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("file", m_file, "The job shown");
-		f.field("finished", m_finished, "1 when showing the last job");
-		f.field("progress", m_progress, "0-100");
-		f.field("thumbnail", m_thumbnail, "Thumbnail path, or empty");
+		f.field("file", m_file, "The current job's file, else the last job's");
+		f.field("finished", m_finished, "1 when showing the last job (none is running), else 0");
+		f.field("progress", m_progress, "Progress, percent 0-100");
+		f.field("thumbnail", m_thumbnail, "The job's thumbnail path, or empty until it arrives");
 		f.list("axes", m_axes, "One row per axis");
-		f.field("speed_factor", m_speedFactor, "Speed override");
-		f.field("speed_text", m_speedText, "Current and requested speed");
-		f.field("speed_top", m_speedTop, "Top speed, thousandths of the fastest axis' maximum");
-		f.field("speed_requested", m_speedRequested, "Requested speed, thousandths of the fastest axis' maximum");
-		f.field("flow_factor", m_flowFactor, "Extrusion override");
-		f.field("flow_text", m_flowText, "Volumetric flow");
-		f.field("flow", m_flow, "Volumetric flow, thousandths of the fastest extruder's maximum");
-		f.field("babystep", m_babystep, "Z babystep");
+		f.field("speed_factor", m_speedFactor, "Speed override, e.g. \"100%\"");
+		f.field("speed_text", m_speedText, "Current and requested speed, e.g. \"0/0 mm/s\"");
+		f.field("speed_top",
+				m_speedTop,
+				"The current move's top speed, in thousandths of the fastest axis' maximum (0-1000)");
+		f.field("speed_requested",
+				m_speedRequested,
+				"Requested speed, in thousandths of the fastest axis' maximum (0-1000)");
+		f.field("flow_factor", m_flowFactor, "Extrusion override, e.g. \"100%\"");
+		f.field("flow_text", m_flowText, "Volumetric flow, e.g. \"0.0 mm³/s\"");
+		f.field("flow", m_flow, "Volumetric flow, in thousandths of the fastest extruder's maximum (0-1000)");
+		f.field("babystep", m_babystep, "Z babystep, e.g. \"0 mm\"");
 		f.field("babystep_open", m_babystepOpen, "1 while the babystepping dialog is open");
-		f.field("elapsed", m_elapsed, "Elapsed time");
-		f.field("remaining", m_remaining, "Time left");
+		f.field("elapsed", m_elapsed, "Elapsed time, e.g. \"Elapsed: 00:03:43\"");
+		f.field("remaining", m_remaining, "Time left, e.g. \"Remaining: 00:45:03\"");
 		f.field("pause", m_pause, "Pause: 0 hidden, 1 disabled, 2 usable");
 		f.field("resume", m_resume, "Resume: 0 hidden, 1 disabled, 2 usable");
 		f.field("print_again", m_printAgain, "Print again: 0 hidden, 1 disabled, 2 usable");
 		f.field("cancel", m_cancel, "Cancel: 0 hidden, 1 disabled, 2 usable");
-		f.field("confirm_cancel", m_confirmCancel, "1 while asking whether to cancel");
+		f.field("confirm_cancel", m_confirmCancel, "1 while asking whether to cancel the job");
 	}
 
 	void JobStatusPresenter::onInit()

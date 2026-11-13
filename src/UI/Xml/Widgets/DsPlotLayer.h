@@ -1,10 +1,8 @@
 /*
  * DsPlotLayer.h
  *
- * <ds_plot_layer>: a layer written inside a <ds_plot>, kept exactly over its drawing area, for widgets placed by X/Y
- * position such as <ds_plot_rect>s. It doesn't scroll, and has no padding. See DsPlot.h.
- *
- * Takes every lv_obj attribute, though the plot sets its position and size.
+ * <ds_plot_layer>: a layer written inside a <ds_plot>, kept exactly over its drawing area. See DsPlot.h. Its attributes
+ * are in registerXml().
  */
 
 #pragma once

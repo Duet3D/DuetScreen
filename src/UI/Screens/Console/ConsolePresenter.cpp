@@ -18,20 +18,22 @@ namespace UI
 {
 	void GcodeRow::fields(Xml::FieldVisitor& f)
 	{
-		f.field("gcode", gcode, "E.g. G28");
-		f.field("description", description, "What it does");
+		f.field("gcode", gcode, "The G-code, e.g. \"G28\"");
+		f.field("description", description, "What it does, e.g. \"Home\"");
 	}
 
 	ConsolePresenter::ConsolePresenter()
 		: XmlPresenter("console")
 	{
 		action("console.input",
+			   "What is typed changed to the text box's text (`value_changed` on it): narrow the G-code list to match",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   m_input.set(args.text());
 				   filter(args.text());
 			   });
 		action("console.send",
+			   "Send what is typed: to the shell while `shell` is 1, else to the printer as G-code",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   const std::string command(m_input.get());
@@ -47,8 +49,9 @@ namespace UI
 				   }
 				   Xml::Services::sendGcode(command);
 			   });
-		action("console.clear", [this](const Xml::ActionArgs&) { m_input.set(""); });
+		action("console.clear", "Empty the text box", [this](const Xml::ActionArgs&) { m_input.set(""); });
 		action("console.pick",
+			   "Put the G-code in the text box. From a row of `gcodes`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<GcodeRow>())
@@ -57,9 +60,12 @@ namespace UI
 				   }
 			   });
 		action("console.shell",
+			   "Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if "
+			   "`shell_available`",
 			   [this](const Xml::ActionArgs& args)
 			   { m_shell.set(m_shellAvailable.get() != 0 && args.value().value_or(0) != 0 ? 1 : 0); });
 		action("console.toggle_commands",
+			   "Show or fold away the G-code list, and remember which",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   const bool show = m_commandsShown.get() == 0;
@@ -74,10 +80,14 @@ namespace UI
 
 	void ConsolePresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("input", m_input, "What is typed");
-		f.field("commands_shown", m_commandsShown, "1 when the G-code list is showing");
-		f.field("shell_available", m_shellAvailable, "1 if this build can run shell commands");
-		f.field("shell", m_shell, "1 while commands go to the shell");
+		f.field("input", m_input, "What is typed, kept equal to the text box so picking a G-code can replace it");
+		f.field("commands_shown",
+				m_commandsShown,
+				"1 when the G-code list is showing, 0 when it is folded away; remembered");
+		f.field("shell_available",
+				m_shellAvailable,
+				"1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds)");
+		f.field("shell", m_shell, "1 while what is sent goes to the shell instead of the Duet");
 		f.list("gcodes", m_gcodes, "The G-codes starting with the first word typed");
 	}
 

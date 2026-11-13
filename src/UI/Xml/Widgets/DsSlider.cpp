@@ -7,6 +7,7 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
@@ -31,7 +32,42 @@ namespace UI::Xml
 
 	void DsSlider::registerXml()
 	{
-		lv_xml_register_widget("ds_slider", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_slider",
+			 .extends = "lv_obj",
+			 .description = "A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises "
+							"`value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ "
+							"or types a value), or with `send=\"change\"` on every movement. Values written by "
+							"`bind_value` are not edits and raise nothing, so a view can show live data and send "
+							"changes without echoing the data back to the printer.",
+			 .example =
+				 R"(<ds_slider min="0" max="100" increment="1" decimals="0" label_tag="fan.speed" bind_value="requested" numberpad="true">
+	<action trigger="value_confirmed" name="fans.set_speed"/>
+</ds_slider>)",
+			 .attributes = {{"min", "Bottom of the range, may have a fraction (default 0)"},
+							{"max", "Top of the range, may have a fraction (default 100)"},
+							{"increment", "Step of the -/+ buttons, may have a fraction, e.g. \"0.01\" (default 1)"},
+							{"decimals", "Decimal places the value is shown with (default 2)"},
+							{"label", "The label, if there is no `label_tag`"},
+							{"label_tag", "Translation key for the label"},
+							{"bind_label", "Follow a text subject for the label"},
+							{"label_shown",
+							 "\"false\" to hide the label, which still heads the number pad (default true)"},
+							{"bind_value", "Follow an int subject for the value"},
+							{"value_scale",
+							 "How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 "
+							 "held as 2 with value_scale=\"100\" (default 1)"},
+							{"send",
+							 "`confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` "
+							 "on every movement, for a setting seen as it changes such as brightness"},
+							{"out_of_range",
+							 "Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a "
+							 "timeout longer than the slider reaches"},
+							{"numberpad",
+							 "\"true\" to type the value on the number pad (the view registered as `numberpad`) when "
+							 "the value is tapped (default false)"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsSlider::setValueQuietly(float value)

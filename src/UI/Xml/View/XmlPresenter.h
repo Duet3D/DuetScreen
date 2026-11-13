@@ -25,12 +25,11 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace UI::Xml
 {
-	class XmlPresenter : public BasePresenter,
-						 public FieldProvider,
-						 public std::enable_shared_from_this<XmlPresenter>
+	class XmlPresenter : public BasePresenter, public FieldProvider, public std::enable_shared_from_this<XmlPresenter>
 	{
 	  public:
 		/** @param name The name the presenter is registered under, used in logs */
@@ -49,8 +48,15 @@ namespace UI::Xml
 		const ActionHandlerSet& getActions() const { return m_actions; }
 
 	  protected:
-		/** Handle `<action name="…">` raised in the view. Call from the constructor. */
-		void action(std::string name, ActionHandler handler) { m_actions.add(std::move(name), std::move(handler)); }
+		/**
+		 * Handle `<action name="…">` raised in the view. Call from the constructor.
+		 * @param description What the action does and what it takes (`arg`, the edited value, the row it is in), for
+		 * the UI API reference
+		 */
+		void action(std::string name, std::string description, ActionHandler handler)
+		{
+			m_actions.add(std::move(name), std::move(description), std::move(handler));
+		}
 
 	  private:
 		std::string m_name;			// Registered name
@@ -79,5 +85,8 @@ namespace UI::Xml
 
 		/** @return a new presenter called `name`, or nullptr if there is none */
 		std::shared_ptr<XmlPresenter> create(std::string_view name);
+
+		/** The names of every registered presenter, in order */
+		std::vector<std::string> names();
 	} // namespace Presenters
 } // namespace UI::Xml

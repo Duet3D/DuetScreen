@@ -3,14 +3,7 @@
  *
  * Publishes the object model's fans.
  *
- *   fans              list, one row per fan in slot order
- *     index           position in the list
- *     number          fan number, as used by M106 P
- *     name            display name, e.g. "Fan 1"
- *     requested       requested speed, percent 0-100
- *     actual          measured speed, percent 0-100
- *     rpm             tachometer reading, -1 if none
- *     thermostatic    1 if the fan is temperature controlled, else 0
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

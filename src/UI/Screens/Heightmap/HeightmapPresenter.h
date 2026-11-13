@@ -4,23 +4,8 @@
  * Behaviour for the Bed Levelling tab (assets/ui/screens/heightmap.xml): the height map shown, the height map files
  * on the printer, and their statistics.
  *
- * Fields
- *   surface             the height map shown, sampled for <ds_heatmap> (see src/UI/Xml/Binding/Surface.h)
- *   title               e.g. "Heightmap: heightmap.csv"
- *   maps                list of the height map files, each with
- *     name              the file name
- *     loaded            1 for the one the printer is using
- *     load_text         "Load", or "Unload" for the one in use
- *   stats.points, stats.area, stats.min, stats.max, stats.mean, stats.rms
- *                       the shown map's statistics, as text, e.g. "Number of points: 0;"
- *   mode                how values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range)
- *   levelling_usable    1 if the bed can be levelled or probed: connected and no job running
- *
- * Actions
- *   heightmap.show      (in a maps row) show that map
- *   heightmap.toggle    (in a maps row) make the printer use that map, or stop using it, and show it
- *   heightmap.mode      arg "fixed" or "auto": colour values that way
- * Levelling and probing use the global `gcode` action (G32, G29).
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md). Levelling and probing use the global `gcode` action (G32, G29).
  */
 
 #pragma once

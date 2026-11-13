@@ -3,11 +3,7 @@
  *
  * Publishes the printer's state.
  *
- *   machine.status      state key, e.g. idle, processing, paused (translations are under state.*)
- *   machine.printing    1 while a job is running and not paused, else 0: controls that would change the job (heater
- *                       states, tool selection) are disabled
- *   machine.job_active  1 while there is a job (running, pausing, paused, resuming or simulating), else 0: the job
- *                       list is disabled, so the job can't be replaced
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

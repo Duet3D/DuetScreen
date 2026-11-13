@@ -1,15 +1,8 @@
 /*
  * DsPlotRect.h
  *
- * <ds_plot_rect>: a rectangle kept at its X/Y bounds over a <ds_plot>, e.g. an object on the bed. It is written
- * inside a <ds_plot_layer> of the plot, directly or deeper (in a list row, say), and hidden while its bounds are
- * outside the plot's span. See DsPlot.h.
- *
- *     <ds_plot_rect bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2"/>
- *
- *   x1, y1, x2, y2                    the corners, in the plot's units; or bind_x1 … to follow integer subjects
- *
- * Takes every lv_obj attribute, though it sets its own position and size.
+ * <ds_plot_rect>: a rectangle kept at its X/Y bounds over a <ds_plot>. See DsPlot.h. Its attributes are in
+ * registerXml().
  */
 
 #pragma once

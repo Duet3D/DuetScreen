@@ -46,8 +46,13 @@ namespace UI::Xml
 
 	void TemperatureSource::fields(FieldVisitor& f)
 	{
-		f.list("temperatures", m_history, "One series per heater, sampled every model tick");
-		f.field("temperatures.limit", m_limit, "Highest maximum temperature of any heater, °C");
+		f.list("temperatures",
+			   m_history,
+			   "One series per heater, in slot order, sampled every model tick, whole °C. Heaters sharing a sensor are "
+			   "shown once.");
+		f.field("temperatures.limit",
+				m_limit,
+				"Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis");
 	}
 
 	void TemperatureSource::onInit()

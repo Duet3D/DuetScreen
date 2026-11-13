@@ -110,6 +110,7 @@ namespace
 			: XmlPresenter("test_tools")
 		{
 			action("test.heater",
+				   "Record the heater and tool the action came from",
 				   [this](const UI::Xml::ActionArgs& args)
 				   {
 					   auto* tool = args.row<UI::Xml::ToolRow>();
@@ -179,8 +180,9 @@ namespace
 		DialogPresenter()
 			: XmlPresenter("test_dialog")
 		{
-			action("test.ok", [this](const UI::Xml::ActionArgs&) { calls.emplace_back("ok"); });
+			action("test.ok", "Record ok", [this](const UI::Xml::ActionArgs&) { calls.emplace_back("ok"); });
 			action("test.dismissed",
+				   "Record dismissed",
 				   [this](const UI::Xml::ActionArgs&)
 				   {
 					   calls.emplace_back("dismissed");

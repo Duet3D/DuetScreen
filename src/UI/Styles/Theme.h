@@ -39,7 +39,7 @@ namespace UI::Themes
 	/** Size and FreeType style flags of one font */
 	struct FontConfig
 	{
-		uint32_t size = 14;								   // Pixel size
+		uint32_t size = 14;								// Pixel size
 		uint32_t style = LV_FREETYPE_FONT_STYLE_NORMAL; // LV_FREETYPE_FONT_STYLE_* flags and weight
 	};
 
@@ -94,7 +94,8 @@ namespace UI::Themes
 	 * built again, or, the first time, the stored theme (or the default).
 	 * @param problems Receives a message for each problem found (unknown parent, unknown style, bad value, …)
 	 */
-	void setThemeFiles(std::vector<ThemeFile> files, std::vector<std::pair<std::filesystem::path, std::string>>* problems);
+	void setThemeFiles(std::vector<ThemeFile> files,
+					   std::vector<std::pair<std::filesystem::path, std::string>>* problems);
 
 	/** Forget every theme and free what the styles point to: styles are emptied and the theme fonts released. Call
 	 * before lv_deinit(). */
@@ -123,6 +124,9 @@ namespace UI::Themes
 
 	/** Names of the themes users can choose, in order */
 	std::vector<std::string_view> getThemeNames();
+
+	/** The loaded files of theme `name` and its ancestors, the root ancestor first; empty if it can't be resolved */
+	std::vector<const ThemeFile*> getThemeChain(std::string_view name);
 
 	/** Recreate the theme fonts in `typeface` (see FontManager) */
 	void setTypeface(const std::string& typeface);

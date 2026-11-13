@@ -4,6 +4,7 @@
 
 #include "Actions.h"
 #include "Debug.h"
+#include "UI/Xml/Widgets/Widgets.h"
 #include "helix_xml.h"
 #include "src/xml/lv_xml_base_types.h"
 #include "src/xml/lv_xml_parser.h"
@@ -293,7 +294,7 @@ namespace UI::Xml
 		{
 			return false;
 		}
-		it->second(args);
+		it->second.handler(args);
 		return true;
 	}
 
@@ -303,7 +304,23 @@ namespace UI::Xml
 		{
 			s_valueConfirmed = static_cast<lv_event_code_t>(lv_event_register_id());
 			s_dismissed = static_cast<lv_event_code_t>(lv_event_register_id());
-			lv_xml_register_widget("lv_obj-action", actionCreate, actionApply);
+			Widgets::add(
+				{.name = "lv_obj-action",
+				 .description = "Written `<action>` inside any widget: run the named action when the widget raises the "
+								"trigger event. The action is looked for in the presenters of the views the widget is "
+								"in, innermost first, then in the global actions.",
+				 .example = R"(<action trigger="value_confirmed" name="gcode" arg="M106 P{number} S{value}"/>)",
+				 .attributes = {{"name", "The action to run (required)"},
+								{"trigger",
+								 "The event that runs it (default `clicked`): an LVGL event name such as "
+								 "`value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is "
+								 "finished) or `dismissed` (a `<ds_modal>` was closed by the user)"},
+								{"arg",
+								 "Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by "
+								 "the current value of the subject `name`, looked up from where the `<action>` is "
+								 "written"}}},
+				actionCreate,
+				actionApply);
 		}
 
 		void deinit()
@@ -347,9 +364,14 @@ namespace UI::Xml
 			}
 		}
 
-		void addGlobal(std::string name, ActionHandler handler)
+		void addGlobal(std::string name, std::string description, ActionHandler handler)
 		{
-			s_globals.add(std::move(name), std::move(handler));
+			s_globals.add(std::move(name), std::move(description), std::move(handler));
+		}
+
+		const ActionHandlerSet& globals()
+		{
+			return s_globals;
 		}
 
 		bool dispatch(lv_obj_t* from, std::string_view name, std::string_view arg, lv_event_t* event)

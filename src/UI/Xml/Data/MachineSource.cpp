@@ -15,9 +15,13 @@ namespace UI::Xml
 
 	void MachineSource::fields(FieldVisitor& f)
 	{
-		f.field("machine.status", m_status, "State key, e.g. idle, processing, paused");
-		f.field("machine.printing", m_printing, "1 while a job is running and not paused, else 0");
-		f.field("machine.job_active", m_jobActive, "1 while there is a job, even paused, else 0");
+		f.field("machine.status", m_status, "State key, e.g. idle, processing, paused; translated under state.*");
+		f.field("machine.printing",
+				m_printing,
+				"1 while a job is running and not paused, else 0: controls that would change the job are disabled");
+		f.field("machine.job_active",
+				m_jobActive,
+				"1 while there is a job (running, pausing, paused, resuming or simulating), else 0");
 	}
 
 	void MachineSource::onInit()

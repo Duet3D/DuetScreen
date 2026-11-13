@@ -24,7 +24,9 @@ namespace UI
 		f.field("name", m_name, "The printer's name");
 		f.field("has_tool", m_hasTool, "1 if there is a current tool with heaters, else 0");
 		f.field("tool", m_tool, "The current tool, e.g. \"T0:\", or empty if it has no heaters");
-		f.field("heaters", m_heaters, "The current tool's heaters' current and target temperatures");
+		f.field("heaters",
+				m_heaters,
+				"The current tool's heaters' current and target temperatures, e.g. \" 210°C/215°C 60°C/60°C\"");
 		f.field("fault", m_fault, "1 if any of the current tool's heaters has a fault, else 0");
 	}
 

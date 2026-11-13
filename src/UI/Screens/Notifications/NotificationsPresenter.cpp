@@ -66,8 +66,11 @@ namespace UI
 		m_timer = lv_timer_create(tickCb, TICK_MS, this);
 		lv_timer_pause(m_timer);
 
-		action("response.close", [this](const Xml::ActionArgs&) { closeResponse(); });
+		action("response.close",
+			   "Close the response showing and show the next",
+			   [this](const Xml::ActionArgs&) { closeResponse(); });
 		action("response.open_console",
+			   "Forget every response and open the console",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_responses.clear();
@@ -76,6 +79,7 @@ namespace UI
 			   });
 
 		action("update.confirm",
+			   "Install the update offered (nothing when a result is showing), and close",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   m_updateOpen.set(0);
@@ -84,9 +88,12 @@ namespace UI
 					   m_install();
 				   }
 			   });
-		action("update.close", [this](const Xml::ActionArgs&) { m_updateOpen.set(0); });
+		action("update.close",
+			   "Close the update prompt without installing",
+			   [this](const Xml::ActionArgs&) { m_updateOpen.set(0); });
 
 		action("alert.ok",
+			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   const uint32_t seq = m_alert.seq;
@@ -114,6 +121,7 @@ namespace UI
 				   closeAlert();
 			   });
 		action("alert.cancel",
+			   "Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   if (m_cancelSends)
@@ -123,6 +131,7 @@ namespace UI
 				   closeAlert();
 			   });
 		action("alert.choose",
+			   "Answer the alert with the choice, and close it. From a row of `alert.choices`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<AlertChoiceRow>())
@@ -132,6 +141,7 @@ namespace UI
 				   closeAlert();
 			   });
 		action("alert.jog",
+			   "Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<AlertAxisRow>();
@@ -142,10 +152,16 @@ namespace UI
 				   }
 				   Xml::Services::sendGcode(fmt::format("M120\nG91\nG1 {:c}{:g} F300\nM121", row->letter, *distance));
 			   });
-		action("alert.input", [this](const Xml::ActionArgs& args) { validateInput(args.text()); });
+		action(
+			"alert.input",
+			"Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok`",
+			[this](const Xml::ActionArgs& args) { validateInput(args.text()); });
 		action("alert.keyboard",
+			   "Set `alert.keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away",
 			   [this](const Xml::ActionArgs& args) { m_alertKeyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
-		action("alert.dismissed", [this](const Xml::ActionArgs&) { closeAlert(); });
+		action("alert.dismissed",
+			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_modal>`",
+			   [this](const Xml::ActionArgs&) { closeAlert(); });
 	}
 
 	NotificationsPresenter::~NotificationsPresenter()
@@ -159,10 +175,10 @@ namespace UI
 	void NotificationsPresenter::fields(Xml::FieldVisitor& f)
 	{
 		f.field("response.open", m_responseOpen, "1 while a response is showing");
-		f.field("response.title", m_responseTitle, "Its title");
+		f.field("response.title", m_responseTitle, "\"Info\", \"Success\", \"Warning\" or \"Error\"");
 		f.field("response.text", m_responseText, "The response");
 		f.field("response.type", m_responseType, "0 info, 1 success, 2 warning, 3 error");
-		f.field("response.progress", m_responseProgress, "Time left, 0-100");
+		f.field("response.progress", m_responseProgress, "Time left before it closes itself, 0-100");
 
 		f.field("update.open", m_updateOpen, "1 while an update is offered or its result shown");
 		f.field("update.title", m_updateTitle, "Title");
@@ -173,23 +189,23 @@ namespace UI
 		f.field("alert.open", m_alertOpen, "1 while an M291 alert is showing");
 		f.field("alert.title", m_alertTitle, "Title");
 		f.field("alert.text", m_alertText, "Text");
-		f.field("alert.ok", m_alertOk, "OK: 0 hidden, 1 disabled, 2 usable");
-		f.field("alert.ok_text", m_alertOkText, "OK button text");
-		f.field("alert.cancel", m_alertCancel, "Cancel: 0 hidden, 2 usable");
+		f.field("alert.ok", m_alertOk, "The OK button: 0 hidden, 1 disabled (the input isn't valid), 2 usable");
+		f.field("alert.ok_text", m_alertOkText, "\"Ok\", or \"Close\" for a message that only needs closing");
+		f.field("alert.cancel", m_alertCancel, "The Cancel button: 0 hidden, 2 usable");
 		f.field("alert.footer_shown", m_alertFooterShown, "1 if there is an OK or Cancel button");
-		f.list("alert.choices", m_alertChoices, "The choices offered");
+		f.list("alert.choices", m_alertChoices, "The choices offered, each with `text`");
 		f.field("alert.choices_shown", m_alertChoicesShown, "1 if choices are offered");
-		f.list("alert.axes", m_alertAxes, "The axes the user may jog");
+		f.list("alert.axes", m_alertAxes, "The axes the user may jog, each with `label` and `homed`");
 		f.field("alert.axes_shown", m_alertAxesShown, "1 if there are axes to jog");
 		f.field("alert.input_shown", m_alertInputShown, "1 if a value is asked for");
 		f.field("alert.input", m_alertInput, "The value to start with");
 		f.field("alert.accepted_chars", m_alertAccepted, "Characters the value may contain; empty for any");
 		f.field("alert.keyboard_mode", m_alertKeyboardMode, "\"number\" or \"text\"");
-		f.field("alert.min", m_alertMin, "Lower limit; empty if none");
-		f.field("alert.max", m_alertMax, "Upper limit; empty if none");
+		f.field("alert.min", m_alertMin, "Lower limit shown beside the value; empty if none");
+		f.field("alert.max", m_alertMax, "Upper limit shown beside the value; empty if none");
 		f.field("alert.warning", m_alertWarning, "Why the value isn't valid; empty if it is");
-		f.field("alert.keyboard", m_alertKeyboard, "1 while the keyboard is up");
-		f.field("alert.progress", m_alertProgress, "Time left, 0-100");
+		f.field("alert.keyboard", m_alertKeyboard, "1 while the keyboard is up, so the alert moves out of its way");
+		f.field("alert.progress", m_alertProgress, "Time left before the alert closes itself, 0-100");
 		f.field("alert.progress_shown", m_alertProgressShown, "1 if the alert closes itself");
 	}
 

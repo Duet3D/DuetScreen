@@ -5,21 +5,10 @@
  * gives its styles, and, for a theme whose palette can be changed, sliders for its hues and chroma and a dark mode
  * toggle, which change it as they move.
  *
- * Fields
- *   swatches                    list of the colours, each with
- *     label                     the style's name, e.g. "Primary"
- *     color                     its colour (a colour subject, for <bind_style_prop>)
- *     text_style                for the text styles, so their names show them: 1 muted, 2 emphasis, 3 header; else 0
- *   controls_shown              1 if the palette can be changed here
- *   primary_hue, secondary_hue  0-360
- *   chroma                      0-0.4, in hundredths (0.02 is 2)
- *   dark                        1 in dark mode
- *   primary.lightness, primary.chroma, secondary.lightness, secondary.chroma
- *                               the colours' OKLCH lightness and chroma in thousandths, to show hues at
- *                               (<ds_hue_slider>)
+ * Actions change the palette as the controls move.
  *
- * Actions
- *   preview.primary_hue, preview.secondary_hue, preview.chroma, preview.dark   (the value) change the palette
+ * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
+ * (docs/XML_UI_API.md).
  *
  * Listens for ThemeChanged, which whatever changes the theme posts.
  */

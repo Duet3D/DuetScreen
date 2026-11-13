@@ -163,10 +163,18 @@ namespace UI::HeaterActions
 
 	void registerAll()
 	{
-		Xml::Actions::addGlobal("tools.toggle", toggleTool);
-		Xml::Actions::addGlobal("heaters.toggle", toggleHeater);
-		Xml::Actions::addGlobal("heaters.set_active", [](const Xml::ActionArgs& args) { setTemperature(args, true); });
+		Xml::Actions::addGlobal(
+			"tools.toggle", "Select the tool, or deselect it if selected. From a row of `tools`.", toggleTool);
+		Xml::Actions::addGlobal("heaters.toggle",
+								"Cycle the heater through active, standby and off. From a tool's `heaters` row, or a "
+								"row of `beds` or `chambers`.",
+								toggleHeater);
+		Xml::Actions::addGlobal("heaters.set_active",
+								"Set the heater's active temperature to the edited value (`value_confirmed`), else ask "
+								"for it with a number pad. From the same rows as `heaters.toggle`.",
+								[](const Xml::ActionArgs& args) { setTemperature(args, true); });
 		Xml::Actions::addGlobal("heaters.set_standby",
+								"As `heaters.set_active`, for the standby temperature",
 								[](const Xml::ActionArgs& args) { setTemperature(args, false); });
 	}
 } // namespace UI::HeaterActions

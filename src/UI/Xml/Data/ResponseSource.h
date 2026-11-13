@@ -1,10 +1,10 @@
 /*
  * ResponseSource.h
  *
- * Publishes that the printer replied, so a control can draw attention to the console.
+ * Publishes that the printer replied, so a control can draw attention to the console, e.g.
+ * `<ds_button flash_on="responses.count"/>`
  *
- *   responses.count   number of responses received; changes with every response, e.g.
- *                     `<ds_button flash_on="responses.count"/>`
+ * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
 #pragma once

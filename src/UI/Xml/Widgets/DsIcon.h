@@ -1,11 +1,8 @@
 /*
  * DsIcon.h
  *
- * <ds_icon>: an icon from the icon set chosen in the settings, coloured by the theme. It follows icon set changes.
- *
- *     <ds_icon icon="folder.png" width="72" height="72"/>
- *
- * Takes every lv_obj and lv_image attribute.
+ * <ds_icon>: an icon from the icon set chosen in the settings, coloured by the theme. Its attributes are in
+ * registerXml().
  */
 
 #pragma once

@@ -11,8 +11,17 @@
 
 #pragma once
 
+#include <string_view>
+#include <vector>
+
 namespace UI::Xml::ThemeStyles
 {
 	/** Register every theme style and font with the XML engine. Call after lv_xml_init(). */
 	void registerAll();
+
+	/** The names fonts are registered under, e.g. "font_header" */
+	std::vector<std::string_view> fontNames();
+
+	/** The names images are registered under, e.g. "symbol_ok" */
+	std::vector<std::string_view> imageNames();
 } // namespace UI::Xml::ThemeStyles

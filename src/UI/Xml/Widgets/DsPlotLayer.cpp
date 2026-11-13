@@ -4,6 +4,7 @@
 
 #include "DsPlotLayer.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
 namespace UI::Xml
@@ -21,7 +22,13 @@ namespace UI::Xml
 
 	void DsPlotLayer::registerXml()
 	{
-		lv_xml_register_widget("ds_plot_layer", xmlCreate, xmlApply);
+		Widgets::add({.name = "ds_plot_layer",
+					  .extends = "lv_obj",
+					  .description = "A layer written inside a `<ds_plot>`, kept exactly over its drawing area, for "
+									 "widgets placed by X/Y position such as `<ds_plot_rect>`s. It doesn't scroll and "
+									 "has no padding; the plot sets its position and size."},
+					 xmlCreate,
+					 xmlApply);
 	}
 
 	void DsPlotLayer::cover(lv_obj_t* area)

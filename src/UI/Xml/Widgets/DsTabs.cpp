@@ -4,6 +4,7 @@
 
 #include "DsTabs.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
@@ -41,8 +42,32 @@ namespace UI::Xml
 
 	void DsTabs::registerXml()
 	{
-		lv_xml_register_widget("ds_tabs", xmlCreate, xmlApply);
-		lv_xml_register_widget("ds_tabs-tab", xmlCreateTab, xmlApplyTab);
+		Widgets::add({.name = "ds_tabs",
+					  .extends = "lv_obj",
+					  .description = "A row of tab buttons over the selected tab's content. Each tab is a "
+									 "`<ds_tabs-tab>` inside it; the first starts selected.",
+					  .example = R"(<ds_tabs width="100%" height="100%">
+	<ds_tabs-tab name="macros" title_tag="file.macros">
+		…the tab's content…
+	</ds_tabs-tab>
+	<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
+		…
+	</ds_tabs-tab>
+</ds_tabs>)"},
+					 xmlCreate,
+					 xmlApply);
+		Widgets::add({.name = "ds_tabs-tab",
+					  .extends = "lv_obj",
+					  .description = "One tab of a `<ds_tabs>`, written inside it. Its content is the tab's page; the "
+									 "lv_obj attributes apply to that page.",
+					  .attributes = {{"title", "The tab button's text, if there is no `title_tag`"},
+									 {"title_tag", "Translation key for the tab button's text"},
+									 {"bind_disabled", "Disable the tab's button while this int subject is non-zero"},
+									 {"select_on",
+									  "Select the tab whenever this subject changes to a non-empty text or non-zero "
+									  "int, e.g. the status tab when a job starts: `select_on=\"job.file\"`"}}},
+					 xmlCreateTab,
+					 xmlApplyTab);
 	}
 
 	void* DsTabs::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)

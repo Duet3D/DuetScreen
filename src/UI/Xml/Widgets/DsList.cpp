@@ -5,6 +5,7 @@
 #include "DsList.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
+#include "Widgets.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
 
@@ -63,7 +64,35 @@ namespace UI::Xml
 
 	void DsList::registerXml()
 	{
-		lv_xml_register_widget("ds_list", xmlCreate, xmlApply);
+		Widgets::add(
+			{.name = "ds_list",
+			 .extends = "lv_obj",
+			 .description =
+				 "A container with one component per row of a list. Each item is built in a scope of its own holding "
+				 "its row's fields, so names are found in the row first, then where the list is written. With "
+				 "`windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of "
+				 "widgets; every item then has the same size, and the list places them itself (its own layout is "
+				 "ignored), with its style_pad_row and style_pad_column as the gaps.",
+			 .example = R"(<ds_list list="files" item="file_row" windowed="true" item_height="90" flow="column"/>)",
+			 .attributes =
+				 {{"list",
+				   "The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can "
+				   "show `list=\"heaters\"`), then the view's presenter, then the globals"},
+				  {"item", "The component built for each row (required)"},
+				  {"windowed",
+				   "\"true\" to build only the rows on screen, building and deleting rows as the list scrolls (default "
+				   "false)"},
+				  {"item_height", "Windowed: each item's height in pixels (required when windowed)"},
+				  {"item_width",
+				   "Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; "
+				   "the list scrolls sideways); the list's full width if not given"},
+				  {"flow",
+				   "Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit"},
+				  {"follow_end",
+				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
+				   "unless the user has scrolled back (default false)"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void DsList::onListResized(size_t oldSize, size_t newSize)
@@ -178,8 +207,7 @@ namespace UI::Xml
 		Row& row = m_list->row(index);
 		auto scope = std::make_unique<Scope>(m_parentContext);
 		ScopeBinder binder(*scope);
-		binder.field("index", row.index, "Position in the list");
-		row.fields(binder);
+		row.allFields(binder);
 
 		const std::string name = std::to_string(index);
 		const char* attrs[] = {"name", name.c_str(), nullptr, nullptr};
