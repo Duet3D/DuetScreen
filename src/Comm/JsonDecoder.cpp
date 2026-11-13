@@ -17,6 +17,7 @@
 #include "Hardware/SerialIo.h"
 #include "ObjectModel/Alert.h"
 #include "ObjectModel/Job.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "ObjectModel/Utils.h"
 #include "UI/Core/Model.h"
 #include "nameof.hpp"
@@ -224,6 +225,7 @@ namespace Comm
 	void JsonDecoder::StartReceivedMessage()
 	{
 		ZoneScoped;
+		m_patch.reset();
 	}
 
 	void JsonDecoder::EndReceivedMessage()
@@ -243,6 +245,60 @@ namespace Comm
 
 		responseType = ResponseType::unknown;
 		responseData = nullptr;
+
+		OM::Tree::get().apply(m_patch);
+		m_patch.reset();
+	}
+
+	OM::Node::Kind JsonDecoder::ValueKind() const
+	{
+		switch (m_state)
+		{
+		case jsStringVal:
+			return OM::Node::Kind::string;
+		case jsCharsVal:
+			return m_fieldVal.Equals("true") || m_fieldVal.Equals("false") ? OM::Node::Kind::boolean
+																		   : OM::Node::Kind::null;
+		default:
+			return OM::Node::Kind::number;
+		}
+	}
+
+	std::optional<OM::Path> JsonDecoder::ResultPath(std::string_view id, size_t depth) const
+	{
+		constexpr std::string_view result = "result";
+		if (!id.starts_with(result) ||
+			(id.size() > result.size() && id[result.size()] != ':' && id[result.size()] != '^'))
+		{
+			return std::nullopt;
+		}
+		return OM::Path::fromDecoderId(id.substr(result.size()), std::span<const size_t>(m_arrayIndices, depth));
+	}
+
+	void JsonDecoder::FeedPatch(OM::Node::Kind kind)
+	{
+		const std::string_view id = m_fieldId.c_str();
+		const std::string_view text = m_fieldVal.c_str();
+		if (id == "key")
+		{
+			m_patch.setKey(text);
+		}
+		else if (id == "flags")
+		{
+			m_patch.setFlags(text);
+		}
+		else if (id == "next")
+		{
+			uint32_t next = 0;
+			if (GetUnsignedInteger(m_fieldVal.c_str(), next))
+			{
+				m_patch.setNext(next);
+			}
+		}
+		else if (const auto path = ResultPath(id, m_arrayDepth))
+		{
+			m_patch.value(*path, kind, text);
+		}
 	}
 
 	// Public functions called by the SerialIo module
@@ -256,26 +312,7 @@ namespace Comm
 					indices[2],
 					indices[3],
 					data);
-		if (StringStartsWith(id.c_str(), "result"))
-		{
-			// We might either get something like:
-			// * "result[optional modified]:[key]:[field]" for a live response or
-			// * "result[optional modified]:[field]" for a detailed response
-			// If live response remove "result:"
-			// else replace "result" by "key" (do NOT replace anything beyond "result" as there might be an
-			// modifier)
-
-			id.Erase(0, 6);
-			if (!m_key.IsEmpty())
-			{
-				id.Prepend(m_key.c_str());
-			}
-			else
-			{
-				// if empty key also erase the colon
-				id.Erase(0);
-			}
-		}
+		TranslateResultId(id);
 
 		// search for key in g_observerMap
 		Model::get().runSubscribers(id.c_str(), this, data, indices);
@@ -370,12 +407,48 @@ namespace Comm
 	}
 
 	// Public function called when the serial I/O module finishes receiving an array of values
+	void JsonDecoder::TranslateResultId(StringRef id) const
+	{
+		if (StringStartsWith(id.c_str(), "result"))
+		{
+			// We might either get something like:
+			// * "result[optional modified]:[key]:[field]" for a live response or
+			// * "result[optional modified]:[field]" for a detailed response
+			// If live response remove "result:"
+			// else replace "result" by "key" (do NOT replace anything beyond "result" as there might be an
+			// modifier)
+
+			id.Erase(0, 6);
+			if (!m_key.IsEmpty())
+			{
+				id.Prepend(m_key.c_str());
+			}
+			else
+			{
+				// if empty key also erase the colon
+				id.Erase(0);
+			}
+		}
+	}
+
 	void JsonDecoder::ProcessArrayEnd(const char id[], const size_t indices[])
 	{
 		ZoneScoped;
-		// search for key in subscribers
-		// LOG_VERBOSE("searching for array end subscribers for '{:s}'", id);
-		Model::get().runArrayEndSubscribers(id, this, indices);
+		// `id` ends with the array's '^', and the last index is the number of items
+		const std::string_view arrayId(id);
+		if (!arrayId.empty() && m_arrayDepth > 0)
+		{
+			if (const auto path = ResultPath(arrayId.substr(0, arrayId.size() - 1), m_arrayDepth - 1))
+			{
+				m_patch.arrayEnd(*path, indices[m_arrayDepth - 1]);
+			}
+		}
+
+		// search for key in subscribers, which know it by its translated id
+		String<MAX_JSON_ID_LENGTH> subscriberId;
+		subscriberId.copy(id);
+		TranslateResultId(subscriberId.GetRef());
+		Model::get().runArrayEndSubscribers(subscriberId.c_str(), this, indices);
 	}
 
 	void JsonDecoder::ParserErrorEncountered(int currentState, const char* id, int errors)
@@ -427,6 +500,7 @@ namespace Comm
 	void JsonDecoder::ProcessField()
 	{
 		ZoneScoped;
+		FeedPatch(ValueKind());
 		if (m_state == jsCharsVal)
 		{
 			if (m_fieldVal.Equals("null"))
@@ -434,7 +508,10 @@ namespace Comm
 				m_fieldVal.Clear(); // so that we can distinguish null from an empty string
 			}
 		}
-		ProcessReceivedValue(m_fieldId.GetRef(), m_fieldVal.c_str(), m_arrayIndices);
+		// Subscribers get a copy of the id to translate (see TranslateResultId()); the parser keeps the id as received
+		String<MAX_JSON_ID_LENGTH> id;
+		id.copy(m_fieldId.c_str());
+		ProcessReceivedValue(id.GetRef(), m_fieldVal.c_str(), m_arrayIndices);
 		m_fieldVal.Clear();
 	}
 
@@ -834,6 +911,10 @@ namespace Comm
 						m_state = jsNegIntVal;
 						break;
 					case '{': // start of a nested object
+						if (const auto path = ResultPath(m_fieldId.c_str(), m_arrayDepth))
+						{
+							m_patch.objectStart(*path);
+						}
 						m_state = (!m_fieldId.cat(':')) ? jsExpectId : jsError;
 
 						if (m_state == jsError)

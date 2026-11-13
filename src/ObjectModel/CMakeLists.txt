@@ -13,4 +13,9 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/Sensor.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Spindle.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tool.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/ChangeSet.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Node.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Patch.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Path.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Tree.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Utils.cpp)

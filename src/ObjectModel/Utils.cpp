@@ -5,6 +5,7 @@
  *      Author: manuel
  */
 #include "Debug.h"
+#include "ObjectModel/Tree/Tree.h"
 
 // #include "UI/UserInterface.h"
 
@@ -48,6 +49,7 @@ namespace OM
 		FileSystem::ClearFileSystem();
 		SetPrinterName("");
 		SetPrinterUniqueId("");
+		Tree::get().clear();
 	}
 
 	static Debug::DebugCommand s_logOM(

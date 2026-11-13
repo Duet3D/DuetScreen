@@ -15,6 +15,7 @@
 #include "Comm/FileInfo.h"
 #include "Configuration.h"
 #include "ObjectModel/Files.h"
+#include "ObjectModel/Tree/Patch.h"
 #include <Duet3D/General/String.h>
 #include <cstddef>
 #include <memory>
@@ -99,6 +100,22 @@ namespace Comm
 		bool CheckValueCompleted(char c, bool doProcess);
 		void receiveError();
 
+		/** Replace "result" at the start of `id` with the response's key, as subscribers know the field */
+		void TranslateResultId(StringRef id) const;
+
+		/** The JSON kind of the value just completed, from the state the parser is in */
+		OM::Node::Kind ValueKind() const;
+
+		/**
+		 * Where field `id` lies in an M409 result, or nothing if it isn't in the result
+		 * @param id A field id, e.g. "result:heaters^:current"
+		 * @param depth How many of m_arrayIndices `id`'s '^' use
+		 */
+		std::optional<OM::Path> ResultPath(std::string_view id, size_t depth) const;
+
+		/** Give a completed top-level or result value to the object model patch */
+		void FeedPatch(OM::Node::Kind kind);
+
 		// m_fieldId is the name of the field being received. A '^' character indicates the position of an _ecv_array
 		// index, and a ':' character indicates a field separator.
 		String<50> m_fieldPrefix;
@@ -114,6 +131,7 @@ namespace Comm
 		Seq* m_seq = nullptr;
 		String<50> m_key; // for OM responses
 		String<10> m_flags; // e.g. "vna0"
+		OM::Patch m_patch;	// The M409 result being received, given to OM::Tree when the message ends
 	};
 } // namespace Comm
 #endif /* JNI_COMM_JSONDECODER_H_ */
