@@ -8,6 +8,8 @@
  * Fields
  *   input              what is typed (kept equal to the text box, so picking a G-code can replace it)
  *   commands_shown     1 when the G-code list is showing, 0 when it is folded away (remembered)
+ *   shell_available    1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds)
+ *   shell              1 while what is sent goes to the shell instead of the Duet
  *   gcodes             list, the G-codes starting with the first word typed
  *     gcode            e.g. "G28"
  *     description      e.g. "Home"
@@ -18,6 +20,7 @@
  *   console.clear            empty the text box
  *   console.pick             (in a gcodes row) put that G-code in the text box
  *   console.toggle_commands  show or fold away the G-code list
+ *   console.shell            (value_changed on a checkbox) send to the shell while checked
  */
 
 #pragma once
@@ -57,8 +60,13 @@ namespace UI
 		/** List the G-codes starting with the first word of `typed`, ignoring case */
 		void filter(std::string_view typed);
 
+		/** Run `command` in the shell and show its output in the console */
+		static void runInShell(const std::string& command);
+
 		Xml::StringSubject<256> m_input;  // What is typed
 		Xml::IntSubject m_commandsShown;  // 1 when the G-code list is showing
+		Xml::IntSubject m_shellAvailable; // 1 if this build can run shell commands
+		Xml::IntSubject m_shell;		  // 1 while commands go to the shell
 		Xml::List<GcodeRow> m_gcodes;	  // G-codes matching what is typed
 	};
 } // namespace UI
