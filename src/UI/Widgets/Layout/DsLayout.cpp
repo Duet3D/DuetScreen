@@ -78,10 +78,11 @@ namespace UI::Xml
 			if (placement.root)
 			{
 				lv_obj_remove_event_cb_with_user_data(placement.root, viewDeletedCb, this);
-				if (placement.overlay)
-				{
-					lv_obj_remove_event_cb_with_user_data(placement.root, overlayFitCb, placement.overlay);
-				}
+			}
+			if (placement.overlay)
+			{
+				lv_obj_remove_event_cb_with_user_data(
+					lv_obj_get_parent(placement.overlay), overlayFitCb, placement.overlay);
 			}
 		}
 	}
@@ -193,7 +194,7 @@ namespace UI::Xml
 				Placement kept = std::move(*same);
 				old.erase(same);
 				kept.item = item;
-				lv_obj_move_to_index(kept.root, static_cast<int32_t>(index));
+				lv_obj_move_to_index(kept.outer(), static_cast<int32_t>(index));
 				m_placements.push_back(std::move(kept));
 			}
 			else
@@ -206,9 +207,9 @@ namespace UI::Xml
 				m_placements.push_back(build(item, index));
 			}
 
-			if (layout->kind == LayoutKind::Grid && m_placements.back().root)
+			if (layout->kind == LayoutKind::Grid && m_placements.back().outer())
 			{
-				placeInGrid(m_placements.back().root, item);
+				placeInGrid(m_placements.back().outer(), item);
 			}
 		}
 		for (auto& placement : old)
@@ -243,14 +244,43 @@ namespace UI::Xml
 							.props = widget ? widget->propsFor(item.settings)
 											: std::map<std::string, std::string>{{"widget", item.widget}}};
 
-		placement.view = new XmlView(item.id, m_container, placement.component, nullptr, placement.props);
+		// In a grid, a plain box the grid sizes, which the widget fills (see the file comment)
+		const Layout* layout = Layouts::find(m_slot);
+		lv_obj_t* parent = m_container;
+		if (layout != nullptr && layout->kind == LayoutKind::Grid)
+		{
+			placement.cell = lv_obj_create(m_container);
+			lv_obj_remove_style_all(placement.cell);
+			lv_obj_remove_flag(placement.cell, LV_OBJ_FLAG_CLICKABLE);
+			lv_obj_remove_flag(placement.cell, LV_OBJ_FLAG_SCROLLABLE);
+			// The widget's shadow or glow shows beyond the cell, as it would without one
+			lv_obj_add_flag(placement.cell, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+			lv_obj_add_event_cb(placement.cell, cellExtDrawSizeCb, LV_EVENT_REFR_EXT_DRAW_SIZE, nullptr);
+			parent = placement.cell;
+		}
+
+		placement.view = new XmlView(item.id, parent, placement.component, nullptr, placement.props);
 		placement.root = placement.view->getRootPtr();
+		if (placement.cell != nullptr)
+		{
+			lv_obj_set_size(placement.root, LV_PCT(100), LV_PCT(100));
+			lv_obj_refresh_ext_draw_size(placement.cell);
+		}
 		// Forget the placement first, then delete the view
 		lv_obj_add_event_cb(placement.root, viewDeletedCb, LV_EVENT_DELETE, this);
 		deleteWith(placement.root, placement.view);
-		lv_obj_move_to_index(placement.root, static_cast<int32_t>(index));
+		lv_obj_move_to_index(placement.outer(), static_cast<int32_t>(index));
 		DsView::showWithParent(*placement.view, m_container);
 		return placement;
+	}
+
+	void DsLayout::cellExtDrawSizeCb(lv_event_t* e)
+	{
+		auto* cell = static_cast<lv_obj_t*>(lv_event_get_current_target(e));
+		if (lv_obj_get_child_count(cell) > 0)
+		{
+			lv_event_set_ext_draw_size(e, lv_obj_calculate_ext_draw_size(lv_obj_get_child(cell, 0), LV_PART_MAIN));
+		}
 	}
 
 	void DsLayout::onEditorChanged()
@@ -286,8 +316,8 @@ namespace UI::Xml
 		const bool grid = layout != nullptr && layout->kind == LayoutKind::Grid;
 		const std::string key = fmt::format("{:s}/{:s}", m_slot, placement.item.id);
 		const char* attrs[] = {"name", "customise_overlay", "key", key.c_str(), nullptr, nullptr};
-		auto* overlay =
-			static_cast<lv_obj_t*>(lv_xml_create(placement.root, grid ? GRID_OVERLAY : STRIP_OVERLAY, attrs));
+		lv_obj_t* parent = placement.cell ? placement.cell : placement.root;
+		auto* overlay = static_cast<lv_obj_t*>(lv_xml_create(parent, grid ? GRID_OVERLAY : STRIP_OVERLAY, attrs));
 		if (overlay == nullptr)
 		{
 			LOG_ERROR("<ds_layout slot=\"{:s}\">: no edit overlay component", m_slot);
@@ -301,18 +331,15 @@ namespace UI::Xml
 		lv_obj_remove_flag(overlay, LV_OBJ_FLAG_SCROLL_CHAIN);
 		lv_obj_remove_flag(overlay, LV_OBJ_FLAG_GESTURE_BUBBLE);
 		lv_obj_add_event_cb(overlay, overlayEventCb, LV_EVENT_ALL, this);
-		lv_obj_add_event_cb(placement.root, overlayFitCb, LV_EVENT_SIZE_CHANGED, overlay);
-		lv_obj_add_event_cb(placement.root, overlayFitCb, LV_EVENT_STYLE_CHANGED, overlay);
+		lv_obj_add_event_cb(parent, overlayFitCb, LV_EVENT_SIZE_CHANGED, overlay);
+		lv_obj_add_event_cb(parent, overlayFitCb, LV_EVENT_STYLE_CHANGED, overlay);
 		placement.overlay = overlay;
 		fitOverlay(overlay);
 	}
 
 	void DsLayout::removeOverlay(Placement& placement)
 	{
-		if (placement.root != nullptr)
-		{
-			lv_obj_remove_event_cb_with_user_data(placement.root, overlayFitCb, placement.overlay);
-		}
+		lv_obj_remove_event_cb_with_user_data(lv_obj_get_parent(placement.overlay), overlayFitCb, placement.overlay);
 		lv_obj_delete(placement.overlay);
 		placement.overlay = nullptr;
 	}
@@ -322,10 +349,20 @@ namespace UI::Xml
 		// Positions are from the parent's content area, inside its border and padding
 		lv_obj_t* parent = lv_obj_get_parent(overlay);
 		const int32_t border = lv_obj_get_style_border_width(parent, LV_PART_MAIN);
-		lv_obj_set_pos(overlay,
-					   -(lv_obj_get_style_pad_left(parent, LV_PART_MAIN) + border),
-					   -(lv_obj_get_style_pad_top(parent, LV_PART_MAIN) + border));
-		lv_obj_set_size(overlay, lv_obj_get_width(parent), lv_obj_get_height(parent));
+		const int32_t x = -(lv_obj_get_style_pad_left(parent, LV_PART_MAIN) + border);
+		const int32_t y = -(lv_obj_get_style_pad_top(parent, LV_PART_MAIN) + border);
+		const int32_t width = lv_obj_get_width(parent);
+		const int32_t height = lv_obj_get_height(parent);
+		// Only a change: setting them lays the parent out again, which would call this again, without end
+		if (lv_obj_get_style_x(overlay, LV_PART_MAIN) != x || lv_obj_get_style_y(overlay, LV_PART_MAIN) != y)
+		{
+			lv_obj_set_pos(overlay, x, y);
+		}
+		if (lv_obj_get_style_width(overlay, LV_PART_MAIN) != width ||
+			lv_obj_get_style_height(overlay, LV_PART_MAIN) != height)
+		{
+			lv_obj_set_size(overlay, width, height);
+		}
 	}
 
 	void DsLayout::overlayFitCb(lv_event_t* e)
@@ -519,12 +556,14 @@ namespace UI::Xml
 
 	void DsLayout::remove(Placement& placement)
 	{
-		if (placement.root)
+		lv_obj_t* outer = placement.outer();
+		placement.view = nullptr;
+		placement.root = nullptr;
+		placement.cell = nullptr;
+		placement.overlay = nullptr;
+		if (outer != nullptr)
 		{
-			lv_obj_t* root = placement.root;
-			placement.view = nullptr;
-			placement.root = nullptr;
-			lv_obj_delete(root);
+			lv_obj_delete(outer);
 		}
 	}
 } // namespace UI::Xml

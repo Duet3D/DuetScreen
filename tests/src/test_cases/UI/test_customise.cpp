@@ -9,6 +9,7 @@
 #include "UI/Widgets/Layout/DsLayout.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/Actions.h"
@@ -265,6 +266,19 @@ class TestCustomiseHome : public UiTestSuite
 		return layout ? layout->findItem(id) : nullptr;
 	}
 
+	/** The edit overlay over the placed widget `id` in `slot`: in its cell in a grid, else in the widget */
+	static lv_obj_t* overlayOf(const char* slot, const char* id)
+	{
+		lv_obj_t* widget = placed(slot, id);
+		if (widget == nullptr)
+		{
+			return nullptr;
+		}
+		const Layout* layout = Layouts::find(slot);
+		lv_obj_t* holder = layout && layout->kind == UI::Xml::LayoutKind::Grid ? lv_obj_get_parent(widget) : widget;
+		return lv_obj_find_by_name(holder, "customise_overlay");
+	}
+
 	/** The item `id` of `slot` being edited */
 	static const UI::Xml::LayoutItem* draftItem(const char* slot, const char* id)
 	{
@@ -299,7 +313,7 @@ class TestCustomiseHome : public UiTestSuite
 TEST_F(TestCustomiseHome, CustomisingCoversEveryWidgetAndShowsTheToolbar)
 {
 	EXPECT_FALSE(shownOnScreen(toolbar()));
-	EXPECT_EQ(lv_obj_find_by_name(placed("dashboard", "tools"), "customise_overlay"), nullptr);
+	EXPECT_EQ(overlayOf("dashboard", "tools"), nullptr);
 
 	start();
 	EXPECT_TRUE(UI::Xml::LayoutEditor::get().isEditing());
@@ -307,7 +321,7 @@ TEST_F(TestCustomiseHome, CustomisingCoversEveryWidgetAndShowsTheToolbar)
 	for (const auto& [slot, id] : std::vector<std::pair<const char*, const char*>>{
 			 {"dashboard", "tools"}, {"dashboard", "files"}, {"sidebar", "home"}, {"sidebar", "estop"}})
 	{
-		EXPECT_NE(lv_obj_find_by_name(placed(slot, id), "customise_overlay"), nullptr) << slot << "/" << id;
+		EXPECT_NE(overlayOf(slot, id), nullptr) << slot << "/" << id;
 	}
 	tap(middleOf(placed("dashboard", "temperature_graph")));
 	EXPECT_EQ(UI::Xml::LayoutEditor::get().selection().item, "temperature_graph");
@@ -316,7 +330,7 @@ TEST_F(TestCustomiseHome, CustomisingCoversEveryWidgetAndShowsTheToolbar)
 	tapToolbar("cancel");
 	EXPECT_FALSE(UI::Xml::LayoutEditor::get().isEditing());
 	EXPECT_FALSE(shownOnScreen(toolbar()));
-	EXPECT_EQ(lv_obj_find_by_name(placed("dashboard", "tools"), "customise_overlay"), nullptr);
+	EXPECT_EQ(overlayOf("dashboard", "tools"), nullptr);
 }
 
 TEST_F(TestCustomiseHome, WidgetsAreRemovedMovedAndResizedByTouch)
@@ -336,7 +350,7 @@ TEST_F(TestCustomiseHome, WidgetsAreRemovedMovedAndResizedByTouch)
 	EXPECT_EQ(draftItem("dashboard", "tools")->y, 2);
 
 	// Its handle, at the bottom right, makes it a row taller
-	const lv_point_t handle = middleOf(lv_obj_find_by_name(placed("dashboard", "tools"), "handle"));
+	const lv_point_t handle = middleOf(lv_obj_find_by_name(overlayOf("dashboard", "tools"), "handle"));
 	drag(handle, {handle.x, handle.y + row});
 	EXPECT_EQ(draftItem("dashboard", "tools")->h, 4);
 
@@ -440,4 +454,36 @@ TEST_F(TestCustomiseHome, DoneKeepsTheChangesAndCancelDoesNot)
 	UI::Xml::deinit();
 	UI::Xml::init(UI::Xml::Paths{.builtin = "assets/ui", .user = m_userDir});
 	EXPECT_EQ(Layouts::find("dashboard")->find("temperature_graph"), nullptr);
+}
+
+TEST_F(TestCustomiseHome, EveryWidgetCanBeAddedToEverySlotItFits)
+{
+	// With printer data, so the widgets show something; the dashboard emptied, to make room
+	load_model_data_from_file("tests/object_model/test_bench/model_sensors_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
+	auto& editor = UI::Xml::LayoutEditor::get();
+	start();
+	for (const char* id : {"tools", "temperature_graph", "files"})
+	{
+		editor.select("dashboard", id);
+		EXPECT_TRUE(editor.removeSelected());
+	}
+
+	// Each lays out and settles: a widget sized 100% once kept the layout from ever settling (see DsLayout.h)
+	for (const auto& [id, widget] : UI::Xml::WidgetCatalogue::all())
+	{
+		for (const auto& slot : widget.slots)
+		{
+			editor.selectPlace(slot);
+			const auto added = editor.add(id);
+			update();
+			if (added)
+			{
+				EXPECT_NE(placed(slot.c_str(), added->c_str()), nullptr) << id << " in " << slot;
+			}
+		}
+	}
+	EXPECT_NE(placed("dashboard", "job_progress"), nullptr);
+	EXPECT_NE(placed("status_bar", "status_speed"), nullptr);
 }

@@ -9,6 +9,11 @@
  * puts each widget in its rectangle; a strip leaves the ds_layout's own layout (e.g. `flex_flow="column"`) to place
  * them in order.
  *
+ * In a grid, each widget is in a box of its own, which the grid sizes, and fills it. The widget can't be the grid's
+ * item itself: when something in it changes its content size (a label's text, a bar), LVGL forgets the size the grid
+ * gave it, and a widget sized `100%` (as widgets are) would take 100% of the whole grid until the grid's next pass,
+ * which in some widgets starts the same again, without end. In its box, 100% is the cell.
+ *
  * The ds_layout follows its slot's layout: when it changes (see UI/Xml/Layout/LayoutStore.h) only the widgets that
  * changed are rebuilt. A widget that moved keeps its state; one whose settings changed is built again.
  *
@@ -77,7 +82,11 @@ namespace UI::Xml
 			std::map<std::string, std::string> props;	// The props it was built with
 			XmlView* view = nullptr;					// The view showing it; deleted with its widgets
 			lv_obj_t* root = nullptr;					// The view's root widget; nullptr once deleted
-			lv_obj_t* overlay = nullptr;				// While customising, its edit overlay (a child of root)
+			lv_obj_t* cell = nullptr;					// Grid: the box the grid sizes, holding root; else nullptr
+			lv_obj_t* overlay = nullptr;				// While customising, its edit overlay (in cell, else root)
+
+			/** What the ds_layout places: the cell in a grid, else the widget */
+			lv_obj_t* outer() const { return cell ? cell : root; }
 		};
 
 		/** A drag of a placed widget, while customising */
@@ -94,6 +103,9 @@ namespace UI::Xml
 
 		/** `<ds_layout>` apply callback: lv_obj attributes, then start showing the slot's layout */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
+
+		/** A grid cell asks how far beyond itself it draws: as far as its widget does */
+		static void cellExtDrawSizeCb(lv_event_t* e);
 
 		/** A placed widget's root widget is being deleted: forget it */
 		static void viewDeletedCb(lv_event_t* e);
