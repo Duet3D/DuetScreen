@@ -95,7 +95,6 @@ namespace UI::Xml::Api
 				}
 				m_fonts.insert(reference.fonts.begin(), reference.fonts.end());
 				m_translations.insert(reference.translationKeys.begin(), reference.translationKeys.end());
-				m_nativeViews.insert(reference.nativeViews.begin(), reference.nativeViews.end());
 				m_triggers.insert(reference.triggers.begin(), reference.triggers.end());
 			}
 
@@ -430,15 +429,10 @@ namespace UI::Xml::Api
 					}
 					return;
 				case AttributeKind::Component:
+				case AttributeKind::View:
 					if (!m_components.contains(value))
 					{
 						issue(context, element, fmt::format("no component `{:s}`", value));
-					}
-					return;
-				case AttributeKind::View:
-					if (!m_components.contains(value) && !m_nativeViews.contains(value))
-					{
-						issue(context, element, fmt::format("no component or C++ view `{:s}`", value));
 					}
 					return;
 				case AttributeKind::Presenter:
@@ -729,7 +723,6 @@ namespace UI::Xml::Api
 			NameSet m_consts;												 // Theme const and colour names
 			NameSet m_fonts;												 // Font names
 			NameSet m_translations;											 // Translation keys
-			NameSet m_nativeViews;											 // C++ view names
 			NameSet m_triggers;												 // Action trigger names
 			std::map<std::string, ComponentDef, std::less<>> m_components;	 // Components by name
 			std::deque<ComponentDef> m_examples; // The widgets' examples, as components; a deque keeps them in place

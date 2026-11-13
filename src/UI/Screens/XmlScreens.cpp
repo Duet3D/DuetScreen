@@ -18,14 +18,13 @@
 #include "Settings/GeneralSettingsPresenter.h"
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
+#include "Sidebar/EStopAction.h"
 #include "Status/JobStatusPresenter.h"
 #include "StatusBar/StatusBarPresenter.h"
 #include "Temperature/ExtruderPresenter.h"
 #include "Temperature/HeaterActions.h"
 #include "Temperature/TemperaturePresenter.h"
 #include "UI/Widgets/BabyStep/BabyStepPresenter.h"
-#include "UI/Widgets/EStop/EStop.h"
-#include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
 namespace UI
@@ -42,6 +41,7 @@ namespace UI
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
 		FactorsPresenter::registerActions();
+		EStopAction::registerAll();
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
@@ -88,9 +88,5 @@ namespace UI
 						.sortBy = {"ui:home:file:jobs:sort_by", SortBy::DATE},
 						.sortDescending = {"ui:home:file:jobs:sort_descending", true},
 						.displayMode = {"ui:home:file:jobs:display_mode", Mode::Tile}});
-
-		/* C++ views, until they are written in XML */
-		Xml::NativeViews::add<LvContainer>("container");
-		Xml::NativeViews::add<EStop>("estop");
 	}
 } // namespace UI

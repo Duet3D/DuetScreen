@@ -295,13 +295,6 @@ namespace UI::Xml::Api
 							   fileLink(component.source));
 			}
 			out += "\n";
-			if (!reference.nativeViews.empty())
-			{
-				fmt::format_to(std::back_inserter(out),
-							   "C++ views that `<ds_view view=\"…\">` can show where there is no component of the "
-							   "name: {:s}\n\n",
-							   codeList(reference.nativeViews));
-			}
 
 			if (!pictures.images.views.empty())
 			{

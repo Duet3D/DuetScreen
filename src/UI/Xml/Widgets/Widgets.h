@@ -21,7 +21,7 @@ namespace UI::Xml
 		Subject,	 // A subject (or list), looked up like any binding
 		List,		 // A list, e.g. `<ds_list list="…">`
 		Component,	 // A component
-		View,		 // A component, or a C++ view (see View/NativeViews.h)
+		View,		 // A component, shown as a view by <ds_view>
 		Presenter,	 // A registered presenter
 		Style,		 // A theme or component style
 		Translation, // A translation key

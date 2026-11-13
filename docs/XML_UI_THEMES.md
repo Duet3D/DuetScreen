@@ -48,6 +48,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_heatmap.png) |
@@ -78,6 +79,7 @@ Extends `base`. Its file is [duetscreen.xml](../assets/ui/themes/duetscreen.xml)
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_heatmap.png) |
@@ -110,6 +112,7 @@ Palette: `chroma=0`, `dark=true`, `primary_hue=80`, `secondary_hue=30`
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_heatmap.png) |
@@ -144,6 +147,7 @@ Colour adjustments: `primary chroma=0`, `primary_muted chroma=0`, `secondary chr
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_heatmap.png) |
@@ -178,6 +182,7 @@ Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 800, bold; norma
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_heatmap.png) |
@@ -214,6 +219,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_heatmap.png) |
@@ -248,6 +254,7 @@ Fonts: emphasis: 15 px, weight 700, bold; header: 20 px, weight 800, bold; norma
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_heatmap.png) |
@@ -282,6 +289,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 600, bold; norma
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_button.png) |
+| [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_graph.png) |
 | [`ds_heatmap`](XML_UI_API.md#ds_heatmap) | ![ds_heatmap](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_heatmap.png) |

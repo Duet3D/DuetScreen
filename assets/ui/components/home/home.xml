@@ -2,9 +2,9 @@
   The home screen: the status bar across the top, the sidebar down the left, and the main window, which shows one
   page at a time (the dashboard when nothing else is open).
 
-  Pages are <ds_view>s: XML components, or C++ views not yet written in XML (src/UI/Screens/XmlScreens.cpp). Each is
-  registered with Navigation under its name, which the sidebar and <action name="nav.open" arg="…"/> use. Modals
-  open over the view called main_window (see getModalHost() in src/UI/Core/Navigation.h).
+  Pages are <ds_view>s showing XML components. Each is registered with Navigation under its name, which the sidebar
+  and <action name="nav.open" arg="…"/> use. Modals open over the view called main_window (see getModalHost() in
+  src/UI/Core/Navigation.h).
 
   The console can sit beside the main window instead of being a page: give the grid a third column (fr(5)) and move
   the console's <ds_view> out of main_window with style_grid_cell_column_pos="2".
@@ -20,7 +20,7 @@
 				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
 				 style_grid_cell_y_align="start" style_grid_cell_row_pos="0" style_grid_cell_row_span="1"/>
 
-		<ds_view name="main_window" view="container" shown="true" height="100%" flex_grow="1"
+		<ds_view name="main_window" view="home_main_window" shown="true" height="100%" flex_grow="1"
 				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
 				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1">
 			<ds_view name="dashboard" view="dashboard" home="true"/>

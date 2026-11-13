@@ -1,0 +1,8 @@
+<!--
+  The main window: the area beside the sidebar and below the status bar, which shows one page at a time and over which
+  dialogs open. home.xml hosts it as `main_window`, the name getModalHost() (src/UI/Core/Navigation.h) looks for, and
+  places the pages in it.
+-->
+<component>
+	<view extends="lv_obj"/>
+</component>

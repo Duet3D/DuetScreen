@@ -11,7 +11,6 @@
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
-#include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include "XmlTree.h"
 #include "helix_xml.h"
@@ -397,7 +396,6 @@ namespace UI::Xml::Api
 		}
 		reference.lvglElements = lvglElements();
 		reference.components = components();
-		reference.nativeViews = NativeViews::names();
 		describeTheme(reference);
 		reference.themes = themes(reference.rootTheme);
 		for (const auto name : ThemeStyles::fontNames())

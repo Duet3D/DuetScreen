@@ -23,6 +23,7 @@
 #include "UI/Xml/Data/TemperatureSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
+#include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "UI/Xml/Widgets/DsGraph.h"
 #include "helix_xml.h"
@@ -1376,4 +1377,28 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactor)
 	EXPECT_EQ(sent[0], "M221 D1 S95\n");
 	EXPECT_FALSE(shownOnScreen(dialog));
 	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
+{
+	lv_obj_t* estop = lv_obj_find_by_name(page<UI::LvObj>("sidebar").getRootPtr(), "estop");
+	ASSERT_NE(estop, nullptr);
+	lv_obj_t* response = notificationPart("response");
+	auto letGo = [estop](float fraction)
+	{
+		lv_obj_send_event(estop, UI::Xml::Actions::valueConfirmedEvent(), &fraction);
+		runEvents();
+	};
+
+	letGo(0.7f); // Dragged most of the way, then let go: nothing
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+
+	letGo(0.1f); // A tap: says to drag it
+	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(std::string_view(lv_label_get_text(lv_obj_find_by_name(response, "text"))), _("estop.prompt"));
+	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+
+	letGo(1.0f); // All the way: stopped
+	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(std::string_view(lv_label_get_text(lv_obj_find_by_name(response, "text"))), _("estop.message"));
 }

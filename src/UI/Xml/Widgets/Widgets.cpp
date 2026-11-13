@@ -6,6 +6,7 @@
 #include "DsBar.h"
 #include "DsBarMarker.h"
 #include "DsButton.h"
+#include "DsDragButton.h"
 #include "DsDropdown.h"
 #include "DsGraph.h"
 #include "DsHeatmap.h"
@@ -58,6 +59,7 @@ namespace UI::Xml::Widgets
 		DsBar::registerXml();
 		DsBarMarker::registerXml();
 		DsButton::registerXml();
+		DsDragButton::registerXml();
 		DsDropdown::registerXml();
 		DsGraph::registerXml();
 		DsHeatmap::registerXml();

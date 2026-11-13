@@ -16,7 +16,8 @@ namespace UI
 		using drag_cb_t = std::function<void(float pct, void* user_data)>;
 
 	  public:
-		DraggableButton(const std::string& name, LvObj& parent, const std::string& text);
+		/** For widgets built by the XML engine, whose parent has no C++ wrapper */
+		DraggableButton(const std::string& name, lv_obj_t* parent, std::string_view text);
 
 		void setDragCallback(drag_cb_t drag_cb, void* user_data);
 		void setDragThreshold(lv_coord_t threshold);

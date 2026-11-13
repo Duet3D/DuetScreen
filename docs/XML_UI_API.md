@@ -168,6 +168,7 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 
 | Action | Description |
 | --- | --- |
+| `estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it |
 | `factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's |
 | `factors.speed` | Open the dialog to change the speed factor |
 | `gcode` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{value}"` |
@@ -1024,6 +1025,30 @@ Also takes every `lv_obj` attribute.
 | `long_mode` | What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip |
 | `flash_on` | Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `responses.count`; style the flash with `<style … selector="user_1"/>` |
 
+### ds_drag_button
+
+A button that must be dragged, not just tapped, to act, such as the E-stop. When let go it raises `value_confirmed` with how far it was dragged, from 0 (a tap) to 1 (all the way, when it shows its `user_1` state).
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_drag_button name="estop" translation_tag="estop.label" icon="estop.png"
+				 hint_tag="estop.prompt" width="80" height="80">
+	<style name="estop"/>
+	<action trigger="value_confirmed" name="estop.dragged"/>
+</ds_drag_button>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_drag_button.png)
+
+| Attribute | Description |
+| --- | --- |
+| `text` | The text shown, if there is no `translation_tag` |
+| `translation_tag` | Translation key for the text |
+| `icon` | Icon file from the icon set, e.g. "estop.png" |
+| `hint` | Shown curved around the edge until it is held, if there is no `hint_tag` |
+| `hint_tag` | Translation key for the hint |
+
 ### ds_dropdown
 
 A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` action as its text (ActionArgs::text()) and its index (ActionArgs::value()).
@@ -1392,7 +1417,7 @@ Also takes every `lv_obj` attribute.
 
 | Attribute | Description |
 | --- | --- |
-| `view` | The XML component shown (with its presenter), or if there is no such component, a C++ view |
+| `view` | The XML component shown, with its presenter |
 | `presenter` | Show the component with this registered presenter instead of the one it names, so one component can show different data in different places |
 | `home` | "true" to make it a home screen: shown when nothing else is open (default false) |
 | `shown` | "true" to show it without taking part in navigation, for always-present parts such as a status bar or the page in a tab: shown, and its presenter active, whenever what it is in is shown (default false) |
@@ -1445,6 +1470,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`heightmap`](#heightmap) | `heightmap` |  | `control` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
+| [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | [`move`](#control) | `move` |  | `control` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
@@ -1480,8 +1506,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
-C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`
-
 ### Views
 
 The components shown as views of their own, drawn with sample printer data in the `duetscreen` theme. A view that shows in another's picture (the status bar in the home screen's) is pictured only there.
@@ -1516,7 +1540,7 @@ Also shows `file_browser`.
 
 #### home
 
-Also shows `dashboard`, `dashboard_tools`, `notifications`, `sidebar`, `status_bar`.
+Also shows `dashboard`, `dashboard_tools`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 

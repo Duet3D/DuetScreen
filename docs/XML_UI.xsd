@@ -355,6 +355,7 @@
 			<xs:enumeration value="console.send"/>
 			<xs:enumeration value="console.shell"/>
 			<xs:enumeration value="console.toggle_commands"/>
+			<xs:enumeration value="estop.dragged"/>
 			<xs:enumeration value="extruder.extrude"/>
 			<xs:enumeration value="extruder.retract"/>
 			<xs:enumeration value="factor.close"/>
@@ -613,6 +614,7 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
+			<xs:enumeration value="home_main_window"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
@@ -660,7 +662,6 @@
 			<xs:enumeration value="console"/>
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
-			<xs:enumeration value="container"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="dashboard"/>
 			<xs:enumeration value="dashboard_axis"/>
@@ -669,7 +670,6 @@
 			<xs:enumeration value="dashboard_job_status"/>
 			<xs:enumeration value="dashboard_tool"/>
 			<xs:enumeration value="dashboard_tools"/>
-			<xs:enumeration value="estop"/>
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
 			<xs:enumeration value="factors_slider"/>
@@ -684,6 +684,7 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
+			<xs:enumeration value="home_main_window"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
@@ -742,6 +743,7 @@
 			<xs:enumeration value="ds_bar"/>
 			<xs:enumeration value="ds_bar_marker"/>
 			<xs:enumeration value="ds_button"/>
+			<xs:enumeration value="ds_drag_button"/>
 			<xs:enumeration value="ds_dropdown"/>
 			<xs:enumeration value="ds_graph"/>
 			<xs:enumeration value="ds_heatmap"/>
@@ -775,6 +777,7 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
+			<xs:enumeration value="home_main_window"/>
 			<xs:enumeration value="lv_arc"/>
 			<xs:enumeration value="lv_bar"/>
 			<xs:enumeration value="lv_button"/>
@@ -2383,6 +2386,23 @@
 			<xs:annotation><xs:documentation>Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `responses.count`; style the flash with `&lt;style … selector=&quot;user_1&quot;/&gt;`</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_drag_button.attributes">
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>The text shown, if there is no `translation_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="translation_tag" type="translation">
+			<xs:annotation><xs:documentation>Translation key for the text</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="icon" type="xs:string">
+			<xs:annotation><xs:documentation>Icon file from the icon set, e.g. &quot;estop.png&quot;</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hint" type="xs:string">
+			<xs:annotation><xs:documentation>Shown curved around the edge until it is held, if there is no `hint_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hint_tag" type="translation">
+			<xs:annotation><xs:documentation>Translation key for the hint</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_dropdown.attributes">
 		<xs:attribute name="bind_options" type="subject">
 			<xs:annotation><xs:documentation>Follow a text subject holding the options, one per line</xs:documentation></xs:annotation>
@@ -2667,7 +2687,7 @@
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_view.attributes">
 		<xs:attribute name="view" type="view">
-			<xs:annotation><xs:documentation>The XML component shown (with its presenter), or if there is no such component, a C++ view</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>The XML component shown, with its presenter</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="presenter" type="presenter">
 			<xs:annotation><xs:documentation>Show the component with this registered presenter instead of the one it names, so one component can show different data in different places</xs:documentation></xs:annotation>
@@ -5275,6 +5295,15 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="ds_drag_button">
+		<xs:annotation><xs:documentation>A button that must be dragged, not just tapped, to act, such as the E-stop. When let go it raises `value_confirmed` with how far it was dragged, from 0 (a tap) to 1 (all the way, when it shows its `user_1` state). Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_drag_button.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="ds_dropdown">
 		<xs:annotation><xs:documentation>A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` action as its text (ActionArgs::text()) and its index (ActionArgs::value()). Also takes every lv_dropdown attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -6852,6 +6881,14 @@
 	</xs:element>
 	<xs:element name="home">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/home/home.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="home_main_window">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/home/home_main_window.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

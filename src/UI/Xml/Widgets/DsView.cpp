@@ -5,7 +5,6 @@
 #include "DsView.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/Runtime/XmlUi.h"
-#include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlView.h"
 #include "WidgetSupport.h"
 #include "Widgets.h"
@@ -17,17 +16,6 @@ namespace UI::Xml::DsView
 
 	namespace
 	{
-		/** The widget `view` created directly inside `parent` (a modal, for example, wraps its root in a backdrop) */
-		lv_obj_t* outermost(LvObj& view, lv_obj_t* parent)
-		{
-			lv_obj_t* obj = view.getRootPtr();
-			while (obj != nullptr && lv_obj_get_parent(obj) != parent)
-			{
-				obj = lv_obj_get_parent(obj);
-			}
-			return obj != nullptr ? obj : view.getRootPtr();
-		}
-
 		/** Whether `obj` or anything it is inside is hidden */
 		bool insideHidden(lv_obj_t* obj)
 		{
@@ -65,7 +53,7 @@ namespace UI::Xml::DsView
 			return presenter;
 		}
 
-		/** Create the view: an XML component if there is one by that name, else a C++ view */
+		/** Create the view: the XML component of that name, with its presenter */
 		void* create(lv_xml_parser_state_t* state, const char** attrs)
 		{
 			const char* view = lv_xml_get_value_of(attrs, "view");
@@ -77,19 +65,11 @@ namespace UI::Xml::DsView
 			const std::string name = attrOr(attrs, "name", view);
 
 			lv_obj_t* parent = parentOf(state);
-			LvObj* object = nullptr;
-			if (findComponent(view) != nullptr || !NativeViews::exists(view))
-			{
-				// A missing component still gets an XmlView, which shows what is missing
-				object = new XmlView(name, parent, view, presenterFor(attrs));
-			}
-			else
-			{
-				object = NativeViews::create(view, name, parent);
-			}
+			// A missing component still gets an XmlView, which shows what is missing
+			auto* object = new XmlView(name, parent, view, presenterFor(attrs));
 
-			lv_obj_t* root = outermost(*object, parent);
-			lv_obj_add_event_cb(root, deletedCb, LV_EVENT_DELETE, object);
+			lv_obj_t* root = object->getRootPtr();
+			lv_obj_add_event_cb(root, deletedCb, LV_EVENT_DELETE, static_cast<LvObj*>(object));
 			registerView(name, object);
 			return root;
 		}
@@ -146,9 +126,7 @@ namespace UI::Xml::DsView
 				 "that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns.",
 			 .example = R"(<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs"/>)",
 			 .attributes =
-				 {{"view",
-				   "The XML component shown (with its presenter), or if there is no such component, a C++ view",
-				   AttributeKind::View},
+				 {{"view", "The XML component shown, with its presenter", AttributeKind::View},
 				  {"presenter",
 				   "Show the component with this registered presenter instead of the one it names, so one component "
 				   "can show different data in different places",

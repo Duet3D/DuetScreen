@@ -179,8 +179,7 @@ namespace UI::Xml::Api
 				{
 					components.insert(component.name);
 				}
-				std::set<std::string> views = components;
-				views.insert(m_reference.nativeViews.begin(), m_reference.nativeViews.end());
+				const std::set<std::string>& views = components;
 				std::set<std::string> widgets = components;
 				for (const auto& widget : m_reference.widgets)
 				{

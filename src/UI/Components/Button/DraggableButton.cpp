@@ -11,7 +11,7 @@
 
 namespace UI
 {
-	DraggableButton::DraggableButton(const std::string& name, LvObj& parent, const std::string& text)
+	DraggableButton::DraggableButton(const std::string& name, lv_obj_t* parent, std::string_view text)
 		: Button(name, parent, text)
 	{
 		ZoneScoped;

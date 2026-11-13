@@ -53,7 +53,11 @@
 				<action trigger="clicked" name="nav.open" arg="settings"/>
 			</ds_button>
 
-			<ds_view name="estop" view="estop" shown="true" width="80" height="80"/>
+			<ds_drag_button name="estop" translation_tag="estop.label" icon="estop.png" hint_tag="estop.prompt"
+							width="80" height="80">
+				<style name="estop"/>
+				<action trigger="value_confirmed" name="estop.dragged"/>
+			</ds_drag_button>
 		</lv_obj>
 	</view>
 </component>
