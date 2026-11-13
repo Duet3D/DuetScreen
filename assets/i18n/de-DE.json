@@ -451,12 +451,22 @@
       "missing": "Dieses Widget ist nicht installiert"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Öffnet das Dashboard",
-      "page_control": "Öffnet die Steuerung: Bewegen, Temperaturen, Lüfter",
-      "page_files": "Öffnet die Druckaufträge und Makros",
-      "page_console": "Öffnet die Konsole; blinkt bei Antworten des Druckers",
-      "page_settings": "Öffnet die Einstellungen",
-      "estop": "Zum sofortigen Stoppen des Druckers ziehen"
+      "page_home_desc": "Öffnet das Dashboard",
+      "page_control_desc": "Öffnet die Steuerung: Bewegen, Temperaturen, Lüfter",
+      "page_files_desc": "Öffnet die Druckaufträge und Makros",
+      "page_console_desc": "Öffnet die Konsole; blinkt bei Antworten des Druckers",
+      "page_settings_desc": "Öffnet die Einstellungen",
+      "estop_desc": "Zum sofortigen Stoppen des Druckers ziehen",
+      "tools": "Werkzeuge und Heizungen",
+      "tools_desc": "Alle Werkzeuge, Betten und Kammern mit ihren Temperaturen",
+      "temperature_graph": "Temperaturdiagramm",
+      "temperature_graph_desc": "Die Temperatur jeder Heizung der letzten Minuten",
+      "temperature_graph_seconds": "Angezeigte Zeit",
+      "files": "Aufträge, Makros und Status",
+      "files_desc": "Aufträge, Makros und Auftragsstatus als Reiter",
+      "jobs_desc": "Die Aufträge auf dem Drucker, um einen zu starten",
+      "macros_desc": "Die Makros des Druckers, um eines auszuführen",
+      "job_status_desc": "Fortschritt, Zeiten und Steuerung des Auftrags"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

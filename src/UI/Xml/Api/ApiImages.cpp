@@ -385,7 +385,9 @@ namespace UI::Xml::Api
 									widget.example);
 					std::string component = "api_example_" + widget.name;
 					std::replace(component.begin(), component.end(), '-', '_');
-					const std::string file = example(xml, component, fmt::format("{:s}/{:s}", dir, widget.name));
+					const int32_t height = widget.exampleHeight > 0 ? widget.exampleHeight : EXAMPLE_HEIGHT;
+					const std::string file =
+						example(xml, component, fmt::format("{:s}/{:s}", dir, widget.name), EXAMPLE_WIDTH, height);
 					if (!file.empty())
 					{
 						index[widget.name] = file;

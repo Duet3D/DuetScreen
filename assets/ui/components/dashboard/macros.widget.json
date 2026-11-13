@@ -1,0 +1,19 @@
+{
+  "component": "dashboard_macros_card",
+  "title_tag": "file.macros",
+  "description_tag": "widget.macros_desc",
+  "icon": "macros.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      4,
+      4
+    ],
+    "min": [
+      3,
+      2
+    ]
+  }
+}

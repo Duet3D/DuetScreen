@@ -1,7 +1,7 @@
 {
   "component": "sidebar_page_button",
   "title_tag": "side_bar.files",
-  "description_tag": "widget.page_files",
+  "description_tag": "widget.page_files_desc",
   "icon": "macros.png",
   "slots": [
     "sidebar"

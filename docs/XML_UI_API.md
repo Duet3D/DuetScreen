@@ -1527,17 +1527,22 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
 | `dashboard_axis` |  |  | `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
+| [`dashboard_files`](#home) |  |  |  | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
 | `dashboard_heater` |  |  | `dashboard_heater_card`, `dashboard_tool` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
 | `dashboard_heater_card` |  |  | `dashboard_tools` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
-| [`dashboard_job_status`](#dashboard_job_status) | `dashboard_job_status` |  | `dashboard` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| [`dashboard_job_status`](#dashboard_job_status_card) | `dashboard_job_status` |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| [`dashboard_job_status_card`](#dashboard_job_status_card) |  |  |  | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
+| [`dashboard_jobs_card`](#dashboard_jobs_card) |  |  |  | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
+| [`dashboard_macros_card`](#dashboard_macros_card) |  |  |  | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
+| [`dashboard_temperature_graph`](#home) |  | `seconds` |  | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
 | `dashboard_tool` |  |  | `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
-| [`dashboard_tools`](#home) |  |  | `dashboard` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| [`dashboard_tools`](#home) |  |  |  | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
 | `factors` | `factors` |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `dialog`, `open`, `title`, `factors`, `pad_shown`, `pad`, `pad_header`, `pad_text`, `pad_accepted`, `pad_confirmable`, `pad_signed` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
 | [`fans`](#fans) | `fans` |  | `control` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
-| [`file_browser`](#files) |  |  | `dashboard`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
+| [`file_browser`](#dashboard_jobs_card) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
 | `file_browser_dialog` |  |  | `file_browser` | [file_browser_dialog.xml](../assets/ui/components/file_browser/file_browser_dialog.xml) |
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
@@ -1604,17 +1609,27 @@ Also shows `babystep`, `move`.
 
 ![customise_missing](../tests/ref_imgs/xml_ui_api/views/customise_missing.png)
 
-#### dashboard_job_status
+#### dashboard_job_status_card
 
-![dashboard_job_status](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status.png)
+Also shows `dashboard_job_status`.
+
+![dashboard_job_status_card](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status_card.png)
+
+#### dashboard_jobs_card
+
+Also shows `file_browser`.
+
+![dashboard_jobs_card](../tests/ref_imgs/xml_ui_api/views/dashboard_jobs_card.png)
+
+#### dashboard_macros_card
+
+![dashboard_macros_card](../tests/ref_imgs/xml_ui_api/views/dashboard_macros_card.png)
 
 #### fans
 
 ![fans](../tests/ref_imgs/xml_ui_api/views/fans.png)
 
 #### files
-
-Also shows `file_browser`.
 
 ![files](../tests/ref_imgs/xml_ui_api/views/files.png)
 
@@ -1628,7 +1643,7 @@ Also shows `file_browser`.
 
 #### home
 
-Also shows `dashboard`, `dashboard_tools`, `home_main_window`, `notifications`, `sidebar`, `sidebar_estop`, `sidebar_page_button`, `status_bar`.
+Also shows `dashboard`, `dashboard_files`, `dashboard_temperature_graph`, `dashboard_tools`, `home_main_window`, `notifications`, `sidebar`, `sidebar_estop`, `sidebar_page_button`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 

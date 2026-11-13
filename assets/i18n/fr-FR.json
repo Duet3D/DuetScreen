@@ -451,12 +451,22 @@
       "missing": "Ce widget n'est pas installé"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Ouvre le tableau de bord",
-      "page_control": "Ouvre les commandes : mouvements, températures, ventilateurs",
-      "page_files": "Ouvre les travaux et les macros",
-      "page_console": "Ouvre la console ; clignote quand l'imprimante répond",
-      "page_settings": "Ouvre les paramètres",
-      "estop": "Faites glisser pour arrêter l'imprimante immédiatement"
+      "page_home_desc": "Ouvre le tableau de bord",
+      "page_control_desc": "Ouvre les commandes : mouvements, températures, ventilateurs",
+      "page_files_desc": "Ouvre les travaux et les macros",
+      "page_console_desc": "Ouvre la console ; clignote quand l'imprimante répond",
+      "page_settings_desc": "Ouvre les paramètres",
+      "estop_desc": "Faites glisser pour arrêter l'imprimante immédiatement",
+      "tools": "Outils et chauffages",
+      "tools_desc": "Chaque outil, plateau et enceinte avec ses températures",
+      "temperature_graph": "Graphique des températures",
+      "temperature_graph_desc": "La température de chaque chauffage ces dernières minutes",
+      "temperature_graph_seconds": "Durée affichée",
+      "files": "Travaux, macros et état",
+      "files_desc": "Les travaux, les macros et l'état du travail, en onglets",
+      "jobs_desc": "Les travaux de l'imprimante, pour en lancer un",
+      "macros_desc": "Les macros de l'imprimante, pour en exécuter une",
+      "job_status_desc": "La progression, les durées et les commandes du travail"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

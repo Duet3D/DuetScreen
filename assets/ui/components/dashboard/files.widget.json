@@ -1,0 +1,19 @@
+{
+  "component": "dashboard_files",
+  "title_tag": "widget.files",
+  "description_tag": "widget.files_desc",
+  "icon": "macros.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      4,
+      6
+    ],
+    "min": [
+      3,
+      3
+    ]
+  }
+}

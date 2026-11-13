@@ -1,10 +1,17 @@
 <!--
   The E-stop: drag it across to stop the printer. It is locked in the sidebar's layout, so it can't be removed.
+
+  The button is in a plain container because a placed widget's root can't be a DuetScreen widget (see XmlView.h); the
+  container draws beyond itself so the button stays visible while it is dragged.
 -->
 <component>
-	<view extends="ds_drag_button" translation_tag="estop.label" icon="estop.png" hint_tag="estop.prompt"
-		  width="80" height="80">
-		<style name="estop"/>
-		<action trigger="value_confirmed" name="estop.dragged"/>
+	<view extends="lv_obj" width="content" height="content" scrollable="false" overflow_visible="true"
+		  ext_draw_size="1024">
+		<style name="pad_zero"/>
+		<ds_drag_button name="button" translation_tag="estop.label" icon="estop.png" hint_tag="estop.prompt"
+						width="80" height="80">
+			<style name="estop"/>
+			<action trigger="value_confirmed" name="estop.dragged"/>
+		</ds_drag_button>
 	</view>
 </component>

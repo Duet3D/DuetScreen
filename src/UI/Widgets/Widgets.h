@@ -53,6 +53,7 @@ namespace UI::Xml
 		std::string extends = {}; // The widget whose attributes it also takes, e.g. "lv_obj"; empty for none
 		std::string description;  // What it is and how it behaves
 		std::string example = {}; // A short XML example; empty for none
+		int32_t exampleHeight = 0; // Height of the area the example is laid out in, if it needs more than most; 0 for that
 		std::vector<WidgetAttribute> attributes = {};	 // Its own attributes, in the order worth reading them
 		std::vector<SampleSubject> exampleSubjects = {}; // Values for what `example` binds to, for its picture
 	};

@@ -1,7 +1,7 @@
 {
   "component": "sidebar_estop",
   "title_tag": "estop.label",
-  "description_tag": "widget.estop",
+  "description_tag": "widget.estop_desc",
   "icon": "estop.png",
   "slots": [
     "sidebar"

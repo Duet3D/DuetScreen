@@ -1,0 +1,19 @@
+{
+  "component": "dashboard_tools",
+  "title_tag": "widget.tools",
+  "description_tag": "widget.tools_desc",
+  "icon": "control.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      6,
+      3
+    ],
+    "min": [
+      3,
+      2
+    ]
+  }
+}

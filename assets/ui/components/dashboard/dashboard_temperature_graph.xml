@@ -1,0 +1,18 @@
+<!--
+  The dashboard's temperature graph: every heater over the last `seconds`. The axis reaches at least 300°C, or the
+  highest heater limit. It is the `temperature_graph` widget (temperature_graph.widget.json), in a plain container
+  because a placed widget's root can't be a DuetScreen widget (see XmlView.h).
+-->
+<component>
+	<api>
+		<prop name="seconds" type="int" default="60"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_graph name="graph" history="temperatures" seconds="$seconds" y_min="0" y_max="300"
+				  bind_y_max="temperatures.limit" width="100%" height="100%">
+			<style name="card"/>
+		</ds_graph>
+	</view>
+</component>

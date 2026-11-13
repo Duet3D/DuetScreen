@@ -452,12 +452,22 @@
       "missing": "This widget isn't installed"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Opens the dashboard",
-      "page_control": "Opens the controls: moving, temperatures, fans",
-      "page_files": "Opens the jobs and macros",
-      "page_console": "Opens the console; flashes when the printer replies",
-      "page_settings": "Opens the settings",
-      "estop": "Drag across to stop the printer at once"
+      "page_home_desc": "Opens the dashboard",
+      "page_control_desc": "Opens the controls: moving, temperatures, fans",
+      "page_files_desc": "Opens the jobs and macros",
+      "page_console_desc": "Opens the console; flashes when the printer replies",
+      "page_settings_desc": "Opens the settings",
+      "estop_desc": "Drag across to stop the printer at once",
+      "tools": "Tools and heaters",
+      "tools_desc": "Every tool, bed and chamber with its temperatures",
+      "temperature_graph": "Temperature graph",
+      "temperature_graph_desc": "Every heater's temperature over the last minutes",
+      "temperature_graph_seconds": "Time shown",
+      "files": "Jobs, macros and status",
+      "files_desc": "The jobs, macros and the job's status, as tabs",
+      "jobs_desc": "The jobs on the printer, to start one",
+      "macros_desc": "The printer's macros, to run one",
+      "job_status_desc": "The job's progress, times and controls"
     },
     "gcodes": { /* G-code descriptions */
       "gcode_G0_desc": "Rapid move",

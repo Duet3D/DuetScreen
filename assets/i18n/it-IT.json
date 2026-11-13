@@ -451,12 +451,22 @@
       "missing": "Questo widget non è installato"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Apre la dashboard",
-      "page_control": "Apre i controlli: movimento, temperature, ventole",
-      "page_files": "Apre i lavori e le macro",
-      "page_console": "Apre la console; lampeggia quando la stampante risponde",
-      "page_settings": "Apre le impostazioni",
-      "estop": "Trascina per fermare subito la stampante"
+      "page_home_desc": "Apre la dashboard",
+      "page_control_desc": "Apre i controlli: movimento, temperature, ventole",
+      "page_files_desc": "Apre i lavori e le macro",
+      "page_console_desc": "Apre la console; lampeggia quando la stampante risponde",
+      "page_settings_desc": "Apre le impostazioni",
+      "estop_desc": "Trascina per fermare subito la stampante",
+      "tools": "Utensili e riscaldatori",
+      "tools_desc": "Ogni utensile, piano e camera con le sue temperature",
+      "temperature_graph": "Grafico delle temperature",
+      "temperature_graph_desc": "La temperatura di ogni riscaldatore negli ultimi minuti",
+      "temperature_graph_seconds": "Tempo mostrato",
+      "files": "Lavori, macro e stato",
+      "files_desc": "I lavori, le macro e lo stato del lavoro, in schede",
+      "jobs_desc": "I lavori sulla stampante, per avviarne uno",
+      "macros_desc": "Le macro della stampante, per eseguirne una",
+      "job_status_desc": "Avanzamento, tempi e controlli del lavoro"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

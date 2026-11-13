@@ -451,12 +451,22 @@
       "missing": "Este widget não está instalado"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Abre o painel",
-      "page_control": "Abre os controlos: movimento, temperaturas, ventoinhas",
-      "page_files": "Abre os trabalhos e macros",
-      "page_console": "Abre a consola; pisca quando a impressora responde",
-      "page_settings": "Abre as definições",
-      "estop": "Arraste para parar a impressora de imediato"
+      "page_home_desc": "Abre o painel",
+      "page_control_desc": "Abre os controlos: movimento, temperaturas, ventoinhas",
+      "page_files_desc": "Abre os trabalhos e macros",
+      "page_console_desc": "Abre a consola; pisca quando a impressora responde",
+      "page_settings_desc": "Abre as definições",
+      "estop_desc": "Arraste para parar a impressora de imediato",
+      "tools": "Ferramentas e aquecedores",
+      "tools_desc": "Cada ferramenta, base e câmara com as suas temperaturas",
+      "temperature_graph": "Gráfico de temperatura",
+      "temperature_graph_desc": "A temperatura de cada aquecedor nos últimos minutos",
+      "temperature_graph_seconds": "Tempo mostrado",
+      "files": "Trabalhos, macros e estado",
+      "files_desc": "Os trabalhos, macros e o estado do trabalho, em separadores",
+      "jobs_desc": "Os trabalhos na impressora, para iniciar um",
+      "macros_desc": "As macros da impressora, para executar uma",
+      "job_status_desc": "O progresso, os tempos e os controlos do trabalho"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

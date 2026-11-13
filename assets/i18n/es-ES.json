@@ -451,12 +451,22 @@
       "missing": "Este widget no está instalado"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Abre el panel",
-      "page_control": "Abre los controles: movimiento, temperaturas, ventiladores",
-      "page_files": "Abre los trabajos y macros",
-      "page_console": "Abre la consola; parpadea cuando responde la impresora",
-      "page_settings": "Abre los ajustes",
-      "estop": "Arrastre para detener la impresora de inmediato"
+      "page_home_desc": "Abre el panel",
+      "page_control_desc": "Abre los controles: movimiento, temperaturas, ventiladores",
+      "page_files_desc": "Abre los trabajos y macros",
+      "page_console_desc": "Abre la consola; parpadea cuando responde la impresora",
+      "page_settings_desc": "Abre los ajustes",
+      "estop_desc": "Arrastre para detener la impresora de inmediato",
+      "tools": "Herramientas y calentadores",
+      "tools_desc": "Cada herramienta, cama y cámara con sus temperaturas",
+      "temperature_graph": "Gráfico de temperatura",
+      "temperature_graph_desc": "La temperatura de cada calentador en los últimos minutos",
+      "temperature_graph_seconds": "Tiempo mostrado",
+      "files": "Trabajos, macros y estado",
+      "files_desc": "Los trabajos, macros y el estado del trabajo, en pestañas",
+      "jobs_desc": "Los trabajos de la impresora, para iniciar uno",
+      "macros_desc": "Las macros de la impresora, para ejecutar una",
+      "job_status_desc": "El progreso, los tiempos y los controles del trabajo"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

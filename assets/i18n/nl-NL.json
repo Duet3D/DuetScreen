@@ -451,12 +451,22 @@
       "missing": "Deze widget is niet geïnstalleerd"
     },
     "widget": { /* Widgets that can be placed on the screen */
-      "page_home": "Opent het dashboard",
-      "page_control": "Opent de bediening: bewegen, temperaturen, ventilatoren",
-      "page_files": "Opent de opdrachten en macro's",
-      "page_console": "Opent de console; knippert als de printer antwoordt",
-      "page_settings": "Opent de instellingen",
-      "estop": "Sleep om de printer direct te stoppen"
+      "page_home_desc": "Opent het dashboard",
+      "page_control_desc": "Opent de bediening: bewegen, temperaturen, ventilatoren",
+      "page_files_desc": "Opent de opdrachten en macro's",
+      "page_console_desc": "Opent de console; knippert als de printer antwoordt",
+      "page_settings_desc": "Opent de instellingen",
+      "estop_desc": "Sleep om de printer direct te stoppen",
+      "tools": "Gereedschappen en verwarmingen",
+      "tools_desc": "Elk gereedschap, bed en kamer met de temperaturen",
+      "temperature_graph": "Temperatuurgrafiek",
+      "temperature_graph_desc": "De temperatuur van elke verwarming in de laatste minuten",
+      "temperature_graph_seconds": "Getoonde tijd",
+      "files": "Opdrachten, macro's en status",
+      "files_desc": "De opdrachten, macro's en de status van de opdracht, als tabbladen",
+      "jobs_desc": "De opdrachten op de printer, om er een te starten",
+      "macros_desc": "De macro's van de printer, om er een uit te voeren",
+      "job_status_desc": "De voortgang, tijden en bediening van de opdracht"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

@@ -61,7 +61,7 @@ class TestHomeView : public UiTestSuite
 	/** The dashboard's tabs (jobs, macros, status), as dashboard.xml builds them */
 	static UI::TabView& dashboardTabs()
 	{
-		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "dashboard_tabs");
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "tabs");
 		if (tabs == nullptr)
 		{
 			throw std::runtime_error("the dashboard has no tabs");
@@ -71,10 +71,21 @@ class TestHomeView : public UiTestSuite
 
 	static constexpr size_t STATUS_TAB = 2; // Index of the dashboard's Status tab
 
+	/** The dashboard's tool list: the widget the dashboard's layout places as `tools` */
+	static lv_obj_t* dashboardToolList()
+	{
+		lv_obj_t* tools = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "tools");
+		if (tools == nullptr)
+		{
+			throw std::runtime_error("the dashboard has no tool list");
+		}
+		return tools;
+	}
+
 	/** The dashboard's temperature graph, as dashboard.xml builds it */
 	static UI::Xml::DsGraph& temperatureGraph()
 	{
-		lv_obj_t* graph = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "temperature_graph");
+		lv_obj_t* graph = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "graph");
 		if (graph == nullptr)
 		{
 			throw std::runtime_error("the dashboard has no temperature_graph");
@@ -440,7 +451,9 @@ TEST_F(TestHomeView, BlankStatusView)
 TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 {
 	lv_obj_t* sidebar = UI::findView("sidebar")->getRootPtr();
-	auto button = [sidebar](const char* name) { return lv_obj_find_by_name(sidebar, name); };
+	// Each page's button, in the widget placed for the page
+	auto button = [sidebar](const char* name)
+	{ return lv_obj_find_by_name(lv_obj_find_by_name(sidebar, name), "button"); };
 	auto pump = []
 	{
 		Model::get().startEventLoop();
@@ -736,7 +749,7 @@ TEST_F(TestHomeViewWithData, Dashboard)
 
 	/* Open the tool list numberpad */
 	// The first tool's first heater row, as dashboard_tools.xml builds it
-	lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
+	lv_obj_t* toolList = dashboardToolList();
 	lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
 	lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
@@ -749,7 +762,7 @@ TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
 	Model::get().startEventLoop();
 	Model::get().stopEventLoop();
-	lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
+	lv_obj_t* toolList = dashboardToolList();
 	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
 	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
 	ASSERT_NE(lv_obj_find_by_name(tools, "status"), nullptr);
@@ -1067,7 +1080,7 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 	// Rebuilt from scratch, showing the printer as before
 	UI::home();
 	ASSERT_EQ(dashboardTabs().getTabCount(), 3u);
-	lv_obj_t* tools = lv_obj_find_by_name(UI::findView("dashboard_tools")->getRootPtr(), "tools");
+	lv_obj_t* tools = lv_obj_find_by_name(dashboardToolList(), "tools");
 	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 4u) << "the test bench's four tools";
 }
 
@@ -1256,7 +1269,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
 	runEvents(); // Fill the lists from the object model
 	{
-		lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
+		lv_obj_t* toolList = dashboardToolList();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
 		lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 		EXPECT_NE(openNumberPad(), nullptr) << "dashboard heater";
@@ -1381,7 +1394,8 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactor)
 
 TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 {
-	lv_obj_t* estop = lv_obj_find_by_name(page<UI::LvObj>("sidebar").getRootPtr(), "estop");
+	lv_obj_t* estop =
+		lv_obj_find_by_name(lv_obj_find_by_name(page<UI::LvObj>("sidebar").getRootPtr(), "estop"), "button");
 	ASSERT_NE(estop, nullptr);
 	lv_obj_t* response = notificationPart("response");
 	auto letGo = [estop](float fraction)

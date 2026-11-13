@@ -52,6 +52,8 @@ namespace UI::Xml
 				 "comes from the `layouts/` of the bundles (see docs/XML_UI.md, Layouts). A grid layout makes this a "
 				 "grid of equal cells; a strip leaves its own layout (e.g. `flex_flow`) to place the widgets in order.",
 			 .example = R"(<ds_layout slot="sidebar" flex_flow="column" width="content" height="100%"/>)",
+			 .exampleHeight =
+				 584, // About the screen's height, as the sidebar is, so every button has room for its label
 			 .attributes = {{"slot", "The slot whose layout is shown (required), e.g. `dashboard`"}}},
 			xmlCreate,
 			xmlApply);

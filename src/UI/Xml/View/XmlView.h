@@ -10,6 +10,10 @@
  * Like a C++ View, it activates the presenter and connects it to the Model while shown, and disconnects it while
  * hidden.
  *
+ * The component's root must be a plain widget (an `lv_obj`, `lv_label`, …): a DuetScreen widget such as a ds_button
+ * has a C++ object of its own, found through the widget the way the view is. A component whose root is one is shown
+ * as a placeholder saying so; wrap it in an `lv_obj`.
+ *
  * A view can be given props, the values of the component's `<api><prop>`s, e.g. the settings of a widget placed by
  * `<ds_layout>`.
  */

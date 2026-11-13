@@ -132,17 +132,28 @@ namespace UI::Xml
 		attrs.push_back(nullptr);
 		auto* obj = static_cast<lv_obj_t*>(
 			lv_xml_create_with_ctx(parent, state.component.c_str(), attrs.data(), state.scope->context()));
+		std::string problem = "couldn't be loaded";
+		if (obj != nullptr && lv_obj_get_user_data(obj) != nullptr)
+		{
+			// The root is a widget with a C++ object of its own (a ds_button, a ds_graph, …), which finds itself
+			// through the widget, as the view would: they can't share it
+			LOG_ERROR("UI component '{:s}' can't be a view: its root is a DuetScreen widget; put it in an lv_obj",
+					  state.component);
+			lv_obj_delete(obj);
+			obj = nullptr;
+			problem = "can't be a view: its root must be an lv_obj";
+		}
 		if (obj != nullptr)
 		{
 			return obj;
 		}
 
-		// Never leave a hole: say what's missing where the view should be
+		// Never leave a hole: say what's wrong where the view should be
 		LOG_ERROR("Couldn't build UI component '{:s}'", state.component);
 		obj = lv_obj_create(parent);
 		lv_obj_set_size(obj, LV_PCT(100), LV_PCT(100));
 		lv_obj_t* label = lv_label_create(obj);
-		lv_label_set_text_fmt(label, "UI component '%s' couldn't be loaded", state.component.c_str());
+		lv_label_set_text_fmt(label, "UI component '%s' %s", state.component.c_str(), problem.c_str());
 		lv_obj_center(label);
 		return obj;
 	}
