@@ -123,6 +123,7 @@ namespace UI::Xml::Api
 		std::vector<Action> globalActions;		  // Actions every view can raise
 		std::vector<Presenter> presenters;		  // In name order
 		std::vector<WidgetSpec> widgets;		  // DuetScreen widgets and elements, in name order
+		std::vector<std::string> lvglElements;	  // The XML engine's own widgets and elements, in name order
 		std::vector<Component> components;		  // In name order
 		std::vector<std::string> nativeViews;	  // C++ views `<ds_view view="…">` can show, in name order
 		std::vector<Theme> themes;				  // Every loaded theme, the root first, then in name order

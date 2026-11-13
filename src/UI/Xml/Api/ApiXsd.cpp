@@ -85,6 +85,18 @@ namespace UI::Xml::Api
 			}
 		}
 
+		/** The element `name`, a registered widget or element, is written as: `lv_obj-x`, a child of any widget, as `x`
+		 */
+		std::string elementName(std::string_view name)
+		{
+			constexpr std::string_view anyWidgetChild = "lv_obj-";
+			if (name.starts_with(anyWidgetChild))
+			{
+				name.remove_prefix(anyWidgetChild.size());
+			}
+			return std::string(name);
+		}
+
 		/** Writes the schema */
 		class Writer
 		{
@@ -106,6 +118,7 @@ namespace UI::Xml::Api
 				writeOpenContent();
 				writeStructure();
 				writeWidgets();
+				writeLvglElements();
 				writeComponents();
 				m_out += "</xs:schema>\n";
 				return std::move(m_out);
@@ -147,6 +160,13 @@ namespace UI::Xml::Api
 				for (const auto& widget : m_reference.widgets)
 				{
 					widgets.insert(widget.name);
+				}
+				for (const auto& element : m_reference.lvglElements)
+				{
+					if (element.find('-') == std::string::npos) // A widget, not a child element
+					{
+						widgets.insert(element);
+					}
 				}
 				std::set<std::string> styles;
 				for (const auto& style : m_reference.styles)
@@ -193,7 +213,7 @@ namespace UI::Xml::Api
 						 "\t\t</xs:sequence>\n\t</xs:group>\n";
 			}
 
-			/** `<component>`, `<api>`, `<prop>`, `<view>` and `<style>` */
+			/** `<component>` and its sections, `<prop>`, and `<style>` */
 			void writeStructure()
 			{
 				writeElement(
@@ -201,6 +221,9 @@ namespace UI::Xml::Api
 					"A component: an `<api>` of props, `<consts>`, `<styles>`, `<subjects>`, and its `<view>`.",
 					{{"presenter", "The presenter that gives its view names and handles its actions", "presenter"}});
 				writeElement("api", "The props the component takes", {});
+				writeElement("consts", "The component's consts, written `#name` in its attributes", {});
+				writeElement("styles", "The component's styles, each a `<style name=\"…\" …/>`", {});
+				writeElement("subjects", "The component's own subjects", {});
 				writeElement("prop",
 							 "A prop: `<my_component title=\"…\"/>` sets `$title` inside the component",
 							 {{"name", "Its name", "xs:string"},
@@ -220,12 +243,7 @@ namespace UI::Xml::Api
 			{
 				for (const auto& widget : m_reference.widgets)
 				{
-					// `lv_obj-x` is a child element of any widget, written <x>
-					std::string name = widget.name;
-					if (name.starts_with("lv_obj-"))
-					{
-						name = name.substr(7);
-					}
+					const std::string name = elementName(widget.name);
 					std::string doc = widget.description;
 					if (!widget.extends.empty())
 					{
@@ -240,6 +258,32 @@ namespace UI::Xml::Api
 						}
 					}
 					writeElement(name, doc, attributes);
+				}
+			}
+
+			/**
+			 * The XML engine's own widgets and elements, with any attributes: the engine has no descriptions of them.
+			 * Declaring them lets an editor complete what is written inside them.
+			 */
+			void writeLvglElements()
+			{
+				for (const auto& element : m_reference.lvglElements)
+				{
+					const std::string name = elementName(element);
+					std::string doc;
+					if (name != element)
+					{
+						doc = fmt::format("LVGL's `<{:s}>`, inside any widget.", name);
+					}
+					else if (const auto dash = element.find('-'); dash != std::string::npos)
+					{
+						doc = fmt::format("LVGL's `<{:s}>`, inside `<{:s}>`.", element, element.substr(0, dash));
+					}
+					else
+					{
+						doc = fmt::format("LVGL's {:s} widget.", element);
+					}
+					writeElement(name, doc + " Its attributes are in LVGL's XML documentation.", {});
 				}
 			}
 

@@ -14,7 +14,9 @@
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include "XmlTree.h"
+#include "helix_xml.h"
 #include "i18n/i18n.h"
+#include "src/xml/lv_xml_widget.h"
 #include <algorithm>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -350,6 +352,26 @@ namespace UI::Xml::Api
 			Themes::ThemeColors colors{};
 			Themes::forEachColor(colors, [&](std::string_view name, Color&) { reference.colours.emplace_back(name); });
 		}
+
+		/**
+		 * The widgets and elements the XML engine itself provides (lv_xml_init()'s, not DuetScreen's), as registered:
+		 * `lv_label`, or `lv_obj-bind_flag_if_eq` for a child element of a widget. In name order.
+		 */
+		std::vector<std::string> lvglElements()
+		{
+			std::vector<std::string> names;
+			lv_xml_widget_foreach(
+				[](const lv_widget_processor_t* processor, void* userData)
+				{
+					if (processor->builtin)
+					{
+						static_cast<std::vector<std::string>*>(userData)->emplace_back(processor->name);
+					}
+				},
+				&names);
+			std::sort(names.begin(), names.end());
+			return names;
+		}
 	} // namespace
 
 	bool Component::isView() const
@@ -370,6 +392,7 @@ namespace UI::Xml::Api
 		{
 			reference.widgets.push_back(*spec);
 		}
+		reference.lvglElements = lvglElements();
 		reference.components = components();
 		reference.nativeViews = NativeViews::names();
 		describeTheme(reference);

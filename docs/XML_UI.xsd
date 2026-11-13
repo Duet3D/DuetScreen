@@ -728,7 +728,31 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
+			<xs:enumeration value="lv_arc"/>
+			<xs:enumeration value="lv_bar"/>
+			<xs:enumeration value="lv_button"/>
+			<xs:enumeration value="lv_buttonmatrix"/>
+			<xs:enumeration value="lv_calendar"/>
+			<xs:enumeration value="lv_canvas"/>
+			<xs:enumeration value="lv_chart"/>
+			<xs:enumeration value="lv_checkbox"/>
+			<xs:enumeration value="lv_dropdown"/>
+			<xs:enumeration value="lv_image"/>
+			<xs:enumeration value="lv_imagebutton"/>
+			<xs:enumeration value="lv_keyboard"/>
+			<xs:enumeration value="lv_label"/>
+			<xs:enumeration value="lv_obj"/>
 			<xs:enumeration value="lv_obj-action"/>
+			<xs:enumeration value="lv_roller"/>
+			<xs:enumeration value="lv_scale"/>
+			<xs:enumeration value="lv_slider"/>
+			<xs:enumeration value="lv_spangroup"/>
+			<xs:enumeration value="lv_spinbox"/>
+			<xs:enumeration value="lv_spinner"/>
+			<xs:enumeration value="lv_switch"/>
+			<xs:enumeration value="lv_table"/>
+			<xs:enumeration value="lv_tabview"/>
+			<xs:enumeration value="lv_textarea"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
@@ -741,6 +765,7 @@
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="question_dialog"/>
+			<xs:enumeration value="responsive_grid"/>
 			<xs:enumeration value="settings"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
@@ -1580,6 +1605,27 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="consts">
+		<xs:annotation><xs:documentation>The component's consts, written `#name` in its attributes</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="styles">
+		<xs:annotation><xs:documentation>The component's styles, each a `&lt;style name=&quot;…&quot; …/&gt;`</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="subjects">
+		<xs:annotation><xs:documentation>The component's own subjects</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="prop">
 		<xs:annotation><xs:documentation>A prop: `&lt;my_component title=&quot;…&quot;/&gt;` sets `$title` inside the component</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -2134,6 +2180,531 @@
 			<xs:attribute name="arg" type="xs:string">
 				<xs:annotation><xs:documentation>Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `&lt;action&gt;` is written</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_arc">
+		<xs:annotation><xs:documentation>LVGL's lv_arc widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_bar">
+		<xs:annotation><xs:documentation>LVGL's lv_bar widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_button">
+		<xs:annotation><xs:documentation>LVGL's lv_button widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_buttonmatrix">
+		<xs:annotation><xs:documentation>LVGL's lv_buttonmatrix widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_calendar">
+		<xs:annotation><xs:documentation>LVGL's lv_calendar widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_calendar-header_arrow">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_calendar-header_arrow&gt;`, inside `&lt;lv_calendar&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_calendar-header_dropdown">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_calendar-header_dropdown&gt;`, inside `&lt;lv_calendar&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_canvas">
+		<xs:annotation><xs:documentation>LVGL's lv_canvas widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_chart">
+		<xs:annotation><xs:documentation>LVGL's lv_chart widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_chart-axis">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_chart-axis&gt;`, inside `&lt;lv_chart&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_chart-cursor">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_chart-cursor&gt;`, inside `&lt;lv_chart&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_chart-series">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_chart-series&gt;`, inside `&lt;lv_chart&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_checkbox">
+		<xs:annotation><xs:documentation>LVGL's lv_checkbox widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_dropdown">
+		<xs:annotation><xs:documentation>LVGL's lv_dropdown widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_dropdown-list">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_dropdown-list&gt;`, inside `&lt;lv_dropdown&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_image">
+		<xs:annotation><xs:documentation>LVGL's lv_image widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_imagebutton">
+		<xs:annotation><xs:documentation>LVGL's lv_imagebutton widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_imagebutton-src_left">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_imagebutton-src_left&gt;`, inside `&lt;lv_imagebutton&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_imagebutton-src_mid">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_imagebutton-src_mid&gt;`, inside `&lt;lv_imagebutton&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_imagebutton-src_right">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_imagebutton-src_right&gt;`, inside `&lt;lv_imagebutton&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_keyboard">
+		<xs:annotation><xs:documentation>LVGL's lv_keyboard widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_label">
+		<xs:annotation><xs:documentation>LVGL's lv_label widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_obj">
+		<xs:annotation><xs:documentation>LVGL's lv_obj widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if_eq">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if_eq&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if_ge">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if_ge&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if_gt">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if_gt&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if_le">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if_le&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if_lt">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if_lt&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_flag_if_not_eq">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_flag_if_not_eq&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if_eq">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if_eq&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if_ge">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if_ge&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if_gt">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if_gt&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if_le">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if_le&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if_lt">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if_lt&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_state_if_not_eq">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_state_if_not_eq&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if_eq">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if_eq&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if_ge">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if_ge&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if_gt">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if_gt&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if_le">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if_le&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if_lt">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if_lt&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_if_not_eq">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_if_not_eq&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bind_style_prop">
+		<xs:annotation><xs:documentation>LVGL's `&lt;bind_style_prop&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="event_cb">
+		<xs:annotation><xs:documentation>LVGL's `&lt;event_cb&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="play_timeline_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;play_timeline_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="remove_style">
+		<xs:annotation><xs:documentation>LVGL's `&lt;remove_style&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="remove_style_all">
+		<xs:annotation><xs:documentation>LVGL's `&lt;remove_style_all&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="screen_create_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;screen_create_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="screen_load_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;screen_load_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="subject_increment_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;subject_increment_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="subject_set_float_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;subject_set_float_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="subject_set_int_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;subject_set_int_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="subject_set_string_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;subject_set_string_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="subject_toggle_event">
+		<xs:annotation><xs:documentation>LVGL's `&lt;subject_toggle_event&gt;`, inside any widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_roller">
+		<xs:annotation><xs:documentation>LVGL's lv_roller widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_scale">
+		<xs:annotation><xs:documentation>LVGL's lv_scale widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_scale-section">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_scale-section&gt;`, inside `&lt;lv_scale&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_slider">
+		<xs:annotation><xs:documentation>LVGL's lv_slider widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_spangroup">
+		<xs:annotation><xs:documentation>LVGL's lv_spangroup widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_spangroup-span">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_spangroup-span&gt;`, inside `&lt;lv_spangroup&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_spinbox">
+		<xs:annotation><xs:documentation>LVGL's lv_spinbox widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_spinner">
+		<xs:annotation><xs:documentation>LVGL's lv_spinner widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_switch">
+		<xs:annotation><xs:documentation>LVGL's lv_switch widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_table">
+		<xs:annotation><xs:documentation>LVGL's lv_table widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_table-cell">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_table-cell&gt;`, inside `&lt;lv_table&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_table-column">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_table-column&gt;`, inside `&lt;lv_table&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_tabview">
+		<xs:annotation><xs:documentation>LVGL's lv_tabview widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_tabview-tab">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_tabview-tab&gt;`, inside `&lt;lv_tabview&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_tabview-tab_bar">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_tabview-tab_bar&gt;`, inside `&lt;lv_tabview&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_tabview-tab_button">
+		<xs:annotation><xs:documentation>LVGL's `&lt;lv_tabview-tab_button&gt;`, inside `&lt;lv_tabview&gt;`. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="lv_textarea">
+		<xs:annotation><xs:documentation>LVGL's lv_textarea widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="responsive_grid">
+		<xs:annotation><xs:documentation>LVGL's responsive_grid widget. Its attributes are in LVGL's XML documentation.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
