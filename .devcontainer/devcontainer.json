@@ -20,7 +20,9 @@
         "vadimcn.vscode-lldb",
         "rioj7.command-variable",
         "GitHub.vscode-pull-request-github",
-        "redhat.vscode-xml"
+        "redhat.vscode-xml",
+        "ms-python.python",
+        "ms-python.autopep8"
       ],
       "settings": {
         "buildroot_path": "/workspaces/buildroot-duetscreen",
