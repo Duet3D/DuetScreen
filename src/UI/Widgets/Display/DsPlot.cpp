@@ -254,7 +254,12 @@ namespace UI::Xml
 			header.setFlexFlow(LV_FLEX_FLOW_ROW);
 			header.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 			m_detail = std::make_unique<LvLabel>("detail", header);
-			m_detail->setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+			// One line taking what room the title leaves, scrolling by if it is longer: a long name, such as an
+			// object's, mustn't wrap onto the area below
+			header.setWidth(LV_PCT(100));
+			m_detail->setSize(0, LV_SIZE_CONTENT);
+			m_detail->setFlexGrow(1);
+			m_detail->setLongMode(LV_LABEL_LONG_MODE_SCROLL_CIRCULAR);
 		}
 		return *m_detail;
 	}

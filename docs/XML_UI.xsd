@@ -342,6 +342,10 @@
 			<xs:enumeration value="value"/>
 			<xs:enumeration value="version"/>
 			<xs:enumeration value="visible"/>
+			<xs:enumeration value="widget.height_class"/>
+			<xs:enumeration value="widget.portrait"/>
+			<xs:enumeration value="widget.size_class"/>
+			<xs:enumeration value="widget.width_class"/>
 			<xs:enumeration value="widgets"/>
 			<xs:enumeration value="x.home_usable"/>
 			<xs:enumeration value="x.homed"/>

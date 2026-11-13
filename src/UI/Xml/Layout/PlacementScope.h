@@ -24,6 +24,8 @@
  * Only a grid measures its widgets, and it measures the cells it gives them, which the grid alone sizes, never the
  * widget's content: so what a widget hides or restyles for its size can't change that size, and the layout can't
  * loop. A strip sizes its widgets by their content, so its widgets are always regular, regular, regular, landscape.
+ * A view that isn't a placed widget, such as a page, has a page's room: the same names are globals (WidgetSource.h),
+ * always expanded, so a piece shared by a page and a widget can use them.
  *
  * Lay a widget out with `%`, `fr` and `flex_grow` first: it must look right at its default and smallest sizes without
  * these. Use them to hide secondary parts, to step a value's font, and for orientation, with `bind_flag_if` and
@@ -54,8 +56,11 @@ namespace UI::Xml
 			Expanded = 2, // From the theme's `widget_expanded_min`
 		};
 
-		/** A scope followed only by the globals, for one placed widget: regular, regular, landscape until it follows a place */
-		PlacementScope();
+		/**
+		 * A scope followed only by the globals, for one placed widget: every class `unmeasured` (regular for a placed
+		 * widget), and landscape, until it follows a place
+		 */
+		explicit PlacementScope(SizeClass unmeasured = SizeClass::Regular);
 
 		/** Stop following the place and the theme; the subjects go, which unbinds every widget still bound to them */
 		~PlacementScope() override;
@@ -94,9 +99,9 @@ namespace UI::Xml
 		Scope m_scope;			   // Holds the subjects below
 		lv_obj_t* m_place = nullptr; // The box measured; nullptr before follow() and once it is deleted
 		size_t m_themeListener;	   // Our id with the theme (see UI::Themes::addThemeListener)
-		IntSubject m_widthClass{static_cast<int32_t>(SizeClass::Regular)};  // SizeClass of the place's width
-		IntSubject m_heightClass{static_cast<int32_t>(SizeClass::Regular)}; // SizeClass of the place's height
-		IntSubject m_sizeClass{static_cast<int32_t>(SizeClass::Regular)};  // The smaller of the two classes
+		IntSubject m_widthClass;  // SizeClass of the place's width
+		IntSubject m_heightClass; // SizeClass of the place's height
+		IntSubject m_sizeClass;	  // The smaller of the two classes
 		IntSubject m_portrait;	   // 1 if the place is taller than it is wide, else 0
 	};
 } // namespace UI::Xml

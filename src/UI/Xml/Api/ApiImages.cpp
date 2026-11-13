@@ -605,13 +605,17 @@ namespace UI::Xml::Api
 				return settings;
 			}
 
-			/** Each widget a user can place, as placed: see the file comment of ApiImages.h */
+			/**
+			 * Each widget a user can place, as placed: see the file comment of ApiImages.h. A grid widget is pictured
+			 * at its smallest size too, to show how it fits what it shows to its size.
+			 */
 			void placeable()
 			{
 				// The home screen, to measure the slots
 				lv_obj_t* screenFrame = frame(LV_PCT(100), LV_PCT(100));
 				lv_obj_set_pos(screenFrame, 0, 0);
 				std::map<std::string, PlacedSize> sizes;
+				std::map<std::string, PlacedSize> smallest;
 				{
 					XmlView home("api_view", screenFrame, "home");
 					home.show();
@@ -620,6 +624,10 @@ namespace UI::Xml::Api
 					for (const auto& widget : m_reference.placeable)
 					{
 						sizes[widget.id] = placedSize(widget, widget.defaultSize);
+						if (sizes[widget.id].height != LV_SIZE_CONTENT && widget.minSize != widget.defaultSize)
+						{
+							smallest[widget.id] = placedSize(widget, widget.minSize);
+						}
 					}
 				}
 				lv_obj_delete(screenFrame);
@@ -630,6 +638,14 @@ namespace UI::Xml::Api
 					if (!file.empty())
 					{
 						m_images.placeable[widget.id] = file;
+					}
+					if (auto it = smallest.find(widget.id); it != smallest.end())
+					{
+						const std::string small = drawPlaced(widget, it->second, "widgets/" + widget.id + "_smallest");
+						if (!small.empty())
+						{
+							m_images.placeableSmallest[widget.id] = small;
+						}
 					}
 				}
 			}

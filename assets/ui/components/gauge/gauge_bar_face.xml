@@ -28,7 +28,7 @@
 			<!-- Too narrow for the name beside the value: one above the other -->
 			<bind_style_if name="gauge_bar_beside" cond="not widget.portrait"/>
 			<bind_style_if name="gauge_bar_stacked" cond="widget.portrait"/>
-			<lv_label name="title" bind_text="name" long_mode="dots" clickable="false">
+			<lv_label name="title" bind_text="name" long_mode="scroll_circular" clickable="false">
 				<style name="widget_title"/>
 				<bind_style_if name="gauge_bar_title_beside" cond="not widget.portrait"/>
 				<bind_style_if name="gauge_bar_title_stacked" cond="widget.portrait"/>
@@ -55,7 +55,7 @@
 			</ds_bar>
 		</lv_obj>
 
-		<lv_label name="detail" bind_text="detail" width="100%" long_mode="dots" clickable="false">
+		<lv_label name="detail" bind_text="detail" width="100%" long_mode="scroll_circular" clickable="false">
 			<style name="widget_detail"/>
 		</lv_label>
 	</view>

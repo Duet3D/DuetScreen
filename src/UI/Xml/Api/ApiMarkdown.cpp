@@ -346,7 +346,8 @@ namespace UI::Xml::Api
 				"### Placeable widgets\n\n"
 				"Each widget is a component (with its props) and a widget file beside it, which says where it can be "
 				"placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is "
-				"pictured as placed, at its default size in its first slot, with its default settings.\n\n";
+				"pictured as placed, at its default size in its first slot, with its default settings; a grid "
+				"widget is pictured at its smallest size too.\n\n";
 			for (const auto& widget : reference.placeable)
 			{
 				fmt::format_to(std::back_inserter(out),
@@ -376,6 +377,14 @@ namespace UI::Xml::Api
 				if (auto it = pictures.images.placeable.find(widget.id); it != pictures.images.placeable.end())
 				{
 					fmt::format_to(std::back_inserter(out), "{:s}\n\n", pictures.image(widget.id, it->second));
+				}
+				if (auto it = pictures.images.placeableSmallest.find(widget.id);
+					it != pictures.images.placeableSmallest.end())
+				{
+					fmt::format_to(std::back_inserter(out),
+								   "At its smallest, {:s}:\n\n{:s}\n\n",
+								   cells(widget.minSize),
+								   pictures.image(widget.id + " at its smallest", it->second));
 				}
 				if (!widget.settings.empty())
 				{

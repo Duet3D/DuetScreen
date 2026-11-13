@@ -52,7 +52,8 @@ src/UI/
     Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
                ConsoleSource, JobSource, MachineSource, MoveSource, NavigationSource, ResponseSource,
                TemperatureSource, GaugeSource (every value a gauge can show), JogSource (the jog distance and speed
-               every view shares), and CustomiseSource (the state of customising the screen)
+               every view shares), WidgetSource (widget.* for views that aren't placed widgets), and
+               CustomiseSource (the state of customising the screen)
     Layout/    WidgetCatalogue (the widgets the user can place), Layout (layout files, and repairing them),
                LayoutStore (the layout each slot shows, and saving the user's), LayoutEditor (customising),
                PlacementScope (a placed widget's size classes)
@@ -381,7 +382,7 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
   </ds_button>
   ```
 
-  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A grid measures each widget's cells, which only the grid sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
+  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A grid measures each widget's cells, which only the grid sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. A view that isn't a placed widget, such as a page, has a page's room: the names are globals there, always expanded, so a piece shown both on a page and in a widget (a fan's card, a heater's row) can use them. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
 - A widget about one of something (a fan, a tool) shows it with a keyed list, so it follows the printer's rows; it shows nothing while the printer has no such one.
 - Printer data is global, so a widget shows it wherever it is placed. A widget may name a presenter, and each placed widget then has one of its own.
 - The lint checks each widget file (its component takes every prop and setting, a `row` setting's list and fields exist, every translation key exists) and each widget's component with its default settings.

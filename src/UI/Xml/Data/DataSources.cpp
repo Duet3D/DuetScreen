@@ -20,6 +20,7 @@
 #include "ToolSource.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Globals.h"
+#include "WidgetSource.h"
 #include <memory>
 #include <vector>
 
@@ -88,6 +89,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<NavigationSource>(),
 			std::make_shared<ResponseSource>(),
 			std::make_shared<TemperatureSource>(),
+			std::make_shared<WidgetSource>(),
 		};
 
 		Publisher publisher;

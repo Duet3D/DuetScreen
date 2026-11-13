@@ -11,7 +11,7 @@
 		<style name="pad_zero"/>
 		<action trigger="clicked" name="gauges.edit"/>
 
-		<lv_label name="title" bind_text="name" width="100%" long_mode="dots" clickable="false">
+		<lv_label name="title" bind_text="name" width="100%" long_mode="scroll_circular" clickable="false">
 			<style name="widget_title"/>
 		</lv_label>
 

@@ -1,5 +1,6 @@
 <!--
-  One fan, a row of <ds_list list="fans">. Bindings resolve against this fan's row first:
+  One fan, a row of <ds_list list="fans">: off, its speed, and full speed. In a widget less than wide (widget.*), only
+  its speed. Bindings resolve against this fan's row first:
     index, number, name, requested, actual, rpm, thermostatic
 -->
 <component>
@@ -11,6 +12,8 @@
 		<bind_flag_if_eq subject="thermostatic" flag="hidden" ref_value="1"/>
 
 		<ds_button name="off" translation_tag="fan.off" width="60" height="100%" style_min_width="content">
+			<!-- The slider needs the room more, in all but a wide widget -->
+			<bind_flag_if cond="widget.width_class lt 2" flag="hidden"/>
 			<action trigger="clicked" name="fans.set_speed" arg="0"/>
 		</ds_button>
 
@@ -21,6 +24,8 @@
 		</ds_slider>
 
 		<ds_button name="max" translation_tag="fan.max" width="60" height="100%" style_min_width="content">
+			<!-- The slider needs the room more, in all but a wide widget -->
+			<bind_flag_if cond="widget.width_class lt 2" flag="hidden"/>
 			<action trigger="clicked" name="fans.set_speed" arg="100"/>
 		</ds_button>
 	</view>

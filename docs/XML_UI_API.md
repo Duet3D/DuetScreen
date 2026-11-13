@@ -269,6 +269,15 @@ Each row of `temperatures`:
 | `index` | int | Position in the list, from 0 |
 | `name` | text | Name of the series, e.g. for a legend |
 
+### widget
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `widget.width_class` | int | How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints (widget_regular_min, widget_expanded_min); always 1 in a strip, and 2 outside a placed widget |
+| `widget.height_class` | int | How tall the widget's place is, as `widget.width_class` |
+| `widget.size_class` | int | The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, such as an arc, can be |
+| `widget.portrait` | int | 1 if the widget's place is taller than it is wide, else 0 |
+
 ## Global actions
 
 Actions any view can raise with `<action name="…">`, whatever its presenter. A presenter's own action of the same name is found first.
@@ -1738,14 +1747,14 @@ A placed widget's component can use these as well as its presenter's names and t
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `widget.width_class` | int | How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints (widget_regular_min, widget_expanded_min); always 1 in a strip |
+| `widget.width_class` | int | How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints (widget_regular_min, widget_expanded_min); always 1 in a strip, and 2 outside a placed widget |
 | `widget.height_class` | int | How tall the widget's place is, as `widget.width_class` |
 | `widget.size_class` | int | The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, such as an arc, can be |
 | `widget.portrait` | int | 1 if the widget's place is taller than it is wide, else 0 |
 
 ### Placeable widgets
 
-Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings.
+Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in grid cells, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings; a grid widget is pictured at its smallest size too.
 
 #### arc_gauge
 
@@ -1754,6 +1763,10 @@ Each widget is a component (with its props) and a widget file beside it, which s
 In Gauges; placed in `dashboard`; component `gauge_arc` ([arc_gauge.json](../assets/ui/widgets/gauges/arc_gauge.json)). In a grid it is 4×4 cells, and at least 3×3.
 
 ![arc_gauge](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge.png)
+
+At its smallest, 3×3:
+
+![arc_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -1767,6 +1780,10 @@ In Motion; placed in `dashboard`; component `dashboard_axes` ([axes.json](../ass
 
 ![axes](../tests/ref_imgs/xml_ui_api/widgets/axes.png)
 
+At its smallest, 6×2:
+
+![axes at its smallest](../tests/ref_imgs/xml_ui_api/widgets/axes_smallest.png)
+
 #### babystep
 
 **Babystepping**: Move Z by small steps while printing
@@ -1775,6 +1792,10 @@ In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json
 
 ![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
 
+At its smallest, 4×6:
+
+![babystep at its smallest](../tests/ref_imgs/xml_ui_api/widgets/babystep_smallest.png)
+
 #### bar_gauge
 
 **Bar gauge**: One value on a bar, such as a fan's speed or the job's progress; tap to change it
@@ -1782,6 +1803,10 @@ In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json
 In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../assets/ui/widgets/gauges/bar_gauge.json)). In a grid it is 6×2 cells, and at least 4×2.
 
 ![bar_gauge](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge.png)
+
+At its smallest, 4×2:
+
+![bar_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -1795,6 +1820,10 @@ In Console; placed in `dashboard`; component `console` ([console.json](../assets
 
 ![console](../tests/ref_imgs/xml_ui_api/widgets/console.png)
 
+At its smallest, 10×6:
+
+![console at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_smallest.png)
+
 #### console_log
 
 **Console log**: The printer's latest replies; tap to open the console
@@ -1802,6 +1831,10 @@ In Console; placed in `dashboard`; component `console` ([console.json](../assets
 In Console; placed in `dashboard`; component `console_log` ([console_log.json](../assets/ui/widgets/console/console_log.json)). In a grid it is 10×6 cells, and at least 6×3.
 
 ![console_log](../tests/ref_imgs/xml_ui_api/widgets/console_log.png)
+
+At its smallest, 6×3:
+
+![console_log at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_log_smallest.png)
 
 #### estop
 
@@ -1819,6 +1852,10 @@ In Motion; placed in `dashboard`; component `temperature_extrusion_card` ([extru
 
 ![extrude](../tests/ref_imgs/xml_ui_api/widgets/extrude.png)
 
+At its smallest, 6×8:
+
+![extrude at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrude_smallest.png)
+
 #### fan
 
 **Fan**: One fan's speed, to change it
@@ -1826,6 +1863,10 @@ In Motion; placed in `dashboard`; component `temperature_extrusion_card` ([extru
 In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a grid it is 10×2 cells, and at least 8×2.
 
 ![fan](../tests/ref_imgs/xml_ui_api/widgets/fan.png)
+
+At its smallest, 8×2:
+
+![fan at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -1839,6 +1880,10 @@ In Fans; placed in `dashboard`; component `fans` ([fans.json](../assets/ui/widge
 
 ![fans](../tests/ref_imgs/xml_ui_api/widgets/fans.png)
 
+At its smallest, 8×4:
+
+![fans at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fans_smallest.png)
+
 #### files
 
 **Jobs, macros and status**: The jobs, macros and the job's status, as tabs
@@ -1847,6 +1892,10 @@ In Jobs; placed in `dashboard`; component `dashboard_files` ([files.json](../ass
 
 ![files](../tests/ref_imgs/xml_ui_api/widgets/files.png)
 
+At its smallest, 6×6:
+
+![files at its smallest](../tests/ref_imgs/xml_ui_api/widgets/files_smallest.png)
+
 #### gcode_button
 
 **G-code button**: Sends the G-code you choose, e.g. M98 P"0:/macros/name" to run a macro
@@ -1854,6 +1903,10 @@ In Jobs; placed in `dashboard`; component `dashboard_files` ([files.json](../ass
 In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a grid it is 4×2 cells, and at least 2×2.
 
 ![gcode_button](../tests/ref_imgs/xml_ui_api/widgets/gcode_button.png)
+
+At its smallest, 2×2:
+
+![gcode_button at its smallest](../tests/ref_imgs/xml_ui_api/widgets/gcode_button_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -1864,9 +1917,13 @@ In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_b
 
 **Bed Levelling**: The bed's height map, levelling and probing
 
-In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a grid it is 14×10 cells, and at least 10×7.
+In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a grid it is 14×10 cells, and at least 12×8.
 
 ![heightmap](../tests/ref_imgs/xml_ui_api/widgets/heightmap.png)
+
+At its smallest, 12×8:
+
+![heightmap at its smallest](../tests/ref_imgs/xml_ui_api/widgets/heightmap_smallest.png)
 
 #### job_progress
 
@@ -1876,11 +1933,15 @@ In Jobs; placed in `dashboard`; component `dashboard_job_progress` ([job_progres
 
 ![job_progress](../tests/ref_imgs/xml_ui_api/widgets/job_progress.png)
 
+At its smallest, 6×2:
+
+![job_progress at its smallest](../tests/ref_imgs/xml_ui_api/widgets/job_progress_smallest.png)
+
 #### job_status
 
 **Status**: The job's progress, times and controls
 
-In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a grid it is 8×8 cells, and at least 6×6.
+In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a grid it is 8×8 cells, and at least 8×8.
 
 ![job_status](../tests/ref_imgs/xml_ui_api/widgets/job_status.png)
 
@@ -1892,13 +1953,21 @@ In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../
 
 ![jobs](../tests/ref_imgs/xml_ui_api/widgets/jobs.png)
 
+At its smallest, 6×4:
+
+![jobs at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jobs_smallest.png)
+
 #### jog_choices
 
 **Jog distance and speed**: How far and how fast every jog goes; hold one to change it
 
-In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a grid it is 12×3 cells, and at least 8×2.
+In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a grid it is 12×3 cells, and at least 8×3.
 
 ![jog_choices](../tests/ref_imgs/xml_ui_api/widgets/jog_choices.png)
+
+At its smallest, 8×3:
+
+![jog_choices at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_choices_smallest.png)
 
 #### jog_xy
 
@@ -1908,6 +1977,10 @@ In Motion; placed in `dashboard`; component `move_xy_card` ([jog_xy.json](../ass
 
 ![jog_xy](../tests/ref_imgs/xml_ui_api/widgets/jog_xy.png)
 
+At its smallest, 4×4:
+
+![jog_xy at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_xy_smallest.png)
+
 #### jog_z
 
 **Z jog**: Jog Z up and down, home it, or move it to a position
@@ -1915,6 +1988,10 @@ In Motion; placed in `dashboard`; component `move_xy_card` ([jog_xy.json](../ass
 In Motion; placed in `dashboard`; component `move_z_card` ([jog_z.json](../assets/ui/widgets/motion/jog_z.json)). In a grid it is 3×6 cells, and at least 2×5.
 
 ![jog_z](../tests/ref_imgs/xml_ui_api/widgets/jog_z.png)
+
+At its smallest, 2×5:
+
+![jog_z at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_z_smallest.png)
 
 #### macros
 
@@ -1924,13 +2001,21 @@ In Jobs; placed in `dashboard`; component `dashboard_macros_card` ([macros.json]
 
 ![macros](../tests/ref_imgs/xml_ui_api/widgets/macros.png)
 
+At its smallest, 6×4:
+
+![macros at its smallest](../tests/ref_imgs/xml_ui_api/widgets/macros_smallest.png)
+
 #### move
 
 **Move**: The Move tab: jog and home every axis, babystep, and choose the jog distance and speed
 
-In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a grid it is 20×8 cells, and at least 14×7.
+In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a grid it is 20×10 cells, and at least 20×9.
 
 ![move](../tests/ref_imgs/xml_ui_api/widgets/move.png)
+
+At its smallest, 20×9:
+
+![move at its smallest](../tests/ref_imgs/xml_ui_api/widgets/move_smallest.png)
 
 #### object_cancel
 
@@ -1939,6 +2024,10 @@ In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/wid
 In Jobs; placed in `dashboard`; component `object_cancel` ([object_cancel.json](../assets/ui/widgets/jobs/object_cancel.json)). In a grid it is 14×10 cells, and at least 10×6.
 
 ![object_cancel](../tests/ref_imgs/xml_ui_api/widgets/object_cancel.png)
+
+At its smallest, 10×6:
+
+![object_cancel at its smallest](../tests/ref_imgs/xml_ui_api/widgets/object_cancel_smallest.png)
 
 #### page_console
 
@@ -2027,9 +2116,13 @@ In Motion; placed in `status_bar`; component `status_bar_factor_button` ([status
 
 **Temperature graph**: Every heater's temperature over the last minutes
 
-In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a grid it is 12×6 cells, and at least 6×4.
+In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` ([temperature_graph.json](../assets/ui/widgets/temperature/temperature_graph.json)). In a grid it is 12×6 cells, and at least 9×4.
 
 ![temperature_graph](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph.png)
+
+At its smallest, 9×4:
+
+![temperature_graph at its smallest](../tests/ref_imgs/xml_ui_api/widgets/temperature_graph_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -2039,9 +2132,13 @@ In Temperatures; placed in `dashboard`; component `dashboard_temperature_graph` 
 
 **Temperatures**: The Temperature tab: every tool, bed and chamber, filament, and the extruder
 
-In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a grid it is 20×10 cells, and at least 12×6.
+In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a grid it is 20×12 cells, and at least 16×10.
 
 ![temperatures](../tests/ref_imgs/xml_ui_api/widgets/temperatures.png)
+
+At its smallest, 16×10:
+
+![temperatures at its smallest](../tests/ref_imgs/xml_ui_api/widgets/temperatures_smallest.png)
 
 #### text
 
@@ -2050,6 +2147,10 @@ In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.j
 In Text; placed in `dashboard`; component `dashboard_text` ([text.json](../assets/ui/widgets/text/text.json)). In a grid it is 6×2 cells, and at least 2×1.
 
 ![text](../tests/ref_imgs/xml_ui_api/widgets/text.png)
+
+At its smallest, 2×1:
+
+![text at its smallest](../tests/ref_imgs/xml_ui_api/widgets/text_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -2063,9 +2164,13 @@ In Text; placed in `dashboard`; component `dashboard_text` ([text.json](../asset
 
 **Tool**: One tool with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a grid it is 12×4 cells, and at least 8×2.
+In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a grid it is 12×4 cells, and at least 10×3.
 
 ![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
+
+At its smallest, 10×3:
+
+![tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
@@ -2079,6 +2184,10 @@ In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
 
+At its smallest, 6×4:
+
+![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
+
 #### value_gauge
 
 **Value**: One value as a large number, such as a temperature or a factor; tap to change it
@@ -2086,6 +2195,10 @@ In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json
 In Gauges; placed in `dashboard`; component `gauge_value` ([value_gauge.json](../assets/ui/widgets/gauges/value_gauge.json)). In a grid it is 4×2 cells, and at least 3×2.
 
 ![value_gauge](../tests/ref_imgs/xml_ui_api/widgets/value_gauge.png)
+
+At its smallest, 3×2:
+
+![value_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/value_gauge_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |

@@ -28,6 +28,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/NavigationSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/WidgetSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ToolSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Layout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutEditor.cpp

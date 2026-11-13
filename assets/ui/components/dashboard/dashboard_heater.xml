@@ -1,6 +1,7 @@
 <!--
   One heater: its name, its state (tap to cycle active, standby and off), its temperature, and its active and standby
-  targets (tap to set). The state can't be changed while printing.
+  targets (tap to set). The state can't be changed while printing. In a widget less than wide (widget.*), the standby
+  target isn't shown.
 
   Fields:   a heater row: heater, name, state, status, current, active, standby (src/UI/Xml/Data/HeaterRow.h)
 -->
@@ -27,6 +28,8 @@
 
 		<ds_button name="standby" bind_text="standby" flex_grow="2">
 			<style name="input"/>
+			<!-- The other columns need the room more, in all but a wide widget -->
+			<bind_flag_if cond="widget.width_class lt 2" flag="hidden"/>
 			<action trigger="clicked" name="heaters.set_standby"/>
 		</ds_button>
 	</view>
