@@ -601,6 +601,38 @@ TEST_F(TestXmlUi, BundleForAnotherUiApiIsNotLoaded)
 	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
 }
 
+TEST_F(TestXmlUi, DoubleStarFolderFindsComponentsInEveryFolderBelow)
+{
+	writeFile(bundleFile("manifest.json"), R"({"id": "test", "ui_api": "1.0", "components": ["components/**/*.xml"]})");
+	writeFile(bundleFile("components/fan_card.xml"), R"(<component><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/control/fans/fan_screen.xml"),
+			  R"(<component presenter="fans"><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/control/fans/notes.txt"), "not a component");
+	restartWithUserBundles();
+
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "test");
+	EXPECT_EQ(UI::Xml::findComponent("fan_screen")->bundle, "test");
+	EXPECT_EQ(UI::Xml::findComponent("notes"), nullptr);
+}
+
+TEST_F(TestXmlUi, TwoComponentsOfOneNameInABundleAreReported)
+{
+	writeFile(bundleFile("manifest.json"), R"({"id": "test", "ui_api": "1.0", "components": ["components/**/*.xml"]})");
+	writeFile(bundleFile("components/a/fan_card.xml"),
+			  R"(<component><view extends="lv_obj"><lv_label name="first"/></view></component>)");
+	writeFile(bundleFile("components/b/fan_card.xml"),
+			  R"(<component><view extends="lv_obj"><lv_label name="second"/></view></component>)");
+	restartWithUserBundles();
+
+	// The first (in path order) is used; the second is reported, naming the first
+	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
+	EXPECT_EQ(UI::Xml::getIssues()[0].file, bundleFile("components/b/fan_card.xml"));
+	EXPECT_NE(UI::Xml::getIssues()[0].message.find("same name as"), std::string::npos);
+	EXPECT_NE(UI::Xml::getIssues()[0].message.find("components/a/fan_card.xml"), std::string::npos);
+	EXPECT_EQ(UI::Xml::findComponent("fan_card")->source, bundleFile("components/a/fan_card.xml"));
+}
+
 TEST_F(TestXmlUi, ReloadRebuildsLiveViewsAndKeepsThePresenter)
 {
 	writeFile(bundleFile("manifest.json"), manifest());

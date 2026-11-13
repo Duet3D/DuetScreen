@@ -2138,42 +2138,42 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="alert_axis">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/alert_axis.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/alert_axis.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="alert_choice">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/alert_choice.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/alert_choice.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="axis_position">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/axis_position.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/axis_position.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="babystep">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/babystep.xml, with presenter babystep.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/babystep.xml, with presenter babystep.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="babystep_step">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/babystep_step.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/babystep_step.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="confirm_dialog">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/confirm_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/confirm_dialog.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attribute name="open" type="xs:string">
@@ -2195,210 +2195,210 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/console.xml, with presenter console.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console.xml, with presenter console.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console_gcode">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/console_gcode.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_gcode.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console_line">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/console_line.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_line.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="control_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/control_screen.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/control_screen.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="dashboard">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/dashboard.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="extruder">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/extruder.xml, with presenter extruder.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/extruder.xml, with presenter extruder.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="fan_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/fan_card.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fan_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="fan_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/fan_screen.xml, with presenter fans.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fan_screen.xml, with presenter fans.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file_browser">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_browser.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file_crumb">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/file_crumb.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_crumb.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file_dialog">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/file_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_dialog.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file_row">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/file_row.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file_tile">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/file_tile.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_tile.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="files_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/files_screen.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/files_screen.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="heater_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/heater_card.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/heater_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="heater_row">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/heater_row.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/heater_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="heightmap">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/heightmap.xml, with presenter heightmap.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/heightmap/heightmap.xml, with presenter heightmap.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="heightmap_file">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/heightmap_file.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/heightmap/heightmap_file.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="home_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/home_screen.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/home/home_screen.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="job_object_item">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/job_object_item.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/job_object_item.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="job_object_rect">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/job_object_rect.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/job_object_rect.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="job_status">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/job_status.xml, with presenter job_status.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_status.xml, with presenter job_status.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/move.xml, with presenter move.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move.xml, with presenter move.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move_axis">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/move_axis.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_axis.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move_distance">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/move_distance.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_distance.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move_feedrate">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/move_feedrate.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_feedrate.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move_xy">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/move_xy.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_xy.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="notifications">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications.xml, with presenter notifications.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/notifications.xml, with presenter notifications.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="object_cancel">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/object_cancel.xml, with presenter object_cancel.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/object_cancel.xml, with presenter object_cancel.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="question_dialog">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/question_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/question_dialog.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attribute name="open" type="xs:string">
@@ -2420,7 +2420,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="setting_dropdown">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/setting_dropdown.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/setting_dropdown.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attribute name="options" type="xs:string">
@@ -2436,126 +2436,126 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_connection">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_connection.xml, with presenter settings_connection.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_connection.xml, with presenter settings_connection.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_developer">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_developer.xml, with presenter settings_developer.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_developer.xml, with presenter settings_developer.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_display">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_display.xml, with presenter settings_display.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_display.xml, with presenter settings_display.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_general">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_screen.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_screen.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="side_bar">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/side_bar.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/home/side_bar.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="status_bar">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar.xml, with presenter status_bar.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/home/status_bar.xml, with presenter status_bar.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="temperature">
-		<xs:annotation><xs:documentation>Component from assets/ui/screens/temperature.xml, with presenter temperature.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature.xml, with presenter temperature.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="temperature_extruder">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_extruder.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extruder.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="temperature_heater">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_heater.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="temperature_heater_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_heater_card.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_heater_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="temperature_tool">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_tool.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_tool.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="theme_preview">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/theme_preview.xml, with presenter theme_preview.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/theme_preview.xml, with presenter theme_preview.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="theme_swatch">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/theme_swatch.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/theme_swatch.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="tool_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/tool_card.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/tool_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="tool_list">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/tool_list.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/tool_list.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="value_choice">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/value_choice.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/value_choice.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="value_selector">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/value_selector.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/value_selector.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attribute name="selector" type="xs:string">
@@ -2574,14 +2574,14 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="wifi_network">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/wifi_network.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/wifi_network.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="wifi_selector">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/wifi_selector.xml, with presenter wifi.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/wifi_selector.xml, with presenter wifi.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>

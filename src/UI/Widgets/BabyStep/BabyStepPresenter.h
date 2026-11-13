@@ -1,8 +1,8 @@
 /*
  * BabyStepPresenter.h
  *
- * Behaviour for the babystepping panel (assets/ui/components/babystep.xml): nudge Z by a chosen step while printing,
- * or reset it.
+ * Behaviour for the babystepping panel (assets/ui/components/common/babystep.xml): nudge Z by a chosen step while
+ * printing, or reset it.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).

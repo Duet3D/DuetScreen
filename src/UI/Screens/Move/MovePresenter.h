@@ -1,8 +1,8 @@
 /*
  * MovePresenter.h
  *
- * Behaviour for the Move tab (assets/ui/screens/move.xml): jog and home each axis, set an axis' position, disable the
- * motors, and choose the distance and speed of a jog.
+ * Behaviour for the Move tab (assets/ui/components/control/move/move.xml): jog and home each axis, set an axis'
+ * position, disable the motors, and choose the distance and speed of a jog.
  *
  * Every control's `*_usable` field already allows for the printer being disconnected or busy, so the view only binds.
  *

@@ -1,9 +1,9 @@
 /*
  * ThemePreviewPresenter.h
  *
- * Behaviour for the theme preview (assets/ui/components/theme_preview.xml): a swatch of each colour the theme in use
- * gives its styles, and, for a theme whose palette can be changed, sliders for its hues and chroma and a dark mode
- * toggle, which change it as they move.
+ * Behaviour for the theme preview (assets/ui/components/settings/theme_preview.xml): a swatch of each colour the theme
+ * in use gives its styles, and, for a theme whose palette can be changed, sliders for its hues and chroma and a dark
+ * mode toggle, which change it as they move.
  *
  * Actions change the palette as the controls move.
  *

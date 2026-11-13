@@ -12,13 +12,17 @@
  *       "themes": ["themes/midnight.xml"]
  *     }
  *
- * A component's name is its file name without `.xml`; a theme's is its `name` attribute (see UI/Styles/Theme.h).
- * An entry may use one `*` wildcard in its file name, e.g. "components/" followed by "*.xml". `ui_api` is the major.minor version of the UI API (data, actions, widgets)
- * the bundle was written for; a bundle for a different major version is not loaded.
+ * A component's name is its file name without `.xml`, wherever it is in the bundle, so it must be unique in the
+ * bundle; a theme's is its `name` attribute (see UI/Styles/Theme.h). An entry may use one `*` wildcard in its file
+ * name, e.g. "components/" followed by "*.xml"; and the folder just before that may be `**`, to look in its parent
+ * folder and every folder below (the built-in manifest lists "components", "**" and "*.xml" joined by slashes).
+ *
+ * `ui_api` is the major.minor version of the UI API (data, actions, widgets) the bundle was written for; a bundle
+ * for a different major version is not loaded.
  *
  * Bundles load in order: the built-in bundle, then each user bundle in name order. A component or theme in a later
- * bundle replaces the one of the same name from an earlier bundle. A component that fails to load (malformed XML, an unknown
- * presenter) leaves the earlier definition in place and is reported as a LoadIssue.
+ * bundle replaces the one of the same name from an earlier bundle. A component that fails to load (malformed XML, an
+ * unknown presenter) leaves the earlier definition in place and is reported as a LoadIssue.
  */
 
 #pragma once

@@ -1,9 +1,9 @@
 /*
  * ConnectionSettingsPresenter.h
  *
- * Behaviour for the Connection settings tab (assets/ui/screens/settings_connection.xml): how the screen talks to the
- * Duet. The screen's own WiFi is wifi_selector.xml (WifiPresenter.h). Each setting is read when the tab is shown and
- * applied as soon as it is changed.
+ * Behaviour for the Connection settings tab (assets/ui/components/settings/settings_connection.xml): how the screen
+ * talks to the Duet. The screen's own WiFi is wifi_selector.xml (WifiPresenter.h). Each setting is read when the tab is
+ * shown and applied as soon as it is changed.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).

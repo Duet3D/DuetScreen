@@ -1,8 +1,8 @@
 /*
  * NotificationsPresenter.h
  *
- * Behaviour for the notifications over every screen (assets/ui/components/notifications.xml): responses from the
- * Duet, M291 alerts, and firmware update prompts.
+ * Behaviour for the notifications over every screen (assets/ui/components/notifications/notifications.xml): responses
+ * from the Duet, M291 alerts, and firmware update prompts.
  *
  * Responses are queued and shown one at a time, each closing itself after the notification timeout. They wait while
  * an alert is open, and aren't shown at all while the console (which shows them itself) is open.

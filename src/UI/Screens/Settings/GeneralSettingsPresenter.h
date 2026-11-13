@@ -1,8 +1,8 @@
 /*
  * GeneralSettingsPresenter.h
  *
- * Behaviour for the General settings tab (assets/ui/screens/settings_general.xml). Each setting is read when the tab
- * is shown and stored (and applied) as soon as it is changed.
+ * Behaviour for the General settings tab (assets/ui/components/settings/settings_general.xml). Each setting is read
+ * when the tab is shown and stored (and applied) as soon as it is changed.
  *
  * There is one action per setting, given the value from the widget (an index, a number, or 1/0 for a toggle), and
  * the answers to the language question.

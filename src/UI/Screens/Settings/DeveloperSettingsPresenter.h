@@ -1,9 +1,9 @@
 /*
  * DeveloperSettingsPresenter.h
  *
- * Behaviour for the Developer settings tab (assets/ui/screens/settings_developer.xml): logging and diagnostic
- * options, restarting, the hardware test, the cache, upgrades, and the storage used. Each setting is read when the tab
- * is shown and applied as soon as it is changed.
+ * Behaviour for the Developer settings tab (assets/ui/components/settings/settings_developer.xml): logging and
+ * diagnostic options, restarting, the hardware test, the cache, upgrades, and the storage used. Each setting is read
+ * when the tab is shown and applied as soon as it is changed.
  *
  * There is one action per setting, given the value from the widget (an index, or 1/0 for a toggle), and one per
  * command. Every build has them all, so the UI API is the same in every build: settings.debug_borders only does

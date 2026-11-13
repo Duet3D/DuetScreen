@@ -1,8 +1,8 @@
 /*
  * ConsolePresenter.h
  *
- * Behaviour for the console page (assets/ui/screens/console.xml): send G-code, with a list of the G-codes the Duet
- * knows, narrowed to those that start with what has been typed. What was sent and what came back is the global
+ * Behaviour for the console page (assets/ui/components/console/console.xml): send G-code, with a list of the G-codes
+ * the Duet knows, narrowed to those that start with what has been typed. What was sent and what came back is the global
  * `console.lines` (src/UI/Xml/Data/ConsoleSource.h).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference

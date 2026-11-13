@@ -1,8 +1,8 @@
 /*
  * HeightmapPresenter.h
  *
- * Behaviour for the Bed Levelling tab (assets/ui/screens/heightmap.xml): the height map shown, the height map files
- * on the printer, and their statistics.
+ * Behaviour for the Bed Levelling tab (assets/ui/components/control/heightmap/heightmap.xml): the height map shown, the
+ * height map files on the printer, and their statistics.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md). Levelling and probing use the global `gcode` action (G32, G29).

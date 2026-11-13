@@ -1,9 +1,9 @@
 /*
  * WifiPresenter.h
  *
- * Behaviour for the screen's WiFi networks (assets/ui/components/wifi_selector.xml): the networks around it, joining,
- * leaving and forgetting them, and its IP address. Networks are scanned for every few seconds while the view is shown
- * (see WifiScanner.h).
+ * Behaviour for the screen's WiFi networks (assets/ui/components/settings/wifi_selector.xml): the networks around it,
+ * joining, leaving and forgetting them, and its IP address. Networks are scanned for every few seconds while the view
+ * is shown (see WifiScanner.h).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).

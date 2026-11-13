@@ -1,8 +1,8 @@
 /*
  * ObjectCancelPresenter.h
  *
- * Behaviour for the Object Cancel tab (assets/ui/screens/object_cancel.xml): the job's objects drawn on the bed and
- * listed, the one being printed, and cancelling (or resuming) objects.
+ * Behaviour for the Object Cancel tab (assets/ui/components/control/object_cancel/object_cancel.xml): the job's objects
+ * drawn on the bed and listed, the one being printed, and cancelling (or resuming) objects.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).

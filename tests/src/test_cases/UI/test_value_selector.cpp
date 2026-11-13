@@ -1,7 +1,7 @@
 /*
  * test_value_selector.cpp
  *
- * A value with presets (assets/ui/components/value_selector.xml, src/UI/Xml/View/ValueSelector.h).
+ * A value with presets (assets/ui/components/common/value_selector.xml, src/UI/Xml/View/ValueSelector.h).
  */
 
 #include "UI/Xml/View/ValueSelector.h"

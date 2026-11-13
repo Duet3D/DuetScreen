@@ -1337,63 +1337,63 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| `alert_axis` |  |  | `notifications` | [alert_axis.xml](../assets/ui/components/alert_axis.xml) |
-| `alert_choice` |  |  | `notifications` | [alert_choice.xml](../assets/ui/components/alert_choice.xml) |
-| `axis_position` |  |  | `job_status` | [axis_position.xml](../assets/ui/components/axis_position.xml) |
-| [`babystep`](#control_screen) | `babystep` |  | `job_status`, `move` | [babystep.xml](../assets/ui/components/babystep.xml) |
-| `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/babystep_step.xml) |
-| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_status` | [confirm_dialog.xml](../assets/ui/components/confirm_dialog.xml) |
-| [`console`](#console) | `console` |  | `home_screen` | [console.xml](../assets/ui/screens/console.xml) |
-| `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console_gcode.xml) |
-| `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console_line.xml) |
-| [`control_screen`](#control_screen) |  |  | `home_screen` | [control_screen.xml](../assets/ui/screens/control_screen.xml) |
-| [`dashboard`](#home_screen) |  |  | `home_screen` | [dashboard.xml](../assets/ui/screens/dashboard.xml) |
-| [`extruder`](#temperature) | `extruder` |  | `temperature` | [extruder.xml](../assets/ui/components/extruder.xml) |
-| `fan_card` |  |  | `fan_screen` | [fan_card.xml](../assets/ui/components/fan_card.xml) |
-| [`fan_screen`](#fan_screen) | `fans` |  | `control_screen` | [fan_screen.xml](../assets/ui/screens/fan_screen.xml) |
-| [`file_browser`](#files_screen) |  |  | `dashboard`, `files_screen` | [file_browser.xml](../assets/ui/components/file_browser.xml) |
-| `file_crumb` |  |  | `file_browser` | [file_crumb.xml](../assets/ui/components/file_crumb.xml) |
-| `file_dialog` |  |  | `file_browser` | [file_dialog.xml](../assets/ui/components/file_dialog.xml) |
-| `file_row` |  |  | `file_browser` | [file_row.xml](../assets/ui/components/file_row.xml) |
-| `file_tile` |  |  | `file_browser` | [file_tile.xml](../assets/ui/components/file_tile.xml) |
-| [`files_screen`](#files_screen) |  |  | `home_screen` | [files_screen.xml](../assets/ui/screens/files_screen.xml) |
-| `heater_card` |  |  | `tool_list` | [heater_card.xml](../assets/ui/components/heater_card.xml) |
-| `heater_row` |  |  | `heater_card`, `tool_card` | [heater_row.xml](../assets/ui/components/heater_row.xml) |
-| [`heightmap`](#heightmap) | `heightmap` |  | `control_screen` | [heightmap.xml](../assets/ui/screens/heightmap.xml) |
-| `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/heightmap_file.xml) |
-| [`home_screen`](#home_screen) |  |  |  | [home_screen.xml](../assets/ui/screens/home_screen.xml) |
-| `job_object_item` |  |  | `object_cancel` | [job_object_item.xml](../assets/ui/components/job_object_item.xml) |
-| `job_object_rect` |  |  | `object_cancel` | [job_object_rect.xml](../assets/ui/components/job_object_rect.xml) |
-| [`job_status`](#job_status) | `job_status` |  | `dashboard` | [job_status.xml](../assets/ui/components/job_status.xml) |
-| [`move`](#control_screen) | `move` |  | `control_screen` | [move.xml](../assets/ui/screens/move.xml) |
-| `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/move_axis.xml) |
-| `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/move_distance.xml) |
-| `move_feedrate` |  |  | `move` | [move_feedrate.xml](../assets/ui/components/move_feedrate.xml) |
-| `move_xy` |  |  | `move` | [move_xy.xml](../assets/ui/components/move_xy.xml) |
-| [`notifications`](#home_screen) | `notifications` |  | `home_screen` | [notifications.xml](../assets/ui/components/notifications.xml) |
-| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control_screen` | [object_cancel.xml](../assets/ui/screens/object_cancel.xml) |
-| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/question_dialog.xml) |
-| `setting_dropdown` |  | `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [setting_dropdown.xml](../assets/ui/components/setting_dropdown.xml) |
-| [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings_screen` | [settings_connection.xml](../assets/ui/screens/settings_connection.xml) |
-| [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings_screen` | [settings_developer.xml](../assets/ui/screens/settings_developer.xml) |
-| [`settings_display`](#settings_display) | `settings_display` |  | `settings_screen` | [settings_display.xml](../assets/ui/screens/settings_display.xml) |
-| [`settings_general`](#settings_screen) | `settings_general` |  | `settings_screen` | [settings_general.xml](../assets/ui/screens/settings_general.xml) |
-| [`settings_screen`](#settings_screen) |  |  | `home_screen` | [settings_screen.xml](../assets/ui/screens/settings_screen.xml) |
-| [`side_bar`](#home_screen) |  |  | `home_screen` | [side_bar.xml](../assets/ui/components/side_bar.xml) |
-| [`status_bar`](#home_screen) | `status_bar` |  | `home_screen` | [status_bar.xml](../assets/ui/components/status_bar.xml) |
-| [`temperature`](#temperature) | `temperature` |  | `control_screen` | [temperature.xml](../assets/ui/screens/temperature.xml) |
-| `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/temperature_extruder.xml) |
-| `temperature_heater` |  |  | `temperature_heater_card`, `temperature_tool` | [temperature_heater.xml](../assets/ui/components/temperature_heater.xml) |
-| `temperature_heater_card` |  |  | `temperature` | [temperature_heater_card.xml](../assets/ui/components/temperature_heater_card.xml) |
-| `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/temperature_tool.xml) |
-| [`theme_preview`](#settings_display) | `theme_preview` |  | `settings_display` | [theme_preview.xml](../assets/ui/components/theme_preview.xml) |
-| `theme_swatch` |  |  | `theme_preview` | [theme_swatch.xml](../assets/ui/components/theme_swatch.xml) |
-| `tool_card` |  |  | `tool_list` | [tool_card.xml](../assets/ui/components/tool_card.xml) |
-| [`tool_list`](#home_screen) |  |  | `dashboard` | [tool_list.xml](../assets/ui/components/tool_list.xml) |
-| `value_choice` |  |  | `value_selector` | [value_choice.xml](../assets/ui/components/value_choice.xml) |
-| `value_selector` |  | `selector`, `title`, `value`, `choices` | `extruder` | [value_selector.xml](../assets/ui/components/value_selector.xml) |
-| `wifi_network` |  |  | `wifi_selector` | [wifi_network.xml](../assets/ui/components/wifi_network.xml) |
-| [`wifi_selector`](#settings_connection) | `wifi` |  | `settings_connection` | [wifi_selector.xml](../assets/ui/components/wifi_selector.xml) |
+| `alert_axis` |  |  | `notifications` | [alert_axis.xml](../assets/ui/components/notifications/alert_axis.xml) |
+| `alert_choice` |  |  | `notifications` | [alert_choice.xml](../assets/ui/components/notifications/alert_choice.xml) |
+| `axis_position` |  |  | `job_status` | [axis_position.xml](../assets/ui/components/dashboard/axis_position.xml) |
+| [`babystep`](#control_screen) | `babystep` |  | `job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
+| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_status` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
+| [`console`](#console) | `console` |  | `home_screen` | [console.xml](../assets/ui/components/console/console.xml) |
+| `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
+| `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
+| [`control_screen`](#control_screen) |  |  | `home_screen` | [control_screen.xml](../assets/ui/components/control/control_screen.xml) |
+| [`dashboard`](#home_screen) |  |  | `home_screen` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
+| [`extruder`](#temperature) | `extruder` |  | `temperature` | [extruder.xml](../assets/ui/components/control/temperature/extruder.xml) |
+| `fan_card` |  |  | `fan_screen` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
+| [`fan_screen`](#fan_screen) | `fans` |  | `control_screen` | [fan_screen.xml](../assets/ui/components/control/fans/fan_screen.xml) |
+| [`file_browser`](#files_screen) |  |  | `dashboard`, `files_screen` | [file_browser.xml](../assets/ui/components/files/file_browser.xml) |
+| `file_crumb` |  |  | `file_browser` | [file_crumb.xml](../assets/ui/components/files/file_crumb.xml) |
+| `file_dialog` |  |  | `file_browser` | [file_dialog.xml](../assets/ui/components/files/file_dialog.xml) |
+| `file_row` |  |  | `file_browser` | [file_row.xml](../assets/ui/components/files/file_row.xml) |
+| `file_tile` |  |  | `file_browser` | [file_tile.xml](../assets/ui/components/files/file_tile.xml) |
+| [`files_screen`](#files_screen) |  |  | `home_screen` | [files_screen.xml](../assets/ui/components/files/files_screen.xml) |
+| `heater_card` |  |  | `tool_list` | [heater_card.xml](../assets/ui/components/dashboard/heater_card.xml) |
+| `heater_row` |  |  | `heater_card`, `tool_card` | [heater_row.xml](../assets/ui/components/dashboard/heater_row.xml) |
+| [`heightmap`](#heightmap) | `heightmap` |  | `control_screen` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
+| `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
+| [`home_screen`](#home_screen) |  |  |  | [home_screen.xml](../assets/ui/components/home/home_screen.xml) |
+| `job_object_item` |  |  | `object_cancel` | [job_object_item.xml](../assets/ui/components/control/object_cancel/job_object_item.xml) |
+| `job_object_rect` |  |  | `object_cancel` | [job_object_rect.xml](../assets/ui/components/control/object_cancel/job_object_rect.xml) |
+| [`job_status`](#job_status) | `job_status` |  | `dashboard` | [job_status.xml](../assets/ui/components/dashboard/job_status.xml) |
+| [`move`](#control_screen) | `move` |  | `control_screen` | [move.xml](../assets/ui/components/control/move/move.xml) |
+| `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
+| `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
+| `move_feedrate` |  |  | `move` | [move_feedrate.xml](../assets/ui/components/control/move/move_feedrate.xml) |
+| `move_xy` |  |  | `move` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
+| [`notifications`](#home_screen) | `notifications` |  | `home_screen` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
+| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control_screen` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
+| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
+| `setting_dropdown` |  | `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [setting_dropdown.xml](../assets/ui/components/settings/setting_dropdown.xml) |
+| [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings_screen` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
+| [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings_screen` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
+| [`settings_display`](#settings_display) | `settings_display` |  | `settings_screen` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
+| [`settings_general`](#settings_screen) | `settings_general` |  | `settings_screen` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
+| [`settings_screen`](#settings_screen) |  |  | `home_screen` | [settings_screen.xml](../assets/ui/components/settings/settings_screen.xml) |
+| [`side_bar`](#home_screen) |  |  | `home_screen` | [side_bar.xml](../assets/ui/components/home/side_bar.xml) |
+| [`status_bar`](#home_screen) | `status_bar` |  | `home_screen` | [status_bar.xml](../assets/ui/components/home/status_bar.xml) |
+| [`temperature`](#temperature) | `temperature` |  | `control_screen` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
+| `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
+| `temperature_heater` |  |  | `temperature_heater_card`, `temperature_tool` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
+| `temperature_heater_card` |  |  | `temperature` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
+| `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
+| [`theme_preview`](#settings_display) | `theme_preview` |  | `settings_display` | [theme_preview.xml](../assets/ui/components/settings/theme_preview.xml) |
+| `theme_swatch` |  |  | `theme_preview` | [theme_swatch.xml](../assets/ui/components/settings/theme_swatch.xml) |
+| `tool_card` |  |  | `tool_list` | [tool_card.xml](../assets/ui/components/dashboard/tool_card.xml) |
+| [`tool_list`](#home_screen) |  |  | `dashboard` | [tool_list.xml](../assets/ui/components/dashboard/tool_list.xml) |
+| `value_choice` |  |  | `value_selector` | [value_choice.xml](../assets/ui/components/common/value_choice.xml) |
+| `value_selector` |  | `selector`, `title`, `value`, `choices` | `extruder` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
+| `wifi_network` |  |  | `wifi_selector` | [wifi_network.xml](../assets/ui/components/settings/wifi_network.xml) |
+| [`wifi_selector`](#settings_connection) | `wifi` |  | `settings_connection` | [wifi_selector.xml](../assets/ui/components/settings/wifi_selector.xml) |
 
 C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `numberpad`, `speed_factor`
 

@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 
 	DisplayHelper::setRotation(StorageHelper::getData(ID_DISPLAY_ROTATION));
 
-	// The whole UI: assets/ui/screens/home_screen.xml
+	// The whole UI: assets/ui/components/home/home_screen.xml
 	lv_obj_set_style_pad_all(lv_screen_active(), 0, LV_PART_MAIN);
 	lv_enable_style_refresh(false); // One style refresh for the whole tree, below
 	UI::Xml::XmlView home("home", lv_screen_active(), "home_screen");

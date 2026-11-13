@@ -1,8 +1,8 @@
 /*
  * ExtruderPresenter.h
  *
- * Behaviour for the extruder panel (assets/ui/components/extruder.xml): extrude or retract with the selected tool,
- * by a distance and at a speed chosen with two value selectors (src/UI/Xml/View/ValueSelector.h).
+ * Behaviour for the extruder panel (assets/ui/components/control/temperature/extruder.xml): extrude or retract with the
+ * selected tool, by a distance and at a speed chosen with two value selectors (src/UI/Xml/View/ValueSelector.h).
  *
  * Its names and actions, including those of its two ValueSelectors, are declared in fields() and its constructor,
  * and listed in the UI API reference (docs/XML_UI_API.md).
