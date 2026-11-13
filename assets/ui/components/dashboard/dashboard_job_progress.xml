@@ -1,5 +1,5 @@
 <!--
-  The current job's progress and times: the `job_progress` widget (job_progress.widget.json).
+  The current job's progress and times: the `job_progress` widget (widgets/jobs/job_progress.json).
 
   Data:     job.file, job.progress, job.elapsed, job.remaining (src/UI/Xml/Data/JobSource.h)
 -->

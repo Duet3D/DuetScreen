@@ -1,5 +1,5 @@
 <!--
-  Babystepping, in a card: the `babystep` widget (babystep.widget.json).
+  Babystepping, in a card: the `babystep` widget (widgets/motion/babystep.json).
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">

@@ -19,8 +19,9 @@
  *
  * While the user customises the screen (UI/Xml/Layout/LayoutEditor.h), each placed widget is covered by an edit
  * overlay, an XML component (customise_item.xml in a strip, customise_grid_item.xml in a grid) that takes its touches:
- * a tap selects the widget, and a drag moves it a cell at a time (in a grid) or along the strip. Dragging a grid
- * widget's handle (the overlay's child called `handle`) resizes it. A tap on an empty part of the ds_layout selects
+ * a tap selects the widget, and a drag moves it a cell at a time (in a grid) or along the strip. A selected grid
+ * widget has handles on its corners and edges (the overlay's children called `handle_` and a compass direction: `n`,
+ * `ne`, `e`, … `nw`); dragging one moves those edges, resizing the widget. A tap on an empty part of the ds_layout selects
  * that place to add a widget, and a grid marks the cell with customise_place.xml. Everything is done through the
  * editor, whose drafts the ds_layout then shows like any other layout.
  */
@@ -95,7 +96,10 @@ namespace UI::Xml
 			std::string id;		  // The item dragged
 			lv_point_t start{};	  // Where the touch began
 			LayoutItem from;	  // The item as it was then
-			bool resize = false; // Resizing (the handle was touched), else moving
+			bool left = false;	  // Moving its left edge (a handle was touched); no edge: moving it all
+			bool top = false;	  // Moving its top edge
+			bool right = false;	  // Moving its right edge
+			bool bottom = false;  // Moving its bottom edge
 		};
 
 		/** `<ds_layout>` create callback: a plain container */
@@ -157,6 +161,9 @@ namespace UI::Xml
 
 		/** Mark the selected place, if it is a cell of this grid */
 		void showPlace();
+
+		/** Which edges the handle of `overlay` at `point` moves, set in `drag`; none if no handle is there */
+		static void handleAt(lv_obj_t* overlay, const lv_point_t& point, Drag& drag);
 
 		/** The placement whose overlay is `overlay`, or nullptr */
 		Placement* placementOf(lv_obj_t* overlay);

@@ -1,5 +1,5 @@
 <!--
-  The macros on their own, in a card: the `macros` widget (macros.widget.json).
+  The macros on their own, in a card: the `macros` widget (widgets/jobs/macros.json).
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">

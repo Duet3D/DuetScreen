@@ -1,5 +1,5 @@
 <!--
-  Every axis' position: the `axes` widget (axes.widget.json).
+  Every axis' position: the `axes` widget (widgets/motion/axes.json).
 
   Data:     move.axes (src/UI/Xml/Data/MoveSource.h)
 -->

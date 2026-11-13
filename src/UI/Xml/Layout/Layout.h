@@ -8,10 +8,10 @@
  *       "format": 1,
  *       "slot": "dashboard",
  *       "kind": "grid",
- *       "columns": 10, "rows": 6,
+ *       "columns": 20, "rows": 12,
  *       "items": [
- *         {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 6, "h": 3},
- *         {"id": "fan1", "widget": "fan", "x": 6, "y": 4, "w": 3, "h": 2, "settings": {"fan": 1}}
+ *         {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 12, "h": 6},
+ *         {"id": "fan1", "widget": "fan", "x": 12, "y": 8, "w": 8, "h": 2, "settings": {"fan": 1}}
  *       ]
  *     }
  *
@@ -73,8 +73,8 @@ namespace UI::Xml
 
 		std::string slot{};					// The slot it is for
 		LayoutKind kind = LayoutKind::Grid; // How it places its widgets
-		int32_t columns = 10;				// Grid: columns
-		int32_t rows = 6;					// Grid: rows
+		int32_t columns = 20;				// Grid: columns
+		int32_t rows = 12;					// Grid: rows
 		std::vector<LayoutItem> items{};		// The widgets, in order
 
 		/** Equal if every member is */

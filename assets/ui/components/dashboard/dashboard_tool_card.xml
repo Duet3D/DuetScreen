@@ -1,5 +1,5 @@
 <!--
-  One tool, chosen by its number (`tool`), with its heaters: the `tool` widget (tool.widget.json). It shows nothing
+  One tool, chosen by its number (`tool`), with its heaters: the `tool` widget (widgets/temperature/tool.json). It shows nothing
   while the printer has no such tool.
 
   Data:     the global tools list (src/UI/Xml/Data/ToolSource.h)

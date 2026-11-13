@@ -1,6 +1,6 @@
 <!--
   A small status bar button that sends G-code (`gcode`), labelled `label`: the `status_gcode` widget
-  (status_gcode.widget.json).
+  (widgets/commands/status_gcode.json).
 -->
 <component>
 	<api>

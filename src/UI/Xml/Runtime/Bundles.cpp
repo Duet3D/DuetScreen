@@ -267,10 +267,9 @@ namespace UI::Xml::Bundles
 			{
 				ZoneScoped;
 				m_result.files.push_back(file);
-				const std::string name = file.filename().string();
-				if (!name.ends_with(WidgetCatalogue::FILE_SUFFIX))
+				if (file.extension() != ".json")
 				{
-					addIssue(file, fmt::format("a widget file's name must end {:s}", WidgetCatalogue::FILE_SUFFIX));
+					addIssue(file, "a widget file is a .json file");
 					return;
 				}
 				auto text = readFile(file);
@@ -286,8 +285,7 @@ namespace UI::Xml::Bundles
 					return;
 				}
 				std::string error;
-				auto widget = WidgetCatalogue::parse(
-					json, name.substr(0, name.size() - WidgetCatalogue::FILE_SUFFIX.size()), error);
+				auto widget = WidgetCatalogue::parse(json, file.stem().string(), error);
 				if (!widget)
 				{
 					addIssue(file, error);

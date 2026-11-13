@@ -24,7 +24,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Widgets/Layout/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Slot | A place whose widgets the user chooses: `<ds_layout slot="dashboard"/>` | [Widgets/DsLayout.h](../src/UI/Widgets/Layout/DsLayout.h) |
 | Layout | What a slot shows: which widgets, and where (a grid of cells, or a strip) | [Layout/Layout.h](../src/UI/Xml/Layout/Layout.h), `assets/ui/layouts/` |
-| Placeable widget | A component the user can place in a slot, with a widget file saying where it fits, its sizes and its settings | [Layout/WidgetCatalogue.h](../src/UI/Xml/Layout/WidgetCatalogue.h), `*.widget.json` |
+| Placeable widget | A component the user can place in a slot, with a widget file saying where it fits, its sizes and its settings | [Layout/WidgetCatalogue.h](../src/UI/Xml/Layout/WidgetCatalogue.h), `widgets/` |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
 A view never contains logic and a presenter never touches a widget. Data flows one way, from C++ to XML through subjects; requests flow the other way, from XML to C++ through actions. Data about the printer is global, published by data sources, so any view (and any widget the user places anywhere) can show it; a presenter holds only its own view's state, such as whether its dialog is open.
@@ -73,7 +73,7 @@ assets/ui/                                the built-in bundle
   components/modals/                      the dialogs every part shares: the number pad, speed and extrusion factors,
                                           babystepping, and the question before cancelling the job
   components/customise/                   customising the screen: its toolbar and dialogs, and the edit overlays
-  components/**/*.widget.json             the widgets the user can place, each beside its component
+  widgets/<purpose>/                      the widgets the user can place, a file each, by what they are for
   layouts/                                the layout of each slot until the user changes it
   themes/                                 the built-in themes
 ```
@@ -129,7 +129,7 @@ A bundle is a directory with a `manifest.json` and component files. A component'
   "ui_api": "1.0",
   "components": ["components/**/*.xml"],
   "themes": ["themes/*.xml"],
-  "widgets": ["components/**/*.widget.json"],
+  "widgets": ["widgets/**/*.json"],
   "layouts": ["layouts/*.json"]
 }
 ```
@@ -304,15 +304,15 @@ A layout is a file in a bundle's `layouts/`, listed by the manifest's `layouts`:
   "format": 1,
   "slot": "dashboard",
   "kind": "grid",
-  "columns": 10, "rows": 6,
+  "columns": 20, "rows": 12,
   "items": [
-    {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 6, "h": 3},
-    {"id": "fan1", "widget": "fan", "x": 6, "y": 4, "w": 3, "h": 1, "settings": {"fan": 1}}
+    {"id": "tools", "widget": "tools", "x": 0, "y": 0, "w": 12, "h": 6},
+    {"id": "fan1", "widget": "fan", "x": 12, "y": 8, "w": 8, "h": 2, "settings": {"fan": 1}}
   ]
 }
 ```
 
-- A `grid` places each widget in a rectangle of cells (10 by 6 unless it says otherwise; the user can change it). A `strip` shows its widgets one after another, in order, sized by their components and placed by the `<ds_layout>`'s own layout, e.g. `flex_flow="column"`.
+- A `grid` places each widget in a rectangle of cells (20 by 12 unless it says otherwise; the user can change it). A `strip` shows its widgets one after another, in order, sized by their components and placed by the `<ds_layout>`'s own layout, e.g. `flex_flow="column"`.
 - An item names a widget, a unique `id`, and the values of the widget's settings it doesn't leave at their defaults.
 - An item marked `"locked": true` can be moved but not removed or reconfigured. Only the first bundle's layout of a slot can lock (the built-in bundle's, for the built-in slots), and a locked item missing from a later layout is put back: Settings and the E-stop are always on the sidebar.
 - A slot shows the user's own layout (saved by the screen in the local bundle), else the last bundle's. *Reset* on the screen goes back to the last bundle's, so a shared bundle's layout becomes the default.
@@ -321,7 +321,7 @@ A layout is a file in a bundle's `layouts/`, listed by the manifest's `layouts`:
 
 ### Writing a widget
 
-A widget is a component and a widget file beside it, `<id>.widget.json`, listed by the manifest's `widgets`:
+A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the widget's id is the file's name), listed by the manifest's `widgets`:
 
 ```json
 {
@@ -330,7 +330,7 @@ A widget is a component and a widget file beside it, `<id>.widget.json`, listed 
   "description_tag": "widget.fan_desc",
   "icon": "fine_tune.png",
   "slots": ["dashboard"],
-  "size": {"default": [5, 1], "min": [4, 1]},
+  "size": {"default": [10, 2], "min": [8, 2]},
   "props": {},
   "settings": [
     {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
@@ -375,7 +375,7 @@ A user bundle adds a widget the same way, and a slot for it to go in if none fit
 
 ### Customising on the screen
 
-*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, a drag moves it a cell at a time or along its strip, and dragging the handle of a grid widget resizes it. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be).
+*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it a cell at a time or along its strip. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. The selected dashboard widget has grab handles on its corners and edges; dragging one moves those edges. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be).
 
 How it is built:
 
@@ -419,7 +419,7 @@ Every name is `snake_case`: components, views, widgets, styles, presenters. Comp
 
 - **A page is named after its part**, which is also the folder it is in: `dashboard`, `control`, `move`, `fans`, `settings`. The `<ds_view>` showing a component has the component's name too (`<ds_view name="move" view="move"/>`), and so does a presenter written for one component (`presenter="move"`). A component shown several ways names each view and presenter after where it is shown: the file browser is `dashboard_jobs`, `dashboard_macros`, `files_jobs` and `files_macros`.
 - **Anything else starts with its part's name**, then says what it is: `move_axis`, `dashboard_tool`, `settings_wifi`, `notifications_alert_choice`. A list's item is named for the one thing it shows (`temperature_heater`, `console_line`), or for how it shows it when there is more than one way (`file_browser_row`, `file_browser_tile`).
-- **A widget's file is named for the widget** (`fan.widget.json`, the widget `fan`) and sits beside its component, which is named like any other piece of its part (`dashboard_fan`). One component can be several widgets (`page_home`, `page_control`, … are all `sidebar_page_button`). A slot is named for where it is (`dashboard`, `sidebar`, `status_bar`), and so is its layout file.
+- **A widget's file is named for the widget** (`widgets/fans/fan.json`, the widget `fan`), in a folder for what it is for (`navigation`, `jobs`, `temperature`, …), not where it goes, as `slots` can name several; its component is named like any other piece of its part (`dashboard_fan`). One component can be several widgets (`page_home`, `page_control`, … are all `sidebar_page_button`). A slot is named for where it is (`dashboard`, `sidebar`, `status_bar`), and so is its layout file.
 - **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`). The dialogs the whole UI shares, hosted once by the home screen, go in `modals/`, each named for what it is (`numberpad`, `factors`) with its pieces prefixed (`numberpad_panel`, `factors_dialog`); their presenters are in `src/UI/Presenters/Modals/`.
 
 Tabs of a page live in their own folder inside it when they are parts in their own right (`control/move/`), or beside the page with its prefix when they are not (`settings/settings_general.xml`).

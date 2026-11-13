@@ -101,6 +101,12 @@ namespace UI::Xml
 		/** End a drag */
 		void endGesture();
 
+		/**
+		 * Put grid item `id` in the w by h cells from (x, y), e.g. when one of its edges is dragged
+		 * @return whether it changed: the size fits its widget, and the cells are in the grid and free
+		 */
+		bool place(const std::string& slot, const std::string& id, int32_t x, int32_t y, int32_t w, int32_t h);
+
 		/** Move grid item `id` so its top left cell is (x, y). @return whether it fits there and was moved */
 		bool move(const std::string& slot, const std::string& id, int32_t x, int32_t y);
 

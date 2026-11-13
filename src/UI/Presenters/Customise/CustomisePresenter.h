@@ -79,7 +79,7 @@ namespace UI
 		/** Register `customise.start` and `customise.open_catalogue` as global actions, for every view */
 		static void registerActions();
 
-		/** The edit changed: close the dialogs when it ends; keep the toolbar off a newly selected widget */
+		/** The edit changed: close the dialogs when it ends */
 		void onEditorChanged() override;
 
 		/** Open the widget pool, with the widgets that fit where one would be added */
@@ -107,7 +107,6 @@ namespace UI
 		/** Stop customising, keeping the changes; say so if they couldn't be saved */
 		void finish();
 
-		Xml::IntSubject m_atTop;						 // 1 if the toolbar is at the top of the screen
 		Xml::IntSubject m_dialogOpen;					 // 1 while any of the dialogs is open
 		Xml::List<CatalogueRow> m_catalogue;			 // The widgets that can be added
 		Xml::IntSubject m_catalogueOpen;				 // 1 while the widget pool is open
@@ -122,7 +121,6 @@ namespace UI
 		Xml::IntSubject m_gridOpen;						 // 1 while the grid's size is shown
 		Xml::StringSubject<8> m_columns;				 // The grid's columns
 		Xml::StringSubject<8> m_rows;					 // The grid's rows
-		std::string m_selected;							 // "slot/item" of the selection the toolbar was placed for
 		std::string m_choosing;							 // The setting whose options or text are shown
 	};
 } // namespace UI

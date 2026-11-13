@@ -179,26 +179,11 @@ namespace UI::Xml
 		}
 	}
 
-	bool LayoutEditor::move(const std::string& slot, const std::string& id, int32_t x, int32_t y)
+	bool LayoutEditor::place(const std::string& slot, const std::string& id, int32_t x, int32_t y, int32_t w, int32_t h)
 	{
 		Layout* layout = editable(slot);
 		LayoutItem* item = layout && layout->kind == LayoutKind::Grid ? layout->find(id) : nullptr;
-		if (item == nullptr || (item->x == x && item->y == y) || !GridCells(*layout, id).isFree(x, y, item->w, item->h))
-		{
-			return false;
-		}
-		record();
-		item->x = x;
-		item->y = y;
-		changed(slot);
-		return true;
-	}
-
-	bool LayoutEditor::resize(const std::string& slot, const std::string& id, int32_t w, int32_t h)
-	{
-		Layout* layout = editable(slot);
-		LayoutItem* item = layout && layout->kind == LayoutKind::Grid ? layout->find(id) : nullptr;
-		if (item == nullptr || (item->w == w && item->h == h))
+		if (item == nullptr || (item->x == x && item->y == y && item->w == w && item->h == h))
 		{
 			return false;
 		}
@@ -210,15 +195,31 @@ namespace UI::Xml
 				return false;
 			}
 		}
-		if (!GridCells(*layout, id).isFree(item->x, item->y, w, h))
+		if (!GridCells(*layout, id).isFree(x, y, w, h))
 		{
 			return false;
 		}
 		record();
+		item->x = x;
+		item->y = y;
 		item->w = w;
 		item->h = h;
 		changed(slot);
 		return true;
+	}
+
+	bool LayoutEditor::move(const std::string& slot, const std::string& id, int32_t x, int32_t y)
+	{
+		const Layout* layout = draft(slot);
+		const LayoutItem* item = layout ? layout->find(id) : nullptr;
+		return item != nullptr && place(slot, id, x, y, item->w, item->h);
+	}
+
+	bool LayoutEditor::resize(const std::string& slot, const std::string& id, int32_t w, int32_t h)
+	{
+		const Layout* layout = draft(slot);
+		const LayoutItem* item = layout ? layout->find(id) : nullptr;
+		return item != nullptr && place(slot, id, item->x, item->y, w, h);
 	}
 
 	bool LayoutEditor::moveTo(const std::string& slot, const std::string& id, size_t index)

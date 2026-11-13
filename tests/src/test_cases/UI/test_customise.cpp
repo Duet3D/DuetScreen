@@ -36,7 +36,7 @@ namespace
 
 	/* A bundle with a `test` slot: a label widget whose text is a setting, and a 4x2 grid layout of two labels */
 	constexpr std::string_view MANIFEST = R"({"id": "test", "ui_api": "1.0", "components": ["*.xml"],
-		"widgets": ["*.widget.json"], "layouts": ["*.layout.json"]})";
+		"widgets": ["widgets/*.json"], "layouts": ["*.layout.json"]})";
 
 	constexpr std::string_view LABEL = R"(
 		<component>
@@ -69,7 +69,7 @@ class TestCustomise : public UiTestSuite
 		writeFile(m_userDir / "test/manifest.json", MANIFEST);
 		writeFile(m_userDir / "test/test_label.xml", LABEL);
 		writeFile(m_userDir / "test/test_screen.xml", SCREEN);
-		writeFile(m_userDir / "test/label.widget.json", LABEL_WIDGET);
+		writeFile(m_userDir / "test/widgets/label.json", LABEL_WIDGET);
 		writeFile(m_userDir / "test/test.layout.json", LAYOUT);
 		m_view.reset();
 		UI::Xml::deinit();
@@ -341,21 +341,39 @@ TEST_F(TestCustomiseHome, WidgetsAreRemovedMovedAndResizedByTouch)
 	EXPECT_EQ(draftItem("dashboard", "temperature_graph"), nullptr);
 	EXPECT_EQ(placed("dashboard", "temperature_graph"), nullptr);
 
-	// Down two rows: a row is a sixth of the dashboard
+	// Down four rows: a row is a twelfth of the dashboard
 	lv_obj_t* dashboard = UI::Xml::DsLayout::find("dashboard")->getContainer();
-	const int32_t row = lv_obj_get_content_height(dashboard) / 6;
+	const int32_t row = lv_obj_get_content_height(dashboard) / 12;
 	const lv_point_t middle = middleOf(placed("dashboard", "tools"));
-	drag(middle, {middle.x, middle.y + 2 * row});
+	drag(middle, {middle.x, middle.y + 4 * row});
 	ASSERT_NE(draftItem("dashboard", "tools"), nullptr);
-	EXPECT_EQ(draftItem("dashboard", "tools")->y, 2);
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 4);
 
-	// Its handle, at the bottom right, makes it a row taller
-	const lv_point_t handle = middleOf(lv_obj_find_by_name(overlayOf("dashboard", "tools"), "handle"));
-	drag(handle, {handle.x, handle.y + row});
-	EXPECT_EQ(draftItem("dashboard", "tools")->h, 4);
+	// The selected widget has a handle on each corner and edge; the bottom one makes it two rows taller
+	lv_obj_t* overlay = overlayOf("dashboard", "tools");
+	for (const char* handle :
+		 {"handle_nw", "handle_n", "handle_ne", "handle_e", "handle_se", "handle_s", "handle_sw", "handle_w"})
+	{
+		ASSERT_NE(lv_obj_find_by_name(overlay, handle), nullptr) << handle;
+		EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(overlay, handle), LV_OBJ_FLAG_HIDDEN)) << handle;
+	}
+	const lv_point_t bottom = middleOf(lv_obj_find_by_name(overlay, "handle_s"));
+	drag(bottom, {bottom.x, bottom.y + 2 * row});
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 4);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 8);
 
 	tapToolbar("undo");
-	EXPECT_EQ(draftItem("dashboard", "tools")->h, 3);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 6);
+
+	// The top one moves the top edge, so it starts higher and is taller
+	const lv_point_t top = middleOf(lv_obj_find_by_name(overlayOf("dashboard", "tools"), "handle_n"));
+	drag(top, {top.x, top.y - 2 * row});
+	EXPECT_EQ(draftItem("dashboard", "tools")->y, 2);
+	EXPECT_EQ(draftItem("dashboard", "tools")->h, 8);
+	EXPECT_EQUAL_SCREENSHOT("customise/handles.png")
+
+	// Other widgets show no handles
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(overlayOf("dashboard", "files"), "handle_n"), LV_OBJ_FLAG_HIDDEN));
 }
 
 TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
@@ -368,8 +386,10 @@ TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
 	lv_obj_t* dashboard = UI::Xml::DsLayout::find("dashboard")->getContainer();
 	lv_area_t area;
 	lv_obj_get_content_coords(dashboard, &area);
-	tap({area.x1 + 20, area.y2 - 20});
-	EXPECT_EQ(UI::Xml::LayoutEditor::get().selection().cell, (std::pair{0, 5}));
+	// The cell at the start of the second row from the bottom, where the 8x2 axis positions fit
+	const int32_t row = lv_obj_get_content_height(dashboard) / 12;
+	tap({area.x1 + 10, area.y2 - row - 10});
+	EXPECT_EQ(UI::Xml::LayoutEditor::get().selection().cell, (std::pair{0, 10}));
 	ASSERT_NE(lv_obj_find_by_name(dashboard, "customise_place"), nullptr);
 
 	tap(middleOf(lv_obj_find_by_name(dashboard, "customise_place")));
@@ -377,7 +397,7 @@ TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
 	ASSERT_TRUE(shownOnScreen(pool));
 	EXPECT_EQUAL_SCREENSHOT("customise/widget_pool.png")
 
-	// The pool lists the dashboard's widgets by name; the axis positions are 4x1
+	// The pool lists the dashboard's widgets by name
 	lv_obj_t* list = lv_obj_find_by_name(pool, "list");
 	lv_obj_t* axes = nullptr;
 	for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
@@ -393,7 +413,7 @@ TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
 	EXPECT_FALSE(shownOnScreen(pool));
 	const auto* added = draftItem("dashboard", "axes");
 	ASSERT_NE(added, nullptr);
-	EXPECT_EQ((std::array{added->x, added->y, added->w, added->h}), (std::array{0, 5, 4, 1}));
+	EXPECT_EQ((std::array{added->x, added->y, added->w, added->h}), (std::array{0, 10, 8, 2}));
 	EXPECT_NE(placed("dashboard", "axes"), nullptr);
 }
 
@@ -486,4 +506,30 @@ TEST_F(TestCustomiseHome, EveryWidgetCanBeAddedToEverySlotItFits)
 	}
 	EXPECT_NE(placed("dashboard", "job_progress"), nullptr);
 	EXPECT_NE(placed("status_bar", "status_speed"), nullptr);
+}
+
+TEST_F(TestCustomiseHome, TheToolbarIsDraggedByItsGrip)
+{
+	start();
+	lv_obj_t* bar = lv_obj_find_by_name(toolbar(), "bar");
+	lv_area_t before;
+	lv_obj_get_coords(bar, &before);
+
+	// Up and left, out of the way
+	const lv_point_t grip = middleOf(lv_obj_find_by_name(bar, "grip"));
+	drag(grip, {grip.x - 100, grip.y - 300});
+	lv_area_t after;
+	lv_obj_get_coords(bar, &after);
+	EXPECT_EQ(after.x1, before.x1 - 100);
+	EXPECT_EQ(after.y1, before.y1 - 300);
+
+	// It stays on the screen however far it is dragged
+	const lv_point_t moved = middleOf(lv_obj_find_by_name(bar, "grip"));
+	drag(moved, {moved.x - 2000, moved.y - 2000});
+	lv_obj_get_coords(bar, &after);
+	lv_area_t screenArea;
+	lv_obj_get_content_coords(toolbar(), &screenArea);
+	EXPECT_EQ(after.x1, screenArea.x1);
+	EXPECT_EQ(after.y1, screenArea.y1);
+	EXPECT_EQUAL_SCREENSHOT("customise/toolbar_moved.png")
 }

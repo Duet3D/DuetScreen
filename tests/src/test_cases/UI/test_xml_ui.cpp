@@ -1276,17 +1276,16 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 
 TEST_F(TestXmlUi, UserBundleAddsWidgetsAndLayouts)
 {
-	writeFile(
-		bundleFile("manifest.json"),
-		R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "widgets": ["components/*.widget.json"],
+	writeFile(bundleFile("manifest.json"),
+			  R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "widgets": ["widgets/*.json"],
 				  "layouts": ["layouts/*.json"]})");
 	writeFile(
 		bundleFile("components/my_label.xml"),
 		R"(<component><api><prop name="text" type="string"/></api><view extends="lv_label" text="$text"/></component>)");
 	writeFile(
-		bundleFile("components/label.widget.json"),
+		bundleFile("widgets/label.json"),
 		R"({"component": "my_label", "slots": ["mine"], "settings": [{"name": "text", "kind": "text", "default": "Hi"}]})");
-	writeFile(bundleFile("components/broken.widget.json"), R"({"slots": []})");
+	writeFile(bundleFile("widgets/broken.json"), R"({"slots": []})");
 	writeFile(bundleFile("layouts/mine.json"),
 			  R"({"format": 1, "slot": "mine", "kind": "strip", "items": [{"id": "a", "widget": "label"}]})");
 	restartWithUserBundles();
@@ -1301,7 +1300,7 @@ TEST_F(TestXmlUi, UserBundleAddsWidgetsAndLayouts)
 
 	const auto& issues = UI::Xml::getIssues();
 	ASSERT_EQ(issues.size(), 1u);
-	EXPECT_EQ(issues[0].file.filename(), "broken.widget.json");
+	EXPECT_EQ(issues[0].file.filename(), "broken.json");
 	EXPECT_EQ(issues[0].message, "\"slots\" must list the layout slots it can be placed in");
 }
 

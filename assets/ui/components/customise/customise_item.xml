@@ -9,13 +9,13 @@
 	</api>
 
 	<styles>
-		<style name="frame" bg_color="#highlight" bg_opa="15%" border_color="#highlight" border_width="2"
-			   border_opa="60%" radius="#radius"/>
-		<style name="chosen" bg_opa="30%" border_width="4" border_opa="100%"/>
+		<style name="frame" bg_color="#highlight" bg_opa="15%" radius="#radius"/>
+		<style name="chosen" bg_opa="30%"/>
 	</styles>
 
 	<view extends="lv_obj" scrollable="false">
 		<style name="frame"/>
+		<style name="border_highlight"/>
 		<style name="chosen" selector="checked"/>
 		<bind_state_if_eq subject="customise.selected" state="checked" ref_value="$key"/>
 	</view>

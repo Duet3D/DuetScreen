@@ -7,7 +7,7 @@
 
   Temperatures are typed on the shared number pad.
 
-  It is the dashboard's `tools` widget (tools.widget.json), a card that fills the cells it is placed in.
+  It is the dashboard's `tools` widget (widgets/temperature/tools.json), a card that fills the cells it is placed in.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">

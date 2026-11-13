@@ -1,5 +1,5 @@
 <!--
-  One fan, chosen by its number (`fan`), with its speed and buttons: the `fan` widget (fan.widget.json), the fan's
+  One fan, chosen by its number (`fan`), with its speed and buttons: the `fan` widget (widgets/fans/fan.json), the fan's
   card as the Fans page shows it. It shows nothing while the printer has no such fan.
 
   Data:     the global fans list (src/UI/Xml/Data/FanSource.h); Actions: fans.set_speed (the fans presenter)

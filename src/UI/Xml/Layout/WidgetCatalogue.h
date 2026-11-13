@@ -1,8 +1,8 @@
 /*
  * WidgetCatalogue.h
  *
- * The widgets a user can place in a layout (see Layout.h), each described by a widget file beside its component:
- * `components/dashboard/fan.widget.json` describes the widget `fan`.
+ * The widgets a user can place in a layout (see Layout.h), each described by a widget file in a bundle's `widgets/`
+ * folder, named for the widget and grouped by what it is for: `widgets/fans/fan.json` describes the widget `fan`.
  *
  *     {
  *       "component": "dashboard_fan",              // The XML component shown; default "widget_<id>"
@@ -10,7 +10,7 @@
  *       "description_tag": "widget.fan.description",
  *       "icon": "fan.png",
  *       "slots": ["dashboard"],                    // The layout slots it can be placed in
- *       "size": {"default": [3, 2], "min": [2, 1], "max": [5, 3]},   // In grid cells: [columns, rows]
+ *       "size": {"default": [10, 2], "min": [8, 2], "max": [20, 4]},   // In grid cells: [columns, rows]
  *       "props": {"style": "card"},                // Props always given to the component
  *       "settings": [                              // Props the user chooses; see SettingDef
  *         {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
@@ -135,13 +135,10 @@ namespace UI::Xml
 
 	namespace WidgetCatalogue
 	{
-		/** The file name ending that marks a widget file */
-		inline constexpr std::string_view FILE_SUFFIX = ".widget.json";
-
 		/**
 		 * Read a widget file
 		 * @param json The file's contents
-		 * @param id The widget's id (the file name without FILE_SUFFIX)
+		 * @param id The widget's id: the file's name, without `.json`
 		 * @param error Set to what is wrong if nullopt is returned
 		 */
 		std::optional<WidgetDef> parse(const nlohmann::json& json, std::string id, std::string& error);

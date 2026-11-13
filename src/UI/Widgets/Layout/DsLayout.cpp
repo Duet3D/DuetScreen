@@ -387,17 +387,9 @@ namespace UI::Xml
 				return;
 			}
 			const lv_point_t point = touchPoint();
-			lv_area_t handle{};
-			lv_obj_t* handleObj = lv_obj_find_by_name(overlay, "handle");
-			bool onHandle = false;
-			if (handleObj != nullptr)
-			{
-				lv_obj_get_coords(handleObj, &handle);
-				// The handle shows only on the selected widget, so a first touch there selects rather than resizes
-				onHandle = !lv_obj_has_flag(handleObj, LV_OBJ_FLAG_HIDDEN) && contains(handle, point);
-			}
 			editor.select(layout->m_slot, item->id);
-			layout->m_drag = Drag{.id = item->id, .start = point, .from = *item, .resize = onHandle};
+			layout->m_drag = Drag{.id = item->id, .start = point, .from = *item};
+			handleAt(overlay, point, *layout->m_drag);
 			editor.beginGesture();
 			break;
 		}
@@ -453,14 +445,18 @@ namespace UI::Xml
 			const auto [stepX, stepY] = cellStep();
 			const int32_t columns = steps(point.x - drag.start.x, stepX);
 			const int32_t rows = steps(point.y - drag.start.y, stepY);
-			if (drag.resize)
-			{
-				editor.resize(m_slot, drag.id, std::max(1, drag.from.w + columns), std::max(1, drag.from.h + rows));
-			}
-			else
+			if (!drag.left && !drag.top && !drag.right && !drag.bottom)
 			{
 				editor.move(m_slot, drag.id, drag.from.x + columns, drag.from.y + rows);
+				return;
 			}
+			// The edges dragged follow the touch; the others stay where they were
+			const LayoutItem& from = drag.from;
+			const int32_t x = drag.left ? from.x + columns : from.x;
+			const int32_t y = drag.top ? from.y + rows : from.y;
+			const int32_t right = drag.right ? from.x + from.w + columns : from.x + from.w;
+			const int32_t bottom = drag.bottom ? from.y + from.h + rows : from.y + from.h;
+			editor.place(m_slot, drag.id, x, y, right - x, bottom - y);
 			return;
 		}
 
@@ -539,6 +535,30 @@ namespace UI::Xml
 		}
 		lv_obj_set_grid_cell(
 			m_place, LV_GRID_ALIGN_STRETCH, selection.cell->first, 1, LV_GRID_ALIGN_STRETCH, selection.cell->second, 1);
+	}
+
+	void DsLayout::handleAt(lv_obj_t* overlay, const lv_point_t& point, Drag& drag)
+	{
+		constexpr std::string_view PREFIX = "handle_";
+		for (uint32_t i = 0; i < lv_obj_get_child_count(overlay); i++)
+		{
+			lv_obj_t* child = lv_obj_get_child(overlay, static_cast<int32_t>(i));
+			const char* name = lv_obj_get_name(child);
+			lv_area_t area;
+			lv_obj_get_coords(child, &area);
+			// Handles show only on the selected widget, so a first touch on one selects rather than resizes
+			if (name == nullptr || !std::string_view(name).starts_with(PREFIX) ||
+				lv_obj_has_flag(child, LV_OBJ_FLAG_HIDDEN) || !contains(area, point))
+			{
+				continue;
+			}
+			const std::string_view direction = std::string_view(name).substr(PREFIX.size());
+			drag.top = direction.find('n') != std::string_view::npos;
+			drag.bottom = direction.find('s') != std::string_view::npos;
+			drag.right = direction.find('e') != std::string_view::npos;
+			drag.left = direction.find('w') != std::string_view::npos;
+			return;
+		}
 	}
 
 	DsLayout::Placement* DsLayout::placementOf(lv_obj_t* overlay)

@@ -116,9 +116,6 @@ namespace UI
 	{
 		editor().addListener(this);
 
-		action("customise.move_toolbar",
-			   "Move the toolbar to the other end of the screen",
-			   [this](const Xml::ActionArgs&) { m_atTop.set(m_atTop.get() ? 0 : 1); });
 		action("customise.add",
 			   "Add the widget of the widget pool's row where it was asked for, and close the pool",
 			   [this](const Xml::ActionArgs& args)
@@ -256,7 +253,6 @@ namespace UI
 
 	void CustomisePresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("at_top", m_atTop, "1 if the toolbar is at the top of the screen, else 0 (at the bottom)");
 		f.field("dialog_open", m_dialogOpen, "1 while any of the dialogs below is open, else 0");
 		f.list("catalogue", m_catalogue, "The widgets that can be added where the user chose, by name");
 		f.field("catalogue_open", m_catalogueOpen, "1 while the widget pool is open");
@@ -299,25 +295,6 @@ namespace UI
 		if (!editor().isEditing())
 		{
 			closeDialogs();
-			m_selected.clear();
-			return;
-		}
-
-		// A newly selected grid widget: the toolbar goes to the other end of the screen from it, so it doesn't cover
-		// the widget's handle. It stays put while the widget is dragged, and can still be moved by hand.
-		const Xml::LayoutEditor::Selection& selection = editor().selection();
-		const std::string selected = selection.slot + "/" + selection.item;
-		if (selected == m_selected)
-		{
-			return;
-		}
-		m_selected = selected;
-		const Xml::Layout* layout = editor().draft(selection.slot);
-		const Xml::LayoutItem* item = editor().selectedItem();
-		if (layout != nullptr && item != nullptr && layout->kind == Xml::LayoutKind::Grid)
-		{
-			// Below the middle of the grid, by its middle row
-			m_atTop.set(2 * item->y + item->h > layout->rows ? 1 : 0);
 		}
 	}
 

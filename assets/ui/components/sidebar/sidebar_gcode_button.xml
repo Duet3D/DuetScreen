@@ -1,6 +1,6 @@
 <!--
   A sidebar button that sends G-code (`gcode`), with an icon and a label: the sidebar's `sidebar_gcode` widget
-  (sidebar_gcode.widget.json). It sits in a plain container like the page buttons (sidebar_page_button.xml).
+  (widgets/commands/sidebar_gcode.json). It sits in a plain container like the page buttons (sidebar_page_button.xml).
 -->
 <component>
 	<api>

@@ -1,6 +1,6 @@
 <!--
   The jobs, macros and the job's status, as tabs: jobs (disabled while there is a job), macros, and the job's status,
-  shown whenever a job starts. It is the `files` widget (files.widget.json), in a plain container because a placed
+  shown whenever a job starts. It is the `files` widget (widgets/jobs/files.json), in a plain container because a placed
   widget's root can't be a DuetScreen widget (see XmlView.h).
 -->
 <component>

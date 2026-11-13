@@ -10,13 +10,13 @@
  *       "ui_api": "1.0",
  *       "components": ["components/fan_card.xml", "screens/main.xml"],
  *       "themes": ["themes/midnight.xml"],
- *       "widgets": ["components/fan.widget.json"],
+ *       "widgets": ["widgets/fan.json"],
  *       "layouts": ["layouts/dashboard.json"]
  *     }
  *
  * A component's name is its file name without `.xml`, wherever it is in the bundle, so it must be unique in the
  * bundle; a theme's is its `name` attribute (see UI/Styles/Theme.h); a widget's is its file name without
- * `.widget.json` (see Layout/WidgetCatalogue.h); a layout's is the slot it is for (see Layout/Layout.h). An entry may use one `*` wildcard in its file
+ * `.json` (see Layout/WidgetCatalogue.h); a layout's is the slot it is for (see Layout/Layout.h). An entry may use one `*` wildcard in its file
  * name, e.g. "components/" followed by "*.xml"; and the folder just before that may be `**`, to look in its parent
  * folder and every folder below (the built-in manifest lists "components", "**" and "*.xml" joined by slashes).
  *

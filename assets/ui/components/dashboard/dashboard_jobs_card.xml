@@ -1,5 +1,5 @@
 <!--
-  The jobs on their own, in a card: the `jobs` widget (jobs.widget.json).
+  The jobs on their own, in a card: the `jobs` widget (widgets/jobs/jobs.json).
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">

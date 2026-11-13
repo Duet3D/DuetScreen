@@ -1,6 +1,6 @@
 <!--
   A button that sends G-code (`gcode`), labelled `label`: the dashboard's `gcode_button` widget
-  (gcode_button.widget.json). A macro is run with M98 P"0:/macros/name".
+  (widgets/commands/gcode_button.json). A macro is run with M98 P"0:/macros/name".
 -->
 <component>
 	<api>

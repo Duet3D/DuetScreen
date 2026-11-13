@@ -29,7 +29,6 @@
 			<xs:enumeration value="alert.title"/>
 			<xs:enumeration value="alert.warning"/>
 			<xs:enumeration value="animations"/>
-			<xs:enumeration value="at_top"/>
 			<xs:enumeration value="axes"/>
 			<xs:enumeration value="axes_shown"/>
 			<xs:enumeration value="beds"/>
@@ -430,7 +429,6 @@
 			<xs:enumeration value="customise.done"/>
 			<xs:enumeration value="customise.edit_setting"/>
 			<xs:enumeration value="customise.grid"/>
-			<xs:enumeration value="customise.move_toolbar"/>
 			<xs:enumeration value="customise.open_catalogue"/>
 			<xs:enumeration value="customise.remove"/>
 			<xs:enumeration value="customise.reset"/>
@@ -925,6 +923,7 @@
 			<xs:enumeration value="ds_layout"/>
 			<xs:enumeration value="ds_list"/>
 			<xs:enumeration value="ds_modal"/>
+			<xs:enumeration value="ds_move_handle"/>
 			<xs:enumeration value="ds_password_toggle"/>
 			<xs:enumeration value="ds_plot"/>
 			<xs:enumeration value="ds_plot_layer"/>
@@ -5735,6 +5734,14 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_modal.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_move_handle">
+		<xs:annotation><xs:documentation>A grip that moves the widget it is in around that widget's parent when dragged, e.g. a floating toolbar's. The first drag takes the widget out of its parent's layout; it is kept inside its parent. What the grip looks like is the XML inside it. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

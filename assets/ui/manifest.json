@@ -6,14 +6,14 @@
      uses (named <part>_<piece>), the way src/UI/Presenters/ holds their presenters; common/ holds small pieces used in
      several parts. See "Naming" in docs/XML_UI.md.
 
-     A widget file (*.widget.json) beside a component makes it a widget the user can place; layouts/ holds the
-     layout of each slot (a <ds_layout>). See "Layouts" in docs/XML_UI.md. */
+     widgets/ holds the widgets the user can place, a file each, grouped by what they are for; layouts/ holds the layout
+     of each slot (a <ds_layout>). See "Layouts and widgets" in docs/XML_UI.md. */
   "id": "duetscreen",
   "name": "DuetScreen",
   "version": "1.0.0",
   "ui_api": "1.0",
   "components": ["components/**/*.xml"],
   "themes": ["themes/*.xml"],
-  "widgets": ["components/**/*.widget.json"],
+  "widgets": ["widgets/**/*.json"],
   "layouts": ["layouts/*.json"]
 }

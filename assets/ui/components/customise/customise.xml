@@ -3,19 +3,16 @@
   the pages, sidebar and status bar; it lets touches through but on its bar, which hides while one of its dialogs is
   open.
 
-  The bar adds a widget where the user chose (the widget pool), changes the selected widget's settings, removes it,
-  changes the grid's size, undoes, resets the slot to its default, moves itself to the other end of the screen, and
-  ends customising, throwing the changes away or keeping them. Widgets are selected, moved and resized on the screen
+  The bar floats at the bottom of the screen until the user drags it by its grip, on its left, to wherever it is out
+  of the way. It adds a widget where the user chose (the widget pool), changes the selected widget's settings, removes
+  it, changes the grid's size, undoes, resets the slot to its default, and ends customising, throwing the changes away
+  or keeping them. Widgets are selected, moved and resized on the screen
   itself (see src/UI/Widgets/Layout/DsLayout.h).
 
   Data:     customise.* (src/UI/Xml/Data/CustomiseSource.h)
   Fields and actions: src/UI/Presenters/Customise/CustomisePresenter.h
 -->
 <component presenter="customise">
-	<styles>
-		<style name="at_top" flex_main_place="start"/>
-	</styles>
-
 	<!-- The view itself is always shown (navigation owns its hidden flag); what is in it shows while customising -->
 	<view extends="lv_obj" width="100%" height="100%" floating="true" clickable="false" scrollable="false">
 		<style name="pad_zero"/>
@@ -23,13 +20,16 @@
 		<lv_obj name="toolbar" width="100%" height="100%" clickable="false" scrollable="false" flex_flow="column"
 				style_flex_main_place="end" style_flex_cross_place="center" style_flex_track_place="center">
 		<style name="pad_small"/>
-		<bind_style_if_eq name="at_top" subject="at_top" ref_value="1"/>
 		<bind_flag_if_eq subject="customise.editing" flag="hidden" ref_value="0"/>
 
 		<lv_obj name="bar" width="content" height="content" scrollable="false" flex_flow="row"
 				style_flex_cross_place="center" style_pad_column="#pad_small">
 			<style name="card"/>
 			<bind_flag_if_eq subject="dialog_open" flag="hidden" ref_value="1"/>
+			<!-- The grip: dragging it moves the bar -->
+			<ds_move_handle name="grip" width="content" height="content" style_pad_all="0">
+				<ds_icon name="grip_icon" icon="drag.png" width="32" height="48" clickable="false"/>
+			</ds_move_handle>
 			<ds_button name="add" translation_tag="customise.add" icon="increment.png">
 				<action trigger="clicked" name="customise.open_catalogue"/>
 			</ds_button>
@@ -51,9 +51,6 @@
 			</ds_button>
 			<ds_button name="reset" translation_tag="customise.reset" icon="print_again.png">
 				<action trigger="clicked" name="customise.reset"/>
-			</ds_button>
-			<ds_button name="move_toolbar" icon="move.png">
-				<action trigger="clicked" name="customise.move_toolbar"/>
 			</ds_button>
 			<ds_button name="cancel" translation_tag="common.cancel" icon="close.png">
 				<action trigger="clicked" name="customise.cancel"/>

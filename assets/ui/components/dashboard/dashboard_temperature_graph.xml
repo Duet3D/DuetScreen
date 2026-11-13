@@ -1,6 +1,6 @@
 <!--
   The dashboard's temperature graph: every heater over the last `seconds`. The axis reaches at least 300°C, or the
-  highest heater limit. It is the `temperature_graph` widget (temperature_graph.widget.json), in a plain container
+  highest heater limit. It is the `temperature_graph` widget (widgets/temperature/temperature_graph.json), in a plain container
   because a placed widget's root can't be a DuetScreen widget (see XmlView.h).
 -->
 <component>
