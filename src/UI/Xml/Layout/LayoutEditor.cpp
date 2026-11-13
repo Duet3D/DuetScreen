@@ -370,6 +370,45 @@ namespace UI::Xml
 		return true;
 	}
 
+	size_t LayoutEditor::apply(const std::vector<Layout>& layouts)
+	{
+		std::vector<const Layout*> usable;
+		for (const auto& layout : layouts)
+		{
+			const Layout* current = draft(layout.slot);
+			if (current != nullptr && current->kind == layout.kind && *current != layout)
+			{
+				usable.push_back(&layout);
+			}
+		}
+		if (usable.empty())
+		{
+			return 0;
+		}
+		record();
+		for (const Layout* layout : usable)
+		{
+			m_drafts.at(layout->slot) = *layout;
+			if (m_selection.slot == layout->slot)
+			{
+				m_selection = {};
+			}
+			// Repaired as it is shown: locked items are put back, and what doesn't fit is moved
+			changed(layout->slot);
+		}
+		return usable.size();
+	}
+
+	std::vector<Layout> LayoutEditor::drafts() const
+	{
+		std::vector<Layout> result;
+		for (const auto& [slot, layout] : m_drafts)
+		{
+			result.push_back(layout);
+		}
+		return result;
+	}
+
 	void LayoutEditor::reset(const std::string& slot)
 	{
 		Layout* layout = editable(slot);

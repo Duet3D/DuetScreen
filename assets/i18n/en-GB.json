@@ -462,7 +462,18 @@
       "undo": "Undo",
       "reset": "Reset",
       "done": "Done",
-      "not_saved": "The changes to the screen couldn't be saved"
+      "not_saved": "The changes to the screen couldn't be saved",
+      "save": "Save",
+      "load": "Load",
+      "delete": "Delete",
+      "save_title": "Save the layout as",
+      "name_hint": "Name",
+      "bad_name": "A name has up to {:d} letters, numbers, spaces, - and _",
+      "saved_title": "Saved layouts",
+      "none_saved": "No layouts have been saved yet",
+      "delete_title": "Delete layout",
+      "delete_text": "Delete the saved layout '{:s}'?",
+      "not_loaded": "The layout couldn't be loaded"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Opens the dashboard",

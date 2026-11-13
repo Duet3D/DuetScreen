@@ -7,6 +7,7 @@
 
 #include "UI/Xml/Layout/Layout.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
+#include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include <array>
@@ -536,4 +537,72 @@ TEST_F(TestLayoutEditor, ResetGoesBackToTheDefault)
 	EXPECT_EQ(shown("dashboard", "fan").x, 4);
 	ASSERT_TRUE(editor().done(error)) << error;
 	EXPECT_FALSE(fs::exists(m_dir / "layouts" / "dashboard.json")); // The default needs no file
+}
+
+TEST_F(TestLayoutStore, SavedLayoutsAreListedLoadedAndDeletedByName)
+{
+	namespace Library = UI::Xml::LayoutLibrary;
+	const Layout layout = dashboard({{.id = "a", .widget = "graph", .w = 4, .h = 3}});
+	std::string error;
+	Library::setFolder({});
+	EXPECT_FALSE(Library::canSave());
+	EXPECT_FALSE(Library::save("Mine", {layout}, error));
+	EXPECT_TRUE(Library::names().empty());
+
+	const fs::path folder = m_dir / "saved";
+	Library::setFolder(folder);
+	ASSERT_TRUE(Library::canSave());
+	ASSERT_TRUE(Library::save("Mine", {layout}, error)) << error;
+	ASSERT_TRUE(Library::save("Another one", {}, error)) << error;
+	EXPECT_EQ(Library::names(), (std::vector<std::string>{"Another one", "Mine"}));
+	EXPECT_EQ(json(readFile(folder / "Mine.json"))["name"], "Mine");
+
+	auto loaded = Library::load("Mine", error);
+	ASSERT_TRUE(loaded) << error;
+	EXPECT_EQ(*loaded, std::vector<Layout>{layout});
+	EXPECT_FALSE(Library::load("Missing", error));
+	EXPECT_FALSE(error.empty());
+
+	// A file that isn't a saved layout says so
+	std::ofstream(folder / "Broken.json") << "{\"format\": 99}";
+	EXPECT_FALSE(Library::load("Broken", error));
+	EXPECT_NE(error.find("Broken"), std::string::npos);
+
+	EXPECT_TRUE(Library::remove("Mine"));
+	EXPECT_FALSE(Library::remove("Mine"));
+	EXPECT_EQ(Library::names(), (std::vector<std::string>{"Another one", "Broken"}));
+	Library::setFolder({});
+}
+
+TEST(TestLayoutLibrary, NamesAreWhatAFileCanBeCalledEverywhere)
+{
+	namespace Library = UI::Xml::LayoutLibrary;
+	for (const char* name : {"Printing", "my layout 2", "a-b_c", "x"})
+	{
+		EXPECT_TRUE(Library::isValidName(name)) << name;
+	}
+	for (const char* name : {"", "   ", "a/b", "..", "a.b", "a\\b", "caf\xc3\xa9"})
+	{
+		EXPECT_FALSE(Library::isValidName(name)) << name;
+	}
+	EXPECT_TRUE(Library::isValidName(std::string(Library::MAX_NAME, 'a')));
+	EXPECT_FALSE(Library::isValidName(std::string(Library::MAX_NAME + 1, 'a')));
+}
+
+TEST_F(TestLayoutEditor, ApplyingSavedLayoutsIsOneChange)
+{
+	Layout saved = *editor().draft("dashboard");
+	saved.items.erase(saved.items.begin()); // No graph
+	const Layout otherKind{.slot = "sidebar", .kind = LayoutKind::Grid, .columns = 10, .rows = 6};
+	const Layout notShown{.slot = "elsewhere", .kind = LayoutKind::Grid, .columns = 10, .rows = 6};
+
+	EXPECT_EQ(editor().apply({saved, otherKind, notShown}), 1u);
+	EXPECT_EQ(ids("dashboard"), (std::vector<std::string>{"fan"}));
+	EXPECT_EQ(ids("sidebar"), (std::vector<std::string>{"a", "settings"}));
+	const auto drafts = editor().drafts();
+	ASSERT_EQ(drafts.size(), 2u);
+	EXPECT_EQ(drafts[0].slot, "dashboard");
+
+	editor().undo();
+	EXPECT_EQ(ids("dashboard"), (std::vector<std::string>{"graph", "fan"}));
 }

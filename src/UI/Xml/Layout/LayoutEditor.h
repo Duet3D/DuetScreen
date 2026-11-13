@@ -132,6 +132,16 @@ namespace UI::Xml
 		/** Change grid `slot` to `columns` by `rows` cells, scaling its items. @return whether it is a grid */
 		bool setGrid(const std::string& slot, int32_t columns, int32_t rows);
 
+		/**
+		 * Show `layouts` (e.g. a saved layout) in their slots, as one change. A layout for a slot that isn't being
+		 * edited, or of another kind than its slot's, is left out; slots it has no layout for are kept as they are.
+		 * @return how many slots were changed
+		 */
+		size_t apply(const std::vector<Layout>& layouts);
+
+		/** Every slot's draft, in slot order, e.g. to save them */
+		std::vector<Layout> drafts() const;
+
 		/** Put `slot` back to its default layout (see Layouts::defaultFor()) */
 		void reset(const std::string& slot);
 

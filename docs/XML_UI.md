@@ -144,6 +144,8 @@ Bundles are loaded in this order. A component, theme or widget in a later bundle
 2. **User bundles**: each sub-directory of `/boot/ui/` on the SD card's boot partition (`var/ui/` in the simulator), in name order.
 3. **The user's own**: `/boot/ui/local/`, the layouts the user made on the screen, written by the screen itself.
 
+Layouts the user saved under a name are kept in `/boot/ui/saved/` (not a bundle: they are only loaded when the user picks one).
+
 Everything the user customises is a file in `/boot/ui/`, never in the screen's settings, so copying that folder copies (or backs up) the whole of it.
 
 If a user component is malformed, names an unknown presenter, or comes from a bundle with a different `ui_api` major version, it isn't loaded and the built-in one stays. The problem is logged and shown as a warning message, with the file name and, for XML errors, the line number.
@@ -376,13 +378,16 @@ A user bundle adds a widget the same way, and a slot for it to go in if none fit
 
 ### Customising on the screen
 
-*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it a cell at a time or along its strip. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be).
+*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it a cell at a time or along its strip. A tap on an empty cell marks it, and a tap on the mark opens the widget pool to add a widget there. The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, sets the grid's size, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be; files and new folders are flushed to the card before a save counts as done).
+
+The toolbar can also save every slot's layout under a name, typed when saving (letters, digits, spaces, `-` and `_`), and load one of them again, or delete it. A saved layout is one file, `/boot/ui/saved/<name>.json`, holding each slot's layout. Loading it is one change, which can be undone, and is kept only when customising ends with *Done*.
 
 How it is built:
 
 - [LayoutEditor](../src/UI/Xml/Layout/LayoutEditor.h) holds a draft of every slot and makes each change, checking it (a widget only goes where it fits; locked items stay), with undo. The [layout store](../src/UI/Xml/Layout/LayoutStore.h) shows the drafts, and saves them at the end.
 - [`<ds_layout>`](../src/UI/Widgets/Layout/DsLayout.h) puts the edit overlays (XML: `customise_item.xml`, `customise_grid_item.xml`) over its widgets and turns touches into editor calls.
 - The edit's state is global data, `customise.*` ([CustomiseSource](../src/UI/Xml/Data/CustomiseSource.h)), which the overlays and the toolbar bind to.
+- [LayoutLibrary](../src/UI/Xml/Layout/LayoutLibrary.h) keeps the layouts saved under a name.
 - The toolbar and its dialogs are `customise/customise.xml`, with [CustomisePresenter](../src/UI/Presenters/Customise/CustomisePresenter.h), hosted once by the home screen.
 
 ## Themes

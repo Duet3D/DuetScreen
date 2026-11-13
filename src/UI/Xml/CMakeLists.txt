@@ -29,6 +29,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ToolSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Layout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutEditor.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutLibrary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutStore.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/WidgetCatalogue.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp

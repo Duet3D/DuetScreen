@@ -461,7 +461,18 @@
       "undo": "Deshacer",
       "reset": "Restablecer",
       "done": "Hecho",
-      "not_saved": "No se pudieron guardar los cambios de la pantalla"
+      "not_saved": "No se pudieron guardar los cambios de la pantalla",
+      "save": "Guardar",
+      "load": "Cargar",
+      "delete": "Eliminar",
+      "save_title": "Guardar el diseño como",
+      "name_hint": "Nombre",
+      "bad_name": "Un nombre tiene hasta {:d} letras, números, espacios, - y _",
+      "saved_title": "Diseños guardados",
+      "none_saved": "Aún no se ha guardado ningún diseño",
+      "delete_title": "Eliminar diseño",
+      "delete_text": "¿Eliminar el diseño guardado '{:s}'?",
+      "not_loaded": "No se pudo cargar el diseño"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Abre el panel",

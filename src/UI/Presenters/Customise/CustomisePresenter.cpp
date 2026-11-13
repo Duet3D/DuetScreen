@@ -7,6 +7,7 @@
 #include "Subscribers/ResponseSubscribers.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Runtime/Services.h"
@@ -95,6 +96,11 @@ namespace UI
 		f.field("title", title, "Its name, translated");
 		f.field("description", description, "What it shows, translated");
 		f.field("icon", icon, "Its icon, e.g. \"fan.png\"; empty for none");
+	}
+
+	void SavedRow::fields(Xml::FieldVisitor& f)
+	{
+		f.field("name", name, "The saved layout's name");
 	}
 
 	void CategoryRow::fields(Xml::FieldVisitor& f)
@@ -199,6 +205,66 @@ namespace UI
 		action("customise.keyboard",
 			   "Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away",
 			   [this](const Xml::ActionArgs& args) { m_keyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
+		action("customise.save",
+			   "Ask for a name, to save every slot's layout as it is now under it",
+			   [this](const Xml::ActionArgs&) { askSaveName(); });
+		action("customise.save_name",
+			   "The name being typed changed (the text area's text)",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   m_saveName.set(args.text());
+				   m_saveProblem.set("");
+			   });
+		action("customise.save_ok", "Save under the name typed", [this](const Xml::ActionArgs&) { saveAs(); });
+		action("customise.close_save",
+			   "Close the question without saving",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_keyboard.set(0);
+				   setOpen(m_saveOpen, 0);
+			   });
+		action("customise.load",
+			   "List the saved layouts, to load one",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   showSaved();
+				   setOpen(m_loadOpen, 1);
+			   });
+		action("customise.close_load",
+			   "Close the saved layouts",
+			   [this](const Xml::ActionArgs&) { setOpen(m_loadOpen, 0); });
+		action("customise.load_saved",
+			   "Show the saved layout of the row, as one change, and close the list",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto* row = args.row<SavedRow>())
+				   {
+					   loadSaved(std::string(row->name.get()));
+				   }
+			   });
+		action("customise.ask_delete",
+			   "Ask whether to delete the saved layout of the row",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto* row = args.row<SavedRow>())
+				   {
+					   m_deleting = row->name.get();
+					   m_deleteTitle.set(_("customise.delete_title"));
+					   m_deleteText.set(_("customise.delete_text", m_deleting));
+					   m_confirmDelete.set(1);
+				   }
+			   });
+		action("customise.delete_saved",
+			   "Delete the saved layout the question is about",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_confirmDelete.set(0);
+				   Xml::LayoutLibrary::remove(m_deleting);
+				   showSaved();
+			   });
+		action("customise.close_delete",
+			   "Close the question without deleting",
+			   [this](const Xml::ActionArgs&) { m_confirmDelete.set(0); });
 		action("customise.remove",
 			   "Remove the selected widget",
 			   [](const Xml::ActionArgs&) { editor().removeSelected(); });
@@ -277,7 +343,17 @@ namespace UI
 		f.list("options", m_options, "The values the setting being changed can take");
 		f.field("options_open", m_optionsOpen, "1 while they are shown");
 		f.field("options_title", m_optionsTitle, "The name of the setting they are for");
-		f.field("keyboard", m_keyboard, "1 while the keyboard is up for a text setting, so the settings move above it");
+		f.field("keyboard", m_keyboard, "1 while the keyboard is up for typed text, so the dialog moves above it");
+		f.field("can_save", m_canSave, "1 if layouts can be saved (not in safe mode), else 0");
+		f.field("save_open", m_saveOpen, "1 while asking for a name to save the layouts as");
+		f.field("save_name", m_saveName, "The name typed so far");
+		f.field("save_problem", m_saveProblem, "Why the name typed can't be used, translated; empty if it can");
+		f.field("load_open", m_loadOpen, "1 while the saved layouts are listed");
+		f.list("saved", m_saved, "The saved layouts, by name");
+		f.field("has_saved", m_hasSaved, "1 if there are any saved layouts, else 0");
+		f.field("confirm_delete", m_confirmDelete, "1 while asking whether to delete a saved layout");
+		f.field("delete_title", m_deleteTitle, "That question's title");
+		f.field("delete_text", m_deleteText, "That question, naming the layout");
 		f.field("grid_open", m_gridOpen, "1 while the grid's size is shown");
 		f.field("columns", m_columns, "The grid's number of columns");
 		f.field("rows", m_rows, "The grid's number of rows");
@@ -310,6 +386,7 @@ namespace UI
 		{
 			closeDialogs();
 		}
+		m_canSave.set(Xml::LayoutLibrary::canSave() ? 1 : 0);
 	}
 
 	void CustomisePresenter::openCatalogue()
@@ -438,16 +515,71 @@ namespace UI
 	void CustomisePresenter::closeDialogs()
 	{
 		m_keyboard.set(0);
+		m_confirmDelete.set(0);
+		setOpen(m_saveOpen, 0);
+		setOpen(m_loadOpen, 0);
 		setOpen(m_catalogueOpen, 0);
 		setOpen(m_settingsOpen, 0);
 		setOpen(m_optionsOpen, 0);
 		setOpen(m_gridOpen, 0);
 	}
 
+	void CustomisePresenter::askSaveName()
+	{
+		m_saveName.set("");
+		m_saveProblem.set("");
+		setOpen(m_saveOpen, 1);
+	}
+
+	void CustomisePresenter::saveAs()
+	{
+		const std::string name(m_saveName.get());
+		if (!Xml::LayoutLibrary::isValidName(name))
+		{
+			m_saveProblem.set(_("customise.bad_name", Xml::LayoutLibrary::MAX_NAME));
+			return;
+		}
+		std::string error;
+		if (!Xml::LayoutLibrary::save(name, editor().drafts(), error))
+		{
+			warn(fmt::format("{:s}: {:s}", _("customise.not_saved"), error));
+		}
+		m_keyboard.set(0);
+		setOpen(m_saveOpen, 0);
+	}
+
+	void CustomisePresenter::showSaved()
+	{
+		const std::vector<std::string> names = Xml::LayoutLibrary::names();
+		m_saved.sync(names.size(), [&names](SavedRow& row, size_t index) { row.name.set(names[index]); });
+		m_hasSaved.set(names.empty() ? 0 : 1);
+		m_canSave.set(Xml::LayoutLibrary::canSave() ? 1 : 0);
+	}
+
+	void CustomisePresenter::loadSaved(const std::string& name)
+	{
+		setOpen(m_loadOpen, 0);
+		std::string error;
+		if (auto layouts = Xml::LayoutLibrary::load(name, error))
+		{
+			editor().apply(*layouts);
+		}
+		else
+		{
+			warn(fmt::format("{:s}: {:s}", _("customise.not_loaded"), error));
+		}
+	}
+
+	void CustomisePresenter::warn(const std::string& message)
+	{
+		Model::get().post<EventType::Response>(ResponseType::WARNING, message);
+	}
+
 	void CustomisePresenter::setOpen(Xml::IntSubject& dialog, bool open)
 	{
 		dialog.set(open ? 1 : 0);
-		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_gridOpen.get();
+		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_gridOpen.get() ||
+						 m_saveOpen.get() || m_loadOpen.get();
 		m_dialogOpen.set(any ? 1 : 0);
 	}
 
@@ -456,8 +588,7 @@ namespace UI
 		std::string error;
 		if (!editor().done(error))
 		{
-			Model::get().post<EventType::Response>(ResponseType::WARNING,
-												   fmt::format("{:s}: {:s}", _("customise.not_saved"), error));
+			warn(fmt::format("{:s}: {:s}", _("customise.not_saved"), error));
 		}
 	}
 } // namespace UI

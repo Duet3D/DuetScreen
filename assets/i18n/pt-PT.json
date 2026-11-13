@@ -461,7 +461,18 @@
       "undo": "Anular",
       "reset": "Repor",
       "done": "Concluído",
-      "not_saved": "Não foi possível guardar as alterações ao ecrã"
+      "not_saved": "Não foi possível guardar as alterações ao ecrã",
+      "save": "Guardar",
+      "load": "Carregar",
+      "delete": "Eliminar",
+      "save_title": "Guardar o esquema como",
+      "name_hint": "Nome",
+      "bad_name": "Um nome tem até {:d} letras, números, espaços, - e _",
+      "saved_title": "Esquemas guardados",
+      "none_saved": "Ainda não foi guardado nenhum esquema",
+      "delete_title": "Eliminar esquema",
+      "delete_text": "Eliminar o esquema guardado '{:s}'?",
+      "not_loaded": "Não foi possível carregar o esquema"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Abre o painel",

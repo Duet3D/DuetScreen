@@ -461,7 +461,18 @@
       "undo": "Rückgängig",
       "reset": "Zurücksetzen",
       "done": "Fertig",
-      "not_saved": "Die Änderungen am Bildschirm konnten nicht gespeichert werden"
+      "not_saved": "Die Änderungen am Bildschirm konnten nicht gespeichert werden",
+      "save": "Speichern",
+      "load": "Laden",
+      "delete": "Löschen",
+      "save_title": "Layout speichern als",
+      "name_hint": "Name",
+      "bad_name": "Ein Name hat bis zu {:d} Buchstaben, Ziffern, Leerzeichen, - und _",
+      "saved_title": "Gespeicherte Layouts",
+      "none_saved": "Es wurden noch keine Layouts gespeichert",
+      "delete_title": "Layout löschen",
+      "delete_text": "Das gespeicherte Layout '{:s}' löschen?",
+      "not_loaded": "Das Layout konnte nicht geladen werden"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Öffnet das Dashboard",

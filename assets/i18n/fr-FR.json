@@ -461,7 +461,18 @@
       "undo": "Annuler",
       "reset": "Réinitialiser",
       "done": "Terminé",
-      "not_saved": "Les modifications de l'écran n'ont pas pu être enregistrées"
+      "not_saved": "Les modifications de l'écran n'ont pas pu être enregistrées",
+      "save": "Enregistrer",
+      "load": "Charger",
+      "delete": "Supprimer",
+      "save_title": "Enregistrer la disposition sous",
+      "name_hint": "Nom",
+      "bad_name": "Un nom contient jusqu'à {:d} lettres, chiffres, espaces, - et _",
+      "saved_title": "Dispositions enregistrées",
+      "none_saved": "Aucune disposition n'a encore été enregistrée",
+      "delete_title": "Supprimer la disposition",
+      "delete_text": "Supprimer la disposition enregistrée '{:s}' ?",
+      "not_loaded": "La disposition n'a pas pu être chargée"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Ouvre le tableau de bord",

@@ -332,7 +332,17 @@ Used by `customise`.
 | `options` | list | The values the setting being changed can take |
 | `options_open` | int | 1 while they are shown |
 | `options_title` | text | The name of the setting they are for |
-| `keyboard` | int | 1 while the keyboard is up for a text setting, so the settings move above it |
+| `keyboard` | int | 1 while the keyboard is up for typed text, so the dialog moves above it |
+| `can_save` | int | 1 if layouts can be saved (not in safe mode), else 0 |
+| `save_open` | int | 1 while asking for a name to save the layouts as |
+| `save_name` | text | The name typed so far |
+| `save_problem` | text | Why the name typed can't be used, translated; empty if it can |
+| `load_open` | int | 1 while the saved layouts are listed |
+| `saved` | list | The saved layouts, by name |
+| `has_saved` | int | 1 if there are any saved layouts, else 0 |
+| `confirm_delete` | int | 1 while asking whether to delete a saved layout |
+| `delete_title` | text | That question's title |
+| `delete_text` | text | That question, naming the layout |
 | `grid_open` | int | 1 while the grid's size is shown |
 | `columns` | text | The grid's number of columns |
 | `rows` | text | The grid's number of rows |
@@ -376,24 +386,41 @@ Each row of `options`:
 | `title` | text | The value as shown, translated |
 | `chosen` | int | 1 for the setting's current value, else 0 |
 
+Each row of `saved`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `name` | text | The saved layout's name |
+
 | Action | Description |
 | --- | --- |
 | `customise.add` | Add the widget of the widget pool's row where it was asked for, and close the pool |
+| `customise.ask_delete` | Ask whether to delete the saved layout of the row |
 | `customise.cancel` | Stop customising and throw the changes away |
 | `customise.choose` | Set the setting being changed to the value of the row, and close the values |
 | `customise.close_catalogue` | Close the widget pool |
+| `customise.close_delete` | Close the question without deleting |
 | `customise.close_grid` | Close the grid's size |
+| `customise.close_load` | Close the saved layouts |
 | `customise.close_options` | Close the values without changing the setting |
+| `customise.close_save` | Close the question without saving |
 | `customise.close_settings` | Close the settings |
 | `customise.columns` | Ask for the grid's number of columns on the number pad |
 | `customise.configure` | Show the selected widget's settings |
+| `customise.delete_saved` | Delete the saved layout the question is about |
 | `customise.done` | Stop customising and keep the changes |
 | `customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
 | `customise.grid` | Show the grid's size |
 | `customise.keyboard` | Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away |
+| `customise.load` | List the saved layouts, to load one |
+| `customise.load_saved` | Show the saved layout of the row, as one change, and close the list |
 | `customise.remove` | Remove the selected widget |
 | `customise.reset` | Put the selected widget's slot (else the dashboard) back as it was before any customising |
 | `customise.rows` | Ask for the grid's number of rows on the number pad |
+| `customise.save` | Ask for a name, to save every slot's layout as it is now under it |
+| `customise.save_name` | The name being typed changed (the text area's text) |
+| `customise.save_ok` | Save under the name typed |
 | `customise.set_text` | Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is pressed |
 | `customise.toggle_setting` | Turn the on or off setting of the row the other way |
 | `customise.undo` | Undo the last change |
@@ -1883,6 +1910,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
 | `customise_option` |  |  | `customise` | [customise_option.xml](../assets/ui/components/customise/customise_option.xml) |
 | [`customise_place`](#customise_place) |  |  |  | [customise_place.xml](../assets/ui/components/customise/customise_place.xml) |
+| `customise_saved_layout` |  |  | `customise` | [customise_saved_layout.xml](../assets/ui/components/customise/customise_saved_layout.xml) |
 | `customise_setting` |  |  | `customise` | [customise_setting.xml](../assets/ui/components/customise/customise_setting.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
 | `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
@@ -1933,7 +1961,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
-| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
+| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `customise`, `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
 | [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |

@@ -461,7 +461,18 @@
       "undo": "Annulla",
       "reset": "Ripristina",
       "done": "Fatto",
-      "not_saved": "Non è stato possibile salvare le modifiche allo schermo"
+      "not_saved": "Non è stato possibile salvare le modifiche allo schermo",
+      "save": "Salva",
+      "load": "Carica",
+      "delete": "Elimina",
+      "save_title": "Salva il layout come",
+      "name_hint": "Nome",
+      "bad_name": "Un nome ha fino a {:d} lettere, numeri, spazi, - e _",
+      "saved_title": "Layout salvati",
+      "none_saved": "Nessun layout è stato ancora salvato",
+      "delete_title": "Elimina layout",
+      "delete_text": "Eliminare il layout salvato '{:s}'?",
+      "not_loaded": "Non è stato possibile caricare il layout"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Apre la dashboard",

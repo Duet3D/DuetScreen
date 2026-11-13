@@ -636,3 +636,67 @@ TEST_F(TestCustomiseHome, EdgesAreGrabbedAnywhereNearThemEvenOnASmallWidget)
 	EXPECT_EQ(draftItem("dashboard", "tools")->h, 6);
 	EXPECT_EQ(draftItem("dashboard", "tools")->y, 1);
 }
+
+TEST_F(TestCustomiseHome, LayoutsAreSavedUnderANameLoadedAndDeleted)
+{
+	auto& editor = UI::Xml::LayoutEditor::get();
+	start();
+	lv_obj_t* screen = lv_screen_active();
+	lv_obj_t* loadDialog = lv_obj_find_by_name(screen, "load_dialog");
+	tapToolbar("load");
+	ASSERT_TRUE(shownOnScreen(loadDialog));
+	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(loadDialog, "none"))); // Nothing saved yet
+	UI::Xml::Actions::dispatch(UI::findView("customise")->getRootPtr(), "customise.close_load", "");
+	update();
+
+	editor.select("dashboard", "temperature_graph");
+	editor.removeSelected();
+	update();
+
+	// Saving asks for a name, and says what is wrong with one it can't use
+	tapToolbar("save");
+	lv_obj_t* saveDialog = lv_obj_find_by_name(screen, "save_dialog");
+	ASSERT_TRUE(shownOnScreen(saveDialog));
+	lv_obj_t* name = lv_obj_find_by_name(saveDialog, "name");
+	EXPECT_STREQ(lv_textarea_get_text(name), "");
+	lv_textarea_set_text(name, "no/graph");
+	tap(middleOf(lv_obj_find_by_name(saveDialog, "ok")));
+	EXPECT_TRUE(shownOnScreen(saveDialog));
+	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(saveDialog, "problem")));
+	EXPECT_FALSE(fs::exists(m_userDir / "saved"));
+
+	lv_textarea_set_text(name, "No graph");
+	EXPECT_EQUAL_SCREENSHOT("customise/save.png")
+	lv_obj_send_event(name, LV_EVENT_READY, nullptr);
+	update();
+	EXPECT_FALSE(shownOnScreen(saveDialog));
+	EXPECT_TRUE(fs::exists(m_userDir / "saved" / "No graph.json"));
+
+	// Loading puts back what was saved, as one change
+	editor.undo();
+	update();
+	ASSERT_NE(draftItem("dashboard", "temperature_graph"), nullptr);
+	tapToolbar("load");
+	ASSERT_TRUE(shownOnScreen(loadDialog));
+	EXPECT_FALSE(shownOnScreen(lv_obj_find_by_name(loadDialog, "none")));
+	lv_obj_t* row = lv_obj_get_child(lv_obj_find_by_name(loadDialog, "list"), 0);
+	ASSERT_NE(row, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(row, "name")), "No graph");
+	EXPECT_EQUAL_SCREENSHOT("customise/load.png")
+	tap(middleOf(lv_obj_find_by_name(row, "load")));
+	EXPECT_FALSE(shownOnScreen(loadDialog));
+	EXPECT_EQ(draftItem("dashboard", "temperature_graph"), nullptr);
+	tapToolbar("undo");
+	EXPECT_NE(draftItem("dashboard", "temperature_graph"), nullptr);
+
+	// Deleting asks first
+	tapToolbar("load");
+	row = lv_obj_get_child(lv_obj_find_by_name(loadDialog, "list"), 0);
+	tap(middleOf(lv_obj_find_by_name(row, "delete")));
+	lv_obj_t* question = lv_obj_find_by_name(screen, "delete_question");
+	ASSERT_TRUE(shownOnScreen(question));
+	tap(middleOf(lv_obj_find_by_name(question, "ok")));
+	EXPECT_FALSE(shownOnScreen(question));
+	EXPECT_FALSE(fs::exists(m_userDir / "saved" / "No graph.json"));
+	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(loadDialog, "none")));
+}

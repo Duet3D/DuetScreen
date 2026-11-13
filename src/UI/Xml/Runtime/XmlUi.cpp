@@ -17,6 +17,7 @@
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
+#include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
@@ -61,6 +62,7 @@ namespace UI::Xml
 			Layouts::set(std::move(s_loaded.layouts),
 						 canSave ? s_paths.user / Layouts::LOCAL_BUNDLE : std::filesystem::path(),
 						 s_loaded.issues);
+			LayoutLibrary::setFolder(canSave ? s_paths.user / "saved" : std::filesystem::path());
 
 			for (const auto& issue : s_loaded.issues)
 			{
@@ -131,6 +133,7 @@ namespace UI::Xml
 		LayoutEditor::get().cancel();
 		DataSources::stop();
 		Layouts::clear();
+		LayoutLibrary::setFolder({});
 		WidgetCatalogue::set({});
 		Themes::clearThemes();
 		Globals::clear();

@@ -461,7 +461,18 @@
       "undo": "Ongedaan maken",
       "reset": "Herstellen",
       "done": "Klaar",
-      "not_saved": "De wijzigingen aan het scherm konden niet worden opgeslagen"
+      "not_saved": "De wijzigingen aan het scherm konden niet worden opgeslagen",
+      "save": "Opslaan",
+      "load": "Laden",
+      "delete": "Verwijderen",
+      "save_title": "Indeling opslaan als",
+      "name_hint": "Naam",
+      "bad_name": "Een naam heeft maximaal {:d} letters, cijfers, spaties, - en _",
+      "saved_title": "Opgeslagen indelingen",
+      "none_saved": "Er zijn nog geen indelingen opgeslagen",
+      "delete_title": "Indeling verwijderen",
+      "delete_text": "De opgeslagen indeling '{:s}' verwijderen?",
+      "not_loaded": "De indeling kon niet worden geladen"
     },
     "widget": { /* Widgets that can be placed on the screen */
       "page_home_desc": "Opent het dashboard",

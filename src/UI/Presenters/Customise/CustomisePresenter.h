@@ -3,7 +3,8 @@
  *
  * Behaviour for customising the screen (assets/ui/components/customise/customise.xml): the toolbar shown while the
  * user customises, and its dialogs: the widget pool, by category, a widget's settings (text is typed in them, on the
- * shared keyboard, and the dialog moves above it), the choice of one of a setting's values, and the grid's size. The edits themselves are the layout editor's
+ * shared keyboard, and the dialog moves above it), the choice of one of a setting's values, the grid's size, and
+ * saving the layouts under a name and loading them again (UI/Xml/Layout/LayoutLibrary.h). The edits themselves are the layout editor's
  * (UI/Xml/Layout/LayoutEditor.h); <ds_layout> turns touches on the widgets into moves, resizes and selections, and the
  * edit's state is global data (`customise.*`, UI/Xml/Data/CustomiseSource.h).
  *
@@ -76,6 +77,16 @@ namespace UI
 		Xml::IntSubject chosen;		   // 1 for the current value
 	};
 
+	/** A layout the user saved */
+	class SavedRow : public Xml::Row
+	{
+	  public:
+		/** Declare the row's fields */
+		void fields(Xml::FieldVisitor& f) override;
+
+		Xml::StringSubject<40> name; // Its name
+	};
+
 	class CustomisePresenter : public Xml::XmlPresenter, public Xml::EditorListener
 	{
 	  public:
@@ -113,6 +124,21 @@ namespace UI
 		/** Close every dialog */
 		void closeDialogs();
 
+		/** Ask for a name, and save every slot's layout as it is now under it */
+		void askSaveName();
+
+		/** Save under the name typed, or say why it can't be */
+		void saveAs();
+
+		/** List the saved layouts */
+		void showSaved();
+
+		/** Show the layout saved as `name`, as one change */
+		void loadSaved(const std::string& name);
+
+		/** Tell the user `message`, e.g. why a layout couldn't be saved */
+		static void warn(const std::string& message);
+
 		/** Open or close the dialog whose subject is `dialog`, and show whether any is open */
 		void setOpen(Xml::IntSubject& dialog, bool open);
 
@@ -127,7 +153,18 @@ namespace UI
 		Xml::List<OptionRow> m_options;					 // The values the setting being changed can take
 		Xml::IntSubject m_optionsOpen;					 // 1 while they are shown
 		Xml::StringSubject<64> m_optionsTitle;			 // The setting they are for
-		Xml::IntSubject m_keyboard;						 // 1 while the keyboard is up, for a text setting
+		Xml::IntSubject m_keyboard;						 // 1 while the keyboard is up, for typed text
+		Xml::IntSubject m_canSave;						 // 1 if layouts can be saved (not in safe mode)
+		Xml::IntSubject m_saveOpen;						 // 1 while asking for a name to save as
+		Xml::StringSubject<40> m_saveName;				 // The name typed so far
+		Xml::StringSubject<96> m_saveProblem;			 // Why the name typed can't be used; empty if it can
+		Xml::IntSubject m_loadOpen;						 // 1 while the saved layouts are listed
+		Xml::List<SavedRow> m_saved;					 // The saved layouts, by name
+		Xml::IntSubject m_hasSaved;						 // 1 if there are any
+		Xml::IntSubject m_confirmDelete;				 // 1 while asking whether to delete one
+		Xml::StringSubject<64> m_deleteTitle;			 // The question's title
+		Xml::StringSubject<96> m_deleteText;			 // The question, naming the layout
+		std::string m_deleting;							 // The saved layout the question is about
 		Xml::IntSubject m_gridOpen;						 // 1 while the grid's size is shown
 		Xml::StringSubject<8> m_columns;				 // The grid's columns
 		Xml::StringSubject<8> m_rows;					 // The grid's rows
