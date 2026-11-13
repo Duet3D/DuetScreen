@@ -1343,7 +1343,7 @@ Also takes every `lv_obj` attribute.
 | `bind_accepted_chars` | Follow a text subject for the characters that may be typed; empty for any |
 | `keyboard_mode` | Keyboard layout to show: `text` (default), `text_upper` or `number` |
 | `bind_keyboard_mode` | Follow a text subject for the keyboard layout, as `keyboard_mode` |
-| `keyboard` | The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else the view of that name (default `keyboard`, the shared one); `none` for a box edited another way, such as a number pad |
+| `keyboard` | The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box edited another way, such as a number pad |
 | `hide_keyboard_on_ready` | Put the keyboard away when its OK key is pressed (default true) |
 | `hide_keyboard_on_defocus` | Put the keyboard away when the box loses focus (default true) |
 | `one_line` | "true" for a single line of text |
@@ -1480,7 +1480,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
-C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `keyboard`
+C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`
 
 ### Views
 

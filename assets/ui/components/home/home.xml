@@ -41,6 +41,7 @@
 
 		<!-- Over everything: responses, alerts and update prompts, then the keyboard -->
 		<ds_view name="notifications" view="notifications" shown="true"/>
-		<ds_view name="keyboard" view="keyboard"/>
+		<!-- The shared keyboard: a ds_textarea in any page or dialog finds it by its name, and brings it up -->
+		<ds_keyboard name="keyboard" hidden="true" floating="true" align="bottom_mid" width="100%" height="50%"/>
 	</view>
 </component>

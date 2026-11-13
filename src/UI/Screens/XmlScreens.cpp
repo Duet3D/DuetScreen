@@ -23,7 +23,6 @@
 #include "Temperature/ExtruderPresenter.h"
 #include "Temperature/HeaterActions.h"
 #include "Temperature/TemperaturePresenter.h"
-#include "UI/Components/LVGL/LvKeyboard.h"
 #include "UI/Widgets/BabyStep/BabyStepPresenter.h"
 #include "UI/Widgets/EStop/EStop.h"
 #include "UI/Xml/View/NativeViews.h"
@@ -31,28 +30,6 @@
 
 namespace UI
 {
-	/** The on-screen keyboard: along the bottom of the screen, hidden when cancelled */
-	static LvObj* createKeyboard(const std::string& name, lv_obj_t* parent)
-	{
-		LvObjRef parentRef(parent);
-		auto* keyboard = new LvKeyboard(name, parentRef);
-		keyboard->hide();
-		keyboard->setFlag(LV_OBJ_FLAG_FLOATING, true);
-		keyboard->setAlign(LV_ALIGN_BOTTOM_MID, 0, 0);
-		keyboard->setSize(LV_PCT(100), LV_PCT(50));
-		keyboard->addEventCallback(
-			[keyboard](lv_event_t*)
-			{
-				keyboard->hide();
-				if (auto textarea = keyboard->getTextarea())
-				{
-					textarea->sendEvent(LV_EVENT_DEFOCUSED);
-				}
-			},
-			LV_EVENT_CANCEL);
-		return keyboard;
-	}
-
 	/** Make a file browser presenter with `settings` available as `name` */
 	static void addFileBrowser(std::string name, FileBrowserPresenter::Settings settings)
 	{
@@ -115,6 +92,5 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add("keyboard", createKeyboard);
 	}
 } // namespace UI

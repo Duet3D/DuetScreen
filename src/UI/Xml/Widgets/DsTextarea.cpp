@@ -81,8 +81,8 @@ namespace UI::Xml
 				   AttributeKind::Subject},
 				  {"keyboard",
 				   "The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same "
-				   "view), else the view of that name (default `keyboard`, the shared one); `none` for a box edited "
-				   "another way, such as a number pad"},
+				   "view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box "
+				   "edited another way, such as a number pad"},
 				  {"hide_keyboard_on_ready", "Put the keyboard away when its OK key is pressed (default true)"},
 				  {"hide_keyboard_on_defocus", "Put the keyboard away when the box loses focus (default true)"},
 				  {"one_line", "\"true\" for a single line of text"},
@@ -235,6 +235,8 @@ namespace UI::Xml
 			break;
 		case LV_EVENT_CANCEL:
 			textarea->showKeyboard(keyboard, false);
+			// Closing the keyboard ends the edit, so whatever moved out of its way can move back
+			lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
 			break;
 		default:
 			break;

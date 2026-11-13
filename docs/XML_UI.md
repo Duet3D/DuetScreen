@@ -73,7 +73,7 @@ In XML, a page of a screen is a `<ds_view>`:
 `view` names an XML component or, until it is rewritten, a C++ view registered in [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp). If both exist, the component wins, so a C++ page is replaced simply by adding a component of the same name. Every `<ds_view>` is registered with Navigation under its `name`:
 
 - `<action name="nav.open" arg="control"/>` opens it (also `nav.home` and `nav.back`)
-- C++ finds it with `findView<ControlView>("control")`, e.g. the shared `numberpad` or `keyboard`
+- C++ finds it with `findView<Xml::XmlView>("control")`, e.g. the shared `numberpad`
 - modals open over the view called `main_window` (`getModalHost()`)
 
 Pages start hidden; `home="true"` makes a page a home screen (shown when nothing else is open) and `shown="true"` shows a part that is always there, such as the status bar.

@@ -237,7 +237,10 @@ TEST_F(TestHomeView, BlankView)
 {
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/blank.png")
 
-	UI::findView("keyboard")->setVisible(true, true);
+	lv_obj_t* keyboard = lv_obj_find_by_name(home.getRootPtr(), "keyboard");
+	ASSERT_NE(keyboard, nullptr);
+	lv_obj_remove_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_move_foreground(keyboard);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/keyboard.png");
 }
 
@@ -969,7 +972,7 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	// Typing the password brings up the keyboard, and the dialog moves out of its way
 	lv_obj_t* input = lv_obj_find_by_name(dialog, "wifi_password_input");
 	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
-	lv_obj_t* keyboard = UI::findView("keyboard")->getRootPtr();
+	lv_obj_t* keyboard = lv_obj_find_by_name(home.getRootPtr(), "keyboard");
 	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
 	lv_obj_update_layout(lv_screen_active());
 	lv_area_t dialogArea;
@@ -991,7 +994,14 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	EXPECT_TRUE(lv_textarea_get_password_mode(input));
 	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "the keyboard stays up";
 
-	lv_obj_send_event(input, LV_EVENT_DEFOCUSED, nullptr);
+	// The keyboard's close key ends the edit: the keyboard goes, and the dialog moves back
+	lv_obj_send_event(keyboard, LV_EVENT_CANCEL, nullptr);
+	lv_obj_send_event(input, LV_EVENT_CANCEL, nullptr); // As the keyboard sends it on to its box
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_update_layout(lv_screen_active());
+	lv_area_t centred;
+	lv_obj_get_coords(dialog, &centred);
+	EXPECT_GT(centred.y1, dialogArea.y1) << "the dialog is back in the middle";
 	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 }

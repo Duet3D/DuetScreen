@@ -684,7 +684,6 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
-			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
@@ -2640,7 +2639,7 @@
 			<xs:annotation><xs:documentation>Follow a text subject for the keyboard layout, as `keyboard_mode`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="keyboard" type="xs:string">
-			<xs:annotation><xs:documentation>The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else the view of that name (default `keyboard`, the shared one); `none` for a box edited another way, such as a number pad</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box edited another way, such as a number pad</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="hide_keyboard_on_ready" type="xs:string">
 			<xs:annotation><xs:documentation>Put the keyboard away when its OK key is pressed (default true)</xs:documentation></xs:annotation>
