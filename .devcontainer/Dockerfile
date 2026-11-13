@@ -42,7 +42,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gdb-multiarch \
     libgtest-dev \
     imagemagick \
-    python3-tk \
     gcovr \
     libfreetype6 \
     libfreetype-dev \

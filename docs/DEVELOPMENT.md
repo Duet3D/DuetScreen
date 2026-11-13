@@ -94,18 +94,6 @@ The simulation is only setup to run on Linux or WSL2 on Windows.
 
 The following steps are required to run the GUI on PC:
 
-### Allow the container to use the host display
-
-The devcontainer passes the host `DISPLAY` through and bind mounts `/tmp/.X11-unix`, so the SDL window opens on the host desktop. X11 still refuses connections from the container's user unless the host grants them, so run this **on the host** once per login session before starting the simulation:
-
-```bash
-xhost +local:
-```
-
-Without it, `lv_sdl_window_create()` fails to initialise SDL video and the simulation exits at startup.
-
-Under WSL2, WSLg provides the X11 socket and `DISPLAY`, so this works the same way as on a native Linux host.
-
 ### Setup udev rules for USB communications
 > [!NOTE]
 > This step is only required if you want to communicate between the PC and the Duet3D mainboard via USB. This is not required for simulating the GUI on PC.
@@ -417,42 +405,31 @@ The script will:
 2) Configure CMake if needed (default preset: `Simulation`)
 3) Build the test binary (`DuetScreen.tests`)
 4) Run the tests (via `ctest`)
-5) If any `*_err` images are produced, open a full-screen review window where you can update references
+5) If the run created any reference images or produced any `*_err` images, open a review page in your browser
 
 #### Review UI
-- Layout: Top row shows Reference (left) and New (_err) (right). Bottom row shows the visual Difference (RGB-only) centered.
-- Images auto-scale to fit the window/display while keeping aspect ratio.
-- Controls: Previous [←], Next [→], Update [Y], Skip [N], Update All [A], Quit [Q/Esc]
-- “Update” replaces the reference image with the `_err` image and removes the `_err` file.
+The script serves the review page on `127.0.0.1` and opens it with your browser; the address is also printed in the terminal. Nothing needs a display inside the devcontainer: VS Code opens the page on the host and forwards the port.
+
+- Each changed screenshot shows the reference, the new screenshot, the difference, and the new screenshot in grey with the differences in red. **Blink** [B] alternates the reference and the new screenshot in one frame; **Fit** [Z] switches between scaling to the window and the real size.
+- A changed screenshot can **update the reference** [Y] or **keep the old reference** [N]. A reference the run created (because none existed) can be **kept** [Y] or **deleted** [N] so the next run writes it again. **Accept all undecided** [A] says yes to the rest, and [U] clears a decision.
+- Nothing changes on disk until you press **Finish**. Anything left undecided stays as the test run wrote it. Ctrl+C in the terminal cancels the review without changing anything.
 
 ![Example of a failed UI test](images/DEVELOPMENT/ui_test_example.png)
 
+To answer in the terminal instead, for example over SSH or from an agent, pass `--compare-mode cli`. `--compare-only` skips configuring, building and running, and reviews the `*_err` images already in `tests/ref_imgs/`. `--review-port <port>` fixes the page's port, if you forward it yourself.
+
 #### Prerequisites
 - Build tools: cmake, ninja, SDL2, etc. (see Simulating section above)
-- Python packages for the GUI reviewer:
-  - Pillow (for image loading and scaling)
-  - Tkinter (for the GUI)
-
-On Ubuntu/Debian you can install these with:
-```bash
-sudo apt-get install -y python3-pil python3-tk
-```
-Alternatively, install Pillow via pip:
-```bash
-pip install pillow
-```
-
-If Pillow/Tkinter are unavailable, the script falls back to a CLI prompt without image previews.
+- Pillow, for the difference images. It is in `requirements.txt` and installed in the devcontainer; without it the page shows only the reference and the new screenshot.
 
 #### Environment variables (optional)
 - `DUETSCREEN_CMAKE_PRESET` — CMake preset to configure (default: `Simulation`)
 - `DUETSCREEN_BUILD_DIR` — Use a specific build directory (otherwise auto-detected under `out/build`)
-- `DUETSCREEN_SCREEN_WIDTH` / `DUETSCREEN_SCREEN_HEIGHT` — Override detected screen size for scaling (useful in headless/remote sessions)
 
 #### Troubleshooting
 - If no build directory is found, the script runs `cmake --preset <preset>` automatically.
 - If tests fail to run, check that `DuetScreen.tests` exists in `out/build/<preset>/tests/` and that `ctest` is available in PATH.
-- If the review window doesn’t appear (headless), set the screen width/height env vars or run with CLI fallback.
+- If no browser opens, open the address the script prints. Over SSH, forward the port first (fix it with `--review-port`), or use `--compare-mode cli`.
 
 
 ### Hardware Testing

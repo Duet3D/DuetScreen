@@ -22,7 +22,6 @@ if [[ "${OS_NAME}" == "Linux" ]]; then
         gdb-multiarch \
         libgtest-dev \
         imagemagick \
-        python3-tk \
         gcovr \
         libfreetype6 \
         libfreetype-dev \
