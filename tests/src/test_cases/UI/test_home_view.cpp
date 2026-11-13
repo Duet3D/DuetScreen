@@ -1009,6 +1009,34 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 4u) << "the test bench's four tools";
 }
 
+TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)
+{
+	// On the Control page's Temperature tab, having come from the Display settings, with the dashboard underneath on
+	// its Status tab
+	dashboardTabs().setActiveTab(STATUS_TAB);
+	UI::openScreen(std::string_view("settings"));
+	settingsPage().setActiveTab(2);
+	UI::openScreen(std::string_view("control"));
+	controlPage().setActiveTab(1);
+
+	UI::Xml::reload();
+
+	EXPECT_EQ(UI::getCurrentScreenName(), "control");
+	EXPECT_TRUE(page<UI::LvObj>("control").isShownOnScreen());
+	EXPECT_FALSE(page<UI::LvObj>("dashboard").isVisible()) << "the home screen stays under the page";
+	EXPECT_EQ(controlPage().getActiveTabIndex(), 1u);
+	EXPECT_TRUE(page<UI::LvObj>("temperature").isShownOnScreen());
+	EXPECT_FALSE(page<UI::LvObj>("move").isShownOnScreen());
+	EXPECT_EQ(settingsPage().getActiveTabIndex(), 2u) << "a page that isn't open keeps its tab too";
+
+	UI::back();
+	EXPECT_EQ(UI::getCurrentScreenName(), "settings") << "back returns where it did before the reload";
+	EXPECT_TRUE(page<UI::LvObj>("settings").isShownOnScreen());
+
+	UI::home();
+	EXPECT_EQ(dashboardTabs().getActiveTabIndex(), STATUS_TAB);
+}
+
 TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
 {
 	// Built while a job runs, the dashboard's Jobs tab is disabled from the start
@@ -1018,8 +1046,8 @@ TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
 	UI::Xml::reload();
 
 	auto& tabs = dashboardTabs();
-	EXPECT_TRUE(tabs.getTabButton(0)->hasState(LV_STATE_DISABLED));
-	EXPECT_EQ(tabs.getActiveTabIndex(), 1u) << "the first tab that isn't disabled";
+	EXPECT_TRUE(tabs.isTabDisabled(0));
+	EXPECT_EQ(tabs.getActiveTabIndex(), STATUS_TAB) << "the tab the job start selected, kept by the reload";
 }
 
 TEST_F(TestHomeView, ResponsesAreShownOneAtATime)

@@ -21,6 +21,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/HotReload.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/ReloadState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Services.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Translations.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/XmlUi.cpp

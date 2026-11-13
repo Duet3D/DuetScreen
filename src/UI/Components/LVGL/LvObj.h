@@ -257,6 +257,9 @@ namespace UI
 		void hide(bool move_to_back = false);
 		bool isVisible();
 
+		/** Whether neither this nor anything it is inside is hidden (it may still be scrolled out of sight) */
+		bool isShownOnScreen() const;
+
 		virtual bool back();
 
 	  protected:

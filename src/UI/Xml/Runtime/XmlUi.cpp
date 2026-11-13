@@ -6,6 +6,7 @@
 #include "Debug.h"
 #include "GlobalActions.h"
 #include "HotReload.h"
+#include "ReloadState.h"
 #include "Services.h"
 #include "Subscribers/ResponseSubscribers.h"
 #include "Translations.h"
@@ -168,6 +169,14 @@ namespace UI::Xml
 			}
 		}
 
+		// The rebuilt views start on the home screen with their first tabs: remember where the user was, to go back
+		std::vector<lv_obj_t*> roots;
+		for (XmlView* view : outermost)
+		{
+			roots.push_back(view->getRootPtr());
+		}
+		const ReloadState where = ReloadState::capture(roots);
+
 		// Every widget goes before the definitions are replaced: a component's styles are freed with its old
 		// definition, and loading the bundles restyles and refreshes everything still on screen
 		for (XmlView* view : outermost)
@@ -179,6 +188,7 @@ namespace UI::Xml
 		{
 			view->buildAgain();
 		}
+		where.restore();
 	}
 
 	const std::vector<LoadIssue>& getIssues()

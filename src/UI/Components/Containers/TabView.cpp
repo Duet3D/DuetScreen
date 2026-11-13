@@ -184,7 +184,7 @@ namespace UI
 		return m_tabs.at(index).get();
 	}
 
-	void TabView::setActiveTab(size_t index)
+	void TabView::setActiveTab(size_t index, bool animate)
 	{
 		ZoneScoped;
 		UI_LOCK();
@@ -208,8 +208,22 @@ namespace UI
 		m_currentTabIndex = index;
 		m_tabButtons.iterateListItems([&](size_t i, TabButton& button) { button.setChecked(i == index); });
 
-		const bool animate = StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) && previous_tab != nullptr;
-		if (!animate)
+		if (!isShownOnScreen())
+		{
+			// Nothing on screen to show or hide: the tabs' views come alive or not when the tab view is shown
+			if (previous_tab != nullptr)
+			{
+				lv_anim_delete(previous_tab->getRootPtr(), tabSetXAnimCb);
+				previous_tab->setX(0);
+				previous_tab->setFlag(LV_OBJ_FLAG_HIDDEN, true);
+			}
+			lv_anim_delete(next_tab.getRootPtr(), tabSetXAnimCb);
+			next_tab.setX(0);
+			next_tab.setFlag(LV_OBJ_FLAG_HIDDEN, false);
+			return;
+		}
+
+		if (!animate || !StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) || previous_tab == nullptr)
 		{
 			if (previous_tab != nullptr)
 			{
@@ -294,6 +308,13 @@ namespace UI
 			return;
 		}
 		return;
+	}
+
+	bool TabView::isTabDisabled(size_t index)
+	{
+		UI_LOCK();
+		TabButton* tab_button = m_tabButtons.getItem(index);
+		return tab_button != nullptr && tab_button->hasState(LV_STATE_DISABLED);
 	}
 
 	bool TabView::disableTab(size_t index, bool disable)

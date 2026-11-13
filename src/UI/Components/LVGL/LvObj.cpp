@@ -1082,6 +1082,19 @@ namespace UI
 		return !hasFlag(LV_OBJ_FLAG_HIDDEN);
 	}
 
+	bool LvObj::isShownOnScreen() const
+	{
+		UI_LOCK();
+		for (const lv_obj_t* obj = getRootPtr(); obj != nullptr; obj = lv_obj_get_parent(obj))
+		{
+			if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+			{
+				return false;
+			}
+		}
+		return getRootPtr() != nullptr;
+	}
+
 	/**
 	 * @brief Handle a back button event
 	 * @return true if the view handled the back event

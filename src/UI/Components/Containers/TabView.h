@@ -33,10 +33,17 @@ namespace UI
 		size_t getTabCount() const { return m_tabs.size(); };
 		size_t getActiveTabIndex() const { return m_currentTabIndex; };
 
-		void setActiveTab(size_t index);
+		/**
+		 * Show tab `index`, sliding it in if animations are enabled and `animate`. While the tab view is hidden (it or
+		 * anything it is inside), the tab is only marked shown: it comes alive with the tab view.
+		 */
+		void setActiveTab(size_t index, bool animate = true);
 		void setTabBarPosition(lv_dir_t dir);
 
 		bool disableTab(size_t index, bool disable);
+
+		/** Whether tab `index`'s button is disabled; false if there is no such tab */
+		bool isTabDisabled(size_t index);
 
 	  private:
 		/** Lay out the tab bar and content area */

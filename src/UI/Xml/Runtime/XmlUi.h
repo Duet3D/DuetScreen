@@ -46,7 +46,11 @@ namespace UI::Xml
 	/** @return whether init() has been called without deinit() */
 	bool isInitialized();
 
-	/** Load the bundles again and rebuild every live XmlView (hot reload, or after installing a bundle) */
+	/**
+	 * Load the bundles again and rebuild every live XmlView (hot reload, or after installing a bundle). The open
+	 * screens and selected tabs are kept (see ReloadState.h); anything else a view held, such as an open dialog or
+	 * a scroll position, starts afresh.
+	 */
 	void reload();
 
 	/** Problems found by the last load */

@@ -492,6 +492,66 @@ namespace UI
 		return findView("main_window");
 	}
 
+	namespace
+	{
+		/** The names `views` are registered under, skipping any with no name */
+		std::vector<std::string> namesOf(const ViewList_t& views)
+		{
+			std::vector<std::string> names;
+			for (LvObjPtr view : views)
+			{
+				if (std::string_view name = getViewName(view); !name.empty())
+				{
+					names.emplace_back(name);
+				}
+			}
+			return names;
+		}
+	} // namespace
+
+	NavigationState saveNavigationState()
+	{
+		UI_LOCK();
+		return NavigationState{.open = namesOf(s_openScreens), .returnable = namesOf(s_returnableScreens)};
+	}
+
+	void restoreNavigationState(const NavigationState& state)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		for (const std::string& name : state.returnable)
+		{
+			if (LvObjPtr view = findView(name))
+			{
+				addToVector(s_returnableScreens, view);
+			}
+		}
+
+		ViewList_t screens;
+		for (const std::string& name : state.open)
+		{
+			LvObjPtr view = findView(name);
+			if (view != nullptr && !inVector(s_homeScreens, view))
+			{
+				screens.push_back(view);
+			}
+		}
+		if (!screens.empty())
+		{
+			for (LvObjPtr home : s_homeScreens)
+			{
+				home->hide();
+			}
+		}
+		for (LvObjPtr view : screens)
+		{
+			removeFromVector(s_returnableScreens, view);
+			addToVector(s_openScreens, view);
+			view->show(true);
+		}
+		notifySideBar();
+	}
+
 	bool openScreen(std::string_view name, bool closePrevious)
 	{
 		LvObj* view = findView(name);

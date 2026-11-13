@@ -5,6 +5,7 @@
 #include <concepts>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace UI
 {
@@ -47,6 +48,23 @@ namespace UI
 
 	/** Open the screen registered as `name` (see openScreen()). @return false if there is no such view */
 	bool openScreen(std::string_view name, bool closePrevious = true);
+
+	/** Where navigation is, by view name, so it survives the views being rebuilt (see saveNavigationState()) */
+	struct NavigationState
+	{
+		std::vector<std::string> open;		 // The open screens, the current one last
+		std::vector<std::string> returnable; // The screens the back button returns to, the next one last
+	};
+
+	/** Where navigation is now. Screens with no name are left out. */
+	NavigationState saveNavigationState();
+
+	/**
+	 * Go back to `state`, e.g. once a reload has rebuilt the views: open its screens again, and let the back button
+	 * return to its returnable ones. Unlike openScreen(), open modals are left alone and nothing fades in. Names with
+	 * no view any more are skipped.
+	 */
+	void restoreNavigationState(const NavigationState& state);
 
 	// Internal helpers used by template APIs; not part of public modal type contract
 	namespace detail
