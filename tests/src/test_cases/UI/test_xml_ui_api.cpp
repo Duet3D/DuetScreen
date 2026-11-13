@@ -1,9 +1,10 @@
 /*
  * test_xml_ui_api.cpp
  *
- * The UI API reference, docs/XML_UI_API.md, is generated from the code (src/UI/Xml/Api). These tests check that the
- * committed copy matches the code; when it doesn't, the file is rewritten and the test fails, so the change shows in
- * `git diff` to be reviewed and committed.
+ * The UI API reference, docs/XML_UI_API.md, and its schema, docs/XML_UI.xsd, are generated from the code
+ * (src/UI/Xml/Api). These tests check that the committed copies match the code; when one doesn't, the file is
+ * rewritten and the test fails, so the change shows in `git diff` to be reviewed and committed. They also lint the
+ * built-in bundle against the reference.
  *
  * Presenters and global actions are registered for the life of the program, so the reference must be built in a
  * process that has registered only the firmware's own: ctest runs each test in a process of its own. Running the test
@@ -13,6 +14,7 @@
 #include "UI/Xml/Api/ApiLint.h"
 #include "UI/Xml/Api/ApiMarkdown.h"
 #include "UI/Xml/Api/ApiReference.h"
+#include "UI/Xml/Api/ApiXsd.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
 #include <filesystem>
@@ -25,7 +27,9 @@
 
 namespace
 {
-	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md"; // Relative to the repository, where tests run
+	// Relative to the repository, where tests run
+	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md"; // The reference
+	constexpr const char* SCHEMA_PATH = "docs/XML_UI.xsd";		 // Its schema
 
 	/** The contents of `path`, or empty if it can't be read */
 	std::string readFile(const char* path)
@@ -46,6 +50,17 @@ namespace
 
 class XmlUiApi : public UiTestSuite
 {
+  protected:
+	/** Fail, and rewrite the file at `path`, unless it holds `expected` */
+	static void expectUpToDate(const char* path, const std::string& expected)
+	{
+		if (readFile(path) == expected)
+		{
+			return;
+		}
+		std::ofstream(path) << expected;
+		FAIL() << path << " was out of date and has been rewritten: review the change and commit it";
+	}
 };
 
 /* Every kind of name is gathered, with its description and type */
@@ -109,13 +124,13 @@ TEST_F(XmlUiApi, DescribesEveryKindOfName)
 /* docs/XML_UI_API.md matches the code; if not, it is rewritten for review */
 TEST_F(XmlUiApi, ReferenceIsUpToDate)
 {
-	const std::string expected = UI::Xml::Api::toMarkdown(UI::Xml::Api::build()) + "\n";
-	if (readFile(REFERENCE_PATH) == expected)
-	{
-		return;
-	}
-	std::ofstream(REFERENCE_PATH) << expected;
-	FAIL() << REFERENCE_PATH << " was out of date and has been rewritten: review the change and commit it";
+	expectUpToDate(REFERENCE_PATH, UI::Xml::Api::toMarkdown(UI::Xml::Api::build()) + "\n");
+}
+
+/* docs/XML_UI.xsd matches the code; if not, it is rewritten for review */
+TEST_F(XmlUiApi, SchemaIsUpToDate)
+{
+	expectUpToDate(SCHEMA_PATH, UI::Xml::Api::toXsd(UI::Xml::Api::build()));
 }
 
 /* Every name the built-in bundle uses is one the UI provides where it is used */
@@ -145,7 +160,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<style name="no_such_style"/>
 		<ds_button translation_tag="no.such.key">
 			<action name="no.such_action"/>
-			<action name="fans.set_speed"/>
+			<action name="fans.set_speed" trigger="clickd"/>
 		</ds_button>
 		<ds_list list="fans" item="lint_fan"/>
 		<lint_dialog open="no_such_open"/>
@@ -195,6 +210,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:4: no style `no_such_style` (in lint_screen)",
 		"lint_screen.xml:5: no translation `no.such.key` (in lint_screen)",
 		"lint_screen.xml:6: no action `no.such_action` (in lint_screen)",
+		"lint_screen.xml:7: no trigger `clickd` (in lint_screen)",
 		"lint_screen.xml:11: <no_such_widget> is no widget, component or binding (in lint_screen)",
 		"lint_screen.xml:12: no const or colour `#no_such_const` (in lint_screen)",
 		"lint_screen.xml:13: no subject `no_such_operand` (in lint_screen)",

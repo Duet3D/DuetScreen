@@ -9,6 +9,8 @@
 #include "src/xml/lv_xml_base_types.h"
 #include "src/xml/lv_xml_parser.h"
 #include "src/xml/lv_xml_utils.h"
+#include <algorithm>
+#include <cctype>
 #include <charconv>
 #include <fmt/format.h>
 #include <unordered_map>
@@ -314,7 +316,8 @@ namespace UI::Xml
 								{"trigger",
 								 "The event that runs it (default `clicked`): an LVGL event name such as "
 								 "`value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is "
-								 "finished) or `dismissed` (a `<ds_modal>` was closed by the user)"},
+								 "finished) or `dismissed` (a `<ds_modal>` was closed by the user)",
+								 AttributeKind::Trigger},
 								{"arg",
 								 "Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by "
 								 "the current value of the subject `name`, looked up from where the `<action>` is "
@@ -373,6 +376,29 @@ namespace UI::Xml
 		const ActionHandlerSet& globals()
 		{
 			return s_globals;
+		}
+
+		std::vector<std::string> triggers()
+		{
+			// LVGL's event names, as the XML engine spells them: whichever of its names it accepts back
+			std::vector<std::string> names;
+			for (int code = 0; code < LV_EVENT_LAST; code++)
+			{
+				std::string name = lv_event_code_get_name(static_cast<lv_event_code_t>(code));
+				if (!name.starts_with("EVENT_"))
+				{
+					continue;
+				}
+				name = name.substr(6);
+				std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+				if (lv_xml_trigger_text_to_enum_value(name.c_str()) == code)
+				{
+					names.push_back(std::move(name));
+				}
+			}
+			names.emplace_back("value_confirmed");
+			names.emplace_back("dismissed");
+			return names;
 		}
 
 		bool dispatch(lv_obj_t* from, std::string_view name, std::string_view arg, lv_event_t* event)

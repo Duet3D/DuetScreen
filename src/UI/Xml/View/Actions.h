@@ -32,6 +32,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace UI::Xml
 {
@@ -158,6 +159,9 @@ namespace UI::Xml
 
 		/** The global actions (see addGlobal()) */
 		const ActionHandlerSet& globals();
+
+		/** Every name `<action trigger="…">` accepts: LVGL's event names, `value_confirmed` and `dismissed` */
+		std::vector<std::string> triggers();
 
 		/**
 		 * Resolve and run an action as if an `<action>` on `from` had fired (placeholders in `arg` are not filled in)

@@ -3,8 +3,8 @@
  */
 
 #include "ApiLint.h"
+#include "XmlTree.h"
 #include "helix_xml.h"
-#include "src/libs/expat/expat.h"
 #include "src/xml/lv_xml_widget.h"
 #include <algorithm>
 #include <cctype>
@@ -20,110 +20,6 @@ namespace UI::Xml::Api
 	namespace
 	{
 		using NameSet = std::set<std::string, std::less<>>;
-
-		/** One element of a component file */
-		struct Element
-		{
-			std::string tag;										// Element name
-			std::vector<std::pair<std::string, std::string>> attrs; // Attributes in order
-			int line = 0;											// Line it starts on
-			std::vector<Element> children;							// Child elements in order
-
-			/** The value of attribute `name`, or nullptr */
-			const std::string* attr(std::string_view name) const
-			{
-				for (const auto& [n, value] : attrs)
-				{
-					if (n == name)
-					{
-						return &value;
-					}
-				}
-				return nullptr;
-			}
-
-			/** The first child called `name`, or nullptr */
-			const Element* child(std::string_view name) const
-			{
-				for (const auto& c : children)
-				{
-					if (c.tag == name)
-					{
-						return &c;
-					}
-				}
-				return nullptr;
-			}
-		};
-
-		/** What expat builds the element tree with */
-		struct ParseState
-		{
-			XML_Parser parser = nullptr;  // The parser, for line numbers
-			Element root;				  // The root element, once started
-			std::vector<Element*> open{}; // Elements started and not ended, innermost last
-		};
-
-		/** expat start handler: add the element under the innermost open one */
-		void onStart(void* user, const XML_Char* name, const XML_Char** attrs)
-		{
-			auto& state = *static_cast<ParseState*>(user);
-			Element element{.tag = name,
-							.attrs = {},
-							.line = static_cast<int>(XML_GetCurrentLineNumber(state.parser)),
-							.children = {}};
-			for (size_t i = 0; attrs[i] != nullptr; i += 2)
-			{
-				element.attrs.emplace_back(attrs[i], attrs[i + 1]);
-			}
-			// An open element's address is stable: only the innermost open element gains children
-			if (state.open.empty())
-			{
-				state.root = std::move(element);
-				state.open.push_back(&state.root);
-			}
-			else
-			{
-				auto& siblings = state.open.back()->children;
-				siblings.push_back(std::move(element));
-				state.open.push_back(&siblings.back());
-			}
-		}
-
-		/** expat end handler: close the innermost element */
-		void onEnd(void* user, const XML_Char*)
-		{
-			static_cast<ParseState*>(user)->open.pop_back();
-		}
-
-		/** The element tree of the file at `path`, or nullopt (with `error` set) if it can't be read or parsed */
-		std::optional<Element> parseFile(const std::string& path, std::string& error)
-		{
-			std::ifstream file(path);
-			if (!file)
-			{
-				error = "can't be read";
-				return std::nullopt;
-			}
-			std::stringstream buffer;
-			buffer << file.rdbuf();
-			const std::string text = buffer.str();
-
-			ParseState state;
-			state.parser = XML_ParserCreate(nullptr);
-			XML_SetUserData(state.parser, &state);
-			XML_SetElementHandler(state.parser, onStart, onEnd);
-			const bool ok =
-				XML_Parse(state.parser, text.data(), static_cast<int>(text.size()), XML_TRUE) != XML_STATUS_ERROR;
-			if (!ok)
-			{
-				error = fmt::format("line {:d}: {:s}",
-									XML_GetCurrentLineNumber(state.parser),
-									XML_ErrorString(XML_GetErrorCode(state.parser)));
-			}
-			XML_ParserFree(state.parser);
-			return ok ? std::optional<Element>(std::move(state.root)) : std::nullopt;
-		}
 
 		/** A component, as read from its file */
 		struct ComponentDef
@@ -199,6 +95,7 @@ namespace UI::Xml::Api
 				m_fonts.insert(reference.fonts.begin(), reference.fonts.end());
 				m_translations.insert(reference.translationKeys.begin(), reference.translationKeys.end());
 				m_nativeViews.insert(reference.nativeViews.begin(), reference.nativeViews.end());
+				m_triggers.insert(reference.triggers.begin(), reference.triggers.end());
 			}
 
 			/** Check every component, from the views nothing else uses */
@@ -239,7 +136,7 @@ namespace UI::Xml::Api
 			void load(const Component& component)
 			{
 				std::string error;
-				auto root = parseFile(component.source, error);
+				auto root = parseXmlFile(component.source, error);
 				if (!root)
 				{
 					m_issues.push_back({.file = component.source, .line = 0, .message = error});
@@ -250,17 +147,9 @@ namespace UI::Xml::Api
 								   .presenter = component.presenter,
 								   .file = component.source,
 								   .root = std::move(*root)};
-				if (const Element* api = def.root.child("api"))
+				for (const auto& prop : component.props)
 				{
-					for (const auto& prop : api->children)
-					{
-						const std::string* name = prop.attr("name");
-						const std::string* fallback = prop.attr("default");
-						if (prop.tag == "prop" && name)
-						{
-							def.props[*name] = fallback ? *fallback : "";
-						}
-					}
+					def.props[prop.name] = prop.defaultValue;
 				}
 				const std::pair<const char*, NameSet*> sections[] = {
 					{"styles", &def.styles}, {"subjects", &def.subjects}, {"consts", &def.consts}};
@@ -562,6 +451,12 @@ namespace UI::Xml::Api
 				case AttributeKind::ActionArg:
 					checkPlaceholders(value, element, context);
 					return;
+				case AttributeKind::Trigger:
+					if (!m_triggers.contains(value))
+					{
+						issue(context, element, fmt::format("no trigger `{:s}`", value));
+					}
+					return;
 				}
 			}
 
@@ -824,6 +719,7 @@ namespace UI::Xml::Api
 			NameSet m_fonts;												 // Font names
 			NameSet m_translations;											 // Translation keys
 			NameSet m_nativeViews;											 // C++ view names
+			NameSet m_triggers;												 // Action trigger names
 			std::map<std::string, ComponentDef, std::less<>> m_components;	 // Components by name
 			std::vector<std::string> m_stack; // Components being checked, outermost first
 			std::vector<LintIssue> m_issues;  // Problems found

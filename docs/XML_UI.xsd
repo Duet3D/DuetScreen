@@ -1,0 +1,2579 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated from the code by tests/src/test_cases/UI/test_xml_ui_api.cpp, like XML_UI_API.md. Don't edit it. -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:simpleType name="subject.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="active"/>
+			<xs:enumeration value="actual"/>
+			<xs:enumeration value="adb"/>
+			<xs:enumeration value="advanced_settings"/>
+			<xs:enumeration value="alert.accepted_chars"/>
+			<xs:enumeration value="alert.axes"/>
+			<xs:enumeration value="alert.axes_shown"/>
+			<xs:enumeration value="alert.cancel"/>
+			<xs:enumeration value="alert.choices"/>
+			<xs:enumeration value="alert.choices_shown"/>
+			<xs:enumeration value="alert.footer_shown"/>
+			<xs:enumeration value="alert.input"/>
+			<xs:enumeration value="alert.input_shown"/>
+			<xs:enumeration value="alert.keyboard"/>
+			<xs:enumeration value="alert.keyboard_mode"/>
+			<xs:enumeration value="alert.max"/>
+			<xs:enumeration value="alert.min"/>
+			<xs:enumeration value="alert.ok"/>
+			<xs:enumeration value="alert.ok_text"/>
+			<xs:enumeration value="alert.open"/>
+			<xs:enumeration value="alert.progress"/>
+			<xs:enumeration value="alert.progress_shown"/>
+			<xs:enumeration value="alert.text"/>
+			<xs:enumeration value="alert.title"/>
+			<xs:enumeration value="alert.warning"/>
+			<xs:enumeration value="animations"/>
+			<xs:enumeration value="axes"/>
+			<xs:enumeration value="axes_shown"/>
+			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_open"/>
+			<xs:enumeration value="beds"/>
+			<xs:enumeration value="brightness"/>
+			<xs:enumeration value="buildroot"/>
+			<xs:enumeration value="cache_size"/>
+			<xs:enumeration value="cancel"/>
+			<xs:enumeration value="cancelled"/>
+			<xs:enumeration value="chambers"/>
+			<xs:enumeration value="change_shown"/>
+			<xs:enumeration value="change_text"/>
+			<xs:enumeration value="chroma"/>
+			<xs:enumeration value="color"/>
+			<xs:enumeration value="command"/>
+			<xs:enumeration value="commands_shown"/>
+			<xs:enumeration value="confirm"/>
+			<xs:enumeration value="confirm_cancel"/>
+			<xs:enumeration value="confirm_text"/>
+			<xs:enumeration value="confirm_title"/>
+			<xs:enumeration value="confirmations"/>
+			<xs:enumeration value="connect_text"/>
+			<xs:enumeration value="connected"/>
+			<xs:enumeration value="connected_message"/>
+			<xs:enumeration value="connection_method"/>
+			<xs:enumeration value="connection_methods"/>
+			<xs:enumeration value="console.lines"/>
+			<xs:enumeration value="controls_shown"/>
+			<xs:enumeration value="crumbs"/>
+			<xs:enumeration value="current"/>
+			<xs:enumeration value="current_object"/>
+			<xs:enumeration value="current_value"/>
+			<xs:enumeration value="dark"/>
+			<xs:enumeration value="date"/>
+			<xs:enumeration value="debug_borders"/>
+			<xs:enumeration value="debug_borders_shown"/>
+			<xs:enumeration value="debug_level"/>
+			<xs:enumeration value="debug_levels"/>
+			<xs:enumeration value="description"/>
+			<xs:enumeration value="developer_mode"/>
+			<xs:enumeration value="dialog"/>
+			<xs:enumeration value="dialog_can_delete"/>
+			<xs:enumeration value="dialog_has_image"/>
+			<xs:enumeration value="dialog_image"/>
+			<xs:enumeration value="dialog_text"/>
+			<xs:enumeration value="dialog_title"/>
+			<xs:enumeration value="disable_motors_usable"/>
+			<xs:enumeration value="distance.choices"/>
+			<xs:enumeration value="distance.title"/>
+			<xs:enumeration value="distance.value"/>
+			<xs:enumeration value="distance_title"/>
+			<xs:enumeration value="distances"/>
+			<xs:enumeration value="duet_ip"/>
+			<xs:enumeration value="duet_password"/>
+			<xs:enumeration value="elapsed"/>
+			<xs:enumeration value="error_notifications_stay"/>
+			<xs:enumeration value="extrude_usable"/>
+			<xs:enumeration value="extruders"/>
+			<xs:enumeration value="factor"/>
+			<xs:enumeration value="fans"/>
+			<xs:enumeration value="fault"/>
+			<xs:enumeration value="feedrate.choices"/>
+			<xs:enumeration value="feedrate.title"/>
+			<xs:enumeration value="feedrate.value"/>
+			<xs:enumeration value="feedrate_title"/>
+			<xs:enumeration value="feedrates"/>
+			<xs:enumeration value="filament_loaded"/>
+			<xs:enumeration value="filament_shown"/>
+			<xs:enumeration value="filament_text"/>
+			<xs:enumeration value="filaments"/>
+			<xs:enumeration value="file"/>
+			<xs:enumeration value="files"/>
+			<xs:enumeration value="finished"/>
+			<xs:enumeration value="firmware"/>
+			<xs:enumeration value="flow"/>
+			<xs:enumeration value="flow_factor"/>
+			<xs:enumeration value="flow_text"/>
+			<xs:enumeration value="font"/>
+			<xs:enumeration value="fonts"/>
+			<xs:enumeration value="gcode"/>
+			<xs:enumeration value="gcodes"/>
+			<xs:enumeration value="has_tool"/>
+			<xs:enumeration value="heater"/>
+			<xs:enumeration value="heater_count"/>
+			<xs:enumeration value="heaters"/>
+			<xs:enumeration value="home_all_usable"/>
+			<xs:enumeration value="home_usable"/>
+			<xs:enumeration value="homed"/>
+			<xs:enumeration value="icon_set"/>
+			<xs:enumeration value="icon_sets"/>
+			<xs:enumeration value="index"/>
+			<xs:enumeration value="info_date"/>
+			<xs:enumeration value="info_generated_by"/>
+			<xs:enumeration value="info_height"/>
+			<xs:enumeration value="info_layer_height"/>
+			<xs:enumeration value="info_print_time"/>
+			<xs:enumeration value="info_shown"/>
+			<xs:enumeration value="info_size"/>
+			<xs:enumeration value="input"/>
+			<xs:enumeration value="ip"/>
+			<xs:enumeration value="is_folder"/>
+			<xs:enumeration value="job.file"/>
+			<xs:enumeration value="jog_usable"/>
+			<xs:enumeration value="keyboard"/>
+			<xs:enumeration value="keyboard_layout"/>
+			<xs:enumeration value="keyboard_layouts"/>
+			<xs:enumeration value="known"/>
+			<xs:enumeration value="label"/>
+			<xs:enumeration value="language"/>
+			<xs:enumeration value="language_confirm"/>
+			<xs:enumeration value="language_confirm_text"/>
+			<xs:enumeration value="language_confirm_title"/>
+			<xs:enumeration value="languages"/>
+			<xs:enumeration value="last"/>
+			<xs:enumeration value="letter"/>
+			<xs:enumeration value="levelling_usable"/>
+			<xs:enumeration value="load_text"/>
+			<xs:enumeration value="loaded"/>
+			<xs:enumeration value="machine.job_active"/>
+			<xs:enumeration value="machine.printing"/>
+			<xs:enumeration value="machine.status"/>
+			<xs:enumeration value="machine_position_mode"/>
+			<xs:enumeration value="maps"/>
+			<xs:enumeration value="mode"/>
+			<xs:enumeration value="mode_icon"/>
+			<xs:enumeration value="name"/>
+			<xs:enumeration value="nav.screen"/>
+			<xs:enumeration value="network_shown"/>
+			<xs:enumeration value="networks"/>
+			<xs:enumeration value="notification_level"/>
+			<xs:enumeration value="notification_levels"/>
+			<xs:enumeration value="notification_timeout"/>
+			<xs:enumeration value="number"/>
+			<xs:enumeration value="objects"/>
+			<xs:enumeration value="password"/>
+			<xs:enumeration value="password_open"/>
+			<xs:enumeration value="password_title"/>
+			<xs:enumeration value="pause"/>
+			<xs:enumeration value="poll_interval"/>
+			<xs:enumeration value="primary.chroma"/>
+			<xs:enumeration value="primary.lightness"/>
+			<xs:enumeration value="primary_hue"/>
+			<xs:enumeration value="print_again"/>
+			<xs:enumeration value="progress"/>
+			<xs:enumeration value="progress_source"/>
+			<xs:enumeration value="progress_sources"/>
+			<xs:enumeration value="remaining"/>
+			<xs:enumeration value="requested"/>
+			<xs:enumeration value="reset_text"/>
+			<xs:enumeration value="response.open"/>
+			<xs:enumeration value="response.progress"/>
+			<xs:enumeration value="response.text"/>
+			<xs:enumeration value="response.title"/>
+			<xs:enumeration value="response.type"/>
+			<xs:enumeration value="responses.count"/>
+			<xs:enumeration value="resume"/>
+			<xs:enumeration value="retract_usable"/>
+			<xs:enumeration value="rotation"/>
+			<xs:enumeration value="rotations"/>
+			<xs:enumeration value="rpm"/>
+			<xs:enumeration value="scale_max"/>
+			<xs:enumeration value="scale_min"/>
+			<xs:enumeration value="screensaver_timeout"/>
+			<xs:enumeration value="second_usb_channel"/>
+			<xs:enumeration value="secondary.chroma"/>
+			<xs:enumeration value="secondary.lightness"/>
+			<xs:enumeration value="secondary_hue"/>
+			<xs:enumeration value="selected"/>
+			<xs:enumeration value="selected_tool"/>
+			<xs:enumeration value="shell"/>
+			<xs:enumeration value="shell_available"/>
+			<xs:enumeration value="signal"/>
+			<xs:enumeration value="sort"/>
+			<xs:enumeration value="sort_date"/>
+			<xs:enumeration value="sort_name"/>
+			<xs:enumeration value="sort_size"/>
+			<xs:enumeration value="speed_factor"/>
+			<xs:enumeration value="speed_requested"/>
+			<xs:enumeration value="speed_text"/>
+			<xs:enumeration value="speed_top"/>
+			<xs:enumeration value="ssh"/>
+			<xs:enumeration value="ssid"/>
+			<xs:enumeration value="standby"/>
+			<xs:enumeration value="state"/>
+			<xs:enumeration value="stats.area"/>
+			<xs:enumeration value="stats.max"/>
+			<xs:enumeration value="stats.mean"/>
+			<xs:enumeration value="stats.min"/>
+			<xs:enumeration value="stats.points"/>
+			<xs:enumeration value="stats.rms"/>
+			<xs:enumeration value="status"/>
+			<xs:enumeration value="steps"/>
+			<xs:enumeration value="storage_info"/>
+			<xs:enumeration value="surface"/>
+			<xs:enumeration value="swatches"/>
+			<xs:enumeration value="system_logging"/>
+			<xs:enumeration value="system_monitor"/>
+			<xs:enumeration value="system_monitor_shown"/>
+			<xs:enumeration value="temperatures"/>
+			<xs:enumeration value="temperatures.limit"/>
+			<xs:enumeration value="text"/>
+			<xs:enumeration value="text_style"/>
+			<xs:enumeration value="theme"/>
+			<xs:enumeration value="themes"/>
+			<xs:enumeration value="thermostatic"/>
+			<xs:enumeration value="thumbnail"/>
+			<xs:enumeration value="tiles"/>
+			<xs:enumeration value="time"/>
+			<xs:enumeration value="title"/>
+			<xs:enumeration value="tool"/>
+			<xs:enumeration value="tools"/>
+			<xs:enumeration value="update.can_cancel"/>
+			<xs:enumeration value="update.ok_text"/>
+			<xs:enumeration value="update.open"/>
+			<xs:enumeration value="update.text"/>
+			<xs:enumeration value="update.title"/>
+			<xs:enumeration value="usable"/>
+			<xs:enumeration value="usb_mode"/>
+			<xs:enumeration value="usb_modes"/>
+			<xs:enumeration value="x.home_usable"/>
+			<xs:enumeration value="x.homed"/>
+			<xs:enumeration value="x.jog_usable"/>
+			<xs:enumeration value="x.label"/>
+			<xs:enumeration value="x1"/>
+			<xs:enumeration value="x2"/>
+			<xs:enumeration value="x_max"/>
+			<xs:enumeration value="x_min"/>
+			<xs:enumeration value="xy.home_usable"/>
+			<xs:enumeration value="xy.homed"/>
+			<xs:enumeration value="y.home_usable"/>
+			<xs:enumeration value="y.homed"/>
+			<xs:enumeration value="y.jog_usable"/>
+			<xs:enumeration value="y.label"/>
+			<xs:enumeration value="y1"/>
+			<xs:enumeration value="y2"/>
+			<xs:enumeration value="y_max"/>
+			<xs:enumeration value="y_min"/>
+			<xs:enumeration value="z.home_usable"/>
+			<xs:enumeration value="z.homed"/>
+			<xs:enumeration value="z.jog_usable"/>
+			<xs:enumeration value="z.label"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="subject">
+		<xs:union memberTypes="subject.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="list.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="alert.axes"/>
+			<xs:enumeration value="alert.choices"/>
+			<xs:enumeration value="axes"/>
+			<xs:enumeration value="beds"/>
+			<xs:enumeration value="chambers"/>
+			<xs:enumeration value="console.lines"/>
+			<xs:enumeration value="crumbs"/>
+			<xs:enumeration value="distance.choices"/>
+			<xs:enumeration value="distances"/>
+			<xs:enumeration value="extruders"/>
+			<xs:enumeration value="fans"/>
+			<xs:enumeration value="feedrate.choices"/>
+			<xs:enumeration value="feedrates"/>
+			<xs:enumeration value="files"/>
+			<xs:enumeration value="gcodes"/>
+			<xs:enumeration value="heaters"/>
+			<xs:enumeration value="maps"/>
+			<xs:enumeration value="networks"/>
+			<xs:enumeration value="objects"/>
+			<xs:enumeration value="steps"/>
+			<xs:enumeration value="swatches"/>
+			<xs:enumeration value="temperatures"/>
+			<xs:enumeration value="tools"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="list">
+		<xs:union memberTypes="list.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="action.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="alert.cancel"/>
+			<xs:enumeration value="alert.choose"/>
+			<xs:enumeration value="alert.dismissed"/>
+			<xs:enumeration value="alert.input"/>
+			<xs:enumeration value="alert.jog"/>
+			<xs:enumeration value="alert.keyboard"/>
+			<xs:enumeration value="alert.ok"/>
+			<xs:enumeration value="babystep.down"/>
+			<xs:enumeration value="babystep.edit"/>
+			<xs:enumeration value="babystep.reset"/>
+			<xs:enumeration value="babystep.select"/>
+			<xs:enumeration value="babystep.up"/>
+			<xs:enumeration value="console.clear"/>
+			<xs:enumeration value="console.input"/>
+			<xs:enumeration value="console.pick"/>
+			<xs:enumeration value="console.send"/>
+			<xs:enumeration value="console.shell"/>
+			<xs:enumeration value="console.toggle_commands"/>
+			<xs:enumeration value="extruder.extrude"/>
+			<xs:enumeration value="extruder.retract"/>
+			<xs:enumeration value="fans.set_speed"/>
+			<xs:enumeration value="files.ask_delete"/>
+			<xs:enumeration value="files.close_dialog"/>
+			<xs:enumeration value="files.confirm"/>
+			<xs:enumeration value="files.crumb"/>
+			<xs:enumeration value="files.open"/>
+			<xs:enumeration value="files.refresh"/>
+			<xs:enumeration value="files.sort"/>
+			<xs:enumeration value="files.toggle_mode"/>
+			<xs:enumeration value="gcode"/>
+			<xs:enumeration value="heaters.set_active"/>
+			<xs:enumeration value="heaters.set_standby"/>
+			<xs:enumeration value="heaters.toggle"/>
+			<xs:enumeration value="heightmap.mode"/>
+			<xs:enumeration value="heightmap.show"/>
+			<xs:enumeration value="heightmap.toggle"/>
+			<xs:enumeration value="job.ask_cancel"/>
+			<xs:enumeration value="job.babystep"/>
+			<xs:enumeration value="job.cancel"/>
+			<xs:enumeration value="job.close_babystep"/>
+			<xs:enumeration value="job.close_dialog"/>
+			<xs:enumeration value="job.flow_factor"/>
+			<xs:enumeration value="job.pause"/>
+			<xs:enumeration value="job.print_again"/>
+			<xs:enumeration value="job.resume"/>
+			<xs:enumeration value="job.speed_factor"/>
+			<xs:enumeration value="move.close_dialog"/>
+			<xs:enumeration value="move.confirm"/>
+			<xs:enumeration value="move.disable_motors"/>
+			<xs:enumeration value="move.distance"/>
+			<xs:enumeration value="move.edit_distance"/>
+			<xs:enumeration value="move.edit_feedrate"/>
+			<xs:enumeration value="move.feedrate"/>
+			<xs:enumeration value="move.home"/>
+			<xs:enumeration value="move.jog"/>
+			<xs:enumeration value="move.set_position"/>
+			<xs:enumeration value="nav.back"/>
+			<xs:enumeration value="nav.home"/>
+			<xs:enumeration value="nav.open"/>
+			<xs:enumeration value="object_cancel.cancel_current"/>
+			<xs:enumeration value="object_cancel.close_dialog"/>
+			<xs:enumeration value="object_cancel.confirm"/>
+			<xs:enumeration value="object_cancel.select"/>
+			<xs:enumeration value="preview.chroma"/>
+			<xs:enumeration value="preview.dark"/>
+			<xs:enumeration value="preview.primary_hue"/>
+			<xs:enumeration value="preview.secondary_hue"/>
+			<xs:enumeration value="response.close"/>
+			<xs:enumeration value="response.open_console"/>
+			<xs:enumeration value="selector.decrement"/>
+			<xs:enumeration value="selector.edit"/>
+			<xs:enumeration value="selector.edit_choice"/>
+			<xs:enumeration value="selector.increment"/>
+			<xs:enumeration value="selector.pick"/>
+			<xs:enumeration value="settings.adb"/>
+			<xs:enumeration value="settings.advanced_settings"/>
+			<xs:enumeration value="settings.animations"/>
+			<xs:enumeration value="settings.brightness"/>
+			<xs:enumeration value="settings.buildroot_setup"/>
+			<xs:enumeration value="settings.clear_cache"/>
+			<xs:enumeration value="settings.confirmations"/>
+			<xs:enumeration value="settings.connected_message"/>
+			<xs:enumeration value="settings.connection_method"/>
+			<xs:enumeration value="settings.debug_borders"/>
+			<xs:enumeration value="settings.debug_level"/>
+			<xs:enumeration value="settings.duet_ip"/>
+			<xs:enumeration value="settings.duet_password"/>
+			<xs:enumeration value="settings.erase_and_restart"/>
+			<xs:enumeration value="settings.error_notifications_stay"/>
+			<xs:enumeration value="settings.font"/>
+			<xs:enumeration value="settings.hardware_test"/>
+			<xs:enumeration value="settings.icon_set"/>
+			<xs:enumeration value="settings.keep_language"/>
+			<xs:enumeration value="settings.keyboard_layout"/>
+			<xs:enumeration value="settings.language"/>
+			<xs:enumeration value="settings.machine_position_mode"/>
+			<xs:enumeration value="settings.notification_level"/>
+			<xs:enumeration value="settings.notification_timeout"/>
+			<xs:enumeration value="settings.poll_interval"/>
+			<xs:enumeration value="settings.progress_source"/>
+			<xs:enumeration value="settings.reboot"/>
+			<xs:enumeration value="settings.restart"/>
+			<xs:enumeration value="settings.restart_in_language"/>
+			<xs:enumeration value="settings.rotation"/>
+			<xs:enumeration value="settings.screensaver_timeout"/>
+			<xs:enumeration value="settings.second_usb_channel"/>
+			<xs:enumeration value="settings.send_config"/>
+			<xs:enumeration value="settings.ssh"/>
+			<xs:enumeration value="settings.system_logging"/>
+			<xs:enumeration value="settings.system_monitor"/>
+			<xs:enumeration value="settings.theme"/>
+			<xs:enumeration value="settings.upgrade_from_github"/>
+			<xs:enumeration value="settings.usb_mode"/>
+			<xs:enumeration value="temperature.change_filament"/>
+			<xs:enumeration value="temperature.extrusion_factor"/>
+			<xs:enumeration value="temperature.pick_filament"/>
+			<xs:enumeration value="temperature.unload_filament"/>
+			<xs:enumeration value="tools.toggle"/>
+			<xs:enumeration value="update.close"/>
+			<xs:enumeration value="update.confirm"/>
+			<xs:enumeration value="wifi.close_password"/>
+			<xs:enumeration value="wifi.connect"/>
+			<xs:enumeration value="wifi.forget"/>
+			<xs:enumeration value="wifi.join"/>
+			<xs:enumeration value="wifi.keyboard"/>
+			<xs:enumeration value="wifi.password"/>
+			<xs:enumeration value="wifi.refresh"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="action">
+		<xs:union memberTypes="action.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="trigger.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="all"/>
+			<xs:enumeration value="cancel"/>
+			<xs:enumeration value="child_changed"/>
+			<xs:enumeration value="child_created"/>
+			<xs:enumeration value="child_deleted"/>
+			<xs:enumeration value="clicked"/>
+			<xs:enumeration value="color_format_changed"/>
+			<xs:enumeration value="cover_check"/>
+			<xs:enumeration value="create"/>
+			<xs:enumeration value="defocused"/>
+			<xs:enumeration value="delete"/>
+			<xs:enumeration value="dismissed"/>
+			<xs:enumeration value="double_clicked"/>
+			<xs:enumeration value="draw_main"/>
+			<xs:enumeration value="draw_main_begin"/>
+			<xs:enumeration value="draw_main_end"/>
+			<xs:enumeration value="draw_post"/>
+			<xs:enumeration value="draw_post_begin"/>
+			<xs:enumeration value="draw_post_end"/>
+			<xs:enumeration value="draw_task_added"/>
+			<xs:enumeration value="flush_finish"/>
+			<xs:enumeration value="flush_start"/>
+			<xs:enumeration value="flush_wait_finish"/>
+			<xs:enumeration value="flush_wait_start"/>
+			<xs:enumeration value="focused"/>
+			<xs:enumeration value="gesture"/>
+			<xs:enumeration value="get_self_size"/>
+			<xs:enumeration value="hit_test"/>
+			<xs:enumeration value="hover_leave"/>
+			<xs:enumeration value="hover_over"/>
+			<xs:enumeration value="indev_reset"/>
+			<xs:enumeration value="insert"/>
+			<xs:enumeration value="invalidate_area"/>
+			<xs:enumeration value="key"/>
+			<xs:enumeration value="layout_changed"/>
+			<xs:enumeration value="leave"/>
+			<xs:enumeration value="long_pressed"/>
+			<xs:enumeration value="long_pressed_repeat"/>
+			<xs:enumeration value="press_lost"/>
+			<xs:enumeration value="pressed"/>
+			<xs:enumeration value="pressing"/>
+			<xs:enumeration value="ready"/>
+			<xs:enumeration value="refr_ext_draw_size"/>
+			<xs:enumeration value="refr_ready"/>
+			<xs:enumeration value="refr_request"/>
+			<xs:enumeration value="refr_start"/>
+			<xs:enumeration value="refresh"/>
+			<xs:enumeration value="released"/>
+			<xs:enumeration value="render_ready"/>
+			<xs:enumeration value="render_start"/>
+			<xs:enumeration value="resolution_changed"/>
+			<xs:enumeration value="rotary"/>
+			<xs:enumeration value="screen_load_start"/>
+			<xs:enumeration value="screen_loaded"/>
+			<xs:enumeration value="screen_unload_start"/>
+			<xs:enumeration value="screen_unloaded"/>
+			<xs:enumeration value="scroll"/>
+			<xs:enumeration value="scroll_begin"/>
+			<xs:enumeration value="scroll_end"/>
+			<xs:enumeration value="scroll_throw_begin"/>
+			<xs:enumeration value="short_clicked"/>
+			<xs:enumeration value="single_clicked"/>
+			<xs:enumeration value="size_changed"/>
+			<xs:enumeration value="state_changed"/>
+			<xs:enumeration value="style_changed"/>
+			<xs:enumeration value="triple_clicked"/>
+			<xs:enumeration value="value_changed"/>
+			<xs:enumeration value="value_confirmed"/>
+			<xs:enumeration value="vsync"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="trigger">
+		<xs:union memberTypes="trigger.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="presenter.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="console"/>
+			<xs:enumeration value="dashboard_jobs"/>
+			<xs:enumeration value="dashboard_macros"/>
+			<xs:enumeration value="extruder"/>
+			<xs:enumeration value="fans"/>
+			<xs:enumeration value="files_jobs"/>
+			<xs:enumeration value="files_macros"/>
+			<xs:enumeration value="heightmap"/>
+			<xs:enumeration value="job_status"/>
+			<xs:enumeration value="move"/>
+			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="settings_connection"/>
+			<xs:enumeration value="settings_developer"/>
+			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="theme_preview"/>
+			<xs:enumeration value="wifi"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="presenter">
+		<xs:union memberTypes="presenter.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="component.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="alert_axis"/>
+			<xs:enumeration value="alert_choice"/>
+			<xs:enumeration value="axis_position"/>
+			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_step"/>
+			<xs:enumeration value="confirm_dialog"/>
+			<xs:enumeration value="console"/>
+			<xs:enumeration value="console_gcode"/>
+			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="control_screen"/>
+			<xs:enumeration value="dashboard"/>
+			<xs:enumeration value="extruder"/>
+			<xs:enumeration value="fan_card"/>
+			<xs:enumeration value="fan_screen"/>
+			<xs:enumeration value="file_browser"/>
+			<xs:enumeration value="file_crumb"/>
+			<xs:enumeration value="file_dialog"/>
+			<xs:enumeration value="file_row"/>
+			<xs:enumeration value="file_tile"/>
+			<xs:enumeration value="files_screen"/>
+			<xs:enumeration value="heater_card"/>
+			<xs:enumeration value="heater_row"/>
+			<xs:enumeration value="heightmap"/>
+			<xs:enumeration value="heightmap_file"/>
+			<xs:enumeration value="home_screen"/>
+			<xs:enumeration value="job_object_item"/>
+			<xs:enumeration value="job_object_rect"/>
+			<xs:enumeration value="job_status"/>
+			<xs:enumeration value="move"/>
+			<xs:enumeration value="move_axis"/>
+			<xs:enumeration value="move_distance"/>
+			<xs:enumeration value="move_feedrate"/>
+			<xs:enumeration value="move_xy"/>
+			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="question_dialog"/>
+			<xs:enumeration value="setting_dropdown"/>
+			<xs:enumeration value="settings_connection"/>
+			<xs:enumeration value="settings_developer"/>
+			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_screen"/>
+			<xs:enumeration value="side_bar"/>
+			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="temperature_extruder"/>
+			<xs:enumeration value="temperature_heater"/>
+			<xs:enumeration value="temperature_heater_card"/>
+			<xs:enumeration value="temperature_tool"/>
+			<xs:enumeration value="theme_preview"/>
+			<xs:enumeration value="theme_swatch"/>
+			<xs:enumeration value="tool_card"/>
+			<xs:enumeration value="tool_list"/>
+			<xs:enumeration value="value_choice"/>
+			<xs:enumeration value="value_selector"/>
+			<xs:enumeration value="wifi_network"/>
+			<xs:enumeration value="wifi_selector"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="component">
+		<xs:union memberTypes="component.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="view.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="alert_axis"/>
+			<xs:enumeration value="alert_choice"/>
+			<xs:enumeration value="axis_position"/>
+			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_step"/>
+			<xs:enumeration value="confirm_dialog"/>
+			<xs:enumeration value="console"/>
+			<xs:enumeration value="console_gcode"/>
+			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="container"/>
+			<xs:enumeration value="control_screen"/>
+			<xs:enumeration value="dashboard"/>
+			<xs:enumeration value="estop"/>
+			<xs:enumeration value="extruder"/>
+			<xs:enumeration value="extrusion_factor"/>
+			<xs:enumeration value="fan_card"/>
+			<xs:enumeration value="fan_screen"/>
+			<xs:enumeration value="file_browser"/>
+			<xs:enumeration value="file_crumb"/>
+			<xs:enumeration value="file_dialog"/>
+			<xs:enumeration value="file_row"/>
+			<xs:enumeration value="file_tile"/>
+			<xs:enumeration value="files_screen"/>
+			<xs:enumeration value="heater_card"/>
+			<xs:enumeration value="heater_row"/>
+			<xs:enumeration value="heightmap"/>
+			<xs:enumeration value="heightmap_file"/>
+			<xs:enumeration value="home_screen"/>
+			<xs:enumeration value="job_extrusion_factor"/>
+			<xs:enumeration value="job_object_item"/>
+			<xs:enumeration value="job_object_rect"/>
+			<xs:enumeration value="job_status"/>
+			<xs:enumeration value="keyboard"/>
+			<xs:enumeration value="move"/>
+			<xs:enumeration value="move_axis"/>
+			<xs:enumeration value="move_distance"/>
+			<xs:enumeration value="move_feedrate"/>
+			<xs:enumeration value="move_xy"/>
+			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="numberpad"/>
+			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="question_dialog"/>
+			<xs:enumeration value="setting_dropdown"/>
+			<xs:enumeration value="settings_connection"/>
+			<xs:enumeration value="settings_developer"/>
+			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_screen"/>
+			<xs:enumeration value="side_bar"/>
+			<xs:enumeration value="speed_factor"/>
+			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="temperature_extruder"/>
+			<xs:enumeration value="temperature_heater"/>
+			<xs:enumeration value="temperature_heater_card"/>
+			<xs:enumeration value="temperature_tool"/>
+			<xs:enumeration value="theme_preview"/>
+			<xs:enumeration value="theme_swatch"/>
+			<xs:enumeration value="tool_card"/>
+			<xs:enumeration value="tool_list"/>
+			<xs:enumeration value="value_choice"/>
+			<xs:enumeration value="value_selector"/>
+			<xs:enumeration value="wifi_network"/>
+			<xs:enumeration value="wifi_selector"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="view">
+		<xs:union memberTypes="view.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="widget.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="alert_axis"/>
+			<xs:enumeration value="alert_choice"/>
+			<xs:enumeration value="axis_position"/>
+			<xs:enumeration value="babystep"/>
+			<xs:enumeration value="babystep_step"/>
+			<xs:enumeration value="confirm_dialog"/>
+			<xs:enumeration value="console"/>
+			<xs:enumeration value="console_gcode"/>
+			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="control_screen"/>
+			<xs:enumeration value="dashboard"/>
+			<xs:enumeration value="ds_bar"/>
+			<xs:enumeration value="ds_bar_marker"/>
+			<xs:enumeration value="ds_button"/>
+			<xs:enumeration value="ds_dropdown"/>
+			<xs:enumeration value="ds_graph"/>
+			<xs:enumeration value="ds_heatmap"/>
+			<xs:enumeration value="ds_hue_slider"/>
+			<xs:enumeration value="ds_icon"/>
+			<xs:enumeration value="ds_keyboard"/>
+			<xs:enumeration value="ds_list"/>
+			<xs:enumeration value="ds_modal"/>
+			<xs:enumeration value="ds_plot"/>
+			<xs:enumeration value="ds_plot_layer"/>
+			<xs:enumeration value="ds_plot_rect"/>
+			<xs:enumeration value="ds_slider"/>
+			<xs:enumeration value="ds_tabs"/>
+			<xs:enumeration value="ds_tabs-tab"/>
+			<xs:enumeration value="ds_textarea"/>
+			<xs:enumeration value="ds_thumbnail"/>
+			<xs:enumeration value="ds_toggle"/>
+			<xs:enumeration value="ds_view"/>
+			<xs:enumeration value="extruder"/>
+			<xs:enumeration value="fan_card"/>
+			<xs:enumeration value="fan_screen"/>
+			<xs:enumeration value="file_browser"/>
+			<xs:enumeration value="file_crumb"/>
+			<xs:enumeration value="file_dialog"/>
+			<xs:enumeration value="file_row"/>
+			<xs:enumeration value="file_tile"/>
+			<xs:enumeration value="files_screen"/>
+			<xs:enumeration value="heater_card"/>
+			<xs:enumeration value="heater_row"/>
+			<xs:enumeration value="heightmap"/>
+			<xs:enumeration value="heightmap_file"/>
+			<xs:enumeration value="home_screen"/>
+			<xs:enumeration value="job_object_item"/>
+			<xs:enumeration value="job_object_rect"/>
+			<xs:enumeration value="job_status"/>
+			<xs:enumeration value="lv_obj-action"/>
+			<xs:enumeration value="move"/>
+			<xs:enumeration value="move_axis"/>
+			<xs:enumeration value="move_distance"/>
+			<xs:enumeration value="move_feedrate"/>
+			<xs:enumeration value="move_xy"/>
+			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="question_dialog"/>
+			<xs:enumeration value="setting_dropdown"/>
+			<xs:enumeration value="settings_connection"/>
+			<xs:enumeration value="settings_developer"/>
+			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_screen"/>
+			<xs:enumeration value="side_bar"/>
+			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="temperature_extruder"/>
+			<xs:enumeration value="temperature_heater"/>
+			<xs:enumeration value="temperature_heater_card"/>
+			<xs:enumeration value="temperature_tool"/>
+			<xs:enumeration value="theme_preview"/>
+			<xs:enumeration value="theme_swatch"/>
+			<xs:enumeration value="tool_card"/>
+			<xs:enumeration value="tool_list"/>
+			<xs:enumeration value="value_choice"/>
+			<xs:enumeration value="value_selector"/>
+			<xs:enumeration value="wifi_network"/>
+			<xs:enumeration value="wifi_selector"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="widget">
+		<xs:union memberTypes="widget.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="style.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="actionBtn"/>
+			<xs:enumeration value="anim"/>
+			<xs:enumeration value="anim_fast"/>
+			<xs:enumeration value="arc_indic"/>
+			<xs:enumeration value="arc_indic_primary"/>
+			<xs:enumeration value="bar"/>
+			<xs:enumeration value="bar_indic"/>
+			<xs:enumeration value="bar_label"/>
+			<xs:enumeration value="bar_label_bg"/>
+			<xs:enumeration value="base"/>
+			<xs:enumeration value="bg"/>
+			<xs:enumeration value="bg_color_error"/>
+			<xs:enumeration value="bg_color_header"/>
+			<xs:enumeration value="bg_color_list_item"/>
+			<xs:enumeration value="bg_color_primary"/>
+			<xs:enumeration value="bg_color_primary_muted"/>
+			<xs:enumeration value="bg_color_secondary"/>
+			<xs:enumeration value="bg_color_secondary_muted"/>
+			<xs:enumeration value="bg_color_success"/>
+			<xs:enumeration value="bg_color_warning"/>
+			<xs:enumeration value="bg_dark"/>
+			<xs:enumeration value="bg_light"/>
+			<xs:enumeration value="bg_modal"/>
+			<xs:enumeration value="bg_switch"/>
+			<xs:enumeration value="border"/>
+			<xs:enumeration value="border_color_card"/>
+			<xs:enumeration value="border_color_primary"/>
+			<xs:enumeration value="border_color_secondary"/>
+			<xs:enumeration value="border_highlight"/>
+			<xs:enumeration value="border_muted"/>
+			<xs:enumeration value="btn"/>
+			<xs:enumeration value="btn_checked"/>
+			<xs:enumeration value="btnm_bg"/>
+			<xs:enumeration value="btnm_btn"/>
+			<xs:enumeration value="btnm_btn_checked"/>
+			<xs:enumeration value="calendar_btnm_bg"/>
+			<xs:enumeration value="calendar_btnm_day"/>
+			<xs:enumeration value="calendar_header"/>
+			<xs:enumeration value="canvas"/>
+			<xs:enumeration value="card"/>
+			<xs:enumeration value="cb_marker"/>
+			<xs:enumeration value="cb_marker_checked"/>
+			<xs:enumeration value="chart_bg"/>
+			<xs:enumeration value="chart_indic"/>
+			<xs:enumeration value="chart_series"/>
+			<xs:enumeration value="circle"/>
+			<xs:enumeration value="clip_corner"/>
+			<xs:enumeration value="console_btn_anim"/>
+			<xs:enumeration value="debug_borders"/>
+			<xs:enumeration value="disabled"/>
+			<xs:enumeration value="drag_complete"/>
+			<xs:enumeration value="draggable"/>
+			<xs:enumeration value="dragging"/>
+			<xs:enumeration value="dropdown"/>
+			<xs:enumeration value="dropdown_list"/>
+			<xs:enumeration value="estop"/>
+			<xs:enumeration value="file"/>
+			<xs:enumeration value="folder"/>
+			<xs:enumeration value="graph_legend"/>
+			<xs:enumeration value="grow"/>
+			<xs:enumeration value="icon"/>
+			<xs:enumeration value="icon_recolor"/>
+			<xs:enumeration value="input"/>
+			<xs:enumeration value="keyboard_button"/>
+			<xs:enumeration value="keyboard_button_checked_bg"/>
+			<xs:enumeration value="knob"/>
+			<xs:enumeration value="led"/>
+			<xs:enumeration value="line"/>
+			<xs:enumeration value="line_space_large"/>
+			<xs:enumeration value="list_bg"/>
+			<xs:enumeration value="list_btn"/>
+			<xs:enumeration value="list_header"/>
+			<xs:enumeration value="list_item_grow"/>
+			<xs:enumeration value="list_title"/>
+			<xs:enumeration value="long_press"/>
+			<xs:enumeration value="menu_bg"/>
+			<xs:enumeration value="menu_cont"/>
+			<xs:enumeration value="menu_header_btn"/>
+			<xs:enumeration value="menu_header_cont"/>
+			<xs:enumeration value="menu_main_cont"/>
+			<xs:enumeration value="menu_page"/>
+			<xs:enumeration value="menu_pressed"/>
+			<xs:enumeration value="menu_section"/>
+			<xs:enumeration value="menu_separator"/>
+			<xs:enumeration value="menu_sidebar_cont"/>
+			<xs:enumeration value="modal"/>
+			<xs:enumeration value="msgbox_backdrop_bg"/>
+			<xs:enumeration value="no_border"/>
+			<xs:enumeration value="no_radius"/>
+			<xs:enumeration value="object_cancel_base"/>
+			<xs:enumeration value="object_cancel_cancelled"/>
+			<xs:enumeration value="object_cancel_current"/>
+			<xs:enumeration value="outline_primary"/>
+			<xs:enumeration value="outline_secondary"/>
+			<xs:enumeration value="pad_base"/>
+			<xs:enumeration value="pad_gap"/>
+			<xs:enumeration value="pad_large"/>
+			<xs:enumeration value="pad_normal"/>
+			<xs:enumeration value="pad_small"/>
+			<xs:enumeration value="pad_tiny"/>
+			<xs:enumeration value="pad_zero"/>
+			<xs:enumeration value="pressed"/>
+			<xs:enumeration value="rotary_scroll"/>
+			<xs:enumeration value="scale"/>
+			<xs:enumeration value="screen"/>
+			<xs:enumeration value="scrollbar"/>
+			<xs:enumeration value="scrollbar_scrolled"/>
+			<xs:enumeration value="sidebar"/>
+			<xs:enumeration value="sidebar_btn"/>
+			<xs:enumeration value="slider"/>
+			<xs:enumeration value="slider_buttons"/>
+			<xs:enumeration value="slider_indic"/>
+			<xs:enumeration value="slider_knob"/>
+			<xs:enumeration value="switch_knob"/>
+			<xs:enumeration value="ta_cursor"/>
+			<xs:enumeration value="ta_placeholder"/>
+			<xs:enumeration value="tab_bg_focus"/>
+			<xs:enumeration value="tab_btn"/>
+			<xs:enumeration value="tab_button"/>
+			<xs:enumeration value="tab_card"/>
+			<xs:enumeration value="table"/>
+			<xs:enumeration value="table_cell"/>
+			<xs:enumeration value="temperature_bar"/>
+			<xs:enumeration value="temperature_bar_indic"/>
+			<xs:enumeration value="text"/>
+			<xs:enumeration value="text_align_center"/>
+			<xs:enumeration value="text_area"/>
+			<xs:enumeration value="text_emphasis"/>
+			<xs:enumeration value="text_header"/>
+			<xs:enumeration value="text_muted"/>
+			<xs:enumeration value="text_warning"/>
+			<xs:enumeration value="tool_list"/>
+			<xs:enumeration value="tool_list_heater"/>
+			<xs:enumeration value="tool_list_tool"/>
+			<xs:enumeration value="tool_selected"/>
+			<xs:enumeration value="transition_delayed"/>
+			<xs:enumeration value="transition_normal"/>
+			<xs:enumeration value="unhomed"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="style">
+		<xs:union memberTypes="style.names xs:string"/>
+	</xs:simpleType>
+	<xs:simpleType name="translation.names">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="app_drawer.console"/>
+			<xs:enumeration value="app_drawer.fan"/>
+			<xs:enumeration value="app_drawer.files"/>
+			<xs:enumeration value="app_drawer.fine_tune"/>
+			<xs:enumeration value="app_drawer.heightmap"/>
+			<xs:enumeration value="app_drawer.move"/>
+			<xs:enumeration value="app_drawer.object_cancel"/>
+			<xs:enumeration value="app_drawer.select_view"/>
+			<xs:enumeration value="app_drawer.settings"/>
+			<xs:enumeration value="app_drawer.status"/>
+			<xs:enumeration value="app_drawer.temperature"/>
+			<xs:enumeration value="babystep.decrement"/>
+			<xs:enumeration value="babystep.header"/>
+			<xs:enumeration value="babystep.increment"/>
+			<xs:enumeration value="babystep.reset"/>
+			<xs:enumeration value="common.cancel"/>
+			<xs:enumeration value="common.close"/>
+			<xs:enumeration value="common.no"/>
+			<xs:enumeration value="common.ok"/>
+			<xs:enumeration value="common.yes"/>
+			<xs:enumeration value="connection_method.network"/>
+			<xs:enumeration value="connection_method.uart"/>
+			<xs:enumeration value="connection_method.unknown"/>
+			<xs:enumeration value="connection_method.usb"/>
+			<xs:enumeration value="console.input_placeholder"/>
+			<xs:enumeration value="console.shell"/>
+			<xs:enumeration value="control.fan_tab"/>
+			<xs:enumeration value="control.heightmap_tab"/>
+			<xs:enumeration value="control.move_tab"/>
+			<xs:enumeration value="control.object_cancel_tab"/>
+			<xs:enumeration value="control.temperature_tab"/>
+			<xs:enumeration value="estop.label"/>
+			<xs:enumeration value="estop.message"/>
+			<xs:enumeration value="estop.prompt"/>
+			<xs:enumeration value="estop.reset_message"/>
+			<xs:enumeration value="extrude.distance_header"/>
+			<xs:enumeration value="extrude.extrude"/>
+			<xs:enumeration value="extrude.feed_dist"/>
+			<xs:enumeration value="extrude.feed_rate"/>
+			<xs:enumeration value="extrude.feedrate_header"/>
+			<xs:enumeration value="extrude.retract"/>
+			<xs:enumeration value="extrude.tool_select"/>
+			<xs:enumeration value="fan.header"/>
+			<xs:enumeration value="fan.max"/>
+			<xs:enumeration value="fan.off"/>
+			<xs:enumeration value="fan.title"/>
+			<xs:enumeration value="filament.change"/>
+			<xs:enumeration value="filament.confirm_filament_change"/>
+			<xs:enumeration value="filament.load"/>
+			<xs:enumeration value="filament.management_header"/>
+			<xs:enumeration value="filament.not_loaded"/>
+			<xs:enumeration value="filament.select"/>
+			<xs:enumeration value="filament.select_tool"/>
+			<xs:enumeration value="filament.select_tool_list_header"/>
+			<xs:enumeration value="filament.unload"/>
+			<xs:enumeration value="file.crumb_separator"/>
+			<xs:enumeration value="file.delete_message"/>
+			<xs:enumeration value="file.delete_title"/>
+			<xs:enumeration value="file.file"/>
+			<xs:enumeration value="file.folder"/>
+			<xs:enumeration value="file.header_prefix"/>
+			<xs:enumeration value="file.jobs"/>
+			<xs:enumeration value="file.macros"/>
+			<xs:enumeration value="file.refresh"/>
+			<xs:enumeration value="file.run_macro_message"/>
+			<xs:enumeration value="file.run_macro_title"/>
+			<xs:enumeration value="file.sort_by_date"/>
+			<xs:enumeration value="file.sort_by_name"/>
+			<xs:enumeration value="file.sort_by_size"/>
+			<xs:enumeration value="file.start_print.date"/>
+			<xs:enumeration value="file.start_print.file"/>
+			<xs:enumeration value="file.start_print.generated_by"/>
+			<xs:enumeration value="file.start_print.height"/>
+			<xs:enumeration value="file.start_print.layer_height"/>
+			<xs:enumeration value="file.start_print.print_time"/>
+			<xs:enumeration value="file.start_print.size"/>
+			<xs:enumeration value="file.start_print_title"/>
+			<xs:enumeration value="fine_tune.extruder"/>
+			<xs:enumeration value="fine_tune.extruder_header"/>
+			<xs:enumeration value="fine_tune.fan"/>
+			<xs:enumeration value="fine_tune.fan_header"/>
+			<xs:enumeration value="fine_tune.speed_factor"/>
+			<xs:enumeration value="gcodes.gcode_G0_desc"/>
+			<xs:enumeration value="gcodes.gcode_G10_desc"/>
+			<xs:enumeration value="gcodes.gcode_G10_temperature_desc"/>
+			<xs:enumeration value="gcodes.gcode_G10_workplace_desc"/>
+			<xs:enumeration value="gcodes.gcode_G11_desc"/>
+			<xs:enumeration value="gcodes.gcode_G17_desc"/>
+			<xs:enumeration value="gcodes.gcode_G18_desc"/>
+			<xs:enumeration value="gcodes.gcode_G19_desc"/>
+			<xs:enumeration value="gcodes.gcode_G1_desc"/>
+			<xs:enumeration value="gcodes.gcode_G20_desc"/>
+			<xs:enumeration value="gcodes.gcode_G21_desc"/>
+			<xs:enumeration value="gcodes.gcode_G28_desc"/>
+			<xs:enumeration value="gcodes.gcode_G29_desc"/>
+			<xs:enumeration value="gcodes.gcode_G2_desc"/>
+			<xs:enumeration value="gcodes.gcode_G30_desc"/>
+			<xs:enumeration value="gcodes.gcode_G31_desc"/>
+			<xs:enumeration value="gcodes.gcode_G32_desc"/>
+			<xs:enumeration value="gcodes.gcode_G382_desc"/>
+			<xs:enumeration value="gcodes.gcode_G383_desc"/>
+			<xs:enumeration value="gcodes.gcode_G384_desc"/>
+			<xs:enumeration value="gcodes.gcode_G385_desc"/>
+			<xs:enumeration value="gcodes.gcode_G3_desc"/>
+			<xs:enumeration value="gcodes.gcode_G4_desc"/>
+			<xs:enumeration value="gcodes.gcode_G53_desc"/>
+			<xs:enumeration value="gcodes.gcode_G54_desc"/>
+			<xs:enumeration value="gcodes.gcode_G55_desc"/>
+			<xs:enumeration value="gcodes.gcode_G56_desc"/>
+			<xs:enumeration value="gcodes.gcode_G57_desc"/>
+			<xs:enumeration value="gcodes.gcode_G58_desc"/>
+			<xs:enumeration value="gcodes.gcode_G591_desc"/>
+			<xs:enumeration value="gcodes.gcode_G592_desc"/>
+			<xs:enumeration value="gcodes.gcode_G593_desc"/>
+			<xs:enumeration value="gcodes.gcode_G59_desc"/>
+			<xs:enumeration value="gcodes.gcode_G60_desc"/>
+			<xs:enumeration value="gcodes.gcode_G68_desc"/>
+			<xs:enumeration value="gcodes.gcode_G69_desc"/>
+			<xs:enumeration value="gcodes.gcode_G90_desc"/>
+			<xs:enumeration value="gcodes.gcode_G91_desc"/>
+			<xs:enumeration value="gcodes.gcode_G92_desc"/>
+			<xs:enumeration value="gcodes.gcode_G93_desc"/>
+			<xs:enumeration value="gcodes.gcode_G94_desc"/>
+			<xs:enumeration value="gcodes.gcode_M0_desc"/>
+			<xs:enumeration value="gcodes.gcode_M101_desc"/>
+			<xs:enumeration value="gcodes.gcode_M102_desc"/>
+			<xs:enumeration value="gcodes.gcode_M103_desc"/>
+			<xs:enumeration value="gcodes.gcode_M104_desc"/>
+			<xs:enumeration value="gcodes.gcode_M105_desc"/>
+			<xs:enumeration value="gcodes.gcode_M106_desc"/>
+			<xs:enumeration value="gcodes.gcode_M107_desc"/>
+			<xs:enumeration value="gcodes.gcode_M108_desc"/>
+			<xs:enumeration value="gcodes.gcode_M109_desc"/>
+			<xs:enumeration value="gcodes.gcode_M110_desc"/>
+			<xs:enumeration value="gcodes.gcode_M111_desc"/>
+			<xs:enumeration value="gcodes.gcode_M112_desc"/>
+			<xs:enumeration value="gcodes.gcode_M114_desc"/>
+			<xs:enumeration value="gcodes.gcode_M115_desc"/>
+			<xs:enumeration value="gcodes.gcode_M116_desc"/>
+			<xs:enumeration value="gcodes.gcode_M117_desc"/>
+			<xs:enumeration value="gcodes.gcode_M118_desc"/>
+			<xs:enumeration value="gcodes.gcode_M119_desc"/>
+			<xs:enumeration value="gcodes.gcode_M120_desc"/>
+			<xs:enumeration value="gcodes.gcode_M121_desc"/>
+			<xs:enumeration value="gcodes.gcode_M122_desc"/>
+			<xs:enumeration value="gcodes.gcode_M135_desc"/>
+			<xs:enumeration value="gcodes.gcode_M140_desc"/>
+			<xs:enumeration value="gcodes.gcode_M141_desc"/>
+			<xs:enumeration value="gcodes.gcode_M143_desc"/>
+			<xs:enumeration value="gcodes.gcode_M144_desc"/>
+			<xs:enumeration value="gcodes.gcode_M150_desc"/>
+			<xs:enumeration value="gcodes.gcode_M17_desc"/>
+			<xs:enumeration value="gcodes.gcode_M18_desc"/>
+			<xs:enumeration value="gcodes.gcode_M190_desc"/>
+			<xs:enumeration value="gcodes.gcode_M191_desc"/>
+			<xs:enumeration value="gcodes.gcode_M1_desc"/>
+			<xs:enumeration value="gcodes.gcode_M200_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2011_desc"/>
+			<xs:enumeration value="gcodes.gcode_M201_desc"/>
+			<xs:enumeration value="gcodes.gcode_M203_desc"/>
+			<xs:enumeration value="gcodes.gcode_M204_desc"/>
+			<xs:enumeration value="gcodes.gcode_M205_desc"/>
+			<xs:enumeration value="gcodes.gcode_M206_desc"/>
+			<xs:enumeration value="gcodes.gcode_M207_desc"/>
+			<xs:enumeration value="gcodes.gcode_M208_desc"/>
+			<xs:enumeration value="gcodes.gcode_M20_desc"/>
+			<xs:enumeration value="gcodes.gcode_M21_desc"/>
+			<xs:enumeration value="gcodes.gcode_M220_desc"/>
+			<xs:enumeration value="gcodes.gcode_M221_desc"/>
+			<xs:enumeration value="gcodes.gcode_M226_desc"/>
+			<xs:enumeration value="gcodes.gcode_M22_desc"/>
+			<xs:enumeration value="gcodes.gcode_M23_desc"/>
+			<xs:enumeration value="gcodes.gcode_M24_desc"/>
+			<xs:enumeration value="gcodes.gcode_M25_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2601_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2602_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2603_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2604_desc"/>
+			<xs:enumeration value="gcodes.gcode_M260_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2611_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2612_desc"/>
+			<xs:enumeration value="gcodes.gcode_M261_desc"/>
+			<xs:enumeration value="gcodes.gcode_M26_desc"/>
+			<xs:enumeration value="gcodes.gcode_M27_desc"/>
+			<xs:enumeration value="gcodes.gcode_M280_desc"/>
+			<xs:enumeration value="gcodes.gcode_M28_desc"/>
+			<xs:enumeration value="gcodes.gcode_M290_desc"/>
+			<xs:enumeration value="gcodes.gcode_M291_desc"/>
+			<xs:enumeration value="gcodes.gcode_M292_desc"/>
+			<xs:enumeration value="gcodes.gcode_M29_desc"/>
+			<xs:enumeration value="gcodes.gcode_M2_desc"/>
+			<xs:enumeration value="gcodes.gcode_M300_desc"/>
+			<xs:enumeration value="gcodes.gcode_M301_desc"/>
+			<xs:enumeration value="gcodes.gcode_M302_desc"/>
+			<xs:enumeration value="gcodes.gcode_M303_desc"/>
+			<xs:enumeration value="gcodes.gcode_M304_desc"/>
+			<xs:enumeration value="gcodes.gcode_M305_desc"/>
+			<xs:enumeration value="gcodes.gcode_M307_desc"/>
+			<xs:enumeration value="gcodes.gcode_M308_desc"/>
+			<xs:enumeration value="gcodes.gcode_M309_desc"/>
+			<xs:enumeration value="gcodes.gcode_M30_desc"/>
+			<xs:enumeration value="gcodes.gcode_M32_desc"/>
+			<xs:enumeration value="gcodes.gcode_M350_desc"/>
+			<xs:enumeration value="gcodes.gcode_M361_desc"/>
+			<xs:enumeration value="gcodes.gcode_M362_desc"/>
+			<xs:enumeration value="gcodes.gcode_M36_desc"/>
+			<xs:enumeration value="gcodes.gcode_M374_desc"/>
+			<xs:enumeration value="gcodes.gcode_M375_desc"/>
+			<xs:enumeration value="gcodes.gcode_M376_desc"/>
+			<xs:enumeration value="gcodes.gcode_M37_desc"/>
+			<xs:enumeration value="gcodes.gcode_M38_desc"/>
+			<xs:enumeration value="gcodes.gcode_M39_desc"/>
+			<xs:enumeration value="gcodes.gcode_M3_desc"/>
+			<xs:enumeration value="gcodes.gcode_M400_desc"/>
+			<xs:enumeration value="gcodes.gcode_M401_desc"/>
+			<xs:enumeration value="gcodes.gcode_M402_desc"/>
+			<xs:enumeration value="gcodes.gcode_M404_desc"/>
+			<xs:enumeration value="gcodes.gcode_M408_desc"/>
+			<xs:enumeration value="gcodes.gcode_M409_desc"/>
+			<xs:enumeration value="gcodes.gcode_M425_desc"/>
+			<xs:enumeration value="gcodes.gcode_M42_desc"/>
+			<xs:enumeration value="gcodes.gcode_M450_desc"/>
+			<xs:enumeration value="gcodes.gcode_M451_desc"/>
+			<xs:enumeration value="gcodes.gcode_M452_desc"/>
+			<xs:enumeration value="gcodes.gcode_M453_desc"/>
+			<xs:enumeration value="gcodes.gcode_M470_desc"/>
+			<xs:enumeration value="gcodes.gcode_M471_desc"/>
+			<xs:enumeration value="gcodes.gcode_M472_desc"/>
+			<xs:enumeration value="gcodes.gcode_M486_desc"/>
+			<xs:enumeration value="gcodes.gcode_M4_desc"/>
+			<xs:enumeration value="gcodes.gcode_M500_desc"/>
+			<xs:enumeration value="gcodes.gcode_M501_desc"/>
+			<xs:enumeration value="gcodes.gcode_M502_desc"/>
+			<xs:enumeration value="gcodes.gcode_M503_desc"/>
+			<xs:enumeration value="gcodes.gcode_M505_desc"/>
+			<xs:enumeration value="gcodes.gcode_M540_desc"/>
+			<xs:enumeration value="gcodes.gcode_M550_desc"/>
+			<xs:enumeration value="gcodes.gcode_M551_desc"/>
+			<xs:enumeration value="gcodes.gcode_M552_desc"/>
+			<xs:enumeration value="gcodes.gcode_M553_desc"/>
+			<xs:enumeration value="gcodes.gcode_M554_desc"/>
+			<xs:enumeration value="gcodes.gcode_M555_desc"/>
+			<xs:enumeration value="gcodes.gcode_M556_desc"/>
+			<xs:enumeration value="gcodes.gcode_M557_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5581_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5582_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5583_desc"/>
+			<xs:enumeration value="gcodes.gcode_M558_desc"/>
+			<xs:enumeration value="gcodes.gcode_M559_desc"/>
+			<xs:enumeration value="gcodes.gcode_M560_desc"/>
+			<xs:enumeration value="gcodes.gcode_M561_desc"/>
+			<xs:enumeration value="gcodes.gcode_M562_desc"/>
+			<xs:enumeration value="gcodes.gcode_M563_desc"/>
+			<xs:enumeration value="gcodes.gcode_M564_desc"/>
+			<xs:enumeration value="gcodes.gcode_M566_desc"/>
+			<xs:enumeration value="gcodes.gcode_M567_desc"/>
+			<xs:enumeration value="gcodes.gcode_M568_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5691_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5692_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5693_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5694_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5695_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5696_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5697_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5698_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5699_desc"/>
+			<xs:enumeration value="gcodes.gcode_M569_desc"/>
+			<xs:enumeration value="gcodes.gcode_M570_desc"/>
+			<xs:enumeration value="gcodes.gcode_M571_desc"/>
+			<xs:enumeration value="gcodes.gcode_M572_desc"/>
+			<xs:enumeration value="gcodes.gcode_M573_desc"/>
+			<xs:enumeration value="gcodes.gcode_M574_desc"/>
+			<xs:enumeration value="gcodes.gcode_M575_desc"/>
+			<xs:enumeration value="gcodes.gcode_M576_desc"/>
+			<xs:enumeration value="gcodes.gcode_M577_desc"/>
+			<xs:enumeration value="gcodes.gcode_M578_desc"/>
+			<xs:enumeration value="gcodes.gcode_M579_desc"/>
+			<xs:enumeration value="gcodes.gcode_M580_desc"/>
+			<xs:enumeration value="gcodes.gcode_M581_desc"/>
+			<xs:enumeration value="gcodes.gcode_M582_desc"/>
+			<xs:enumeration value="gcodes.gcode_M584_desc"/>
+			<xs:enumeration value="gcodes.gcode_M585_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5864_desc"/>
+			<xs:enumeration value="gcodes.gcode_M586_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5871_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5872_desc"/>
+			<xs:enumeration value="gcodes.gcode_M587_desc"/>
+			<xs:enumeration value="gcodes.gcode_M588_desc"/>
+			<xs:enumeration value="gcodes.gcode_M589_desc"/>
+			<xs:enumeration value="gcodes.gcode_M591_desc"/>
+			<xs:enumeration value="gcodes.gcode_M592_desc"/>
+			<xs:enumeration value="gcodes.gcode_M593_desc"/>
+			<xs:enumeration value="gcodes.gcode_M594_desc"/>
+			<xs:enumeration value="gcodes.gcode_M595_desc"/>
+			<xs:enumeration value="gcodes.gcode_M596_desc"/>
+			<xs:enumeration value="gcodes.gcode_M597_desc"/>
+			<xs:enumeration value="gcodes.gcode_M598_desc"/>
+			<xs:enumeration value="gcodes.gcode_M599_desc"/>
+			<xs:enumeration value="gcodes.gcode_M5_desc"/>
+			<xs:enumeration value="gcodes.gcode_M600_desc"/>
+			<xs:enumeration value="gcodes.gcode_M606_desc"/>
+			<xs:enumeration value="gcodes.gcode_M650_desc"/>
+			<xs:enumeration value="gcodes.gcode_M651_desc"/>
+			<xs:enumeration value="gcodes.gcode_M655_desc"/>
+			<xs:enumeration value="gcodes.gcode_M665_desc"/>
+			<xs:enumeration value="gcodes.gcode_M666_desc"/>
+			<xs:enumeration value="gcodes.gcode_M667_desc"/>
+			<xs:enumeration value="gcodes.gcode_M669_desc"/>
+			<xs:enumeration value="gcodes.gcode_M670_desc"/>
+			<xs:enumeration value="gcodes.gcode_M671_desc"/>
+			<xs:enumeration value="gcodes.gcode_M672_desc"/>
+			<xs:enumeration value="gcodes.gcode_M673_desc"/>
+			<xs:enumeration value="gcodes.gcode_M674_desc"/>
+			<xs:enumeration value="gcodes.gcode_M675_desc"/>
+			<xs:enumeration value="gcodes.gcode_M701_desc"/>
+			<xs:enumeration value="gcodes.gcode_M702_desc"/>
+			<xs:enumeration value="gcodes.gcode_M703_desc"/>
+			<xs:enumeration value="gcodes.gcode_M73_desc"/>
+			<xs:enumeration value="gcodes.gcode_M750_desc"/>
+			<xs:enumeration value="gcodes.gcode_M751_desc"/>
+			<xs:enumeration value="gcodes.gcode_M752_desc"/>
+			<xs:enumeration value="gcodes.gcode_M753_desc"/>
+			<xs:enumeration value="gcodes.gcode_M754_desc"/>
+			<xs:enumeration value="gcodes.gcode_M755_desc"/>
+			<xs:enumeration value="gcodes.gcode_M756_desc"/>
+			<xs:enumeration value="gcodes.gcode_M80_desc"/>
+			<xs:enumeration value="gcodes.gcode_M81_desc"/>
+			<xs:enumeration value="gcodes.gcode_M82_desc"/>
+			<xs:enumeration value="gcodes.gcode_M83_desc"/>
+			<xs:enumeration value="gcodes.gcode_M84_desc"/>
+			<xs:enumeration value="gcodes.gcode_M851_desc"/>
+			<xs:enumeration value="gcodes.gcode_M905_desc"/>
+			<xs:enumeration value="gcodes.gcode_M906_desc"/>
+			<xs:enumeration value="gcodes.gcode_M911_desc"/>
+			<xs:enumeration value="gcodes.gcode_M912_desc"/>
+			<xs:enumeration value="gcodes.gcode_M913_desc"/>
+			<xs:enumeration value="gcodes.gcode_M914_desc"/>
+			<xs:enumeration value="gcodes.gcode_M915_desc"/>
+			<xs:enumeration value="gcodes.gcode_M916_desc"/>
+			<xs:enumeration value="gcodes.gcode_M917_desc"/>
+			<xs:enumeration value="gcodes.gcode_M918_desc"/>
+			<xs:enumeration value="gcodes.gcode_M929_desc"/>
+			<xs:enumeration value="gcodes.gcode_M92_desc"/>
+			<xs:enumeration value="gcodes.gcode_M950_desc"/>
+			<xs:enumeration value="gcodes.gcode_M951_desc"/>
+			<xs:enumeration value="gcodes.gcode_M952_desc"/>
+			<xs:enumeration value="gcodes.gcode_M953_desc"/>
+			<xs:enumeration value="gcodes.gcode_M954_desc"/>
+			<xs:enumeration value="gcodes.gcode_M955_desc"/>
+			<xs:enumeration value="gcodes.gcode_M956_desc"/>
+			<xs:enumeration value="gcodes.gcode_M957_desc"/>
+			<xs:enumeration value="gcodes.gcode_M9701_desc"/>
+			<xs:enumeration value="gcodes.gcode_M9702_desc"/>
+			<xs:enumeration value="gcodes.gcode_M970_desc"/>
+			<xs:enumeration value="gcodes.gcode_M98_desc"/>
+			<xs:enumeration value="gcodes.gcode_M997_desc"/>
+			<xs:enumeration value="gcodes.gcode_M998_desc"/>
+			<xs:enumeration value="gcodes.gcode_M999_desc"/>
+			<xs:enumeration value="gcodes.gcode_M99_desc"/>
+			<xs:enumeration value="gcodes.gcode_T_desc"/>
+			<xs:enumeration value="heightmap.area"/>
+			<xs:enumeration value="heightmap.auto"/>
+			<xs:enumeration value="heightmap.fixed"/>
+			<xs:enumeration value="heightmap.list_header"/>
+			<xs:enumeration value="heightmap.load"/>
+			<xs:enumeration value="heightmap.max_error"/>
+			<xs:enumeration value="heightmap.mean_error"/>
+			<xs:enumeration value="heightmap.mesh_bed_level"/>
+			<xs:enumeration value="heightmap.min_error"/>
+			<xs:enumeration value="heightmap.not_supported"/>
+			<xs:enumeration value="heightmap.num_points"/>
+			<xs:enumeration value="heightmap.render_mode"/>
+			<xs:enumeration value="heightmap.std_dev"/>
+			<xs:enumeration value="heightmap.title"/>
+			<xs:enumeration value="heightmap.true_bed_level"/>
+			<xs:enumeration value="heightmap.unload"/>
+			<xs:enumeration value="message.connected"/>
+			<xs:enumeration value="message.disconnected"/>
+			<xs:enumeration value="message.update_available"/>
+			<xs:enumeration value="message.update_available_github_text"/>
+			<xs:enumeration value="message.update_available_text"/>
+			<xs:enumeration value="message.update_buildroot_error_text"/>
+			<xs:enumeration value="message.update_buildroot_warning"/>
+			<xs:enumeration value="message.update_buildroot_warning_text"/>
+			<xs:enumeration value="message.update_cancel"/>
+			<xs:enumeration value="message.update_confirm"/>
+			<xs:enumeration value="message.update_failed"/>
+			<xs:enumeration value="message.update_successful"/>
+			<xs:enumeration value="message.update_successful_text"/>
+			<xs:enumeration value="move.axis_home"/>
+			<xs:enumeration value="move.disable_motors"/>
+			<xs:enumeration value="move.disable_motors_confirm.text"/>
+			<xs:enumeration value="move.disable_motors_confirm.title"/>
+			<xs:enumeration value="move.distance"/>
+			<xs:enumeration value="move.distance_adjust_header"/>
+			<xs:enumeration value="move.feedrate"/>
+			<xs:enumeration value="move.feedrate_adjust_header"/>
+			<xs:enumeration value="move.home_all"/>
+			<xs:enumeration value="move.home_all_confirm.text"/>
+			<xs:enumeration value="move.home_all_confirm.title"/>
+			<xs:enumeration value="move.home_generic_confirm.text"/>
+			<xs:enumeration value="move.home_generic_confirm.title"/>
+			<xs:enumeration value="move.home_xy_confirm.text"/>
+			<xs:enumeration value="move.home_xy_confirm.title"/>
+			<xs:enumeration value="move.machine_position"/>
+			<xs:enumeration value="move.set_position"/>
+			<xs:enumeration value="move.tool_position"/>
+			<xs:enumeration value="msgbox.open_console"/>
+			<xs:enumeration value="msgbox.response_error"/>
+			<xs:enumeration value="msgbox.response_info"/>
+			<xs:enumeration value="msgbox.response_success"/>
+			<xs:enumeration value="msgbox.response_warning"/>
+			<xs:enumeration value="msgbox.warning_float_range"/>
+			<xs:enumeration value="msgbox.warning_int_range"/>
+			<xs:enumeration value="msgbox.warning_text_length"/>
+			<xs:enumeration value="multi_value_selector.numberpad_input_header"/>
+			<xs:enumeration value="multi_value_selector.numberpad_new_value_header"/>
+			<xs:enumeration value="object_cancel.cancel_current"/>
+			<xs:enumeration value="object_cancel.confirm_cancel_current_text"/>
+			<xs:enumeration value="object_cancel.confirm_cancel_current_title"/>
+			<xs:enumeration value="object_cancel.confirm_cancel_text"/>
+			<xs:enumeration value="object_cancel.confirm_cancel_title"/>
+			<xs:enumeration value="object_cancel.confirm_uncancel_text"/>
+			<xs:enumeration value="object_cancel.confirm_uncancel_title"/>
+			<xs:enumeration value="object_cancel.current_object_none"/>
+			<xs:enumeration value="object_cancel.current_object_prefix"/>
+			<xs:enumeration value="object_cancel.objects_header"/>
+			<xs:enumeration value="object_cancel.title"/>
+			<xs:enumeration value="settings.brightness"/>
+			<xs:enumeration value="settings.build_time"/>
+			<xs:enumeration value="settings.buildroot_version"/>
+			<xs:enumeration value="settings.clear_duetscreen_cache"/>
+			<xs:enumeration value="settings.connectivity_header"/>
+			<xs:enumeration value="settings.debug_borders"/>
+			<xs:enumeration value="settings.debug_level"/>
+			<xs:enumeration value="settings.dev_header"/>
+			<xs:enumeration value="settings.developer"/>
+			<xs:enumeration value="settings.display_connected_message"/>
+			<xs:enumeration value="settings.duet"/>
+			<xs:enumeration value="settings.duet_connection_method"/>
+			<xs:enumeration value="settings.duet_ip_address"/>
+			<xs:enumeration value="settings.duet_ip_address_prompt"/>
+			<xs:enumeration value="settings.duet_password"/>
+			<xs:enumeration value="settings.duet_password_prompt"/>
+			<xs:enumeration value="settings.duet_poll_interval"/>
+			<xs:enumeration value="settings.duetscreen_cache_size"/>
+			<xs:enumeration value="settings.duetscreen_cache_size_format"/>
+			<xs:enumeration value="settings.enable_adb"/>
+			<xs:enumeration value="settings.enable_advanced_settings"/>
+			<xs:enumeration value="settings.enable_animations"/>
+			<xs:enumeration value="settings.enable_second_usb_channel"/>
+			<xs:enumeration value="settings.enable_ssh"/>
+			<xs:enumeration value="settings.enable_system_monitor"/>
+			<xs:enumeration value="settings.erase_and_restart"/>
+			<xs:enumeration value="settings.firmware_version"/>
+			<xs:enumeration value="settings.font"/>
+			<xs:enumeration value="settings.headers.notifications"/>
+			<xs:enumeration value="settings.headers.screen_networking"/>
+			<xs:enumeration value="settings.icons"/>
+			<xs:enumeration value="settings.job_progress_source"/>
+			<xs:enumeration value="settings.job_progress_source_options.duration"/>
+			<xs:enumeration value="settings.job_progress_source_options.file"/>
+			<xs:enumeration value="settings.keyboard_layout"/>
+			<xs:enumeration value="settings.language"/>
+			<xs:enumeration value="settings.language_confirm.text"/>
+			<xs:enumeration value="settings.language_confirm.title"/>
+			<xs:enumeration value="settings.move_machine_position_mode"/>
+			<xs:enumeration value="settings.network.available_wifi"/>
+			<xs:enumeration value="settings.network.connect"/>
+			<xs:enumeration value="settings.network.connected"/>
+			<xs:enumeration value="settings.network.disconnect"/>
+			<xs:enumeration value="settings.network.enable"/>
+			<xs:enumeration value="settings.network.enter_password_hint"/>
+			<xs:enumeration value="settings.network.enter_password_title"/>
+			<xs:enumeration value="settings.network.forget"/>
+			<xs:enumeration value="settings.network.ip_address"/>
+			<xs:enumeration value="settings.network.join"/>
+			<xs:enumeration value="settings.network.known"/>
+			<xs:enumeration value="settings.network.password_for"/>
+			<xs:enumeration value="settings.network.refresh"/>
+			<xs:enumeration value="settings.network.signal"/>
+			<xs:enumeration value="settings.network.ssid"/>
+			<xs:enumeration value="settings.network.status_auth_failure"/>
+			<xs:enumeration value="settings.network.status_connected"/>
+			<xs:enumeration value="settings.network.status_connecting"/>
+			<xs:enumeration value="settings.network.status_disconnected"/>
+			<xs:enumeration value="settings.network.status_error"/>
+			<xs:enumeration value="settings.network.status_not_found"/>
+			<xs:enumeration value="settings.network.status_timeout"/>
+			<xs:enumeration value="settings.notification_auto_close_error"/>
+			<xs:enumeration value="settings.notification_level"/>
+			<xs:enumeration value="settings.notification_timeout"/>
+			<xs:enumeration value="settings.reboot"/>
+			<xs:enumeration value="settings.restart"/>
+			<xs:enumeration value="settings.run_buildroot_setup"/>
+			<xs:enumeration value="settings.screen"/>
+			<xs:enumeration value="settings.screen_header"/>
+			<xs:enumeration value="settings.screen_rotation"/>
+			<xs:enumeration value="settings.screen_rotation_options.rotation_0"/>
+			<xs:enumeration value="settings.screen_rotation_options.rotation_180"/>
+			<xs:enumeration value="settings.screen_rotation_options.rotation_270"/>
+			<xs:enumeration value="settings.screen_rotation_options.rotation_90"/>
+			<xs:enumeration value="settings.screensaver_timeout"/>
+			<xs:enumeration value="settings.send_config_to_duet"/>
+			<xs:enumeration value="settings.severity.debug"/>
+			<xs:enumeration value="settings.severity.error"/>
+			<xs:enumeration value="settings.severity.fatal"/>
+			<xs:enumeration value="settings.severity.info"/>
+			<xs:enumeration value="settings.severity.none"/>
+			<xs:enumeration value="settings.severity.success"/>
+			<xs:enumeration value="settings.severity.verbose"/>
+			<xs:enumeration value="settings.severity.warn"/>
+			<xs:enumeration value="settings.show_confirmation_dialogs"/>
+			<xs:enumeration value="settings.start_hardware_test"/>
+			<xs:enumeration value="settings.storage_info"/>
+			<xs:enumeration value="settings.storage_info_format"/>
+			<xs:enumeration value="settings.style.bg"/>
+			<xs:enumeration value="settings.style.bg_color_header"/>
+			<xs:enumeration value="settings.style.bg_color_list_item"/>
+			<xs:enumeration value="settings.style.bg_color_primary"/>
+			<xs:enumeration value="settings.style.bg_color_primary_muted"/>
+			<xs:enumeration value="settings.style.bg_color_secondary"/>
+			<xs:enumeration value="settings.style.bg_color_secondary_muted"/>
+			<xs:enumeration value="settings.style.bg_dark"/>
+			<xs:enumeration value="settings.style.bg_light"/>
+			<xs:enumeration value="settings.style.border"/>
+			<xs:enumeration value="settings.style.border_color_primary"/>
+			<xs:enumeration value="settings.style.border_color_secondary"/>
+			<xs:enumeration value="settings.style.border_highlight"/>
+			<xs:enumeration value="settings.style.border_muted"/>
+			<xs:enumeration value="settings.style.error"/>
+			<xs:enumeration value="settings.style.success"/>
+			<xs:enumeration value="settings.style.text"/>
+			<xs:enumeration value="settings.style.text_emphasis"/>
+			<xs:enumeration value="settings.style.text_header"/>
+			<xs:enumeration value="settings.style.text_muted"/>
+			<xs:enumeration value="settings.style.warning"/>
+			<xs:enumeration value="settings.system_logging"/>
+			<xs:enumeration value="settings.tabs.connection"/>
+			<xs:enumeration value="settings.tabs.developer"/>
+			<xs:enumeration value="settings.tabs.display"/>
+			<xs:enumeration value="settings.tabs.general"/>
+			<xs:enumeration value="settings.theme"/>
+			<xs:enumeration value="settings.upgrade_from_github"/>
+			<xs:enumeration value="settings.upgrade_from_github_failed"/>
+			<xs:enumeration value="settings.usb_mode"/>
+			<xs:enumeration value="settings.usb_mode_device"/>
+			<xs:enumeration value="settings.usb_mode_host"/>
+			<xs:enumeration value="settings.usb_mode_internal_wifi"/>
+			<xs:enumeration value="settings.wifi"/>
+			<xs:enumeration value="side_bar.back"/>
+			<xs:enumeration value="side_bar.console"/>
+			<xs:enumeration value="side_bar.control"/>
+			<xs:enumeration value="side_bar.files"/>
+			<xs:enumeration value="side_bar.home"/>
+			<xs:enumeration value="side_bar.menu"/>
+			<xs:enumeration value="side_bar.settings"/>
+			<xs:enumeration value="slider.reset"/>
+			<xs:enumeration value="state.busy"/>
+			<xs:enumeration value="state.cancelling"/>
+			<xs:enumeration value="state.changingTool"/>
+			<xs:enumeration value="state.connected"/>
+			<xs:enumeration value="state.connecting"/>
+			<xs:enumeration value="state.disconnected"/>
+			<xs:enumeration value="state.halted"/>
+			<xs:enumeration value="state.idle"/>
+			<xs:enumeration value="state.off"/>
+			<xs:enumeration value="state.paused"/>
+			<xs:enumeration value="state.pausing"/>
+			<xs:enumeration value="state.processing"/>
+			<xs:enumeration value="state.resuming"/>
+			<xs:enumeration value="state.simulating"/>
+			<xs:enumeration value="state.starting"/>
+			<xs:enumeration value="state.unknown"/>
+			<xs:enumeration value="state.updating"/>
+			<xs:enumeration value="status.acceleration"/>
+			<xs:enumeration value="status.babystep_header"/>
+			<xs:enumeration value="status.babystep_value"/>
+			<xs:enumeration value="status.bed_temp"/>
+			<xs:enumeration value="status.cancel"/>
+			<xs:enumeration value="status.current_speed"/>
+			<xs:enumeration value="status.elapsed_time"/>
+			<xs:enumeration value="status.extrusion_speed"/>
+			<xs:enumeration value="status.fan_speed"/>
+			<xs:enumeration value="status.flow_header"/>
+			<xs:enumeration value="status.flow_multiplier"/>
+			<xs:enumeration value="status.flow_rate"/>
+			<xs:enumeration value="status.layer_number"/>
+			<xs:enumeration value="status.pause"/>
+			<xs:enumeration value="status.positions"/>
+			<xs:enumeration value="status.print_again"/>
+			<xs:enumeration value="status.print_cancel_message"/>
+			<xs:enumeration value="status.print_cancel_title"/>
+			<xs:enumeration value="status.print_finished"/>
+			<xs:enumeration value="status.print_height"/>
+			<xs:enumeration value="status.remaining_time"/>
+			<xs:enumeration value="status.requested_speed"/>
+			<xs:enumeration value="status.resume"/>
+			<xs:enumeration value="status.speed_detailed"/>
+			<xs:enumeration value="status.speed_header"/>
+			<xs:enumeration value="status.speed_label"/>
+			<xs:enumeration value="status.speed_multiplier"/>
+			<xs:enumeration value="status.time_header"/>
+			<xs:enumeration value="status.z_offset"/>
+			<xs:enumeration value="temperature.bed"/>
+			<xs:enumeration value="temperature.beds"/>
+			<xs:enumeration value="temperature.chamber"/>
+			<xs:enumeration value="temperature.chambers"/>
+			<xs:enumeration value="temperature.default_tool_name"/>
+			<xs:enumeration value="temperature.heater"/>
+			<xs:enumeration value="temperature.numpad_header_bed_chamber"/>
+			<xs:enumeration value="temperature.numpad_header_tool_heater"/>
+			<xs:enumeration value="temperature.numpad_header_tool_spindle"/>
+			<xs:enumeration value="temperature.selected_tool_label"/>
+			<xs:enumeration value="temperature.set_temperature_numpad_header"/>
+			<xs:enumeration value="temperature.status.active"/>
+			<xs:enumeration value="temperature.status.fault"/>
+			<xs:enumeration value="temperature.status.off"/>
+			<xs:enumeration value="temperature.status.offline"/>
+			<xs:enumeration value="temperature.status.standby"/>
+			<xs:enumeration value="temperature.status.tuning"/>
+			<xs:enumeration value="temperature.status.unknown"/>
+			<xs:enumeration value="temperature.tools"/>
+			<xs:enumeration value="theme.chroma"/>
+			<xs:enumeration value="theme.dark_mode"/>
+			<xs:enumeration value="theme.icon_sets.material"/>
+			<xs:enumeration value="theme.id.3d"/>
+			<xs:enumeration value="theme.id.duetscreen"/>
+			<xs:enumeration value="theme.id.flat"/>
+			<xs:enumeration value="theme.id.grey"/>
+			<xs:enumeration value="theme.id.industrial"/>
+			<xs:enumeration value="theme.id.neon"/>
+			<xs:enumeration value="theme.id.retro"/>
+			<xs:enumeration value="theme.id.soft"/>
+			<xs:enumeration value="theme.primary_hue"/>
+			<xs:enumeration value="theme.secondary_hue"/>
+			<xs:enumeration value="units.inches"/>
+			<xs:enumeration value="units.inches_speed"/>
+			<xs:enumeration value="units.mm"/>
+			<xs:enumeration value="units.mm_speed"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="translation">
+		<xs:union memberTypes="translation.names xs:string"/>
+	</xs:simpleType>
+	<xs:group name="anyContent">
+		<xs:sequence>
+			<xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+		</xs:sequence>
+	</xs:group>
+	<xs:element name="component">
+		<xs:annotation><xs:documentation>A component: an `&lt;api&gt;` of props, `&lt;consts&gt;`, `&lt;styles&gt;`, `&lt;subjects&gt;`, and its `&lt;view&gt;`.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="presenter" type="presenter">
+				<xs:annotation><xs:documentation>The presenter that gives its view names and handles its actions</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="api">
+		<xs:annotation><xs:documentation>The props the component takes</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="prop">
+		<xs:annotation><xs:documentation>A prop: `&lt;my_component title=&quot;…&quot;/&gt;` sets `$title` inside the component</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="name" type="xs:string">
+				<xs:annotation><xs:documentation>Its name</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="type" type="xs:string">
+				<xs:annotation><xs:documentation>Its type, e.g. string</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="default" type="xs:string">
+				<xs:annotation><xs:documentation>Its value when not given</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="view">
+		<xs:annotation><xs:documentation>The component's root widget. Takes every attribute of the widget it extends.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="extends" type="widget">
+				<xs:annotation><xs:documentation>The widget, or component, it is (default lv_obj)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="style">
+		<xs:annotation><xs:documentation>Inside a widget: add the style called `name`. Inside `&lt;styles&gt;`: define a style.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="name" type="style">
+				<xs:annotation><xs:documentation>The style</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="selector" type="xs:string">
+				<xs:annotation><xs:documentation>The part and state it applies to</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_bar">
+		<xs:annotation><xs:documentation>A progress bar that draws its value as text, inside the filled part when it fits Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Bottom of the range (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Top of the range (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_min" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the bottom of the range, e.g. a heater's minimum</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_max" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the top of the range, e.g. a heater's maximum</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_value" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the value</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label_format" type="xs:string">
+				<xs:annotation><xs:documentation>fmt format for the value's text (default &quot;{}&quot;)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_bar_marker">
+		<xs:annotation><xs:documentation>A value marked on a bar, such as a heater's target temperature above its current-temperature bar: a button showing the value, placed along the bar where the value falls and pointing at it with a triangle (the indicator part's background colour). Its x position is set from the value; set its y with `align` and `y`. Drag it along the bar to choose a value, raising `value_confirmed` with it when released (the marker shows the dragged value until the subject changes), or tap it to raise `clicked`; a drag doesn't raise `clicked`. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bar" type="xs:string">
+				<xs:annotation><xs:documentation>Name of the sibling bar it marks, written before the marker. The bar spans its parent's width (e.g. width=&quot;100%&quot;), as the marker is placed by percentages of that width</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Bottom of the scale the value is on (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Top of the scale the value is on (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_min" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the bottom of the scale</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_max" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the top of the scale</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_value" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the value marked</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label_format" type="xs:string">
+				<xs:annotation><xs:documentation>fmt format for the value's text (default &quot;{}&quot;)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_button">
+		<xs:annotation><xs:documentation>A button showing text, an icon or both Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>The text shown, if there is no `translation_tag`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="translation_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the text; follows language changes</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_text" type="subject">
+				<xs:annotation><xs:documentation>Follow a text or int subject for the text</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_text-fmt" type="xs:string">
+				<xs:annotation><xs:documentation>printf format for `bind_text`, e.g. &quot;%d°C&quot; (default &quot;%s&quot; for text, &quot;%d&quot; for an int)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="icon" type="xs:string">
+				<xs:annotation><xs:documentation>Icon file from the icon set, e.g. &quot;fan.png&quot;</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="checkable" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to make the button toggle its `checked` state when clicked</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="long_mode" type="xs:string">
+				<xs:annotation><xs:documentation>What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flash_on" type="subject">
+				<xs:annotation><xs:documentation>Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `responses.count`; style the flash with `&lt;style … selector=&quot;user_1&quot;/&gt;`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_dropdown">
+		<xs:annotation><xs:documentation>A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` action as its text (ActionArgs::text()) and its index (ActionArgs::value()). Also takes every lv_dropdown attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bind_options" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject holding the options, one per line</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_text" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject shown on the button instead of the chosen option, e.g. what is loaded</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_selected" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the index of the option shown chosen, kept when the options change</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_graph">
+		<xs:annotation><xs:documentation>A line graph of a history, with a legend whose buttons show and hide series. Series are coloured by position from LVGL's palette (red, pink, purple, …). The graph starts with what was recorded before it was built, and follows series being added, removed and renamed. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="history" type="list">
+				<xs:annotation><xs:documentation>The history shown (required), looked up like a list: the enclosing rows, the view's presenter, then the globals</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="seconds" type="xs:string">
+				<xs:annotation><xs:documentation>The X axis shows the last this-many seconds, labelled -seconds to 0 (default 60)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y_min" type="xs:string">
+				<xs:annotation><xs:documentation>Bottom of the Y axis (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y_max" type="xs:string">
+				<xs:annotation><xs:documentation>Top of the Y axis (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_y_max" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a heater's limit</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_heatmap">
+		<xs:annotation><xs:documentation>A colour map of a surface, such as a bed's height map, with X and Y scales, a grid, a title, and the colour scale beside it Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bind_surface" type="subject">
+				<xs:annotation><xs:documentation>The surface subject to show; redrawn whenever it changes</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_title" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the title shown above the map</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="resolution" type="xs:string">
+				<xs:annotation><xs:documentation>Pixels the map is drawn with along each side, scaled to fit (default 200)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_hue_slider">
+		<xs:annotation><xs:documentation>A `&lt;ds_slider&gt;` for a hue, 0 to 360, whose track shows every hue at a lightness and chroma, so the slider is a colour picker, e.g. for a theme's primary colour. `min` and `max` default to 0 and 360. Also takes every ds_slider attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bind_lightness" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the OKLCH lightness the hues are shown at, in thousandths (0.65 is 650)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_chroma" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the OKLCH chroma the hues are shown at, in thousandths</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Bottom of the range, may have a fraction (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Top of the range, may have a fraction (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="increment" type="xs:string">
+				<xs:annotation><xs:documentation>Step of the -/+ buttons, may have a fraction, e.g. &quot;0.01&quot; (default 1)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="decimals" type="xs:string">
+				<xs:annotation><xs:documentation>Decimal places the value is shown with (default 2)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>The label, if there is no `label_tag`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the label</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_label" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the label</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label_shown" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;false&quot; to hide the label, which still heads the number pad (default true)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_value" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the value</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value_scale" type="xs:string">
+				<xs:annotation><xs:documentation>How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 held as 2 with value_scale=&quot;100&quot; (default 1)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="send" type="xs:string">
+				<xs:annotation><xs:documentation>`confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` on every movement, for a setting seen as it changes such as brightness</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="out_of_range" type="xs:string">
+				<xs:annotation><xs:documentation>Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="numberpad" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to type the value on the number pad (the view registered as `numberpad`) when the value is tapped (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_icon">
+		<xs:annotation><xs:documentation>An icon from the icon set chosen in the settings, coloured by the theme. It follows icon set changes. Also takes every lv_image attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="icon" type="xs:string">
+				<xs:annotation><xs:documentation>Icon file from the icon set, e.g. &quot;folder.png&quot;</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_keyboard">
+		<xs:annotation><xs:documentation>An on-screen keyboard with DuetScreen's key layouts. A `&lt;ds_textarea&gt;` brings it up and types into it. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="mode" type="xs:string">
+				<xs:annotation><xs:documentation>Key layout: `text` (default), `text_upper` or `number`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_list">
+		<xs:annotation><xs:documentation>A container with one component per row of a list. Each item is built in a scope of its own holding its row's fields, so names are found in the row first, then where the list is written. With `windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of widgets; every item then has the same size, and the list places them itself (its own layout is ignored), with its style_pad_row and style_pad_column as the gaps. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="list" type="list">
+				<xs:annotation><xs:documentation>The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can show `list=&quot;heaters&quot;`), then the view's presenter, then the globals</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="item" type="component">
+				<xs:annotation><xs:documentation>The component built for each row (required)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="windowed" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to build only the rows on screen, building and deleting rows as the list scrolls (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="item_height" type="xs:string">
+				<xs:annotation><xs:documentation>Windowed: each item's height in pixels (required when windowed)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="item_width" type="xs:string">
+				<xs:annotation><xs:documentation>Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; the list scrolls sideways); the list's full width if not given</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flow" type="xs:string">
+				<xs:annotation><xs:documentation>Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="follow_end" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_modal">
+		<xs:annotation><xs:documentation>A dialog over the main window with a dimmed backdrop. Its subject alone decides whether it is open, so a presenter opens and closes it by setting a subject. Closed any other way (tapped outside, the back button, navigation closing every modal), it raises `dismissed` so the presenter can update the subject; closing it by its subject raises nothing. The content is laid out in the dialog's card, which the lv_obj attributes apply to. Unless `in_place`, it is deleted with the widget it was written in. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bind_open" type="subject">
+				<xs:annotation><xs:documentation>Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="open_value" type="xs:string">
+				<xs:annotation><xs:documentation>The value `bind_open` must have for the dialog to be open</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="blocking" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; so that tapping outside doesn't close it (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="in_place" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to stay in the widget it is written in rather than move to the main window, so the backdrop covers only that widget, e.g. alerts covering the whole screen (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_plot">
+		<xs:annotation><xs:documentation>An X/Y area with scales and a grid, such as the bed with its objects, whose content is widgets placed by X/Y position. `&lt;ds_plot_layer&gt;`s written inside it are kept over its drawing area, and `&lt;ds_plot_rect&gt;`s inside a layer are kept at their X/Y bounds. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>The title above the area, if there is no `title_tag`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the title</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_title" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the title</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title_style" type="style">
+				<xs:annotation><xs:documentation>A theme style for the title, e.g. `text_emphasis`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_detail" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject shown after the title</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x_min" type="xs:string">
+				<xs:annotation><xs:documentation>Left of the span (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x_max" type="xs:string">
+				<xs:annotation><xs:documentation>Right of the span (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y_min" type="xs:string">
+				<xs:annotation><xs:documentation>Bottom of the span (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y_max" type="xs:string">
+				<xs:annotation><xs:documentation>Top of the span (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_x_min" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `x_min`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_x_max" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `x_max`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_y_min" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `y_min`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_y_max" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `y_max`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="resolution" type="xs:string">
+				<xs:annotation><xs:documentation>Pixels the grid is drawn with along each side, scaled to fit (default 200)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_plot_layer">
+		<xs:annotation><xs:documentation>A layer written inside a `&lt;ds_plot&gt;`, kept exactly over its drawing area, for widgets placed by X/Y position such as `&lt;ds_plot_rect&gt;`s. It doesn't scroll and has no padding; the plot sets its position and size. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_plot_rect">
+		<xs:annotation><xs:documentation>A rectangle kept at its X/Y bounds over a `&lt;ds_plot&gt;`, e.g. an object on the bed. It is written inside a `&lt;ds_plot_layer&gt;` of the plot, directly or deeper (in a list row, say), and hidden while its bounds are outside the plot's span. It sets its own position and size. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="x1" type="xs:string">
+				<xs:annotation><xs:documentation>X of one corner, in the plot's units</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y1" type="xs:string">
+				<xs:annotation><xs:documentation>Y of that corner</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x2" type="xs:string">
+				<xs:annotation><xs:documentation>X of the opposite corner</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y2" type="xs:string">
+				<xs:annotation><xs:documentation>Y of the opposite corner</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_x1" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `x1`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_y1" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `y1`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_x2" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `x2`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_y2" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for `y2`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_slider">
+		<xs:annotation><xs:documentation>A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send=&quot;change&quot;` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Bottom of the range, may have a fraction (default 0)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Top of the range, may have a fraction (default 100)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="increment" type="xs:string">
+				<xs:annotation><xs:documentation>Step of the -/+ buttons, may have a fraction, e.g. &quot;0.01&quot; (default 1)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="decimals" type="xs:string">
+				<xs:annotation><xs:documentation>Decimal places the value is shown with (default 2)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>The label, if there is no `label_tag`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the label</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_label" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the label</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="label_shown" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;false&quot; to hide the label, which still heads the number pad (default true)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_value" type="subject">
+				<xs:annotation><xs:documentation>Follow an int subject for the value</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value_scale" type="xs:string">
+				<xs:annotation><xs:documentation>How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 held as 2 with value_scale=&quot;100&quot; (default 1)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="send" type="xs:string">
+				<xs:annotation><xs:documentation>`confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` on every movement, for a setting seen as it changes such as brightness</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="out_of_range" type="xs:string">
+				<xs:annotation><xs:documentation>Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="numberpad" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to type the value on the number pad (the view registered as `numberpad`) when the value is tapped (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_tabs">
+		<xs:annotation><xs:documentation>A row of tab buttons over the selected tab's content. Each tab is a `&lt;ds_tabs-tab&gt;` inside it; the first starts selected. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_tabs-tab">
+		<xs:annotation><xs:documentation>One tab of a `&lt;ds_tabs&gt;`, written inside it. Its content is the tab's page; the lv_obj attributes apply to that page. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>The tab button's text, if there is no `title_tag`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the tab button's text</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_disabled" type="subject">
+				<xs:annotation><xs:documentation>Disable the tab's button while this int subject is non-zero</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="select_on" type="subject">
+				<xs:annotation><xs:documentation>Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on=&quot;job.file&quot;`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_textarea">
+		<xs:annotation><xs:documentation>A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text(). Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bind_text" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject: the box shows its value whenever it changes to something other than what is in the box, so a presenter that keeps the subject equal to the edits can replace the text at any time</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_accepted_chars" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the characters that may be typed; empty for any</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="keyboard_mode" type="xs:string">
+				<xs:annotation><xs:documentation>Keyboard layout to show: `text` (default), `text_upper` or `number`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_keyboard_mode" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the keyboard layout, as `keyboard_mode`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="keyboard" type="xs:string">
+				<xs:annotation><xs:documentation>The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else the view of that name (default `keyboard`, the shared one); `none` for a box edited another way, such as a number pad</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hide_keyboard_on_ready" type="xs:string">
+				<xs:annotation><xs:documentation>Put the keyboard away when its OK key is pressed (default true)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hide_keyboard_on_defocus" type="xs:string">
+				<xs:annotation><xs:documentation>Put the keyboard away when the box loses focus (default true)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="one_line" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; for a single line of text</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="password_mode" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to show dots for the characters, e.g. for a password</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="placeholder" type="xs:string">
+				<xs:annotation><xs:documentation>Text shown while the box is empty</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="placeholder_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the placeholder, instead of `placeholder`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_thumbnail">
+		<xs:annotation><xs:documentation>An image as tall as its parent's content and as wide as its aspect ratio needs, so a thumbnail beside some text is as large as it can be without making the row taller. With no image it takes no width. Also takes every lv_image attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="bind_src" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject holding an image path; empty shows no image</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_toggle">
+		<xs:annotation><xs:documentation>An on/off setting, drawn as the build's toggle (a check box or a switch), so every setting looks the same. Raises `value_changed` when it is changed; the action's value is 1 when turned on and 0 when off. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_view">
+		<xs:annotation><xs:documentation>A view inside a screen, e.g. a page of the home screen, registered with navigation as its `name` (default: its `view`) so it can be opened with `nav.open`. A view starts hidden, like any screen that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="view" type="view">
+				<xs:annotation><xs:documentation>The XML component shown (with its presenter), or if there is no such component, a C++ view</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="presenter" type="presenter">
+				<xs:annotation><xs:documentation>Show the component with this registered presenter instead of the one it names, so one component can show different data in different places</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="home" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to make it a home screen: shown when nothing else is open (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>&quot;true&quot; to show it without taking part in navigation, for always-present parts such as a status bar or the page in a tab: shown, and its presenter active, whenever what it is in is shown (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="action">
+		<xs:annotation><xs:documentation>Written `&lt;action&gt;` inside any widget: run the named action when the widget raises the trigger event. The action is looked for in the presenters of the views the widget is in, innermost first, then in the global actions.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="name" type="action">
+				<xs:annotation><xs:documentation>The action to run (required)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="trigger" type="trigger">
+				<xs:annotation><xs:documentation>The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished) or `dismissed` (a `&lt;ds_modal&gt;` was closed by the user)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="arg" type="xs:string">
+				<xs:annotation><xs:documentation>Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `&lt;action&gt;` is written</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="alert_axis">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/alert_axis.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="alert_choice">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/alert_choice.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="axis_position">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/axis_position.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="babystep">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/babystep.xml, with presenter babystep.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="babystep_step">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/babystep_step.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="confirm_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/confirm_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="open" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `open` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title_tag" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text_tag" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text_tag` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="confirm" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `confirm` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="close" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `close` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="console">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/console.xml, with presenter console.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="console_gcode">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console_gcode.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="console_line">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console_line.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="control_screen">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/control_screen.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/dashboard.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="extruder">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/extruder.xml, with presenter extruder.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="fan_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/fan_card.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="fan_screen">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/fan_screen.xml, with presenter fans.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file_browser">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file_crumb">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_crumb.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file_row">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_row.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file_tile">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_tile.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="files_screen">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/files_screen.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="heater_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/heater_card.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="heater_row">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/heater_row.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="heightmap">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/heightmap.xml, with presenter heightmap.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="heightmap_file">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/heightmap_file.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="home_screen">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/home_screen.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="job_object_item">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/job_object_item.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="job_object_rect">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/job_object_rect.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="job_status">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/job_status.xml, with presenter job_status.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/move.xml, with presenter move.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_axis">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/move_axis.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_distance">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/move_distance.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_feedrate">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/move_feedrate.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_xy">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/move_xy.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="notifications">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications.xml, with presenter notifications.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="object_cancel">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/object_cancel.xml, with presenter object_cancel.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="question_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/question_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="open" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `open` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="confirm" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `confirm` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="close" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `close` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="setting_dropdown">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/setting_dropdown.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="options" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `options` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="selected" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `selected` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_connection">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_connection.xml, with presenter settings_connection.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_developer">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_developer.xml, with presenter settings_developer.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_display">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_display.xml, with presenter settings_display.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_general">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_screen">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/settings_screen.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="side_bar">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/side_bar.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="status_bar">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar.xml, with presenter status_bar.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature">
+		<xs:annotation><xs:documentation>Component from assets/ui/screens/temperature.xml, with presenter temperature.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_extruder">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_extruder.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_heater_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_heater_card.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_tool">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/temperature_tool.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="theme_preview">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/theme_preview.xml, with presenter theme_preview.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="theme_swatch">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/theme_swatch.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tool_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/tool_card.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tool_list">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/tool_list.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="value_choice">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/value_choice.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="value_selector">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/value_selector.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="selector" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `selector` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="choices" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `choices` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="wifi_network">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/wifi_network.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="wifi_selector">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/wifi_selector.xml, with presenter wifi.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

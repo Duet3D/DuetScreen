@@ -5,6 +5,8 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiLint.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiMarkdown.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiReference.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiXsd.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Api/XmlTree.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Globals.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/History.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/List.cpp

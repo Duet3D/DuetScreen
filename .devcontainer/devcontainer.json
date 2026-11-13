@@ -33,7 +33,13 @@
         "cmake.ctest.testSuiteDelimiter": "\\.",
         "cmake.ctest.testExplorerIntegrationEnabled": true,
         "cmake.ctest.debugLaunchTarget": "Debug GTest - CMake Tools",
-        "smartTemplates.jsonConfigurationFile": ".vscode/file_templates.json"
+        "smartTemplates.jsonConfigurationFile": ".vscode/file_templates.json",
+        "xml.fileAssociations": [
+          { "pattern": "**/assets/ui/components/*.xml", "systemId": "${workspaceFolder}/docs/XML_UI.xsd" },
+          { "pattern": "**/assets/ui/screens/*.xml", "systemId": "${workspaceFolder}/docs/XML_UI.xsd" },
+          { "pattern": "**/var/ui/*/components/*.xml", "systemId": "${workspaceFolder}/docs/XML_UI.xsd" },
+          { "pattern": "**/var/ui/*/screens/*.xml", "systemId": "${workspaceFolder}/docs/XML_UI.xsd" }
+        ]
       }
     }
   },

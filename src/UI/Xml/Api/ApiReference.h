@@ -62,13 +62,22 @@ namespace UI::Xml::Api
 		std::string value; // As the root theme writes it, e.g. "5" or "#border_width"
 	};
 
+	/** A prop a component takes, declared in its `<api>`: `<my_dialog title="…"/>` sets `$title` inside it */
+	struct Prop
+	{
+		std::string name;		  // As written
+		std::string type;		  // As declared, e.g. "string"
+		std::string defaultValue; // Its value when not given; empty for none
+	};
+
 	/** A loaded component */
 	struct Component
 	{
-		std::string name;	   // Component name, used as an element or a `<ds_list item="…">`
-		std::string presenter; // Presenter it names, or empty
-		std::string bundle;	   // Id of the bundle it came from
-		std::string source;	   // File it was loaded from
+		std::string name;		   // Component name, used as an element or a `<ds_list item="…">`
+		std::string presenter;	   // Presenter it names, or empty
+		std::string bundle;		   // Id of the bundle it came from
+		std::string source;		   // File it was loaded from
+		std::vector<Prop> props{}; // Props it takes, in order
 	};
 
 	/** Everything the XML UI provides to XML */
@@ -76,6 +85,7 @@ namespace UI::Xml::Api
 	{
 		std::string apiVersion;					  // UI API version, "major.minor"
 		std::vector<Source> sources;			  // Global data, by data source
+		std::vector<std::string> triggers;		  // What `<action trigger="…">` accepts
 		std::vector<Action> globalActions;		  // Actions every view can raise
 		std::vector<Presenter> presenters;		  // In name order
 		std::vector<WidgetSpec> widgets;		  // DuetScreen widgets and elements, in name order

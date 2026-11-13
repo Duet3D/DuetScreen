@@ -27,6 +27,7 @@ namespace UI::Xml
 		Translation, // A translation key
 		Action,		 // An action
 		ActionArg,	 // An action's argument: `{name}` placeholders name subjects
+		Trigger,	 // An event that runs an action (see Actions::triggers())
 	};
 
 	/** One attribute a widget takes */

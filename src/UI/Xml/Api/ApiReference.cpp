@@ -13,6 +13,7 @@
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/NativeViews.h"
 #include "UI/Xml/View/XmlPresenter.h"
+#include "XmlTree.h"
 #include "i18n/i18n.h"
 #include <algorithm>
 #include <fmt/format.h>
@@ -109,10 +110,26 @@ namespace UI::Xml::Api
 			std::vector<Component> result;
 			for (const auto& [name, info] : getComponents())
 			{
-				result.push_back({.name = name,
-								  .presenter = info.presenter,
-								  .bundle = info.bundle,
-								  .source = info.source.generic_string()});
+				Component& component = result.emplace_back(Component{.name = name,
+																	 .presenter = info.presenter,
+																	 .bundle = info.bundle,
+																	 .source = info.source.generic_string()});
+				// The file loaded, so it parses; its props are the `<prop>`s of its `<api>`
+				std::string error;
+				const auto root = parseXmlFile(component.source, error);
+				const Element* api = root ? root->child("api") : nullptr;
+				for (const auto& prop : api ? api->children : std::vector<Element>{})
+				{
+					const std::string* propName = prop.attr("name");
+					if (prop.tag != "prop" || propName == nullptr)
+					{
+						continue;
+					}
+					const std::string* type = prop.attr("type");
+					const std::string* fallback = prop.attr("default");
+					component.props.push_back(
+						{.name = *propName, .type = type ? *type : "", .defaultValue = fallback ? *fallback : ""});
+				}
 			}
 			return result;
 		}
@@ -177,6 +194,7 @@ namespace UI::Xml::Api
 		Reference reference;
 		reference.apiVersion = fmt::format("{}.{}", UI_API_VERSION_MAJOR, UI_API_VERSION_MINOR);
 		reference.sources = sources();
+		reference.triggers = Actions::triggers();
 		reference.globalActions = actionsOf(Actions::globals());
 		reference.presenters = presenters();
 		for (const WidgetSpec* spec : Widgets::specs())

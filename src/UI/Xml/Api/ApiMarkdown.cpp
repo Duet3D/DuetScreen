@@ -140,6 +140,9 @@ namespace UI::Xml::Api
 				   "Actions any view can raise with `<action name=\"…\">`, whatever its presenter. A presenter's own "
 				   "action of the same name is found first.\n\n";
 			writeActions(out, reference.globalActions);
+			fmt::format_to(std::back_inserter(out),
+						   "An action runs when its widget raises its `trigger` (default `clicked`): {:s}\n\n",
+						   codeList(reference.triggers));
 		}
 
 		/** The presenters section. Presenters that provide exactly the same names share one entry. */
@@ -229,13 +232,19 @@ namespace UI::Xml::Api
 			out += "## Components\n\n"
 				   "The components of the built-in bundle. A user bundle replaces one by giving its own the same name; "
 				   "a component is used as an element (`<fan_card/>`) or as a list's `item`.\n\n"
-				   "| Component | Presenter | File |\n| --- | --- | --- |\n";
+				   "| Component | Presenter | Props | File |\n| --- | --- | --- | --- |\n";
 			for (const auto& component : reference.components)
 			{
+				std::vector<std::string> props;
+				for (const auto& prop : component.props)
+				{
+					props.push_back(prop.name);
+				}
 				fmt::format_to(std::back_inserter(out),
-							   "| {:s} | {:s} | {:s} |\n",
+							   "| {:s} | {:s} | {:s} | {:s} |\n",
 							   code(component.name),
 							   component.presenter.empty() ? "" : code(component.presenter),
+							   codeList(props),
 							   fileLink(component.source));
 			}
 			out += "\n";

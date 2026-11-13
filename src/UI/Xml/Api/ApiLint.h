@@ -9,8 +9,8 @@
  *   - element names: a widget (`lv_*`, `ds_*`), a component, a binding (`bind_*`) or `<action>`, `<style>`, …
  *   - subjects and lists: `bind_*` and `subject` attributes, the subject attributes of DuetScreen widgets (see
  *     AttributeKind), the operands of `cond=` expressions and the `{name}` placeholders of an action's `arg`
- *   - actions, styles (theme or the component's own `<styles>`), fonts, `#consts`, translation keys, components,
- *     C++ views and presenters
+ *   - actions and their triggers, styles (theme or the component's own `<styles>`), fonts, `#consts`, translation
+ *     keys, components, C++ views and presenters
  *
  * A name is looked up where the component is used, as at runtime. A component that nothing uses is a view of its own
  * (shown from C++): its names are its presenter's, then the globals. `<ds_view view="x">` starts a new view, with
