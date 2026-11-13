@@ -62,6 +62,30 @@ Each row of `fans`:
 | `rpm` | int | Tachometer reading, -1 if none |
 | `thermostatic` | int | 1 if the fan is temperature controlled, else 0 |
 
+### gauges
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `gauges` | list | Every value a gauge can show, one row each, all with the same fields: the heaters, fans, analog sensors that no heater uses, the job's progress and the speed and extrusion factors |
+
+Each row of `gauges`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `id` | text | What it shows: bed.N, chamber.N, tool.T.H (tool T's Hth heater, from 0), fan.N, sensor.N, job.progress, speed_factor or extrusion_factor |
+| `name` | text | Display name, e.g. "Bed" or "Tool 0" |
+| `kind` | text | heater, fan, sensor or percent |
+| `value` | int | The value, whole units, e.g. °C or percent |
+| `min` | int | Bottom of its scale, e.g. 0 |
+| `max` | int | Top of its scale: a heater's maximum, 100 for a fan or the job, 200 for a factor |
+| `text` | text | The value as shown, without its unit, e.g. "61.2" |
+| `unit` | text | The value's unit, e.g. "°C" or "%" |
+| `target` | int | What it is heading for, e.g. a heater's target; `min` if nothing |
+| `detail` | text | A line about the value, e.g. "Target 215°C", "Off" or "1200 RPM"; empty if there is none |
+| `state` | text | A heater's status key: active, standby, off, fault, tuning, offline; else empty |
+| `editable` | int | 1 if gauges.edit changes it: a heater's target, a fan's speed, a factor |
+
 ### tools
 
 | Name | Type | Description |
@@ -232,6 +256,7 @@ Actions any view can raise with `<action name="…">`, whatever its presenter. A
 | `estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it |
 | `factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's |
 | `factors.speed` | Open the dialog to change the speed factor |
+| `gauges.edit` | Change the value a row of `gauges` shows: a heater's target (its standby one while on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else asking for it on the number pad; or open the speed or extrusion factor dialog. Does nothing for a row that isn't `editable`. |
 | `gcode` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{value}"` |
 | `heaters.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `heaters.toggle`. |
 | `heaters.set_standby` | As `heaters.set_active`, for the standby temperature |

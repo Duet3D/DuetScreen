@@ -521,6 +521,9 @@
       "category_jobs": "Trabajos",
       "category_motion": "Movimiento",
       "category_fans": "Ventiladores",
+      "gauge_target": "Objetivo {:d}°C",
+      "gauge_rpm": "{:d} RPM",
+      "gauge_sensor": "Sensor {:d}",
       "category_commands": "Comandos"
     },
     "gcodes": {

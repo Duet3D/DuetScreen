@@ -522,6 +522,9 @@
       "category_jobs": "Jobs",
       "category_motion": "Motion",
       "category_fans": "Fans",
+      "gauge_target": "Target {:d}°C",
+      "gauge_rpm": "{:d} RPM",
+      "gauge_sensor": "Sensor {:d}",
       "category_commands": "Commands"
     },
     "gcodes": { /* G-code descriptions */

@@ -11,8 +11,13 @@
 
 #include "UI/Xml/View/XmlPresenter.h"
 
+#include <cstdint>
+
 namespace UI
 {
+	/** Set fan `number`'s speed to `value` percent (clamped to 0-100), unless it is already set to that */
+	void setFanSpeed(int32_t number, float value);
+
 	class FanPresenter : public Xml::XmlPresenter
 	{
 	  public:

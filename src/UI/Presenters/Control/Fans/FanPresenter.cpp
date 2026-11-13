@@ -39,8 +39,12 @@ namespace UI
 			return;
 		}
 
-		const int32_t percent = std::clamp(static_cast<int32_t>(std::lround(*value)), 0, 100);
-		const int32_t number = row->number.get();
+		setFanSpeed(row->number.get(), *value);
+	}
+
+	void setFanSpeed(int32_t number, float value)
+	{
+		const int32_t percent = std::clamp(static_cast<int32_t>(std::lround(value)), 0, 100);
 
 		// Don't send what the fan is already set to
 		{

@@ -70,95 +70,108 @@ namespace UI::HeaterActions
 		}
 	}
 
-	/** `heaters.set_active` (`active`) and `heaters.set_standby`: set the edited value, or ask for one */
-	static void setTemperature(const Xml::ActionArgs& args, bool active)
+	void setTemperature(Heated what, size_t number, size_t slot, bool active, std::optional<float> value)
 	{
 		ZoneScoped;
 		Xml::NumberRequest request;
-
-		if (const auto* heaterRow = args.row<Xml::ToolHeaterRow>())
 		{
-			const auto* toolRow = args.row<Xml::ToolRow>();
-			if (toolRow == nullptr)
-			{
-				return;
-			}
-			const size_t toolNumber = static_cast<size_t>(toolRow->number.get());
-			const size_t slot = static_cast<size_t>(heaterRow->index.get());
 			MODEL_LOCK();
-			auto tool = OM::GetTool(toolNumber);
-			auto toolHeater = tool ? tool->GetHeater(slot) : nullptr;
-			if (toolHeater == nullptr || toolHeater->heater == nullptr)
+			switch (what)
 			{
-				return;
-			}
-			request.header = _("temperature.numpad_header_tool_heater", toolNumber, slot, modeText(active));
-			request.min = toolHeater->heater->min;
-			request.max = toolHeater->heater->max;
-			request.onConfirm = [toolNumber, slot, active](float value)
+			case Heated::ToolHeater:
 			{
-				if (auto t = OM::GetTool(toolNumber))
+				auto tool = OM::GetTool(number);
+				auto toolHeater = tool ? tool->GetHeater(slot) : nullptr;
+				if (toolHeater == nullptr || toolHeater->heater == nullptr)
 				{
-					t->SetHeaterTemps(slot, static_cast<int32_t>(value), active);
+					return;
 				}
-			};
-		}
-		else if (const auto* bedRow = args.row<Xml::BedRow>())
-		{
-			const size_t number = static_cast<size_t>(bedRow->number.get());
-			auto bed = OM::GetBed(number);
-			if (bed == nullptr)
-			{
-				return;
-			}
-			request.header = _("temperature.numpad_header_bed_chamber",
-							   _("temperature.bed"),
-							   static_cast<size_t>(bedRow->index.get()),
-							   modeText(active));
-			request.min = bed->GetMin();
-			request.max = bed->GetMax();
-			request.onConfirm = [number, active](float value)
-			{
-				if (auto b = OM::GetBed(number))
+				request.header = _("temperature.numpad_header_tool_heater", number, slot, modeText(active));
+				request.min = toolHeater->heater->min;
+				request.max = toolHeater->heater->max;
+				request.onConfirm = [number, slot, active](float v)
 				{
-					b->SetBedTemp(static_cast<int32_t>(value), active);
-				}
-			};
-		}
-		else if (const auto* chamberRow = args.row<Xml::ChamberRow>())
-		{
-			const size_t number = static_cast<size_t>(chamberRow->number.get());
-			auto chamber = OM::GetChamber(number);
-			if (chamber == nullptr)
-			{
-				return;
+					if (auto t = OM::GetTool(number))
+					{
+						t->SetHeaterTemps(slot, static_cast<int32_t>(v), active);
+					}
+				};
+				break;
 			}
-			request.header = _("temperature.numpad_header_bed_chamber",
-							   _("temperature.chamber"),
-							   static_cast<size_t>(chamberRow->index.get()),
-							   modeText(active));
-			request.min = chamber->GetMin();
-			request.max = chamber->GetMax();
-			request.onConfirm = [number, active](float value)
+			case Heated::Bed:
+			case Heated::Chamber:
 			{
-				if (auto c = OM::GetChamber(number))
+				const bool bed = what == Heated::Bed;
+				auto item = bed ? OM::GetBed(number) : OM::GetChamber(number);
+				if (item == nullptr)
 				{
-					c->SetChamberTemp(static_cast<int32_t>(value), active);
+					return;
 				}
-			};
-		}
-		else
-		{
-			LOG_WARN("heaters.set_active/standby must come from a tool heater, bed or chamber row");
-			return;
+				request.header = _("temperature.numpad_header_bed_chamber",
+								   bed ? _("temperature.bed") : _("temperature.chamber"),
+								   slot,
+								   modeText(active));
+				request.min = item->GetMin();
+				request.max = item->GetMax();
+				request.onConfirm = [bed, number, active](float v)
+				{
+					auto i = bed ? OM::GetBed(number) : OM::GetChamber(number);
+					if (i && bed)
+					{
+						i->SetBedTemp(static_cast<int32_t>(v), active);
+					}
+					else if (i)
+					{
+						i->SetChamberTemp(static_cast<int32_t>(v), active);
+					}
+				};
+				break;
+			}
+			}
 		}
 
-		if (const auto value = args.value())
+		if (value)
 		{
 			request.onConfirm(*value);
 			return;
 		}
 		Xml::Services::askNumber(std::move(request));
+	}
+
+	/** `heaters.set_active` (`active`) and `heaters.set_standby`: set the edited value, or ask for one */
+	static void setTemperature(const Xml::ActionArgs& args, bool active)
+	{
+		if (const auto* heaterRow = args.row<Xml::ToolHeaterRow>())
+		{
+			if (const auto* toolRow = args.row<Xml::ToolRow>())
+			{
+				setTemperature(Heated::ToolHeater,
+							   static_cast<size_t>(toolRow->number.get()),
+							   static_cast<size_t>(heaterRow->index.get()),
+							   active,
+							   args.value());
+			}
+		}
+		else if (const auto* bedRow = args.row<Xml::BedRow>())
+		{
+			setTemperature(Heated::Bed,
+						   static_cast<size_t>(bedRow->number.get()),
+						   static_cast<size_t>(bedRow->index.get()),
+						   active,
+						   args.value());
+		}
+		else if (const auto* chamberRow = args.row<Xml::ChamberRow>())
+		{
+			setTemperature(Heated::Chamber,
+						   static_cast<size_t>(chamberRow->number.get()),
+						   static_cast<size_t>(chamberRow->index.get()),
+						   active,
+						   args.value());
+		}
+		else
+		{
+			LOG_WARN("heaters.set_active/standby must come from a tool heater, bed or chamber row");
+		}
 	}
 
 	void registerAll()

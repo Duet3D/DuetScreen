@@ -88,6 +88,7 @@
 			<xs:enumeration value="delete_text"/>
 			<xs:enumeration value="delete_title"/>
 			<xs:enumeration value="description"/>
+			<xs:enumeration value="detail"/>
 			<xs:enumeration value="developer_mode"/>
 			<xs:enumeration value="dialog"/>
 			<xs:enumeration value="dialog_can_delete"/>
@@ -104,6 +105,7 @@
 			<xs:enumeration value="distances"/>
 			<xs:enumeration value="duet_ip"/>
 			<xs:enumeration value="duet_password"/>
+			<xs:enumeration value="editable"/>
 			<xs:enumeration value="error_notifications_stay"/>
 			<xs:enumeration value="exit_shown"/>
 			<xs:enumeration value="extrude_usable"/>
@@ -133,6 +135,7 @@
 			<xs:enumeration value="firmware"/>
 			<xs:enumeration value="font"/>
 			<xs:enumeration value="fonts"/>
+			<xs:enumeration value="gauges"/>
 			<xs:enumeration value="gcode"/>
 			<xs:enumeration value="gcodes"/>
 			<xs:enumeration value="grid_open"/>
@@ -309,6 +312,7 @@
 			<xs:enumeration value="system_logging"/>
 			<xs:enumeration value="system_monitor"/>
 			<xs:enumeration value="system_monitor_shown"/>
+			<xs:enumeration value="target"/>
 			<xs:enumeration value="target_x"/>
 			<xs:enumeration value="target_y"/>
 			<xs:enumeration value="temperatures"/>
@@ -323,6 +327,7 @@
 			<xs:enumeration value="time"/>
 			<xs:enumeration value="title"/>
 			<xs:enumeration value="tools"/>
+			<xs:enumeration value="unit"/>
 			<xs:enumeration value="update.can_cancel"/>
 			<xs:enumeration value="update.ok_text"/>
 			<xs:enumeration value="update.open"/>
@@ -384,6 +389,7 @@
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrates"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="gauges"/>
 			<xs:enumeration value="gcodes"/>
 			<xs:enumeration value="heaters"/>
 			<xs:enumeration value="maps"/>
@@ -476,6 +482,7 @@
 			<xs:enumeration value="files.refresh"/>
 			<xs:enumeration value="files.sort"/>
 			<xs:enumeration value="files.toggle_mode"/>
+			<xs:enumeration value="gauges.edit"/>
 			<xs:enumeration value="gcode"/>
 			<xs:enumeration value="hardware_test.buzzer_heard"/>
 			<xs:enumeration value="hardware_test.colour_tapped"/>
@@ -1891,6 +1898,9 @@
 			<xs:enumeration value="widget.fan_desc"/>
 			<xs:enumeration value="widget.files"/>
 			<xs:enumeration value="widget.files_desc"/>
+			<xs:enumeration value="widget.gauge_rpm"/>
+			<xs:enumeration value="widget.gauge_sensor"/>
+			<xs:enumeration value="widget.gauge_target"/>
 			<xs:enumeration value="widget.gcode_button"/>
 			<xs:enumeration value="widget.gcode_button_desc"/>
 			<xs:enumeration value="widget.job_progress"/>

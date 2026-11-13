@@ -521,6 +521,9 @@
       "category_jobs": "Opdrachten",
       "category_motion": "Beweging",
       "category_fans": "Ventilatoren",
+      "gauge_target": "Doel {:d}°C",
+      "gauge_rpm": "{:d} RPM",
+      "gauge_sensor": "Sensor {:d}",
       "category_commands": "Opdrachten sturen"
     },
     "gcodes": {

@@ -521,6 +521,9 @@
       "category_jobs": "Trabalhos",
       "category_motion": "Movimento",
       "category_fans": "Ventoinhas",
+      "gauge_target": "Alvo {:d}°C",
+      "gauge_rpm": "{:d} RPM",
+      "gauge_sensor": "Sensor {:d}",
       "category_commands": "Comandos"
     },
     "gcodes": {

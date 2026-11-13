@@ -521,6 +521,9 @@
       "category_jobs": "Aufträge",
       "category_motion": "Bewegung",
       "category_fans": "Lüfter",
+      "gauge_target": "Ziel {:d}°C",
+      "gauge_rpm": "{:d} U/min",
+      "gauge_sensor": "Sensor {:d}",
       "category_commands": "Befehle"
     },
     "gcodes": {

@@ -15,6 +15,7 @@
 #include "Customise/CustomisePresenter.h"
 #include "Dashboard/JobActions.h"
 #include "FileBrowser/FileBrowserPresenter.h"
+#include "Gauge/GaugeActions.h"
 #include "HardwareTest/HardwareTestPresenter.h"
 #include "Modals/BabystepDialogPresenter.h"
 #include "Modals/FactorsPresenter.h"
@@ -43,6 +44,7 @@ namespace UI
 	{
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
+		GaugeActions::registerAll();
 		FactorsPresenter::registerActions();
 		EStopAction::registerAll();
 		JobActions::registerAll();

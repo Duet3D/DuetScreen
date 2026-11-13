@@ -521,6 +521,9 @@
       "category_jobs": "Lavori",
       "category_motion": "Movimento",
       "category_fans": "Ventole",
+      "gauge_target": "Obiettivo {:d}°C",
+      "gauge_rpm": "{:d} giri/min",
+      "gauge_sensor": "Sensore {:d}",
       "category_commands": "Comandi"
     },
     "gcodes": {
