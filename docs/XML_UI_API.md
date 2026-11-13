@@ -238,6 +238,54 @@ Each row of `gcodes`:
 | `console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
 | `console.toggle_commands` | Show or fold away the G-code list, and remember which |
 
+### dashboard_job_status
+
+Used by `dashboard_job_status`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `file` | text | The current job's file, else the last job's |
+| `finished` | int | 1 when showing the last job (none is running), else 0 |
+| `progress` | int | Progress, percent 0-100 |
+| `thumbnail` | text | The job's thumbnail path, or empty until it arrives |
+| `axes` | list | One row per axis |
+| `speed_factor` | text | Speed override, e.g. "100%" |
+| `speed_text` | text | Current and requested speed, e.g. "0/0 mm/s" |
+| `speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000) |
+| `speed_requested` | int | Requested speed, in thousandths of the fastest axis' maximum (0-1000) |
+| `flow_factor` | text | Extrusion override, e.g. "100%" |
+| `flow_text` | text | Volumetric flow, e.g. "0.0 mm³/s" |
+| `flow` | int | Volumetric flow, in thousandths of the fastest extruder's maximum (0-1000) |
+| `babystep` | text | Z babystep, e.g. "0 mm" |
+| `babystep_open` | int | 1 while the babystepping dialog is open |
+| `elapsed` | text | Elapsed time, e.g. "Elapsed: 00:03:43" |
+| `remaining` | text | Time left, e.g. "Remaining: 00:45:03" |
+| `pause` | int | Pause: 0 hidden, 1 disabled, 2 usable |
+| `resume` | int | Resume: 0 hidden, 1 disabled, 2 usable |
+| `print_again` | int | Print again: 0 hidden, 1 disabled, 2 usable |
+| `cancel` | int | Cancel: 0 hidden, 1 disabled, 2 usable |
+| `confirm_cancel` | int | 1 while asking whether to cancel the job |
+
+Each row of `axes`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `text` | text | Letter and user position on two lines, e.g. "X\n0.00" |
+
+| Action | Description |
+| --- | --- |
+| `job.ask_cancel` | Ask whether to cancel the job (sets `confirm_cancel`) |
+| `job.babystep` | Open the babystepping dialog (sets `babystep_open`) |
+| `job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
+| `job.close_babystep` | Close the babystepping dialog |
+| `job.close_dialog` | Close the question without cancelling the job |
+| `job.flow_factor` | Open the dialog to change the extrusion override |
+| `job.pause` | Pause the job |
+| `job.print_again` | Start the last job again |
+| `job.resume` | Resume the paused job |
+| `job.speed_factor` | Open the dialog to change the speed override |
+
 ### dashboard_jobs, dashboard_macros, files_jobs, files_macros
 
 | Name | Type | Description |
@@ -293,48 +341,9 @@ Each row of `crumbs`:
 | `files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
 | `files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
 
-### extruder
-
-Used by `extruder`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
-| `retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
-| `distance.title` | text | The title, e.g. "Feed Distance (mm)" |
-| `distance.value` | text | The value, e.g. "0.1" |
-| `distance.choices` | list | The presets, each with `text` |
-| `feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
-| `feedrate.value` | text | The value, e.g. "0.1" |
-| `feedrate.choices` | list | The presets, each with `text` |
-
-Each row of `distance.choices`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The preset, e.g. "10" |
-
-Each row of `feedrate.choices`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The preset, e.g. "10" |
-
-| Action | Description |
-| --- | --- |
-| `extruder.extrude` | Extrude the chosen distance at the chosen feed rate with the selected tool |
-| `extruder.retract` | Retract the chosen distance at the chosen feed rate with the selected tool |
-| `selector.decrement` | Step the selector named by `arg` (its id) down |
-| `selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad |
-| `selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. |
-| `selector.increment` | Step the selector named by `arg` (its id) up |
-| `selector.pick` | Use the preset. From a row of a selector's `choices`. |
-
 ### fans
 
-Used by `fan_screen`.
+Used by `fans`.
 
 | Action | Description |
 | --- | --- |
@@ -372,54 +381,6 @@ Each row of `maps`:
 | `heightmap.mode` | Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range) |
 | `heightmap.show` | Show that height map. From a row of `maps`. |
 | `heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
-
-### job_status
-
-Used by `job_status`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `file` | text | The current job's file, else the last job's |
-| `finished` | int | 1 when showing the last job (none is running), else 0 |
-| `progress` | int | Progress, percent 0-100 |
-| `thumbnail` | text | The job's thumbnail path, or empty until it arrives |
-| `axes` | list | One row per axis |
-| `speed_factor` | text | Speed override, e.g. "100%" |
-| `speed_text` | text | Current and requested speed, e.g. "0/0 mm/s" |
-| `speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000) |
-| `speed_requested` | int | Requested speed, in thousandths of the fastest axis' maximum (0-1000) |
-| `flow_factor` | text | Extrusion override, e.g. "100%" |
-| `flow_text` | text | Volumetric flow, e.g. "0.0 mm³/s" |
-| `flow` | int | Volumetric flow, in thousandths of the fastest extruder's maximum (0-1000) |
-| `babystep` | text | Z babystep, e.g. "0 mm" |
-| `babystep_open` | int | 1 while the babystepping dialog is open |
-| `elapsed` | text | Elapsed time, e.g. "Elapsed: 00:03:43" |
-| `remaining` | text | Time left, e.g. "Remaining: 00:45:03" |
-| `pause` | int | Pause: 0 hidden, 1 disabled, 2 usable |
-| `resume` | int | Resume: 0 hidden, 1 disabled, 2 usable |
-| `print_again` | int | Print again: 0 hidden, 1 disabled, 2 usable |
-| `cancel` | int | Cancel: 0 hidden, 1 disabled, 2 usable |
-| `confirm_cancel` | int | 1 while asking whether to cancel the job |
-
-Each row of `axes`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | Letter and user position on two lines, e.g. "X\n0.00" |
-
-| Action | Description |
-| --- | --- |
-| `job.ask_cancel` | Ask whether to cancel the job (sets `confirm_cancel`) |
-| `job.babystep` | Open the babystepping dialog (sets `babystep_open`) |
-| `job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
-| `job.close_babystep` | Close the babystepping dialog |
-| `job.close_dialog` | Close the question without cancelling the job |
-| `job.flow_factor` | Open the dialog to change the extrusion override |
-| `job.pause` | Pause the job |
-| `job.print_again` | Start the last job again |
-| `job.resume` | Resume the paused job |
-| `job.speed_factor` | Open the dialog to change the speed override |
 
 ### move
 
@@ -729,6 +690,74 @@ Used by `settings_general`.
 | `settings.restart_in_language` | Answer yes to `language_confirm`: store the language picked and restart |
 | `settings.screensaver_timeout` | Set the screensaver timeout to the edited value, in seconds |
 
+### settings_theme_preview
+
+Used by `settings_theme_preview`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `swatches` | list | A swatch of each colour of the theme |
+| `controls_shown` | int | 1 if the palette can be changed here |
+| `primary_hue` | int | Primary hue, 0-360 |
+| `secondary_hue` | int | Secondary hue, 0-360 |
+| `chroma` | int | Chroma, 0-0.4, in hundredths (0.02 is 2) |
+| `dark` | int | 1 in dark mode |
+| `primary.lightness` | int | The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`) |
+| `primary.chroma` | int | The primary colour's OKLCH chroma, in thousandths, to show hues at |
+| `secondary.lightness` | int | The secondary colour's OKLCH lightness, in thousandths, to show hues at |
+| `secondary.chroma` | int | The secondary colour's OKLCH chroma, in thousandths, to show hues at |
+
+Each row of `swatches`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `label` | text | The style's name, e.g. "Primary" |
+| `color` | colour | Its colour, e.g. for `<bind_style_prop>` |
+| `text_style` | int | For the text styles, so their names show them: 1 muted, 2 emphasis, 3 header; else 0 |
+
+| Action | Description |
+| --- | --- |
+| `preview.chroma` | Set the palette's chroma to the edited value, e.g. 0.02 |
+| `preview.dark` | Use the dark palette if the edited value is 1, else the light one |
+| `preview.primary_hue` | Set the palette's primary hue to the edited value, 0-360 |
+| `preview.secondary_hue` | Set the palette's secondary hue to the edited value, 0-360 |
+
+### settings_wifi
+
+Used by `settings_wifi`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `ip` | text | E.g. "IP Address: 192.168.1.100" |
+| `status` | text | How the last connection attempt went, or empty |
+| `networks` | list | The networks found |
+| `password_open` | int | 1 while asking for a network's password |
+| `password_title` | text | The password question |
+| `password` | text | The password typed |
+| `keyboard` | int | 1 while the keyboard is up, so the question moves out of its way |
+
+Each row of `networks`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `ssid` | text | Network name |
+| `signal` | text | Signal level, e.g. "75 dBm" |
+| `known` | int | 1 if the screen has joined it before, so it can be forgotten |
+| `connected` | int | 1 if the screen is on it |
+| `connect_text` | text | "Disconnect" (connected), "Connect" (known) or "Join" |
+
+| Action | Description |
+| --- | --- |
+| `wifi.close_password` | Stop asking for a password |
+| `wifi.connect` | Disconnect from the network if on it, connect to it if known, else ask for its password to join it. From a row of `networks`. |
+| `wifi.forget` | Forget the network. From a row of `networks`. |
+| `wifi.join` | Join the network asked about with the password typed |
+| `wifi.keyboard` | Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
+| `wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
+| `wifi.refresh` | Scan for networks now |
+
 ### status_bar
 
 Used by `status_bar`.
@@ -801,73 +830,44 @@ Each row of `tools` › `extruders`:
 | `temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`. |
 | `temperature.unload_filament` | Unload the tool's filament. From a row of `tools`. |
 
-### theme_preview
+### temperature_extrusion
 
-Used by `theme_preview`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `swatches` | list | A swatch of each colour of the theme |
-| `controls_shown` | int | 1 if the palette can be changed here |
-| `primary_hue` | int | Primary hue, 0-360 |
-| `secondary_hue` | int | Secondary hue, 0-360 |
-| `chroma` | int | Chroma, 0-0.4, in hundredths (0.02 is 2) |
-| `dark` | int | 1 in dark mode |
-| `primary.lightness` | int | The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`) |
-| `primary.chroma` | int | The primary colour's OKLCH chroma, in thousandths, to show hues at |
-| `secondary.lightness` | int | The secondary colour's OKLCH lightness, in thousandths, to show hues at |
-| `secondary.chroma` | int | The secondary colour's OKLCH chroma, in thousandths, to show hues at |
-
-Each row of `swatches`:
+Used by `temperature_extrusion`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `label` | text | The style's name, e.g. "Primary" |
-| `color` | colour | Its colour, e.g. for `<bind_style_prop>` |
-| `text_style` | int | For the text styles, so their names show them: 1 muted, 2 emphasis, 3 header; else 0 |
+| `extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `distance.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `distance.value` | text | The value, e.g. "0.1" |
+| `distance.choices` | list | The presets, each with `text` |
+| `feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `feedrate.value` | text | The value, e.g. "0.1" |
+| `feedrate.choices` | list | The presets, each with `text` |
 
-| Action | Description |
-| --- | --- |
-| `preview.chroma` | Set the palette's chroma to the edited value, e.g. 0.02 |
-| `preview.dark` | Use the dark palette if the edited value is 1, else the light one |
-| `preview.primary_hue` | Set the palette's primary hue to the edited value, 0-360 |
-| `preview.secondary_hue` | Set the palette's secondary hue to the edited value, 0-360 |
-
-### wifi
-
-Used by `wifi_selector`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `ip` | text | E.g. "IP Address: 192.168.1.100" |
-| `status` | text | How the last connection attempt went, or empty |
-| `networks` | list | The networks found |
-| `password_open` | int | 1 while asking for a network's password |
-| `password_title` | text | The password question |
-| `password` | text | The password typed |
-| `keyboard` | int | 1 while the keyboard is up, so the question moves out of its way |
-
-Each row of `networks`:
+Each row of `distance.choices`:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `index` | int | Position in the list, from 0 |
-| `ssid` | text | Network name |
-| `signal` | text | Signal level, e.g. "75 dBm" |
-| `known` | int | 1 if the screen has joined it before, so it can be forgotten |
-| `connected` | int | 1 if the screen is on it |
-| `connect_text` | text | "Disconnect" (connected), "Connect" (known) or "Join" |
+| `text` | text | The preset, e.g. "10" |
+
+Each row of `feedrate.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `text` | text | The preset, e.g. "10" |
 
 | Action | Description |
 | --- | --- |
-| `wifi.close_password` | Stop asking for a password |
-| `wifi.connect` | Disconnect from the network if on it, connect to it if known, else ask for its password to join it. From a row of `networks`. |
-| `wifi.forget` | Forget the network. From a row of `networks`. |
-| `wifi.join` | Join the network asked about with the password typed |
-| `wifi.keyboard` | Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
-| `wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
-| `wifi.refresh` | Scan for networks now |
+| `extruder.extrude` | Extrude the chosen distance at the chosen feed rate with the selected tool |
+| `extruder.retract` | Retract the chosen distance at the chosen feed rate with the selected tool |
+| `selector.decrement` | Step the selector named by `arg` (its id) down |
+| `selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad |
+| `selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. |
+| `selector.increment` | Step the selector named by `arg` (its id) up |
+| `selector.pick` | Use the preset. From a row of a selector's `choices`. |
 
 ## Widgets
 
@@ -1066,7 +1066,7 @@ A container with one component per row of a list. Each item is built in a scope 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_list list="files" item="file_row" windowed="true" item_height="90" flow="column"/>
+<ds_list list="files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>
 ```
 
 | Attribute | Description |
@@ -1128,7 +1128,7 @@ Also takes every `lv_obj` attribute.
 <ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
 		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
-		<ds_list list="objects" item="job_object_rect" width="100%" height="100%"/>
+		<ds_list list="objects" item="object_cancel_outline" width="100%" height="100%"/>
 	</ds_plot_layer>
 </ds_plot>
 ```
@@ -1337,63 +1337,63 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| `alert_axis` |  |  | `notifications` | [alert_axis.xml](../assets/ui/components/notifications/alert_axis.xml) |
-| `alert_choice` |  |  | `notifications` | [alert_choice.xml](../assets/ui/components/notifications/alert_choice.xml) |
-| `axis_position` |  |  | `job_status` | [axis_position.xml](../assets/ui/components/dashboard/axis_position.xml) |
-| [`babystep`](#control_screen) | `babystep` |  | `job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| [`babystep`](#control) | `babystep` |  | `dashboard_job_status`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
-| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_status` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
-| [`console`](#console) | `console` |  | `home_screen` | [console.xml](../assets/ui/components/console/console.xml) |
+| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `dashboard_job_status` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
+| [`console`](#console) | `console` |  | `home` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
 | `console_line` |  |  | `console` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
-| [`control_screen`](#control_screen) |  |  | `home_screen` | [control_screen.xml](../assets/ui/components/control/control_screen.xml) |
-| [`dashboard`](#home_screen) |  |  | `home_screen` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
-| [`extruder`](#temperature) | `extruder` |  | `temperature` | [extruder.xml](../assets/ui/components/control/temperature/extruder.xml) |
-| `fan_card` |  |  | `fan_screen` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
-| [`fan_screen`](#fan_screen) | `fans` |  | `control_screen` | [fan_screen.xml](../assets/ui/components/control/fans/fan_screen.xml) |
-| [`file_browser`](#files_screen) |  |  | `dashboard`, `files_screen` | [file_browser.xml](../assets/ui/components/files/file_browser.xml) |
-| `file_crumb` |  |  | `file_browser` | [file_crumb.xml](../assets/ui/components/files/file_crumb.xml) |
-| `file_dialog` |  |  | `file_browser` | [file_dialog.xml](../assets/ui/components/files/file_dialog.xml) |
-| `file_row` |  |  | `file_browser` | [file_row.xml](../assets/ui/components/files/file_row.xml) |
-| `file_tile` |  |  | `file_browser` | [file_tile.xml](../assets/ui/components/files/file_tile.xml) |
-| [`files_screen`](#files_screen) |  |  | `home_screen` | [files_screen.xml](../assets/ui/components/files/files_screen.xml) |
-| `heater_card` |  |  | `tool_list` | [heater_card.xml](../assets/ui/components/dashboard/heater_card.xml) |
-| `heater_row` |  |  | `heater_card`, `tool_card` | [heater_row.xml](../assets/ui/components/dashboard/heater_row.xml) |
-| [`heightmap`](#heightmap) | `heightmap` |  | `control_screen` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
+| [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
+| [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
+| `dashboard_axis` |  |  | `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
+| `dashboard_heater` |  |  | `dashboard_heater_card`, `dashboard_tool` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
+| `dashboard_heater_card` |  |  | `dashboard_tools` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
+| [`dashboard_job_status`](#dashboard_job_status) | `dashboard_job_status` |  | `dashboard` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| `dashboard_tool` |  |  | `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
+| [`dashboard_tools`](#home) |  |  | `dashboard` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| `fan_card` |  |  | `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
+| [`fans`](#fans) | `fans` |  | `control` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
+| [`file_browser`](#files) |  |  | `dashboard`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
+| `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
+| `file_browser_dialog` |  |  | `file_browser` | [file_browser_dialog.xml](../assets/ui/components/file_browser/file_browser_dialog.xml) |
+| `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
+| `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
+| [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
+| [`heightmap`](#heightmap) | `heightmap` |  | `control` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
-| [`home_screen`](#home_screen) |  |  |  | [home_screen.xml](../assets/ui/components/home/home_screen.xml) |
-| `job_object_item` |  |  | `object_cancel` | [job_object_item.xml](../assets/ui/components/control/object_cancel/job_object_item.xml) |
-| `job_object_rect` |  |  | `object_cancel` | [job_object_rect.xml](../assets/ui/components/control/object_cancel/job_object_rect.xml) |
-| [`job_status`](#job_status) | `job_status` |  | `dashboard` | [job_status.xml](../assets/ui/components/dashboard/job_status.xml) |
-| [`move`](#control_screen) | `move` |  | `control_screen` | [move.xml](../assets/ui/components/control/move/move.xml) |
+| [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
+| [`move`](#control) | `move` |  | `control` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_distance` |  |  | `move` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
 | `move_feedrate` |  |  | `move` | [move_feedrate.xml](../assets/ui/components/control/move/move_feedrate.xml) |
 | `move_xy` |  |  | `move` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
-| [`notifications`](#home_screen) | `notifications` |  | `home_screen` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
-| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control_screen` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
+| [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
+| `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
+| `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
+| [`object_cancel`](#object_cancel) | `object_cancel` |  | `control` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
+| `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
+| `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
 | `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `move`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
-| `setting_dropdown` |  | `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [setting_dropdown.xml](../assets/ui/components/settings/setting_dropdown.xml) |
-| [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings_screen` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
-| [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings_screen` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
-| [`settings_display`](#settings_display) | `settings_display` |  | `settings_screen` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
-| [`settings_general`](#settings_screen) | `settings_general` |  | `settings_screen` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
-| [`settings_screen`](#settings_screen) |  |  | `home_screen` | [settings_screen.xml](../assets/ui/components/settings/settings_screen.xml) |
-| [`side_bar`](#home_screen) |  |  | `home_screen` | [side_bar.xml](../assets/ui/components/home/side_bar.xml) |
-| [`status_bar`](#home_screen) | `status_bar` |  | `home_screen` | [status_bar.xml](../assets/ui/components/home/status_bar.xml) |
-| [`temperature`](#temperature) | `temperature` |  | `control_screen` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
+| [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
+| [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
+| [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
+| [`settings_display`](#settings_display) | `settings_display` |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
+| `settings_dropdown` |  | `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_dropdown.xml](../assets/ui/components/settings/settings_dropdown.xml) |
+| [`settings_general`](#settings) | `settings_general` |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
+| [`settings_theme_preview`](#settings_display) | `settings_theme_preview` |  | `settings_display` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
+| `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |
+| [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
+| `settings_wifi_network` |  |  | `settings_wifi` | [settings_wifi_network.xml](../assets/ui/components/settings/settings_wifi_network.xml) |
+| [`sidebar`](#home) |  |  | `home` | [sidebar.xml](../assets/ui/components/sidebar/sidebar.xml) |
+| [`status_bar`](#home) | `status_bar` |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
+| [`temperature`](#temperature) | `temperature` |  | `control` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
+| [`temperature_extrusion`](#temperature) | `temperature_extrusion` |  | `temperature` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
 | `temperature_heater` |  |  | `temperature_heater_card`, `temperature_tool` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
 | `temperature_heater_card` |  |  | `temperature` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
-| [`theme_preview`](#settings_display) | `theme_preview` |  | `settings_display` | [theme_preview.xml](../assets/ui/components/settings/theme_preview.xml) |
-| `theme_swatch` |  |  | `theme_preview` | [theme_swatch.xml](../assets/ui/components/settings/theme_swatch.xml) |
-| `tool_card` |  |  | `tool_list` | [tool_card.xml](../assets/ui/components/dashboard/tool_card.xml) |
-| [`tool_list`](#home_screen) |  |  | `dashboard` | [tool_list.xml](../assets/ui/components/dashboard/tool_list.xml) |
-| `value_choice` |  |  | `value_selector` | [value_choice.xml](../assets/ui/components/common/value_choice.xml) |
-| `value_selector` |  | `selector`, `title`, `value`, `choices` | `extruder` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
-| `wifi_network` |  |  | `wifi_selector` | [wifi_network.xml](../assets/ui/components/settings/wifi_network.xml) |
-| [`wifi_selector`](#settings_connection) | `wifi` |  | `settings_connection` | [wifi_selector.xml](../assets/ui/components/settings/wifi_selector.xml) |
+| `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
+| `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
 C++ views that `<ds_view view="…">` can show where there is no component of the name: `container`, `estop`, `extrusion_factor`, `job_extrusion_factor`, `keyboard`, `numberpad`, `speed_factor`
 
@@ -1405,43 +1405,49 @@ The components shown as views of their own, drawn with sample printer data in th
 
 ![console](../tests/ref_imgs/xml_ui_api/views/console.png)
 
-#### control_screen
+#### control
 
 Also shows `babystep`, `move`.
 
-![control_screen](../tests/ref_imgs/xml_ui_api/views/control_screen.png)
+![control](../tests/ref_imgs/xml_ui_api/views/control.png)
 
-#### fan_screen
+#### dashboard_job_status
 
-![fan_screen](../tests/ref_imgs/xml_ui_api/views/fan_screen.png)
+![dashboard_job_status](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status.png)
 
-#### files_screen
+#### fans
+
+![fans](../tests/ref_imgs/xml_ui_api/views/fans.png)
+
+#### files
 
 Also shows `file_browser`.
 
-![files_screen](../tests/ref_imgs/xml_ui_api/views/files_screen.png)
+![files](../tests/ref_imgs/xml_ui_api/views/files.png)
 
 #### heightmap
 
 ![heightmap](../tests/ref_imgs/xml_ui_api/views/heightmap.png)
 
-#### home_screen
+#### home
 
-Also shows `dashboard`, `notifications`, `side_bar`, `status_bar`, `tool_list`.
+Also shows `dashboard`, `dashboard_tools`, `notifications`, `sidebar`, `status_bar`.
 
-![home_screen](../tests/ref_imgs/xml_ui_api/views/home_screen.png)
-
-#### job_status
-
-![job_status](../tests/ref_imgs/xml_ui_api/views/job_status.png)
+![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 
 #### object_cancel
 
 ![object_cancel](../tests/ref_imgs/xml_ui_api/views/object_cancel.png)
 
+#### settings
+
+Also shows `settings_general`.
+
+![settings](../tests/ref_imgs/xml_ui_api/views/settings.png)
+
 #### settings_connection
 
-Also shows `wifi_selector`.
+Also shows `settings_wifi`.
 
 ![settings_connection](../tests/ref_imgs/xml_ui_api/views/settings_connection.png)
 
@@ -1451,19 +1457,13 @@ Also shows `wifi_selector`.
 
 #### settings_display
 
-Also shows `theme_preview`.
+Also shows `settings_theme_preview`.
 
 ![settings_display](../tests/ref_imgs/xml_ui_api/views/settings_display.png)
 
-#### settings_screen
-
-Also shows `settings_general`.
-
-![settings_screen](../tests/ref_imgs/xml_ui_api/views/settings_screen.png)
-
 #### temperature
 
-Also shows `extruder`.
+Also shows `temperature_extrusion`.
 
 ![temperature](../tests/ref_imgs/xml_ui_api/views/temperature.png)
 
@@ -1537,7 +1537,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `transition_normal` |  | *(not set)* |
 | `anim` |  | anim_duration=200 |
 | `anim_fast` |  | anim_duration=120 |
-| `actionBtn` | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/actionBtn.png) | bg_opa=100% bg_color=#secondary |
+| `action_btn` | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/action_btn.png) | bg_opa=100% bg_color=#secondary |
 | `input` | ![input](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/input.png) | border_color=#border border_width=1 pad_hor=20 pad_ver=0 text_align=center |
 | `long_press` |  | *(not set)* |
 | `draggable` |  | transition_props=transform_width transform_height transition_duration=200ms transition_easing=ease_in_out transition_delay=100ms |

@@ -35,7 +35,7 @@ class TestGeneralSettings : public UiTestSuite
 		lv_obj_send_event(dropdown, LV_EVENT_VALUE_CHANGED, nullptr);
 	}
 
-	UI::Xml::XmlView tab{"general_settings", screen, "settings_general"};
+	UI::Xml::XmlView tab{"settings_general", screen, "settings_general"};
 };
 
 TEST_F(TestGeneralSettings, TogglesAreStored)
@@ -92,7 +92,7 @@ class TestDisplaySettings : public UiTestSuite
 		tab.show();
 	}
 
-	UI::Xml::XmlView tab{"display_settings", screen, "settings_display"};
+	UI::Xml::XmlView tab{"settings_display", screen, "settings_display"};
 };
 
 TEST_F(TestDisplaySettings, PickingAThemeUsesAndStoresIt)
@@ -123,7 +123,7 @@ class TestDeveloperSettings : public UiTestSuite
 		tab.show();
 	}
 
-	UI::Xml::XmlView tab{"developer_settings", screen, "settings_developer"};
+	UI::Xml::XmlView tab{"settings_developer", screen, "settings_developer"};
 };
 
 TEST_F(TestDeveloperSettings, TogglesAreStoredAndBuildOnlyOptionsHidden)

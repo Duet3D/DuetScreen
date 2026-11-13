@@ -5,7 +5,7 @@
 <component>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" style_pad_all="0"
 		  style_layout="grid" style_grid_column_dsc_array="fr(3) fr(2)" style_grid_row_dsc_array="content fr(1)">
-		<ds_view name="tool_list" view="tool_list" shown="true" height="content" style_max_height="50%"
+		<ds_view name="dashboard_tools" view="dashboard_tools" shown="true" height="content" style_max_height="50%"
 				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="0" style_grid_cell_column_span="1"
 				 style_grid_cell_y_align="start" style_grid_cell_row_pos="0" style_grid_cell_row_span="1">
 			<style name="card"/>
@@ -30,7 +30,7 @@
 				<ds_view name="dashboard_macros" view="file_browser" presenter="dashboard_macros" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="status" title_tag="app_drawer.status" select_on="job.file">
-				<ds_view name="job_status" view="job_status" shown="true"/>
+				<ds_view name="dashboard_job_status" view="dashboard_job_status" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>
 

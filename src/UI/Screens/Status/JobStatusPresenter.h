@@ -1,9 +1,9 @@
 /*
  * JobStatusPresenter.h
  *
- * Behaviour for the job status panel (assets/ui/components/dashboard/job_status.xml): the current (or last) job with
- * its progress and thumbnail, the tool position, speed, flow, babystepping and times, and pause, resume, print again
- * and cancel.
+ * Behaviour for the job status panel (assets/ui/components/dashboard/dashboard_job_status.xml): the current (or last)
+ * job with its progress and thumbnail, the tool position, speed, flow, babystepping and times, and pause, resume, print
+ * again and cancel.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).

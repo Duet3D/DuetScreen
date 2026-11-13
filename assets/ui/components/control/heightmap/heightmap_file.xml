@@ -13,7 +13,7 @@
 
 		<lv_label name="label" bind_text="name" height="content" flex_grow="1"/>
 		<ds_button name="load" bind_text="load_text" width="70" height="content" style_min_width="content">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="loaded" state="checked" ref_value="1"/>
 			<action trigger="clicked" name="heightmap.toggle"/>
 		</ds_button>

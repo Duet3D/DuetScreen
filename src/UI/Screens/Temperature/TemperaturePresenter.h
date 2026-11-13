@@ -3,7 +3,7 @@
  *
  * Behaviour for the Temperature tab (assets/ui/components/control/temperature/temperature.xml): every tool with a
  * heater, with its state, extrusion factors, filament and heaters; the beds and chambers (the global `beds` and
- * `chambers` lists, src/UI/Xml/Data/HeatSource.h); and the extruder panel (extruder.xml).
+ * `chambers` lists, src/UI/Xml/Data/HeatSource.h); and the extruder panel (temperature_extrusion.xml).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md). Tool selection and heater states and temperatures use the global actions in

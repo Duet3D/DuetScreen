@@ -154,7 +154,7 @@ namespace UI::Themes
 		Style anim; // Normal animation time
 		Style anim_fast; // Fast animation time
 
-		Style actionBtn; // for UI elements that perform actions on the Duet
+		Style action_btn; // UI elements that perform actions on the Duet
 		Style input; // Text inputs
 		Style long_press; // Long-press feedback
 		Style draggable; // Draggable widgets

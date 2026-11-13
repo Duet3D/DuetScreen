@@ -1,7 +1,7 @@
 /*
  * WifiPresenter.h
  *
- * Behaviour for the screen's WiFi networks (assets/ui/components/settings/wifi_selector.xml): the networks around it,
+ * Behaviour for the screen's WiFi networks (assets/ui/components/settings/settings_wifi.xml): the networks around it,
  * joining, leaving and forgetting them, and its IP address. Networks are scanned for every few seconds while the view
  * is shown (see WifiScanner.h).
  *

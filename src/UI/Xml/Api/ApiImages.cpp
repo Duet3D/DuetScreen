@@ -177,7 +177,7 @@ namespace UI::Xml::Api
 												   dir + "/lvgl_widgets",
 												   lv_display_get_horizontal_resolution(nullptr) - 2 * MARGIN,
 												   lv_display_get_vertical_resolution(nullptr) - 2 * MARGIN);
-					pictures.home = home(dir + "/home_screen");
+					pictures.home = home(dir + "/home");
 				}
 				if (active)
 				{
@@ -434,7 +434,7 @@ namespace UI::Xml::Api
 				lv_obj_set_pos(screenFrame, 0, 0);
 				std::string file;
 				{
-					XmlView view("api_view", screenFrame, "home_screen");
+					XmlView view("api_view", screenFrame, "home");
 					view.show();
 					m_settle();
 					lv_obj_update_layout(lv_screen_active());

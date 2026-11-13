@@ -40,7 +40,7 @@
 				<action trigger="clicked" name="$close"/>
 			</ds_button>
 			<ds_button name="ok" translation_tag="common.ok" height="content" flex_grow="1">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<action trigger="clicked" name="$confirm"/>
 			</ds_button>
 		</lv_obj>

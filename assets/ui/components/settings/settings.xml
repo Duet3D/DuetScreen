@@ -6,16 +6,16 @@
 		<style name="bg_dark"/>
 		<ds_tabs name="tabs" width="100%" height="100%">
 			<ds_tabs-tab name="general" title_tag="settings.tabs.general">
-				<ds_view name="general_settings" view="settings_general" shown="true"/>
+				<ds_view name="settings_general" view="settings_general" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="connection" title_tag="settings.tabs.connection">
-				<ds_view name="connection_settings" view="settings_connection" shown="true"/>
+				<ds_view name="settings_connection" view="settings_connection" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="display" title_tag="settings.tabs.display">
-				<ds_view name="display_settings" view="settings_display" shown="true"/>
+				<ds_view name="settings_display" view="settings_display" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="developer" title_tag="settings.tabs.developer">
-				<ds_view name="developer_settings" view="settings_developer" shown="true"/>
+				<ds_view name="settings_developer" view="settings_developer" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>
 	</view>

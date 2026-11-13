@@ -62,7 +62,7 @@ namespace
 	constexpr std::string_view TOOLS_SCREEN = R"(
 		<component presenter="test_tools">
 			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
-				<ds_list name="tools" list="tools" item="tool_card" width="100%" height="content" flex_flow="column"/>
+				<ds_list name="tools" list="tools" item="dashboard_tool" width="100%" height="content" flex_flow="column"/>
 			</view>
 		</component>)";
 
@@ -287,7 +287,7 @@ class TestXmlUi : public UiTestSuite
 
 	fs::path bundleFile(std::string_view relative) const { return m_userDir / "test" / relative; }
 
-	UI::Xml::XmlView& makeView(const std::string& component = "fan_screen")
+	UI::Xml::XmlView& makeView(const std::string& component = "fans")
 	{
 		m_views.push_back(
 			std::make_unique<UI::Xml::XmlView>(fmt::format("view{:d}", m_views.size()), screen, component));
@@ -312,7 +312,7 @@ class TestXmlUi : public UiTestSuite
 	{
 		writeFile(bundleFile("manifest.json"), manifest());
 		writeFile(bundleFile("components/tools_screen.xml"), TOOLS_SCREEN);
-		writeFile(bundleFile("components/tool_card.xml"), TOOL_CARD);
+		writeFile(bundleFile("components/dashboard_tool.xml"), TOOL_CARD);
 		writeFile(bundleFile("components/tool_heater_row.xml"), TOOL_HEATER_ROW);
 		restartWithUserBundles();
 		EXPECT_TRUE(UI::Xml::getIssues().empty());
@@ -406,7 +406,7 @@ TEST_F(TestXmlUi, BuiltinBundleLoadsCleanly)
 {
 	EXPECT_TRUE(UI::Xml::getIssues().empty());
 
-	const auto* screen = UI::Xml::findComponent("fan_screen");
+	const auto* screen = UI::Xml::findComponent("fans");
 	ASSERT_NE(screen, nullptr);
 	EXPECT_EQ(screen->presenter, "fans");
 	EXPECT_EQ(screen->bundle, "duetscreen");
@@ -581,13 +581,12 @@ TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
 TEST_F(TestXmlUi, OverrideNamingAnUnknownPresenterIsRejected)
 {
 	writeFile(bundleFile("manifest.json"), manifest());
-	writeFile(bundleFile("components/fan_screen.xml"),
-			  R"(<component presenter="nope"><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/fans.xml"), R"(<component presenter="nope"><view extends="lv_obj"/></component>)");
 	restartWithUserBundles();
 
 	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
 	EXPECT_NE(UI::Xml::getIssues()[0].message.find("unknown presenter 'nope'"), std::string::npos);
-	EXPECT_EQ(UI::Xml::findComponent("fan_screen")->presenter, "fans");
+	EXPECT_EQ(UI::Xml::findComponent("fans")->presenter, "fans");
 }
 
 TEST_F(TestXmlUi, BundleForAnotherUiApiIsNotLoaded)
@@ -605,14 +604,14 @@ TEST_F(TestXmlUi, DoubleStarFolderFindsComponentsInEveryFolderBelow)
 {
 	writeFile(bundleFile("manifest.json"), R"({"id": "test", "ui_api": "1.0", "components": ["components/**/*.xml"]})");
 	writeFile(bundleFile("components/fan_card.xml"), R"(<component><view extends="lv_obj"/></component>)");
-	writeFile(bundleFile("components/control/fans/fan_screen.xml"),
+	writeFile(bundleFile("components/control/fans/fans.xml"),
 			  R"(<component presenter="fans"><view extends="lv_obj"/></component>)");
 	writeFile(bundleFile("components/control/fans/notes.txt"), "not a component");
 	restartWithUserBundles();
 
 	EXPECT_TRUE(UI::Xml::getIssues().empty());
 	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "test");
-	EXPECT_EQ(UI::Xml::findComponent("fan_screen")->bundle, "test");
+	EXPECT_EQ(UI::Xml::findComponent("fans")->bundle, "test");
 	EXPECT_EQ(UI::Xml::findComponent("notes"), nullptr);
 }
 

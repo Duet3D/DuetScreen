@@ -10,7 +10,7 @@
 		<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
 
 		<ds_button name="tool_name" bind_text="name" width="content" height="content">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<style name="border_color_card" selector="checked"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 			<action trigger="clicked" name="tools.toggle"/>
@@ -19,7 +19,7 @@
 		<lv_obj name="heaters" width="100%" height="content" flex_flow="column"
 				style_pad_bottom="0" style_pad_left="0" style_pad_right="0">
 			<bind_flag_if_eq subject="heater_count" flag="hidden" ref_value="0"/>
-			<ds_list name="list" list="heaters" item="heater_row" width="100%" height="content" flex_flow="column"
+			<ds_list name="list" list="heaters" item="dashboard_heater" width="100%" height="content" flex_flow="column"
 					 style_pad_all="0"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>

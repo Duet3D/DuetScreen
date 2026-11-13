@@ -13,7 +13,7 @@
 
 		<ds_button name="status" bind_text="status" flex_grow="3">
 			<style name="border_color_card" selector="checked"/>
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 			<action trigger="clicked" name="heaters.toggle"/>
 		</ds_button>

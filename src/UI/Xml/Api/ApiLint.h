@@ -39,7 +39,7 @@ namespace UI::Xml::Api
 	{
 		std::string file;	 // The component's file, or e.g. "ds_slider example" for a widget's example
 		int line = 0;		 // Line of the element that uses the name
-		std::string message; // What is wrong, and where the component was used, e.g. "in fan_screen › fans"
+		std::string message; // What is wrong, and where the component was used, e.g. "in fans › fan_card"
 
 		/** Equal if every member is */
 		bool operator==(const LintIssue&) const = default;

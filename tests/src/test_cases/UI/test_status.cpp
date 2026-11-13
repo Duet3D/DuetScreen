@@ -18,7 +18,7 @@ class TestStatus : public UiTestSuite
 {
   public:
 	TestStatus()
-		: view("status", screen, "job_status")
+		: view("status", screen, "dashboard_job_status")
 	{
 		// TODO: there is a race condition between the filesystem operations and the test execution when tests are run
 		// in parallel
@@ -32,7 +32,7 @@ class TestStatus : public UiTestSuite
 
 	UI::Xml::XmlView view;
 	/** Hidden: the status view's modals belong to its main window */
-	UI::Xml::XmlView home{"home", lv_screen_active(), "home_screen"};
+	UI::Xml::XmlView home{"home", lv_screen_active(), "home"};
 };
 
 TEST_F(TestStatus, Blank)

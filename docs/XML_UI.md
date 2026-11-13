@@ -1,6 +1,6 @@
 # XML UI
 
-DuetScreen builds its UI from XML files loaded at runtime. The home screen ([home_screen.xml](../assets/ui/components/home/home_screen.xml)) is XML; some of the pages it shows are still C++ views, which XML hosts until they are rewritten, so both kinds work side by side.
+DuetScreen builds its UI from XML files loaded at runtime. The home screen ([home.xml](../assets/ui/components/home/home.xml)) is XML; some of the pages it shows are still C++ views, which XML hosts until they are rewritten, so both kinds work side by side.
 
 The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/helix-xml`), an MIT fork of the XML engine LVGL shipped before 9.5. The DuetScreen side is [src/UI/Xml](../src/UI/Xml).
 
@@ -54,9 +54,9 @@ docs/XML_UI_API.md, docs/XML_UI.xsd      the UI API reference and its schema, ge
 docs/XML_UI_THEMES.md                     every built-in theme, generated with them
 tests/ref_imgs/xml_ui_api/                their pictures: reference images, like every other screenshot
 assets/ui/                                the built-in bundle
-  components/<part>/                      each part of the UI (home, dashboard, control/move, settings, …): its screen
-                                          and the pieces only it uses; mirrors src/UI/Screens/
-  components/common/                      pieces used by several parts (dialogs, value selector, babystepping)
+  components/<part>/                      each part of the UI (home, dashboard, control/move, settings, …): its page
+                                          and the pieces only it uses; mirrors src/UI/Screens/ (see Naming below)
+  components/common/                      small pieces used by several parts (dialogs, value selector, babystepping)
   themes/                                 the built-in themes
 ```
 
@@ -80,15 +80,15 @@ Pages start hidden; `home="true"` makes a page a home screen (shown when nothing
 In C++, an XML component is hosted with `Xml::XmlView`:
 
 ```cpp
-Xml::XmlView m_fanView{"fan", parent, "fan_screen"};
+Xml::XmlView m_fanView{"fans", parent, "fans"};
 ```
 
 An `XmlView` behaves like any other `LvObj`: it works in tabs and navigation, and its presenter is active, and receives Model events, only while it is shown.
 
-A view can also be given a presenter, which then replaces the one the component names. Its fields shadow the globals, so a component can show other data: the theme gallery test shows `tool_list.xml` with made-up `tools`.
+A view can also be given a presenter, which then replaces the one the component names. Its fields shadow the globals, so a component can show other data: the theme gallery test shows `dashboard_tools.xml` with made-up `tools`.
 
 ```cpp
-Xml::XmlView toolList{"tool_list", parent, "tool_list", std::make_shared<MyTools>()};
+Xml::XmlView toolList{"dashboard_tools", parent, "dashboard_tools", std::make_shared<MyTools>()};
 ```
 
 In XML, `presenter=` does the same with a registered presenter, so one component can be shown in several places with different data or settings (each placement's presenter is registered in [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp)):
@@ -169,10 +169,10 @@ A string subject can be compared with `bind_*_if_eq`: the sidebar checks the but
 ### Lists
 
 ```xml
-<ds_list list="tools" item="tool_card" flex_flow="column"/>
+<ds_list list="tools" item="dashboard_tool" flex_flow="column"/>
 ```
 
-builds one `tool_card` per row of `tools` (see [tool_list.xml](../assets/ui/components/dashboard/tool_list.xml)). Inside `tool_card`, a list belonging to the row is shown the same way:
+builds one `dashboard_tool` per row of `tools` (see [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml)). Inside `dashboard_tool`, a list belonging to the row is shown the same way:
 
 ```xml
 <ds_list list="heaters" item="tool_heater_row"/>
@@ -183,8 +183,8 @@ Lists add and remove rows at the end, so existing rows keep their scroll positio
 A long list should be windowed: only the rows on screen are built, and rows are built and deleted as it scrolls. Every item then has the same size, set by the list:
 
 ```xml
-<ds_list list="files" item="file_row" windowed="true" item_height="90"/>
-<ds_list list="files" item="file_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
+<ds_list list="files" item="file_browser_row" windowed="true" item_height="90"/>
+<ds_list list="files" item="file_browser_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
 ```
 
 ### Graphs
@@ -274,9 +274,19 @@ A theme is an XML file that sets the palette, the four fonts and the properties 
 
 Problems in a theme (an unknown style, colour or parent) are reported with the file and line, like component errors.
 
+## Naming
+
+Every name is `snake_case`: components, views, widgets, styles, presenters. Component names are global, so the built-in ones follow these rules to stay unique and say where they belong:
+
+- **A page is named after its part**, which is also the folder it is in: `dashboard`, `control`, `move`, `fans`, `settings`. The `<ds_view>` showing a component has the component's name too (`<ds_view name="move" view="move"/>`), and so does a presenter written for one component (`presenter="move"`). A component shown several ways names each view and presenter after where it is shown: the file browser is `dashboard_jobs`, `dashboard_macros`, `files_jobs` and `files_macros`.
+- **Anything else starts with its part's name**, then says what it is: `move_axis`, `dashboard_tool`, `settings_wifi`, `notifications_alert_choice`. A list's item is named for the one thing it shows (`temperature_heater`, `console_line`), or for how it shows it when there is more than one way (`file_browser_row`, `file_browser_tile`).
+- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`).
+
+Tabs of a page live in their own folder inside it when they are parts in their own right (`control/move/`), or beside the page with its prefix when they are not (`settings/settings_general.xml`).
+
 ## Adding a screen
 
-1. Write `assets/ui/components/<part>/<name>.xml`, in the folder of the part of the UI it belongs to (a new folder for a new part). Pieces of it that other parts also use go in `components/common/`.
+1. Write `assets/ui/components/<part>/<part>.xml`, in a new folder for the part, named as in [Naming](#naming).
 2. If it needs printer data that isn't published yet, add it to a data source (or add a source to the list in [DataSources.cpp](../src/UI/Xml/Data/DataSources.cpp)) and describe each in its `fields()` (see below). These names are the public UI API: renaming one breaks user bundles and needs a `UI_API_VERSION_MAJOR` bump in [XmlUi.h](../src/UI/Xml/Runtime/XmlUi.h).
 3. If it needs behaviour, write a presenter in `src/UI/Screens/<Name>/` (see [FanPresenter](../src/UI/Screens/Fan/FanPresenter.h)), add it to [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp), and name it on the root element: `<component presenter="…">`.
 4. Add a `<ds_view>` for it to the screen that shows it (or host it in C++ with `Xml::XmlView`).
@@ -303,7 +313,7 @@ The declaration is used to bind the names into a scope, to publish them globally
   - [test_xml_ui.cpp](../tests/src/test_cases/UI/test_xml_ui.cpp) covers loading, overrides, per-row and nested-list bindings, actions, reload and themes.
   - [test_xml_ui_api.cpp](../tests/src/test_cases/UI/test_xml_ui_api.cpp) checks that every action and widget attribute is described, and that [XML_UI_API.md](XML_UI_API.md), [XML_UI_THEMES.md](XML_UI_THEMES.md) and [XML_UI.xsd](XML_UI.xsd) match the code. When one doesn't, the test rewrites the file and fails: review the change in `git diff` and commit it with the code.
     Their pictures are drawn by the UI: in every built-in theme the palette, fonts, a swatch of each style, each widget's example, a sample of LVGL's widgets and the home screen, and each view with sample printer data. Each is a reference image under `tests/ref_imgs/xml_ui_api/`, compared with `EXPECT_EQUAL_PICTURE` like any screenshot, so a changed one is written as `_err` and reviewed with `run_tests.py`; a picture of something that is gone is removed. They show the release firmware, so developer builds don't compare them. To picture a widget, give its spec an `example` and `exampleSubjects` for what the example binds to; the examples are linted too.
-    It also lints the built-in bundle ([ApiLint.h](../src/UI/Xml/Api/ApiLint.h)): every subject, list, action, style, `#const`, font, translation key, component and presenter a component uses must exist where the component is used, so a typo fails the test with the file, line and the path of components that led there, e.g. `heater_row.xml:21: no subject `currentx` (in home_screen › dashboard › tool_list › tool_card › heater_row)`.
+    It also lints the built-in bundle ([ApiLint.h](../src/UI/Xml/Api/ApiLint.h)): every subject, list, action, style, `#const`, font, translation key, component and presenter a component uses must exist where the component is used, so a typo fails the test with the file, line and the path of components that led there, e.g. `dashboard_heater.xml:21: no subject `currentx` (in home › dashboard › dashboard_tools › dashboard_tool › dashboard_heater)`.
   - Every theme is checked pixel by pixel by the dashboard and widget screenshots (`home_view/dashboard/theme_*.png`, `theme/*`).
   - Converted screens must still match their existing screenshots in `tests/ref_imgs`.
   - Engine changes belong in helix-xml with tests there (`cmake -S tests -B build` in `libraries/helix-xml`).

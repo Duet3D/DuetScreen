@@ -32,7 +32,7 @@
 			   shadow_opa="30%"/>
 
 		<!-- Action buttons: the same in the secondary colour -->
-		<style name="actionBtn"
+		<style name="action_btn"
 			   bg_color="lighten(#secondary, 0.08)" bg_grad_color="darken(#secondary, 0.10)" bg_grad_dir="ver"
 			   border_width="1" border_color="lighten(#secondary, 0.15)" border_opa="40%" border_side="top"/>
 

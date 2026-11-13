@@ -14,7 +14,7 @@
 		<lv_label name="row_label_0" translation_tag="settings.debug_level"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="debug_level" options="debug_levels" selected="debug_level"
+		<settings_dropdown name="debug_level" options="debug_levels" selected="debug_level"
 						  action="settings.debug_level"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>

@@ -2,8 +2,9 @@
   /* The built-in UI. User bundles in the user UI folder can replace any component or theme here by giving it the
      same name. See src/UI/Xml/Runtime/Bundles.h.
 
-     components/ has a folder for each part of the UI, holding its screen and the pieces only it uses, the way
-     src/UI/Screens/ holds their presenters; common/ holds pieces used in several parts. */
+     components/ has a folder for each part of the UI, holding its page (named after the part) and the pieces only it
+     uses (named <part>_<piece>), the way src/UI/Screens/ holds their presenters; common/ holds small pieces used in
+     several parts. See "Naming" in docs/XML_UI.md. */
   "id": "duetscreen",
   "name": "DuetScreen",
   "version": "1.0.0",

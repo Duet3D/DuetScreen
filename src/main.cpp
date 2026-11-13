@@ -145,10 +145,10 @@ int main(int argc, char** argv)
 
 	DisplayHelper::setRotation(StorageHelper::getData(ID_DISPLAY_ROTATION));
 
-	// The whole UI: assets/ui/components/home/home_screen.xml
+	// The whole UI: assets/ui/components/home/home.xml
 	lv_obj_set_style_pad_all(lv_screen_active(), 0, LV_PART_MAIN);
 	lv_enable_style_refresh(false); // One style refresh for the whole tree, below
-	UI::Xml::XmlView home("home", lv_screen_active(), "home_screen");
+	UI::Xml::XmlView home("home", lv_screen_active(), "home");
 	lv_enable_style_refresh(true);
 	lv_obj_refresh_style(home.getRootPtr(), LV_PART_ANY, LV_STYLE_PROP_ANY);
 	home.show();
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
 				[](lv_timer_t* timer)
 				{
 					static size_t index = 0;
-					// Every page in turn, by the names home_screen.xml registers them under
+					// Every page in turn, by the names home.xml registers them under
 					// The tabs called `tabs` on the page called `page`
 					auto tabsOn = [](const char* page, const char* tabs) -> UI::TabView*
 					{

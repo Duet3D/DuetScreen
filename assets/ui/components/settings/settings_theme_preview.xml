@@ -4,13 +4,13 @@
 
   Fields and actions: src/UI/Screens/Settings/ThemePreviewPresenter.h. Values are typed on the shared number pad.
 -->
-<component presenter="theme_preview">
+<component presenter="settings_theme_preview">
 	<view extends="lv_obj" width="100%" height="content" style_layout="grid"
 		  style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content content content content">
 		<lv_obj name="swatches" width="100%" height="content" flex_flow="column"
 				style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
-			<ds_list name="list" list="swatches" item="theme_swatch" width="100%" height="content" flex_flow="row_wrap"
+			<ds_list name="list" list="swatches" item="settings_theme_swatch" width="100%" height="content" flex_flow="row_wrap"
 					 style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start"/>
 		</lv_obj>
 

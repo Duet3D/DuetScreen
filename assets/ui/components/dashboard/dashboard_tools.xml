@@ -12,17 +12,17 @@
 		<style name="pad_zero"/>
 
 		<lv_obj name="tools" width="100%" height="content" flex_flow="column" style_pad_all="0">
-			<ds_list name="list" list="tools" item="tool_card" width="100%" height="content" flex_flow="column"
+			<ds_list name="list" list="tools" item="dashboard_tool" width="100%" height="content" flex_flow="column"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 
 		<lv_obj name="beds" width="100%" height="content" flex_flow="column" style_pad_all="0">
-			<ds_list name="list" list="beds" item="heater_card" width="100%" height="content" flex_flow="column"
+			<ds_list name="list" list="beds" item="dashboard_heater_card" width="100%" height="content" flex_flow="column"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 
 		<lv_obj name="chambers" width="100%" height="content" flex_flow="column" style_pad_all="0">
-			<ds_list name="list" list="chambers" item="heater_card" width="100%" height="content" flex_flow="column"
+			<ds_list name="list" list="chambers" item="dashboard_heater_card" width="100%" height="content" flex_flow="column"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 	</view>

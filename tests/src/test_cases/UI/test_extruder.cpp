@@ -1,7 +1,7 @@
 /*
  * test_extruder.cpp
  *
- * The extruder panel (assets/ui/components/control/temperature/extruder.xml,
+ * The extruder panel (assets/ui/components/control/temperature/temperature_extrusion.xml,
  * src/UI/Screens/Temperature/ExtruderPresenter.h).
  */
 
@@ -44,7 +44,7 @@ class TestExtruder : public UiTestSuite
 	/** The value the selector called `selector` shows */
 	std::string_view valueOf(const char* selector) { return lv_textarea_get_text(part(selector, "value")); }
 
-	UI::Xml::XmlView panel{"extruder", screen, "extruder"};
+	UI::Xml::XmlView panel{"temperature_extrusion", screen, "temperature_extrusion"};
 };
 
 TEST_F(TestExtruder, Basic)

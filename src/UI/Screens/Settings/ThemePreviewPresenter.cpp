@@ -72,7 +72,7 @@ namespace UI
 	}
 
 	ThemePreviewPresenter::ThemePreviewPresenter(bool controls)
-		: XmlPresenter("theme_preview")
+		: XmlPresenter("settings_theme_preview")
 		, m_controls(controls)
 	{
 		action("preview.primary_hue",

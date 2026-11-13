@@ -79,7 +79,8 @@ namespace UI::Xml
 				 "`windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of "
 				 "widgets; every item then has the same size, and the list places them itself (its own layout is "
 				 "ignored), with its style_pad_row and style_pad_column as the gaps.",
-			 .example = R"(<ds_list list="files" item="file_row" windowed="true" item_height="90" flow="column"/>)",
+			 .example =
+				 R"(<ds_list list="files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
 			 .attributes =
 				 {{"list",
 				   "The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can "

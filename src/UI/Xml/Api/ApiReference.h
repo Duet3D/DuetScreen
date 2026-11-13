@@ -78,7 +78,7 @@ namespace UI::Xml::Api
 		{
 			Element, // As an element: `<fan_card/>`
 			Item,	 // As a list's item: `<ds_list item="fan_card">`
-			View,	 // As a view: `<ds_view view="fan_screen">`
+			View,	 // As a view: `<ds_view view="fans">`
 			Base,	 // As the base of a view: `<view extends="fan_card">`
 		};
 

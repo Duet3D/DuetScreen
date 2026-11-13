@@ -18,7 +18,7 @@
 			<style name="card"/>
 			<style name="pad_base"/>
 			<ds_plot_layer name="objects_layer">
-				<ds_list name="objects" list="objects" item="job_object_rect" width="100%" height="100%"
+				<ds_list name="objects" list="objects" item="object_cancel_outline" width="100%" height="100%"
 						 style_pad_all="0" scrollable="false"/>
 			</ds_plot_layer>
 		</ds_plot>
@@ -35,7 +35,7 @@
 					<style name="list_title"/>
 				</lv_label>
 			</lv_obj>
-			<ds_list name="list" list="objects" item="job_object_item" width="100%" flex_grow="1" flex_flow="column"
+			<ds_list name="list" list="objects" item="object_cancel_row" width="100%" flex_grow="1" flex_flow="column"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 
@@ -43,7 +43,7 @@
 				   style_min_height="content"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
-			<bind_style name="actionBtn" subject="confirmations" ref_value="0"/>
+			<bind_style name="action_btn" subject="confirmations" ref_value="0"/>
 			<action trigger="clicked" name="object_cancel.cancel_current"/>
 		</ds_button>
 

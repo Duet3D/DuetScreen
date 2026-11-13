@@ -202,7 +202,7 @@ namespace UI::Themes
 		{"transition_normal", &LvglStyles::transition_normal},
 		{"anim", &LvglStyles::anim},
 		{"anim_fast", &LvglStyles::anim_fast},
-		{"actionBtn", &LvglStyles::actionBtn},
+		{"action_btn", &LvglStyles::action_btn},
 		{"input", &LvglStyles::input},
 		{"long_press", &LvglStyles::long_press},
 		{"draggable", &LvglStyles::draggable},

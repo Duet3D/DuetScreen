@@ -46,7 +46,7 @@ namespace UI::Xml
 				 R"(<ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
 		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
-		<ds_list list="objects" item="job_object_rect" width="100%" height="100%"/>
+		<ds_list list="objects" item="object_cancel_outline" width="100%" height="100%"/>
 	</ds_plot_layer>
 </ds_plot>)",
 			 .attributes = {{"title", "The title above the area, if there is no `title_tag`"},

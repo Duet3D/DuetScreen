@@ -20,7 +20,7 @@
 
 		<!-- Buttons: flat, angular, bordered -->
 		<style name="btn" bg_color="#bg_light" border_width="2" border_color="#primary" border_side="full" text_color="#primary"/>
-		<style name="actionBtn" bg_color="#primary" text_color="#text"/>
+		<style name="action_btn" bg_color="#primary" text_color="#text"/>
 
 		<!-- Heavier padding for an industrial panel feel -->
 		<style name="card" pad_all="8" pad_row="4" pad_column="4"/>

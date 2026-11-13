@@ -1,6 +1,6 @@
 <!--
   The Temperature tab: the tools, beds and chambers with their heaters on the left; the selected tool and the extruder
-  panel (extruder.xml) on the right.
+  panel (temperature_extrusion.xml) on the right.
 
   Fields and actions: src/UI/Screens/Temperature/TemperaturePresenter.h; the beds and chambers are the global lists
   (src/UI/Xml/Data/HeatSource.h). Its own number pad covers only this tab.
@@ -58,7 +58,7 @@
 		<lv_obj name="control_cont" height="100%" flex_grow="1" flex_flow="column" style_pad_all="0">
 			<lv_label name="selected_tool_label" bind_text="selected_tool" width="100%" height="content"
 					  style_text_align="center"/>
-			<ds_view name="extruder_control" view="extruder" shown="true" width="100%" flex_grow="1">
+			<ds_view name="extruder_control" view="temperature_extrusion" shown="true" width="100%" flex_grow="1">
 				<style name="card"/>
 			</ds_view>
 		</lv_obj>

@@ -80,7 +80,7 @@
 		<!-- Buttons -->
 		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#primary"/>
 		<style name="btn_checked" bg_grad_dir="none" merge="border_highlight"/>
-		<style name="actionBtn" bg_opa="100%" bg_color="#secondary"/>
+		<style name="action_btn" bg_opa="100%" bg_color="#secondary"/>
 
 		<!-- Icons -->
 		<style name="icon_recolor" recolor="#text" recolor_opa="100%"/>

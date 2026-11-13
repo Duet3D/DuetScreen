@@ -4,7 +4,7 @@
 
   Fields and actions: src/UI/Screens/Settings/WifiPresenter.h
 -->
-<component presenter="wifi">
+<component presenter="settings_wifi">
 	<styles>
 		<!-- Out of the on-screen keyboard's way -->
 		<style name="above_keyboard" align="top_mid" translate_y="50"/>
@@ -29,7 +29,7 @@
 					<action trigger="clicked" name="wifi.refresh"/>
 				</ds_button>
 			</lv_obj>
-			<ds_list name="list" list="networks" item="wifi_network" width="100%" height="content" flex_flow="column"
+			<ds_list name="list" list="networks" item="settings_wifi_network" width="100%" height="content" flex_flow="column"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 
@@ -60,7 +60,7 @@
 					<action trigger="clicked" name="wifi.close_password"/>
 				</ds_button>
 				<ds_button name="ok" translation_tag="common.ok" height="content" flex_grow="1">
-					<style name="actionBtn"/>
+					<style name="action_btn"/>
 					<action trigger="clicked" name="wifi.join"/>
 				</ds_button>
 			</lv_obj>

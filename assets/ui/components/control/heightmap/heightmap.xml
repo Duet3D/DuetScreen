@@ -23,13 +23,13 @@
 			<!-- A width, though flex_grow sets it, so the text wraps rather than widening the button -->
 			<ds_button name="true_bed_level" translation_tag="heightmap.true_bed_level" width="0" height="100%"
 					   style_min_height="content" flex_grow="1">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_state_if_eq subject="levelling_usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="gcode" arg="G32"/>
 			</ds_button>
 			<ds_button name="mesh_bed_level" translation_tag="heightmap.mesh_bed_level" width="0" height="100%"
 					   style_min_height="content" flex_grow="1">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_state_if_eq subject="levelling_usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="gcode" arg="G29"/>
 			</ds_button>

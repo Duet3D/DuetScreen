@@ -1,7 +1,7 @@
 /*
  * FanPresenter.h
  *
- * Behaviour for the fan screen (assets/ui/components/control/fans/fan_screen.xml). The fan data itself is the global
+ * Behaviour for the fan screen (assets/ui/components/control/fans/fans.xml). The fan data itself is the global
  * `fans` list (see UI/Xml/Data/FanSource.h).
  *
  * What each action does is in its registration, and in the UI API reference (docs/XML_UI_API.md).

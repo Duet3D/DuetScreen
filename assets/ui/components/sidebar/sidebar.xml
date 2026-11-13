@@ -1,7 +1,7 @@
 <!--
   The sidebar down the left of the screen: a button per page and the drag-to-stop E-stop.
 
-  Each button opens a page by the name home_screen.xml registers it under, and is checked while that page is open
+  Each button opens a page by the name home.xml registers it under, and is checked while that page is open
   (nav.screen is empty on the home screen). Add a button for any page the same way.
 
   The sidebar and its buttons draw beyond their own area so the E-stop stays visible while it is dragged (and

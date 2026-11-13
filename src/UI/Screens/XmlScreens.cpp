@@ -79,20 +79,20 @@ namespace UI
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<StatusBarPresenter>("status_bar");
-		Xml::Presenters::add<JobStatusPresenter>("job_status");
+		Xml::Presenters::add<JobStatusPresenter>("dashboard_job_status");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<BabyStepPresenter>("babystep");
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
-		Xml::Presenters::add<ExtruderPresenter>("extruder");
+		Xml::Presenters::add<ExtruderPresenter>("temperature_extrusion");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");
 		Xml::Presenters::add<GeneralSettingsPresenter>("settings_general");
 		Xml::Presenters::add<ConnectionSettingsPresenter>("settings_connection");
-		Xml::Presenters::add<WifiPresenter>("wifi");
+		Xml::Presenters::add<WifiPresenter>("settings_wifi");
 		Xml::Presenters::add<DisplaySettingsPresenter>("settings_display");
-		Xml::Presenters::add<ThemePreviewPresenter>("theme_preview");
+		Xml::Presenters::add<ThemePreviewPresenter>("settings_theme_preview");
 		Xml::Presenters::add<DeveloperSettingsPresenter>("settings_developer");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */

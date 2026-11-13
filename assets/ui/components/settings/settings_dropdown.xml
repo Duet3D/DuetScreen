@@ -1,7 +1,7 @@
 <!--
   A setting chosen from a list, for a row of a settings tab.
 
-      <setting_dropdown options="languages" selected="language" action="settings.language"/>
+      <settings_dropdown options="languages" selected="language" action="settings.language"/>
 
   `options` names a string subject with the options, one per line; `selected` an integer subject with the index of the
   one in use; `action` is raised with the index of the one picked (ActionArgs::value()).

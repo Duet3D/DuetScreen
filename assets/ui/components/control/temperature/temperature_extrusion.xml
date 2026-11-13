@@ -4,7 +4,7 @@
 
   Fields and actions: src/UI/Screens/Temperature/ExtruderPresenter.h. Values are typed on the nearest number pad.
 -->
-<component presenter="extruder">
+<component presenter="temperature_extrusion">
 	<view extends="lv_obj" flex_flow="column"
 		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
 		<lv_obj name="controls" width="100%" flex_grow="1" style_layout="grid"
@@ -12,14 +12,14 @@
 			<ds_button name="retract" translation_tag="extrude.retract" icon="retract.png"
 					   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_state_if_eq subject="retract_usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="extruder.retract"/>
 			</ds_button>
 			<ds_button name="extrude" translation_tag="extrude.extrude" icon="extrude.png"
 					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_state_if_eq subject="extrude_usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="extruder.extrude"/>
 			</ds_button>

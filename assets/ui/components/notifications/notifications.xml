@@ -71,14 +71,14 @@
 
 				<lv_obj name="axis_jog_list" width="100%" height="content" flex_flow="column">
 					<bind_flag_if_eq subject="alert.axes_shown" flag="hidden" ref_value="0"/>
-					<ds_list name="list" list="alert.axes" item="alert_axis" width="100%" height="content"
+					<ds_list name="list" list="alert.axes" item="notifications_alert_axis" width="100%" height="content"
 							 flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start"
 							 style_flex_track_place="start"/>
 				</lv_obj>
 
 				<lv_obj name="choices_list" width="100%" height="content" flex_flow="column">
 					<bind_flag_if_eq subject="alert.choices_shown" flag="hidden" ref_value="0"/>
-					<ds_list name="list" list="alert.choices" item="alert_choice" width="100%" height="content"
+					<ds_list name="list" list="alert.choices" item="notifications_alert_choice" width="100%" height="content"
 							 flex_flow="row" style_flex_main_place="start" style_flex_cross_place="start"
 							 style_flex_track_place="start"/>
 				</lv_obj>
@@ -89,12 +89,12 @@
 			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 				<bind_flag_if_eq subject="alert.footer_shown" flag="hidden" ref_value="0"/>
 				<ds_button name="cancel" translation_tag="common.cancel" height="content" flex_grow="1">
-					<style name="actionBtn"/>
+					<style name="action_btn"/>
 					<bind_flag_if_eq subject="alert.cancel" flag="hidden" ref_value="0"/>
 					<action trigger="clicked" name="alert.cancel"/>
 				</ds_button>
 				<ds_button name="ok" bind_text="alert.ok_text" height="content" flex_grow="1">
-					<style name="actionBtn"/>
+					<style name="action_btn"/>
 					<bind_flag_if_eq subject="alert.ok" flag="hidden" ref_value="0"/>
 					<bind_state_if_eq subject="alert.ok" state="disabled" ref_value="1"/>
 					<action trigger="clicked" name="alert.ok"/>

@@ -2,8 +2,8 @@
  * DisplaySettingsPresenter.h
  *
  * Behaviour for the Display settings tab (assets/ui/components/settings/settings_display.xml): the theme, font and
- * icons, the theme preview (theme_preview.xml, ThemePreviewPresenter.h), animations and screen rotation. Each setting
- * is read when the tab is shown and applied as soon as it is changed.
+ * icons, the theme preview (settings_theme_preview.xml, ThemePreviewPresenter.h), animations and screen rotation. Each
+ * setting is read when the tab is shown and applied as soon as it is changed.
  *
  * There is one action per setting, given the value from the widget (an index, or 1/0 for a toggle).
  *

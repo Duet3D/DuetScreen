@@ -16,19 +16,19 @@
 			<action trigger="clicked" name="move.set_position"/>
 		</ds_button>
 		<ds_button name="increment" icon="increment.png" width="100%" flex_grow="1">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="+"/>
 		</ds_button>
 		<ds_button name="home" bind_text="letter" icon="home_axis.png" width="100%" flex_grow="1">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
 			<bind_state_if_eq subject="homed" state="checked" ref_value="0"/>
 			<bind_state_if_eq subject="home_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.home"/>
 		</ds_button>
 		<ds_button name="decrement" icon="decrement.png" width="100%" flex_grow="1">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="-"/>
 		</ds_button>

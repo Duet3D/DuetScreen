@@ -26,13 +26,13 @@
 		<lv_label name="row_label_2" translation_tag="settings.language"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="language" options="languages" selected="language" action="settings.language"
+		<settings_dropdown name="language" options="languages" selected="language" action="settings.language"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_3" translation_tag="settings.keyboard_layout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="keyboard_layout" options="keyboard_layouts" selected="keyboard_layout"
+		<settings_dropdown name="keyboard_layout" options="keyboard_layouts" selected="keyboard_layout"
 						  action="settings.keyboard_layout"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
@@ -77,7 +77,7 @@
 		<lv_label name="row_label_8" translation_tag="settings.job_progress_source"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="job_progress_source" options="progress_sources" selected="progress_source"
+		<settings_dropdown name="job_progress_source" options="progress_sources" selected="progress_source"
 						  action="settings.progress_source"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
@@ -100,7 +100,7 @@
 		<lv_label name="row_label_11" translation_tag="settings.notification_level"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="notification_level" options="notification_levels" selected="notification_level"
+		<settings_dropdown name="notification_level" options="notification_levels" selected="notification_level"
 						  action="settings.notification_level"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>

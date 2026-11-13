@@ -39,7 +39,7 @@
 			   shadow_width="10" shadow_color="#primary" shadow_opa="30%" shadow_spread="2"/>
 
 		<!-- Action buttons glow in the secondary colour -->
-		<style name="actionBtn" bg_color="#bg_light" border_width="1" border_color="#secondary" text_color="#secondary"
+		<style name="action_btn" bg_color="#bg_light" border_width="1" border_color="#secondary" text_color="#secondary"
 			   shadow_color="#secondary"/>
 
 		<!-- Checked button: filled, with a glow -->

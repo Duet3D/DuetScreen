@@ -1,5 +1,5 @@
 <!--
-  The Display settings tab: the theme, font and icons, a preview of the theme (theme_preview.xml), animations and the
+  The Display settings tab: the theme, font and icons, a preview of the theme (settings_theme_preview.xml), animations and the
   screen's rotation. Each is applied as soon as it is changed.
 
   Fields and actions: src/UI/Screens/Settings/DisplaySettingsPresenter.h
@@ -13,23 +13,23 @@
 		<lv_label name="row_label_0" translation_tag="settings.theme"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="theme" options="themes" selected="theme" action="settings.theme"
+		<settings_dropdown name="theme" options="themes" selected="theme" action="settings.theme"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_1" translation_tag="settings.font"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="font" options="fonts" selected="font" action="settings.font"
+		<settings_dropdown name="font" options="fonts" selected="font" action="settings.font"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_2" translation_tag="settings.icons"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="icons" options="icon_sets" selected="icon_set" action="settings.icon_set"
+		<settings_dropdown name="icons" options="icon_sets" selected="icon_set" action="settings.icon_set"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 
-		<ds_view name="theme_preview" view="theme_preview" shown="true" height="content"
+		<ds_view name="theme_preview" view="settings_theme_preview" shown="true" height="content"
 				 style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				 style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 
@@ -45,7 +45,7 @@
 		<lv_label name="row_label_5" translation_tag="settings.screen_rotation"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="screen_rotation" options="rotations" selected="rotation" action="settings.rotation"
+		<settings_dropdown name="screen_rotation" options="rotations" selected="rotation" action="settings.rotation"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
 	</view>

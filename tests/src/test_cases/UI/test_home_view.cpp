@@ -39,20 +39,20 @@ class TestHomeView : public UiTestSuite
   protected:
 	/** The home screen, as the application shows it */
 	TestHomeView()
-		: home("home", lv_screen_active(), "home_screen")
+		: home("home", lv_screen_active(), "home")
 	{
 		ZoneScoped;
 		home.show();
 	}
 
-	/** The view home_screen.xml registers as `name`; fails the test if there is none */
+	/** The view home.xml registers as `name`; fails the test if there is none */
 	template <typename T>
 	static T& page(std::string_view name)
 	{
 		T* view = UI::findView<T>(name);
 		if (view == nullptr)
 		{
-			throw std::runtime_error(fmt::format("home_screen has no {:s}", name));
+			throw std::runtime_error(fmt::format("home has no {:s}", name));
 		}
 		return *view;
 	}
@@ -81,7 +81,7 @@ class TestHomeView : public UiTestSuite
 		return static_cast<UI::Xml::DsGraph&>(*UI::LvObj::fromPtr(graph));
 	}
 
-	/** The Control page's tabs, as control_screen.xml builds them */
+	/** The Control page's tabs, as control.xml builds them */
 	static UI::TabView& controlPage()
 	{
 		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("control").getRootPtr(), "tabs");
@@ -104,7 +104,7 @@ class TestHomeView : public UiTestSuite
 		return lv_obj_find_by_name(page<UI::LvObj>("console").getRootPtr(), name);
 	}
 
-	/** The Files page's tabs, as files_screen.xml builds them */
+	/** The Files page's tabs, as files.xml builds them */
 	static UI::TabView& filesPage()
 	{
 		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("files").getRootPtr(), "tabs");
@@ -165,7 +165,7 @@ class TestHomeView : public UiTestSuite
 		for (uint32_t i = 0; i < lv_obj_get_child_count(host); i++)
 		{
 			lv_obj_t* backdrop = lv_obj_get_child(host, static_cast<int32_t>(i));
-			lv_obj_t* dialog = lv_obj_find_by_name(backdrop, "file_dialog");
+			lv_obj_t* dialog = lv_obj_find_by_name(backdrop, "file_browser_dialog");
 			if (dialog != nullptr && !lv_obj_has_flag(backdrop, LV_OBJ_FLAG_HIDDEN) &&
 				!lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN))
 			{
@@ -184,7 +184,7 @@ class TestHomeView : public UiTestSuite
 	{
 		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
 	}
-	/** The Settings page's tabs (0 general, 1 connection, 2 display, 3 developer), as settings_screen.xml builds them
+	/** The Settings page's tabs (0 general, 1 connection, 2 display, 3 developer), as settings.xml builds them
 	 */
 	static UI::TabView& settingsPage()
 	{
@@ -435,7 +435,7 @@ TEST_F(TestHomeView, BlankStatusView)
 
 TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 {
-	lv_obj_t* sidebar = UI::findView("side_bar")->getRootPtr();
+	lv_obj_t* sidebar = UI::findView("sidebar")->getRootPtr();
 	auto button = [sidebar](const char* name) { return lv_obj_find_by_name(sidebar, name); };
 	auto pump = []
 	{
@@ -731,8 +731,8 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/temperature_graph.png");
 
 	/* Open the tool list numberpad */
-	// The first tool's first heater row, as tool_list.xml builds it
-	lv_obj_t* toolList = UI::findView("tool_list")->getRootPtr();
+	// The first tool's first heater row, as dashboard_tools.xml builds it
+	lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
 	lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
 	lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
@@ -745,7 +745,7 @@ TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
 	Model::get().startEventLoop();
 	Model::get().stopEventLoop();
-	lv_obj_t* toolList = UI::findView("tool_list")->getRootPtr();
+	lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
 	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
 	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
 	ASSERT_NE(lv_obj_find_by_name(tools, "status"), nullptr);
@@ -946,7 +946,7 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 {
 	UI::openScreen(std::string_view("settings"));
 	settingsPage().setActiveTab(1);
-	lv_obj_t* wifi = UI::findView("wifi_selector")->getRootPtr();
+	lv_obj_t* wifi = UI::findView("settings_wifi")->getRootPtr();
 	lv_obj_t* networks = lv_obj_find_by_name(wifi, "list");
 	ASSERT_NE(networks, nullptr);
 	for (int i = 0; i < 50 && lv_obj_get_child_count(networks) == 0; i++) // Scanned on a thread of its own
@@ -1001,7 +1001,7 @@ TEST_F(TestHomeViewWithData, StatusView)
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
-	lv_obj_t* status = page<UI::LvObj>("job_status").getRootPtr();
+	lv_obj_t* status = page<UI::LvObj>("dashboard_job_status").getRootPtr();
 	auto click = [&](const char* name)
 	{
 		lv_obj_t* obj = lv_obj_find_by_name(status, name);
@@ -1056,7 +1056,7 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 	// Rebuilt from scratch, showing the printer as before
 	UI::home();
 	ASSERT_EQ(dashboardTabs().getTabCount(), 3u);
-	lv_obj_t* tools = lv_obj_find_by_name(UI::findView("tool_list")->getRootPtr(), "tools");
+	lv_obj_t* tools = lv_obj_find_by_name(UI::findView("dashboard_tools")->getRootPtr(), "tools");
 	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 4u) << "the test bench's four tools";
 }
 
@@ -1258,7 +1258,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
 	runEvents(); // Fill the lists from the object model
 	{
-		lv_obj_t* toolList = UI::findView("tool_list")->getRootPtr();
+		lv_obj_t* toolList = UI::findView("dashboard_tools")->getRootPtr();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
 		lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 		EXPECT_NE(shownNumberPadIn(lv_screen_active()), nullptr) << "dashboard heater";
@@ -1270,7 +1270,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "active_temperature")) << "temperature heater";
 	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "value")) << "value selector";
 	openControlTab(4);
-	EXPECT_TRUE(tapShowsNumberPad("fan", nullptr, "slider", true)) << "fan slider";
+	EXPECT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true)) << "fan slider";
 
 	UI::openScreen(std::string_view("settings"), false);
 	settingsPage().setActiveTab(0);

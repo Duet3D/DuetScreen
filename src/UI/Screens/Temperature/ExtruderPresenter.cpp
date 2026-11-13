@@ -16,7 +16,7 @@
 namespace UI
 {
 	ExtruderPresenter::ExtruderPresenter()
-		: XmlPresenter("extruder")
+		: XmlPresenter("temperature_extrusion")
 		, m_distance({.id = "distance",
 					  .storageKey = std::string(ID_MVS_EXTRUSION_DISTANCES),
 					  .presets = {1.0f, 2.0f, 5.0f, 10.0f},

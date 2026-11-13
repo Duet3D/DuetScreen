@@ -520,14 +520,13 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="babystep"/>
 			<xs:enumeration value="console"/>
+			<xs:enumeration value="dashboard_job_status"/>
 			<xs:enumeration value="dashboard_jobs"/>
 			<xs:enumeration value="dashboard_macros"/>
-			<xs:enumeration value="extruder"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
 			<xs:enumeration value="heightmap"/>
-			<xs:enumeration value="job_status"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="object_cancel"/>
@@ -535,10 +534,11 @@
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
 			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_theme_preview"/>
+			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="status_bar"/>
 			<xs:enumeration value="temperature"/>
-			<xs:enumeration value="theme_preview"/>
-			<xs:enumeration value="wifi"/>
+			<xs:enumeration value="temperature_extrusion"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="presenter">
@@ -546,63 +546,63 @@
 	</xs:simpleType>
 	<xs:simpleType name="component.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="alert_axis"/>
-			<xs:enumeration value="alert_choice"/>
-			<xs:enumeration value="axis_position"/>
 			<xs:enumeration value="babystep"/>
 			<xs:enumeration value="babystep_step"/>
 			<xs:enumeration value="confirm_dialog"/>
 			<xs:enumeration value="console"/>
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
-			<xs:enumeration value="control_screen"/>
+			<xs:enumeration value="control"/>
 			<xs:enumeration value="dashboard"/>
-			<xs:enumeration value="extruder"/>
+			<xs:enumeration value="dashboard_axis"/>
+			<xs:enumeration value="dashboard_heater"/>
+			<xs:enumeration value="dashboard_heater_card"/>
+			<xs:enumeration value="dashboard_job_status"/>
+			<xs:enumeration value="dashboard_tool"/>
+			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="fan_card"/>
-			<xs:enumeration value="fan_screen"/>
+			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
-			<xs:enumeration value="file_crumb"/>
-			<xs:enumeration value="file_dialog"/>
-			<xs:enumeration value="file_row"/>
-			<xs:enumeration value="file_tile"/>
-			<xs:enumeration value="files_screen"/>
-			<xs:enumeration value="heater_card"/>
-			<xs:enumeration value="heater_row"/>
+			<xs:enumeration value="file_browser_crumb"/>
+			<xs:enumeration value="file_browser_dialog"/>
+			<xs:enumeration value="file_browser_row"/>
+			<xs:enumeration value="file_browser_tile"/>
+			<xs:enumeration value="files"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
-			<xs:enumeration value="home_screen"/>
-			<xs:enumeration value="job_object_item"/>
-			<xs:enumeration value="job_object_rect"/>
-			<xs:enumeration value="job_status"/>
+			<xs:enumeration value="home"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_distance"/>
 			<xs:enumeration value="move_feedrate"/>
 			<xs:enumeration value="move_xy"/>
 			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="notifications_alert_axis"/>
+			<xs:enumeration value="notifications_alert_choice"/>
 			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="object_cancel_outline"/>
+			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="question_dialog"/>
-			<xs:enumeration value="setting_dropdown"/>
+			<xs:enumeration value="settings"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_dropdown"/>
 			<xs:enumeration value="settings_general"/>
-			<xs:enumeration value="settings_screen"/>
-			<xs:enumeration value="side_bar"/>
+			<xs:enumeration value="settings_theme_preview"/>
+			<xs:enumeration value="settings_theme_swatch"/>
+			<xs:enumeration value="settings_wifi"/>
+			<xs:enumeration value="settings_wifi_network"/>
+			<xs:enumeration value="sidebar"/>
 			<xs:enumeration value="status_bar"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
+			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
-			<xs:enumeration value="theme_preview"/>
-			<xs:enumeration value="theme_swatch"/>
-			<xs:enumeration value="tool_card"/>
-			<xs:enumeration value="tool_list"/>
-			<xs:enumeration value="value_choice"/>
 			<xs:enumeration value="value_selector"/>
-			<xs:enumeration value="wifi_network"/>
-			<xs:enumeration value="wifi_selector"/>
+			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="component">
@@ -610,9 +610,6 @@
 	</xs:simpleType>
 	<xs:simpleType name="view.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="alert_axis"/>
-			<xs:enumeration value="alert_choice"/>
-			<xs:enumeration value="axis_position"/>
 			<xs:enumeration value="babystep"/>
 			<xs:enumeration value="babystep_step"/>
 			<xs:enumeration value="confirm_dialog"/>
@@ -620,28 +617,28 @@
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="container"/>
-			<xs:enumeration value="control_screen"/>
+			<xs:enumeration value="control"/>
 			<xs:enumeration value="dashboard"/>
+			<xs:enumeration value="dashboard_axis"/>
+			<xs:enumeration value="dashboard_heater"/>
+			<xs:enumeration value="dashboard_heater_card"/>
+			<xs:enumeration value="dashboard_job_status"/>
+			<xs:enumeration value="dashboard_tool"/>
+			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="estop"/>
-			<xs:enumeration value="extruder"/>
 			<xs:enumeration value="extrusion_factor"/>
 			<xs:enumeration value="fan_card"/>
-			<xs:enumeration value="fan_screen"/>
+			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
-			<xs:enumeration value="file_crumb"/>
-			<xs:enumeration value="file_dialog"/>
-			<xs:enumeration value="file_row"/>
-			<xs:enumeration value="file_tile"/>
-			<xs:enumeration value="files_screen"/>
-			<xs:enumeration value="heater_card"/>
-			<xs:enumeration value="heater_row"/>
+			<xs:enumeration value="file_browser_crumb"/>
+			<xs:enumeration value="file_browser_dialog"/>
+			<xs:enumeration value="file_browser_row"/>
+			<xs:enumeration value="file_browser_tile"/>
+			<xs:enumeration value="files"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
-			<xs:enumeration value="home_screen"/>
+			<xs:enumeration value="home"/>
 			<xs:enumeration value="job_extrusion_factor"/>
-			<xs:enumeration value="job_object_item"/>
-			<xs:enumeration value="job_object_rect"/>
-			<xs:enumeration value="job_status"/>
 			<xs:enumeration value="keyboard"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
@@ -649,31 +646,34 @@
 			<xs:enumeration value="move_feedrate"/>
 			<xs:enumeration value="move_xy"/>
 			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="notifications_alert_axis"/>
+			<xs:enumeration value="notifications_alert_choice"/>
 			<xs:enumeration value="numberpad"/>
 			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="object_cancel_outline"/>
+			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="question_dialog"/>
-			<xs:enumeration value="setting_dropdown"/>
+			<xs:enumeration value="settings"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_dropdown"/>
 			<xs:enumeration value="settings_general"/>
-			<xs:enumeration value="settings_screen"/>
-			<xs:enumeration value="side_bar"/>
+			<xs:enumeration value="settings_theme_preview"/>
+			<xs:enumeration value="settings_theme_swatch"/>
+			<xs:enumeration value="settings_wifi"/>
+			<xs:enumeration value="settings_wifi_network"/>
+			<xs:enumeration value="sidebar"/>
 			<xs:enumeration value="speed_factor"/>
 			<xs:enumeration value="status_bar"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
+			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
-			<xs:enumeration value="theme_preview"/>
-			<xs:enumeration value="theme_swatch"/>
-			<xs:enumeration value="tool_card"/>
-			<xs:enumeration value="tool_list"/>
-			<xs:enumeration value="value_choice"/>
 			<xs:enumeration value="value_selector"/>
-			<xs:enumeration value="wifi_network"/>
-			<xs:enumeration value="wifi_selector"/>
+			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="view">
@@ -681,17 +681,20 @@
 	</xs:simpleType>
 	<xs:simpleType name="widget.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="alert_axis"/>
-			<xs:enumeration value="alert_choice"/>
-			<xs:enumeration value="axis_position"/>
 			<xs:enumeration value="babystep"/>
 			<xs:enumeration value="babystep_step"/>
 			<xs:enumeration value="confirm_dialog"/>
 			<xs:enumeration value="console"/>
 			<xs:enumeration value="console_gcode"/>
 			<xs:enumeration value="console_line"/>
-			<xs:enumeration value="control_screen"/>
+			<xs:enumeration value="control"/>
 			<xs:enumeration value="dashboard"/>
+			<xs:enumeration value="dashboard_axis"/>
+			<xs:enumeration value="dashboard_heater"/>
+			<xs:enumeration value="dashboard_heater_card"/>
+			<xs:enumeration value="dashboard_job_status"/>
+			<xs:enumeration value="dashboard_tool"/>
+			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="ds_bar"/>
 			<xs:enumeration value="ds_bar_marker"/>
 			<xs:enumeration value="ds_button"/>
@@ -714,23 +717,17 @@
 			<xs:enumeration value="ds_thumbnail"/>
 			<xs:enumeration value="ds_toggle"/>
 			<xs:enumeration value="ds_view"/>
-			<xs:enumeration value="extruder"/>
 			<xs:enumeration value="fan_card"/>
-			<xs:enumeration value="fan_screen"/>
+			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
-			<xs:enumeration value="file_crumb"/>
-			<xs:enumeration value="file_dialog"/>
-			<xs:enumeration value="file_row"/>
-			<xs:enumeration value="file_tile"/>
-			<xs:enumeration value="files_screen"/>
-			<xs:enumeration value="heater_card"/>
-			<xs:enumeration value="heater_row"/>
+			<xs:enumeration value="file_browser_crumb"/>
+			<xs:enumeration value="file_browser_dialog"/>
+			<xs:enumeration value="file_browser_row"/>
+			<xs:enumeration value="file_browser_tile"/>
+			<xs:enumeration value="files"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
-			<xs:enumeration value="home_screen"/>
-			<xs:enumeration value="job_object_item"/>
-			<xs:enumeration value="job_object_rect"/>
-			<xs:enumeration value="job_status"/>
+			<xs:enumeration value="home"/>
 			<xs:enumeration value="lv_obj-action"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
@@ -738,29 +735,32 @@
 			<xs:enumeration value="move_feedrate"/>
 			<xs:enumeration value="move_xy"/>
 			<xs:enumeration value="notifications"/>
+			<xs:enumeration value="notifications_alert_axis"/>
+			<xs:enumeration value="notifications_alert_choice"/>
 			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="object_cancel_outline"/>
+			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="question_dialog"/>
-			<xs:enumeration value="setting_dropdown"/>
+			<xs:enumeration value="settings"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
+			<xs:enumeration value="settings_dropdown"/>
 			<xs:enumeration value="settings_general"/>
-			<xs:enumeration value="settings_screen"/>
-			<xs:enumeration value="side_bar"/>
+			<xs:enumeration value="settings_theme_preview"/>
+			<xs:enumeration value="settings_theme_swatch"/>
+			<xs:enumeration value="settings_wifi"/>
+			<xs:enumeration value="settings_wifi_network"/>
+			<xs:enumeration value="sidebar"/>
 			<xs:enumeration value="status_bar"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_extruder"/>
+			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
-			<xs:enumeration value="theme_preview"/>
-			<xs:enumeration value="theme_swatch"/>
-			<xs:enumeration value="tool_card"/>
-			<xs:enumeration value="tool_list"/>
-			<xs:enumeration value="value_choice"/>
 			<xs:enumeration value="value_selector"/>
-			<xs:enumeration value="wifi_network"/>
-			<xs:enumeration value="wifi_selector"/>
+			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="widget">
@@ -768,7 +768,7 @@
 	</xs:simpleType>
 	<xs:simpleType name="style.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="actionBtn"/>
+			<xs:enumeration value="action_btn"/>
 			<xs:enumeration value="anim"/>
 			<xs:enumeration value="anim_fast"/>
 			<xs:enumeration value="arc_indic"/>
@@ -2137,27 +2137,6 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="alert_axis">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/alert_axis.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="alert_choice">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/alert_choice.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="axis_position">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/axis_position.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="babystep">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/common/babystep.xml, with presenter babystep.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -2215,8 +2194,8 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="control_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/control_screen.xml.</xs:documentation></xs:annotation>
+	<xs:element name="control">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/control.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2229,8 +2208,43 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="extruder">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/extruder.xml, with presenter extruder.</xs:documentation></xs:annotation>
+	<xs:element name="dashboard_axis">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_axis.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_heater_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_heater_card.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_job_status">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_job_status.xml, with presenter dashboard_job_status.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_tool">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tool.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_tools">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tools.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2243,64 +2257,50 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="fan_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fan_screen.xml, with presenter fans.</xs:documentation></xs:annotation>
+	<xs:element name="fans">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fans.xml, with presenter fans.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="file_browser">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_browser.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="file_crumb">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_crumb.xml.</xs:documentation></xs:annotation>
+	<xs:element name="file_browser_crumb">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser_crumb.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="file_dialog">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_dialog.xml.</xs:documentation></xs:annotation>
+	<xs:element name="file_browser_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser_dialog.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="file_row">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_row.xml.</xs:documentation></xs:annotation>
+	<xs:element name="file_browser_row">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="file_tile">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/files/file_tile.xml.</xs:documentation></xs:annotation>
+	<xs:element name="file_browser_tile">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser_tile.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="files_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/files/files_screen.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="heater_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/heater_card.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="heater_row">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/heater_row.xml.</xs:documentation></xs:annotation>
+	<xs:element name="files">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/files/files.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2320,29 +2320,8 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="home_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/home/home_screen.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="job_object_item">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/job_object_item.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="job_object_rect">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/job_object_rect.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="job_status">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_status.xml, with presenter job_status.</xs:documentation></xs:annotation>
+	<xs:element name="home">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/home/home.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2390,8 +2369,36 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="notifications_alert_axis">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/notifications_alert_axis.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="notifications_alert_choice">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/notifications_alert_choice.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="object_cancel">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/object_cancel.xml, with presenter object_cancel.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="object_cancel_outline">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/object_cancel_outline.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="object_cancel_row">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/object_cancel_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2419,19 +2426,10 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="setting_dropdown">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/setting_dropdown.xml.</xs:documentation></xs:annotation>
+	<xs:element name="settings">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attribute name="options" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `options` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="selected" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `selected` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="action" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
@@ -2456,6 +2454,22 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="settings_dropdown">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_dropdown.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="options" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `options` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="selected" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `selected` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="settings_general">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -2463,22 +2477,43 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="settings_screen">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_screen.xml.</xs:documentation></xs:annotation>
+	<xs:element name="settings_theme_preview">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_theme_preview.xml, with presenter settings_theme_preview.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="side_bar">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/home/side_bar.xml.</xs:documentation></xs:annotation>
+	<xs:element name="settings_theme_swatch">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_theme_swatch.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_wifi">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_wifi.xml, with presenter settings_wifi.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_wifi_network">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_wifi_network.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="sidebar">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/sidebar/sidebar.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="status_bar">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/home/status_bar.xml, with presenter status_bar.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar/status_bar.xml, with presenter status_bar.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2493,6 +2528,13 @@
 	</xs:element>
 	<xs:element name="temperature_extruder">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extruder.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_extrusion">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extrusion.xml, with presenter temperature_extrusion.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -2519,41 +2561,6 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="theme_preview">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/theme_preview.xml, with presenter theme_preview.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="theme_swatch">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/theme_swatch.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="tool_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/tool_card.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="tool_list">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/tool_list.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="value_choice">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/common/value_choice.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="value_selector">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/common/value_selector.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -2573,15 +2580,8 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="wifi_network">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/wifi_network.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="wifi_selector">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/wifi_selector.xml, with presenter wifi.</xs:documentation></xs:annotation>
+	<xs:element name="value_selector_choice">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/value_selector_choice.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:anyAttribute processContents="lax"/>

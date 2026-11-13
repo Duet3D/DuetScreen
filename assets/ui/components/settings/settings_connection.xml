@@ -1,6 +1,6 @@
 <!--
   The Connection settings tab: how the screen reaches the Duet (and, over the network, the Duet's address and
-  password), how often it polls it, and the screen's own WiFi (wifi_selector.xml).
+  password), how often it polls it, and the screen's own WiFi (settings_wifi.xml).
 
   Fields and actions: src/UI/Screens/Settings/ConnectionSettingsPresenter.h. Numbers and the IP address are typed on
   the shared number pad; the password on the shared keyboard.
@@ -14,14 +14,14 @@
 		<lv_label name="row_label_0" translation_tag="settings.duet_connection_method"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="connection_method" options="connection_methods" selected="connection_method"
+		<settings_dropdown name="connection_method" options="connection_methods" selected="connection_method"
 						  action="settings.connection_method"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_1" translation_tag="settings.usb_mode"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<setting_dropdown name="usb_mode" options="usb_modes" selected="usb_mode" action="settings.usb_mode"
+		<settings_dropdown name="usb_mode" options="usb_modes" selected="usb_mode" action="settings.usb_mode"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_2" translation_tag="settings.duet_poll_interval"
@@ -66,7 +66,7 @@
 				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
 			<style name="text_emphasis"/>
 		</lv_label>
-		<ds_view name="wifi_selector" view="wifi_selector" shown="true" height="content"
+		<ds_view name="settings_wifi" view="settings_wifi" shown="true" height="content"
 				 style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				 style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
 	</view>

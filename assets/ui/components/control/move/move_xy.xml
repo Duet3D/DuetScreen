@@ -30,35 +30,35 @@
 		<ds_button name="x_increment" icon="arrow_right.png"
 				   style_grid_cell_column_pos="3" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="x.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="X+"/>
 		</ds_button>
 		<ds_button name="x_decrement" icon="arrow_left.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="x.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="X-"/>
 		</ds_button>
 		<ds_button name="y_increment" icon="arrow_up.png"
 				   style_grid_cell_column_pos="1" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="y.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="Y+"/>
 		</ds_button>
 		<ds_button name="y_decrement" icon="arrow_down.png"
 				   style_grid_cell_column_pos="1" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="y.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="Y-"/>
 		</ds_button>
 		<ds_button name="home_all" translation_tag="move.home_all" icon="home_axis.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
 			<bind_state_if_eq subject="home_all_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.home" arg="all"/>
@@ -66,7 +66,7 @@
 		<ds_button name="home_xy" text="XY" icon="home_axis.png"
 				   style_grid_cell_column_pos="1" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
 			<bind_state_if_eq subject="xy.homed" state="checked" ref_value="0"/>
 			<bind_state_if_eq subject="xy.home_usable" state="disabled" ref_value="0"/>
@@ -75,7 +75,7 @@
 		<ds_button name="home_x" text="X" icon="home_axis.png"
 				   style_grid_cell_column_pos="3" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
 			<bind_state_if_eq subject="x.homed" state="checked" ref_value="0"/>
 			<bind_state_if_eq subject="x.home_usable" state="disabled" ref_value="0"/>
@@ -84,7 +84,7 @@
 		<ds_button name="home_y" text="Y" icon="home_axis.png"
 				   style_grid_cell_column_pos="3" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
 			<bind_state_if_eq subject="y.homed" state="checked" ref_value="0"/>
 			<bind_state_if_eq subject="y.home_usable" state="disabled" ref_value="0"/>
@@ -93,7 +93,7 @@
 		<ds_button name="disable_motors" translation_tag="move.disable_motors" icon="disable_motors.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
-			<style name="actionBtn"/>
+			<style name="action_btn"/>
 			<bind_state_if_eq subject="disable_motors_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.disable_motors"/>
 		</ds_button>

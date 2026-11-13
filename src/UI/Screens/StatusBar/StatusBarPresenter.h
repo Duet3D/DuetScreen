@@ -1,7 +1,7 @@
 /*
  * StatusBarPresenter.h
  *
- * Behaviour for the status bar (assets/ui/components/home/status_bar.xml): the connection and printer state, the
+ * Behaviour for the status bar (assets/ui/components/status_bar/status_bar.xml): the connection and printer state, the
  * printer's name, and the current tool's temperatures.
  *
  * The names it provides are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).

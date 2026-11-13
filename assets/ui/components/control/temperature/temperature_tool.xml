@@ -16,7 +16,7 @@
 		<lv_obj name="tool_info" width="100%" height="content" flex_flow="row_wrap"
 				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 			<ds_button name="tool_name" bind_text="name" width="content" height="content">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
 				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 				<action trigger="clicked" name="tools.toggle"/>
@@ -39,13 +39,13 @@
 					<action trigger="value_changed" name="temperature.pick_filament"/>
 				</ds_dropdown>
 				<ds_button name="filament_change" bind_text="change_text" width="content" height="100%">
-					<style name="actionBtn"/>
+					<style name="action_btn"/>
 					<bind_flag_if_eq subject="change_shown" flag="hidden" ref_value="0"/>
 					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 					<action trigger="clicked" name="temperature.change_filament"/>
 				</ds_button>
 				<ds_button name="filament_load_unload" translation_tag="filament.unload" width="content" height="100%">
-					<style name="actionBtn"/>
+					<style name="action_btn"/>
 					<bind_state_if_eq subject="filament_loaded" state="disabled" ref_value="0"/>
 					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 					<action trigger="clicked" name="temperature.unload_filament"/>

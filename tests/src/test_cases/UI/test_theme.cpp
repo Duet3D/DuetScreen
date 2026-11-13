@@ -74,7 +74,7 @@ TEST_F(TestTheme, DefaultTheme)
 	theme->resetPalette();
 	theme->setThemeActive();
 
-	Xml::XmlView themePreview("theme_preview", screen, "theme_preview");
+	Xml::XmlView themePreview("settings_theme_preview", screen, "settings_theme_preview");
 	themePreview.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 	themePreview.show();
 	EXPECT_TRUE(Themes::getCurrentTheme() == theme);

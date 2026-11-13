@@ -100,7 +100,7 @@ namespace UI
 		addEventCallback(
 			[this](lv_event_t*)
 			{
-				const auto& actionStyle = Themes::getLvglStyles().actionBtn;
+				const auto& actionStyle = Themes::getLvglStyles().action_btn;
 				lv_style_value_t v;
 				const bool hasRecolor = actionStyle.getProp(LV_STYLE_RECOLOR, &v) == LV_STYLE_RES_FOUND;
 				if (hasStyle(actionStyle) && hasRecolor)

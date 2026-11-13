@@ -1,8 +1,8 @@
 /*
  * FileBrowserPresenter.h
  *
- * Behaviour for the file browser (assets/ui/components/files/file_browser.xml): browse the jobs or macros folder, sort,
- * and start a job, run a macro or delete a file after asking.
+ * Behaviour for the file browser (assets/ui/components/file_browser/file_browser.xml): browse the jobs or macros
+ * folder, sort, and start a job, run a macro or delete a file after asking.
  *
  * The browser is shown in several places, each with its own folder and remembered settings, so each placement
  * registers a presenter of its own (see Screens/XmlScreens.cpp) and names it: `<ds_view view="file_browser"

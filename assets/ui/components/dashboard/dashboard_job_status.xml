@@ -7,7 +7,7 @@
 
   Fields and actions: src/UI/Screens/Status/JobStatusPresenter.h
 -->
-<component presenter="job_status">
+<component presenter="dashboard_job_status">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="pad_zero"/>
 		<style name="pad_gap"/>
@@ -50,7 +50,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="axes" item="axis_position" width="100%" height="content"
+				<ds_list name="list" list="axes" item="dashboard_axis" width="100%" height="content"
 						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="start"
 						 style_flex_track_place="start"/>
 			</lv_obj>
@@ -148,21 +148,21 @@
 			<style name="card"/>
 			<ds_button name="pause" translation_tag="status.pause" icon="pause.png" height="100%"
 					   style_min_height="content" flex_grow="1">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_flag_if_eq subject="pause" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="pause" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.pause"/>
 			</ds_button>
 			<ds_button name="resume" translation_tag="status.resume" icon="resume.png" height="100%"
 					   style_min_height="content" flex_grow="1">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_flag_if_eq subject="resume" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="resume" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.resume"/>
 			</ds_button>
 			<ds_button name="print_again" translation_tag="status.print_again" icon="print_again.png" height="100%"
 					   style_min_height="content" flex_grow="1">
-				<style name="actionBtn"/>
+				<style name="action_btn"/>
 				<bind_flag_if_eq subject="print_again" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="print_again" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.print_again"/>

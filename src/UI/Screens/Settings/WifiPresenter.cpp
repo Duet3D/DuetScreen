@@ -19,7 +19,7 @@ namespace UI
 	}
 
 	WifiPresenter::WifiPresenter()
-		: XmlPresenter("wifi")
+		: XmlPresenter("settings_wifi")
 	{
 		action("wifi.refresh", "Scan for networks now", [this](const Xml::ActionArgs&) { m_scanner.scanNow(); });
 		action("wifi.connect",

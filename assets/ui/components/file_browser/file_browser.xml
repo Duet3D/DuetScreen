@@ -1,6 +1,6 @@
 <!--
   Browse a folder of jobs or macros: sort buttons and display mode at the top, the folder's path, then its files as a
-  list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in file_dialog.
+  list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in file_browser_dialog.xml.
 
   Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
   e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Screens/XmlScreens.cpp).
@@ -42,23 +42,23 @@
 					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="bg_color_header"/>
 				<lv_label name="breadcrumb_prefix" translation_tag="file.header_prefix" width="content" height="content"/>
-				<ds_list name="breadcrumb_container" list="crumbs" item="file_crumb" height="content" flex_grow="1"
+				<ds_list name="breadcrumb_container" list="crumbs" item="file_browser_crumb" height="content" flex_grow="1"
 						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="center"
 						 style_flex_track_place="start">
 					<style name="pad_tiny"/>
 				</ds_list>
 			</lv_obj>
 
-			<ds_list name="rows" list="files" item="file_row" windowed="true" item_height="90"
+			<ds_list name="rows" list="files" item="file_browser_row" windowed="true" item_height="90"
 					 width="100%" height="100%" flex_grow="1" scroll_dir="ver">
 				<bind_flag_if_eq subject="tiles" flag="hidden" ref_value="1"/>
 			</ds_list>
-			<ds_list name="tiles" list="files" item="file_tile" windowed="true" item_width="150" item_height="170"
+			<ds_list name="tiles" list="files" item="file_browser_tile" windowed="true" item_width="150" item_height="170"
 					 flow="row_wrap" width="100%" height="100%" flex_grow="1" scroll_dir="ver">
 				<bind_flag_if_eq subject="tiles" flag="hidden" ref_value="0"/>
 			</ds_list>
 		</lv_obj>
 
-		<file_dialog/>
+		<file_browser_dialog/>
 	</view>
 </component>

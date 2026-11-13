@@ -4,11 +4,11 @@
  * A list is a dynamic-length sequence of rows. Each row owns its own subjects, and may own lists of its own (a tool
  * row has a list of heaters). XML shows a list with
  *
- *     <ds_list list="tools" item="tool_card"/>
+ *     <ds_list list="tools" item="dashboard_tool"/>
  *
- * which builds one `tool_card` per row, each in a scope holding that row's fields. Lists tell the views showing them
- * when they grow or shrink; views add or remove rows at the end, so existing rows, and their scroll position, focus
- * and in-progress edits, survive a length change.
+ * which builds one `dashboard_tool` per row, each in a scope holding that row's fields. Lists tell the views showing
+ * them when they grow or shrink; views add or remove rows at the end, so existing rows, and their scroll position,
+ * focus and in-progress edits, survive a length change.
  */
 
 #pragma once

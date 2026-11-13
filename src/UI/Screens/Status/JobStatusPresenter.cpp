@@ -43,7 +43,7 @@ namespace UI
 	}
 
 	JobStatusPresenter::JobStatusPresenter()
-		: XmlPresenter("job_status")
+		: XmlPresenter("dashboard_job_status")
 	{
 		action("job.pause", "Pause the job", [](const Xml::ActionArgs&) { OM::FileSystem::PausePrint(); });
 		action("job.resume", "Resume the paused job", [](const Xml::ActionArgs&) { OM::FileSystem::ResumePrint(); });

@@ -39,7 +39,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/3d/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/3d/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/3d/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/3d/lvgl_widgets.png)
 
@@ -69,7 +69,7 @@ Extends `base`. Its file is [duetscreen.xml](../assets/ui/themes/duetscreen.xml)
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/duetscreen/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/duetscreen/lvgl_widgets.png)
 
@@ -101,7 +101,7 @@ Palette: `chroma=0`, `dark=true`, `primary_hue=80`, `secondary_hue=30`
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/flat/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/flat/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/flat/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/flat/lvgl_widgets.png)
 
@@ -135,7 +135,7 @@ Colour adjustments: `primary chroma=0`, `primary_muted chroma=0`, `secondary chr
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/grey/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/grey/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/grey/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/grey/lvgl_widgets.png)
 
@@ -169,7 +169,7 @@ Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 800, bold; norma
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/industrial/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/industrial/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/industrial/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/industrial/lvgl_widgets.png)
 
@@ -205,7 +205,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/neon/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/neon/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/neon/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/neon/lvgl_widgets.png)
 
@@ -239,7 +239,7 @@ Fonts: emphasis: 15 px, weight 700, bold; header: 20 px, weight 800, bold; norma
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/retro/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/retro/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/retro/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/retro/lvgl_widgets.png)
 
@@ -273,7 +273,7 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 600, bold; norma
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/soft/fonts.png)
 
-![The home screen](../tests/ref_imgs/xml_ui_api/themes/soft/home_screen.png)
+![The home screen](../tests/ref_imgs/xml_ui_api/themes/soft/home.png)
 
 ![LVGL's widgets](../tests/ref_imgs/xml_ui_api/themes/soft/lvgl_widgets.png)
 
@@ -359,7 +359,7 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `transition_normal` |  |  |  |  |  |  |  |  |
 | `anim` |  |  |  |  |  |  |  |  |
 | `anim_fast` |  |  |  |  |  |  |  |  |
-| `actionBtn` | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/actionBtn.png) | ![actionBtn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/actionBtn.png) |
+| `action_btn` | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/action_btn.png) | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/action_btn.png) |
 | `input` | ![input](../tests/ref_imgs/xml_ui_api/themes/3d/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/flat/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/grey/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/neon/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/retro/styles/input.png) | ![input](../tests/ref_imgs/xml_ui_api/themes/soft/styles/input.png) |
 | `long_press` |  |  |  |  |  |  |  |  |
 | `draggable` |  |  |  |  |  |  |  |  |

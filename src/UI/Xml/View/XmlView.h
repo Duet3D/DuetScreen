@@ -6,7 +6,7 @@
  *
  * The view owns the component's presenter (if it names one, or the one it is given) and a top-level scope holding the
  * presenter's fields. Giving a view a presenter lets C++ show a component with data of its own: the presenter's
- * fields shadow the globals, so e.g. tool_list.xml can show a presenter's `tools` list instead of the printer's.
+ * fields shadow the globals, so e.g. dashboard_tools.xml can show a presenter's `tools` list instead of the printer's.
  * Like a C++ View, it activates the presenter and connects it to the Model while shown, and disconnects it while
  * hidden.
  */

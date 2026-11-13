@@ -17,8 +17,8 @@
 			<ds_tabs-tab name="object_cancel" title_tag="control.object_cancel_tab">
 				<ds_view name="object_cancel" view="object_cancel" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="fan" title_tag="control.fan_tab">
-				<ds_view name="fan" view="fan_screen" shown="true"/>
+			<ds_tabs-tab name="fans" title_tag="control.fan_tab">
+				<ds_view name="fans" view="fans" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>
 	</view>
