@@ -83,6 +83,29 @@ namespace UI::Xml
 		{
 			slider.setLabel(label);
 		}
+		if (!lv_xml_to_bool(attrOr(attrs, "label_shown", "true")))
+		{
+			slider.getLabel().hide(); // Still the number pad's header
+		}
+		if (lv_streq(attrOr(attrs, "send", "confirmed"), "change"))
+		{
+			slider.setSendMode(SendMode::VALUE_CHANGED);
+		}
+		if (const char* outOfRange = lv_xml_get_value_of(attrs, "out_of_range"))
+		{
+			if (lv_streq(outOfRange, "upper"))
+			{
+				slider.setOutOfRangeMode(OutOfRange::UPPER);
+			}
+			else if (lv_streq(outOfRange, "lower"))
+			{
+				slider.setOutOfRangeMode(OutOfRange::LOWER);
+			}
+			else if (lv_streq(outOfRange, "both"))
+			{
+				slider.setOutOfRangeMode(OutOfRange::BOTH);
+			}
+		}
 		if (lv_xml_to_bool(attrOr(attrs, "numberpad", "false")))
 		{
 			slider.setNumberPad(findView<ModalNumberPad>("numberpad"));

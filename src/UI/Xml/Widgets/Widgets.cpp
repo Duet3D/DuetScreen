@@ -20,6 +20,7 @@
 #include "DsTabs.h"
 #include "DsTextarea.h"
 #include "DsThumbnail.h"
+#include "DsToggle.h"
 #include "DsView.h"
 
 namespace UI::Xml::Widgets
@@ -43,6 +44,7 @@ namespace UI::Xml::Widgets
 		DsTabs::registerXml();
 		DsTextarea::registerXml();
 		DsThumbnail::registerXml();
+		DsToggle::registerXml();
 		DsView::registerXml();
 	}
 } // namespace UI::Xml::Widgets

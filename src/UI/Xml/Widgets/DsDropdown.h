@@ -9,9 +9,10 @@
  *
  *   bind_options   a string subject holding the options, one per line
  *   bind_text      a string subject shown on the button instead of the chosen option, e.g. what is loaded
+ *   bind_selected  an integer subject: the index of the option shown chosen, kept when the options change
  *
- * The option chosen reaches a `value_changed` action as its text (ActionArgs::text()). Takes every lv_dropdown
- * attribute too.
+ * The option chosen reaches a `value_changed` action as its text (ActionArgs::text()) and its index
+ * (ActionArgs::value()). Takes every lv_dropdown attribute too.
  */
 
 #pragma once
@@ -47,6 +48,10 @@ namespace UI::Xml
 		/** `bind_text` observer: show the subject's text */
 		static void textObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		std::string m_text; // The text shown, kept here because lv_dropdown_set_text() doesn't copy it
+		/** `bind_selected` observer: choose the subject's option */
+		static void selectedObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		std::string m_text;				   // The text shown, kept here because lv_dropdown_set_text() doesn't copy it
+		lv_subject_t* m_selected = nullptr; // `bind_selected`'s subject, or nullptr
 	};
 } // namespace UI::Xml

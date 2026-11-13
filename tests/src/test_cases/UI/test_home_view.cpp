@@ -17,7 +17,6 @@
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
-#include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/TemperatureSource.h"
@@ -182,7 +181,17 @@ class TestHomeView : public UiTestSuite
 	{
 		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
 	}
-	static UI::SettingsView& settingsPage() { return page<UI::SettingsView>("settings"); }
+	/** The Settings page's tabs (0 general, 1 connection, 2 display, 3 developer), as settings_screen.xml builds them
+	 */
+	static UI::TabView& settingsPage()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the Settings page has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
 	/** What notifications.xml shows responses, alerts and update prompts with */
 	static UI::NotificationsPresenter& notifications()
 	{
@@ -891,21 +900,21 @@ TEST_F(TestHomeViewWithData, MacroView)
 
 TEST_F(TestHomeViewWithData, SettingsView)
 {
+	UI::openScreen(std::string_view("settings"));
 	auto& settings = settingsPage();
-	openScreen(&settings);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/initial.png")
 
-	settings.showGeneralSettings();
+	settings.setActiveTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/general.png")
 
-	settings.showConnectionSettings();
+	settings.setActiveTab(1);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
 
-	settings.showDisplaySettings();
+	settings.setActiveTab(2);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display.png")
 
-	settings.showDeveloperSettings();
+	settings.setActiveTab(3);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
 }
 

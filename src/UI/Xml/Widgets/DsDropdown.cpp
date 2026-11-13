@@ -5,6 +5,7 @@
 #include "DsDropdown.h"
 #include "WidgetSupport.h"
 #include "src/xml/parsers/lv_xml_dropdown_parser.h"
+#include <vector>
 
 namespace UI::Xml
 {
@@ -34,7 +35,18 @@ namespace UI::Xml
 
 	void DsDropdown::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
 	{
-		lv_xml_dropdown_apply(state, attrs);
+		// lv_dropdown's own bind_selected would be applied before the options exist, so it is handled here, after them
+		std::vector<const char*> others;
+		for (int i = 0; attrs[i] != nullptr; i += 2)
+		{
+			if (!lv_streq(attrs[i], "bind_selected"))
+			{
+				others.push_back(attrs[i]);
+				others.push_back(attrs[i + 1]);
+			}
+		}
+		others.push_back(nullptr);
+		lv_xml_dropdown_apply(state, others.data());
 
 		lv_obj_t* dropdown = itemOf(state);
 		auto* owner = static_cast<DsDropdown*>(LvObj::fromPtr(dropdown));
@@ -46,11 +58,28 @@ namespace UI::Xml
 		{
 			lv_subject_add_observer_obj(subject, textObserverCb, dropdown, owner);
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_selected"))
+		{
+			owner->m_selected = subject;
+			lv_subject_add_observer_obj(subject, selectedObserverCb, dropdown, owner);
+		}
 	}
 
 	void DsDropdown::optionsObserverCb(lv_observer_t* observer, lv_subject_t* subject)
 	{
-		lv_dropdown_set_options(lv_observer_get_target_obj(observer), lv_subject_get_string(subject));
+		auto& owner = *static_cast<DsDropdown*>(lv_observer_get_user_data(observer));
+		lv_obj_t* dropdown = lv_observer_get_target_obj(observer);
+		lv_dropdown_set_options(dropdown, lv_subject_get_string(subject));
+		if (owner.m_selected != nullptr) // New options start at the first; show the bound one again
+		{
+			lv_dropdown_set_selected(dropdown, static_cast<uint32_t>(lv_subject_get_int(owner.m_selected)));
+		}
+	}
+
+	void DsDropdown::selectedObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		lv_dropdown_set_selected(lv_observer_get_target_obj(observer),
+								 static_cast<uint32_t>(lv_subject_get_int(subject)));
 	}
 
 	void DsDropdown::textObserverCb(lv_observer_t* observer, lv_subject_t* subject)

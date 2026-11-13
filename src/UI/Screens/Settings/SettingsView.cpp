@@ -22,11 +22,6 @@
 
 namespace UI
 {
-	constexpr std::string_view JOB_PROGRESS_SOURCE_STRINGS[] = {
-		"settings.job_progress_source_options.duration",
-		"settings.job_progress_source_options.file",
-	};
-
 	struct ScreenRotationOption
 	{
 		std::string_view name;
@@ -44,37 +39,6 @@ namespace UI
 #endif
 	};
 
-	struct KeyboardLayout
-	{
-		std::string_view name;
-		std::string_view code;
-		const char* variant = nullptr;
-	};
-
-	/**
-	 * @brief List of common keyboard layouts with their XKB layout codes and variants where applicable
-	 *
-	 * @note It doesn't make sense to translate the layout names since they are only relevant when the user is familar
-	 * with that language. Each layout name should be easily readable by a user familiar with the language it is
-	 * relevant to
-	 */
-	static constexpr std::array s_keyboardLayouts = {
-		KeyboardLayout{.name = "US (QWERTY)", .code = "us"},
-		KeyboardLayout{.name = "UK (QWERTY)", .code = "gb"},
-		KeyboardLayout{.name = "Deutsch (QWERTZ)", .code = "de"},
-		KeyboardLayout{.name = "Français (AZERTY)", .code = "fr"},
-		KeyboardLayout{.name = "Español", .code = "es"},
-		KeyboardLayout{.name = "Italiano", .code = "it"},
-		KeyboardLayout{.name = "Svenska", .code = "se"},
-		KeyboardLayout{.name = "Norsk", .code = "no"},
-		KeyboardLayout{.name = "Dansk", .code = "dk"},
-		KeyboardLayout{.name = "Nederlands", .code = "nl"},
-		KeyboardLayout{.name = "Português", .code = "pt"},
-		KeyboardLayout{.name = "Polski", .code = "pl"},
-		KeyboardLayout{.name = "Čeština", .code = "cz"},
-		KeyboardLayout{.name = "US Dvorak", .code = "us", .variant = "dvorak"},
-	};
-
 	static void onTextareaEvent(lv_event_t* e, TextBox& text_box, lv_keyboard_mode_t mode);
 
 	static void setSliderNumberpadLabel(Slider& slider, std::string_view label)
@@ -83,41 +47,6 @@ namespace UI
 		slider.setLabel(label);
 		slider.getLabel().hide();
 	}
-
-	SettingsView::SettingsView(const std::string& name, LvObj& parent)
-		: View(name, parent, layout_t(0, 0, 100, 100))
-	{
-		ZoneScoped;
-		UI_LOCK();
-
-		addStyle(Themes::getLvglStyles().bg_dark);
-		setStylePad(0);
-
-		m_tabs.setSize(LV_PCT(100), LV_PCT(100));
-	}
-
-	void SettingsView::setKeyboard(LvKeyboard* keyboard)
-	{
-		ZoneScoped;
-		m_keyboard = keyboard;
-		m_connectionSettings.setKeyboard(m_keyboard);
-	}
-
-	bool SettingsView::back()
-	{
-		ZoneScoped;
-		return false;
-	}
-
-	void SettingsView::onInit()
-	{
-		ZoneScoped;
-		setKeyboard(findView<LvKeyboard>("keyboard"));
-	}
-
-	void SettingsView::onShow() {}
-
-	void SettingsView::onHide() {}
 
 	SettingsTab::SettingsTab(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent, layout_t(0, 0, 100, 100))
@@ -219,235 +148,6 @@ namespace UI
 			label->setVisible(show);
 		}
 		obj.setVisible(show);
-	}
-
-	GeneralSettings::GeneralSettings(const std::string& name, LvObj& parent)
-		: View(name, parent)
-	{
-		ZoneScoped;
-		/* Firmware version */
-		createRow(_("settings.firmware_version"), m_buildTime);
-#if USE_FIXED_TEST_STRINGS
-		m_buildTime.setText(_("settings.build_time", "vX.Y.Z", "YYYY-MM-DD", "HH:mm::ss"));
-#else
-		m_buildTime.setText(_("settings.build_time", FIRMWARE_VERSION, BuildDateText, BuildTimeSuffix));
-#endif
-		createRow(_("settings.buildroot_version"), m_buildrootVersion);
-		m_buildrootVersion.setText(UpgradeHelper::getBuildrootVersion());
-
-		/* Language */
-		createRow(_("settings.language"), m_language);
-		m_language.setHeight(LV_SIZE_CONTENT);
-		{
-			const auto& languages = i18n::getAvailableLanguages();
-			m_languageCodes.clear();
-			m_languageCodes.reserve(languages.size());
-			for (const auto& [code, readable] : languages)
-			{
-				m_language.addOption(readable);
-				m_languageCodes.push_back(code);
-			}
-		}
-		m_languageConfirm.okVisible(true);
-		m_languageConfirm.cancelVisible(true);
-		m_languageConfirm.setOkBtnText(_("common.yes"));
-		m_languageConfirm.setCancelBtnText(_("common.no"));
-		m_languageConfirm.setCancelCallback(
-			[this]()
-			{
-				const auto currentIndex = i18n::getLanguageIndex(i18n::getCurrentLanguage());
-				m_language.setSelected(currentIndex);
-			});
-
-		m_language.setSelectedCallback(
-			[this](uint32_t index, std::string_view /* option */)
-			{
-				if (index >= m_languageCodes.size())
-					return;
-
-				const auto& langCode = m_languageCodes.at(index);
-				if (langCode == i18n::getCurrentLanguage())
-					return;
-
-				LOG_INFO("Language selection changed to: {:s}", langCode);
-				m_languageConfirm.setTitle(_("settings.language_confirm.title"));
-				m_languageConfirm.setText(_("settings.language_confirm.text"));
-				m_languageConfirm.setOkCallback(
-					[langCode = std::string(langCode)]()
-					{
-						StorageHelper::setData(ID_SYS_LANG_CODE_KEY, std::string_view(langCode));
-						Restart();
-					});
-				openModal(&m_languageConfirm);
-			});
-
-		/* Keyboard Layout */
-		createRow(_("settings.keyboard_layout"), m_keyboardLayout);
-		m_keyboardLayout.setHeight(LV_SIZE_CONTENT);
-		{
-			// Common keyboard layouts with their XKB layout codes
-			std::array<std::string_view, s_keyboardLayouts.size()> layoutNames;
-			std::ranges::transform(
-				s_keyboardLayouts, layoutNames.begin(), [](const KeyboardLayout& kl) { return kl.name; });
-			m_keyboardLayout.setOptions<std::string_view>(layoutNames);
-		}
-		m_keyboardLayout.setSelectedCallback(
-			[](uint32_t index, std::string_view /* option */)
-			{
-				if (index >= s_keyboardLayouts.size())
-					return;
-
-				std::string_view layoutCode = s_keyboardLayouts.at(index).code;
-				const char* variant = s_keyboardLayouts.at(index).variant;
-
-				LOG_INFO("Selected keyboard layout: {} (code: {}, variant: {})",
-						 s_keyboardLayouts.at(index).name,
-						 layoutCode,
-						 variant ? variant : "none");
-
-				// Save to storage
-				StorageHelper::setData(ID_KEYBOARD_LAYOUT, layoutCode);
-
-#if LV_USE_EVDEV && LV_EVDEV_XKB
-				// Apply to all keyboard input devices
-				struct xkb_rule_names names = {.rules = nullptr,
-											   .model = "pc105",
-											   .layout = layoutCode.data(),
-											   .variant = variant,
-											   .options = nullptr};
-
-				lv_indev_t* indev = nullptr;
-				while ((indev = lv_indev_get_next(indev)) != nullptr)
-				{
-					if (lv_indev_get_type(indev) == LV_INDEV_TYPE_KEYPAD)
-					{
-						lv_evdev_set_keymap(indev, names);
-					}
-				}
-#endif
-			});
-
-		/* Brightness */
-		createRow(_("settings.brightness"), m_brightness);
-		setSliderNumberpadLabel(m_brightness, _("settings.brightness"));
-		m_brightness.setHeight(LV_SIZE_CONTENT);
-		m_brightness.setRange(0, 100);
-		m_brightness.setValueChangedCallback([](float value)
-											 { DisplayHelper::setBrightness(static_cast<int32_t>(value)); });
-		m_brightness.setSendMode(Slider::SendMode::VALUE_CHANGED);
-
-		/* Screensaver Timeout */
-		createRow(_("settings.screensaver_timeout"), m_screensaverTimeout);
-		setSliderNumberpadLabel(m_screensaverTimeout, _("settings.screensaver_timeout"));
-		m_screensaverTimeout.setHeight(LV_SIZE_CONTENT);
-		m_screensaverTimeout.setRange(0, 5 * 60); // seconds
-		m_screensaverTimeout.setValueChangedCallback(
-			[](float value)
-			{ StorageHelper::setData(ID_SCREENSAVER_TIMEOUT, std::chrono::seconds(static_cast<int32_t>(value))); });
-		m_screensaverTimeout.setOutOfRangeMode(Slider::OutOfRange::UPPER);
-
-		/* Show Confirmation Dialogs */
-		createRow(_("settings.show_confirmation_dialogs"), m_showConfirmationDialogs);
-		m_showConfirmationDialogs.setCheckedCallback(
-			[](bool checked) { StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, checked); });
-		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
-
-		/* Move Position Mode */
-		createRow(_("settings.move_machine_position_mode"), m_moveMachinePositionMode);
-		m_moveMachinePositionMode.setCheckedCallback(
-			[](bool checked) { StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, checked); });
-		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
-
-		/* Job Progress Source */
-		createRow(_("settings.job_progress_source"), m_jobProgressSource);
-		m_jobProgressSource.setHeight(LV_SIZE_CONTENT);
-		for (auto& source : JOB_PROGRESS_SOURCE_STRINGS)
-		{
-			m_jobProgressSource.addOption(_(source));
-		}
-		m_jobProgressSource.setSelectedCallback(
-			[](uint32_t index, std::string_view /* option */)
-			{ StorageHelper::setData(ID_JOB_PROGRESS_SOURCE, OM::JobProgressSource(index)); });
-
-		/* Notifications */
-		createHeader(_("settings.headers.notifications"));
-
-		/* Display Connected Message */
-		createRow(_("settings.display_connected_message"), m_displayConnectedMessage);
-		m_displayConnectedMessage.setAlign(LV_ALIGN_CENTER, 0, 0);
-		m_displayConnectedMessage.setCheckedCallback(
-			[](bool checked) { StorageHelper::setData(ID_DISPLAY_CONNECTED_MESSAGE, checked); });
-		m_displayConnectedMessage.setChecked(StorageHelper::getData(ID_DISPLAY_CONNECTED_MESSAGE));
-
-		/* Notification Level */
-		createRow(_("settings.notification_level"), m_notificationLevel);
-		m_notificationLevel.setHeight(LV_SIZE_CONTENT);
-		for (auto& level : RESPONSE_TYPE_STRINGS)
-		{
-			m_notificationLevel.addOption(_(level));
-		}
-		m_notificationLevel.setSelectedCallback(
-			[](uint32_t index, std::string_view /* option */)
-			{ StorageHelper::setData(ID_NOTIFICATION_LEVEL, ResponseType(index)); });
-
-		/* Info Timeout */
-		createRow(_("settings.notification_timeout"), m_notificationTimeout);
-		setSliderNumberpadLabel(m_notificationTimeout, _("settings.notification_timeout"));
-		m_notificationTimeout.setHeight(LV_SIZE_CONTENT);
-		m_notificationTimeout.setOutOfRangeMode(Slider::OutOfRange::UPPER);
-		m_notificationTimeout.setRange(0, 5000);
-		m_notificationTimeout.setValueChangedCallback(
-			[](float value)
-			{
-				StorageHelper::setData(ID_NOTIFICATION_TIMEOUT, std::chrono::milliseconds(static_cast<int32_t>(value)));
-			});
-
-		/* Auto-close Error Notifications */
-		createRow(_("settings.notification_auto_close_error"), m_notificationAutoCloseError);
-		m_notificationAutoCloseError.setCheckedCallback(
-			[](bool checked) { StorageHelper::setData(ID_NOTIFICATION_AUTO_CLOSE_ERROR, !checked); });
-	}
-
-	void GeneralSettings::onInit()
-	{
-		ZoneScoped;
-		m_brightness.setNumberPad(findView<ModalNumberPad>("numberpad"));
-		m_screensaverTimeout.setNumberPad(findView<ModalNumberPad>("numberpad"));
-		m_notificationTimeout.setNumberPad(findView<ModalNumberPad>("numberpad"));
-	}
-
-	void GeneralSettings::onShow()
-	{
-		ZoneScoped;
-		// Update language selection
-		{
-			int32_t langIdx = i18n::getLanguageIndex(i18n::getCurrentLanguage());
-			if (langIdx >= 0)
-				m_language.setSelected(static_cast<uint32_t>(langIdx));
-		}
-		m_brightness.setValue(static_cast<float>(DisplayHelper::getBrightness()));
-		m_screensaverTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT).count()));
-		m_showConfirmationDialogs.setChecked(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
-		m_moveMachinePositionMode.setChecked(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
-		m_jobProgressSource.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_JOB_PROGRESS_SOURCE)));
-		m_notificationLevel.setSelected(static_cast<uint32_t>(StorageHelper::getData(ID_NOTIFICATION_LEVEL)));
-		m_notificationTimeout.setValue(static_cast<float>(StorageHelper::getData(ID_NOTIFICATION_TIMEOUT).count()));
-		m_notificationAutoCloseError.setChecked(!StorageHelper::getData(ID_NOTIFICATION_AUTO_CLOSE_ERROR));
-
-		// Update keyboard layout selection
-		{
-			auto currentLayout = StorageHelper::getData(ID_KEYBOARD_LAYOUT);
-			uint32_t selectedIndex = 0;
-			for (size_t i = 0; i < s_keyboardLayouts.size(); ++i)
-			{
-				if (s_keyboardLayouts.at(i).code == currentLayout)
-				{
-					selectedIndex = static_cast<uint32_t>(i);
-					break;
-				}
-			}
-			m_keyboardLayout.setSelected(selectedIndex);
-		}
 	}
 
 	ConnectionSettings::ConnectionSettings(const std::string& name, LvObj& parent)
@@ -580,6 +280,7 @@ namespace UI
 
 	void ConnectionSettings::onInit()
 	{
+		setKeyboard(findView<LvKeyboard>("keyboard"));
 		ZoneScoped;
 		m_pollInterval.setNumberPad(findView<ModalNumberPad>("numberpad"));
 #if USE_MODAL_NUMBERPAD_FOR_IP_ADDRESS

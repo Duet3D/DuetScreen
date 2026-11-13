@@ -10,6 +10,7 @@
 #include "Move/MovePresenter.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "ObjectCancel/ObjectCancelPresenter.h"
+#include "Settings/GeneralSettingsPresenter.h"
 #include "Settings/SettingsView.h"
 #include "Status/JobStatusPresenter.h"
 #include "StatusBar/StatusBarPresenter.h"
@@ -83,6 +84,7 @@ namespace UI
 		Xml::Presenters::add<ExtruderPresenter>("extruder");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");
+		Xml::Presenters::add<GeneralSettingsPresenter>("settings_general");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;
@@ -112,7 +114,9 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<SettingsView>("settings");
+		Xml::NativeViews::add<ConnectionSettings>("connection_settings");
+		Xml::NativeViews::add<DisplaySettings>("display_settings");
+		Xml::NativeViews::add<DeveloperSettings>("developer_settings");
 		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");
 		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);

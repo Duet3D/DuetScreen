@@ -27,7 +27,7 @@
 			<ds_view name="console" view="console"/>
 			<ds_view name="control" view="control_screen"/>
 			<ds_view name="files" view="files_screen"/>
-			<ds_view name="settings" view="settings"/>
+			<ds_view name="settings" view="settings_screen"/>
 			<ds_view name="extrusion_factor" view="extrusion_factor"/>
 			<ds_view name="numberpad" view="numberpad"/>
 			<!-- The job status panel's dialogs -->

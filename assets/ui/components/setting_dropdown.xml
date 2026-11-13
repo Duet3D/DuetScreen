@@ -1,0 +1,23 @@
+<!--
+  A setting chosen from a list, for a row of a settings tab.
+
+      <setting_dropdown options="languages" selected="language" action="settings.language"/>
+
+  `options` names a string subject with the options, one per line; `selected` an integer subject with the index of the
+  one in use; `action` is raised with the index of the one picked (ActionArgs::value()).
+-->
+<component>
+	<api>
+		<prop name="options" type="string"/>
+		<prop name="selected" type="string"/>
+		<prop name="action" type="string"/>
+	</api>
+
+	<view extends="lv_obj" height="content" flex_flow="row"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<ds_dropdown name="dropdown" bind_options="$options" bind_selected="$selected" width="content"
+					 height="content" flex_grow="1">
+			<action trigger="value_changed" name="$action"/>
+		</ds_dropdown>
+	</view>
+</component>

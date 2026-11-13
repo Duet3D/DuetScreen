@@ -9,7 +9,11 @@
  *         <action trigger="value_confirmed" name="…"/>
  *     </ds_slider>
  *
- * The slider raises `value_confirmed` when the user finishes an edit (releases it, presses -/+ or types a value).
+ * `label_shown="false"` hides the label, which still heads the number pad. `out_of_range` ("upper", "lower" or "both")
+ * lets a typed value go past the slider's end, e.g. a timeout longer than the slider reaches.
+ *
+ * The slider raises `value_confirmed` when the user finishes an edit (releases it, presses -/+ or types a value), or
+ * with `send="change"` on every movement, for a setting seen as it changes, such as brightness.
  * Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes
  * without echoing the data back to the printer.
  */

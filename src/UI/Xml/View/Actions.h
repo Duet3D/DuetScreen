@@ -43,8 +43,8 @@ namespace UI::Xml
 		lv_event_t* event = nullptr; // The event that triggered it, or nullptr if dispatched directly
 		lv_obj_t* target = nullptr;	 // The widget the `<action>` belongs to
 
-		/** The value an edit produced (`value_confirmed`, or `value_changed` on a slider, arc or checkable), else `arg`
-		 * as a number */
+		/** The value an edit produced (`value_confirmed`, or `value_changed` on a slider, arc, dropdown (the option's
+		 * index) or checkable), else `arg` as a number */
 		std::optional<float> value() const;
 
 		/** `arg` as an integer, if it is one */

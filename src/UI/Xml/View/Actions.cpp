@@ -221,6 +221,10 @@ namespace UI::Xml
 				{
 					return static_cast<float>(lv_arc_get_value(target));
 				}
+				if (lv_obj_check_type(target, &lv_dropdown_class))
+				{
+					return static_cast<float>(lv_dropdown_get_selected(target));
+				}
 				if (lv_obj_has_flag(target, LV_OBJ_FLAG_CHECKABLE))
 				{
 					return lv_obj_has_state(target, LV_STATE_CHECKED) ? 1.0f : 0.0f;

@@ -15,7 +15,6 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/Settings/SettingsView.h"
 #include "UI/Screens/XmlScreens.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
@@ -277,7 +276,7 @@ int main(int argc, char** argv)
 					};
 					auto control = [=] { return tabsOn("control", "tabs"); };
 					auto files = [=] { return tabsOn("files", "tabs"); };
-					auto settings = [] { return UI::findView<UI::SettingsView>("settings"); };
+					auto settings = [=] { return tabsOn("settings", "tabs"); };
 					auto dashboard = [=] { return tabsOn("dashboard", "dashboard_tabs"); };
 					static const std::function<void()> cbs[] = {
 						[=]()
@@ -329,22 +328,22 @@ int main(int argc, char** argv)
 						{
 							UI::openScreen("settings", true);
 							if (auto* v = settings())
-								v->showGeneralSettings();
+								v->setActiveTab(0); // General
 						},
 						[=]()
 						{
 							if (auto* v = settings())
-								v->showConnectionSettings();
+								v->setActiveTab(1); // Connection
 						},
 						[=]()
 						{
 							if (auto* v = settings())
-								v->showDisplaySettings();
+								v->setActiveTab(2); // Display
 						},
 						[=]()
 						{
 							if (auto* v = settings())
-								v->showDeveloperSettings();
+								v->setActiveTab(3); // Developer
 						},
 					};
 

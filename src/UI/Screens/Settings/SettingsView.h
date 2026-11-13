@@ -41,35 +41,6 @@ namespace UI
 		std::array<int32_t, m_maxRowCount + 1> m_rowDsc;
 	};
 
-	class GeneralSettings : public View<GeneralSettingsPresenter, SettingsTab>
-	{
-	  public:
-		GeneralSettings(const std::string& name, LvObj& parent);
-
-	  private:
-		void onInit() override;
-		void onShow() override;
-
-		/* General */
-		LvLabel m_buildTime{"build_time", getRoot()};
-		LvLabel m_buildrootVersion{"buildroot_version", getRoot()};
-		DropdownMenu m_language{"language", getRoot()};
-		std::vector<std::string> m_languageCodes;
-		Modal<MessageBox> m_languageConfirm{"language_confirm", getRoot(), layout_t(0, 0, 70, LV_SIZE_CONTENT)};
-		DropdownMenu m_keyboardLayout{"keyboard_layout", getRoot()};
-		Slider m_brightness{"brightness", getRoot()};
-		Slider m_screensaverTimeout{"screensaver_timeout", getRoot()};
-		LvSettingsToggle m_showConfirmationDialogs{"show_confirmation_dialogs", getRoot()};
-		LvSettingsToggle m_moveMachinePositionMode{"move_machine_position_mode", getRoot()};
-		DropdownMenu m_jobProgressSource{"job_progress_source", getRoot()};
-
-		/* Notifications */
-		LvSettingsToggle m_displayConnectedMessage{"display_connected_message", getRoot()};
-		LvSettingsToggle m_notificationAutoCloseError{"notification_auto_close_error", getRoot()};
-		DropdownMenu m_notificationLevel{"notification_level", getRoot()};
-		Slider m_notificationTimeout{"info_timeout", getRoot()};
-	};
-
 	class ConnectionSettings : public View<ConnectionSettingsPresenter, SettingsTab>
 	{
 	  public:
@@ -180,42 +151,4 @@ namespace UI
 		HardwareTest m_hardwareTest;
 	};
 
-	/**
-	 * @brief View to configure the screen settings
-	 *
-	 * This class provides a user interface for configuring various screen settings.
-	 */
-	class SettingsView : public View<SettingsPresenter>
-	{
-		friend class SettingsSubView;
-		friend class DuetSettingsView;
-		friend class ScreenSettingsView;
-		friend class ThemeSettingsView;
-
-	  public:
-		SettingsView(const std::string& name, LvObj& parent);
-
-		void setKeyboard(LvKeyboard* keyboard);
-		bool back() override;
-
-		void showGeneralSettings() { m_tabs.setActiveTab(0); }
-		void showConnectionSettings() { m_tabs.setActiveTab(1); }
-		void showDisplaySettings() { m_tabs.setActiveTab(2); }
-		void showDeveloperSettings() { m_tabs.setActiveTab(3); }
-
-	  protected:
-		/** Find the on-screen keyboard */
-		void onInit() override;
-		void onShow() override;
-		void onHide() override;
-
-		TabView m_tabs{"tabs", getRoot()};
-
-		GeneralSettings m_generalSettings{"general_settings", m_tabs.addTab(_("settings.tabs.general"))};
-		ConnectionSettings m_connectionSettings{"connection_settings", m_tabs.addTab(_("settings.tabs.connection"))};
-		DisplaySettings m_displaySettings{"display_settings", m_tabs.addTab(_("settings.tabs.display"))};
-		DeveloperSettings m_developerSettings{"developer_settings", m_tabs.addTab(_("settings.tabs.developer"))};
-
-		LvKeyboard* m_keyboard = nullptr;
-	};
 } // namespace UI

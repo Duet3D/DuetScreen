@@ -18,7 +18,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_bar_marker`, `ds_dropdown`, `ds_thumbnail`, `ds_slider`, `ds_list`, `ds_graph`, `ds_heatmap`, `ds_plot`, `ds_plot_layer`, `ds_plot_rect`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
+| Widget | A DuetScreen XML element backed by C++: `ds_button`, `ds_icon`, `ds_bar`, `ds_bar_marker`, `ds_dropdown`, `ds_thumbnail`, `ds_toggle`, `ds_slider`, `ds_list`, `ds_graph`, `ds_heatmap`, `ds_plot`, `ds_plot_layer`, `ds_plot_rect`, `ds_tabs`, `ds_modal`, `ds_textarea`, `ds_keyboard`, `ds_view` | [Widgets/](../src/UI/Xml/Widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
@@ -199,9 +199,10 @@ These are in addition to the standard `lv_*` widgets.
 | `<ds_icon>` | `icon`: an icon from the icon set chosen in the settings, e.g. `icon="folder.png"`; follows icon set changes |
 | `<ds_bar>` | `min`, `max`, `bind_min`, `bind_max`, `label_format`, `bind_value`: a progress bar that draws its value, e.g. `label_format="{}%"` |
 | `<ds_bar_marker>` | `bar`, `min`, `max`, `bind_min`, `bind_max`, `bind_value`, `label_format`: a value marked on a sibling bar that spans its parent, e.g. a heater's target above its temperature. Dragged along the bar it raises `value_confirmed` with the new value; tapped, `clicked`. |
-| `<ds_dropdown>` | `bind_options` (one per line), `bind_text` (shown instead of the chosen option), and every `lv_dropdown` attribute; handlers read the option chosen with `ActionArgs::text()` |
+| `<ds_dropdown>` | `bind_options` (one per line), `bind_selected` (the index chosen, kept when the options change), `bind_text` (shown instead of the chosen option), and every `lv_dropdown` attribute; handlers read the option chosen with `ActionArgs::text()` or its index with `ActionArgs::value()` |
 | `<ds_thumbnail>` | `bind_src`: an image as tall as its parent's content and as wide as its aspect ratio needs; no width without an image |
-| `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `bind_value`, `numberpad`. Raises `value_confirmed` when an edit is finished. |
+| `<ds_slider>` | `min`, `max`, `increment`, `decimals`, `label`, `label_tag`, `bind_label`, `label_shown`, `bind_value`, `numberpad`, `out_of_range`, `send`. Raises `value_confirmed` when an edit is finished, or on every movement with `send="change"`. |
+| `<ds_toggle>` | An on/off setting drawn as the build's toggle (check box or switch). Bind it with `<bind_state_if_eq … state="checked">`; a `value_changed` action gets 1 or 0. |
 | `<ds_list>` | `list`, `item`: one `item` component per row of the list; `windowed` (see Lists); `follow_end` keeps a log-like list showing its newest rows |
 | `<ds_graph>` | `history`, `seconds`, `y_min`, `y_max`, `bind_y_max`: a line graph of a history, with a legend that shows and hides series (see Graphs) |
 | `<ds_heatmap>` | `bind_surface`, `bind_title`, `resolution`: a colour map of a `Surface` (a grid of samples over an X/Y area, see [Surface.h](../src/UI/Xml/Binding/Surface.h)), e.g. a bed's height map, with its scale |

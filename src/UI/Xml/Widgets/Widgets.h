@@ -20,6 +20,7 @@
  *   <ds_tabs>         see DsTabs.h
  *   <ds_textarea>     see DsTextarea.h
  *   <ds_thumbnail>    see DsThumbnail.h
+ *   <ds_toggle>       see DsToggle.h
  *   <ds_view>         see DsView.h
  */
 
