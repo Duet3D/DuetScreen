@@ -29,6 +29,7 @@
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
+#include <fstream>
 #include <gtest/gtest.h>
 
 class TestHomeView : public UiTestSuite
@@ -1035,6 +1036,26 @@ TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)
 
 	UI::home();
 	EXPECT_EQ(dashboardTabs().getActiveTabIndex(), STATUS_TAB);
+}
+
+TEST_F(TestHomeView, ReloadDoesNotMoveFocusThroughTheOldWidgets)
+{
+	// With an input group, as the simulator's keyboard and mouse wheel have, every button joins it
+	lv_group_t* group = lv_group_create();
+	lv_group_set_default(group);
+	static int focusChanges;
+	lv_group_set_focus_cb(group, [](lv_group_t*) { focusChanges++; });
+	UI::Xml::reload();
+	ASSERT_GT(lv_group_get_obj_count(group), 1u);
+
+	// Deleting the focused widget used to move focus to the next one to be deleted, and so on through the whole UI,
+	// laying out the half-deleted screen each time; a layout that never settled hung the reload
+	focusChanges = 0;
+	UI::Xml::reload();
+	EXPECT_EQ(focusChanges, 1) << "only the rebuilt UI's first widget is focused";
+
+	lv_group_set_default(nullptr);
+	lv_group_delete(group);
 }
 
 TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)

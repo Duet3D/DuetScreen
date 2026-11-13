@@ -32,6 +32,14 @@ namespace UI
 	void lv_timer_delete_safe(lv_timer_t* timer);
 
 	/**
+	 * Take `tree` (a widget and everything inside it) out of its input groups, the focused widget last, so focus
+	 * moves to a widget outside it. Call before deleting a large tree: deleting the focused widget otherwise moves
+	 * focus to the next widget in the group, often the next to be deleted, and each move scrolls that widget into
+	 * view, laying out the half-deleted screen again. That is slow, and a layout that never settles hangs.
+	 */
+	void removeFromInputGroups(lv_obj_t* tree);
+
+	/**
 	 * @brief Position and size layout in percentage 0-100
 	 */
 	struct layout_t

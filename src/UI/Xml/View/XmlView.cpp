@@ -106,6 +106,10 @@ namespace UI::Xml
 			Model::get().unbind(presenter);
 		}
 		// ~LvObj deletes the widgets next; the presenter and scope (members of the base) outlive them
+		if (getRootPtr() != nullptr)
+		{
+			removeFromInputGroups(getRootPtr());
+		}
 	}
 
 	lv_obj_t* XmlView::build(lv_obj_t* parent, detail::XmlViewState& state)
@@ -156,6 +160,7 @@ namespace UI::Xml
 		// The widgets may be bound to the scope (and presenter) about to be replaced.
 		// Deleting the root nulls m_root (LvObj registers lv_obj_null_on_delete).
 		disconnectPresenter();
+		removeFromInputGroups(old);
 		lv_obj_delete(old);
 	}
 

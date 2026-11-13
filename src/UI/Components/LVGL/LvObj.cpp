@@ -19,6 +19,33 @@ namespace UI
 		}
 	}
 
+	void removeFromInputGroups(lv_obj_t* tree)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		lv_obj_t* focused = nullptr; // Removed last, once focus has nowhere to go inside the tree
+		lv_obj_tree_walk(
+			tree,
+			[](lv_obj_t* obj, void* userData)
+			{
+				lv_group_t* group = lv_obj_get_group(obj);
+				if (group != nullptr && lv_group_get_focused(group) == obj)
+				{
+					*static_cast<lv_obj_t**>(userData) = obj;
+				}
+				else if (group != nullptr)
+				{
+					lv_group_remove_obj(obj);
+				}
+				return LV_OBJ_TREE_WALK_NEXT;
+			},
+			&focused);
+		if (focused != nullptr)
+		{
+			lv_group_remove_obj(focused);
+		}
+	}
+
 	static lv_coord_t getPct(lv_coord_t value, lv_coord_t base)
 	{
 		return (value * 100 + base / 2) / base;
