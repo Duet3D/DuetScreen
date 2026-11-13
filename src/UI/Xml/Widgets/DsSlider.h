@@ -28,6 +28,9 @@ namespace UI::Xml
 		/** Set the range without raising `value_confirmed` */
 		void setRangeQuietly(float min, float max);
 
+		/** With `numberpad="true"`, the number pad nearest the slider when it is tapped (Services::numberPadFor()) */
+		ModalNumberPad* getNumberPad() const override;
+
 	  protected:
 		/** `<ds_slider>` apply callback: apply lv_obj attributes, then the slider's own. Also for widgets extending it.
 		 */
@@ -43,7 +46,8 @@ namespace UI::Xml
 		/** `bind_value` observer; ignores updates while the user is editing */
 		static void valueObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		bool m_settingQuietly = false; // True while a value is written by code rather than edited
+		bool m_settingQuietly = false;	// True while a value is written by code rather than edited
+		bool m_usesNumberPad = false;	// `numberpad="true"`: the value is typed on a number pad
 		float m_valueScale = 1.0f;	   // `bind_value`'s subject holds the value times this
 	};
 } // namespace UI::Xml

@@ -27,6 +27,11 @@ namespace UI::Xml
 		{
 			setParent(*host);
 		}
+		// Centred by a style rather than Modal's local property, which would outrank every style, so a view's own
+		// styles can place it, e.g. <bind_style> moving it out of the keyboard's way
+		lv_obj_remove_local_style_prop(getRootPtr(), LV_STYLE_ALIGN, LV_PART_MAIN);
+		lv_obj_add_style(getRootPtr(), centredStyle(), LV_PART_MAIN);
+
 		// Actions raised in the dialog go to the view it was written in, not the modal host's
 		Actions::setOwner(getRootPtr(), owner);
 		lv_obj_add_event_cb(owner, ownerDeletedCb, LV_EVENT_DELETE, this);
@@ -41,6 +46,17 @@ namespace UI::Xml
 			lv_obj_remove_event_cb_with_user_data(getRootPtr(), cardDeletedCb, this);
 		}
 		lv_obj_remove_event_cb_with_user_data(m_owner, ownerDeletedCb, this);
+	}
+
+	lv_style_t* DsModal::centredStyle()
+	{
+		static lv_style_t style;
+		if (style.prop_cnt == 0)
+		{
+			lv_style_init(&style);
+			lv_style_set_align(&style, LV_ALIGN_CENTER);
+		}
+		return &style;
 	}
 
 	void DsModal::registerXml()

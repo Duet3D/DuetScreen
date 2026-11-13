@@ -468,6 +468,18 @@ namespace UI
 		return it == s_namedViews.end() ? nullptr : it->second;
 	}
 
+	std::vector<LvObj*> getViews()
+	{
+		UI_LOCK();
+		std::vector<LvObj*> views;
+		views.reserve(s_namedViews.size());
+		for (const auto& [name, view] : s_namedViews)
+		{
+			views.push_back(view);
+		}
+		return views;
+	}
+
 	std::string_view getCurrentScreenName()
 	{
 		UI_LOCK();

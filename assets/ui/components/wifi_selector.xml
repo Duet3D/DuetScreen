@@ -43,13 +43,17 @@
 				<lv_label name="title" bind_text="password_title"/>
 			</lv_obj>
 
-			<ds_textarea name="wifi_password_input" bind_text="password" one_line="true" password_mode="true"
-						 placeholder_tag="settings.network.enter_password_hint" width="100%" height="content">
-				<action trigger="value_changed" name="wifi.password"/>
-				<action trigger="focused" name="wifi.keyboard" arg="1"/>
-				<action trigger="defocused" name="wifi.keyboard" arg="0"/>
-				<action trigger="ready" name="wifi.keyboard" arg="0"/>
-			</ds_textarea>
+			<lv_obj name="password_row" width="100%" height="content" flex_flow="row" style_pad_all="0"
+					style_flex_cross_place="center" style_bg_opa="0" style_border_width="0">
+				<ds_textarea name="wifi_password_input" bind_text="password" one_line="true" password_mode="true"
+							 placeholder_tag="settings.network.enter_password_hint" height="content" flex_grow="1">
+					<action trigger="value_changed" name="wifi.password"/>
+					<action trigger="focused" name="wifi.keyboard" arg="1"/>
+					<action trigger="defocused" name="wifi.keyboard" arg="0"/>
+					<action trigger="ready" name="wifi.keyboard" arg="0"/>
+				</ds_textarea>
+				<ds_password_toggle name="show_password" textarea="wifi_password_input" height="content"/>
+			</lv_obj>
 
 			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 				<ds_button name="cancel" translation_tag="common.cancel" height="content" flex_grow="1">

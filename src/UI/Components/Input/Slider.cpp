@@ -266,19 +266,19 @@ namespace UI
 		case LV_EVENT_CLICKED:
 		{
 			slider->m_focused = true;
-			if (slider->m_numberPad)
+			if (ModalNumberPad* pad = slider->getNumberPad())
 			{
-				slider->m_numberPad->setHeader(slider->getLabelText());
-				slider->m_numberPad->setValue(slider->getValue());
+				pad->setHeader(slider->getLabelText());
+				pad->setValue(slider->getValue());
 
 				auto outOfRangeMode = slider->m_outOfRangeMode;
-				slider->m_numberPad->setMinValue(
-					outOfRangeMode & OutOfRange::LOWER ? std::numeric_limits<float>::lowest() : slider->getMin());
-				slider->m_numberPad->setMaxValue(outOfRangeMode & OutOfRange::UPPER ? std::numeric_limits<float>::max()
-																					: slider->getMax());
-				slider->m_numberPad->setConfirmCallback([slider](float value) { slider->setValue(value); });
+				pad->setMinValue(outOfRangeMode & OutOfRange::LOWER ? std::numeric_limits<float>::lowest()
+																	: slider->getMin());
+				pad->setMaxValue(outOfRangeMode & OutOfRange::UPPER ? std::numeric_limits<float>::max()
+																	: slider->getMax());
+				pad->setConfirmCallback([slider](float value) { slider->setValue(value); });
 				slider->getInput().sendEvent(LV_EVENT_DEFOCUSED, nullptr); // stop cursor blinking
-				openModal(slider->m_numberPad);
+				openModal(pad);
 			}
 			if (slider->m_focusedCallback)
 			{

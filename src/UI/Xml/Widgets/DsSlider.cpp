@@ -4,7 +4,7 @@
 
 #include "DsSlider.h"
 #include "UI/Components/Input/ModalNumberPad.h"
-#include "UI/Core/Navigation.h"
+#include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include "WidgetSupport.h"
 #include "Widgets.h"
@@ -65,8 +65,8 @@ namespace UI::Xml
 							 "Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a "
 							 "timeout longer than the slider reaches"},
 							{"numberpad",
-							 "\"true\" to type the value on the number pad (the view registered as `numberpad`) when "
-							 "the value is tapped (default false)"}},
+							 "\"true\" to type the value on a number pad when the value is tapped: the one hosted "
+							 "nearest the slider, else the shared `numberpad` (default false)"}},
 			 .exampleSubjects = {{"brightness", "int", "60"}}},
 			xmlCreate,
 			xmlApply);
@@ -84,6 +84,12 @@ namespace UI::Xml
 		m_settingQuietly = true;
 		setRange(min, max);
 		m_settingQuietly = false;
+	}
+
+	ModalNumberPad* DsSlider::getNumberPad() const
+	{
+		// Found when needed: the number pad may be built after the slider, or rebuilt by a reload
+		return m_usesNumberPad ? Services::numberPadFor(getRootPtr()) : nullptr;
 	}
 
 	void* DsSlider::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
@@ -150,10 +156,7 @@ namespace UI::Xml
 				slider.setOutOfRangeMode(OutOfRange::BOTH);
 			}
 		}
-		if (lv_xml_to_bool(attrOr(attrs, "numberpad", "false")))
-		{
-			slider.setNumberPad(findView<ModalNumberPad>("numberpad"));
-		}
+		slider.m_usesNumberPad = lv_xml_to_bool(attrOr(attrs, "numberpad", "false"));
 
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_label"))
 		{

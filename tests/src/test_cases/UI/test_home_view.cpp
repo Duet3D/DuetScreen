@@ -14,6 +14,8 @@
 #include "ObjectModel/Tool.h"
 #include "Storage.h"
 #include "UI/Components/Containers/TabView.h"
+#include "UI/Components/Input/ModalNumberPad.h"
+#include "UI/Components/Input/Slider.h"
 #include "UI/Components/LVGL/LvTextarea.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Screens/Notifications/NotificationsPresenter.h"
@@ -934,6 +936,33 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 	lv_obj_send_event(lv_obj_find_by_name(unknown, "connect"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// Typing the password brings up the keyboard, and the dialog moves out of its way
+	lv_obj_t* input = lv_obj_find_by_name(dialog, "wifi_password_input");
+	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
+	lv_obj_t* keyboard = UI::findView("keyboard")->getRootPtr();
+	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_update_layout(lv_screen_active());
+	lv_area_t dialogArea;
+	lv_area_t keyboardArea;
+	lv_obj_get_coords(dialog, &dialogArea);
+	lv_obj_get_coords(keyboard, &keyboardArea);
+	EXPECT_LE(dialogArea.y2, keyboardArea.y1) << "the dialog is above the keyboard";
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_password_keyboard.png")
+
+	// The eye shows the password, and hides it again
+	lv_obj_t* eye = lv_obj_find_by_name(dialog, "show_password");
+	ASSERT_NE(eye, nullptr);
+	EXPECT_TRUE(lv_textarea_get_password_mode(input));
+	lv_obj_add_state(eye, LV_STATE_CHECKED);
+	lv_obj_send_event(eye, LV_EVENT_VALUE_CHANGED, nullptr);
+	EXPECT_FALSE(lv_textarea_get_password_mode(input));
+	lv_obj_remove_state(eye, LV_STATE_CHECKED);
+	lv_obj_send_event(eye, LV_EVENT_VALUE_CHANGED, nullptr);
+	EXPECT_TRUE(lv_textarea_get_password_mode(input));
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "the keyboard stays up";
+
+	lv_obj_send_event(input, LV_EVENT_DEFOCUSED, nullptr);
 	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 }
@@ -1125,4 +1154,116 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	click("ok");
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", OM::g_currentAlert.seq)}));
 	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+namespace
+{
+	/** Run the Model's queued events, as the main loop would */
+	void runEvents()
+	{
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	}
+
+	/** Whether `obj` and every widget it is in are shown */
+	bool shownOnScreen(lv_obj_t* obj)
+	{
+		for (; obj != nullptr; obj = lv_obj_get_parent(obj))
+		{
+			if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** The number pad shown in `obj`'s widget tree, or nullptr */
+	UI::ModalNumberPad* shownNumberPadIn(lv_obj_t* obj)
+	{
+		if (lv_obj_get_user_data(obj) != nullptr)
+		{
+			if (auto* pad = dynamic_cast<UI::ModalNumberPad*>(UI::LvObj::fromPtr(obj)); pad && shownOnScreen(obj))
+			{
+				return pad;
+			}
+		}
+		for (uint32_t i = 0; i < lv_obj_get_child_count(obj); i++)
+		{
+			if (auto* pad = shownNumberPadIn(lv_obj_get_child(obj, static_cast<int32_t>(i))))
+			{
+				return pad;
+			}
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Tap the widget called `name` (in the widget called `within`, if given) in the view registered as `view`, and
+	 * say whether a number pad was shown. `sliderValue` taps the value of the slider called `name`.
+	 */
+	bool tapShowsNumberPad(const char* view, const char* within, const char* name, bool sliderValue = false)
+	{
+		UI::closeAllModals();
+		lv_obj_t* obj = UI::findView(view)->getRootPtr();
+		if (within != nullptr)
+		{
+			obj = lv_obj_find_by_name(obj, within);
+		}
+		obj = obj == nullptr ? nullptr : lv_obj_find_by_name(obj, name);
+		if (obj == nullptr)
+		{
+			ADD_FAILURE() << view << " has no " << name;
+			return false;
+		}
+		if (sliderValue)
+		{
+			obj = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(obj)).getInput().getRootPtr();
+		}
+		lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
+		return shownNumberPadIn(lv_screen_active()) != nullptr;
+	}
+} // namespace
+
+TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
+{
+	runEvents(); // Fill the lists from the object model
+	{
+		lv_obj_t* toolList = UI::findView("tool_list")->getRootPtr();
+		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
+		lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
+		EXPECT_NE(shownNumberPadIn(lv_screen_active()), nullptr) << "dashboard heater";
+	}
+
+	openControlTab(0);
+	EXPECT_TRUE(tapShowsNumberPad("move", "z_control", "label")) << "move Z position";
+	openControlTab(1);
+	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "active_temperature")) << "temperature heater";
+	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "value")) << "value selector";
+	openControlTab(4);
+	EXPECT_TRUE(tapShowsNumberPad("fan", nullptr, "slider", true)) << "fan slider";
+
+	UI::openScreen(std::string_view("settings"), false);
+	settingsPage().setActiveTab(0);
+	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "brightness", true)) << "brightness";
+	settingsPage().setActiveTab(1);
+	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true)) << "poll interval";
+	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "duet_ip_address")) << "IP address";
+	settingsPage().setActiveTab(2);
+	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "chroma_slider", true)) << "chroma";
+	UI::closeAllModals();
+}
+
+TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
+{
+	runEvents();
+	openControlTab(1);
+	lv_obj_t* factors = lv_obj_find_by_name(UI::findView("temperature")->getRootPtr(), "extrusion_factors");
+	ASSERT_NE(factors, nullptr);
+	ASSERT_GT(lv_obj_get_child_count(factors), 0u);
+	lv_obj_t* firstFactor = lv_obj_get_child(lv_obj_find_by_name(factors, "list"), 0);
+	ASSERT_NE(firstFactor, nullptr);
+	lv_obj_send_event(firstFactor, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
+	UI::closeAllModals();
 }

@@ -39,6 +39,9 @@ namespace UI::Xml
 		void onHide() override;
 
 	  private:
+		/** The style centring every dialog's card, made on first use */
+		static lv_style_t* centredStyle();
+
 		/** Pass a temporary C++ wrapper for `owner` to Modal, which only uses it during construction */
 		DsModal(const std::string& name, lv_obj_t* owner, bool inPlace, LvObjRef&& ownerRef);
 

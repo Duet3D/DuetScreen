@@ -14,6 +14,7 @@
 #include "DsKeyboard.h"
 #include "DsList.h"
 #include "DsModal.h"
+#include "DsPasswordToggle.h"
 #include "DsPlot.h"
 #include "DsPlotLayer.h"
 #include "DsPlotRect.h"
@@ -66,6 +67,7 @@ namespace UI::Xml::Widgets
 		DsKeyboard::registerXml();
 		DsList::registerXml();
 		DsModal::registerXml();
+		DsPasswordToggle::registerXml();
 		DsPlot::registerXml();
 		DsPlotLayer::registerXml();
 		DsPlotRect::registerXml();

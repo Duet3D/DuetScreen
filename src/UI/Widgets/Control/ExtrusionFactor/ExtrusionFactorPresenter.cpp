@@ -110,7 +110,12 @@ namespace UI
 	void ModalExtrusionFactorPresenter::onActivate()
 	{
 		ZoneScoped;
-		auto tool = OM::GetCurrentTool();
+		// The tool the dialog was opened for, else (the job's dialog, which shows every extruder) the selected one
+		auto tool = getView()->getExtrusionFactor().getPresenter()->m_tool;
+		if (tool == nullptr)
+		{
+			tool = OM::GetCurrentTool();
+		}
 		OM::Move::ExtruderAxisPtr extruder;
 		if (tool)
 		{

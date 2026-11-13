@@ -51,7 +51,8 @@ namespace UI
 		float getMax() const { return m_max; }
 		LvSlider& getLvSlider() { return m_slider; }
 		LvTextarea& getInput() { return m_input; }
-		ModalNumberPad* getNumberPad() const { return m_numberPad; }
+		/** The number pad the value is typed on when tapped, or nullptr to type it in place */
+		virtual ModalNumberPad* getNumberPad() const { return m_numberPad; }
 
 		bool isFocused() const { return m_focused; }
 

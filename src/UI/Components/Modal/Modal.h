@@ -99,6 +99,9 @@ namespace UI
 		}
 		bool isBlocking() const { return m_blocking; }
 
+		/** The backdrop the modal sits on, which is what is placed in the modal's parent */
+		lv_obj_t* getBackdropPtr() const { return m_modalBg.getRootPtr(); }
+
 	  protected:
 		/**
 		 * @warning private to prevent accidental calls (use this->open() or openModal() instead)

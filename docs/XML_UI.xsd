@@ -703,6 +703,7 @@
 			<xs:enumeration value="ds_keyboard"/>
 			<xs:enumeration value="ds_list"/>
 			<xs:enumeration value="ds_modal"/>
+			<xs:enumeration value="ds_password_toggle"/>
 			<xs:enumeration value="ds_plot"/>
 			<xs:enumeration value="ds_plot_layer"/>
 			<xs:enumeration value="ds_plot_rect"/>
@@ -1803,7 +1804,7 @@
 				<xs:annotation><xs:documentation>Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="numberpad" type="xs:string">
-				<xs:annotation><xs:documentation>&quot;true&quot; to type the value on the number pad (the view registered as `numberpad`) when the value is tapped (default false)</xs:documentation></xs:annotation>
+				<xs:annotation><xs:documentation>&quot;true&quot; to type the value on a number pad when the value is tapped: the one hosted nearest the slider, else the shared `numberpad` (default false)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -1871,6 +1872,16 @@
 			</xs:attribute>
 			<xs:attribute name="in_place" type="xs:string">
 				<xs:annotation><xs:documentation>&quot;true&quot; to stay in the widget it is written in rather than move to the main window, so the backdrop covers only that widget, e.g. alerts covering the whole screen (default false)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_password_toggle">
+		<xs:annotation><xs:documentation>An eye button that shows what is typed in a password box while it is checked, and hides it again when unchecked. Tapping it doesn't take the focus from the box, so the keyboard stays up. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attribute name="textarea" type="xs:string">
+				<xs:annotation><xs:documentation>Name of the password box: the nearest `ds_textarea` of that name around the button, e.g. its sibling</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -2003,7 +2014,7 @@
 				<xs:annotation><xs:documentation>Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="numberpad" type="xs:string">
-				<xs:annotation><xs:documentation>&quot;true&quot; to type the value on the number pad (the view registered as `numberpad`) when the value is tapped (default false)</xs:documentation></xs:annotation>
+				<xs:annotation><xs:documentation>&quot;true&quot; to type the value on a number pad when the value is tapped: the one hosted nearest the slider, else the shared `numberpad` (default false)</xs:documentation></xs:annotation>
 			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

@@ -123,7 +123,7 @@ namespace UI
 		/* C++ views, until they are written in XML */
 		Xml::NativeViews::add<LvContainer>("container");
 		Xml::NativeViews::add<EStop>("estop");
-		Xml::NativeViews::add<ModalExtrusionFactor>("extrusion_factor");
+		Xml::NativeViews::add("extrusion_factor", createFactorDialog<ModalExtrusionFactor>);
 		Xml::NativeViews::add<ModalNumberPad>("numberpad");
 		Xml::NativeViews::add("speed_factor", createFactorDialog<ModalSpeedFactor>);
 		Xml::NativeViews::add("job_extrusion_factor", createFactorDialog<ModalExtrusionFactor>);

@@ -51,39 +51,24 @@ namespace UI::Xml::Services
 			openModal(&pad);
 		}
 
-		/** A number pad in `obj`'s widget tree, or nullptr */
-		ModalNumberPad* numberPadIn(lv_obj_t* obj)
-		{
-			if (lv_obj_get_user_data(obj) != nullptr)
-			{
-				if (auto* pad = dynamic_cast<ModalNumberPad*>(LvObj::fromPtr(obj)))
-				{
-					return pad;
-				}
-			}
-			for (uint32_t i = 0; i < lv_obj_get_child_count(obj); i++)
-			{
-				if (auto* pad = numberPadIn(lv_obj_get_child(obj, static_cast<int32_t>(i))))
-				{
-					return pad;
-				}
-			}
-			return nullptr;
-		}
-
-		/** The number pad nearest `asker`: each enclosing widget in turn, then the shared one; or nullptr */
-		ModalNumberPad* nearestNumberPad(lv_obj_t* asker)
-		{
-			for (lv_obj_t* scope = asker; scope != nullptr; scope = lv_obj_get_parent(scope))
-			{
-				if (auto* pad = numberPadIn(scope))
-				{
-					return pad;
-				}
-			}
-			return findView<ModalNumberPad>("numberpad");
-		}
 	} // namespace
+
+	ModalNumberPad* numberPadFor(lv_obj_t* asker)
+	{
+		// A pad serves what is inside the widget it was placed in, so a page's own pad isn't found from another page
+		const std::vector<ModalNumberPad*> pads = findViews<ModalNumberPad>();
+		for (lv_obj_t* scope = asker; scope != nullptr; scope = lv_obj_get_parent(scope))
+		{
+			for (ModalNumberPad* pad : pads)
+			{
+				if (lv_obj_get_parent(pad->getBackdropPtr()) == scope)
+				{
+					return pad;
+				}
+			}
+		}
+		return findView<ModalNumberPad>("numberpad");
+	}
 
 	bool askNumber(std::string_view numberPad, NumberRequest request)
 	{
@@ -99,7 +84,7 @@ namespace UI::Xml::Services
 
 	bool askNumber(lv_obj_t* asker, NumberRequest request)
 	{
-		auto* pad = nearestNumberPad(asker);
+		auto* pad = numberPadFor(asker);
 		if (pad == nullptr)
 		{
 			LOG_WARN("No number pad to ask for {:s}", request.header);
@@ -111,7 +96,7 @@ namespace UI::Xml::Services
 
 	bool askText(lv_obj_t* asker, TextRequest request)
 	{
-		auto* pad = nearestNumberPad(asker);
+		auto* pad = numberPadFor(asker);
 		if (pad == nullptr)
 		{
 			LOG_WARN("No number pad to ask for {:s}", request.header);

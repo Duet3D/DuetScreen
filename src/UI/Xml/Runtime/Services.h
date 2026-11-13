@@ -12,6 +12,11 @@
 #include <string>
 #include <string_view>
 
+namespace UI
+{
+	class ModalNumberPad;
+}
+
 namespace UI::Xml::Services
 {
 	/** A number to ask the user for (see askNumber()) */
@@ -32,9 +37,17 @@ namespace UI::Xml::Services
 	bool askNumber(std::string_view numberPad, NumberRequest request);
 
 	/**
-	 * Ask the user for a number with the number pad nearest `asker` (the widget the user tapped, ActionArgs::target):
-	 * one in the same view before any further out, else the shared one registered as `numberpad`. So a page can
-	 * keep the number pad over itself by hosting its own: `<ds_view name="move_numberpad" view="numberpad"/>`.
+	 * The number pad nearest `asker` (e.g. the widget the user tapped): of the number pads hosted with
+	 * `<ds_view view="numberpad"/>`, the one placed in the innermost widget that `asker` is inside, else the shared one
+	 * registered as `numberpad`. So a page can keep the number pad over itself by hosting its own, `<ds_view
+	 * name="move_numberpad" view="numberpad"/>`, while pages that host none use the shared one. nullptr if there is
+	 * none.
+	 */
+	ModalNumberPad* numberPadFor(lv_obj_t* asker);
+
+	/**
+	 * Ask the user for a number with the number pad nearest `asker` (the widget the user tapped, ActionArgs::target),
+	 * found by numberPadFor()
 	 * @return false if there is no number pad
 	 */
 	bool askNumber(lv_obj_t* asker, NumberRequest request);

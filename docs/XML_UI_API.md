@@ -1099,6 +1099,25 @@ Also takes every `lv_obj` attribute.
 | `blocking` | "true" so that tapping outside doesn't close it (default false) |
 | `in_place` | "true" to stay in the widget it is written in rather than move to the main window, so the backdrop covers only that widget, e.g. alerts covering the whole screen (default false) |
 
+### ds_password_toggle
+
+An eye button that shows what is typed in a password box while it is checked, and hides it again when unchecked. Tapping it doesn't take the focus from the box, so the keyboard stays up.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<lv_obj width="100%" height="content" flex_flow="row" style_pad_all="0">
+	<ds_textarea name="password" one_line="true" password_mode="true" flex_grow="1"/>
+	<ds_password_toggle textarea="password"/>
+</lv_obj>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_password_toggle.png)
+
+| Attribute | Description |
+| --- | --- |
+| `textarea` | Name of the password box: the nearest `ds_textarea` of that name around the button, e.g. its sibling |
+
 ### ds_plot
 
 An X/Y area with scales and a grid, such as the bed with its objects, whose content is widgets placed by X/Y position. `<ds_plot_layer>`s written inside it are kept over its drawing area, and `<ds_plot_rect>`s inside a layer are kept at their X/Y bounds.
@@ -1189,7 +1208,7 @@ Also takes every `lv_obj` attribute.
 | `value_scale` | How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 held as 2 with value_scale="100" (default 1) |
 | `send` | `confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` on every movement, for a setting seen as it changes such as brightness |
 | `out_of_range` | Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches |
-| `numberpad` | "true" to type the value on the number pad (the view registered as `numberpad`) when the value is tapped (default false) |
+| `numberpad` | "true" to type the value on a number pad when the value is tapped: the one hosted nearest the slider, else the shared `numberpad` (default false) |
 
 ### ds_tabs
 

@@ -34,6 +34,24 @@ namespace UI
 		return dynamic_cast<T*>(findView(name));
 	}
 
+	/** Every registered view */
+	std::vector<LvObj*> getViews();
+
+	/** Every registered view that is a T */
+	template <typename T>
+	std::vector<T*> findViews()
+	{
+		std::vector<T*> found;
+		for (LvObj* view : getViews())
+		{
+			if (auto* t = dynamic_cast<T*>(view))
+			{
+				found.push_back(t);
+			}
+		}
+		return found;
+	}
+
 	/** The name of the open screen (the top one), or empty when the home screens are showing */
 	std::string_view getCurrentScreenName();
 
