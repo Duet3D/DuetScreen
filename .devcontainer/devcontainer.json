@@ -19,7 +19,8 @@
         "TrevorNesbitt.smart-file-templates",
         "vadimcn.vscode-lldb",
         "rioj7.command-variable",
-        "GitHub.vscode-pull-request-github"
+        "GitHub.vscode-pull-request-github",
+        "redhat.vscode-xml"
       ],
       "settings": {
         "buildroot_path": "/workspaces/buildroot-duetscreen",

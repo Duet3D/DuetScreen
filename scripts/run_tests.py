@@ -31,7 +31,7 @@ from typing import List, Optional, Tuple, Any
 
 DEFAULT_CMAKE_PRESET = "Test"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-CMAKE_EXE = PROJECT_ROOT / "env" / "bin" / "cmake"
+CMAKE_EXE = "cmake"
 BUILD_ROOT = PROJECT_ROOT / "out" / "build"
 SRC_DIR = PROJECT_ROOT / "src"
 REF_IMGS_DIR = PROJECT_ROOT / "tests" / "ref_imgs"
