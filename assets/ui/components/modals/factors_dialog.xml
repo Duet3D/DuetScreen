@@ -10,7 +10,7 @@
 
   `dialog` is the dialog's id, the arg of its actions, and `pad` its number pad's; the others name its fields. The
   presenter showing it owns a FactorDialog, which declares those fields and handles the actions
-  (src/UI/Screens/Modals/FactorDialog.h).
+  (src/UI/Presenters/Modals/FactorDialog.h).
 -->
 <component>
 	<api>

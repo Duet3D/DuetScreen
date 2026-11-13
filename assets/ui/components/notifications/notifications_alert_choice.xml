@@ -1,7 +1,7 @@
 <!--
   One choice in an M291 alert. Tap to answer with it.
 
-  Fields:   an alert.choices row: text (src/UI/Screens/Notifications/NotificationsPresenter.h)
+  Fields:   an alert.choices row: text (src/UI/Presenters/Notifications/NotificationsPresenter.h)
 -->
 <component>
 	<view extends="ds_button" bind_text="text" width="20%" height="content">

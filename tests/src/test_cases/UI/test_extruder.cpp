@@ -2,7 +2,7 @@
  * test_extruder.cpp
  *
  * The extruder panel (assets/ui/components/control/temperature/temperature_extrusion.xml,
- * src/UI/Screens/Temperature/ExtruderPresenter.h).
+ * src/UI/Presenters/Control/Temperature/ExtruderPresenter.h).
  */
 
 #include "ObjectModel/Heat.h"

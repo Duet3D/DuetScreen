@@ -38,27 +38,4 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/View/ValueSelector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsBar.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsBarMarker.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsButton.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsDragButton.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsDropdown.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsGraph.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsHeatmap.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsHueSlider.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsIcon.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsKeyboard.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsList.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsModal.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPasswordToggle.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPlot.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPlotLayer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsPlotRect.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsSlider.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTabs.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsTextarea.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsThumbnail.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsToggle.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/DsView.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Widgets/Widgets.cpp
 )

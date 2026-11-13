@@ -2,7 +2,7 @@
   One of the job's objects in the Object Cancel tab's list: tap it to cancel it, or resume it if cancelled.
   Highlighted while it is being printed, and marked once cancelled.
 
-  Fields and actions: an objects row (src/UI/Screens/ObjectCancel/ObjectCancelPresenter.h)
+  Fields and actions: an objects row (src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content">

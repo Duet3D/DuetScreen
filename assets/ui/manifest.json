@@ -3,7 +3,7 @@
      same name. See src/UI/Xml/Runtime/Bundles.h.
 
      components/ has a folder for each part of the UI, holding its page (named after the part) and the pieces only it
-     uses (named <part>_<piece>), the way src/UI/Screens/ holds their presenters; common/ holds small pieces used in
+     uses (named <part>_<piece>), the way src/UI/Presenters/ holds their presenters; common/ holds small pieces used in
      several parts. See "Naming" in docs/XML_UI.md. */
   "id": "duetscreen",
   "name": "DuetScreen",

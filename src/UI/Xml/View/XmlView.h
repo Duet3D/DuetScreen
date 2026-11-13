@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "UI/Components/LVGL/LvObj.h"
+#include "UI/Lvgl/LvObj.h"
 #include "UI/Xml/Binding/Scope.h"
 #include "XmlPresenter.h"
 #include <memory>

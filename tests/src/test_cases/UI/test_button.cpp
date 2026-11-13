@@ -6,9 +6,9 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/Button/Button.h"
-#include "UI/Components/List/List.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Widgets/Buttons/Button.h"
+#include "UI/Widgets/Layout/List.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

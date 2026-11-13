@@ -1,7 +1,7 @@
 <!--
   One extruder of a tool on the Temperature tab: its extrusion factor. Tap to change the tool's factors.
 
-  Fields:   an extruders row: factor (src/UI/Screens/Temperature/TemperaturePresenter.h)
+  Fields:   an extruders row: factor (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h)
 -->
 <component>
 	<view extends="ds_button" bind_text="factor" width="content" height="content">

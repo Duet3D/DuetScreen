@@ -1,7 +1,7 @@
 /*
  * test_settings.cpp
  *
- * The settings tabs (assets/ui/screens/settings_*.xml, src/UI/Screens/Settings/).
+ * The settings tabs (assets/ui/screens/settings_*.xml, src/UI/Presenters/Settings/).
  */
 
 #include "ObjectModel/Job.h"

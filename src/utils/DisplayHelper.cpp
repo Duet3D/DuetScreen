@@ -7,7 +7,7 @@
 
 #include "DisplayHelper.h"
 #include "Debug.h"
-#include "UI/Components/LVGL/LvObj.h" // for UI_LOCK
+#include "UI/Lvgl/LvObj.h" // for UI_LOCK
 #include "utils/StorageHelper.h"
 #include <cerrno>
 #include <cstdio>

@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/List/LazyList.h"
+#include "UI/Widgets/Layout/LazyList.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

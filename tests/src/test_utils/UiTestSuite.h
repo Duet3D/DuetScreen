@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/Components/Screen/Screen.h"
+#include "test_utils/Screen.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "test_utils/TestSuite.h"
 #include "test_utils/utils.h"

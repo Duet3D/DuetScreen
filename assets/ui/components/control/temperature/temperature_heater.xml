@@ -5,7 +5,7 @@
 
   Fields:   a heater row: name, state, status, current_value, scale_min, scale_max, active, standby
             (src/UI/Xml/Data/HeaterRow.h)
-  Actions:  heaters.toggle, heaters.set_active, heaters.set_standby (src/UI/Screens/Temperature/HeaterActions.h)
+  Actions:  heaters.toggle, heaters.set_active, heaters.set_standby (src/UI/Presenters/Control/Temperature/HeaterActions.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_pad_all="0"

@@ -2,7 +2,7 @@
   One file or folder in the file browser's grid: its thumbnail (or a folder icon) above its name. Tap to open it. The
   list sets its size.
 
-  Fields:   a files row: name, thumbnail, is_folder (src/UI/Screens/File/FileBrowserPresenter.h)
+  Fields:   a files row: name, thumbnail, is_folder (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="150" height="170" scrollable="false" flex_flow="column"

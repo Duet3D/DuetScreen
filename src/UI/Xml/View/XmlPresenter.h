@@ -13,7 +13,7 @@
  * users restyle or restructure a view freely. Model events are subscribed in `onInit()` as for every other presenter
  * (`registerEventListener<EventType::...>`), and are only delivered while the view is shown.
  *
- * Presenters are registered by name (see Presenters below), normally in Screens/XmlPresenters.cpp.
+ * Presenters are registered by name (see Presenters below), in src/UI/Presenters/Presenters.cpp.
  */
 
 #pragma once

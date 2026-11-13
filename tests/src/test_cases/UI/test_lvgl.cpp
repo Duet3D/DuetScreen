@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/LVGL/LvTextarea.h"
+#include "UI/Lvgl/LvTextarea.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

@@ -1,7 +1,7 @@
 <!--
   One finished test in the hardware test's results: its name and what it found, green if it passed, red if not.
 
-  Fields:   a passed or failed row: name, output, passed (src/UI/Screens/HardwareTest/HardwareTestPresenter.h)
+  Fields:   a passed or failed row: name, output, passed (src/UI/Presenters/HardwareTest/HardwareTestPresenter.h)
 -->
 <component>
 	<styles>

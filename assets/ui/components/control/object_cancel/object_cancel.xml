@@ -3,7 +3,7 @@
   and a button to cancel it. Tapping an object cancels it, or resumes it if cancelled, after asking. Cancel Current
   Object only asks if confirmations are on, and stands out when it won't.
 
-  Fields and actions: src/UI/Screens/ObjectCancel/ObjectCancelPresenter.h
+  Fields and actions: src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h
 -->
 <component presenter="object_cancel">
 	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"

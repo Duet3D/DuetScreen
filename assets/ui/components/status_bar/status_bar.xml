@@ -5,7 +5,7 @@
   The name is at most 40% wide and centred, and the temperatures at most 30% wide, so they never overlap. The
   temperatures are spans so the tool and the temperatures share a baseline whatever the theme's fonts.
 
-  Fields:   status, name, has_tool, tool, heaters, fault (see src/UI/Screens/StatusBar/StatusBarPresenter.h)
+  Fields:   status, name, has_tool, tool, heaters, fault (see src/UI/Presenters/StatusBar/StatusBarPresenter.h)
 -->
 <component presenter="status_bar">
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">

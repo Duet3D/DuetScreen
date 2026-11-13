@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "UI/Components/LVGL/LvSubject.h"
+#include "UI/Lvgl/LvSubject.h"
 #include <array>
 #include <cstdint>
 #include <string>

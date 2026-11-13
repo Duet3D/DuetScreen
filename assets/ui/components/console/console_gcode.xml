@@ -1,7 +1,7 @@
 <!--
   One G-code in the console's list: the code and what it does. Tap to type it.
 
-  Fields:   a gcodes row: gcode, description (src/UI/Screens/Console/ConsolePresenter.h)
+  Fields:   a gcodes row: gcode, description (src/UI/Presenters/Console/ConsolePresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="content" height="30" flex_flow="row" scrollable="false"

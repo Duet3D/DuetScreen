@@ -2,7 +2,7 @@
   The shared speed and extrusion factor dialogs. Any view opens them with the global actions `factors.speed` and
   `factors.extrusion` (the tool's extruders from a row of a list of tools, else every extruder).
 
-  Fields and actions: src/UI/Screens/Modals/FactorsPresenter.h
+  Fields and actions: src/UI/Presenters/Modals/FactorsPresenter.h
 -->
 <component presenter="factors">
 	<!-- Takes no room: its dialogs open over the main window -->

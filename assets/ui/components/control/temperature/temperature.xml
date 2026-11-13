@@ -2,7 +2,7 @@
   The Temperature tab: the tools, beds and chambers with their heaters on the left; the selected tool and the extruder
   panel (temperature_extrusion.xml) on the right.
 
-  Fields and actions: src/UI/Screens/Temperature/TemperaturePresenter.h; the beds and chambers are the global lists
+  Fields and actions: src/UI/Presenters/Control/Temperature/TemperaturePresenter.h; the beds and chambers are the global lists
   (src/UI/Xml/Data/HeatSource.h).
 -->
 <component presenter="temperature">

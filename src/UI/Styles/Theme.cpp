@@ -7,7 +7,7 @@
 #include "Font.h"
 #include "Storage.h"
 #include "Styles.h"
-#include "UI/Components/LVGL/LvObj.h"
+#include "UI/Lvgl/LvObj.h"
 #include "helix_xml.h"
 #include "src/xml/lv_xml_base_types.h"
 #include "utils/StorageHelper.h"

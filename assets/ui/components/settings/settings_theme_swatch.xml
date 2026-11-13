@@ -2,7 +2,7 @@
   One colour of the theme in the theme preview: a box of the colour over the style's name. The text styles' names are
   shown in those styles.
 
-  Fields:   a swatches row: label, color, text_style (src/UI/Screens/Settings/ThemePreviewPresenter.h)
+  Fields:   a swatches row: label, color, text_style (src/UI/Presenters/Settings/ThemePreviewPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="content" height="content" style_max_width="100%" flex_flow="column"

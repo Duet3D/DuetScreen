@@ -3,7 +3,7 @@
   and disabling the motors. Homing buttons show unhomed axes until homed.
 
   Binds to the Move tab's x.*, y.*, xy.*, home_all_usable and disable_motors_usable, and raises its move.* actions
-  (src/UI/Screens/Move/MovePresenter.h).
+  (src/UI/Presenters/Control/Move/MovePresenter.h).
 -->
 <component>
 	<view extends="lv_obj" style_layout="grid" style_grid_column_dsc_array="fr(2) fr(1) fr(1) fr(2)"

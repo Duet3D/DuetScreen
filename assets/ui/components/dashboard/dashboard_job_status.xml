@@ -5,7 +5,7 @@
   Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens
   babystep.xml in a dialog.
 
-  Fields and actions: src/UI/Screens/Status/JobStatusPresenter.h
+  Fields and actions: src/UI/Presenters/Dashboard/JobStatusPresenter.h
 -->
 <component presenter="dashboard_job_status">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">

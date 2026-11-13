@@ -4,7 +4,7 @@
 
   The text is English only: the test is run at the factory.
 
-  Fields and actions: src/UI/Screens/HardwareTest/HardwareTestPresenter.h
+  Fields and actions: src/UI/Presenters/HardwareTest/HardwareTestPresenter.h
 -->
 <component presenter="hardware_test">
 	<styles>

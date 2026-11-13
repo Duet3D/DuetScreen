@@ -1,14 +1,14 @@
 /*
  * test_file_browser.cpp
  *
- * The file browser's presenter (src/UI/Screens/File/FileBrowserPresenter.h). Browsing on screen, and the dialogs, are
- * covered by test_home_view.cpp.
+ * The file browser's presenter (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h). Browsing on screen, and the
+ * dialogs, are covered by test_home_view.cpp.
  *
  *  Created on: 2026-03-12
  *      Author: Andy Everitt
  */
 
-#include "UI/Screens/File/FileBrowserPresenter.h"
+#include "UI/Presenters/FileBrowser/FileBrowserPresenter.h"
 #include <gtest/gtest.h>
 
 using namespace UI;

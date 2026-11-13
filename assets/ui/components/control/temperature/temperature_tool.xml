@@ -4,8 +4,8 @@
 
   Pick a filament, then Load (or Change) to load it. Nothing that would change the job can be pressed while printing.
 
-  Fields and actions: a tools row (src/UI/Screens/Temperature/TemperaturePresenter.h); tools.toggle
-  (src/UI/Screens/Temperature/HeaterActions.h)
+  Fields and actions: a tools row (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h); tools.toggle
+  (src/UI/Presenters/Control/Temperature/HeaterActions.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">

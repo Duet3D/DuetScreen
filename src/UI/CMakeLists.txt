@@ -1,5 +1,6 @@
-add_subdirectory(Components)
 add_subdirectory(Core)
-add_subdirectory(Screens)
+add_subdirectory(Lvgl)
+add_subdirectory(Presenters)
 add_subdirectory(Styles)
+add_subdirectory(Widgets)
 add_subdirectory(Xml)

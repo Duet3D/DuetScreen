@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/LVGL/LvLabel.h"
+#include "UI/Lvgl/LvLabel.h"
 #include "test_utils/UiTestSuite.h"
 #include <cstring>
 #include <gtest/gtest.h>

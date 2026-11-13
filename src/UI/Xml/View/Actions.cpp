@@ -4,8 +4,8 @@
 
 #include "Actions.h"
 #include "Debug.h"
-#include "UI/Components/Input/Slider.h"
-#include "UI/Xml/Widgets/Widgets.h"
+#include "UI/Widgets/Inputs/Slider.h"
+#include "UI/Widgets/Widgets.h"
 #include "helix_xml.h"
 #include "src/xml/lv_xml_base_types.h"
 #include "src/xml/lv_xml_parser.h"

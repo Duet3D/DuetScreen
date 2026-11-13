@@ -1,7 +1,7 @@
 /*
  * test_heatmap.cpp
  *
- * <ds_heatmap> (src/UI/Xml/Widgets/DsHeatmap.h) drawing a Surface (src/UI/Xml/Binding/Surface.h).
+ * <ds_heatmap> (src/UI/Widgets/Display/DsHeatmap.h) drawing a Surface (src/UI/Xml/Binding/Surface.h).
  */
 
 #include "UI/Xml/Binding/Surface.h"

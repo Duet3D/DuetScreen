@@ -13,11 +13,11 @@
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
 #include "ObjectModel/PrinterStatus.h"
-#include "UI/Components/Containers/TabView.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/XmlScreens.h"
+#include "UI/Presenters/Presenters.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Widgets/Layout/TabView.h"
 #include "UI/Xml/Runtime/HotReload.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 	}
 	{
 		ZoneScopedN("Xml::init");
-		UI::registerXmlScreens();
+		UI::registerPresenters();
 		UI::Xml::init();
 #if SIMULATION
 		// Edit assets/ui/ or var/ui/ and the running UI rebuilds

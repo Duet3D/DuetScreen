@@ -2,10 +2,10 @@
  * test_hardware_test.cpp
  *
  * The factory hardware test (assets/ui/components/hardware_test/hardware_test.xml,
- * src/UI/Screens/HardwareTest/HardwareTestPresenter.h): its first stages, driven by taps.
+ * src/UI/Presenters/HardwareTest/HardwareTestPresenter.h): its first stages, driven by taps.
  */
 
-#include "UI/Screens/HardwareTest/HardwareTestPresenter.h"
+#include "UI/Presenters/HardwareTest/HardwareTestPresenter.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
@@ -38,13 +38,21 @@ class TestHardwareTest : public UiTestSuite
 		lv_obj_send_event(input, LV_EVENT_READY, nullptr);
 	}
 
+	/** Tap the screen at (`x`, `y`), holding the UI lock while LVGL runs as the main loop does: the tests' threads
+	 * change the screen under it */
+	static void tap(int32_t x, int32_t y)
+	{
+		UI_LOCK();
+		lv_test_mouse_click_at(x, y);
+	}
+
 	/** Tap the middle of the touch target */
 	void tapTarget()
 	{
 		lv_obj_update_layout(screen.getRootPtr());
 		lv_area_t area;
 		lv_obj_get_coords(part("target"), &area);
-		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+		tap((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
 	}
 
 	std::shared_ptr<UI::HardwareTestPresenter> presenter =
@@ -92,7 +100,7 @@ TEST_F(TestHardwareTest, TouchThenDeadPixels)
 		{
 			EXPECT_EQUAL_SCREENSHOT("hardware_test/red.png");
 		}
-		lv_test_mouse_click_at(900, 300);
+		tap(900, 300);
 	}
 	EXPECT_TRUE(showing("command_stage")) << "the memory test starts";
 }

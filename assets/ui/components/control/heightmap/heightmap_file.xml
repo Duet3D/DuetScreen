@@ -2,7 +2,7 @@
   One height map file on the Bed Levelling tab: tap it to show it; Load (or Unload) makes the printer use it (or stop).
   Highlighted while the printer is using it.
 
-  Fields and actions: a maps row (src/UI/Screens/Heightmap/HeightmapPresenter.h)
+  Fields and actions: a maps row (src/UI/Presenters/Control/Heightmap/HeightmapPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row"

@@ -5,9 +5,9 @@
  *      Author: Andy Everitt
  */
 
-#include "UI/Components/Input/Slider.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
+#include "UI/Widgets/Inputs/Slider.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"

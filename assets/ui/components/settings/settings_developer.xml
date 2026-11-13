@@ -3,7 +3,7 @@
   upgrading from GitHub, sending the settings to the Duet, and the storage used. The options only some builds have
   (debug borders, SSH, ADB, setup, the system monitor) are hidden in the others, so they come last.
 
-  Fields and actions: src/UI/Screens/Settings/DeveloperSettingsPresenter.h
+  Fields and actions: src/UI/Presenters/Settings/DeveloperSettingsPresenter.h
 -->
 <component presenter="settings_developer">
 	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"

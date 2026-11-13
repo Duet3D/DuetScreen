@@ -3,7 +3,7 @@
 
   Data:     the global tools, beds and chambers lists (src/UI/Xml/Data/ToolSource.h, HeatSource.h)
   Actions:  tools.toggle, heaters.toggle, heaters.set_active, heaters.set_standby
-            (src/UI/Screens/Temperature/HeaterActions.h)
+            (src/UI/Presenters/Control/Temperature/HeaterActions.h)
 
   Temperatures are typed on the shared number pad.
 -->

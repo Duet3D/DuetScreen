@@ -4,11 +4,11 @@ Generate/update C++ LVGL wrapper classes from LVGL widget headers.
 
 - Scans `libraries/lvgl/src/widgets/**/lv_*.h` for widgets
 - Parses function prototypes prefixed with the widget name (e.g., lv_chart_*())
-- Emits generated wrappers into `src/UI/Components/LVGL/generated/` as `Lv<Widget>.gen.h/.gen.cpp`
+- Emits generated wrappers into `src/UI/Lvgl/generated/` as `Lv<Widget>.gen.h/.gen.cpp`
 - Generated class names are suffixed with `Gen` (e.g., `LvLabelGen`)
-- Also creates a thin non-generated header `src/UI/Components/LVGL/Lv<Widget>.h` if missing,
+- Also creates a thin non-generated header `src/UI/Lvgl/Lv<Widget>.h` if missing,
     defining `class Lv<Widget> : public Lv<Widget>Gen` with inherited constructors for manual overrides
-- Updates `src/UI/Components/LVGL/CMakeLists.txt` to include new generated `.gen.cpp` files
+- Updates `src/UI/Lvgl/CMakeLists.txt` to include new generated `.gen.cpp` files
 
 Usage:
     python scripts/generate_lvgl_wrappers.py --all
@@ -36,7 +36,7 @@ from typing import List, Tuple, Dict, Optional
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDGETS_DIR = ROOT / "libraries" / "lvgl" / "src" / "widgets"
-OUTPUT_DIR = ROOT / "src" / "UI" / "Components" / "LVGL"
+OUTPUT_DIR = ROOT / "src" / "UI" / "Lvgl"
 OUTPUT_GEN_DIR = OUTPUT_DIR / "generated"
 GEN_CMAKE_FILE = OUTPUT_GEN_DIR / "CMakeLists.txt"
 CMAKE_FILE = OUTPUT_DIR / "CMakeLists.txt"
@@ -425,7 +425,7 @@ def emit_header_gen(
     lines.extend(banner_lines(f"{class_base_name}.gen.h"))
     lines.append("#pragma once")
     lines.append("")
-    lines.append("#include \"UI/Components/LVGL/LvObj.h\"")
+    lines.append("#include \"UI/Lvgl/LvObj.h\"")
     # Include <span> if any method uses std::span
     if any(m.array_count_pairs or any(is_arr for (_, _, is_arr) in m.args[1:]) for m in methods):
         lines.append("#include <span>")
@@ -438,7 +438,7 @@ def emit_header_gen(
     base_methods_tmpl = None
     if base_widget_token:
         base_class_base = f"Lv{to_pascal(base_widget_token)}"
-        lines.append(f"#include \"UI/Components/LVGL/generated/{base_class_base}.gen.h\"")
+        lines.append(f"#include \"UI/Lvgl/generated/{base_class_base}.gen.h\"")
         lines.append("")
 
     lines.append("namespace UI")
@@ -574,7 +574,7 @@ def emit_derived_header_if_missing(class_base_name: str) -> Optional[str]:
     lines: List[str] = []
     lines.append("#pragma once")
     lines.append("")
-    lines.append(f"#include \"UI/Components/LVGL/generated/{class_base_name}.gen.h\"")
+    lines.append(f"#include \"UI/Lvgl/generated/{class_base_name}.gen.h\"")
     lines.append("")
     lines.append("namespace UI")
     lines.append("{")
@@ -617,7 +617,7 @@ def ensure_parent_references_generated() -> None:
 
 def update_generated_cmake(new_gen_cpp_files: List[str]) -> None:
     """
-    Maintain src/UI/Components/LVGL/generated/CMakeLists.txt with the list of generated sources.
+    Maintain src/UI/Lvgl/generated/CMakeLists.txt with the list of generated sources.
     Entries should be of the form: ${CMAKE_CURRENT_SOURCE_DIR}/Lv<Widget>.gen.cpp
     """
     # Normalize to basenames within generated dir

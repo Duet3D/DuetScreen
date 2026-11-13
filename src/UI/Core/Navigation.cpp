@@ -1,6 +1,6 @@
 #include "Navigation.h"
 #include "Debug.h"
-#include "UI/Components/LVGL/Transitions.h"
+#include "UI/Lvgl/Transitions.h"
 #include <algorithm>
 #include <map>
 #include <vector>

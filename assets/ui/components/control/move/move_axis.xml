@@ -2,7 +2,7 @@
   Controls for one axis: its position (tap to set it), forwards, home, backwards. Homing shows it unhomed until
   done.
 
-  Fields:   an axes row: letter, label, homed, jog_usable, home_usable (src/UI/Screens/Move/MovePresenter.h)
+  Fields:   an axes row: letter, label, homed, jog_usable, home_usable (src/UI/Presenters/Control/Move/MovePresenter.h)
 -->
 <component>
 	<view extends="lv_obj" height="100%" flex_grow="1" style_min_width="content" flex_flow="column"

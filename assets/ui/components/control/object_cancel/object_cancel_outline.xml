@@ -2,7 +2,7 @@
   One of the job's objects on the Object Cancel tab's bed: its outline at its bounds. Press it to cancel it, or resume
   it if cancelled. Highlighted while it is being printed, and marked once cancelled.
 
-  Fields and actions: an objects row (src/UI/Screens/ObjectCancel/ObjectCancelPresenter.h)
+  Fields and actions: an objects row (src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h)
 -->
 <component>
 	<view extends="ds_plot_rect" bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2" style_pad_all="0"

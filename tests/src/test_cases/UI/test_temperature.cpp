@@ -1,11 +1,11 @@
 /*
  * test_temperature.cpp
  *
- * The Temperature tab's tool rows (src/UI/Screens/Temperature/TemperaturePresenter.h).
+ * The Temperature tab's tool rows (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h).
  */
 
 #include "ObjectModel/Tool.h"
-#include "UI/Screens/Temperature/TemperaturePresenter.h"
+#include "UI/Presenters/Control/Temperature/TemperaturePresenter.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

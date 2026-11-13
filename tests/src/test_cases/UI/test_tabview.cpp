@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/Containers/TabView.h"
+#include "UI/Widgets/Layout/TabView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

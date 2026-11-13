@@ -3,7 +3,7 @@
   macro, or delete a file. Open while `dialog` is set.
 
   Fields and actions: dialog, dialog_*, info_*; files.confirm, files.ask_delete, files.close_dialog
-  (src/UI/Screens/File/FileBrowserPresenter.h)
+  (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
 -->
 <component>
 	<styles>

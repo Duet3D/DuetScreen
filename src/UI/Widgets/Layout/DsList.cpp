@@ -1,0 +1,390 @@
+/*
+ * DsList.cpp
+ */
+
+#include "DsList.h"
+#include "UI/Widgets/WidgetSupport.h"
+#include "UI/Widgets/Widgets.h"
+#include "UI/Xml/View/Actions.h"
+#include "src/xml/parsers/lv_xml_obj_parser.h"
+#include <algorithm>
+
+namespace UI::Xml
+{
+	using namespace WidgetSupport;
+
+	DsList::DsList(lv_obj_t* container,
+				   ListBase& list,
+				   std::string item,
+				   lv_xml_subject_ctx_t* parentContext,
+				   std::optional<Window> window,
+				   bool followEnd)
+		: m_container(container)
+		, m_list(&list)
+		, m_item(std::move(item))
+		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
+		, m_window(window)
+		, m_count(list.size())
+		, m_followEnd(followEnd)
+	{
+		m_list->addListener(this);
+		if (m_followEnd)
+		{
+			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_SCROLL_END, this);
+			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_LAYOUT_CHANGED, this);
+			m_display = lv_obj_get_display(m_container);
+			lv_display_add_event_cb(m_display, layoutCompletedEventCb, LV_EVENT_UPDATE_LAYOUT_COMPLETED, this);
+		}
+		if (!m_window)
+		{
+			build(0, m_list->size());
+			return;
+		}
+
+		// The list places the items itself
+		lv_obj_set_layout(m_container, LV_LAYOUT_NONE);
+		m_sizer = lv_obj_create(m_container);
+		lv_obj_remove_style_all(m_sizer);
+		lv_obj_remove_flag(m_sizer, LV_OBJ_FLAG_CLICKABLE);
+		lv_obj_set_size(m_sizer, 0, 0);
+		lv_obj_add_event_cb(m_container, windowEventCb, LV_EVENT_SCROLL, this);
+		lv_obj_add_event_cb(m_container, windowEventCb, LV_EVENT_SCROLL_END, this);
+		lv_obj_add_event_cb(m_container, windowEventCb, LV_EVENT_SIZE_CHANGED, this);
+		updateWindow();
+	}
+
+	DsList::~DsList()
+	{
+		if (m_list)
+		{
+			m_list->removeListener(this);
+		}
+		if (m_display)
+		{
+			lv_display_remove_event_cb_with_user_data(m_display, layoutCompletedEventCb, this);
+		}
+		m_entries.clear();
+		m_shown.clear();
+		lv_xml_subject_ctx_unref(m_parentContext);
+	}
+
+	void DsList::registerXml()
+	{
+		Widgets::add(
+			{.name = "ds_list",
+			 .extends = "lv_obj",
+			 .description =
+				 "A container with one component per row of a list. Each item is built in a scope of its own holding "
+				 "its row's fields, so names are found in the row first, then where the list is written. With "
+				 "`windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of "
+				 "widgets; every item then has the same size, and the list places them itself (its own layout is "
+				 "ignored), with its style_pad_row and style_pad_column as the gaps.",
+			 .example =
+				 R"(<ds_list list="files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
+			 .attributes =
+				 {{"list",
+				   "The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can "
+				   "show `list=\"heaters\"`), then the view's presenter, then the globals",
+				   AttributeKind::List},
+				  {"item", "The component built for each row (required)", AttributeKind::Component},
+				  {"windowed",
+				   "\"true\" to build only the rows on screen, building and deleting rows as the list scrolls (default "
+				   "false)"},
+				  {"item_height", "Windowed: each item's height in pixels (required when windowed)"},
+				  {"item_width",
+				   "Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; "
+				   "the list scrolls sideways); the list's full width if not given"},
+				  {"flow",
+				   "Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit"},
+				  {"follow_end",
+				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
+				   "unless the user has scrolled back (default false)"}}},
+			xmlCreate,
+			xmlApply);
+	}
+
+	void DsList::onListResized(size_t oldSize, size_t newSize)
+	{
+		if (m_window)
+		{
+			// Removed rows' widgets go now, before the rows do. The list still holds them until every listener has
+			// been told, so from here on only the first newSize rows are used.
+			m_count = newSize;
+			for (auto it = m_shown.lower_bound(newSize); it != m_shown.end();)
+			{
+				deleteRow(it->second);
+				it = m_shown.erase(it);
+			}
+			updateWindow();
+		}
+		else if (newSize > oldSize)
+		{
+			build(m_entries.size(), newSize);
+		}
+		else
+		{
+			truncate(newSize);
+		}
+	}
+
+	void DsList::onListDestroyed()
+	{
+		truncate(0);
+		for (auto& [index, entry] : m_shown)
+		{
+			deleteRow(entry);
+		}
+		m_shown.clear();
+		m_list = nullptr;
+	}
+
+	void* DsList::xmlCreate(lv_xml_parser_state_t* state, const char** /* attrs */)
+	{
+		return lv_obj_create(parentOf(state));
+	}
+
+	void DsList::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
+	{
+		lv_xml_obj_apply(state, attrs);
+
+		const char* listName = lv_xml_get_value_of(attrs, "list");
+		const char* item = lv_xml_get_value_of(attrs, "item");
+		if (listName == nullptr || item == nullptr)
+		{
+			LOG_WARN("<ds_list> needs both list= and item=");
+			return;
+		}
+
+		lv_xml_subject_ctx_t* context = lv_xml_subject_ctx_get_active();
+		ListBase* list = Scope::findList(context, listName);
+		if (list == nullptr)
+		{
+			LOG_WARN("<ds_list list=\"{:s}\">: no such list", listName);
+			return;
+		}
+
+		std::optional<Window> window;
+		if (lv_xml_to_bool(attrOr(attrs, "windowed", "false")))
+		{
+			window = Window{.itemWidth = std::nullopt,
+							.itemHeight = lv_xml_atoi(attrOr(attrs, "item_height", "0")),
+							.wrap = lv_streq(attrOr(attrs, "flow", "column"), "row_wrap")};
+			if (const char* width = lv_xml_get_value_of(attrs, "item_width"))
+			{
+				if (lv_streq(width, "content"))
+				{
+					window->contentWidth = true;
+				}
+				else
+				{
+					window->itemWidth = lv_xml_atoi(width);
+				}
+			}
+			if (window->itemHeight <= 0)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\" windowed=\"true\"> needs item_height=", listName);
+				return;
+			}
+		}
+
+		lv_obj_t* container = itemOf(state);
+		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
+		deleteWith(container, new DsList(container, *list, item, context, window, followEnd));
+	}
+
+	void DsList::windowEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (list->m_list == nullptr)
+		{
+			return;
+		}
+		// While scrolling, only add items: deleting the one under the finger would stop the scroll. Items that left
+		// the screen are deleted once scrolling ends.
+		if (lv_event_get_code(e) == LV_EVENT_SCROLL)
+		{
+			list->addVisibleRows(list->itemsPerLine());
+			return;
+		}
+		list->updateWindow();
+	}
+
+	DsList::Entry DsList::buildRow(size_t index)
+	{
+		ZoneScoped;
+		Row& row = m_list->row(index);
+		auto scope = std::make_unique<Scope>(m_parentContext);
+		ScopeBinder binder(*scope);
+		row.allFields(binder);
+
+		const std::string name = std::to_string(index);
+		const char* attrs[] = {"name", name.c_str(), nullptr, nullptr};
+		auto* obj =
+			static_cast<lv_obj_t*>(lv_xml_create_with_ctx(m_container, m_item.c_str(), attrs, scope->context()));
+		if (obj == nullptr)
+		{
+			LOG_ERROR("<ds_list>: couldn't create item component '{:s}'", m_item);
+			return {nullptr, std::move(scope)};
+		}
+
+		Actions::setRow(obj, &row);
+		if (m_window)
+		{
+			placeItem(obj, index, itemsPerLine());
+		}
+		return {obj, std::move(scope)};
+	}
+
+	void DsList::placeItem(lv_obj_t* obj, size_t index, int32_t perLine) const
+	{
+		const lv_area_t area = itemArea(index, perLine);
+		lv_obj_set_pos(obj, area.x1, area.y1);
+		lv_obj_set_height(obj, lv_area_get_height(&area));
+		if (!m_window->contentWidth)
+		{
+			lv_obj_set_width(obj, lv_area_get_width(&area));
+		}
+	}
+
+	void DsList::followEndEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (lv_event_get_code(e) == LV_EVENT_SCROLL_END)
+		{
+			list->m_atEnd = lv_obj_get_scroll_bottom(list->m_container) <= 0;
+		}
+		else
+		{
+			list->m_laidOut = true;
+		}
+	}
+
+	void DsList::layoutCompletedEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (!list->m_laidOut)
+		{
+			return;
+		}
+		list->m_laidOut = false;
+		// Also brings back a list left past its end, e.g. by rows that became shorter: the scroll is bounded
+		if (list->m_atEnd && lv_obj_get_scroll_bottom(list->m_container) != 0)
+		{
+			lv_obj_scroll_to_y(list->m_container, LV_COORD_MAX, LV_ANIM_OFF);
+		}
+	}
+
+	void DsList::deleteRow(Entry& entry)
+	{
+		if (entry.obj)
+		{
+			lv_obj_delete(entry.obj);
+			entry.obj = nullptr;
+		}
+	}
+
+	void DsList::build(size_t from, size_t to)
+	{
+		for (size_t i = from; i < to; i++)
+		{
+			m_entries.push_back(buildRow(i));
+		}
+	}
+
+	void DsList::truncate(size_t count)
+	{
+		while (m_entries.size() > count)
+		{
+			deleteRow(m_entries.back());
+			m_entries.pop_back();
+		}
+	}
+
+	int32_t DsList::itemsPerLine() const
+	{
+		if (!m_window->wrap)
+		{
+			return 1;
+		}
+		const int32_t width = lv_obj_get_content_width(m_container);
+		const int32_t gap = lv_obj_get_style_pad_column(m_container, LV_PART_MAIN);
+		const int32_t itemWidth = m_window->itemWidth.value_or(width);
+		return std::max<int32_t>(1, (width + gap) / std::max<int32_t>(1, itemWidth + gap));
+	}
+
+	lv_area_t DsList::itemArea(size_t index, int32_t perLine) const
+	{
+		const int32_t width = m_window->itemWidth.value_or(lv_obj_get_content_width(m_container));
+		const int32_t height = m_window->itemHeight;
+		const auto line = static_cast<int32_t>(index / static_cast<size_t>(perLine));
+		const auto column = static_cast<int32_t>(index % static_cast<size_t>(perLine));
+		const int32_t x = column * (width + lv_obj_get_style_pad_column(m_container, LV_PART_MAIN));
+		const int32_t y = line * (height + lv_obj_get_style_pad_row(m_container, LV_PART_MAIN));
+		return {x, y, x + width - 1, y + height - 1};
+	}
+
+	void DsList::updateWindow()
+	{
+		ZoneScoped;
+		if (m_list == nullptr)
+		{
+			return;
+		}
+
+		// The scrollable area holds every row
+		const size_t count = m_count;
+		const int32_t perLine = itemsPerLine();
+		if (count == 0)
+		{
+			lv_obj_set_size(m_sizer, 0, 0);
+		}
+		else
+		{
+			const lv_area_t lastItem = itemArea(count - 1, perLine);
+			lv_obj_set_size(m_sizer, 1, lastItem.y2 + 1);
+		}
+		// A shorter list may have left the view scrolled past its end
+		lv_obj_update_layout(m_container);
+		lv_obj_readjust_scroll(m_container, LV_ANIM_OFF);
+
+		// Delete the rows that left the screen; the others may need moving if the width changed
+		const auto [first, last] = visibleRows(perLine);
+		for (auto it = m_shown.begin(); it != m_shown.end();)
+		{
+			if (it->first < first || it->first >= last)
+			{
+				deleteRow(it->second);
+				it = m_shown.erase(it);
+				continue;
+			}
+			if (it->second.obj != nullptr)
+			{
+				placeItem(it->second.obj, it->first, perLine);
+			}
+			++it;
+		}
+		addVisibleRows(perLine);
+	}
+
+	std::pair<size_t, size_t> DsList::visibleRows(int32_t perLine) const
+	{
+		const size_t count = m_count;
+		const int32_t top = std::max(0, lv_obj_get_scroll_top(m_container));
+		const int32_t bottom = top + lv_obj_get_content_height(m_container);
+		const int32_t lineHeight = m_window->itemHeight + lv_obj_get_style_pad_row(m_container, LV_PART_MAIN);
+		const auto line = [&](int32_t y) { return static_cast<size_t>(y / lineHeight) * static_cast<size_t>(perLine); };
+		return {std::min(count, line(top)), std::min(count, line(bottom) + static_cast<size_t>(perLine))};
+	}
+
+	void DsList::addVisibleRows(int32_t perLine)
+	{
+		const auto [first, last] = visibleRows(perLine);
+		for (size_t i = first; i < last; i++)
+		{
+			if (!m_shown.contains(i))
+			{
+				m_shown.emplace(i, buildRow(i));
+			}
+		}
+	}
+} // namespace UI::Xml

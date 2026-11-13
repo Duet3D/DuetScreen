@@ -2,7 +2,7 @@
   The Connection settings tab: how the screen reaches the Duet (and, over the network, the Duet's address and
   password), how often it polls it, and the screen's own WiFi (settings_wifi.xml).
 
-  Fields and actions: src/UI/Screens/Settings/ConnectionSettingsPresenter.h. Numbers and the IP address are typed on
+  Fields and actions: src/UI/Presenters/Settings/ConnectionSettingsPresenter.h. Numbers and the IP address are typed on
   the shared number pad; the password on the shared keyboard.
 -->
 <component presenter="settings_connection">

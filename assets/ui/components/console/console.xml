@@ -3,7 +3,7 @@
   G-code into, with the console's own keyboard.
 
   The lines are the global console.lines (src/UI/Xml/Data/ConsoleSource.h), recorded even while the console isn't
-  showing. Fields and actions: src/UI/Screens/Console/ConsolePresenter.h
+  showing. Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
 -->
 <component presenter="console">
 	<styles>

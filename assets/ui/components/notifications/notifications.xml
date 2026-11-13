@@ -3,7 +3,7 @@
   covering the screen that only takes touches where a message is showing; the alert and update prompt dim the whole
   screen behind them.
 
-  Fields and actions: src/UI/Screens/Notifications/NotificationsPresenter.h
+  Fields and actions: src/UI/Presenters/Notifications/NotificationsPresenter.h
 -->
 <component presenter="notifications">
 	<styles>

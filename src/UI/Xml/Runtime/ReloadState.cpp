@@ -4,7 +4,7 @@
 
 #include "ReloadState.h"
 #include "Debug.h"
-#include "UI/Components/Containers/TabView.h"
+#include "UI/Widgets/Layout/TabView.h"
 #include <array>
 
 namespace UI::Xml

@@ -13,12 +13,12 @@
 #include "UI/Core/Model.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
-#include "UI/Xml/Widgets/Widgets.h"
 #include "helix_xml.h"
 #include "i18n/i18n.h"
 #include <algorithm>

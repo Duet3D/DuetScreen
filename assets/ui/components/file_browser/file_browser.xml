@@ -3,9 +3,9 @@
   list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in file_browser_dialog.xml.
 
   Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
-  e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Screens/XmlScreens.cpp).
+  e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Presenters/Presenters.cpp).
 
-  Fields and actions: src/UI/Screens/File/FileBrowserPresenter.h
+  Fields and actions: src/UI/Presenters/FileBrowser/FileBrowserPresenter.h
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">

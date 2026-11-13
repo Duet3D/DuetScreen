@@ -2,7 +2,7 @@
   The Display settings tab: the theme, font and icons, a preview of the theme (settings_theme_preview.xml), animations and the
   screen's rotation. Each is applied as soon as it is changed.
 
-  Fields and actions: src/UI/Screens/Settings/DisplaySettingsPresenter.h
+  Fields and actions: src/UI/Presenters/Settings/DisplaySettingsPresenter.h
 -->
 <component presenter="settings_display">
 	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"

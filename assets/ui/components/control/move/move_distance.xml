@@ -1,7 +1,7 @@
 <!--
   One jog distance choice. Tap to use it; hold to change it.
 
-  Fields:   a distances row: text, selected (src/UI/Screens/Move/MovePresenter.h)
+  Fields:   a distances row: text, selected (src/UI/Presenters/Control/Move/MovePresenter.h)
 -->
 <component>
 	<view extends="ds_button" bind_text="text" height="100%" flex_grow="1" style_min_height="content">

@@ -2,7 +2,7 @@
   One file or folder in the file browser's list: its name and date, with the file's thumbnail or a folder icon on the
   right. Tap to open it. The list sets its size.
 
-  Fields:   a files row: name, date, thumbnail, is_folder (src/UI/Screens/File/FileBrowserPresenter.h)
+  Fields:   a files row: name, date, thumbnail, is_folder (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="90" scrollable="false" style_layout="grid"

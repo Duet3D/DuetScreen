@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "UI/Xml/Widgets/Widgets.h"
+#include "UI/Widgets/Widgets.h"
 #include <string>
 #include <vector>
 

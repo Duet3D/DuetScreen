@@ -2,7 +2,7 @@
   One folder of the file browser's path: a separator before all but the first, then the folder's name, which can be
   tapped to go back up to it unless it is the open folder.
 
-  Fields:   a crumbs row: name, last (src/UI/Screens/File/FileBrowserPresenter.h)
+  Fields:   a crumbs row: name, last (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="content" height="content" flex_flow="row" style_pad_all="0"

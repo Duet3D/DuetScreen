@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/Bar/Bar.h"
+#include "UI/Widgets/Display/Bar.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

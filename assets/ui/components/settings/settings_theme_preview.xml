@@ -2,7 +2,7 @@
   The theme preview: a swatch of each colour of the theme in use and, for a theme whose palette can be changed, its
   hues (on sliders showing every hue), chroma and dark mode, which change it as they are moved.
 
-  Fields and actions: src/UI/Screens/Settings/ThemePreviewPresenter.h. Values are typed on the shared number pad.
+  Fields and actions: src/UI/Presenters/Settings/ThemePreviewPresenter.h. Values are typed on the shared number pad.
 -->
 <component presenter="settings_theme_preview">
 	<view extends="lv_obj" width="100%" height="content" style_layout="grid"

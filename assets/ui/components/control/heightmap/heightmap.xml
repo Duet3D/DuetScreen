@@ -2,7 +2,7 @@
   The Bed Levelling tab: the height map shown, with its colour scale; buttons to level the bed (G32) and probe it
   (G29); the height map files on the printer; how values are coloured; and the map's statistics along the bottom.
 
-  Fields and actions: src/UI/Screens/Heightmap/HeightmapPresenter.h
+  Fields and actions: src/UI/Presenters/Control/Heightmap/HeightmapPresenter.h
 -->
 <component presenter="heightmap">
 	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"

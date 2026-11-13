@@ -2,7 +2,7 @@
   The screen's WiFi: its IP address, how the last connection attempt went, and the networks around it, scanned for
   every few seconds while shown. Joining a new network asks for its password, typed on the shared keyboard.
 
-  Fields and actions: src/UI/Screens/Settings/WifiPresenter.h
+  Fields and actions: src/UI/Presenters/Settings/WifiPresenter.h
 -->
 <component presenter="settings_wifi">
 	<styles>

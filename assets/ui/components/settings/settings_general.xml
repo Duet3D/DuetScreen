@@ -2,7 +2,7 @@
   The General settings tab: versions, language, keyboard layout, brightness, screensaver, confirmations, move mode
   and job progress, then the notifications from the Duet. Each is stored as soon as it is changed.
 
-  Fields and actions: src/UI/Screens/Settings/GeneralSettingsPresenter.h. Numbers are typed on the shared number pad.
+  Fields and actions: src/UI/Presenters/Settings/GeneralSettingsPresenter.h. Numbers are typed on the shared number pad.
 -->
 <component presenter="settings_general">
 	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"

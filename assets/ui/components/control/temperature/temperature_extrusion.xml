@@ -2,7 +2,7 @@
   The extruder panel: extrude or retract with the selected tool, by the feed distance and at the feed rate chosen
   below. The buttons are disabled while the tool is too cold or a job is running.
 
-  Fields and actions: src/UI/Screens/Temperature/ExtruderPresenter.h. Values are typed on the shared number pad.
+  Fields and actions: src/UI/Presenters/Control/Temperature/ExtruderPresenter.h. Values are typed on the shared number pad.
 -->
 <component presenter="temperature_extrusion">
 	<view extends="lv_obj" flex_flow="column"

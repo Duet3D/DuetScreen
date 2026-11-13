@@ -7,7 +7,7 @@
 
 #include "Presenter.h"
 #include "Debug.h"
-#include "UI/Components/LVGL/LvObj.h"
+#include "UI/Lvgl/LvObj.h"
 
 namespace UI
 {

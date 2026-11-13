@@ -2,7 +2,7 @@
   One WiFi network in the WiFi selector: its name and signal, a button to connect (or disconnect, or join), and one to
   forget it once it is known.
 
-  Fields and actions: a networks row (src/UI/Screens/Settings/WifiPresenter.h)
+  Fields and actions: a networks row (src/UI/Presenters/Settings/WifiPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row"

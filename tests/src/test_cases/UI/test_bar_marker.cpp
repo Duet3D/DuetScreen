@@ -1,10 +1,10 @@
 /*
  * test_bar_marker.cpp
  *
- * <ds_bar_marker> (src/UI/Xml/Widgets/DsBarMarker.h): a value marked on a bar, dragged along it or tapped.
+ * <ds_bar_marker> (src/UI/Widgets/Display/DsBarMarker.h): a value marked on a bar, dragged along it or tapped.
  */
 
-#include "UI/Components/Button/Button.h"
+#include "UI/Widgets/Buttons/Button.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include "UI/Xml/View/XmlView.h"

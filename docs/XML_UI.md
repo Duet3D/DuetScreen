@@ -13,15 +13,15 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | Bundle | A directory of XML components with a `manifest.json` | `assets/ui/`, `/boot/ui/<bundle>/` |
 | Component | One XML file: a reusable piece of UI, or a whole screen | `assets/ui/**/*.xml` |
 | View | Shows a component in C++: `Xml::XmlView` | [View/XmlView.h](../src/UI/Xml/View/XmlView.h) |
-| Presenter | C++ behaviour for one component: declares subjects and lists, handles actions | [View/XmlPresenter.h](../src/UI/Xml/View/XmlPresenter.h), `src/UI/Screens/<Name>/` |
+| Presenter | C++ behaviour for one component: declares subjects and lists, handles actions | [View/XmlPresenter.h](../src/UI/Xml/View/XmlPresenter.h), `src/UI/Presenters/<Name>/` |
 | Data source | Publishes printer data (fans, tools, …) as global subjects and lists | [Data/](../src/UI/Xml/Data) |
 | Subject | A named value a widget binds to (`bind_text="name"`) | [Binding/Subjects.h](../src/UI/Xml/Binding/Subjects.h) |
 | List | A dynamic-length list of rows; each row has its own subjects, and may have lists of its own | [Binding/List.h](../src/UI/Xml/Binding/List.h) |
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++, e.g. `ds_button`, `ds_list`, `ds_modal`; each registers a spec of its attributes | [Widgets/](../src/UI/Xml/Widgets), [reference](XML_UI_API.md#widgets) |
-| Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Xml/Widgets/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
+| Widget | A DuetScreen XML element backed by C++, e.g. `ds_button`, `ds_list`, `ds_modal`; each registers a spec of its attributes | [Widgets/](../src/UI/Widgets), [reference](XML_UI_API.md#widgets) |
+| Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Widgets/Layout/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Theme | An XML file setting the palette, fonts and every style; extends another theme | [UI/Styles/Theme.h](../src/UI/Styles/Theme.h), `assets/ui/themes/` |
 
 A view never contains logic and a presenter never touches a widget. Data flows one way, from C++ to XML through subjects; requests flow the other way, from XML to C++ through actions.
@@ -35,27 +35,34 @@ A view never contains logic and a presenter never touches a widget. Data flows o
 ## Source layout
 
 ```
-src/UI/Xml/
-  Runtime/   XmlUi (start, stop, reload), Bundles (manifest, checks), HotReload, Services (G-code, number pad),
-             Translations, GlobalActions
-  Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History
-  View/      XmlView, XmlPresenter (and the presenter registry), Actions
-  Widgets/   one Ds* class per ds_* element; Widgets (registration and the widget specs)
-  Api/       ApiReference (everything XML can use, gathered from the running UI), ApiMarkdown (docs/XML_UI_API.md),
-             ApiLint (checks every name the components use against the reference), ApiXsd (docs/XML_UI.xsd),
-             ApiImages (the reference's pictures, drawn by the UI itself)
-  Theme/     ThemeStyles (theme styles and fonts made available to XML)
-  Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
-             ConsoleSource, JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
-src/UI/Styles/                            global styles; Theme, ThemeFile and Palette build them from theme files
-src/UI/Screens/<Name>/<Name>Presenter.*   presenters live with their screen
-src/UI/Screens/XmlScreens.cpp             the presenters XML can name, and the global actions
+src/UI/
+  Core/        Model and its events, Navigation, the presenter base class
+  Xml/         the framework
+    Runtime/   XmlUi (start, stop, reload), Bundles (manifest, checks), HotReload, Services (G-code, number pad),
+               Translations, GlobalActions
+    Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History, Surface
+    View/      XmlView, XmlPresenter (and the presenter registry), Actions, NumberEntry, ValueSelector
+    Api/       ApiReference (everything XML can use, gathered from the running UI), ApiMarkdown (docs/XML_UI_API.md),
+               ApiLint (checks every name the components use against the reference), ApiXsd (docs/XML_UI.xsd),
+               ApiImages (the reference's pictures, drawn by the UI itself)
+    Theme/     ThemeStyles (theme styles and fonts made available to XML)
+    Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
+               ConsoleSource, JobSource, MachineSource, NavigationSource, ResponseSource, TemperatureSource
+  Widgets/     every ds_* widget, beside the C++ class behind it; Widgets.cpp registers them
+    Buttons/   ds_button, ds_drag_button, ds_password_toggle
+    Inputs/    ds_slider, ds_hue_slider, ds_textarea, ds_keyboard, ds_dropdown, ds_toggle
+    Display/   ds_bar, ds_bar_marker, ds_graph, ds_heatmap, ds_plot (layer, rect), ds_icon, ds_thumbnail
+    Layout/    ds_tabs, ds_list, ds_modal, ds_view
+  Presenters/  the presenters and global actions, a folder per part of the UI, mirroring assets/ui/components/
+               (Control/Move/MovePresenter.h shows components/control/move/move.xml); Presenters.cpp registers them
+  Lvgl/        thin C++ wrappers of LVGL's widgets (generated by scripts/generate_lvgl_wrappers.py)
+  Styles/      global styles; Theme, ThemeFile and Palette build them from theme files
 docs/XML_UI_API.md, docs/XML_UI.xsd      the UI API reference and its schema, generated by test_xml_ui_api.cpp
 docs/XML_UI_THEMES.md                     every built-in theme, generated with them
 tests/ref_imgs/xml_ui_api/                their pictures: reference images, like every other screenshot
 assets/ui/                                the built-in bundle
   components/<part>/                      each part of the UI (home, dashboard, control/move, settings, …): its page
-                                          and the pieces only it uses; mirrors src/UI/Screens/ (see Naming below)
+                                          and the pieces only it uses; mirrors src/UI/Presenters/ (see Naming below)
   components/common/                      small pieces used by several parts (dialogs, value selector, babystepping)
   components/modals/                      the dialogs every part shares: the number pad, speed and extrusion factors
   themes/                                 the built-in themes
@@ -92,7 +99,7 @@ A view can also be given a presenter, which then replaces the one the component 
 Xml::XmlView toolList{"dashboard_tools", parent, "dashboard_tools", std::make_shared<MyTools>()};
 ```
 
-In XML, `presenter=` does the same with a registered presenter, so one component can be shown in several places with different data or settings (each placement's presenter is registered in [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp)):
+In XML, `presenter=` does the same with a registered presenter, so one component can be shown in several places with different data or settings (each placement's presenter is registered in [Presenters.cpp](../src/UI/Presenters/Presenters.cpp)):
 
 ```xml
 <ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs"/>
@@ -246,7 +253,7 @@ An action is resolved like a name: first the presenter of the nearest enclosing 
 
 `arg` may contain placeholders: `{value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{number} S{value}"`.
 
-The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program; the tool and heater actions are in [HeaterActions.cpp](../src/UI/Screens/Temperature/HeaterActions.cpp), `factors.speed` and `factors.extrusion`, which open the shared speed and extrusion factor dialogs, in [FactorsPresenter.cpp](../src/UI/Screens/Modals/FactorsPresenter.cpp), and the E-stop's `estop.dragged` in [EStopAction.cpp](../src/UI/Screens/Sidebar/EStopAction.cpp).
+The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program; the tool and heater actions are in [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp), `factors.speed` and `factors.extrusion`, which open the shared speed and extrusion factor dialogs, in [FactorsPresenter.cpp](../src/UI/Presenters/Modals/FactorsPresenter.cpp), and the E-stop's `estop.dragged` in [EStopAction.cpp](../src/UI/Presenters/Sidebar/EStopAction.cpp).
 
 ## Themes
 
@@ -283,7 +290,7 @@ Every name is `snake_case`: components, views, widgets, styles, presenters. Comp
 
 - **A page is named after its part**, which is also the folder it is in: `dashboard`, `control`, `move`, `fans`, `settings`. The `<ds_view>` showing a component has the component's name too (`<ds_view name="move" view="move"/>`), and so does a presenter written for one component (`presenter="move"`). A component shown several ways names each view and presenter after where it is shown: the file browser is `dashboard_jobs`, `dashboard_macros`, `files_jobs` and `files_macros`.
 - **Anything else starts with its part's name**, then says what it is: `move_axis`, `dashboard_tool`, `settings_wifi`, `notifications_alert_choice`. A list's item is named for the one thing it shows (`temperature_heater`, `console_line`), or for how it shows it when there is more than one way (`file_browser_row`, `file_browser_tile`).
-- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`). The dialogs the whole UI shares, hosted once by the home screen, go in `modals/`, each named for what it is (`numberpad`, `factors`) with its pieces prefixed (`numberpad_panel`, `factors_dialog`); their presenters are in `src/UI/Screens/Modals/`.
+- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`). The dialogs the whole UI shares, hosted once by the home screen, go in `modals/`, each named for what it is (`numberpad`, `factors`) with its pieces prefixed (`numberpad_panel`, `factors_dialog`); their presenters are in `src/UI/Presenters/Modals/`.
 
 Tabs of a page live in their own folder inside it when they are parts in their own right (`control/move/`), or beside the page with its prefix when they are not (`settings/settings_general.xml`).
 
@@ -291,7 +298,7 @@ Tabs of a page live in their own folder inside it when they are parts in their o
 
 1. Write `assets/ui/components/<part>/<part>.xml`, in a new folder for the part, named as in [Naming](#naming).
 2. If it needs printer data that isn't published yet, add it to a data source (or add a source to the list in [DataSources.cpp](../src/UI/Xml/Data/DataSources.cpp)) and describe each in its `fields()` (see below). These names are the public UI API: renaming one breaks user bundles and needs a `UI_API_VERSION_MAJOR` bump in [XmlUi.h](../src/UI/Xml/Runtime/XmlUi.h).
-3. If it needs behaviour, write a presenter in `src/UI/Screens/<Name>/` (see [FanPresenter](../src/UI/Screens/Fan/FanPresenter.h)), add it to [XmlScreens.cpp](../src/UI/Screens/XmlScreens.cpp), and name it on the root element: `<component presenter="…">`.
+3. If it needs behaviour, write a presenter in the part's folder of `src/UI/Presenters/` (see [FanPresenter](../src/UI/Presenters/Control/Fans/FanPresenter.h)), add it to [Presenters.cpp](../src/UI/Presenters/Presenters.cpp), and name it on the root element: `<component presenter="…">`.
 4. Add a `<ds_view>` for it to the screen that shows it (or host it in C++ with `Xml::XmlView`).
 
 ### Declaring names

@@ -2,7 +2,7 @@
   One axis an M291 alert lets the user jog: three steps back, its position, three steps forward. The steps are
   disabled until the axis is homed.
 
-  Fields:   an alert.axes row: label, homed (src/UI/Screens/Notifications/NotificationsPresenter.h)
+  Fields:   an alert.axes row: label, homed (src/UI/Presenters/Notifications/NotificationsPresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_pad_all="2" style_pad_column="2"
