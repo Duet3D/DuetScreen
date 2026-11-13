@@ -151,6 +151,13 @@ namespace UI::Xml::Api
 				, m_settle(settle)
 				, m_picture(picture)
 			{
+				// Text as the screen shows it: home.xml gives the whole screen the theme's `text` style, which views
+				// and widgets inherit rather than set themselves
+				if (lv_xml_style_t* text = lv_xml_get_style_by_name(nullptr, "text"))
+				{
+					m_screenText = lv_xml_style_get_lv_style(text);
+					lv_obj_add_style(m_host, m_screenText, LV_PART_MAIN);
+				}
 			}
 
 			/** Draw every picture */
@@ -342,12 +349,17 @@ namespace UI::Xml::Api
 
 				lv_obj_update_layout(lv_screen_active());
 				const lv_area_t area = grown(areaOf(box), MARGIN);
+				// Whether a style changes the box is judged without the screen's text style, which would hide what
+				// the text styles do; the picture shows the box as the screen would
+				setScreenText(false);
 				const auto plain = pixels(area);
 				Themes::forEachStyle(
 					[&](std::string_view styleName, Themes::Style& style)
 					{
 						lv_obj_add_style(box, static_cast<lv_style_t*>(style), LV_PART_MAIN);
-						if (pixels(area) != plain) // Else it changes nothing on its own
+						const bool changes = pixels(area) != plain; // Else it changes nothing on its own
+						setScreenText(true);
+						if (changes)
 						{
 							const std::string file = picture(area, fmt::format("{:s}/{:s}", dir, styleName));
 							if (!file.empty())
@@ -355,9 +367,26 @@ namespace UI::Xml::Api
 								index[std::string(styleName)] = file;
 							}
 						}
+						setScreenText(false);
 						lv_obj_remove_style(box, static_cast<lv_style_t*>(style), LV_PART_MAIN);
 					});
+				setScreenText(true);
 				lv_obj_delete(box);
+			}
+
+			/** Give what is pictured the screen's text style, or take it away */
+			void setScreenText(bool on)
+			{
+				if (m_screenText == nullptr)
+				{
+					return;
+				}
+				lv_obj_remove_style(m_host, m_screenText, LV_PART_MAIN);
+				if (on)
+				{
+					lv_obj_add_style(m_host, m_screenText, LV_PART_MAIN);
+				}
+				lv_obj_update_layout(lv_screen_active());
 			}
 
 			/** Each widget's example, in a component declaring the subjects it binds to */
@@ -640,8 +669,10 @@ namespace UI::Xml::Api
 				return note;
 			}
 
-			const Reference& m_reference;								   // What to picture
-			lv_obj_t* m_host;											   // Where pictures are drawn
+			const Reference& m_reference; // What to picture
+			lv_obj_t* m_host;			  // Where pictures are drawn
+			lv_style_t* m_screenText =
+				nullptr; // The theme's `text` style, given to the host as home.xml gives the screen
 			const std::function<void()>& m_settle;						   // Lets Model events reach a view
 			const std::function<void(const std::string& file)>& m_picture; // Compares a picture
 			Images m_images;											   // The pictures so far
