@@ -626,6 +626,11 @@ namespace UI::Xml::Api
 					{
 						XmlView view(
 							widget.id, area, widget.component, nullptr, widget.propsFor(sampleSettings(widget)));
+						// A grid widget fills its cells, as <ds_layout> makes it
+						if (size.height != LV_SIZE_CONTENT)
+						{
+							lv_obj_set_size(view.getRootPtr(), LV_PCT(100), LV_PCT(100));
+						}
 						view.show();
 						m_settle();
 						lv_obj_update_layout(lv_screen_active());
