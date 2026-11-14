@@ -36,6 +36,13 @@ namespace UI::Xml
 	DsTextarea::~DsTextarea()
 	{
 		stopWatchingLeave();
+		// Deleted while typed into (its row rebuilt, its dialog gone): nothing would put the keyboard away
+		if (m_shownKeyboard != nullptr && lv_obj_is_valid(m_shownKeyboard) &&
+			lv_keyboard_get_textarea(m_shownKeyboard) == getRootPtr())
+		{
+			lv_keyboard_set_textarea(m_shownKeyboard, nullptr);
+			showKeyboard(m_shownKeyboard, false);
+		}
 	}
 
 	void DsTextarea::leftByPress()
@@ -255,9 +262,11 @@ namespace UI::Xml
 			lv_keyboard_set_textarea(keyboard, getRootPtr());
 			lv_obj_remove_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_move_foreground(keyboard);
+			m_shownKeyboard = keyboard;
 			KeyboardRoom::make(keyboard, getRootPtr());
 			return;
 		}
+		m_shownKeyboard = nullptr;
 		stopWatchingLeave();
 		if (!lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN))
 		{

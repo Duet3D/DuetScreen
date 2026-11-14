@@ -131,6 +131,7 @@ namespace UI
 		void finish();
 
 		Xml::IntSubject m_dialogOpen;					 // 1 while any of the dialogs is open
+		Xml::LayoutEditor::Selection m_openedFor;		 // What was selected when the pool or settings opened
 		Xml::List<CategoryRow> m_catalogue;				 // The widgets that can be added, by category
 		Xml::IntSubject m_catalogueOpen;				 // 1 while the widget pool is open
 		Xml::List<SettingRow> m_settings;				 // The selected widget's settings

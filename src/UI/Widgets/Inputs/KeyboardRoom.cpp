@@ -17,6 +17,8 @@ namespace UI::Xml::KeyboardRoom
 			lv_obj_t* padded = nullptr;		   // The container given more padding, or nullptr
 			std::optional<int32_t> ownPadding; // Its own bottom padding, if it had one before
 			DialogHost* dialog = nullptr;	   // The dialog surface keeping above the keyboard, or nullptr
+			lv_obj_t* keyboard = nullptr;	   // The keyboard up
+			lv_obj_t* textarea = nullptr;	   // The box it types into
 		};
 
 		Room s_room; // The room made now
@@ -52,16 +54,22 @@ namespace UI::Xml::KeyboardRoom
 		lv_obj_t* container = host == nullptr ? scrollingAround(textarea) : nullptr;
 		if (host != nullptr && host == s_room.dialog)
 		{
+			s_room.keyboard = keyboard;
+			s_room.textarea = textarea;
 			host->makeRoom(keys.y1, textarea);
 			return;
 		}
 		if (container != nullptr && container == s_room.padded)
 		{
+			s_room.keyboard = keyboard;
+			s_room.textarea = textarea;
 			lv_obj_scroll_to_view_recursive(textarea, LV_ANIM_ON);
 			return;
 		}
 
 		giveBack();
+		s_room.keyboard = keyboard;
+		s_room.textarea = textarea;
 		if (host != nullptr)
 		{
 			host->makeRoom(keys.y1, textarea);
@@ -111,5 +119,25 @@ namespace UI::Xml::KeyboardRoom
 			s_room.dialog->giveRoomBack();
 		}
 		s_room = {};
+	}
+
+	void putAwayFrom(lv_obj_t* obj)
+	{
+		lv_obj_t* keyboard = s_room.keyboard;
+		lv_obj_t* textarea = s_room.textarea;
+		if (keyboard == nullptr || textarea == nullptr || lv_keyboard_get_textarea(keyboard) != textarea)
+		{
+			return;
+		}
+		for (lv_obj_t* o = textarea; o != nullptr; o = lv_obj_get_parent(o))
+		{
+			if (o == obj)
+			{
+				lv_keyboard_set_textarea(keyboard, nullptr);
+				lv_obj_add_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
+				giveBack();
+				return;
+			}
+		}
 	}
 } // namespace UI::Xml::KeyboardRoom

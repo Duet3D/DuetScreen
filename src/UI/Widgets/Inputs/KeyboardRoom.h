@@ -23,4 +23,10 @@ namespace UI::Xml::KeyboardRoom
 
 	/** The keyboard has gone: give the room back */
 	void giveBack();
+
+	/**
+	 * Put the keyboard away if the box it types into is `obj` or inside it: `obj` is going out of sight, e.g. the
+	 * dialog step it is in closes, so the edit ends
+	 */
+	void putAwayFrom(lv_obj_t* obj);
 } // namespace UI::Xml::KeyboardRoom

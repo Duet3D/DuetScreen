@@ -145,6 +145,7 @@ namespace UI
 			   [this](const Xml::ActionArgs&)
 			   {
 				   showSettings();
+				   m_openedFor = editor().selection();
 				   setOpen(m_settingsOpen, editor().canConfigure() ? 1 : 0);
 			   });
 		action("customise.close_settings",
@@ -280,6 +281,13 @@ namespace UI
 		{
 			closeDialogs();
 		}
+		// The pool and the settings are for what was selected: selecting something else (a widget tapped beside the
+		// dialog, in the sidebar or status bar) closes them, as tapping outside a dialog does
+		else if ((m_settingsOpen.get() != 0 || m_catalogueOpen.get() != 0) && editor().selection() != m_openedFor)
+		{
+			setOpen(m_settingsOpen, 0);
+			setOpen(m_catalogueOpen, 0);
+		}
 		m_canSave.set(Xml::LayoutLibrary::canSave() ? 1 : 0);
 	}
 
@@ -322,6 +330,7 @@ namespace UI
 												  item.icon.set(widget.icon);
 											  });
 						 });
+		m_openedFor = editor().selection();
 		setOpen(m_catalogueOpen, 1);
 	}
 

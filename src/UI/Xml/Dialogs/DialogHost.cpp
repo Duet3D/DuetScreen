@@ -10,6 +10,7 @@
 #include "PromptPresenters.h"
 #include "UI/Lvgl/LvObj.h"
 #include "UI/Lvgl/Transitions.h"
+#include "UI/Widgets/Inputs/KeyboardRoom.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/View/XmlView.h"
@@ -582,6 +583,8 @@ namespace UI::Xml
 		{
 			return;
 		}
+		// An edit in it ends as it goes out of sight
+		KeyboardRoom::putAwayFrom(content);
 		returnFooter(content);
 		lv_anim_delete(content, translateXCb);
 		lv_obj_remove_local_style_prop(content, LV_STYLE_TRANSLATE_X, LV_PART_MAIN);

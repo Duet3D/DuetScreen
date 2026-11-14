@@ -554,6 +554,33 @@ TEST_F(TestCustomiseHome, SettingsAreChangedInTheirDialogs)
 	EXPECT_STREQ(lv_label_get_text(lv_obj_get_child(lv_obj_find_by_name(dialog, "value"), -1)), "5 min");
 }
 
+TEST_F(TestCustomiseHome, SelectingAnotherWidgetClosesTheSettingsAndTheirKeyboard)
+{
+	auto& editor = UI::Xml::LayoutEditor::get();
+	start();
+	editor.select("dashboard", "temperature_graph");
+	editor.removeSelected();
+	editor.selectPlace("dashboard", UI::Xml::Point{0, 470});
+	ASSERT_EQ(editor.add("gcode_button"), "gcode_button");
+	update();
+	tapToolbar("configure");
+	ASSERT_NE(TestDialogs::shownNamed("settings_dialog"), nullptr);
+
+	// The label typed in: the keyboard is up
+	lv_obj_t* label = lv_obj_find_by_name(lv_obj_get_child(TestDialogs::find("list"), 0), "text");
+	ASSERT_NE(label, nullptr);
+	lv_obj_send_event(label, LV_EVENT_FOCUSED, nullptr);
+	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
+	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// A sidebar button tapped beside the dialog is selected: the settings, which were the G-code button's, close,
+	// and the keyboard goes with the box it typed into
+	tap(middleOf(placed("sidebar", "files")));
+	EXPECT_EQ(editor.selection().item, "files");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+}
+
 TEST_F(TestCustomiseHome, TheSidebarIsReorderedButKeepsSettingsAndTheEstop)
 {
 	start();

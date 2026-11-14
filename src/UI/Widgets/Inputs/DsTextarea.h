@@ -19,7 +19,7 @@ namespace UI::Xml
 		/** Create an empty text box inside `parent` */
 		DsTextarea(const std::string& name, lv_obj_t* parent);
 
-		/** Stop watching a press that left the box */
+		/** Stop watching a press that left the box, and put away a keyboard still typing into it */
 		~DsTextarea() override;
 
 		/** Register `<ds_textarea>` with the XML engine */
@@ -88,6 +88,7 @@ namespace UI::Xml
 		bool m_hideOnReady = true;								 // Put the keyboard away on its OK key
 		bool m_hideOnDefocus = true;							 // Put the keyboard away when focus leaves
 		bool m_settingQuietly = false;							 // True while `bind_text` writes the text
+		lv_obj_t* m_shownKeyboard = nullptr;					 // The keyboard shown for this box, if it is up
 		lv_indev_t* m_leavingIndev = nullptr;					 // The input device watched since the box was left, if any
 	};
 } // namespace UI::Xml
