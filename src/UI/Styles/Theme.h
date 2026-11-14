@@ -120,6 +120,12 @@ namespace UI::Themes
 	/** Build the active theme again, e.g. after setPalette(). @return false if no theme is active */
 	bool refreshCurrentTheme();
 
+	/**
+	 * Change the active theme's palette with `change` (stored as the user's choice) and build the theme again.
+	 * @return false, changing nothing, if no theme is active or its palette is fixed
+	 */
+	bool changeCurrentPalette(const std::function<void(PaletteInputs&)>& change);
+
 	/** Names of the themes users can choose, in order */
 	std::vector<std::string_view> getThemeNames();
 

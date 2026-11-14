@@ -54,6 +54,7 @@ namespace UI::Xml
 				  {"max", "Top of the range, may have a fraction (default 100)"},
 				  {"increment", "Step of the -/+ buttons, may have a fraction, e.g. \"0.01\" (default 1)"},
 				  {"decimals", "Decimal places the value is shown with (default 2)"},
+				  {"unit", "Shown after the value, e.g. \"%\" or \"s\""},
 				  {"label", "The label, if there is no `label_tag`"},
 				  {"label_tag", "Translation key for the label", AttributeKind::Translation},
 				  {"bind_label", "Follow a text subject for the label", AttributeKind::Subject},
@@ -150,6 +151,10 @@ namespace UI::Xml
 		if (const char* decimals = lv_xml_get_value_of(attrs, "decimals"))
 		{
 			slider.setDisplayDecimals(lv_xml_atoi(decimals));
+		}
+		if (const char* unit = lv_xml_get_value_of(attrs, "unit"))
+		{
+			slider.setUnit(unit);
 		}
 		if (const char* tag = lv_xml_get_value_of(attrs, "label_tag"))
 		{

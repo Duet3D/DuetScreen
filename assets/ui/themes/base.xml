@@ -94,9 +94,13 @@
 			   pad_row="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"
 			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
 		<style name="setting_group_title" text_color="#text_muted" text_font="font_emphasis" pad_left="4" pad_top="6"/>
+		<!-- A group whose actions can't be undone: edged, and ruled, in the error colour -->
+		<style name="setting_group_danger" bg_color="#error" border_color="#error"/>
 		<style name="setting_row" width="100%" min_height="56" pad_hor="12" pad_ver="6" pad_column="16" radius="0"
 			   bg_color="#bg" bg_opa="100%" border_width="0"/>
 		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
+		<!-- A row's button or choice, or one of a few options: big enough to tap -->
+		<style name="setting_control" min_height="40" min_width="64" pad_hor="12"/>
 
 		<!-- The number pad: what is typed, large, in a box edged in the accent, over keys a size apart; the keys that
 			 edit rather than type are a step darker -->
@@ -151,6 +155,8 @@
 			   outline_width="#outline_width" outline_pad="-#outline_width" outline_opa="100%"/>
 		<!-- Acts on the machine: filled with the accent -->
 		<style name="action_btn" bg_opa="100%" bg_color="#primary" border_color="#primary"/>
+		<!-- Can't be undone, such as erasing every setting: filled with the error colour -->
+		<style name="danger_btn" bg_opa="100%" bg_color="#error" border_color="#error"/>
 
 		<!-- Icons -->
 		<style name="icon_recolor" recolor="#text" recolor_opa="100%"/>

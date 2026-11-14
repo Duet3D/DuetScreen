@@ -204,8 +204,15 @@ class TestHomeView : public UiTestSuite
 	{
 		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
 	}
-	/** The Settings page's tabs (0 general, 1 connection, 2 display, 3 developer), as settings.xml builds them
-	 */
+	/** The Settings page's categories, in the order settings.xml lists them */
+	static constexpr size_t SETTINGS_GENERAL = 0;
+	static constexpr size_t SETTINGS_DISPLAY = 1;
+	static constexpr size_t SETTINGS_NOTIFICATIONS = 2;
+	static constexpr size_t SETTINGS_CONNECTION = 3;
+	static constexpr size_t SETTINGS_SYSTEM = 4;
+	static constexpr size_t SETTINGS_DEVELOPER = 5;
+
+	/** The Settings page's categories (SETTINGS_*), as settings.xml builds them */
 	static UI::TabView& settingsPage()
 	{
 		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "tabs");
@@ -1052,37 +1059,62 @@ TEST_F(TestHomeViewWithData, MacroView)
 
 TEST_F(TestHomeViewWithData, SettingsView)
 {
+	// Scroll the settings page shown by the view registered as `view` to its end, so its last rows show too
+	auto scrollToEnd = [](const char* view)
+	{
+		lv_obj_t* root = UI::findView(view)->getRootPtr();
+		lv_obj_update_layout(root);
+		lv_obj_scroll_to_y(root, LV_COORD_MAX, LV_ANIM_OFF);
+	};
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So Connection shows every row
+
 	UI::openScreen(std::string_view("settings"));
 	auto& settings = settingsPage();
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/initial.png")
 
-	settings.setActiveTab(0);
+	settings.setActiveTab(SETTINGS_GENERAL);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/general.png")
 
-	settings.setActiveTab(1);
-	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
-	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
-
-	settings.setActiveTab(2);
+	settings.setActiveTab(SETTINGS_DISPLAY);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display.png")
+	scrollToEnd("settings_display");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display_end.png")
 
 	// The colours are a page of their own, opened from Display; the back key goes back to Display
 	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
-	lv_obj_send_event(lv_obj_find_by_name(display, "colours"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(display, "colours"), "open"), LV_EVENT_CLICKED, nullptr);
 	runTimers();
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/colours.png")
 	UI::back();
 	runTimers();
 	EXPECT_TRUE(UI::findView("settings_display")->isShownOnScreen());
 
-	settings.setActiveTab(3);
+	settings.setActiveTab(SETTINGS_NOTIFICATIONS);
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/notifications.png")
+
+	settings.setActiveTab(SETTINGS_CONNECTION);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
+	deliverModelEvents();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
+	scrollToEnd("settings_connection");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection_end.png")
+
+	settings.setActiveTab(SETTINGS_SYSTEM);
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/system.png")
+	scrollToEnd("settings_system");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/system_end.png")
+
+	settings.setActiveTab(SETTINGS_DEVELOPER);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
+
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
 }
 
 TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 {
 	UI::openScreen(std::string_view("settings"));
-	settingsPage().setActiveTab(1);
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
 	lv_obj_t* wifi = UI::findView("settings_wifi")->getRootPtr();
 	lv_obj_t* networks = lv_obj_find_by_name(wifi, "list");
 	ASSERT_NE(networks, nullptr);
@@ -1451,7 +1483,9 @@ namespace
 
 TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
-	deliverModelEvents(); // Fill the lists from the object model
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So the poll interval shows
+	deliverModelEvents();									   // Fill the lists from the object model
 	{
 		lv_obj_t* toolList = dashboardToolList();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
@@ -1468,14 +1502,25 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	EXPECT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true)) << "fan slider";
 
 	UI::openScreen(std::string_view("settings"), false);
-	settingsPage().setActiveTab(0);
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "brightness", true)) << "brightness";
-	settingsPage().setActiveTab(1);
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true)) << "poll interval";
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "duet_ip_address")) << "IP address";
-	settingsPage().setActiveTab(2);
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "chroma_slider", true)) << "chroma";
+	settingsPage().setActiveTab(SETTINGS_DISPLAY);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "brightness", "slider", true)) << "brightness";
+	EXPECT_TRUE(tapShowsNumberPad("settings", "screensaver_timeout", "slider", true)) << "screensaver";
+	settingsPage().setActiveTab(SETTINGS_NOTIFICATIONS);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "notification_timeout", "slider", true)) << "notification timeout";
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true)) << "poll interval";
+	EXPECT_TRUE(tapShowsNumberPad("settings", "duet_ip_address", "field")) << "IP address";
+
+	// The colours, a page opened from Display
+	settingsPage().setActiveTab(SETTINGS_DISPLAY);
+	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(display, "colours"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_TRUE(tapShowsNumberPad("settings", "chroma", "slider", true)) << "chroma";
 	UI::closeDialogs();
+	UI::back();
+	runTimers();
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
 }
 
 TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
@@ -1509,26 +1554,29 @@ TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
 
 TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 {
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So the poll interval shows
 	UI::openScreen(std::string_view("settings"), false);
-	settingsPage().setActiveTab(1);
-	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
 	lv_obj_t* dialog = openNumberPad();
 
 	// Typed on the keys, then OK
 	EXPECT_EQ(TestDialogs::text("range"), "100 or more");
 	TestDialogs::enterOnPad("1234");
 	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
-	auto& slider = static_cast<UI::Slider&>(
-		*UI::LvObj::fromPtr(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval")));
+	auto& slider = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(
+		lv_obj_find_by_name(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval"), "slider")));
 	EXPECT_EQ(slider.getValue(), 1234.0f);
 
 	// Out of range: OK does nothing
-	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
+	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
 	dialog = openNumberPad();
 	TestDialogs::enterOnPad("5");
 	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
 	EXPECT_EQ(slider.getValue(), 1234.0f);
 	UI::closeDialogs();
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
 }
 
 TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)

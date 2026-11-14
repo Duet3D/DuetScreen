@@ -1,12 +1,12 @@
 /*
  * DeveloperSettingsPresenter.h
  *
- * Behaviour for the Developer settings tab (assets/ui/components/settings/settings_developer.xml): logging and
- * diagnostic options, restarting, the hardware test, the cache, upgrades, and the storage used. Each setting is read
- * when the tab is shown and applied as soon as it is changed.
+ * Behaviour for the Developer settings page (assets/ui/components/settings/settings_developer.xml): logging, options
+ * for developers, the hardware test, and what only some builds have. Each setting is read when the page is shown and
+ * applied as soon as it is changed.
  *
- * There is one action per setting, given the value from the widget (an index, or 1/0 for a toggle), and one per
- * command. Every build has them all, so the UI API is the same in every build: settings.debug_borders only does
+ * There is one action per setting, given the value from the widget (an index, or 1/0 for a switch), and one to open
+ * the hardware test. Every build has them all, so the UI API is the same in every build: settings.debug_borders only does
  * something in builds with debug borders (`debug_borders_shown`), and settings.ssh, settings.adb and
  * settings.buildroot_setup only in developer mode builds (`developer_mode`).
  *
@@ -16,8 +16,8 @@
 
 #pragma once
 
+#include "SettingsPresenter.h"
 #include "UI/Xml/Binding/Subjects.h"
-#include "UI/Xml/View/XmlPresenter.h"
 #include <functional>
 #include <memory>
 
@@ -28,7 +28,7 @@ namespace UI
 		class XmlView;
 	}
 
-	class DeveloperSettingsPresenter : public Xml::XmlPresenter
+	class DeveloperSettingsPresenter : public SettingsPresenter
 	{
 	  public:
 		/** Create the presenter */
@@ -45,16 +45,6 @@ namespace UI
 		void onActivate() override;
 
 	  private:
-		/** Register an action, described by `description`, that applies the 1/0 a toggle gives with `apply`, and shows
-		 * it in `shown` */
-		void toggle(std::string name,
-					std::string description,
-					Xml::IntSubject& shown,
-					std::function<void(bool on)> apply);
-
-		/** Show the storage used and the size of the cache */
-		void showStorage();
-
 		/** Start the hardware test, without asking for a serial number */
 		void startHardwareTest();
 
@@ -72,8 +62,7 @@ namespace UI
 		Xml::IntSubject m_ssh;						  // 1 if SSH is on
 		Xml::IntSubject m_adb;						  // 1 if ADB is on
 		Xml::IntSubject m_systemMonitorShown;		  // 1 if the build has the system monitor
+		Xml::IntSubject m_buildToolsShown;			  // 1 if the build has debug borders, developer mode or the monitor
 		Xml::IntSubject m_systemMonitor;			  // 1 if it is on
-		Xml::StringSubject<96> m_storageInfo;		  // Storage used
-		Xml::StringSubject<96> m_cacheSize;			  // Cache size
 	};
 } // namespace UI

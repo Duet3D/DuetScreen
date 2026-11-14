@@ -5,6 +5,9 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/DeveloperSettingsPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DisplaySettingsPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GeneralSettingsPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/NotificationSettingsPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SettingsPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SystemSettingsPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ThemePreviewPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/WifiPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/WifiScanner.cpp

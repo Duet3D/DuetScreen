@@ -805,6 +805,23 @@ namespace UI::Themes
 		return false;
 	}
 
+	bool changeCurrentPalette(const std::function<void(PaletteInputs&)>& change)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		Theme* theme = getCurrentTheme();
+		if (theme == nullptr || !theme->isCustomisable())
+		{
+			LOG_ERROR("The theme in use has a fixed palette");
+			return false;
+		}
+		PaletteInputs palette = theme->getPalette();
+		change(palette);
+		theme->setPalette(palette);
+		theme->setThemeActive();
+		return true;
+	}
+
 	std::vector<std::string_view> getThemeNames()
 	{
 		std::vector<std::string_view> names;

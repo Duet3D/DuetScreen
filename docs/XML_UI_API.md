@@ -840,6 +840,7 @@ Used by `settings_connection`.
 | `presenter.usb_mode` | int | Index of the one in use, in `usb_modes` |
 | `presenter.poll_interval` | int | ms between polls of the Duet |
 | `presenter.network_shown` | int | 1 if the Duet is reached over the network, so its IP address and password are shown |
+| `presenter.advanced_shown` | int | 1 if advanced settings are shown (the USB-C port's mode and the poll interval) |
 | `presenter.duet_ip` | text | The Duet's IP address |
 | `presenter.duet_password` | text | The Duet's password |
 
@@ -869,27 +870,20 @@ Used by `settings_developer`.
 | `presenter.adb` | int | 1 if ADB is on (developer mode builds) |
 | `presenter.system_monitor_shown` | int | 1 if the build has the system monitor |
 | `presenter.system_monitor` | int | 1 if the system monitor is on |
-| `presenter.storage_info` | text | Storage used, e.g. "256.00 MB / 16.00 GB (1%)" |
-| `presenter.cache_size` | text | Size of the cache, e.g. "10.00 KB (100 files)" |
+| `presenter.build_tools_shown` | int | 1 if the build has any of debug borders, developer mode or the system monitor |
 
 | Action | Description |
 | --- | --- |
 | `presenter.settings.adb` | Turn ADB on (edited value 1) or off (0) (developer mode builds) |
 | `presenter.settings.advanced_settings` | Show advanced settings if the edited value is 1, else hide them |
 | `presenter.settings.buildroot_setup` | Restart the system's setup service (developer mode builds) |
-| `presenter.settings.clear_cache` | Delete the cached settings and file information, then show the storage used again |
 | `presenter.settings.debug_borders` | Show debug borders if the edited value is 1, else hide them (builds with debug borders) |
 | `presenter.settings.debug_level` | Log at the level at the edited index of `debug_levels` |
-| `presenter.settings.erase_and_restart` | Erase every setting, then restart |
 | `presenter.settings.hardware_test` | Open the hardware test |
-| `presenter.settings.reboot` | Reboot the screen |
-| `presenter.settings.restart` | Restart the DuetScreen program |
 | `presenter.settings.second_usb_channel` | Use the second USB channel if the edited value is 1, else not |
-| `presenter.settings.send_config` | Upload the screen's settings to the Duet as duetscreen.json in its system directory |
 | `presenter.settings.ssh` | Turn SSH on (edited value 1) or off (0) (developer mode builds) |
 | `presenter.settings.system_logging` | Log system messages to the console if the edited value is 1, else not |
 | `presenter.settings.system_monitor` | Show the system monitor if the edited value is 1, else hide it |
-| `presenter.settings.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start |
 
 ### settings_display
 
@@ -906,13 +900,20 @@ Used by `settings_display`.
 | `presenter.rotations` | text | Screen rotations offered, one per line |
 | `presenter.rotation` | int | Index of the rotation in use |
 | `presenter.animations` | int | 1 if the UI animates |
+| `presenter.brightness` | int | Brightness, 0-100 |
+| `presenter.screensaver_timeout` | int | Seconds without a touch before the screen dims; 0 for never |
+| `presenter.dark` | int | 1 if the theme in use is in dark mode |
+| `presenter.dark_shown` | int | 1 if the theme in use can change between dark and light mode |
 
 | Action | Description |
 | --- | --- |
 | `presenter.settings.animations` | Turn UI animations on (edited value 1) or off (0) |
+| `presenter.settings.brightness` | Set the screen brightness to the edited value, 0-100 |
+| `presenter.settings.dark` | Put the theme in use in dark mode (edited value 1) or light mode (0), if its palette can be changed |
 | `presenter.settings.font` | Use the typeface at the edited index of `fonts` |
 | `presenter.settings.icon_set` | Use the icon set at the edited index of `icon_sets` |
 | `presenter.settings.rotation` | Rotate the screen as the edited index of `rotations` says |
+| `presenter.settings.screensaver_timeout` | Dim the screen after the edited value, in seconds, without a touch; 0 for never |
 | `presenter.settings.theme` | Use the theme at the edited index of `themes` |
 
 ### settings_general
@@ -921,37 +922,61 @@ Used by `settings_general`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `presenter.firmware` | text | Firmware version and build time |
-| `presenter.buildroot` | text | Buildroot version |
 | `presenter.languages` | text | Languages offered, one per line |
 | `presenter.language` | int | Index of the language in use, in `languages` |
 | `presenter.keyboard_layouts` | text | USB keyboard layouts, one per line |
 | `presenter.keyboard_layout` | int | Index of the layout in use, in `keyboard_layouts` |
-| `presenter.brightness` | int | Brightness, 0-100 |
-| `presenter.screensaver_timeout` | int | Screensaver timeout, s |
 | `presenter.confirmations` | int | 1 if actions are confirmed first |
 | `presenter.machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) |
 | `presenter.progress_sources` | text | How a job's progress can be worked out, one per line |
 | `presenter.progress_source` | int | Index of the one used, in `progress_sources` |
-| `presenter.connected_message` | int | 1 if a message is shown on connecting |
-| `presenter.notification_levels` | text | Notification levels, one per line |
-| `presenter.notification_level` | int | Index of the lowest level shown, in `notification_levels` |
-| `presenter.notification_timeout` | int | ms before a notification closes itself |
-| `presenter.error_notifications_stay` | int | 1 if error notifications stay until closed |
 
 | Action | Description |
 | --- | --- |
-| `presenter.settings.brightness` | Set the screen brightness to the edited value, 0-100 |
-| `presenter.settings.confirmations` | Turn confirmation dialogs on (edited value 1) or off (0) |
-| `presenter.settings.connected_message` | Show a message on connecting if the edited value is 1, else not |
-| `presenter.settings.error_notifications_stay` | Keep error notifications open until closed if the edited value is 1, else not |
+| `presenter.settings.confirmations` | Ask first before acting on the machine (edited value 1), or not (0) |
 | `presenter.settings.keyboard_layout` | Use the USB keyboard layout at the edited index of `keyboard_layouts` |
 | `presenter.settings.language` | Ask whether to restart in the language at the edited index of `languages` |
 | `presenter.settings.machine_position_mode` | Use machine coordinates (G53) for absolute moves if the edited value is 1, else not |
-| `presenter.settings.notification_level` | Show notifications from the level at the edited index of `notification_levels` up |
-| `presenter.settings.notification_timeout` | Close notifications after the edited value, in ms |
 | `presenter.settings.progress_source` | Work out job progress with the source at the edited index of `progress_sources` |
-| `presenter.settings.screensaver_timeout` | Set the screensaver timeout to the edited value, in seconds |
+
+### settings_notifications
+
+Used by `settings_notifications`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.connected_message` | int | 1 if a message shows when the Duet connects |
+| `presenter.notification_levels` | text | Message levels, one per line |
+| `presenter.notification_level` | int | Index of the lowest level shown, in `notification_levels` |
+| `presenter.notification_timeout` | int | ms before a message closes itself |
+| `presenter.error_notifications_stay` | int | 1 if errors stay until closed |
+
+| Action | Description |
+| --- | --- |
+| `presenter.settings.connected_message` | Show a message when the Duet connects if the edited value is 1, else not |
+| `presenter.settings.error_notifications_stay` | Keep errors open until closed if the edited value is 1, else close them as other messages |
+| `presenter.settings.notification_level` | Show messages from the level at the edited index of `notification_levels` up |
+| `presenter.settings.notification_timeout` | Close messages after the edited value, in seconds |
+
+### settings_system
+
+Used by `settings_system`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.firmware` | text | DuetScreen's version and build time |
+| `presenter.buildroot` | text | Buildroot's version |
+| `presenter.storage_info` | text | Storage used, e.g. "256.00 MB / 16.00 GB (1%)" |
+| `presenter.cache_size` | text | Size of the cache, e.g. "10.00 KB (100 files)" |
+
+| Action | Description |
+| --- | --- |
+| `presenter.settings.clear_cache` | Delete the cached settings and file information, show the storage used again, and say so |
+| `presenter.settings.erase_and_restart` | Ask whether to erase every setting, the WiFi networks and the layouts made on the screen, then restart |
+| `presenter.settings.reboot` | Reboot the screen |
+| `presenter.settings.restart` | Restart the DuetScreen program |
+| `presenter.settings.send_config` | Back the screen's settings up to the Duet, as duetscreen.json in its system folder, and say whether it worked |
+| `presenter.settings.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start |
 
 ### settings_theme_preview
 
@@ -964,7 +989,6 @@ Used by `settings_theme_preview`.
 | `presenter.primary_hue` | int | Primary hue, 0-360 |
 | `presenter.secondary_hue` | int | Secondary hue, 0-360 |
 | `presenter.chroma` | int | Chroma, 0-0.4, in hundredths (0.02 is 2) |
-| `presenter.dark` | int | 1 in dark mode |
 | `presenter.primary.lightness` | int | The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`) |
 | `presenter.primary.chroma` | int | The primary colour's OKLCH chroma, in thousandths, to show hues at |
 | `presenter.secondary.lightness` | int | The secondary colour's OKLCH lightness, in thousandths, to show hues at |
@@ -982,7 +1006,6 @@ Each row of `presenter.swatches`:
 | Action | Description |
 | --- | --- |
 | `presenter.preview.chroma` | Set the palette's chroma to the edited value, e.g. 0.02 |
-| `presenter.preview.dark` | Use the dark palette if the edited value is 1, else the light one |
 | `presenter.preview.primary_hue` | Set the palette's primary hue to the edited value, 0-360 |
 | `presenter.preview.secondary_hue` | Set the palette's secondary hue to the edited value, 0-360 |
 
@@ -1635,6 +1658,7 @@ Also takes every `lv_obj` attribute.
 | `max` | Top of the range, may have a fraction (default 100) |
 | `increment` | Step of the -/+ buttons, may have a fraction, e.g. "0.01" (default 1) |
 | `decimals` | Decimal places the value is shown with (default 2) |
+| `unit` | Shown after the value, e.g. "%" or "s" |
 | `label` | The label, if there is no `label_tag` |
 | `label_tag` | Translation key for the label |
 | `bind_label` | Follow a text subject for the label |
@@ -2920,8 +2944,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
 | [`settings_display`](#settings_display) | `settings_display` |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
-| `settings_dropdown` |  | `title`, `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_dropdown.xml](../assets/ui/components/settings/settings_dropdown.xml) |
 | [`settings_general`](#settings) | `settings_general` |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
+| [`settings_notifications`](#settings_notifications) | `settings_notifications` |  | `settings` | [settings_notifications.xml](../assets/ui/components/settings/settings_notifications.xml) |
+| [`settings_system`](#settings_system) | `settings_system` |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
 | [`settings_theme_preview`](#settings_theme_preview) | `settings_theme_preview` |  | `settings` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
@@ -3036,6 +3061,14 @@ Also shows `settings_wifi`.
 
 ![settings_display](../tests/ref_imgs/xml_ui_api/views/settings_display.png)
 
+#### settings_notifications
+
+![settings_notifications](../tests/ref_imgs/xml_ui_api/views/settings_notifications.png)
+
+#### settings_system
+
+![settings_system](../tests/ref_imgs/xml_ui_api/views/settings_system.png)
+
 #### settings_theme_preview
 
 ![settings_theme_preview](../tests/ref_imgs/xml_ui_api/views/settings_theme_preview.png)
@@ -3115,6 +3148,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `anim` |  | anim_duration=200 |
 | `anim_fast` |  | anim_duration=120 |
 | `action_btn` | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/action_btn.png) | bg_opa=100% bg_color=#primary border_color=#primary |
+| `danger_btn` | ![danger_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/danger_btn.png) | bg_opa=100% bg_color=#error border_color=#error |
 | `input` | ![input](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/input.png) | border_color=#border border_width=1 pad_hor=20 pad_ver=0 text_align=center |
 | `long_press` |  | *(not set)* |
 | `draggable` |  | transition_props=transform_width transform_height transition_duration=200ms transition_easing=ease_in_out transition_delay=100ms |
@@ -3222,8 +3256,10 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `dialog_row_chosen` | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row_chosen.png) | text_color=#primary |
 | `setting_group` | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group.png) | width=100% height=content layout=flex flex_flow=column pad_all=0 pad_row=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |
 | `setting_group_title` | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group_title.png) | text_color=#text_muted text_font=font_emphasis pad_left=4 pad_top=6 |
+| `setting_group_danger` |  | bg_color=#error border_color=#error |
 | `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | width=100% min_height=56 pad_hor=12 pad_ver=6 pad_column=16 radius=0 bg_color=#bg bg_opa=100% border_width=0 |
 | `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | text_color=#text_muted text_font=font_subdued |
+| `setting_control` |  | min_height=40 min_width=64 pad_hor=12 |
 | `numpad` |  | pad_row=8 pad_column=8 |
 | `numpad_readout` | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_readout.png) | bg_color=#bg_dark bg_opa=100% border_color=#primary border_width=1 border_opa=100% radius=#radius pad_hor=12 pad_ver=6 pad_column=12 |
 | `numpad_value` | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_value.png) | text_color=#text text_font=font_xlarge |

@@ -1,8 +1,9 @@
 /*
  * GeneralSettingsPresenter.h
  *
- * Behaviour for the General settings tab (assets/ui/components/settings/settings_general.xml). Each setting is read
- * when the tab is shown and stored (and applied) as soon as it is changed.
+ * Behaviour for the General settings page (assets/ui/components/settings/settings_general.xml): the language and USB
+ * keyboard layout, and how the screen works the machine. Each setting is read when the page is shown and stored (and
+ * applied) as soon as it is changed.
  *
  * There is one action per setting, given the value from the widget (an index, a number, or 1/0 for a toggle). Picking
  * another language asks whether to restart in it.
@@ -13,14 +14,14 @@
 
 #pragma once
 
+#include "SettingsPresenter.h"
 #include "UI/Xml/Binding/Subjects.h"
-#include "UI/Xml/View/XmlPresenter.h"
 #include <string>
 #include <vector>
 
 namespace UI
 {
-	class GeneralSettingsPresenter : public Xml::XmlPresenter
+	class GeneralSettingsPresenter : public SettingsPresenter
 	{
 	  public:
 		/** Create the presenter */
@@ -34,30 +35,18 @@ namespace UI
 		void onActivate() override;
 
 	  private:
-		/** Register an action, described by `description`, that stores the value the widget gives with `store` */
-		void setting(std::string name, std::string description, std::function<void(float value)> store);
-
 		/** Ask whether to restart in the language at `index`; the question goes with `asker` */
 		void askLanguage(size_t index, lv_obj_t* asker);
 
 		std::vector<std::string> m_languageCodes; // Language codes, in the order offered
 
-		Xml::StringSubject<96> m_firmware;				   // Firmware version
-		Xml::StringSubject<64> m_buildroot;				   // Buildroot version
 		Xml::StringSubject<512> m_languages;			   // Languages offered
 		Xml::IntSubject m_language;						   // Index of the language in use
 		Xml::StringSubject<512> m_keyboardLayouts;		   // Keyboard layouts offered
 		Xml::IntSubject m_keyboardLayout;				   // Index of the layout in use
-		Xml::IntSubject m_brightness;					   // 0-100
-		Xml::IntSubject m_screensaverTimeout;			   // Seconds
 		Xml::IntSubject m_confirmations;				   // 1 if actions are confirmed
 		Xml::IntSubject m_machinePositionMode;			   // 1 for machine coordinates
 		Xml::StringSubject<128> m_progressSources;		   // Progress sources offered
 		Xml::IntSubject m_progressSource;				   // Index of the source used
-		Xml::IntSubject m_connectedMessage;				   // 1 if shown on connecting
-		Xml::StringSubject<128> m_notificationLevels;	   // Levels offered
-		Xml::IntSubject m_notificationLevel;			   // Index of the lowest level shown
-		Xml::IntSubject m_notificationTimeout;			   // ms
-		Xml::IntSubject m_errorNotificationsStay;		   // 1 if errors stay until closed
 	};
 } // namespace UI

@@ -59,6 +59,9 @@ namespace UI
 		void setValue(float value);
 		void setDefaultValue(float value);
 		void setDisplayDecimals(int decimals);
+
+		/** Show `unit` after the value, e.g. "%" or "s"; empty for none */
+		void setUnit(std::string_view unit);
 		void setSendMode(SendMode mode) { m_sendMode = mode; }
 		void setLongPressedEnabled(bool enabled) { m_longPressEnabled = enabled; }
 		void setValueChangedCallback(value_changed_callback_t callback) { m_valueChangedCallback = callback; }
@@ -102,7 +105,9 @@ namespace UI
 		Button m_decrement{"decrement", m_sliderCont};
 		LvSlider m_slider{"slider", m_sliderCont};
 		Button m_increment{"increment", m_sliderCont};
-		LvTextarea m_input{"input", m_sliderCont};
+		LvContainer m_valueCont{"value_cont", m_sliderCont}; // The value, and its unit after it if it has one
+		LvTextarea m_input{"input", m_valueCont};
+		LvLabel m_unit{"unit", m_valueCont}; // The value's unit, e.g. "%"; hidden if it has none
 
 		float m_incrementValue = 1;
 

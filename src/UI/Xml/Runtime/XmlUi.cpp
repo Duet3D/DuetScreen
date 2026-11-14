@@ -65,7 +65,7 @@ namespace UI::Xml
 			Layouts::set(std::move(s_loaded.layouts),
 						 canSave ? s_paths.user / Layouts::LOCAL_BUNDLE : std::filesystem::path(),
 						 s_loaded.issues);
-			LayoutLibrary::setFolder(canSave ? s_paths.user / "saved" : std::filesystem::path());
+			LayoutLibrary::setFolder(canSave ? s_paths.user / LayoutLibrary::SAVED_FOLDER : std::filesystem::path());
 
 			for (const auto& issue : s_loaded.issues)
 			{
@@ -92,6 +92,23 @@ namespace UI::Xml
 #else
 		return Paths{.builtin = ASSETS_FOLDER "ui", .user = "var/ui"};
 #endif
+	}
+
+	void eraseUserLayouts()
+	{
+		const std::filesystem::path user = s_initialized ? s_paths.user : defaultPaths().user;
+		if (user.empty())
+		{
+			return;
+		}
+		for (const std::filesystem::path& dir : {user / Layouts::LOCAL_BUNDLE, user / LayoutLibrary::SAVED_FOLDER})
+		{
+			std::string error;
+			if (!Layouts::removeSafely(dir, error))
+			{
+				LOG_ERROR("Erasing the layouts: {:s}", error);
+			}
+		}
 	}
 
 	void init(const Paths& paths)

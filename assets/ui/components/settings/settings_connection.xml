@@ -1,73 +1,80 @@
 <!--
-  The Connection settings tab: how the screen reaches the Duet (and, over the network, the Duet's address and
-  password), how often it polls it, and the screen's own WiFi (settings_wifi.xml).
+  The Connection settings page: how the screen reaches the Duet (and, over the network, the Duet's address and
+  password), then, with advanced settings shown (Developer), the USB-C port's mode and how often the Duet is polled;
+  and the screen's own WiFi (settings_wifi.xml). Each setting is a row (ds_setting), applied as soon as it is changed.
 
   Fields and actions: src/UI/Presenters/Settings/ConnectionSettingsPresenter.h. Numbers and the IP address are typed on
   the shared number pad; the password on the shared keyboard.
 -->
 <component presenter="settings_connection">
-	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"
-		  style_grid_column_dsc_array="content fr(1)"
-		  style_grid_row_dsc_array="content content content content content content content">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
 
-		<lv_label name="row_label_0" translation_tag="tr.settings.duet_connection_method"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<settings_dropdown title="tr.settings.duet_connection_method" name="connection_method" options="presenter.connection_methods" selected="presenter.connection_method"
-						  action="presenter.settings.connection_method"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_1" translation_tag="tr.settings.usb_mode"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<settings_dropdown title="tr.settings.usb_mode" name="usb_mode" options="presenter.usb_modes" selected="presenter.usb_mode" action="presenter.settings.usb_mode"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_2" translation_tag="tr.settings.duet_poll_interval"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<ds_slider name="poll_interval" label_tag="tr.settings.duet_poll_interval" label_shown="false"
-				   numberpad="true" min="100" max="2000" bind_value="presenter.poll_interval" height="content" out_of_range="upper"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-				   style_grid_cell_row_pos="2" style_grid_cell_y_align="center">
-			<action trigger="value_confirmed" name="presenter.settings.poll_interval"/>
-		</ds_slider>
+		<lv_label name="duet_title" translation_tag="tr.settings.groups.duet">
+			<style name="setting_group_title"/>
+		</lv_label>
+		<lv_obj name="duet">
+			<style name="setting_group"/>
+			<!-- One of a few, in the order of `connection_methods`: the chosen one is checked -->
+			<ds_setting name="connection_method" title_tag="tr.settings.duet_connection_method">
+				<lv_obj name="options" width="content" height="content" flex_flow="row" style_pad_all="0">
+					<ds_button name="usb" translation_tag="tr.connection_method.usb">
+						<style name="setting_control"/>
+						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="presenter.settings.connection_method" arg="0"/>
+					</ds_button>
+					<ds_button name="network" translation_tag="tr.connection_method.network">
+						<style name="setting_control"/>
+						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="presenter.settings.connection_method" arg="1"/>
+					</ds_button>
+					<ds_button name="uart" translation_tag="tr.connection_method.uart">
+						<style name="setting_control"/>
+						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="2"/>
+						<action trigger="clicked" name="presenter.settings.connection_method" arg="2"/>
+					</ds_button>
+				</lv_obj>
+			</ds_setting>
 
-		<!-- Over the network only -->
-		<lv_label name="row_label_3" translation_tag="tr.settings.duet_ip_address"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<ds_textarea name="duet_ip_address" bind_text="presenter.duet_ip" one_line="true" keyboard="none"
-						 placeholder_tag="tr.settings.duet_ip_address_prompt" height="content"
-						 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						 style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
-			<action trigger="clicked" name="presenter.settings.duet_ip"/>
-		</ds_textarea>
-		<lv_label name="row_label_4" translation_tag="tr.settings.duet_password"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<ds_textarea name="duet_password" bind_text="presenter.duet_password" one_line="true" password_mode="true"
-						 placeholder_tag="tr.settings.duet_password_prompt" height="content"
-						 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						 style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
-			<action trigger="ready" name="presenter.settings.duet_password"/>
-		</ds_textarea>
+			<!-- Over the network only -->
+			<ds_setting name="duet_ip_address" title_tag="tr.settings.duet_ip_address">
+				<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="field" bind_text="presenter.duet_ip" one_line="true" keyboard="none"
+							 placeholder_tag="tr.settings.duet_ip_address_prompt" width="45%" height="content">
+					<action trigger="clicked" name="presenter.settings.duet_ip"/>
+				</ds_textarea>
+			</ds_setting>
+			<ds_setting name="duet_password" title_tag="tr.settings.duet_password">
+				<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="field" bind_text="presenter.duet_password" one_line="true" password_mode="true"
+							 placeholder_tag="tr.settings.duet_password_prompt" width="45%" height="content">
+					<action trigger="ready" name="presenter.settings.duet_password"/>
+				</ds_textarea>
+			</ds_setting>
 
-		<!-- The screen's own networking -->
-		<lv_label name="row_label_5" translation_tag="tr.settings.headers.screen_networking"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="start"
-				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
-			<style name="text_emphasis"/>
+			<!-- With advanced settings shown -->
+			<ds_setting name="usb_mode" title_tag="tr.settings.usb_mode">
+				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
+				<ds_choice name="choice" title_tag="tr.settings.usb_mode" bind_options="presenter.usb_modes"
+						   bind_selected="presenter.usb_mode">
+					<style name="setting_control"/>
+					<action trigger="value_confirmed" name="presenter.settings.usb_mode"/>
+				</ds_choice>
+			</ds_setting>
+			<ds_setting name="poll_interval" title_tag="tr.settings.duet_poll_interval"
+						hint_tag="tr.settings.hints.poll_interval">
+				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
+				<ds_slider name="slider" label_tag="tr.settings.duet_poll_interval" label_shown="false" numberpad="true"
+						   min="100" max="2000" increment="50" decimals="0" unit="ms" out_of_range="upper"
+						   bind_value="presenter.poll_interval" width="55%" height="content">
+					<action trigger="value_confirmed" name="presenter.settings.poll_interval"/>
+				</ds_slider>
+			</ds_setting>
+		</lv_obj>
+
+		<lv_label name="wifi_title" translation_tag="tr.settings.groups.wifi">
+			<style name="setting_group_title"/>
 		</lv_label>
-		<ds_view name="settings_wifi" view="settings_wifi" shown="true" height="content"
-				 style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-				 style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
+		<ds_view name="settings_wifi" view="settings_wifi" shown="true" width="100%" height="content"/>
 	</view>
 </component>

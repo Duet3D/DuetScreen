@@ -29,6 +29,8 @@
 #include "Settings/DeveloperSettingsPresenter.h"
 #include "Settings/DisplaySettingsPresenter.h"
 #include "Settings/GeneralSettingsPresenter.h"
+#include "Settings/NotificationSettingsPresenter.h"
+#include "Settings/SystemSettingsPresenter.h"
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
 #include "Sidebar/EStopActions.h"
@@ -75,6 +77,8 @@ namespace UI
 		Xml::Presenters::add<WifiPresenter>("settings_wifi");
 		Xml::Presenters::add<DisplaySettingsPresenter>("settings_display");
 		Xml::Presenters::add<ThemePreviewPresenter>("settings_theme_preview");
+		Xml::Presenters::add<NotificationSettingsPresenter>("settings_notifications");
+		Xml::Presenters::add<SystemSettingsPresenter>("settings_system");
 		Xml::Presenters::add<DeveloperSettingsPresenter>("settings_developer");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */

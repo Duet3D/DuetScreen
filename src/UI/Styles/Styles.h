@@ -155,6 +155,7 @@ namespace UI::Themes
 		Style anim_fast; // Fast animation time
 
 		Style action_btn; // UI elements that perform actions on the Duet
+		Style danger_btn; // A button whose action can't be undone, such as erasing every setting
 		Style input; // Text inputs
 		Style long_press; // Long-press feedback
 		Style draggable; // Draggable widgets
@@ -355,8 +356,10 @@ namespace UI::Themes
 		/* Settings (ds_setting): rows in boxed groups, each group under a heading */
 		Style setting_group;	   // A box of rows: its background shows in the gaps between them, as rules
 		Style setting_group_title; // The heading over a group
+		Style setting_group_danger; // A group whose actions can't be undone, on top of setting_group
 		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
 		Style setting_hint;		   // The line under a row's title that says more about it
+		Style setting_control;	   // A row's button or choice, or one of a few options: big enough to tap
 
 		/* The number pad (assets/ui/components/dialogs/dialog_number.xml) */
 		Style numpad;		   // The pad, and its grid of keys: the gaps between them

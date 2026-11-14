@@ -5,6 +5,7 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="presenter.adb"/>
 			<xs:enumeration value="presenter.advanced_settings"/>
+			<xs:enumeration value="presenter.advanced_shown"/>
 			<xs:enumeration value="presenter.alert.axes"/>
 			<xs:enumeration value="presenter.alert.axes_shown"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
@@ -31,6 +32,7 @@
 			<xs:enumeration value="presenter.axes"/>
 			<xs:enumeration value="presenter.axes_shown"/>
 			<xs:enumeration value="presenter.brightness"/>
+			<xs:enumeration value="presenter.build_tools_shown"/>
 			<xs:enumeration value="presenter.buildroot"/>
 			<xs:enumeration value="presenter.cache_size"/>
 			<xs:enumeration value="presenter.can_close"/>
@@ -52,6 +54,7 @@
 			<xs:enumeration value="presenter.crumbs"/>
 			<xs:enumeration value="presenter.current_object"/>
 			<xs:enumeration value="presenter.dark"/>
+			<xs:enumeration value="presenter.dark_shown"/>
 			<xs:enumeration value="presenter.debug_borders"/>
 			<xs:enumeration value="presenter.debug_borders_shown"/>
 			<xs:enumeration value="presenter.debug_level"/>
@@ -479,7 +482,6 @@
 			<xs:enumeration value="presenter.object_cancel.cancel_current"/>
 			<xs:enumeration value="presenter.object_cancel.select"/>
 			<xs:enumeration value="presenter.preview.chroma"/>
-			<xs:enumeration value="presenter.preview.dark"/>
 			<xs:enumeration value="presenter.preview.primary_hue"/>
 			<xs:enumeration value="presenter.preview.secondary_hue"/>
 			<xs:enumeration value="presenter.question.no"/>
@@ -500,6 +502,7 @@
 			<xs:enumeration value="presenter.settings.confirmations"/>
 			<xs:enumeration value="presenter.settings.connected_message"/>
 			<xs:enumeration value="presenter.settings.connection_method"/>
+			<xs:enumeration value="presenter.settings.dark"/>
 			<xs:enumeration value="presenter.settings.debug_borders"/>
 			<xs:enumeration value="presenter.settings.debug_level"/>
 			<xs:enumeration value="presenter.settings.duet_ip"/>
@@ -645,6 +648,8 @@
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
 			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_notifications"/>
+			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="temperature"/>
@@ -756,8 +761,9 @@
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
-			<xs:enumeration value="settings_dropdown"/>
 			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_notifications"/>
+			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_theme_swatch"/>
 			<xs:enumeration value="settings_wifi"/>
@@ -888,8 +894,9 @@
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
-			<xs:enumeration value="settings_dropdown"/>
 			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_notifications"/>
+			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_theme_swatch"/>
 			<xs:enumeration value="settings_wifi"/>
@@ -1079,8 +1086,9 @@
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
-			<xs:enumeration value="settings_dropdown"/>
 			<xs:enumeration value="settings_general"/>
+			<xs:enumeration value="settings_notifications"/>
+			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_theme_swatch"/>
 			<xs:enumeration value="settings_wifi"/>
@@ -1163,6 +1171,7 @@
 			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_handle"/>
 			<xs:enumeration value="customise_place"/>
+			<xs:enumeration value="danger_btn"/>
 			<xs:enumeration value="debug_borders"/>
 			<xs:enumeration value="dialog"/>
 			<xs:enumeration value="dialog_backdrop"/>
@@ -1261,7 +1270,9 @@
 			<xs:enumeration value="screen"/>
 			<xs:enumeration value="scrollbar"/>
 			<xs:enumeration value="scrollbar_scrolled"/>
+			<xs:enumeration value="setting_control"/>
 			<xs:enumeration value="setting_group"/>
+			<xs:enumeration value="setting_group_danger"/>
 			<xs:enumeration value="setting_group_title"/>
 			<xs:enumeration value="setting_hint"/>
 			<xs:enumeration value="setting_row"/>
@@ -1771,9 +1782,13 @@
 			<xs:enumeration value="tr.object_cancel.current_object_prefix"/>
 			<xs:enumeration value="tr.object_cancel.objects_header"/>
 			<xs:enumeration value="tr.object_cancel.title"/>
+			<xs:enumeration value="tr.settings.back_up"/>
+			<xs:enumeration value="tr.settings.backup_failed"/>
+			<xs:enumeration value="tr.settings.backup_saved"/>
 			<xs:enumeration value="tr.settings.brightness"/>
 			<xs:enumeration value="tr.settings.build_time"/>
 			<xs:enumeration value="tr.settings.buildroot_version"/>
+			<xs:enumeration value="tr.settings.cache_cleared"/>
 			<xs:enumeration value="tr.settings.clear_duetscreen_cache"/>
 			<xs:enumeration value="tr.settings.colours"/>
 			<xs:enumeration value="tr.settings.colours_open"/>
@@ -1800,11 +1815,53 @@
 			<xs:enumeration value="tr.settings.enable_second_usb_channel"/>
 			<xs:enumeration value="tr.settings.enable_ssh"/>
 			<xs:enumeration value="tr.settings.enable_system_monitor"/>
+			<xs:enumeration value="tr.settings.erase"/>
 			<xs:enumeration value="tr.settings.erase_and_restart"/>
+			<xs:enumeration value="tr.settings.erase_confirm.text"/>
+			<xs:enumeration value="tr.settings.erase_confirm.title"/>
+			<xs:enumeration value="tr.settings.erase_confirm.yes"/>
+			<xs:enumeration value="tr.settings.erase_title"/>
 			<xs:enumeration value="tr.settings.firmware_version"/>
 			<xs:enumeration value="tr.settings.font"/>
+			<xs:enumeration value="tr.settings.groups.about"/>
+			<xs:enumeration value="tr.settings.groups.appearance"/>
+			<xs:enumeration value="tr.settings.groups.build_only"/>
+			<xs:enumeration value="tr.settings.groups.colour_roles"/>
+			<xs:enumeration value="tr.settings.groups.duet"/>
+			<xs:enumeration value="tr.settings.groups.erase"/>
+			<xs:enumeration value="tr.settings.groups.home"/>
+			<xs:enumeration value="tr.settings.groups.language_keyboard"/>
+			<xs:enumeration value="tr.settings.groups.logging"/>
+			<xs:enumeration value="tr.settings.groups.machine"/>
+			<xs:enumeration value="tr.settings.groups.messages"/>
+			<xs:enumeration value="tr.settings.groups.options"/>
+			<xs:enumeration value="tr.settings.groups.palette"/>
+			<xs:enumeration value="tr.settings.groups.restart"/>
+			<xs:enumeration value="tr.settings.groups.screen"/>
+			<xs:enumeration value="tr.settings.groups.tools"/>
+			<xs:enumeration value="tr.settings.groups.update_backup"/>
+			<xs:enumeration value="tr.settings.groups.wifi"/>
+			<xs:enumeration value="tr.settings.hardware_test"/>
 			<xs:enumeration value="tr.settings.headers.notifications"/>
 			<xs:enumeration value="tr.settings.headers.screen_networking"/>
+			<xs:enumeration value="tr.settings.hints.advanced"/>
+			<xs:enumeration value="tr.settings.hints.backup"/>
+			<xs:enumeration value="tr.settings.hints.cache"/>
+			<xs:enumeration value="tr.settings.hints.colours"/>
+			<xs:enumeration value="tr.settings.hints.confirmations"/>
+			<xs:enumeration value="tr.settings.hints.customise"/>
+			<xs:enumeration value="tr.settings.hints.erase"/>
+			<xs:enumeration value="tr.settings.hints.hardware_test"/>
+			<xs:enumeration value="tr.settings.hints.job_progress"/>
+			<xs:enumeration value="tr.settings.hints.language"/>
+			<xs:enumeration value="tr.settings.hints.machine_coordinates"/>
+			<xs:enumeration value="tr.settings.hints.notification_level"/>
+			<xs:enumeration value="tr.settings.hints.poll_interval"/>
+			<xs:enumeration value="tr.settings.hints.reboot"/>
+			<xs:enumeration value="tr.settings.hints.restart"/>
+			<xs:enumeration value="tr.settings.hints.screensaver"/>
+			<xs:enumeration value="tr.settings.hints.system_logging"/>
+			<xs:enumeration value="tr.settings.hints.upgrade"/>
 			<xs:enumeration value="tr.settings.icons"/>
 			<xs:enumeration value="tr.settings.job_progress_source"/>
 			<xs:enumeration value="tr.settings.job_progress_source_options.duration"/>
@@ -1840,7 +1897,10 @@
 			<xs:enumeration value="tr.settings.notification_level"/>
 			<xs:enumeration value="tr.settings.notification_timeout"/>
 			<xs:enumeration value="tr.settings.reboot"/>
+			<xs:enumeration value="tr.settings.reboot_title"/>
 			<xs:enumeration value="tr.settings.restart"/>
+			<xs:enumeration value="tr.settings.restart_title"/>
+			<xs:enumeration value="tr.settings.run"/>
 			<xs:enumeration value="tr.settings.run_buildroot_setup"/>
 			<xs:enumeration value="tr.settings.screen"/>
 			<xs:enumeration value="tr.settings.screen_header"/>
@@ -1860,6 +1920,7 @@
 			<xs:enumeration value="tr.settings.severity.verbose"/>
 			<xs:enumeration value="tr.settings.severity.warn"/>
 			<xs:enumeration value="tr.settings.show_confirmation_dialogs"/>
+			<xs:enumeration value="tr.settings.start"/>
 			<xs:enumeration value="tr.settings.start_hardware_test"/>
 			<xs:enumeration value="tr.settings.storage_info"/>
 			<xs:enumeration value="tr.settings.storage_info_format"/>
@@ -1889,7 +1950,10 @@
 			<xs:enumeration value="tr.settings.tabs.developer"/>
 			<xs:enumeration value="tr.settings.tabs.display"/>
 			<xs:enumeration value="tr.settings.tabs.general"/>
+			<xs:enumeration value="tr.settings.tabs.notifications"/>
+			<xs:enumeration value="tr.settings.tabs.system"/>
 			<xs:enumeration value="tr.settings.theme"/>
+			<xs:enumeration value="tr.settings.update"/>
 			<xs:enumeration value="tr.settings.upgrade_from_github"/>
 			<xs:enumeration value="tr.settings.upgrade_from_github_failed"/>
 			<xs:enumeration value="tr.settings.usb_mode"/>
@@ -3358,6 +3422,9 @@
 		</xs:attribute>
 		<xs:attribute name="decimals" type="xs:string">
 			<xs:annotation><xs:documentation>Decimal places the value is shown with (default 2)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Shown after the value, e.g. &quot;%&quot; or &quot;s&quot;</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="label" type="xs:string">
 			<xs:annotation><xs:documentation>The label, if there is no `label_tag`</xs:documentation></xs:annotation>
@@ -5403,20 +5470,6 @@
 		</xs:attribute>
 		<xs:attribute name="fit_items" type="bool">
 			<xs:annotation><xs:documentation>true: no more columns than visible children</xs:documentation></xs:annotation>
-		</xs:attribute>
-	</xs:attributeGroup>
-	<xs:attributeGroup name="settings_dropdown.attributes">
-		<xs:attribute name="title" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="options" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `options` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="selected" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `selected` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="action" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="sidebar_button.attributes">
@@ -13266,17 +13319,24 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="settings_dropdown">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_dropdown.xml.</xs:documentation></xs:annotation>
+	<xs:element name="settings_general">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="settings_dropdown.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="settings_general">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
+	<xs:element name="settings_notifications">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_notifications.xml, with presenter settings_notifications.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_system">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_system.xml, with presenter settings_system.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

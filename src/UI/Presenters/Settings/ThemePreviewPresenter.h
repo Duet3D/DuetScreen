@@ -1,9 +1,10 @@
 /*
  * ThemePreviewPresenter.h
  *
- * Behaviour for the theme preview (assets/ui/components/settings/settings_theme_preview.xml): a swatch of each colour
- * the theme in use gives its styles, and, for a theme whose palette can be changed, sliders for its hues and chroma and
- * a dark mode toggle, which change it as they move.
+ * Behaviour for the theme's colours (assets/ui/components/settings/settings_theme_preview.xml, Settings > Display >
+ * Colours): a swatch of each colour the theme in use gives its styles, and, for a theme whose palette can be changed,
+ * sliders for its hues and chroma, which change it as they move. Dark mode is on the Display page
+ * (DisplaySettingsPresenter.h).
  *
  * Actions change the palette as the controls move.
  *
@@ -75,7 +76,6 @@ namespace UI
 		Xml::IntSubject m_primaryHue;		   // 0-360
 		Xml::IntSubject m_secondaryHue;		   // 0-360
 		Xml::IntSubject m_chroma;			   // 0-0.4, in hundredths
-		Xml::IntSubject m_dark;				   // 1 in dark mode
 		Xml::IntSubject m_primaryLightness;  // Primary colour's lightness, thousandths
 		Xml::IntSubject m_primaryChroma;	   // Primary colour's chroma, thousandths
 		Xml::IntSubject m_secondaryLightness; // Secondary colour's lightness, thousandths

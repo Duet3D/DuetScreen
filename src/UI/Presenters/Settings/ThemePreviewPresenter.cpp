@@ -96,13 +96,6 @@ namespace UI
 				   const float chroma = args.value().value_or(0.0f);
 				   changePalette([chroma](Themes::PaletteInputs& palette) { palette.chroma = chroma; });
 			   });
-		action("preview.dark",
-			   "Use the dark palette if the edited value is 1, else the light one",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   const bool dark = args.value().value_or(0.0f) != 0.0f;
-				   changePalette([dark](Themes::PaletteInputs& palette) { palette.dark = dark; });
-			   });
 	}
 
 	void ThemePreviewPresenter::fields(Xml::FieldVisitor& f)
@@ -112,7 +105,6 @@ namespace UI
 		f.field("primary_hue", m_primaryHue, "Primary hue, 0-360");
 		f.field("secondary_hue", m_secondaryHue, "Secondary hue, 0-360");
 		f.field("chroma", m_chroma, "Chroma, 0-0.4, in hundredths (0.02 is 2)");
-		f.field("dark", m_dark, "1 in dark mode");
 		f.field("primary.lightness",
 				m_primaryLightness,
 				"The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`)");
@@ -152,7 +144,6 @@ namespace UI
 			m_primaryHue.set(palette.primaryHue);
 			m_secondaryHue.set(palette.secondaryHue);
 			m_chroma.set(scaled(palette.chroma, CHROMA_SCALE));
-			m_dark.set(palette.dark ? 1 : 0);
 			showColours();
 		}
 		showSwatches();
@@ -195,21 +186,9 @@ namespace UI
 
 	void ThemePreviewPresenter::changePalette(const std::function<void(Themes::PaletteInputs&)>& change)
 	{
-		Themes::Theme* theme = Themes::getCurrentTheme();
-		if (theme == nullptr || !theme->isCustomisable())
+		if (Themes::changeCurrentPalette(change))
 		{
-			LOG_ERROR("The theme in use has a fixed palette");
-			return;
+			showTheme();
 		}
-		auto palette = theme->getPalette();
-		change(palette);
-		theme->setPalette(palette);
-		Themes::refreshCurrentTheme();
-		m_primaryHue.set(palette.primaryHue);
-		m_secondaryHue.set(palette.secondaryHue);
-		m_chroma.set(scaled(palette.chroma, CHROMA_SCALE));
-		m_dark.set(palette.dark ? 1 : 0);
-		showColours();
-		showSwatches();
 	}
 } // namespace UI

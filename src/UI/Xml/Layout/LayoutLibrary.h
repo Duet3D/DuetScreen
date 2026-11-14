@@ -26,6 +26,9 @@
 
 namespace UI::Xml::LayoutLibrary
 {
+	/** The saved layouts' directory name, in the user bundle folder */
+	inline constexpr std::string_view SAVED_FOLDER = "saved";
+
 	/** The current file format */
 	inline constexpr int FORMAT = 1;
 

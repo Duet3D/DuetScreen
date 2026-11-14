@@ -15,6 +15,12 @@
 
 namespace UI
 {
+	namespace
+	{
+		/** The gap between the value and its unit */
+		constexpr lv_coord_t UNIT_GAP = 4;
+	} // namespace
+
 	Slider::Slider(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
@@ -56,8 +62,18 @@ namespace UI
 		m_decrement.setIcon("decrement.png");
 		m_increment.setIcon("increment.png");
 
+		m_valueCont.setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+		m_valueCont.setStylePad(0);
+		m_valueCont.setStylePad(UNIT_GAP, 0, Padding::COLUMN);
+		m_valueCont.setFlexFlow(LV_FLEX_FLOW_ROW);
+		m_valueCont.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+		m_valueCont.setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
+
 		m_input.setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		m_input.setMinWidth(50);
+
+		m_unit.addStyle(Themes::getLvglStyles().text_muted);
+		m_unit.hide();
 
 		m_slider.setMinHeight(LV_SIZE_CONTENT);
 		m_slider.setFlexGrow(1);
@@ -350,6 +366,14 @@ namespace UI
 										(getMax() - getMin())) +
 				   slider_min;
 		}
+	}
+
+	void Slider::setUnit(std::string_view unit)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		m_unit.setText(unit);
+		m_unit.setVisible(!unit.empty());
 	}
 
 	void Slider::updateText()

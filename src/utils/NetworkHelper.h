@@ -93,4 +93,7 @@ namespace NetworkHelper
 	void disconnect();
 	void reconnect();
 	void forgetNetwork(std::string_view ssid);
+
+	/// Forget every network the screen has joined, as erasing every setting does.
+	void forgetAllNetworks();
 } // namespace NetworkHelper

@@ -806,4 +806,12 @@ namespace NetworkHelper
 		}
 		LOG_ERROR("Network \"{:s}\" not found in known networks", ssid);
 	}
+
+	void forgetAllNetworks()
+	{
+		ZoneScoped;
+		LOG_INFO("Forgetting every network");
+		sendCommand("REMOVE_NETWORK all");
+		sendCommand("SAVE_CONFIG");
+	}
 } // namespace NetworkHelper
