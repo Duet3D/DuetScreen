@@ -24,6 +24,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 #include <string_view>
 
 namespace UI::Xml
@@ -137,7 +138,11 @@ namespace UI::Xml
 		std::map<std::string, ListBase*, std::less<>> m_lists;	  // Lists added to this scope
 		Resolver* m_resolver = nullptr;						  // Gives names on demand, or nullptr
 		std::string m_resolverPrefix;						  // What the names the resolver gives start with
-		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_keptSubjects; // Made for this scope
-		std::map<std::string, std::unique_ptr<ListBase>, std::less<>> m_keptLists;	 // Made for this scope
+		// Made for this scope, by key, and owned in the order made: a subject or list made later may observe one made
+		// earlier (`om.spindles[{row.spindle}]` observes `row.spindle`), so they are destroyed newest first
+		std::map<std::string, Subject*, std::less<>> m_keptSubjects;
+		std::map<std::string, ListBase*, std::less<>> m_keptLists;
+		std::vector<std::unique_ptr<Subject>> m_keptSubjectsInOrder;
+		std::vector<std::unique_ptr<ListBase>> m_keptListsInOrder;
 	};
 } // namespace UI::Xml

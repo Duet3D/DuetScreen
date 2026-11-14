@@ -1614,6 +1614,35 @@ TEST_F(TestXmlUi, ActionsCanComeFromPropsAndAnEmptyOneIsNone)
 	EXPECT_EQ(m_sent, std::vector<std::string>{"G28\n"});
 }
 
+TEST_F(TestXmlUi, AScopeWhosePathsUseItsOwnFieldsIsDeletedCleanly)
+{
+	// A path indexed by a field of the scope (row.spindle) observes that field's subject: deleting the scope must
+	// delete it first
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/scope_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_scope name="current" path="om.tools[{om.state.currentTool}]" item="scoped_spindle"/>
+			</view>
+		</component>)");
+	writeFile(bundleFile("components/scoped_spindle.xml"), R"(
+		<component>
+			<view extends="lv_label" bind_text="om.spindles[{row.spindle}].max|int"/>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"state":{"currentTool":0},"tools":[{"number":0,"spindle":0}],"spindles":[{"max":24000}]}})"
+		"\n");
+	deliverModelEvents();
+
+	auto& view = makeView("scope_screen");
+	lv_obj_t* label = lv_obj_get_child(find(view, "current"), 0);
+	ASSERT_NE(label, nullptr);
+	EXPECT_STREQ(lv_label_get_text(label), "24000");
+	m_views.clear(); // Crashed when the scope deleted row.spindle before the path observing it
+}
+
 TEST_F(TestXmlUi, HeaterAndFanActionsWorkFromAnyHeaterOrFanTheyAreGiven)
 {
 	writeFile(bundleFile("manifest.json"), manifest());

@@ -38,6 +38,15 @@ namespace UI::Xml
 		{
 			lv_xml_subject_ctx_unref(m_parentRow);
 		}
+		// Newest first, so each goes before anything it observes; lists before subjects, as they observe them
+		while (!m_keptListsInOrder.empty())
+		{
+			m_keptListsInOrder.pop_back();
+		}
+		while (!m_keptSubjectsInOrder.empty())
+		{
+			m_keptSubjectsInOrder.pop_back();
+		}
 	}
 
 	void Scope::add(const std::string& name, Subject& subject)
@@ -61,30 +70,46 @@ namespace UI::Xml
 		}
 	}
 
+	namespace
+	{
+		/** Keep `item` as `key` in `byKey` and `inOrder`, destroying any kept as `key` before */
+		template <typename T>
+		T& keepInOrder(std::map<std::string, T*, std::less<>>& byKey,
+					   std::vector<std::unique_ptr<T>>& inOrder,
+					   std::string key,
+					   std::unique_ptr<T> item)
+		{
+			T*& kept = byKey[std::move(key)];
+			if (kept != nullptr)
+			{
+				std::erase_if(inOrder, [old = kept](const std::unique_ptr<T>& made) { return made.get() == old; });
+			}
+			kept = item.get();
+			inOrder.push_back(std::move(item));
+			return *kept;
+		}
+	} // namespace
+
 	Subject& Scope::keep(std::string key, std::unique_ptr<Subject> subject)
 	{
-		auto& kept = m_keptSubjects[std::move(key)];
-		kept = std::move(subject);
-		return *kept;
+		return keepInOrder(m_keptSubjects, m_keptSubjectsInOrder, std::move(key), std::move(subject));
 	}
 
 	ListBase& Scope::keep(std::string key, std::unique_ptr<ListBase> list)
 	{
-		auto& kept = m_keptLists[std::move(key)];
-		kept = std::move(list);
-		return *kept;
+		return keepInOrder(m_keptLists, m_keptListsInOrder, std::move(key), std::move(list));
 	}
 
 	Subject* Scope::keptSubject(std::string_view key) const
 	{
 		const auto it = m_keptSubjects.find(key);
-		return it == m_keptSubjects.end() ? nullptr : it->second.get();
+		return it == m_keptSubjects.end() ? nullptr : it->second;
 	}
 
 	ListBase* Scope::keptList(std::string_view key) const
 	{
 		const auto it = m_keptLists.find(key);
-		return it == m_keptLists.end() ? nullptr : it->second.get();
+		return it == m_keptLists.end() ? nullptr : it->second;
 	}
 
 	Scope* Scope::owner(const lv_xml_subject_ctx_t* ctx)
