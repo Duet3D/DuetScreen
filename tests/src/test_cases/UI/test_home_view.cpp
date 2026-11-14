@@ -13,6 +13,7 @@
 #include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "ObjectModel/Tool.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "Storage.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Lvgl/LvTextarea.h"
@@ -34,6 +35,16 @@
 #include <fmt/format.h>
 #include <fstream>
 #include <gtest/gtest.h>
+
+namespace
+{
+	/** The M291 alert the object model's message box describes now, as the notifications presenter builds it */
+	OM::Alert alertInObjectModel()
+	{
+		MODEL_LOCK();
+		return OM::Alert::fromObjectModel(OM::Tree::get().root().at("state.messageBox"));
+	}
+} // namespace
 
 class TestHomeView : public UiTestSuite
 {
@@ -558,60 +569,60 @@ TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 TEST_F(TestHomeView, AlertS0)
 {
 	load_model_data_from_file("tests/object_model/m291/s0.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s0.png");
 }
 
 TEST_F(TestHomeView, AlertS1)
 {
 	load_model_data_from_file("tests/object_model/m291/s1.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s1.png");
 }
 
 TEST_F(TestHomeView, AlertS2)
 {
 	load_model_data_from_file("tests/object_model/m291/s2.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s2.png");
 }
 
 TEST_F(TestHomeView, AlertS3)
 {
 	load_model_data_from_file("tests/object_model/m291/s3.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3.png");
 
 	load_model_data_from_file("tests/object_model/test_bench/model_move_vn.json");
 	load_model_data_from_file("tests/object_model/m291/s3_axis.json");
 	home.show();
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3_axis.png");
 }
 
 TEST_F(TestHomeView, AlertS4)
 {
 	load_model_data_from_file("tests/object_model/m291/s4.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4.png");
 
 	load_model_data_from_file("tests/object_model/m291/s4_j1.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4_j1.png");
 }
 
 TEST_F(TestHomeView, AlertS5)
 {
 	load_model_data_from_file("tests/object_model/m291/s5.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_j1.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits.png");
 
 	auto& input = alertInput();
@@ -634,15 +645,15 @@ TEST_F(TestHomeView, AlertS5)
 TEST_F(TestHomeView, AlertS6)
 {
 	load_model_data_from_file("tests/object_model/m291/s6.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_j1.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_limits.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits.png");
 
 	auto& input = alertInput();
@@ -665,11 +676,11 @@ TEST_F(TestHomeView, AlertS6)
 TEST_F(TestHomeView, AlertS7)
 {
 	load_model_data_from_file("tests/object_model/m291/s7_j1.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits.png");
 
 	auto& input = alertInput();
@@ -1145,6 +1156,37 @@ TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
 	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
 }
 
+TEST_F(TestHomeView, AlertFollowsTheMessageBox)
+{
+	const auto deliver = []
+	{
+		Model::get().startEventLoop();
+		Model::get().stopEventLoop();
+	};
+	lv_obj_t* alert = notificationPart("alert");
+
+	// A new message box opens the alert
+	load_model_data_from_file("tests/object_model/m291/s3.json");
+	deliver();
+	EXPECT_FALSE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+
+	// Once answered, the same box sent again (the same sequence number) doesn't open it again
+	lv_obj_send_event(lv_obj_find_by_name(alert, "cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	load_model_data_from_file("tests/object_model/m291/s3.json");
+	deliver();
+	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+
+	// Another box opens it, and the box going away closes it
+	load_model_data_from_file("tests/object_model/m291/s0.json");
+	deliver();
+	EXPECT_FALSE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	load_model_data(R"({"key":"state","flags":"vn","result":{"messageBox":null}})"
+					"\n");
+	deliver();
+	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+}
+
 TEST_F(TestHomeView, AlertAnswersThePrinter)
 {
 	std::vector<std::string> sent;
@@ -1155,12 +1197,12 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 
 	// A response waits while an alert is open
 	load_model_data_from_file("tests/object_model/m291/s3.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	notifications().newResponse(ResponseType::INFO, "waiting");
 	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
 
 	// Cancel, offered by the printer, answers it
-	const uint32_t seq3 = OM::g_currentAlert.seq;
+	const uint32_t seq3 = alertInObjectModel().seq;
 	click("cancel");
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 P1 S{:d}\n", seq3)}));
 	EXPECT_TRUE(lv_obj_has_flag(notificationPart("alert"), LV_OBJ_FLAG_HIDDEN));
@@ -1170,22 +1212,22 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	// A choice answers with its index
 	sent.clear();
 	load_model_data_from_file("tests/object_model/m291/s4.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	lv_obj_t* choices = lv_obj_find_by_name(notificationPart("choices_list"), "list");
 	ASSERT_EQ(lv_obj_get_child_count(choices), 3u);
 	lv_obj_send_event(lv_obj_get_child(choices, 1), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{1}} S{:d}\n", OM::g_currentAlert.seq)}));
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{1}} S{:d}\n", alertInObjectModel().seq)}));
 
 	// A value can't be sent until it is within the limits
 	sent.clear();
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
-	notifications().newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	alertInput().setText("11");
 	EXPECT_TRUE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
 	alertInput().setText("7");
 	EXPECT_FALSE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
 	click("ok");
-	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", OM::g_currentAlert.seq)}));
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", alertInObjectModel().seq)}));
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 

@@ -7,6 +7,7 @@
 #include "ObjectModel/Axis.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -212,12 +213,12 @@ namespace UI
 	void NotificationsPresenter::onInit()
 	{
 		registerEventListener<EventType::Response>(this, &NotificationsPresenter::newResponse);
-		registerEventListener<EventType::Alert>(this, &NotificationsPresenter::newAlertData);
+		m_alertWatch = Xml::OmWatch({"state.messageBox"}, [this] { messageBoxChanged(); });
+		m_axesWatch = Xml::OmWatch({"move.axes"}, [this] { updateAlertAxes(); });
 		registerEventListener<EventType::UpdateAvailable>(this, &NotificationsPresenter::newUpdateAvailable);
 		registerEventListener<EventType::GithubUpdateAvailable>(this,
 																&NotificationsPresenter::newGithubUpdateAvailable);
 		registerEventListener<EventType::UpdateResult>(this, &NotificationsPresenter::handleUpdateResult);
-		registerEventListener<EventType::AxesData>([this]() { updateAlertAxes(); });
 		registerEventListener<EventType::UsbDrive>(
 			[this](const std::string& path, bool mounted)
 			{
@@ -382,12 +383,14 @@ namespace UI
 		std::vector<char> letters;
 		if (alert.flags.IsBitSet(OM::Alert::GotControls))
 		{
-			for (size_t i = 0; i < MAX_TOTAL_AXES; ++i)
+			MODEL_LOCK();
+			const OM::Node& axes = Xml::PrinterModel::root()["move"]["axes"];
+			for (size_t i = 0; i < MAX_TOTAL_AXES && i < axes.size(); ++i)
 			{
-				auto axis = (alert.controls & (1u << i)) ? OM::Move::GetAxis(i) : nullptr;
-				if (axis != nullptr)
+				const std::string_view letter = axes[i]["letter"].text();
+				if ((alert.controls & (1u << i)) != 0 && !letter.empty())
 				{
-					letters.push_back(axis->letter[0]);
+					letters.push_back(letter.front());
 				}
 			}
 		}
@@ -456,15 +459,40 @@ namespace UI
 		m_alertOk.set(valid ? Usable : Disabled);
 	}
 
+	void NotificationsPresenter::messageBoxChanged()
+	{
+		OM::Alert alert;
+		{
+			MODEL_LOCK();
+			alert = OM::Alert::fromObjectModel(Xml::PrinterModel::root()["state"]["messageBox"]);
+		}
+		// No box closes the alert; a box is a new alert only when its sequence number changes, as other fields of
+		// the same box (e.g. axis positions) come and go
+		if (alert.mode == OM::Alert::Mode::None)
+		{
+			m_lastAlertSeq.reset();
+			newAlertData(alert);
+			return;
+		}
+		if (m_lastAlertSeq == alert.seq)
+		{
+			return;
+		}
+		m_lastAlertSeq = alert.seq;
+		newAlertData(alert);
+	}
+
 	void NotificationsPresenter::updateAlertAxes()
 	{
 		for (size_t i = 0; i < m_alertAxes.size(); i++)
 		{
 			AlertAxisRow& row = m_alertAxes[i];
-			if (auto axis = OM::Move::GetAxisByLetter(row.letter))
+			MODEL_LOCK();
+			if (const OM::Node& axis = Xml::PrinterModel::axis(row.letter); axis.exists())
 			{
-				row.label.set(fmt::format("{:c} = {:.2f}", row.letter, axis->userPosition));
-				row.homed.set(axis->homed ? 1 : 0);
+				row.label.set(
+					fmt::format("{:c} = {:.2f}", row.letter, static_cast<float>(axis["userPosition"].number())));
+				row.homed.set(axis["homed"].boolean() ? 1 : 0);
 			}
 		}
 	}

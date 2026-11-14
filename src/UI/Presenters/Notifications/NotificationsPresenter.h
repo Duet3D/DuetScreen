@@ -17,11 +17,13 @@
 #include "Subscribers/ResponseSubscribers.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include "utils/UpgradeHelper.h"
 #include "lvgl/lvgl.h"
 #include <chrono>
 #include <deque>
+#include <optional>
 #include <string>
 
 namespace UI
@@ -115,6 +117,9 @@ namespace UI
 		/** Show the alert's axes' positions and whether they can move */
 		void updateAlertAxes();
 
+		/** The object model's message box changed: show a new alert, or close the alert if it has gone */
+		void messageBoxChanged();
+
 		/** Offer an update: OK runs `install` */
 		void offerUpdate(std::string text, std::function<void()> install);
 
@@ -168,5 +173,8 @@ namespace UI
 		Xml::IntSubject m_alertKeyboard;			// 1 while the keyboard is up
 		Xml::IntSubject m_alertProgress;			// Time left, 0-100
 		Xml::IntSubject m_alertProgressShown;		// 1 if the alert closes itself
+		std::optional<uint32_t> m_lastAlertSeq;		// Sequence number of the alert shown, or none
+		Xml::OmWatch m_alertWatch;					// Follows the message box
+		Xml::OmWatch m_axesWatch;					// Follows the axes the alert jogs
 	};
 } // namespace UI
