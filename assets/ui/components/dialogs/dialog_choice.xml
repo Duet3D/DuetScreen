@@ -1,0 +1,13 @@
+<!--
+  A choice prompt: the values that can be chosen, the chosen one marked. Tapping one hands it back. Code asks it with
+  Prompts::askChoice() (src/UI/Xml/Dialogs/Prompts.h); what is chosen is the step's title.
+
+  Fields and actions: src/UI/Xml/Dialogs/PromptPresenters.h (ChoicePrompt)
+-->
+<component presenter="dialog_choice">
+	<view extends="lv_obj" width="300" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_list name="list" list="presenter.choices" item="dialog_choice_row" width="100%" height="content"
+				 flex_flow="column"/>
+	</view>
+</component>

@@ -3,6 +3,7 @@
  */
 
 #include "DsTextarea.h"
+#include "KeyboardRoom.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
@@ -31,6 +32,55 @@ namespace UI::Xml
 			return mode == "text_upper" ? LV_KEYBOARD_MODE_TEXT_UPPER : LV_KEYBOARD_MODE_TEXT_LOWER;
 		}
 	} // namespace
+
+	DsTextarea::~DsTextarea()
+	{
+		stopWatchingLeave();
+	}
+
+	void DsTextarea::leftByPress()
+	{
+		lv_indev_t* indev = lv_indev_active();
+		if (indev == nullptr || lv_indev_get_state(indev) != LV_INDEV_STATE_PRESSED)
+		{
+			lv_obj_send_event(getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+			return;
+		}
+		if (m_leavingIndev == indev)
+		{
+			return; // Already watched, since a press that scrolled
+		}
+		stopWatchingLeave();
+		m_leavingIndev = indev;
+		lv_indev_add_event_cb(indev, leftReleasedCb, LV_EVENT_RELEASED, this);
+	}
+
+	void DsTextarea::leftReleasedCb(lv_event_t* e)
+	{
+		auto* textarea = static_cast<DsTextarea*>(lv_event_get_user_data(e));
+		auto* pressed = static_cast<lv_obj_t*>(lv_event_get_param(e));
+		// The object scrolled is still set as the press is let go
+		if (lv_indev_get_scroll_obj(textarea->m_leavingIndev) != nullptr || pressed == nullptr ||
+			!lv_obj_has_flag(pressed, LV_OBJ_FLAG_CLICK_FOCUSABLE))
+		{
+			return;
+		}
+		textarea->stopWatchingLeave();
+		const bool onTheBox = pressed == textarea->getRootPtr() || lv_obj_get_parent(pressed) == textarea->getRootPtr();
+		if (!onTheBox)
+		{
+			lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+		}
+	}
+
+	void DsTextarea::stopWatchingLeave()
+	{
+		if (m_leavingIndev != nullptr)
+		{
+			lv_indev_remove_event_cb_with_user_data(m_leavingIndev, leftReleasedCb, this);
+			m_leavingIndev = nullptr;
+		}
+	}
 
 	DsTextarea::DsTextarea(const std::string& name, LvObjRef&& parent)
 		: LvTextarea(name, parent)
@@ -205,7 +255,13 @@ namespace UI::Xml
 			lv_keyboard_set_textarea(keyboard, getRootPtr());
 			lv_obj_remove_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
 			lv_obj_move_foreground(keyboard);
+			KeyboardRoom::make(keyboard, getRootPtr());
 			return;
+		}
+		stopWatchingLeave();
+		if (!lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN))
+		{
+			KeyboardRoom::giveBack();
 		}
 		lv_obj_add_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
 	}
@@ -233,10 +289,10 @@ namespace UI::Xml
 			break;
 		case LV_EVENT_LEAVE:
 			// A tap on something outside the input group, such as a page's background, leaves the box focused in its
-			// group and only raises this; it still ends the edit, so treat it as losing focus
+			// group and only raises this; it still ends the edit, so treat it as losing focus, once it is a tap
 			if (textarea->m_hideOnDefocus)
 			{
-				lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+				textarea->leftByPress();
 			}
 			break;
 		case LV_EVENT_CLICKED:

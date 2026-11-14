@@ -8,8 +8,8 @@
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/JogSource.h"
 #include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Runtime/Services.h"
-#include "UI/Xml/View/NumberEntry.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/UnitSystem.h"
@@ -81,17 +81,19 @@ namespace UI
 		action("move.home",
 			   "Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if "
 			   "confirmations are on.",
-			   [this](const Xml::ActionArgs& args)
+			   [](const Xml::ActionArgs& args)
 			   {
 				   if (args.arg == "all")
 				   {
-					   confirmThen(_("move.home_all_confirm.title"),
+					   confirmThen(args.target,
+								   _("move.home_all_confirm.title"),
 								   _("move.home_all_confirm.text"),
 								   []() { Xml::Services::sendGcode("G28"); });
 				   }
 				   else if (args.arg == "XY")
 				   {
-					   confirmThen(_("move.home_xy_confirm.title"),
+					   confirmThen(args.target,
+								   _("move.home_xy_confirm.title"),
 								   _("move.home_xy_confirm.text"),
 								   []()
 								   {
@@ -101,16 +103,18 @@ namespace UI
 				   }
 				   else if (const char letter = axisOf(args))
 				   {
-					   confirmThen(_("move.home_generic_confirm.title", letter),
+					   confirmThen(args.target,
+								   _("move.home_generic_confirm.title", letter),
 								   _("move.home_generic_confirm.text", letter),
 								   [letter]() { home(letter); });
 				   }
 			   });
 		action("move.disable_motors",
 			   "Disable the motors (M18), asking first if confirmations are on",
-			   [this](const Xml::ActionArgs&)
+			   [](const Xml::ActionArgs& args)
 			   {
-				   confirmThen(_("move.disable_motors_confirm.title"),
+				   confirmThen(args.target,
+							   _("move.disable_motors_confirm.title"),
 							   _("move.disable_motors_confirm.text"),
 							   []() { Xml::Services::sendGcode("M18"); });
 			   });
@@ -123,19 +127,6 @@ namespace UI
 					   askPosition(letter);
 				   }
 			   });
-		action("move.confirm",
-			   "Answer yes to the question (`confirm`): close it and do what it asked",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_confirm.set(0);
-				   if (m_confirmed)
-				   {
-					   m_confirmed();
-				   }
-			   });
-		action("move.close_dialog",
-			   "Answer no to the question (`confirm`): close it without doing anything",
-			   [this](const Xml::ActionArgs&) { m_confirm.set(0); });
 	}
 
 	void MovePresenter::fields(Xml::FieldVisitor& f)
@@ -157,9 +148,6 @@ namespace UI
 		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
 		f.list("axes", m_axes, "The axes other than X, Y and Z");
 		f.field("axes_shown", m_axesShown, "1 if there are other axes");
-		f.field("confirm", m_confirm, "1 while asking before homing or disabling the motors");
-		f.field("confirm_title", m_confirmTitle, "The question's title");
-		f.field("confirm_text", m_confirmText, "The question");
 	}
 
 	void MovePresenter::onInit()
@@ -170,7 +158,6 @@ namespace UI
 
 	void MovePresenter::onActivate()
 	{
-		m_confirm.set(0);
 		showAxes();
 	}
 
@@ -234,17 +221,15 @@ namespace UI
 		m_axesShown.set(others.empty() ? 0 : 1);
 	}
 
-	void MovePresenter::confirmThen(std::string title, std::string text, std::function<void()> action)
+	void MovePresenter::confirmThen(lv_obj_t* asker, std::string title, std::string text, std::function<void()> action)
 	{
 		if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
 		{
 			action();
 			return;
 		}
-		m_confirmTitle.set(title);
-		m_confirmText.set(text);
-		m_confirmed = std::move(action);
-		m_confirm.set(1);
+		Xml::Prompts::askQuestion(
+			{.title = std::move(title), .text = std::move(text), .onYes = std::move(action), .asker = asker});
 	}
 
 	void MovePresenter::home(char letter)
@@ -286,7 +271,7 @@ namespace UI
 	{
 		const auto feedrate = Xml::JogSource::feedrate();
 		const bool machine = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
-		Xml::NumberRequest request;
+		Xml::Prompts::NumberRequest request;
 		{
 			MODEL_LOCK();
 			const OM::Node& axis = Xml::PrinterModel::axis(letter);
@@ -308,7 +293,7 @@ namespace UI
 										   Units::convertDisplayedSpeedToDuetUnits(static_cast<float>(*feedrate))));
 					   }};
 		}
-		Xml::Services::askNumber(std::move(request));
+		Xml::Prompts::askNumber(std::move(request));
 	}
 
 	char MovePresenter::axisOf(const Xml::ActionArgs& args)

@@ -7,5 +7,6 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/DsSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsTextarea.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsToggle.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/KeyboardRoom.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Slider.cpp
 )

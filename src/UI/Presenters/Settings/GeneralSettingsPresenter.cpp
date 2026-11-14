@@ -9,6 +9,7 @@
 #include "ObjectModel/JobProgressSource.h"
 #include "Storage.h"
 #include "Subscribers/ResponseSubscribers.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "i18n/i18n.h"
 #include "utils/DisplayHelper.h"
 #include "utils/StorageHelper.h"
@@ -118,9 +119,15 @@ namespace UI
 		m_progressSources.set(translatedLines(PROGRESS_SOURCES));
 		m_notificationLevels.set(translatedLines(RESPONSE_TYPE_STRINGS));
 
-		setting("settings.language",
-				"Ask whether to restart in the language at the edited index of `languages`",
-				[this](float value) { askLanguage(static_cast<size_t>(value)); });
+		action("settings.language",
+			   "Ask whether to restart in the language at the edited index of `languages`",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto value = args.value())
+				   {
+					   askLanguage(static_cast<size_t>(*value), args.target);
+				   }
+			   });
 		setting("settings.keyboard_layout",
 				"Use the USB keyboard layout at the edited index of `keyboard_layouts`",
 				[this](float value)
@@ -203,22 +210,6 @@ namespace UI
 					m_errorNotificationsStay.set(value != 0.0f ? 1 : 0);
 					StorageHelper::setData(ID_NOTIFICATION_AUTO_CLOSE_ERROR, value == 0.0f);
 				});
-
-		action("settings.restart_in_language",
-			   "Answer yes to `language_confirm`: store the language picked and restart",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_languageConfirm.set(0);
-				   StorageHelper::setData(ID_SYS_LANG_CODE_KEY, std::string_view(m_pickedLanguage));
-				   Restart();
-			   });
-		action("settings.keep_language",
-			   "Answer no to `language_confirm`: keep the language in use",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_languageConfirm.set(0);
-				   m_language.set(i18n::getLanguageIndex(i18n::getCurrentLanguage()));
-			   });
 	}
 
 	void GeneralSettingsPresenter::fields(Xml::FieldVisitor& f)
@@ -240,9 +231,6 @@ namespace UI
 		f.field("notification_level", m_notificationLevel, "Index of the lowest level shown, in `notification_levels`");
 		f.field("notification_timeout", m_notificationTimeout, "ms before a notification closes itself");
 		f.field("error_notifications_stay", m_errorNotificationsStay, "1 if error notifications stay until closed");
-		f.field("language_confirm", m_languageConfirm, "1 while asking to restart in another language");
-		f.field("language_confirm_title", m_languageConfirmTitle, "The language question's title");
-		f.field("language_confirm_text", m_languageConfirmText, "The language question");
 	}
 
 	void GeneralSettingsPresenter::onActivate()
@@ -268,7 +256,6 @@ namespace UI
 		m_notificationLevel.set(static_cast<int32_t>(StorageHelper::getData(ID_NOTIFICATION_LEVEL)));
 		m_notificationTimeout.set(static_cast<int32_t>(StorageHelper::getData(ID_NOTIFICATION_TIMEOUT).count()));
 		m_errorNotificationsStay.set(StorageHelper::getData(ID_NOTIFICATION_AUTO_CLOSE_ERROR) ? 0 : 1);
-		m_languageConfirm.set(0);
 	}
 
 	void GeneralSettingsPresenter::setting(std::string name,
@@ -286,7 +273,7 @@ namespace UI
 			   });
 	}
 
-	void GeneralSettingsPresenter::askLanguage(size_t index)
+	void GeneralSettingsPresenter::askLanguage(size_t index, lv_obj_t* asker)
 	{
 		if (index >= m_languageCodes.size() || m_languageCodes.at(index) == i18n::getCurrentLanguage())
 		{
@@ -294,9 +281,18 @@ namespace UI
 		}
 		LOG_INFO("Language selection changed to: {:s}", m_languageCodes.at(index));
 		m_language.set(static_cast<int32_t>(index));
-		m_pickedLanguage = m_languageCodes.at(index);
-		m_languageConfirmTitle.set(_("settings.language_confirm.title"));
-		m_languageConfirmText.set(_("settings.language_confirm.text"));
-		m_languageConfirm.set(1);
+		Xml::Prompts::askQuestion(
+			{.title = _("settings.language_confirm.title"),
+			 .text = _("settings.language_confirm.text"),
+			 .onYes =
+				 [code = m_languageCodes.at(index)]
+			 {
+				 StorageHelper::setData(ID_SYS_LANG_CODE_KEY, std::string_view(code));
+				 Restart();
+			 },
+			 // Not restarting keeps the language in use; the question goes with the list, and
+			 // so with this
+			 .onNo = [this] { m_language.set(i18n::getLanguageIndex(i18n::getCurrentLanguage())); },
+			 .asker = asker});
 	}
 } // namespace UI

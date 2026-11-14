@@ -259,7 +259,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
-An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`, `value_tapped`
+An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
 
 ## Presenters
 
@@ -343,10 +343,6 @@ Used by `customise`.
 | `presenter.catalogue_open` | int | 1 while the widget pool is open |
 | `presenter.settings` | list | The selected widget's settings |
 | `presenter.settings_open` | int | 1 while the selected widget's settings are open |
-| `presenter.options` | list | The values the setting being changed can take |
-| `presenter.options_open` | int | 1 while they are shown |
-| `presenter.options_title` | text | The name of the setting they are for |
-| `presenter.keyboard` | int | 1 while the keyboard is up for typed text, so the dialog moves above it |
 | `presenter.can_save` | int | 1 if layouts can be saved (not in safe mode), else 0 |
 | `presenter.save_open` | int | 1 while asking for a name to save the layouts as |
 | `presenter.save_name` | text | The name typed so far |
@@ -354,9 +350,6 @@ Used by `customise`.
 | `presenter.load_open` | int | 1 while the saved layouts are listed |
 | `presenter.saved` | list | The saved layouts, by name |
 | `presenter.has_saved` | int | 1 if there are any saved layouts, else 0 |
-| `presenter.confirm_delete` | int | 1 while asking whether to delete a saved layout |
-| `presenter.delete_title` | text | That question's title |
-| `presenter.delete_text` | text | That question, naming the layout |
 
 Each row of `presenter.catalogue`:
 
@@ -388,15 +381,6 @@ Each row of `presenter.settings`:
 | `row.value` | text | Its value as shown, e.g. "Fan 1" |
 | `row.on` | int | For a bool, 1 when on, else 0 |
 
-Each row of `presenter.options`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.value` | text | The value |
-| `row.title` | text | The value as shown, translated |
-| `row.chosen` | int | 1 for the setting's current value, else 0 |
-
 Each row of `presenter.saved`:
 
 | Name | Type | Description |
@@ -409,18 +393,13 @@ Each row of `presenter.saved`:
 | `presenter.customise.add` | Add the widget of the widget pool's row where it was asked for, and close the pool |
 | `presenter.customise.ask_delete` | Ask whether to delete the saved layout of the row |
 | `presenter.customise.cancel` | Stop customising and throw the changes away |
-| `presenter.customise.choose` | Set the setting being changed to the value of the row, and close the values |
 | `presenter.customise.close_catalogue` | Close the widget pool |
-| `presenter.customise.close_delete` | Close the question without deleting |
 | `presenter.customise.close_load` | Close the saved layouts |
-| `presenter.customise.close_options` | Close the values without changing the setting |
 | `presenter.customise.close_save` | Close the question without saving |
 | `presenter.customise.close_settings` | Close the settings |
 | `presenter.customise.configure` | Show the selected widget's settings |
-| `presenter.customise.delete_saved` | Delete the saved layout the question is about |
 | `presenter.customise.done` | Stop customising and keep the changes |
-| `presenter.customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
-| `presenter.customise.keyboard` | Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away |
+| `presenter.customise.edit_setting` | Change the setting of the row: on a number pad or a choice of its values, the settings' next step |
 | `presenter.customise.load` | List the saved layouts, to load one |
 | `presenter.customise.load_saved` | Show the saved layout of the row, as one change, and close the list |
 | `presenter.customise.remove` | Remove the selected widget |
@@ -445,7 +424,7 @@ Each row of `presenter.saved`:
 | `presenter.sort_size` | text | As `sort_name`, for the size order |
 | `presenter.tiles` | int | 1 when files are shown as tiles, 0 as a list |
 | `presenter.mode_icon` | text | Symbol for the other way of showing files |
-| `presenter.dialog` | text | What the dialog asks: "start_print", "run_macro" or "delete"; empty when it is closed |
+| `presenter.dialog` | text | What the dialog asks: "start_print" or "run_macro"; empty when it is closed |
 | `presenter.dialog_title` | text | Dialog title |
 | `presenter.dialog_text` | text | Dialog message |
 | `presenter.dialog_image` | text | Thumbnail shown in the dialog, or empty |
@@ -479,14 +458,85 @@ Each row of `presenter.crumbs`:
 
 | Action | Description |
 | --- | --- |
-| `presenter.files.ask_delete` | Ask to delete the file the dialog is about |
+| `presenter.files.ask_delete` | Ask whether to delete the file the dialog is about, as the dialog's next step; deleting it closes the dialog |
 | `presenter.files.close_dialog` | Close the dialog without doing anything |
-| `presenter.files.confirm` | Do what the dialog asks (start the job, run the macro or delete the file), and close it |
+| `presenter.files.confirm` | Do what the dialog asks (start the job or run the macro), and close it |
 | `presenter.files.crumb` | Open that folder. From a row of `crumbs`. |
 | `presenter.files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
 | `presenter.files.refresh` | Close the dialog and read the folder again |
 | `presenter.files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
 | `presenter.files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
+
+### dialog_choice
+
+Used by `dialog_choice`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.choices` | list | The values to choose from, in order |
+
+Each row of `presenter.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.value` | text | The value handed back if it is chosen |
+| `row.title` | text | What the user sees |
+| `row.chosen` | int | 1 for the value chosen now |
+
+| Action | Description |
+| --- | --- |
+| `presenter.choice.choose` | Hand back the value of the row and go back. From a row of `choices`. |
+
+### dialog_host
+
+Used by `dialog_host`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.title` | text | The title of the step shown |
+| `presenter.from` | text | The title of the step it came from; empty on a dialog's first step |
+| `presenter.can_go_back` | int | 1 if the back button shows: a later step that isn't blocking |
+| `presenter.can_close` | int | 1 if the close button shows: no step of the dialog is blocking |
+
+| Action | Description |
+| --- | --- |
+| `presenter.dialog.back` | Go back to the step before, as the back button does |
+| `presenter.dialog.close` | Close the whole dialog, as the close button does, unless a step of it is blocking |
+| `presenter.dialog.outside` | The backdrop was tapped: close the whole dialog, unless a step of it is blocking |
+
+### dialog_number
+
+Used by `dialog_number`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.text` | text | What has been typed |
+| `presenter.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `presenter.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for digits and dots |
+| `presenter.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `presenter.signed` | int | 1 if the number may be negative, so the +/- key works |
+
+| Action | Description |
+| --- | --- |
+| `presenter.number.clear` | Empty the box |
+| `presenter.number.confirm` | Hand back what has been typed, if it can be, and go back. From the keys' `ready` (their OK key). |
+| `presenter.number.typed` | What has been typed in the box changed. From the box's `value_changed`. |
+
+### dialog_question
+
+Used by `dialog_question`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.text` | text | The question |
+| `presenter.yes` | text | The label of the button that agrees |
+| `presenter.no` | text | The label of the button that doesn't |
+
+| Action | Description |
+| --- | --- |
+| `presenter.question.no` | Don't agree, and go back |
+| `presenter.question.yes` | Agree, and go back |
 
 ### factors
 
@@ -497,21 +547,9 @@ Used by `factors`.
 | `presenter.speed_dialog.open` | int | 1 while the dialog is open |
 | `presenter.speed_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
 | `presenter.speed_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
-| `presenter.speed_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
-| `presenter.speed_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
-| `presenter.speed_dialog.pad.text` | text | What has been typed |
-| `presenter.speed_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
-| `presenter.speed_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `presenter.speed_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
 | `presenter.extrusion_dialog.open` | int | 1 while the dialog is open |
 | `presenter.extrusion_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
 | `presenter.extrusion_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
-| `presenter.extrusion_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
-| `presenter.extrusion_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
-| `presenter.extrusion_dialog.pad.text` | text | What has been typed |
-| `presenter.extrusion_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
-| `presenter.extrusion_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `presenter.extrusion_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
 
 Each row of `presenter.speed_dialog.factors`:
 
@@ -536,12 +574,7 @@ Each row of `presenter.extrusion_dialog.factors`:
 | Action | Description |
 | --- | --- |
 | `presenter.factor.close` | Close the dialog named by `arg` (its id), e.g. when it is dismissed |
-| `presenter.factor.dragged` | The slider moved (`value_changed`): the number pad follows it if it is for that factor. From a row of `factors`. |
-| `presenter.factor.edit` | Type a percentage for the factor on the dialog's number pad (`value_tapped`). From a row of `factors`. |
-| `presenter.factor.set` | Use the slider's edited percentage (`value_confirmed`) for its factor. From a row of `factors`. |
-| `presenter.numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
-| `presenter.numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
-| `presenter.numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
+| `presenter.factor.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of `factors`. |
 
 ### fans
 
@@ -640,19 +673,6 @@ Each row of `presenter.maps`:
 | `presenter.heightmap.show` | Show that height map. From a row of `maps`. |
 | `presenter.heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
 
-### job_cancel
-
-Used by `job_cancel`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.confirm` | int | 1 while asking whether to cancel the job |
-
-| Action | Description |
-| --- | --- |
-| `presenter.job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
-| `presenter.job.close_cancel` | Close the question without cancelling the job |
-
 ### move
 
 Used by `move`, `move_xy_card`, `move_z_card`.
@@ -678,9 +698,6 @@ Used by `move`, `move_xy_card`, `move_z_card`.
 | `presenter.disable_motors_usable` | int | 1 if the motors can be disabled |
 | `presenter.axes` | list | The axes other than X, Y and Z |
 | `presenter.axes_shown` | int | 1 if there are other axes |
-| `presenter.confirm` | int | 1 while asking before homing or disabling the motors |
-| `presenter.confirm_title` | text | The question's title |
-| `presenter.confirm_text` | text | The question |
 
 Each row of `presenter.axes`:
 
@@ -695,8 +712,6 @@ Each row of `presenter.axes`:
 
 | Action | Description |
 | --- | --- |
-| `presenter.move.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
-| `presenter.move.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
 | `presenter.move.disable_motors` | Disable the motors (M18), asking first if confirmations are on |
 | `presenter.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if confirmations are on. |
 | `presenter.move.jog` | Jog by the chosen distance at the chosen speed. `arg` is `X+`, `Z-`, …; from a row of `axes`, `+` or `-`. |
@@ -769,26 +784,6 @@ Each row of `presenter.alert.axes`:
 | `presenter.update.close` | Close the update prompt without installing |
 | `presenter.update.confirm` | Install the update offered (nothing when a result is showing), and close |
 
-### numberpad
-
-Used by `numberpad`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.open` | int | 1 while the dialog is open |
-| `presenter.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
-| `presenter.pad.text` | text | What has been typed |
-| `presenter.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
-| `presenter.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `presenter.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
-
-| Action | Description |
-| --- | --- |
-| `presenter.numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
-| `presenter.numberpad.close` | Close the dialog without answering, e.g. when it is dismissed |
-| `presenter.numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
-| `presenter.numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
-
 ### object_cancel
 
 Used by `object_cancel`.
@@ -802,9 +797,6 @@ Used by `object_cancel`.
 | `presenter.y_max` | int | Highest Y of the bed, whole mm; as `x_min` |
 | `presenter.objects` | list | The job's objects |
 | `presenter.confirmations` | int | 1 if actions are confirmed first (the setting) |
-| `presenter.confirm` | int | 1 while asking; `confirm_title` and `confirm_text` are the question |
-| `presenter.confirm_title` | text | Question title |
-| `presenter.confirm_text` | text | Question |
 
 Each row of `presenter.objects`:
 
@@ -823,8 +815,6 @@ Each row of `presenter.objects`:
 | Action | Description |
 | --- | --- |
 | `presenter.object_cancel.cancel_current` | Cancel the object being printed, asking first if confirmations are on |
-| `presenter.object_cancel.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
-| `presenter.object_cancel.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
 | `presenter.object_cancel.select` | Cancel the object, or resume it if cancelled, asking first. From a row of `objects`. |
 
 ### settings_connection
@@ -937,9 +927,6 @@ Used by `settings_general`.
 | `presenter.notification_level` | int | Index of the lowest level shown, in `notification_levels` |
 | `presenter.notification_timeout` | int | ms before a notification closes itself |
 | `presenter.error_notifications_stay` | int | 1 if error notifications stay until closed |
-| `presenter.language_confirm` | int | 1 while asking to restart in another language |
-| `presenter.language_confirm_title` | text | The language question's title |
-| `presenter.language_confirm_text` | text | The language question |
 
 | Action | Description |
 | --- | --- |
@@ -947,14 +934,12 @@ Used by `settings_general`.
 | `presenter.settings.confirmations` | Turn confirmation dialogs on (edited value 1) or off (0) |
 | `presenter.settings.connected_message` | Show a message on connecting if the edited value is 1, else not |
 | `presenter.settings.error_notifications_stay` | Keep error notifications open until closed if the edited value is 1, else not |
-| `presenter.settings.keep_language` | Answer no to `language_confirm`: keep the language in use |
 | `presenter.settings.keyboard_layout` | Use the USB keyboard layout at the edited index of `keyboard_layouts` |
 | `presenter.settings.language` | Ask whether to restart in the language at the edited index of `languages` |
 | `presenter.settings.machine_position_mode` | Use machine coordinates (G53) for absolute moves if the edited value is 1, else not |
 | `presenter.settings.notification_level` | Show notifications from the level at the edited index of `notification_levels` up |
 | `presenter.settings.notification_timeout` | Close notifications after the edited value, in ms |
 | `presenter.settings.progress_source` | Work out job progress with the source at the edited index of `progress_sources` |
-| `presenter.settings.restart_in_language` | Answer yes to `language_confirm`: store the language picked and restart |
 | `presenter.settings.screensaver_timeout` | Set the screensaver timeout to the edited value, in seconds |
 
 ### settings_theme_preview
@@ -1002,7 +987,6 @@ Used by `settings_wifi`.
 | `presenter.password_open` | int | 1 while asking for a network's password |
 | `presenter.password_title` | text | The password question |
 | `presenter.password` | text | The password typed |
-| `presenter.keyboard` | int | 1 while the keyboard is up, so the question moves out of its way |
 
 Each row of `presenter.networks`:
 
@@ -1021,7 +1005,6 @@ Each row of `presenter.networks`:
 | `presenter.wifi.connect` | Disconnect from the network if on it, connect to it if known, else ask for its password to join it. From a row of `networks`. |
 | `presenter.wifi.forget` | Forget the network. From a row of `networks`. |
 | `presenter.wifi.join` | Join the network asked about with the password typed |
-| `presenter.wifi.keyboard` | Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
 | `presenter.wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
 | `presenter.wifi.refresh` | Scan for networks now |
 
@@ -1194,6 +1177,59 @@ Also takes every `lv_obj` attribute.
 | `checkable` | "true" to make the button toggle its `checked` state when clicked |
 | `long_mode` | What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip |
 | `flash_on` | Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `source.response.count`; style the flash with `<style … selector="user_1"/>` |
+
+### ds_dialog
+
+A dialog, shown by the dialog surface (`<ds_dialog_host>`) while its subject says so, as the dialog or as the next step of the one open, which the card slides to. Its content stays where it is written, hidden, so its actions go to that view. The surface draws its title, a close button (and a back button on a later step); closed by them, by tapping outside or by the back key, it raises `dismissed` so the view can update the subject. Closing it by its subject takes any steps opened from it too. The lv_obj attributes apply to its content.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
+	<action trigger="dismissed" name="presenter.files.close_dialog"/>
+	…the dialog's content…
+</ds_dialog>
+```
+
+| Attribute | Description |
+| --- | --- |
+| `bind_open` | Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it |
+| `open_value` | The value `bind_open` must have for the dialog to be open |
+| `title` | Its title, as written |
+| `title_tag` | Its title, a translation key |
+| `bind_title` | Its title, a subject's text |
+| `width` | The card's width while it shows: a percentage of the room, or pixels (default 70%); its content always fills the card |
+| `height` | The card's height: `content` (default) to fit the content, scrolling once it reaches the room there is, or a percentage or pixels for a card of a set height whose content fills it |
+| `blocking` | "true" if it must be answered: no close or back button, and tapping outside or the back key do nothing, for it and the steps under it (default false) |
+| `alert` | "true" for an alert: shown before everything else, setting the user's dialog aside until it is answered; alerts wait their turn (default false) |
+
+### ds_dialog_footer
+
+A dialog step's own buttons, written last in a `<ds_dialog>` or a prompt: a row, right-aligned, its main button last (style it `action_btn`). While the step shows they stay at the bottom of the card, below its content, which scrolls on its own. Styled `dialog_footer`.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_dialog_footer>
+	<ds_button name="cancel" translation_tag="tr.common.cancel">
+		<style name="dialog_button"/>
+		<action trigger="clicked" name="presenter.files.close_dialog"/>
+	</ds_button>
+	<ds_button name="ok" translation_tag="tr.common.ok">
+		<style name="dialog_button"/>
+		<style name="action_btn"/>
+		<action trigger="clicked" name="presenter.files.confirm"/>
+	</ds_button>
+</ds_dialog_footer>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_dialog_footer.png)
+
+### ds_dialog_host
+
+The dialog surface: one card over a dimmed backdrop that every `<ds_dialog>` and prompt on the screen opens in, one step at a time. It fills where it is placed (the home screen puts it over its main window), and is drawn by the component `dialog_host`. A screen without one gets one covering it.
+
+Also takes every `lv_obj` attribute.
 
 ### ds_drag_button
 
@@ -1538,7 +1574,9 @@ Also takes every `lv_obj` attribute.
 | `value_scale` | How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 held as 2 with value_scale="100" (default 1) |
 | `send` | `confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` on every movement, for a setting seen as it changes such as brightness |
 | `out_of_range` | Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a timeout longer than the slider reaches |
-| `numberpad` | What tapping the value does: `true` types it on the shared number pad, `own` raises `value_tapped` with the value for the view to show its own, `false` types it in place (default) |
+| `lowest` | The least the value may be, dragged, typed or reset, if not the bottom of the range: for a range that moves with the value (`bind_min`), its true limit |
+| `highest` | The most the value may be, if not the top of the range (or none past it, with `out_of_range`) |
+| `numberpad` | What tapping the value does: `true` types it on a number pad, the next step of the dialog the slider is in or a dialog of its own; `false` types it in place (default) |
 | `default` | A value to go back to: a Reset button shows while the value is anything else, and raises `value_confirmed` with it |
 | `bind_min` | Follow an int subject for the bottom of the range (scaled by `value_scale`) |
 | `bind_max` | Follow an int subject for the top of the range (scaled by `value_scale`) |
@@ -1661,7 +1699,7 @@ Written `<action>` inside any widget: run the named action when the widget raise
 | Attribute | Description |
 | --- | --- |
 | `name` | The action to run (required): `presenter.<action>` or `actions.<group>.<action>`; empty for none, so a component can leave it to a prop (`name="$tap_action"`) |
-| `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `<ds_slider numberpad="own">`'s value was tapped to type one) or `dismissed` (a `<ds_modal>` was closed by the user) |
+| `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished) or `dismissed` (a `<ds_dialog>` was closed by the user without answering it) |
 | `arg` | Passed to the handler. `{event.value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `<action>` is written |
 
 ## Layouts
@@ -2701,7 +2739,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`babystep`](#control) | `babystep` |  | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` | `babystep_dialog` |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
-| `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_cancel` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
 | [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `console` |  | `console`, `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
 | `console_gcode` |  |  | `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
@@ -2716,7 +2753,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `customise_guide` |  |  |  | [customise_guide.xml](../assets/ui/components/customise/customise_guide.xml) |
 | `customise_item` |  | `key` | `customise_free_item` | [customise_item.xml](../assets/ui/components/customise/customise_item.xml) |
 | [`customise_missing`](#customise_missing) |  | `widget` |  | [customise_missing.xml](../assets/ui/components/customise/customise_missing.xml) |
-| `customise_option` |  |  | `customise` | [customise_option.xml](../assets/ui/components/customise/customise_option.xml) |
 | [`customise_place`](#customise_place) |  |  |  | [customise_place.xml](../assets/ui/components/customise/customise_place.xml) |
 | `customise_saved_layout` |  |  | `customise` | [customise_saved_layout.xml](../assets/ui/components/customise/customise_saved_layout.xml) |
 | `customise_setting` |  |  | `customise` | [customise_setting.xml](../assets/ui/components/customise/customise_setting.xml) |
@@ -2745,8 +2781,13 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
 | `dashboard_tool_heater` |  |  | `dashboard_tool` | [dashboard_tool_heater.xml](../assets/ui/components/dashboard/dashboard_tool_heater.xml) |
 | `dashboard_tools` |  |  | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| `dialog_choice` | `dialog_choice` |  |  | [dialog_choice.xml](../assets/ui/components/dialogs/dialog_choice.xml) |
+| `dialog_choice_row` |  |  | `dialog_choice` | [dialog_choice_row.xml](../assets/ui/components/dialogs/dialog_choice_row.xml) |
+| [`dialog_host`](#dialog_host) | `dialog_host` |  |  | [dialog_host.xml](../assets/ui/components/dialogs/dialog_host.xml) |
+| [`dialog_number`](#dialog_number) | `dialog_number` |  |  | [dialog_number.xml](../assets/ui/components/dialogs/dialog_number.xml) |
+| [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
 | `factors` | `factors` |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
-| `factors_dialog` |  | `dialog`, `open`, `title`, `factors`, `pad_shown`, `pad`, `pad_header`, `pad_text`, `pad_accepted`, `pad_confirmable`, `pad_signed` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
+| `factors_dialog` |  | `dialog`, `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
 | [`fans`](#fans) | `fans` |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
@@ -2774,7 +2815,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
-| `job_cancel` | `job_cancel` |  | `home` | [job_cancel.xml](../assets/ui/components/modals/job_cancel.xml) |
 | [`move`](#control) | `move` |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_distance` |  |  | `move_jog_choices` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
@@ -2787,12 +2827,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
-| `numberpad` | `numberpad` |  | `home` | [numberpad.xml](../assets/ui/components/modals/numberpad.xml) |
-| `numberpad_panel` |  | `entry`, `header`, `text`, `accepted`, `confirmable`, `signed` | `factors_dialog`, `numberpad` | [numberpad_panel.xml](../assets/ui/components/modals/numberpad_panel.xml) |
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control`, `object_cancel` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
-| `question_dialog` |  | `open`, `title`, `text`, `confirm`, `close` | `customise`, `move`, `move_xy_card`, `move_z_card`, `object_cancel`, `settings_general` | [question_dialog.xml](../assets/ui/components/common/question_dialog.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
 | [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
@@ -2852,6 +2889,18 @@ Also shows `babystep`, `move`.
 #### dashboard_job_status
 
 ![dashboard_job_status](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status.png)
+
+#### dialog_host
+
+![dialog_host](../tests/ref_imgs/xml_ui_api/views/dialog_host.png)
+
+#### dialog_number
+
+![dialog_number](../tests/ref_imgs/xml_ui_api/views/dialog_number.png)
+
+#### dialog_question
+
+![dialog_question](../tests/ref_imgs/xml_ui_api/views/dialog_question.png)
 
 #### fans
 
@@ -3071,6 +3120,15 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | text_font=font_xlarge |
 | `widget_value_huge` | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_huge.png) | text_font=font_huge |
 | `widget_detail` | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_detail.png) | text_color=#text_muted text_font=font_small |
+| `dialog` | ![dialog](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog.png) | pad_all=0 pad_row=0 clip_corner=true border_color=#border shadow_width=32 shadow_spread=2 shadow_offset_y=6 shadow_color=0x000000 shadow_opa=40% |
+| `dialog_backdrop` | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_backdrop.png) | bg_color=#bg_dark bg_opa=75% pad_all=#pad_large |
+| `dialog_header` | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_header.png) | bg_color=#bg_light bg_opa=100% pad_all=#pad pad_column=#pad |
+| `dialog_title` | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_title.png) | text_color=#text_header text_font=font_header |
+| `dialog_from` | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_from.png) | text_color=#text_muted text_font=font_subdued |
+| `dialog_icon_button` |  | width=48 height=48 pad_all=0 |
+| `dialog_body` |  | pad_all=#pad_large |
+| `dialog_footer` | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_footer.png) | width=100% height=content layout=flex flex_flow=row flex_main_place=end pad_all=0 pad_column=#pad |
+| `dialog_button` |  | pad_left=24 pad_right=24 |
 | `gauge_arc` |  | arc_color=#bg_light arc_width=10dpx arc_rounded=true bg_opa=0 pad_all=0 |
 | `gauge_arc_indic` |  | arc_color=#primary arc_width=10dpx arc_rounded=true |
 | `gauge_arc_target` |  | arc_color=#primary_muted |

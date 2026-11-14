@@ -670,6 +670,11 @@
       "tool_toggle": "Select or deselect a tool",
       "fan_set_speed": "Set a fan's speed"
     },
+    "dialogs": { /* Dialogs and the prompts code asks */
+      "range": "{:s} to {:s}",
+      "at_least": "{:s} or more",
+      "at_most": "{:s} or less"
+    },
     "gcodes": { /* G-code descriptions */
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

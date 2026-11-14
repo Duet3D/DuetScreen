@@ -76,9 +76,6 @@ namespace UI
 		action("wifi.close_password",
 			   "Stop asking for a password",
 			   [this](const Xml::ActionArgs&) { m_passwordOpen.set(0); });
-		action("wifi.keyboard",
-			   "Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away",
-			   [this](const Xml::ActionArgs& args) { m_keyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
 		m_ip.set(_("settings.network.ip_address", "-"));
 	}
 
@@ -90,7 +87,6 @@ namespace UI
 		f.field("password_open", m_passwordOpen, "1 while asking for a network's password");
 		f.field("password_title", m_passwordTitle, "The password question");
 		f.field("password", m_password, "The password typed");
-		f.field("keyboard", m_keyboard, "1 while the keyboard is up, so the question moves out of its way");
 	}
 
 	void WifiPresenter::onInit()

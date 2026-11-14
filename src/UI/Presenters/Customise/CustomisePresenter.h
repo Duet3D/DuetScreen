@@ -2,9 +2,9 @@
  * CustomisePresenter.h
  *
  * Behaviour for customising the screen (assets/ui/components/customise/customise.xml): the toolbar shown while the
- * user customises, and its dialogs: the widget pool, by category, a widget's settings (text is typed in them, on the
- * shared keyboard, and the dialog moves above it), the choice of one of a setting's values, and saving the layouts
- * under a name and loading them again (UI/Xml/Layout/LayoutLibrary.h); and snapping, on or off. The edits themselves are the layout editor's
+ * user customises, and its dialogs: the widget pool, by category, a widget's settings (text is typed in them; numbers
+ * and choices are the settings' next step, a prompt), and saving the layouts under a name and loading them again
+ * (UI/Xml/Layout/LayoutLibrary.h); and snapping, on or off. The edits themselves are the layout editor's
  * (UI/Xml/Layout/LayoutEditor.h); <ds_layout> turns touches on the widgets into moves, resizes and selections, and the
  * edit's state is global data (`customise.*`, UI/Xml/Data/CustomiseSource.h).
  *
@@ -65,18 +65,6 @@ namespace UI
 		Xml::IntSubject on;			   // bool: 1 when on
 	};
 
-	/** One of the values a choice or row setting can take */
-	class OptionRow : public Xml::Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(Xml::FieldVisitor& f) override;
-
-		Xml::StringSubject<128> value; // The value stored
-		Xml::StringSubject<128> title; // As shown, translated
-		Xml::IntSubject chosen;		   // 1 for the current value
-	};
-
 	/** A layout the user saved */
 	class SavedRow : public Xml::Row
 	{
@@ -112,8 +100,8 @@ namespace UI
 		/** Fill the settings dialog with the selected widget's settings */
 		void showSettings();
 
-		/** Change setting `row`: on the number pad, a choice of values, or typed */
-		void editSetting(const SettingRow& row);
+		/** Change setting `row` on a prompt that goes with `asker` (its row): a number pad or a choice of values */
+		void editSetting(const SettingRow& row, lv_obj_t* asker);
 
 		/** Set the selected widget's setting `name` to `value`, and show the settings again */
 		void setSetting(const std::string& name, const nlohmann::json& value);
@@ -147,10 +135,6 @@ namespace UI
 		Xml::IntSubject m_catalogueOpen;				 // 1 while the widget pool is open
 		Xml::List<SettingRow> m_settings;				 // The selected widget's settings
 		Xml::IntSubject m_settingsOpen;					 // 1 while its settings are open
-		Xml::List<OptionRow> m_options;					 // The values the setting being changed can take
-		Xml::IntSubject m_optionsOpen;					 // 1 while they are shown
-		Xml::StringSubject<64> m_optionsTitle;			 // The setting they are for
-		Xml::IntSubject m_keyboard;						 // 1 while the keyboard is up, for typed text
 		Xml::IntSubject m_canSave;						 // 1 if layouts can be saved (not in safe mode)
 		Xml::IntSubject m_saveOpen;						 // 1 while asking for a name to save as
 		Xml::StringSubject<40> m_saveName;				 // The name typed so far
@@ -158,10 +142,5 @@ namespace UI
 		Xml::IntSubject m_loadOpen;						 // 1 while the saved layouts are listed
 		Xml::List<SavedRow> m_saved;					 // The saved layouts, by name
 		Xml::IntSubject m_hasSaved;						 // 1 if there are any
-		Xml::IntSubject m_confirmDelete;				 // 1 while asking whether to delete one
-		Xml::StringSubject<64> m_deleteTitle;			 // The question's title
-		Xml::StringSubject<96> m_deleteText;			 // The question, naming the layout
-		std::string m_deleting;							 // The saved layout the question is about
-		std::string m_choosing;							 // The setting whose options are shown
 	};
 } // namespace UI

@@ -7,7 +7,7 @@
 #include "Configuration.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
-#include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "i18n/i18n.h"
 
 namespace UI
@@ -78,13 +78,13 @@ namespace UI
 			   "Ask for the Duet's IP address with the number pad, and use it",
 			   [this](const Xml::ActionArgs&)
 			   {
-				   Xml::Services::askText({.header = _("settings.duet_ip_address_prompt"),
-										   .text = std::string(m_ip.get()),
-										   .onConfirm = [this](std::string_view ip)
-										   {
-											   m_ip.set(ip);
-											   Comm::DUET.SetIPAddress(std::string(ip));
-										   }});
+				   Xml::Prompts::askText({.header = _("settings.duet_ip_address_prompt"),
+										  .text = std::string(m_ip.get()),
+										  .onConfirm = [this](std::string_view ip)
+										  {
+											  m_ip.set(ip);
+											  Comm::DUET.SetIPAddress(std::string(ip));
+										  }});
 			   });
 		action("settings.duet_password",
 			   "Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password",

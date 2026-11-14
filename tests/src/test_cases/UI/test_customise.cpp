@@ -15,6 +15,8 @@
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
+#include "i18n/i18n.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include <array>
 #include <filesystem>
@@ -538,14 +540,16 @@ TEST_F(TestCustomiseHome, SettingsAreChangedInTheirDialogs)
 	ASSERT_TRUE(shownOnScreen(dialog));
 	EXPECT_EQUAL_SCREENSHOT("customise/settings.png")
 
-	// The time shown: its values, then 5 minutes
+	// The time shown: its values, the settings' next step, then 5 minutes, which goes back to the settings
 	tap(middleOf(lv_obj_find_by_name(dialog, "value")));
-	lv_obj_t* options = lv_obj_find_by_name(lv_screen_active(), "options_dialog");
-	ASSERT_TRUE(shownOnScreen(options));
+	lv_obj_t* options = TestDialogs::shownNamed("dialog_choice");
+	ASSERT_NE(options, nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("widget.temperature_graph_seconds"));
 	lv_obj_t* list = lv_obj_find_by_name(options, "list");
 	ASSERT_EQ(lv_obj_get_child_count(list), 5u);
+	EXPECT_EQUAL_SCREENSHOT("customise/setting_choices.png")
 	tap(middleOf(lv_obj_get_child(list, 3)));
-	EXPECT_FALSE(shownOnScreen(options));
+	EXPECT_EQ(TestDialogs::shown(), dialog);
 	EXPECT_EQ(draftItem("dashboard", "temperature_graph")->settings["seconds"], "300");
 	EXPECT_STREQ(lv_label_get_text(lv_obj_get_child(lv_obj_find_by_name(dialog, "value"), -1)), "5 min");
 }
@@ -779,7 +783,7 @@ TEST_F(TestCustomiseHome, LayoutsAreSavedUnderANameLoadedAndDeleted)
 	lv_obj_t* name = lv_obj_find_by_name(saveDialog, "name");
 	EXPECT_STREQ(lv_textarea_get_text(name), "");
 	lv_textarea_set_text(name, "no/graph");
-	tap(middleOf(lv_obj_find_by_name(saveDialog, "ok")));
+	tap(middleOf(TestDialogs::find("ok")));
 	EXPECT_TRUE(shownOnScreen(saveDialog));
 	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(saveDialog, "problem")));
 	EXPECT_FALSE(fs::exists(m_userDir / "saved"));
@@ -812,10 +816,10 @@ TEST_F(TestCustomiseHome, LayoutsAreSavedUnderANameLoadedAndDeleted)
 	tapToolbar("load");
 	row = lv_obj_get_child(lv_obj_find_by_name(loadDialog, "list"), 0);
 	tap(middleOf(lv_obj_find_by_name(row, "delete")));
-	lv_obj_t* question = lv_obj_find_by_name(screen, "delete_question");
-	ASSERT_TRUE(shownOnScreen(question));
-	tap(middleOf(lv_obj_find_by_name(question, "ok")));
-	EXPECT_FALSE(shownOnScreen(question));
+	lv_obj_t* question = TestDialogs::shownNamed("dialog_question");
+	ASSERT_NE(question, nullptr);
+	tap(middleOf(TestDialogs::find("yes")));
+	EXPECT_EQ(TestDialogs::shown(), loadDialog) << "back to the saved layouts";
 	EXPECT_FALSE(fs::exists(m_userDir / "saved" / "No graph.json"));
 	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(loadDialog, "none")));
 }

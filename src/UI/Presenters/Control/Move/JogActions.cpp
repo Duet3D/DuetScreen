@@ -4,7 +4,7 @@
 
 #include "JogActions.h"
 #include "UI/Xml/Data/JogSource.h"
-#include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -54,17 +54,17 @@ namespace UI::JogActions
 				{
 					return;
 				}
-				Xml::Services::askNumber({.header = _("move.distance_adjust_header", Units::getDisplayedDistanceUnit()),
-										  .min = 0.01f,
-										  .max = 1000.0f,
-										  .value = distances[*i],
-										  .onConfirm =
-											  [i](float value)
-										  {
-											  Xml::JogSource::setDistance(*i, value);
-											  Xml::JogSource::chooseDistance(*i);
-										  },
-										  .asker = nullptr});
+				Xml::Prompts::askNumber({.header = _("move.distance_adjust_header", Units::getDisplayedDistanceUnit()),
+										 .min = 0.01f,
+										 .max = 1000.0f,
+										 .value = distances[*i],
+										 .onConfirm =
+											 [i](float value)
+										 {
+											 Xml::JogSource::setDistance(*i, value);
+											 Xml::JogSource::chooseDistance(*i);
+										 },
+										 .asker = nullptr});
 			});
 		Xml::Actions::addGlobal(
 			"jog.edit_feedrate",
@@ -77,18 +77,17 @@ namespace UI::JogActions
 				{
 					return;
 				}
-				Xml::Services::askNumber({.header = _("move.feedrate_adjust_header", Units::getDisplayedSpeedUnit()),
-										  .min = 0.01f,
-										  .max = 1000.0f,
-										  .value = static_cast<float>(feedrates[*i]),
-										  .onConfirm =
-											  [i](float value)
-										  {
-											  Xml::JogSource::setFeedrate(*i,
-																		  static_cast<uint32_t>(std::lround(value)));
-											  Xml::JogSource::chooseFeedrate(*i);
-										  },
-										  .asker = nullptr});
+				Xml::Prompts::askNumber({.header = _("move.feedrate_adjust_header", Units::getDisplayedSpeedUnit()),
+										 .min = 0.01f,
+										 .max = 1000.0f,
+										 .value = static_cast<float>(feedrates[*i]),
+										 .onConfirm =
+											 [i](float value)
+										 {
+											 Xml::JogSource::setFeedrate(*i, static_cast<uint32_t>(std::lround(value)));
+											 Xml::JogSource::chooseFeedrate(*i);
+										 },
+										 .asker = nullptr});
 			});
 	}
 } // namespace UI::JogActions

@@ -337,6 +337,17 @@ namespace UI::Themes
 		Style widget_value_huge;  // A widget's main value, in an expanded widget
 		Style widget_detail;	  // Anything else a widget shows beside its value, e.g. a target
 
+		/* Dialogs (assets/ui/components/dialogs/dialog_host.xml) */
+		Style dialog;			  // The card, on top of the theme's card style
+		Style dialog_backdrop;	  // The dimmed backdrop; its padding is the room the card keeps from the edges
+		Style dialog_header;	  // The header: back button, titles, close button
+		Style dialog_title;		  // The step's title
+		Style dialog_from;		  // The title of the step it came from, under it
+		Style dialog_icon_button; // The back and close buttons
+		Style dialog_body;		  // Around the step's content
+		Style dialog_footer;	  // A row of a step's buttons, its main one last
+		Style dialog_button;	  // A button in that row
+
 		/* Gauges */
 		Style gauge_arc;		// An arc gauge's track
 		Style gauge_arc_indic;	// An arc gauge's value

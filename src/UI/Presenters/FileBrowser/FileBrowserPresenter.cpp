@@ -11,6 +11,7 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/UnitSystem.h"
@@ -113,11 +114,12 @@ namespace UI
 				   requestFiles();
 			   });
 		action("files.confirm",
-			   "Do what the dialog asks (start the job, run the macro or delete the file), and close it",
+			   "Do what the dialog asks (start the job or run the macro), and close it",
 			   [this](const Xml::ActionArgs&) { confirm(); });
 		action("files.ask_delete",
-			   "Ask to delete the file the dialog is about",
-			   [this](const Xml::ActionArgs&) { askDelete(); });
+			   "Ask whether to delete the file the dialog is about, as the dialog's next step; deleting it closes the "
+			   "dialog",
+			   [this](const Xml::ActionArgs& args) { askDelete(args.target); });
 		action("files.close_dialog",
 			   "Close the dialog without doing anything",
 			   [this](const Xml::ActionArgs&) { closeDialog(); });
@@ -135,9 +137,7 @@ namespace UI
 		f.field("sort_size", m_sortSize, "As `sort_name`, for the size order");
 		f.field("tiles", m_tiles, "1 when files are shown as tiles, 0 as a list");
 		f.field("mode_icon", m_modeIcon, "Symbol for the other way of showing files");
-		f.field("dialog",
-				m_dialog,
-				"What the dialog asks: \"start_print\", \"run_macro\" or \"delete\"; empty when it is closed");
+		f.field("dialog", m_dialog, "What the dialog asks: \"start_print\" or \"run_macro\"; empty when it is closed");
 		f.field("dialog_title", m_dialogTitle, "Dialog title");
 		f.field("dialog_text", m_dialogText, "Dialog message");
 		f.field("dialog_image", m_dialogImage, "Thumbnail shown in the dialog, or empty");
@@ -393,15 +393,25 @@ namespace UI
 		m_dialog.set("run_macro");
 	}
 
-	void FileBrowserPresenter::askDelete()
+	void FileBrowserPresenter::askDelete(lv_obj_t* asker)
 	{
-		m_infoShown.set(0);
-		m_dialogImage.set("");
-		m_dialogHasImage.set(0);
-		m_dialogTitle.set(_("file.delete_title"));
-		m_dialogText.set(_("file.delete_message", m_selectedName));
-		m_dialogCanDelete.set(0);
-		m_dialog.set("delete");
+		// The question goes with the dialog's button, and so with this
+		Xml::Prompts::askQuestion({.title = _("file.delete_title"),
+								   .text = _("file.delete_message", m_selectedName),
+								   .onYes =
+									   [this, path = m_selected]
+								   {
+									   closeDialog();
+									   if (Comm::DUET.DeleteFile(path))
+									   {
+										   requestFiles();
+									   }
+									   else
+									   {
+										   LOG_WARN("Failed to delete file {:s}", path);
+									   }
+								   },
+								   .asker = asker});
 	}
 
 	void FileBrowserPresenter::confirm()
@@ -417,17 +427,6 @@ namespace UI
 		else if (asked == "run_macro")
 		{
 			OM::FileSystem::RunMacro(m_selected);
-		}
-		else if (asked == "delete")
-		{
-			if (Comm::DUET.DeleteFile(m_selected))
-			{
-				requestFiles();
-			}
-			else
-			{
-				LOG_WARN("Failed to delete file {:s}", m_selected);
-			}
 		}
 	}
 

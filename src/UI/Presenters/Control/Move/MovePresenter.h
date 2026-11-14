@@ -70,8 +70,8 @@ namespace UI
 		/** Show every axis' position and what can be done with it */
 		void showAxes();
 
-		/** Do `action`, asking first with `title` and `text` if confirmations are on */
-		void confirmThen(std::string title, std::string text, std::function<void()> action);
+		/** Do `action`, asking first with `title` and `text` if confirmations are on; the question goes with `asker` */
+		static void confirmThen(lv_obj_t* asker, std::string title, std::string text, std::function<void()> action);
 
 		/** Home the axis called `letter` */
 		static void home(char letter);
@@ -85,8 +85,6 @@ namespace UI
 		/** The axis letter an action is about: its `arg`'s first character, or its axes row's */
 		static char axisOf(const Xml::ActionArgs& args);
 
-		std::function<void()> m_confirmed; // What the question's Yes does
-
 		Xml::IntSubject m_connected;				 // 1 while connected
 		NamedAxis m_x;								 // X's controls
 		NamedAxis m_y;								 // Y's controls
@@ -97,9 +95,6 @@ namespace UI
 		Xml::IntSubject m_disableMotorsUsable;		 // 1 if the motors can be disabled
 		Xml::List<MoveAxisRow> m_axes;				 // The other axes
 		Xml::IntSubject m_axesShown;				 // 1 if there are other axes
-		Xml::IntSubject m_confirm;					 // 1 while asking
-		Xml::StringSubject<64> m_confirmTitle;		 // Question title
-		Xml::StringSubject<128> m_confirmText;		 // Question
 		Xml::OmWatch m_watch;						 // Shows the axes again as the move changes
 	};
 } // namespace UI

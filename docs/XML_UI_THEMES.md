@@ -57,6 +57,7 @@ In dark mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_graph.png) |
@@ -98,6 +99,7 @@ In light mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_graph.png) |
@@ -143,6 +145,7 @@ In light mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_graph.png) |
@@ -184,6 +187,7 @@ Consts: `#data_colours=grey`
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_graph.png) |
@@ -233,6 +237,7 @@ In dark mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_graph.png) |
@@ -278,6 +283,7 @@ In light mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_graph.png) |
@@ -327,6 +333,7 @@ In dark mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_graph.png) |
@@ -376,6 +383,7 @@ In dark mode:
 | [`ds_bar`](XML_UI_API.md#ds_bar) | ![ds_bar](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_bar.png) |
 | [`ds_bar_marker`](XML_UI_API.md#ds_bar_marker) | ![ds_bar_marker](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_bar_marker.png) |
 | [`ds_button`](XML_UI_API.md#ds_button) | ![ds_button](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_button.png) |
+| [`ds_dialog_footer`](XML_UI_API.md#ds_dialog_footer) | ![ds_dialog_footer](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_dialog_footer.png) |
 | [`ds_drag_button`](XML_UI_API.md#ds_drag_button) | ![ds_drag_button](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_drag_button.png) |
 | [`ds_dropdown`](XML_UI_API.md#ds_dropdown) | ![ds_dropdown](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_dropdown.png) |
 | [`ds_graph`](XML_UI_API.md#ds_graph) | ![ds_graph](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_graph.png) |
@@ -549,6 +557,15 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_value_large.png) | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_value_large.png) |
 | `widget_value_huge` | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_value_huge.png) | ![widget_value_huge](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_value_huge.png) |
 | `widget_detail` | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/3d/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/flat/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/grey/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/neon/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/retro/styles/widget_detail.png) | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/soft/styles/widget_detail.png) |
+| `dialog` | ![dialog](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog.png) | ![dialog](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog.png) |
+| `dialog_backdrop` | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_backdrop.png) | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_backdrop.png) |
+| `dialog_header` | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_header.png) | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_header.png) |
+| `dialog_title` | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_title.png) | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_title.png) |
+| `dialog_from` | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_from.png) | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_from.png) |
+| `dialog_icon_button` |  |  |  |  |  |  |  |  |
+| `dialog_body` |  |  |  |  |  |  |  |  |
+| `dialog_footer` | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_footer.png) | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_footer.png) |
+| `dialog_button` |  |  |  |  |  |  |  |  |
 | `gauge_arc` |  |  |  |  |  |  |  |  |
 | `gauge_arc_indic` |  |  |  |  |  |  |  |  |
 | `gauge_arc_target` |  |  |  |  |  |  |  |  |

@@ -29,6 +29,7 @@
 #include "UI/Widgets/Layout/DsScope.h"
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Widgets/Layout/DsView.h"
+#include "UI/Xml/Dialogs/DialogHost.h"
 
 #include <map>
 
@@ -66,6 +67,7 @@ namespace UI::Xml::Widgets
 		DsButton::registerXml();
 		DsDragButton::registerXml();
 		DsDropdown::registerXml();
+		DialogHost::registerXml();
 		DsGraph::registerXml();
 		DsHeatmap::registerXml();
 		DsHueSlider::registerXml();

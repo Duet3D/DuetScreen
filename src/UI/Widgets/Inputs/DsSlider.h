@@ -20,8 +20,7 @@ namespace UI::Xml
 		enum class NumberPad
 		{
 			NONE,	// Type it in place
-			SHARED, // Type it on the shared number pad
-			OWN,	// Raise `value_tapped`, for the view's own number pad
+			SHARED, // Type it on a number pad prompt
 		};
 
 		/** Create a slider inside `parent` */

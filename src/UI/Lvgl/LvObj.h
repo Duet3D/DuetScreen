@@ -85,6 +85,12 @@ namespace UI
 
 		static LvObj* fromPtr(lv_obj_t* obj);
 
+		/**
+		 * Show or hide `obj`, telling the views inside it, as show() and hide() do: for a widget with no LvObj of its
+		 * own (an XML <lv_obj>, say) as for one with, e.g. a dialog's content moved in and out of the dialog surface
+		 */
+		static void setShown(lv_obj_t* obj, bool shown);
+
 		virtual ~LvObj();
 
 		std::string_view getName() const;

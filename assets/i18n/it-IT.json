@@ -669,6 +669,11 @@
       "tool_toggle": "Seleziona o deseleziona un utensile",
       "fan_set_speed": "Imposta la velocità di una ventola"
     },
+    "dialogs": { /* Dialogs and the prompts code asks */
+      "range": "Da {:s} a {:s}",
+      "at_least": "{:s} o più",
+      "at_most": "{:s} o meno"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

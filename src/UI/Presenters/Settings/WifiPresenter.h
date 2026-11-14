@@ -71,6 +71,5 @@ namespace UI
 		Xml::IntSubject m_passwordOpen;			   // 1 while asking for a password
 		Xml::StringSubject<96> m_passwordTitle;	   // The question
 		Xml::StringSubject<128> m_password;		   // The password typed
-		Xml::IntSubject m_keyboard;				   // 1 while the keyboard is up
 	};
 } // namespace UI

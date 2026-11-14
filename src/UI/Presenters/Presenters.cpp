@@ -24,8 +24,6 @@
 #include "Modals/BabystepDialogPresenter.h"
 #include "Modals/FactorsActions.h"
 #include "Modals/FactorsPresenter.h"
-#include "Modals/JobCancelPresenter.h"
-#include "Modals/NumberPadPresenter.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
 #include "Settings/DeveloperSettingsPresenter.h"
@@ -62,9 +60,7 @@ namespace UI
 		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
-		Xml::Presenters::add<NumberPadPresenter>("numberpad");
 		Xml::Presenters::add<FactorsPresenter>("factors");
-		Xml::Presenters::add<JobCancelPresenter>("job_cancel");
 		Xml::Presenters::add<BabystepDialogPresenter>("babystep_dialog");
 		Xml::Presenters::add<CustomisePresenter>("customise");
 		Xml::Presenters::add<ConsolePresenter>("console");

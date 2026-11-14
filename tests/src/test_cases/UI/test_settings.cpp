@@ -9,6 +9,7 @@
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include <gtest/gtest.h>
@@ -72,14 +73,13 @@ TEST_F(TestGeneralSettings, ALanguageIsOnlyChangedAfterAsking)
 	ASSERT_GE(lv_dropdown_get_option_count(language), 2u);
 	EXPECT_EQ(lv_dropdown_get_selected(language), current);
 
-	lv_obj_t* dialog = part("language_confirm");
-	ASSERT_NE(dialog, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 	pick(language, current == 0 ? 1 : 0);
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "asks before restarting";
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr) << "asks before restarting";
+	EXPECT_EQ(TestDialogs::title(), _("settings.language_confirm.title"));
 
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	TestDialogs::tap("no");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 	EXPECT_EQ(lv_dropdown_get_selected(language), current) << "No shows the language in use again";
 }
 

@@ -669,6 +669,11 @@
       "tool_toggle": "Seleccionar o deseleccionar una herramienta",
       "fan_set_speed": "Ajustar la velocidad de un ventilador"
     },
+    "dialogs": { /* Dialogs and the prompts code asks */
+      "range": "De {:s} a {:s}",
+      "at_least": "{:s} o más",
+      "at_most": "{:s} o menos"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

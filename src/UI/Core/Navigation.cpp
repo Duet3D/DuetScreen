@@ -15,6 +15,7 @@ namespace UI
 	static ViewList_t s_returnableScreens;
 	static ViewList_t s_openModals;
 	static std::map<std::string, LvObjPtr, std::less<>> s_namedViews; // Views by name
+	static DialogLayer* s_dialogs = nullptr;						  // The dialog surface, if there is one
 
 	static bool inVector(ViewList_t& vec, LvObjPtr item)
 	{
@@ -48,7 +49,8 @@ namespace UI
 	{
 		ZoneScoped;
 		Model::get().post<EventType::NavigationHomeEnable>(s_openScreens.size() > 0);
-		Model::get().post<EventType::NavigationBackEnable>(s_openScreens.size() > 0 || s_openModals.size() > 0);
+		Model::get().post<EventType::NavigationBackEnable>(s_openScreens.size() > 0 || s_openModals.size() > 0 ||
+														   (s_dialogs != nullptr && s_dialogs->isOpen()));
 		LvObj* currentScreen = s_openScreens.empty() ? nullptr : s_openScreens.back();
 		Model::get().post<EventType::NavigationCurrentScreen>(currentScreen);
 	}
@@ -74,7 +76,7 @@ namespace UI
 		UI_LOCK();
 		LOG_INFO("Back button pressed");
 
-		if (closeLastModal())
+		if ((s_dialogs != nullptr && s_dialogs->back()) || closeLastModal())
 		{
 			return;
 		}
@@ -399,10 +401,43 @@ namespace UI
 		}
 	} // namespace detail
 
+	void setDialogLayer(DialogLayer* layer)
+	{
+		UI_LOCK();
+		s_dialogs = layer;
+		notifySideBar();
+	}
+
+	void dialogsChanged()
+	{
+		notifySideBar();
+	}
+
+	void closeDialogs()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (s_dialogs != nullptr)
+		{
+			s_dialogs->closeAll();
+		}
+	}
+
+	void closeDialogsNotAround(lv_obj_t* obj)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (s_dialogs != nullptr)
+		{
+			s_dialogs->closeNotAround(obj);
+		}
+	}
+
 	void closeAllModals()
 	{
 		ZoneScoped;
 		UI_LOCK();
+		closeDialogs();
 		LOG_INFO("Closing all modals");
 		for (auto modal : s_openModals)
 		{
@@ -417,6 +452,7 @@ namespace UI
 	{
 		ZoneScoped;
 		UI_LOCK();
+		closeDialogsNotAround(obj);
 		// A modal's card sits on its backdrop, so `obj` is around it if it is in either
 		auto isAround = [obj](const LvObj* modal)
 		{

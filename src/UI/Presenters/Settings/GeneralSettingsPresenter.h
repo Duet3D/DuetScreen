@@ -4,8 +4,8 @@
  * Behaviour for the General settings tab (assets/ui/components/settings/settings_general.xml). Each setting is read
  * when the tab is shown and stored (and applied) as soon as it is changed.
  *
- * There is one action per setting, given the value from the widget (an index, a number, or 1/0 for a toggle), and
- * the answers to the language question.
+ * There is one action per setting, given the value from the widget (an index, a number, or 1/0 for a toggle). Picking
+ * another language asks whether to restart in it.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).
@@ -37,11 +37,10 @@ namespace UI
 		/** Register an action, described by `description`, that stores the value the widget gives with `store` */
 		void setting(std::string name, std::string description, std::function<void(float value)> store);
 
-		/** Ask whether to restart in the language at `index` */
-		void askLanguage(size_t index);
+		/** Ask whether to restart in the language at `index`; the question goes with `asker` */
+		void askLanguage(size_t index, lv_obj_t* asker);
 
 		std::vector<std::string> m_languageCodes; // Language codes, in the order offered
-		std::string m_pickedLanguage;			  // The language asked about
 
 		Xml::StringSubject<96> m_firmware;				   // Firmware version
 		Xml::StringSubject<64> m_buildroot;				   // Buildroot version
@@ -60,8 +59,5 @@ namespace UI
 		Xml::IntSubject m_notificationLevel;			   // Index of the lowest level shown
 		Xml::IntSubject m_notificationTimeout;			   // ms
 		Xml::IntSubject m_errorNotificationsStay;		   // 1 if errors stay until closed
-		Xml::IntSubject m_languageConfirm;				   // 1 while asking
-		Xml::StringSubject<64> m_languageConfirmTitle;	   // The question's title
-		Xml::StringSubject<256> m_languageConfirmText;	   // The question
 	};
 } // namespace UI

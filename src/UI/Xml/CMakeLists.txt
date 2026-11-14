@@ -16,6 +16,13 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Scope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ConsoleSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogHost.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogHostPresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DsDialog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DsDialogFooter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/PromptPresenters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/PromptStep.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/Prompts.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/CustomiseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
@@ -56,7 +63,6 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/XmlUi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Theme/ThemeStyles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/Actions.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/View/NumberEntry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/ValueSelector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp

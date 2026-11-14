@@ -1,7 +1,7 @@
 <!--
-  One setting of the selected widget: its name and its value. Text is typed in place, on the shared keyboard (the
-  dialog moves above it); on or off settings are a switch; tapping the value of any other opens what changes it (the
-  number pad, or a choice of values).
+  One setting of the selected widget: its name and its value. Text is typed in place, on the shared keyboard; on or
+  off settings are a switch; tapping the value of any other opens what changes it as the dialog's next step (a number
+  pad, or a choice of values).
 
   Fields:   a settings row: row.name, row.title, row.kind, row.control, row.value, row.on (src/UI/Presenters/Customise/CustomisePresenter.h)
 -->
@@ -17,9 +17,6 @@
 			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="text"/>
 			<action trigger="ready" name="presenter.customise.set_text"/>
 			<action trigger="defocused" name="presenter.customise.set_text"/>
-			<action trigger="focused" name="presenter.customise.keyboard" arg="1"/>
-			<action trigger="defocused" name="presenter.customise.keyboard" arg="0"/>
-			<action trigger="ready" name="presenter.customise.keyboard" arg="0"/>
 		</ds_textarea>
 		<ds_toggle name="toggle">
 			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="switch"/>

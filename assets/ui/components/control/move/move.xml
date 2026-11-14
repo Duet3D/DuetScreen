@@ -2,7 +2,7 @@
   The Move tab: X and Y on a pad, Z beside it and any other axes after, babystepping on the right, and the jog
   distance and speed along the bottom. Tap a position to move to one; hold a distance or speed to change it.
 
-  Fields and actions: src/UI/Presenters/Control/Move/MovePresenter.h. Its question covers only this tab. The jog
+  Fields and actions: src/UI/Presenters/Control/Move/MovePresenter.h. The jog
   distance and speed are the global source.jog.* (src/UI/Xml/Data/JogSource.h), shared with any jog widgets.
 -->
 <component presenter="move">
@@ -39,7 +39,5 @@
 		<!-- Jog distance and speed -->
 		<move_jog_choices name="bottombar" width="100%" height="content"/>
 
-		<question_dialog name="confirm_msgbox" open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
-						 confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 	</view>
 </component>

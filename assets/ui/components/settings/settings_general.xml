@@ -122,9 +122,5 @@
 			<bind_state_if_eq subject="presenter.error_notifications_stay" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.error_notifications_stay"/>
 		</ds_toggle>
-
-		<question_dialog name="language_confirm" open="presenter.language_confirm" title="presenter.language_confirm_title"
-						 text="presenter.language_confirm_text" confirm="presenter.settings.restart_in_language"
-						 close="presenter.settings.keep_language"/>
 	</view>
 </component>

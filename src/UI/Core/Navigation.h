@@ -12,6 +12,43 @@ namespace UI
 	void back();
 	void home();
 
+	/**
+	 * What navigation needs of the dialog surface (UI/Xml/Dialogs/DialogHost.h): the back key goes back through its
+	 * steps first, and opening or closing a screen closes its dialog
+	 */
+	class DialogLayer
+	{
+	  public:
+		virtual ~DialogLayer() = default;
+
+		/** The back key: go back a step, or close the dialog; false if no dialog is open */
+		virtual bool back() = 0;
+
+		/** Close the user's dialog, e.g. when the page changes */
+		virtual void closeAll() = 0;
+
+		/** Close the steps above the highest one `obj` is in, or every step if it is in none */
+		virtual void closeNotAround(lv_obj_t* obj) = 0;
+
+		/** Whether a dialog is open */
+		virtual bool isOpen() const = 0;
+	};
+
+	/** Make `layer` the dialogs navigation goes through (nullptr for none) */
+	void setDialogLayer(DialogLayer* layer);
+
+	/** A dialog opened or closed: update what depends on it, such as the back button */
+	void dialogsChanged();
+
+	/** Close the user's dialog, as opening a screen does */
+	void closeDialogs();
+
+	/**
+	 * Close the dialog's steps that `obj` isn't in, e.g. when a tab view changes tab: a dialog opened from the tab left
+	 * behind goes with it, but not a dialog the tab view is in
+	 */
+	void closeDialogsNotAround(lv_obj_t* obj);
+
 	/*
 	 * Named views. A view registered by name can be found, and opened, by that name instead of through whatever owns
 	 * it. This is how the XML UI's `<ds_view>` makes the views it hosts available, e.g. `findView<XmlView>

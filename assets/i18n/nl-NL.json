@@ -669,6 +669,11 @@
       "tool_toggle": "Gereedschap kiezen of vrijgeven",
       "fan_set_speed": "Ventilatorsnelheid instellen"
     },
+    "dialogs": { /* Dialogs and the prompts code asks */
+      "range": "{:s} tot {:s}",
+      "at_least": "{:s} of meer",
+      "at_most": "{:s} of minder"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

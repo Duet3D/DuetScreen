@@ -20,7 +20,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
 | Action | A named request from XML (`<action name="presenter.…">` or `"actions.<group>.…"`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
-| Widget | A DuetScreen XML element backed by C++, e.g. `ds_button`, `ds_list`, `ds_modal`; each registers a spec of its attributes | [Widgets/](../src/UI/Widgets), [reference](XML_UI_API.md#widgets) |
+| Widget | A DuetScreen XML element backed by C++, e.g. `ds_button`, `ds_list`, `ds_dialog`; each registers a spec of its attributes | [Widgets/](../src/UI/Widgets), [reference](XML_UI_API.md#widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Widgets/Layout/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Slot | A place whose widgets the user chooses: `<ds_layout slot="dashboard"/>` | [Widgets/DsLayout.h](../src/UI/Widgets/Layout/DsLayout.h) |
 | Layout | What a slot shows: which widgets, and where (rectangles of pixels, or a strip) | [Layout/Layout.h](../src/UI/Xml/Layout/Layout.h), `assets/ui/layouts/` |
@@ -41,10 +41,12 @@ A view never contains logic and a presenter never touches a widget. Data flows o
 src/UI/
   Core/        Model and its events, Navigation, the presenter base class
   Xml/         the framework
-    Runtime/   XmlUi (start, stop, reload), Bundles (manifest, checks), HotReload, Services (G-code, number pad),
+    Runtime/   XmlUi (start, stop, reload), Bundles (manifest, checks), HotReload, Services (G-code),
                Translations, GlobalActions
-    Binding/   Subjects, Scope, Globals, Fields (declaring names), List and Row, History, Surface
-    View/      XmlView, XmlPresenter (and the presenter registry), Actions, NumberEntry, ValueSelector
+    Dialogs/   DialogHost (the dialog surface, one step at a time), DsDialog (<ds_dialog>), Prompts (asking a
+               number, a choice or a question from code), PromptStep and PromptPresenters
+    Binding/   Subjects, Scope, Globals, Constants, Fields (declaring names), List and Row, History, Surface
+    View/      XmlView, XmlPresenter (and the presenter registry), Actions, ValueSelector
     Api/       ApiReference (everything XML can use, gathered from the running UI), ApiMarkdown (docs/XML_UI_API.md),
                ApiLint (checks every name the components use against the reference), ApiXsd (docs/XML_UI.xsd),
                ApiImages (the reference's pictures, drawn by the UI itself)
@@ -73,9 +75,10 @@ tests/ref_imgs/xml_ui_api/                their pictures: reference images, like
 assets/ui/                                the built-in bundle
   components/<part>/                      each part of the UI (home, dashboard, control/move, settings, …): its page
                                           and the pieces only it uses; mirrors src/UI/Presenters/ (see Naming below)
-  components/common/                      small pieces used by several parts (dialogs, value selector, babystepping)
-  components/modals/                      the dialogs every part shares: the number pad, speed and extrusion factors,
-                                          babystepping, and the question before cancelling the job
+  components/common/                      small pieces used by several parts (value selector, babystepping)
+  components/dialogs/                     the dialog surface's chrome, and the prompts code asks (number, choice,
+                                          question)
+  components/modals/                      the dialogs every part shares: speed and extrusion factors, babystepping
   components/customise/                   customising the screen: its toolbar and dialogs, and the edit overlays
   widgets/<purpose>/                      the widgets the user can place, a file each, by what they are for
   layouts/                                the layout of each slot until the user changes it
@@ -94,8 +97,7 @@ In XML, a page of a screen is a `<ds_view>`:
 `view` names the XML component shown, with its presenter. Every `<ds_view>` is registered with Navigation under its `name`:
 
 - `<action name="actions.navigation.open" arg="control"/>` opens it (also `actions.navigation.home` and `actions.navigation.back`)
-- C++ finds it with `findView<Xml::XmlView>("control")`, e.g. the shared `numberpad`
-- modals open over the view called `main_window` (`getModalHost()`)
+- C++ finds it with `findView<Xml::XmlView>("control")`, e.g. the shared `factors`
 
 Pages start hidden; `home="true"` makes a page a home screen (shown when nothing else is open) and `shown="true"` shows a part that is always there, such as the status bar.
 
@@ -266,43 +268,42 @@ shows the last 60 seconds of every heater (see [dashboard.xml](../assets/ui/comp
 
 ### DuetScreen widgets
 
-These are in addition to the standard `lv_*` widgets: `ds_button`, `ds_slider`, `ds_list`, `ds_modal`, `ds_tabs`, `ds_graph` and more. Each is listed, with every attribute it takes and the events it raises, under [Widgets](XML_UI_API.md#widgets) in the reference. A widget declares them where it registers itself (`registerXml()` in its `Ds*.cpp`), so that is where to add one.
+These are in addition to the standard `lv_*` widgets: `ds_button`, `ds_slider`, `ds_list`, `ds_dialog`, `ds_tabs`, `ds_graph` and more. Each is listed, with every attribute it takes and the events it raises, under [Widgets](XML_UI_API.md#widgets) in the reference. A widget declares them where it registers itself (`registerXml()` in its `Ds*.cpp`), so that is where to add one.
 
 ### Dialogs
 
-A dialog is a `<ds_modal>` whose subject says whether it is open, so the presenter opens and closes it by setting a subject and never touches a widget:
+Every dialog opens on the screen's *dialog surface*: one card over a dimmed backdrop, which the home screen places over its main window (`<ds_dialog_host>`), so the sidebar and the E-stop stay usable ([DialogHost.h](../src/UI/Xml/Dialogs/DialogHost.h)). It shows one *step* at a time. The first to open is the dialog; anything opened while it is open becomes its next step, and the card slides sideways to it. The card's header shows the step's title, the title of the step it came from, a back button from the second step, and a close button:
+
+- The close button, and tapping outside the card, close the whole dialog, unless any of its steps is `blocking`.
+- The back button goes back one step; the back key does that, or on the first step closes the dialog.
+- An alert (`alert="true"`) comes before everything: the user's dialog is set aside, as it is, until every alert is answered.
+- While the on-screen keyboard is up, the card keeps above it, and a page scrolls the box being typed in above it ([KeyboardRoom.h](../src/UI/Widgets/Inputs/KeyboardRoom.h)). Nothing in XML asks for this.
+
+A dialog written in XML is a `<ds_dialog>` whose subject says whether it is open, so the presenter opens and closes it by setting a subject and never touches a widget. Its content stays where it is written, so its actions go to that view's presenter:
 
 ```xml
-<ds_modal name="file_dialog" bind_open="presenter.dialog" open_value="start_print" width="70%" height="content">
+<ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
     <action trigger="dismissed" name="presenter.files.close_dialog"/>
-    …
-</ds_modal>
+    …the content…
+    <ds_dialog_footer>
+        <ds_button translation_tag="tr.common.cancel"><style name="dialog_button"/>…</ds_button>
+        <ds_button translation_tag="tr.common.ok"><style name="dialog_button"/><style name="action_btn"/>…</ds_button>
+    </ds_dialog_footer>
+</ds_dialog>
 ```
 
-For a plain question, `confirm_dialog.xml` is ready-made, as in the shared question before cancelling the job (`modals/job_cancel.xml`):
+When the user leaves it without answering (close, back, tapping outside) it raises `dismissed`, and the presenter clears the subject. `width` and `height` are the card's: `height="content"` (the default) fits the content and scrolls once it fills the room; a set height lets the content fill the card. A step's own buttons go in its `<ds_dialog_footer>`, a row, right-aligned, its main one last: the card keeps it at the bottom, under the content, however far that is scrolled.
 
-```xml
-<confirm_dialog open="presenter.confirm" title_tag="tr.status.print_cancel_title"
-                text_tag="tr.status.print_cancel_message" confirm="presenter.job.cancel"
-                close="presenter.job.close_cancel"/>
-```
+What code asks the user, it asks with a *prompt* ([Prompts.h](../src/UI/Xml/Dialogs/Prompts.h)): a number (`Prompts::askNumber`), digits and dots such as an IP address (`askText`), one of a list of values (`askChoice`) or a yes or no question (`askQuestion`). Each is a step of its own, an XML component in `dialogs/` with a presenter of its own, and hands its answer to a callback once it has gone, so the callback may ask the next. A `ds_slider` with `numberpad="true"` asks for a number when its value is tapped; inside a dialog the number pad is the dialog's next step. A prompt given an `asker` goes when that widget does, so a callback that uses a presenter is safe:
 
-`question_dialog.xml` asks yes or no with a title and text from subjects, over the view it is in:
-
-```xml
-<question_dialog open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
-                 confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
+```cpp
+Xml::Prompts::askQuestion({.title = _("file.delete_title"), .text = _("file.delete_message", name),
+                           .onYes = [this, path] { deleteFile(path); }, .asker = args.target});
 ```
 
 A value with - and + and a row of presets, such as the extruder's feed distance, is `value_selector.xml`, backed by a `ValueSelector` the presenter owns ([ValueSelector.h](../src/UI/Xml/View/ValueSelector.h)), which also stores the presets and the value.
 
-Numbers are typed on the number pad. There is one, shared by the whole UI: `numberpad.xml`, hosted in the home screen as `<ds_view name="numberpad" view="numberpad"/>`. A presenter asks it for a number with `Services::askNumber({.header, .min, .max, .value, .onConfirm})`, or for digits and dots, such as an IP address, with `Services::askText({...})` ([Services.h](../src/UI/Xml/Runtime/Services.h)); a `ds_slider` with `numberpad="true"` asks it when its value is tapped. It answers one question at a time, and closes when the user confirms, dismisses it, or changes tab.
-
-A dialog that keeps a number pad beside its own controls, as the speed and extrusion factor dialogs (`factors_dialog.xml`) do, places `numberpad_panel.xml` and owns a `NumberEntry` for it ([NumberEntry.h](../src/UI/Xml/View/NumberEntry.h)), as a value selector owns a `ValueSelector`. Any view opens those dialogs with the global actions `actions.factors.speed` and `actions.factors.extrusion`.
-
-A dialog the whole UI shares is hosted once by the home screen, from `modals/`, and opened with a global action, so any view, and any widget the user places, can open it: the number pad, the factor dialogs, babystepping (`actions.babystep.open`) and the question before cancelling the job (`actions.job.ask_cancel`, which cancels only if the user says so).
-
-When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
+A dialog the whole UI shares is hosted once by the home screen, from `modals/`, and opened with a global action, so any view, and any widget the user places, can open it: the speed and extrusion factors (`actions.factors.speed`, `actions.factors.extrusion`) and babystepping (`actions.babystep.open`). Cancelling the job asks first (`actions.job.ask_cancel`).
 
 ### Actions
 
@@ -312,7 +313,7 @@ When the user closes it another way (tapping outside, the back button) it raises
 
 An action's name says where it is: `presenter.<action>` is the presenter of the nearest enclosing view that handles it (then the next view out), and `actions.<group>.<action>` is a global action, added in `<Group>Actions.cpp`. A handler can find the rows the widget is inside: `args.row<FanRow>()`, or the innermost object model row, `args.row<OmRow>()`, whose `item()` says what it is about (`tools[2].heaters[1]`). Where a row only says which thing it is about, pass it in `arg` instead: `<action name="actions.tool.toggle" arg="{row.index}"/>`.
 
-`trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...), `value_confirmed` (an edit finished) or `dismissed` (a `<ds_modal>` was closed by the user).
+`trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...), `value_confirmed` (an edit finished) or `dismissed` (the user left a `<ds_dialog>` without answering it).
 
 `arg` may contain placeholders: `{event.value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{row.index} S{event.value}"`.
 
@@ -501,7 +502,7 @@ Every name is `snake_case`: components, views, widgets, styles, presenters. Comp
 - **A page is named after its part**, which is also the folder it is in: `dashboard`, `control`, `move`, `fans`, `settings`. The `<ds_view>` showing a component has the component's name too (`<ds_view name="move" view="move"/>`), and so does a presenter written for one component (`presenter="move"`). A component shown several ways names each view and presenter after where it is shown: the file browser is `dashboard_jobs`, `dashboard_macros`, `files_jobs` and `files_macros`.
 - **Anything else starts with its part's name**, then says what it is: `move_axis`, `dashboard_tool`, `settings_wifi`, `notifications_alert_choice`. A list's item is named for the one thing it shows (`temperature_heater`, `console_line`), or for how it shows it when there is more than one way (`file_browser_row`, `file_browser_tile`).
 - **A widget's file is named for the widget** (`widgets/fans/fan.json`, the widget `fan`), in a folder for what it is for (`navigation`, `jobs`, `temperature`, …), not where it goes, as `slots` can name several; its component is named like any other piece of its part (`dashboard_fan`). One component can be several widgets (`page_home`, `page_control`, … are all `sidebar_page_button`). A slot is named for where it is (`dashboard`, `sidebar`, `status_bar`), and so is its layout file.
-- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`confirm_dialog`, `value_selector`, whose choices are `value_selector_choice`). The dialogs the whole UI shares, hosted once by the home screen, go in `modals/`, each named for what it is (`numberpad`, `factors`) with its pieces prefixed (`numberpad_panel`, `factors_dialog`); their presenters are in `src/UI/Presenters/Modals/`.
+- **A piece used by several parts is a part of its own**: `file_browser/` is used by the dashboard and the Files page, `status_bar/` and `sidebar/` by the home screen. Small, general pieces go in `common/` with no prefix (`value_selector`, whose choices are `value_selector_choice`). The dialogs the whole UI shares, hosted once by the home screen, go in `modals/`, each named for what it is (`factors`, `babystep_dialog`) with its pieces prefixed (`factors_dialog`); their presenters are in `src/UI/Presenters/Modals/`. The dialog surface's chrome and the prompts code asks are in `dialogs/` (`dialog_host`, `dialog_number`, `dialog_choice`, `dialog_question`), with their C++ in `src/UI/Xml/Dialogs/`.
 
 Tabs of a page live in their own folder inside it when they are parts in their own right (`control/move/`), or beside the page with its prefix when they are not (`settings/settings_general.xml`).
 

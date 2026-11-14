@@ -5,7 +5,7 @@
 #include "ValueSelector.h"
 #include "Debug.h"
 #include "Storage.h"
-#include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
@@ -110,11 +110,11 @@ namespace UI::Xml
 
 	void ValueSelector::ask(std::string header, float start, std::function<void(float)> onConfirm)
 	{
-		Services::askNumber({.header = std::move(header),
-							 .min = m_settings.min,
-							 .max = m_settings.max,
-							 .value = start,
-							 .onConfirm = std::move(onConfirm)});
+		Prompts::askNumber({.header = std::move(header),
+							.min = m_settings.min,
+							.max = m_settings.max,
+							.value = start,
+							.onConfirm = std::move(onConfirm)});
 	}
 
 	std::vector<ValueSelector::Action> ValueSelector::actions(std::initializer_list<ValueSelector*> selectors)

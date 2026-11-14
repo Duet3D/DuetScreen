@@ -72,6 +72,22 @@
 		<style name="modal" align="center" border_color="#border" shadow_width="32" shadow_spread="2"
 			   shadow_offset_y="6" shadow_color="0x000000" shadow_opa="40%"/>
 
+		<!-- Dialogs: one card over a dimmed backdrop (components/dialogs/dialog_host.xml). The backdrop's padding is the
+			 room the card keeps from the edges; the header holds the back button, the titles and the close button. A
+			 step's own buttons go in its <ds_dialog_footer>, a dialog_footer row kept under the body, right-aligned, its
+			 main one last with action_btn. -->
+		<style name="dialog_backdrop" bg_color="#bg_dark" bg_opa="75%" pad_all="#pad_large"/>
+		<style name="dialog" pad_all="0" pad_row="0" clip_corner="true" border_color="#border" shadow_width="32"
+			   shadow_spread="2" shadow_offset_y="6" shadow_color="0x000000" shadow_opa="40%"/>
+		<style name="dialog_header" bg_color="#bg_light" bg_opa="100%" pad_all="#pad" pad_column="#pad"/>
+		<style name="dialog_title" text_color="#text_header" text_font="font_header"/>
+		<style name="dialog_from" text_color="#text_muted" text_font="font_subdued"/>
+		<style name="dialog_icon_button" width="48" height="48" pad_all="0"/>
+		<style name="dialog_body" pad_all="#pad_large"/>
+		<style name="dialog_footer" width="100%" height="content" layout="flex" flex_flow="row" flex_main_place="end"
+			   pad_all="0" pad_column="#pad"/>
+		<style name="dialog_button" pad_left="24" pad_right="24"/>
+
 		<!-- Text -->
 		<style name="text" text_color="#text" text_font="font_normal"/>
 		<style name="text_muted" text_color="#text_muted" text_font="font_subdued"/>

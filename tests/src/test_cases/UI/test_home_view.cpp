@@ -24,6 +24,7 @@
 #include "UI/Xml/View/XmlView.h"
 #include "helix_xml.h"
 #include "i18n/i18n.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
@@ -188,22 +189,8 @@ class TestHomeView : public UiTestSuite
 		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
 	}
 
-	/** The open file dialog (each file browser has one, in the modal host), or nullptr */
-	static lv_obj_t* openFileDialog()
-	{
-		lv_obj_t* host = UI::getModalHost()->getRootPtr();
-		for (uint32_t i = 0; i < lv_obj_get_child_count(host); i++)
-		{
-			lv_obj_t* backdrop = lv_obj_get_child(host, static_cast<int32_t>(i));
-			lv_obj_t* dialog = lv_obj_find_by_name(backdrop, "file_browser_dialog");
-			if (dialog != nullptr && !lv_obj_has_flag(backdrop, LV_OBJ_FLAG_HIDDEN) &&
-				!lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN))
-			{
-				return dialog;
-			}
-		}
-		return nullptr;
-	}
+	/** The file dialog, if it is the step shown (each file browser has one), or nullptr */
+	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_browser_dialog"); }
 
 	static std::string_view labelText(lv_obj_t* parent, const char* name)
 	{
@@ -324,32 +311,27 @@ TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 	openControlTab(3);
 	lv_obj_t* page = UI::findView("object_cancel")->getRootPtr();
-	lv_obj_t* dialog = lv_obj_find_by_name(page, "confirm_object_cancel");
-	ASSERT_NE(dialog, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "title"))),
-			  _("object_cancel.confirm_cancel_current_title"));
-	EXPECT_NE(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "text"))).find("gear (Instance 1)"),
-			  std::string::npos);
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_current_title"));
+	EXPECT_NE(TestDialogs::text("text").find("gear (Instance 1)"), std::string::npos);
+	TestDialogs::tap("no");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	// Pressing the object on the bed asks to cancel it
 	lv_obj_t* rects = lv_obj_find_by_name(page, "objects");
 	ASSERT_NE(rects, nullptr);
 	ASSERT_EQ(lv_obj_get_child_count(rects), 1u);
 	lv_obj_send_event(lv_obj_get_child(rects, 0), LV_EVENT_PRESSED, nullptr);
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "title"))),
-			  _("object_cancel.confirm_cancel_title"));
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_title"));
+	TestDialogs::tap("no");
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, false);
 	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "cancelled without asking";
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "cancelled without asking";
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 }
@@ -380,12 +362,12 @@ TEST_F(TestHomeView, JobModalShowsDeleteButton)
 
 	lv_obj_t* dialog = openFileDialog();
 	ASSERT_NE(dialog, nullptr);
-	EXPECT_EQ(labelText(dialog, "title"), "Start Print");
+	EXPECT_EQ(TestDialogs::title(), "Start Print");
 	EXPECT_EQ(labelText(dialog, "text"), "File: test.gcode");
-	EXPECT_FALSE(isHidden(dialog, "delete"));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("delete"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/start_print_modal.png");
 
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
@@ -397,11 +379,11 @@ TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 
 	lv_obj_t* dialog = openFileDialog();
 	ASSERT_NE(dialog, nullptr);
-	EXPECT_EQ(labelText(dialog, "title"), "Run Macro");
-	EXPECT_TRUE(isHidden(dialog, "delete"));
+	EXPECT_EQ(TestDialogs::title(), "Run Macro");
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("delete"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/run_macro_modal.png");
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
@@ -413,15 +395,18 @@ TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 
 	lv_obj_t* dialog = openFileDialog();
 	ASSERT_NE(dialog, nullptr);
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "delete"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(TestDialogs::find("delete"), LV_EVENT_CLICKED, nullptr);
 
-	ASSERT_EQ(openFileDialog(), dialog) << "the same dialog asks again";
-	EXPECT_EQ(labelText(dialog, "title"), "Delete File");
-	EXPECT_EQ(labelText(dialog, "text"), "Are you sure you want to delete test.gcode?");
-	EXPECT_TRUE(isHidden(dialog, "delete"));
+	// The question is the dialog's next step; going back returns to the job
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Delete File");
+	EXPECT_EQ(TestDialogs::text("text"), "Are you sure you want to delete test.gcode?");
+	EXPECT_EQ(TestDialogs::host().shownSteps(), 2u);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/confirm_delete_modal.png");
+	TestDialogs::tapHeader("back");
+	EXPECT_EQ(openFileDialog(), dialog);
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
@@ -524,7 +509,7 @@ TEST_F(TestHomeView, HandleUpdateResultSuccess)
 	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_success.png");
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
@@ -539,7 +524,7 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
 	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_failed.png");
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
@@ -554,7 +539,7 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
 	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_warning.png");
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
@@ -769,7 +754,7 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
@@ -1026,7 +1011,7 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	lv_area_t centred;
 	lv_obj_get_coords(dialog, &centred);
 	EXPECT_GT(centred.y1, dialogArea.y1) << "the dialog is back in the middle";
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 }
 
@@ -1044,16 +1029,16 @@ TEST_F(TestHomeViewWithData, StatusView)
 	};
 
 	click("speed_multiplier");
-	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_numberpad.png")
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_dialog.png")
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 
 	click("flow_multiplier");
 	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"extruders":[{"factor":1.2},{}]}}})"
 					"\n");
-	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_dialog.png")
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 
 	click("babystep_button");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
@@ -1313,11 +1298,10 @@ namespace
 		return true;
 	}
 
-	/** The shared number pad's dialog if it is open, else nullptr */
+	/** The number pad prompt if it is the step shown, else nullptr */
 	lv_obj_t* openNumberPad()
 	{
-		lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "numberpad_dialog");
-		return dialog != nullptr && shownOnScreen(dialog) ? dialog : nullptr;
+		return TestDialogs::shownNamed("dialog_number");
 	}
 
 	/**
@@ -1326,7 +1310,7 @@ namespace
 	 */
 	bool tapShowsNumberPad(const char* view, const char* within, const char* name, bool sliderValue = false)
 	{
-		UI::closeAllModals();
+		UI::closeDialogs();
 		lv_obj_t* obj = UI::findView(view)->getRootPtr();
 		if (within != nullptr)
 		{
@@ -1373,7 +1357,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "duet_ip_address")) << "IP address";
 	settingsPage().setActiveTab(2);
 	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "chroma_slider", true)) << "chroma";
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
@@ -1387,7 +1371,7 @@ TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
 	ASSERT_NE(firstFactor, nullptr);
 	lv_obj_send_event(firstFactor, LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
@@ -1413,9 +1397,9 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 	lv_obj_t* dialog = openNumberPad();
 
 	// Typed on the keys, then OK
+	EXPECT_EQ(TestDialogs::text("range"), "100 or more");
 	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "1234");
-	lv_obj_t* keys = lv_obj_find_by_name(dialog, "keys");
-	lv_obj_send_event(keys, LV_EVENT_READY, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "keys"), LV_EVENT_READY, nullptr);
 	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
 	auto& slider = static_cast<UI::Slider&>(
 		*UI::LvObj::fromPtr(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval")));
@@ -1423,11 +1407,12 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 
 	// Out of range: OK does nothing
 	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
+	dialog = openNumberPad();
 	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "5");
-	lv_obj_send_event(keys, LV_EVENT_READY, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(dialog, "keys"), LV_EVENT_READY, nullptr);
 	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
 	EXPECT_EQ(slider.getValue(), 1234.0f);
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
@@ -1442,7 +1427,7 @@ TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
 	EXPECT_EQ(openNumberPad(), nullptr);
 }
 
-TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactor)
+TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 {
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
@@ -1451,26 +1436,28 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactor)
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "flow_multiplier"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
-	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "extrusion_dialog");
+	lv_obj_t* dialog = TestDialogs::shownNamed("extrusion_dialog");
 	ASSERT_NE(dialog, nullptr);
-	ASSERT_TRUE(shownOnScreen(dialog));
-	lv_obj_t* pad = lv_obj_find_by_name(dialog, "numberpad");
-	EXPECT_TRUE(shownOnScreen(pad)) << "the number pad starts on the first extruder";
-	EXPECT_EQ(labelText(pad, "header"), "Extruder 0");
+	EXPECT_EQ(TestDialogs::title(), _("fine_tune.extruder_header"));
 
-	// Tap the second extruder's value: the pad is for it now
+	// Tap the second extruder's value: a number pad for it, the dialog's next step
 	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
 	ASSERT_EQ(lv_obj_get_child_count(rows), 2u);
 	auto& second = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(rows, 1)));
 	lv_obj_send_event(second.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(labelText(pad, "header"), "Extruder 1");
+	lv_obj_t* pad = TestDialogs::shownNamed("dialog_number");
+	ASSERT_NE(pad, nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Extruder 1");
+	EXPECT_EQ(TestDialogs::text("range"), "1 or more");
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
 
-	// Type 95 and confirm: sent, and the dialog closes
+	// Type 95 and confirm: sent, and back to the factors
 	lv_textarea_set_text(lv_obj_find_by_name(pad, "text"), "95");
 	lv_obj_send_event(lv_obj_find_by_name(pad, "keys"), LV_EVENT_READY, nullptr);
 	ASSERT_EQ(sent.size(), 1u);
 	EXPECT_EQ(sent[0], "M221 D1 S95\n");
-	EXPECT_FALSE(shownOnScreen(dialog));
+	EXPECT_EQ(TestDialogs::shown(), dialog);
+	UI::closeDialogs();
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
@@ -1504,54 +1491,84 @@ TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
 	runEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
-	// A dialog opens over the main window, not in the view it belongs to
-	lv_obj_t* question = lv_obj_find_by_name(lv_screen_active(), "confirm_cancel");
-	ASSERT_NE(question, nullptr);
-	EXPECT_FALSE(shownOnScreen(question));
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
-	// The job panel's Cancel button asks the shared question
+	// The job panel's Cancel button asks the question
 	lv_obj_t* cancel = lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "cancel");
 	ASSERT_NE(cancel, nullptr);
 	EXPECT_FALSE(lv_obj_has_state(cancel, LV_STATE_DISABLED)) << "a paused job can be cancelled";
 	lv_obj_send_event(cancel, LV_EVENT_CLICKED, nullptr);
-	ASSERT_TRUE(shownOnScreen(question));
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("status.print_cancel_title"));
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/cancel_question.png")
 
 	// Answering no closes it
-	lv_obj_send_event(lv_obj_find_by_name(question, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_FALSE(shownOnScreen(question));
+	TestDialogs::tap("no");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	// Any view can ask it, e.g. a button placed in the sidebar
 	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "actions.job.ask_cancel", "");
-	EXPECT_TRUE(shownOnScreen(question));
-	UI::closeAllModals();
+	EXPECT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	UI::closeDialogs();
 }
 
-TEST_F(TestHomeViewWithData, FactorDialogNumberPadTextStartsUnscrolled)
+TEST_F(TestHomeViewWithData, NumberPadTextStartsUnscrolled)
 {
-	// The pad's text is written while the pad is hidden and has no size; once shown, it must not scroll out of view
+	// The pad's text is written before the pad is shown and has a size; once shown, it must not scroll out of view
 	runEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
-	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "speed_dialog");
+	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");
 	ASSERT_NE(dialog, nullptr);
-	lv_obj_t* pad = lv_obj_find_by_name(dialog, "numberpad");
-	ASSERT_FALSE(shownOnScreen(pad)) << "the pad starts hidden";
-
 	auto& speed =
 		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0)));
 	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
-	ASSERT_TRUE(shownOnScreen(pad));
+	ASSERT_NE(openNumberPad(), nullptr);
 	for (int i = 0; i < 10; i++) // Let any scroll animation finish
 	{
 		lv_tick_inc(100);
 		lv_timer_handler();
 	}
 
-	lv_obj_t* text = lv_obj_find_by_name(pad, "text");
+	lv_obj_t* text = TestDialogs::find("text");
 	EXPECT_EQ(lv_obj_get_scroll_x(text), 0);
 	EXPECT_EQ(lv_obj_get_scroll_y(text), 0);
-	UI::closeAllModals();
+	UI::closeDialogs();
+}
+
+TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
+{
+	// At 200% the speed slider shows 150% to 250%, but the speed may be anything from 1% up
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
+	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"speedFactor":2}}})"
+					"\n");
+	runEvents();
+	dashboardTabs().setActiveTab(STATUS_TAB);
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
+					  LV_EVENT_CLICKED,
+					  nullptr);
+	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");
+	ASSERT_NE(dialog, nullptr);
+	auto& speed =
+		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0)));
+	ASSERT_EQ(speed.getValue(), 200.0f);
+	EXPECT_EQ(speed.getMin(), 150.0f);
+
+	// The number pad takes anything from 1%
+	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
+	EXPECT_EQ(TestDialogs::text("range"), "1 or more");
+	TestDialogs::tapHeader("back");
+
+	// Reset goes back to 100%, below the window
+	lv_obj_send_event(lv_obj_find_by_name(speed.getRootPtr(), "reset"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(sent.size(), 1u);
+	EXPECT_EQ(sent[0], "M220 S100\n");
+	EXPECT_EQ(speed.getValue(), 100.0f);
+	EXPECT_EQ(speed.getMin(), 50.0f) << "the window follows";
+	UI::closeDialogs();
+	UI::Xml::Services::setGcodeSender(nullptr);
 }

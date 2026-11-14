@@ -1,0 +1,14 @@
+<!--
+  One value of a choice prompt (dialog_choice.xml), checked if it is the one chosen now. Tapping it chooses it.
+
+  Fields:   a choices row: row.value, row.title, row.chosen (src/UI/Xml/Dialogs/PromptPresenters.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_button name="choice" bind_text="row.title" width="100%">
+			<bind_state_if_eq subject="row.chosen" state="checked" ref_value="1"/>
+			<action trigger="clicked" name="presenter.choice.choose"/>
+		</ds_button>
+	</view>
+</component>

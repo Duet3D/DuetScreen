@@ -47,7 +47,5 @@
 			<action trigger="clicked" name="presenter.object_cancel.cancel_current"/>
 		</ds_button>
 
-		<question_dialog name="confirm_object_cancel" open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
-						 confirm="presenter.object_cancel.confirm" close="presenter.object_cancel.close_dialog"/>
 	</view>
 </component>
