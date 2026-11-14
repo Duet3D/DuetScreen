@@ -739,6 +739,22 @@ namespace UI::Xml::Api
 						fmt::format_to(std::back_inserter(out), "{:s}\n\n", pictures.image(alt, file));
 					}
 				}
+				// The mode the user can switch the theme to
+				if (!p.homeOtherMode.empty() || !p.lvglWidgetsOtherMode.empty())
+				{
+					fmt::format_to(std::back_inserter(out), "In {:s} mode:\n\n", p.otherMode);
+					for (const auto& [alt, file] :
+						 {std::pair<const char*, const std::string&>{"The home screen", p.homeOtherMode},
+						  {"LVGL's widgets", p.lvglWidgetsOtherMode}})
+					{
+						if (!file.empty())
+						{
+							fmt::format_to(std::back_inserter(out),
+										   "{:s}\n\n",
+										   pictures.image(fmt::format("{:s} in {:s} mode", alt, p.otherMode), file));
+						}
+					}
+				}
 				if (!p.widgets.empty())
 				{
 					out += "| Widget | Its example |\n| --- | --- |\n";

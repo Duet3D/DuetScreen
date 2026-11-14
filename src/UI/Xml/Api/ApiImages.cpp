@@ -188,6 +188,7 @@ namespace UI::Xml::Api
 												   lv_display_get_horizontal_resolution(nullptr) - 2 * MARGIN,
 												   lv_display_get_vertical_resolution(nullptr) - 2 * MARGIN);
 					pictures.home = home(dir + "/home");
+					otherMode(*loaded, dir, pictures);
 				}
 				if (active)
 				{
@@ -461,6 +462,32 @@ namespace UI::Xml::Api
 				lv_obj_delete(area);
 				lv_xml_component_unregister(component.c_str());
 				return file;
+			}
+
+			/**
+			 * For a theme whose palette the user can change: the home screen and LVGL's widgets in the mode it isn't
+			 * in, light or dark, which the user can switch it to. The palette the user chose is put back after.
+			 */
+			void otherMode(Themes::Theme& theme, const std::string& dir, ThemePictures& pictures)
+			{
+				if (!theme.isCustomisable())
+				{
+					return;
+				}
+				const Themes::PaletteInputs chosen = theme.getPalette();
+				Themes::PaletteInputs other = chosen;
+				other.dark = !chosen.dark;
+				pictures.otherMode = other.dark ? "dark" : "light";
+				theme.setPalette(other);
+				theme.setThemeActive();
+				pictures.homeOtherMode = home(fmt::format("{:s}/home_{:s}", dir, pictures.otherMode));
+				pictures.lvglWidgetsOtherMode = example(LVGL_WIDGETS,
+														"api_lvgl_widgets",
+														fmt::format("{:s}/lvgl_widgets_{:s}", dir, pictures.otherMode),
+														lv_display_get_horizontal_resolution(nullptr) - 2 * MARGIN,
+														lv_display_get_vertical_resolution(nullptr) - 2 * MARGIN);
+				theme.setPalette(chosen);
+				theme.setThemeActive();
 			}
 
 			/** The home screen, as nothing contains it */

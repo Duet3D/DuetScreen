@@ -316,7 +316,12 @@ namespace UI::Themes
 		Style list_title; // List title text
 
 		/* Graph */
-		Style graph_legend; // Graph legend
+		Style graph_legend;				 // A graph's legend, beside its plot: sets its width
+		Style graph_legend_item;		 // An entry in the legend (a button), as it looks while its series is hidden
+		Style graph_legend_item_shown;	 // An entry while its series is shown
+		Style graph_legend_swatch;		 // An entry's colour key, hollow while hidden (its colour is the series')
+		Style graph_legend_swatch_shown; // The colour key while its series is shown
+		Style graph_legend_value;		 // An entry's latest value
 
 		/* Bar */
 		Style bar_label_bg; // Background behind a bar's label
@@ -340,6 +345,13 @@ namespace UI::Themes
 		Style gauge_standby_target; // A gauge's target while its heater is on standby
 		Style gauge_off;		// A gauge's value while its heater is off
 		Style gauge_fault;		// A gauge's value while its heater has a fault
+
+		/* Customising the screen: what is drawn over the widgets while the user edits them */
+		Style customise_frame;			// Over each widget
+		Style customise_frame_selected; // Over the selected widget
+		Style customise_handle;			// A bracket or bar showing where to drag to resize the selected widget
+		Style customise_guide;			// A line showing what a dragged widget snapped to
+		Style customise_place;			// The empty place tapped, where a new widget goes
 
 		/* Object cancel */
 		Style object_cancel_base;	   // Base style for object cancel list items

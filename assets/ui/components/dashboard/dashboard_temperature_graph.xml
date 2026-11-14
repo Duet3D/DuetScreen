@@ -14,7 +14,8 @@
 		<!-- The legend goes where it would leave the plot too little room: below 400 pixels wide, the theme's
 			 widget_expanded_min -->
 		<ds_graph name="graph" history="source.temperature.temperatures" seconds="$seconds" y_min="0" y_max="300"
-				  bind_y_max="source.temperature.limit" legend_min_width="400" width="100%" height="100%">
+				  bind_y_max="source.temperature.limit" legend_format="{}°C" legend_min_width="400"
+				  width="100%" height="100%">
 			<style name="card"/>
 		</ds_graph>
 	</view>

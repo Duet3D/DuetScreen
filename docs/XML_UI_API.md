@@ -1260,7 +1260,7 @@ Also takes every `lv_dropdown` attribute.
 
 ### ds_graph
 
-A line graph of a history, with a legend whose buttons show and hide series. Series are coloured by position from LVGL's palette (red, pink, purple, …). The graph starts with what was recorded before it was built, and follows series being added, removed and renamed.
+A line graph of a history, with a legend whose entries show each series' colour, name and latest value, and show and hide it when tapped. Series are coloured by position from the theme's series colours (#series_1, #series_2, …), which follow the theme. The graph starts with what was recorded before it was built, and follows series being added, removed and renamed.
 
 Also takes every `lv_obj` attribute.
 
@@ -1278,6 +1278,7 @@ Also takes every `lv_obj` attribute.
 | `y_min` | Bottom of the Y axis (default 0) |
 | `y_max` | Top of the Y axis (default 100) |
 | `bind_y_max` | Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a heater's limit |
+| `legend_format` | How the legend shows a series' latest value: a fmt format with one argument, e.g. `{}°C` (default: no value) |
 | `legend_min_width` | Show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown) |
 
 ### ds_heatmap
@@ -2555,7 +2556,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `estop` | ![estop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/estop.png) | bg_color=0xf44336 text_color=0xffffff radius=circle |
 | `file` | ![file](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file.png) | merge=btn merge=bg_light merge=border |
 | `folder` | ![folder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder.png) | copy=btn |
-| `unhomed` |  | bg_color=#warning border_color=#warning |
+| `unhomed` |  | bg_color=#secondary border_color=#secondary |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
 | `tool_list` |  | *(not set)* |
@@ -2569,7 +2570,12 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `slider_buttons` |  | width=40 height=40 |
 | `list_header` |  | *(not set)* |
 | `list_title` | ![list_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_title.png) | merge=text_emphasis |
-| `graph_legend` |  | min_width=150 |
+| `graph_legend` |  | width=30% min_width=130 max_width=220 pad_all=0 pad_row=#pad |
+| `graph_legend_item` | ![graph_legend_item](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_item.png) | pad_all=#pad pad_column=#pad text_color=#text_muted |
+| `graph_legend_item_shown` | ![graph_legend_item_shown](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_item_shown.png) | text_color=#text |
+| `graph_legend_swatch` | ![graph_legend_swatch](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_swatch.png) | width=12 height=12 radius=3 border_width=2 border_opa=100% bg_opa=0 |
+| `graph_legend_swatch_shown` | ![graph_legend_swatch_shown](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_swatch_shown.png) | bg_opa=100% |
+| `graph_legend_value` | ![graph_legend_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_value.png) | text_font=font_emphasis |
 | `bar_label_bg` | ![bar_label_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label_bg.png) | bg_color=#bg bg_opa=80% radius=#radius pad_hor=#pad |
 | `bar_label` |  | *(not set)* |
 | `widget_title` | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_title.png) | text_color=#text_muted text_font=font_emphasis |
@@ -2587,6 +2593,11 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `gauge_standby_target` |  | arc_color=#secondary_muted bg_color=#secondary_muted |
 | `gauge_off` |  | arc_color=#text_muted bg_color=#text_muted |
 | `gauge_fault` |  | arc_color=#error bg_color=#error |
+| `customise_frame` | ![customise_frame](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_frame.png) | bg_color=#primary bg_opa=12% radius=#radius border_color=#primary border_opa=60% border_width=#border_width border_side=full |
+| `customise_frame_selected` | ![customise_frame_selected](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_frame_selected.png) | bg_opa=22% border_opa=100% border_width=2 |
+| `customise_handle` | ![customise_handle](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_handle.png) | bg_color=#primary bg_opa=100% radius=0 pad_all=0 border_width=0 |
+| `customise_guide` | ![customise_guide](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_guide.png) | bg_color=#text bg_opa=100% radius=0 border_width=0 pad_all=0 |
+| `customise_place` | ![customise_place](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_place.png) | bg_color=#primary bg_opa=25% radius=#radius border_color=#primary border_width=2 border_opa=100% border_side=full |
 | `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=100% |
 | `object_cancel_current` | ![object_cancel_current](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_current.png) | bg_color=#primary bg_opa=100% |
 | `object_cancel_cancelled` | ![object_cancel_cancelled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_cancelled.png) | bg_color=#error bg_opa=100% |
@@ -2596,7 +2607,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 
 Palette colours, used as attribute values, e.g. `style_bg_color="#primary"`:
 
-`#bg_dark`, `#bg`, `#bg_light`, `#primary`, `#primary_muted`, `#secondary`, `#secondary_muted`, `#text`, `#text_muted`, `#text_header`, `#border`, `#border_muted`, `#highlight`, `#shadow`, `#success`, `#warning`, `#error`
+`#bg_dark`, `#bg`, `#bg_light`, `#primary`, `#primary_muted`, `#secondary`, `#secondary_muted`, `#text`, `#text_muted`, `#text_header`, `#border`, `#border_muted`, `#highlight`, `#shadow`, `#success`, `#warning`, `#error`, `#series_1`, `#series_2`, `#series_3`, `#series_4`, `#series_5`, `#series_6`, `#series_7`, `#series_8`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/duetscreen/colours.png)
 

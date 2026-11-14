@@ -1,16 +1,19 @@
 <!--
-  Industrial: a light, engineered control panel. Square corners, crisp dark edges on every control, no decoration;
+  Industrial: an engineered control panel, light by default. Square corners, crisp dark edges on every control, no decoration;
   actions are solid steel blue with white text, standby amber. Built to be read at a distance under workshop light.
 -->
 <theme name="industrial" extends="base">
 	<palette primary_hue="240" secondary_hue="70" chroma="0.012" dark="false">
-		<!-- A deep accent, filled behind white text (action_btn) -->
+		<!-- Deep accents, filled behind white text (action_btn, and the standby and unhomed states shown on it) -->
 		<color name="primary" lightness="0.5" chroma="0.13"/>
-		<color name="primary_muted" lightness="0.88"/>
-		<!-- A grey panel, so white cards and controls stand off it -->
-		<color name="bg_dark" lightness="0.89"/>
-		<color name="bg" lightness="0.975"/>
-		<color name="border" lightness="0.6"/>
+		<color name="secondary" lightness="0.52" chroma="0.12"/>
+		<color name="primary_muted" lightness="0.88" when="light"/>
+		<!-- Light: a grey panel, so white cards and controls stand off it -->
+		<color name="bg_dark" lightness="0.89" when="light"/>
+		<color name="bg" lightness="0.975" when="light"/>
+		<color name="border" lightness="0.6" when="light"/>
+		<!-- Dark: edges as crisp as in light mode -->
+		<color name="border" lightness="0.52" when="dark"/>
 	</palette>
 
 	<fonts>

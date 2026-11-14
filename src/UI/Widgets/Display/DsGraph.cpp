@@ -29,9 +29,10 @@ namespace UI::Xml
 			{.name = "ds_graph",
 			 .extends = "lv_obj",
 			 .description =
-				 "A line graph of a history, with a legend whose buttons show and hide series. Series are coloured by "
-				 "position from LVGL's palette (red, pink, purple, …). The graph starts with what was recorded before "
-				 "it was built, and follows series being added, removed and renamed.",
+				 "A line graph of a history, with a legend whose entries show each series' colour, name and latest "
+				 "value, and show and hide it when tapped. Series are coloured by position from the theme's series "
+				 "colours (#series_1, #series_2, …), which follow the theme. The graph starts with what was recorded "
+				 "before it was built, and follows series being added, removed and renamed.",
 			 .example =
 				 R"(<ds_graph history="source.temperature.temperatures" seconds="60" y_min="0" y_max="300"
 		  bind_y_max="source.temperature.limit" width="400" height="250"/>)",
@@ -46,6 +47,9 @@ namespace UI::Xml
 							 "Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a "
 							 "heater's limit",
 							 AttributeKind::Subject},
+							{"legend_format",
+							 "How the legend shows a series' latest value: a fmt format with one argument, e.g. "
+							 "`{}°C` (default: no value)"},
 							{"legend_min_width",
 							 "Show the legend only while the graph is at least this many pixels wide, so a narrow "
 							 "graph keeps its room for the plot (default 0: always shown)"}}},
@@ -97,6 +101,10 @@ namespace UI::Xml
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_y_max"))
 		{
 			lv_subject_add_observer_obj(subject, yMaxObserverCb, root, &graph);
+		}
+		if (const char* format = lv_xml_get_value_of(attrs, "legend_format"))
+		{
+			graph.setValueFormat(format);
 		}
 		if (const char* width = lv_xml_get_value_of(attrs, "legend_min_width"))
 		{
@@ -189,8 +197,7 @@ namespace UI::Xml
 		for (size_t i = from; i < to; i++)
 		{
 			SeriesRow& row = m_history->row(i);
-			if (!createSeries(lv_palette_main(static_cast<lv_palette_t>(i % LV_PALETTE_LAST)),
-							  std::string(row.name.get())))
+			if (!createSeries(std::string(row.name.get())))
 			{
 				return;
 			}

@@ -256,8 +256,9 @@
 		<style name="folder" copy="btn"/>
 		<style name="file" merge="btn bg_light border"/>
 
-		<!-- An axis that isn't homed: a warning -->
-		<style name="unhomed" bg_color="#warning" border_color="#warning"/>
+		<!-- An axis that isn't homed: in the secondary accent, which no action uses, so it stands out among the move
+			 buttons -->
+		<style name="unhomed" bg_color="#secondary" border_color="#secondary"/>
 
 		<!-- Blue to red (LVGL's palette) -->
 		<style name="temperature_bar" bg_opa="100%" bg_color="0x2196f3" bg_grad_color="0xf44336" bg_grad_dir="hor"/>
@@ -277,7 +278,16 @@
 
 		<style name="slider_buttons" width="40" height="40"/>
 
-		<style name="graph_legend" min_width="150"/>
+		<!-- Graph legend, beside the plot: an entry per series, a neutral button (it shows and hides the series) with
+			 the series' colour key, its name and its latest value. While the series is hidden its key is hollow and
+			 its text muted. The key's colour is the series' (#series_1, #series_2, …). -->
+		<style name="graph_legend" width="30%" min_width="130" max_width="220" pad_all="0" pad_row="#pad"/>
+		<style name="graph_legend_item" pad_all="#pad" pad_column="#pad" text_color="#text_muted"/>
+		<style name="graph_legend_item_shown" text_color="#text"/>
+		<style name="graph_legend_swatch" width="12" height="12" radius="3" border_width="2" border_opa="100%"
+			   bg_opa="0"/>
+		<style name="graph_legend_swatch_shown" bg_opa="100%"/>
+		<style name="graph_legend_value" text_font="font_emphasis"/>
 
 		<style name="bar_label_bg" bg_color="#bg" bg_opa="80%" radius="#radius" pad_hor="#pad"/>
 
@@ -307,6 +317,17 @@
 		<style name="gauge_standby_target" arc_color="#secondary_muted" bg_color="#secondary_muted"/>
 		<style name="gauge_off" arc_color="#text_muted" bg_color="#text_muted"/>
 		<style name="gauge_fault" arc_color="#error" bg_color="#error"/>
+
+		<!-- Customising the screen: in the accent, which stands out from any widget, light or dark. Each widget is
+			 tinted and edged, the selected one more strongly, with solid handles; snap guides are in the text colour,
+			 which contrasts with everything, the handles too. -->
+		<style name="customise_frame" bg_color="#primary" bg_opa="12%" radius="#radius" border_color="#primary"
+			   border_opa="60%" border_width="#border_width" border_side="full"/>
+		<style name="customise_frame_selected" bg_opa="22%" border_opa="100%" border_width="2"/>
+		<style name="customise_handle" bg_color="#primary" bg_opa="100%" radius="0" pad_all="0" border_width="0"/>
+		<style name="customise_guide" bg_color="#text" bg_opa="100%" radius="0" border_width="0" pad_all="0"/>
+		<style name="customise_place" bg_color="#primary" bg_opa="25%" radius="#radius" border_color="#primary"
+			   border_width="2" border_opa="100%" border_side="full"/>
 
 		<style name="debug_borders" outline_color="#text" outline_width="1" outline_opa="100%"/>
 	</styles>

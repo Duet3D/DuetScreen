@@ -1,15 +1,10 @@
 <!--
   Marks the empty place the user tapped in a free layout while customising: a new widget goes there, or as near as
-  there is room. Tapping it opens the widget pool.
+  there is room. Tapping it opens the widget pool. The theme draws it (customise_place).
 -->
 <component>
-	<styles>
-		<style name="place" bg_color="#highlight" bg_opa="30%" radius="#radius"/>
-	</styles>
-
 	<view extends="lv_obj" scrollable="false">
-		<style name="place"/>
-		<style name="border_highlight"/>
+		<style name="customise_place"/>
 		<lv_label name="plus" text="+" align="center" style_text_font="font_header"/>
 		<action trigger="clicked" name="actions.customise.open_catalogue"/>
 	</view>

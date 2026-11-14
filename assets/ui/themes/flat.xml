@@ -17,10 +17,11 @@
 		<!-- A choice is filled with the muted accent, without an edge -->
 		<style name="btn_checked" outline_width="0"/>
 		<style name="tab_btn" border_width="0"/>
-		<!-- The tools are cards too (tool_list_tool copied the base theme's card); the selected one is marked by a bar
-			 in the accent down its side -->
-		<style name="tool_list_tool" border_width="0" bg_color="#bg_dark"/>
-		<style name="tool_selected" outline_width="0" border_width="4" border_side="left" border_color="#primary"/>
+		<!-- The tools are a flat list in their card (tool_list_tool copied the base theme's card), a hairline between
+			 each; the selected one is tinted with the muted accent -->
+		<style name="tool_list_tool" bg_opa="0" radius="0" border_width="1" border_side="bottom"
+			   border_color="#border_muted"/>
+		<style name="tool_selected" outline_width="0" bg_color="#primary_muted" bg_opa="45%" border_color="#border_muted"/>
 		<style name="object_cancel_base" border_width="0"/>
 		<style name="input" border_width="0" bg_color="#bg_light" bg_opa="100%"/>
 

@@ -5,9 +5,10 @@
 -->
 <theme name="3d" extends="base">
 	<palette primary_hue="240" secondary_hue="70" chroma="0.02" dark="false">
-		<color name="primary" lightness="0.66" chroma="0.13"/>
-		<color name="bg_dark" lightness="0.9"/>
-		<color name="bg_light" lightness="0.97"/>
+		<color name="primary" chroma="0.13"/>
+		<color name="primary" lightness="0.66" when="light"/>
+		<color name="bg_dark" lightness="0.9" when="light"/>
+		<color name="bg_light" lightness="0.97" when="light"/>
 	</palette>
 
 	<fonts>
@@ -37,8 +38,8 @@
 			   bg_grad_dir="ver" border_color="#border"/>
 		<style name="heater_fault" bg_color="lighten(#error, 0.06)" bg_grad_color="darken(#error, 0.08)"
 			   bg_grad_dir="ver" border_color="darken(#error, 0.18)"/>
-		<style name="unhomed" bg_color="lighten(#warning, 0.06)" bg_grad_color="darken(#warning, 0.08)"
-			   bg_grad_dir="ver" border_color="darken(#warning, 0.18)"/>
+		<style name="unhomed" bg_color="lighten(#secondary, 0.06)" bg_grad_color="darken(#secondary, 0.08)"
+			   bg_grad_dir="ver" border_color="darken(#secondary, 0.18)"/>
 		<!-- Chosen: pressed in, the gradient inverted and no shadow -->
 		<style name="btn_checked" bg_color="darken(#primary_muted, 0.06)" bg_grad_color="#primary_muted"
 			   bg_grad_dir="ver" shadow_opa="0"/>

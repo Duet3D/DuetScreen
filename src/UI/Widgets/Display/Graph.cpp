@@ -8,10 +8,80 @@
 #include "Graph.h"
 #include "Debug.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Styles/Theme.h"
+#include <fmt/format.h>
 
 namespace UI
 {
-	static lv_color_t s_hiddenColor = lv_color_darken(lv_color_white(), 50);
+	Graph::LegendItem::LegendItem(const std::string& objName, LvObj& legend, std::string_view name)
+		: LvContainer(objName, legend)
+	{
+		ZoneScoped;
+		const auto& lvgl = Themes::getLvglStyles();
+		const auto& components = Themes::getComponentStyles();
+
+		// A neutral control: the theme's button, then the legend's own look, which shows whether it is shown
+		addStyle(lvgl.btn);
+		addStyle(lvgl.pressed, LV_STATE_PRESSED);
+		addStyle(lvgl.outline_primary, LV_STATE_FOCUS_KEY);
+		addStyle(components.graph_legend_item);
+		addStyle(components.graph_legend_item_shown, LV_STATE_CHECKED);
+		setFlag(LV_OBJ_FLAG_CLICKABLE, true);
+		setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
+		setSize(LV_PCT(100), LV_SIZE_CONTENT);
+		setFlexFlow(LV_FLEX_FLOW_ROW);
+		setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+		m_swatch.addStyle(components.graph_legend_swatch);
+		m_swatch.addStyle(components.graph_legend_swatch_shown, LV_STATE_CHECKED);
+		m_swatch.setFlag(LV_OBJ_FLAG_CLICKABLE, false);
+		m_swatch.setFlag(LV_OBJ_FLAG_EVENT_BUBBLE, true);
+
+		// The name takes the room left, wrapping if it must; the value keeps its own width
+		m_name.setFlexGrow(1);
+		m_name.setWidth(1);
+		m_name.setLongMode(LV_LABEL_LONG_MODE_WRAP);
+		m_name.setText(name);
+		m_value.addStyle(components.graph_legend_value);
+		m_value.setWidth(LV_SIZE_CONTENT);
+		m_value.setVisible(false);
+
+		setShown(true);
+	}
+
+	std::string_view Graph::LegendItem::getName() const
+	{
+		return m_name.getText();
+	}
+
+	void Graph::LegendItem::setName(std::string_view name)
+	{
+		m_name.setText(name);
+	}
+
+	void Graph::LegendItem::setValue(std::string_view value)
+	{
+		m_value.setText(value);
+		m_value.setVisible(!value.empty());
+	}
+
+	std::string_view Graph::LegendItem::getValue() const
+	{
+		return m_value.getText();
+	}
+
+	void Graph::LegendItem::setColor(lv_color_t color)
+	{
+		lv_obj_t* swatch = m_swatch.getRootPtr();
+		lv_obj_set_style_bg_color(swatch, color, LV_PART_MAIN);
+		lv_obj_set_style_border_color(swatch, color, LV_PART_MAIN);
+	}
+
+	void Graph::LegendItem::setShown(bool shown)
+	{
+		setState(LV_STATE_CHECKED, shown);
+		m_swatch.setState(LV_STATE_CHECKED, shown);
+	}
 
 	Graph::Graph(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
@@ -27,6 +97,11 @@ namespace UI
 		init();
 	}
 
+	Graph::~Graph()
+	{
+		Themes::removeThemeListener(m_themeListener);
+	}
+
 	void Graph::init()
 	{
 		ZoneScoped;
@@ -37,8 +112,10 @@ namespace UI
 		m_chartCont.setSize(LV_PCT(100), LV_PCT(100));
 		m_chartCont.setFlexGrow(1);
 
-		m_legend.setSize(LV_SIZE_CONTENT, LV_PCT(100));
+		// The legend's width is the theme's (graph_legend), so it never depends on the names in it
+		m_legend.setHeight(LV_PCT(100));
 		m_legend.addStyle(Themes::getComponentStyles().graph_legend);
+		m_legend.setFlexFlow(LV_FLEX_FLOW_COLUMN);
 
 		m_columnDsc = {LV_GRID_CONTENT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 		m_rowDsc = {LV_GRID_FR(1), LV_GRID_CONTENT, LV_GRID_TEMPLATE_LAST};
@@ -65,10 +142,9 @@ namespace UI
 		m_chart.setType(LV_CHART_TYPE_LINE);
 		m_chart.setUpdateMode(LV_CHART_UPDATE_MODE_SHIFT);
 
-		// Legend
-		m_legend.setFlexFlow(LV_FLEX_FLOW_COLUMN);
-
 		showLegend(true);
+
+		m_themeListener = Themes::addThemeListener([this] { applyThemeColors(); });
 	}
 
 	void Graph::showLegend(const bool show)
@@ -121,29 +197,28 @@ namespace UI
 		m_chart.setPointCount(count);
 	}
 
+	void Graph::setValueFormat(std::string format)
+	{
+		m_valueFormat = std::move(format);
+	}
+
 	void Graph::setSeriesCount(size_t count)
 	{
 		ZoneScoped;
 		UI_LOCK();
-		if (count == m_series.size())
+		if (count >= m_series.size())
 		{
 			return;
 		}
-		if (count < m_series.size())
+		for (size_t i = count; i < m_series.size(); ++i)
 		{
-			for (size_t i = count; i < m_series.size(); ++i)
-			{
-				m_chart.removeSeries(m_series[i].series);
-			}
-			m_series.resize(count);
-			return;
+			m_chart.removeSeries(m_series[i].series);
 		}
-		m_series.reserve(count);
+		m_series.resize(count);
 	}
 
-	const Graph::series_t* Graph::getSeries(const size_t index)
+	const Graph::series_t* Graph::getSeries(const size_t index) const
 	{
-		ZoneScoped;
 		if (index >= m_series.size())
 		{
 			LOG_DBG("Series index out of range");
@@ -152,55 +227,34 @@ namespace UI
 		return &m_series[index];
 	}
 
-	bool Graph::createSeries(lv_color_t color, const std::string& displayName)
+	lv_color_t Graph::seriesColor(size_t index)
+	{
+		const Themes::Theme* theme = Themes::getCurrentTheme();
+		if (theme == nullptr)
+		{
+			return lv_color_white();
+		}
+		return theme->getColors().series[index % Themes::SERIES_COLOR_COUNT];
+	}
+
+	bool Graph::createSeries(const std::string& displayName)
 	{
 		ZoneScoped;
 		UI_LOCK();
+		const size_t index = getSeriesCount();
+		const lv_color_t color = seriesColor(index);
 		lv_chart_series_t* series = m_chart.addSeries(color, LV_CHART_AXIS_PRIMARY_Y);
-
 		if (series == nullptr)
 		{
 			LOG_ERROR("Failed to create series");
 			return false;
 		}
 
-		size_t index = getSeriesCount();
-
-		auto legendObj = std::make_unique<legend_obj_t>(fmt::format("legend_obj_{}", index), m_legend);
-
-		/**
-		 * Spent some time on this to make the legend buttons all the same width but shrink to the smallest required
-		 * width to display the text without wrapping. Couldn't get lvgl to play ball so am leaving that for now.
-		 *
-		 * Currently the legend options will all be the width of the legend container which has is min width set in
-		 * `DefaultTheme.cpp`.
-		 */
-		legendObj->setSize(LV_PCT(100), LV_SIZE_CONTENT);
-		legendObj->setText(displayName);
-		legendObj->setStyleBgColor(color, LV_STATE_CHECKED);
-		lv_obj_set_style_bg_grad_dir(legendObj->getRootPtr(), LV_GRAD_DIR_NONE, LV_STATE_CHECKED);
-		legendObj->addStyle(Themes::getLvglStyles().border);
-		legendObj->addStyle(Themes::getLvglStyles().bg_light, LV_STATE_DEFAULT);
-		legendObj->addStyle(Themes::getLvglStyles().text, LV_STATE_CHECKED);
-		legendObj->setCheckable(true);
-		legendObj->setChecked(true);
-		legendObj->addClickedCallback(legendEvent, this);
-		legendObj->setUserData((void*)(uintptr_t)index);
-		m_series.emplace_back(series, color, std::move(legendObj));
-		return true;
-	}
-
-	bool Graph::updateSeriesColor(const size_t index, lv_color_t color)
-	{
-		ZoneScoped;
-		UI_LOCK();
-		series_t* series = (series_t*)getSeries(index);
-		if (series == nullptr)
-		{
-			LOG_WARN("Cannot update series, series not found");
-			return false;
-		}
-		setSeriesColor(*series, color);
+		auto item = std::make_unique<LegendItem>(fmt::format("legend_item_{}", index), m_legend, displayName);
+		item->setColor(color);
+		item->setUserData(reinterpret_cast<void*>(static_cast<uintptr_t>(index)));
+		item->addEventCallback(legendEvent, LV_EVENT_CLICKED, this);
+		m_series.push_back({series, std::move(item)});
 		return true;
 	}
 
@@ -208,14 +262,13 @@ namespace UI
 	{
 		ZoneScoped;
 		UI_LOCK();
-		series_t* series = (series_t*)getSeries(index);
+		const series_t* series = getSeries(index);
 		if (series == nullptr)
 		{
 			LOG_WARN("Cannot update series, series not found");
 			return false;
 		}
-		auto& legendObj = series->legendObj;
-		legendObj->setText(displayName.c_str());
+		series->legendItem->setName(displayName);
 		return true;
 	}
 
@@ -230,7 +283,13 @@ namespace UI
 			return;
 		}
 		m_chart.hideSeries(series->series, !show);
-		series->legendObj->setChecked(show);
+		series->legendItem->setShown(show);
+	}
+
+	bool Graph::isSeriesShown(const size_t index) const
+	{
+		const series_t* series = getSeries(index);
+		return series != nullptr && series->legendItem->hasState(LV_STATE_CHECKED);
 	}
 
 	void Graph::clear()
@@ -245,21 +304,6 @@ namespace UI
 		m_series.clear();
 	}
 
-	void Graph::clear(const size_t index)
-	{
-		ZoneScoped;
-		UI_LOCK();
-		const series_t* series = getSeries(index);
-		if (series == nullptr)
-		{
-			LOG_WARN("Cannot clear series, series not found");
-			return;
-		}
-		m_chart.removeSeries(series->series);
-		m_chart.refresh();
-		m_series.erase(m_series.begin() + index);
-	}
-
 	void Graph::addData(const size_t index, int32_t value)
 	{
 		ZoneScoped;
@@ -271,28 +315,46 @@ namespace UI
 			return;
 		}
 		m_chart.setNextValue(series->series, value);
+		series->legendItem->setValue(formatValue(value));
 	}
 
 	void Graph::legendEvent(lv_event_t* e)
 	{
 		ZoneScoped;
 		UI_LOCK();
-		Graph* g = (Graph*)lv_event_get_user_data(e);
-		LvObj* btn = LvObj::fromPtr(lv_event_get_target_obj(e));
-		size_t index = (uintptr_t)btn->getUserData();
-
-		// checked is inverted since this callback runs before the state is updated
-		g->showSeries(index, btn->hasState(LV_STATE_CHECKED));
+		auto* graph = static_cast<Graph*>(lv_event_get_user_data(e));
+		const LvObj* item = LvObj::fromPtr(lv_event_get_current_target_obj(e));
+		const auto index = static_cast<size_t>(reinterpret_cast<uintptr_t>(item->getUserData()));
+		graph->showSeries(index, !graph->isSeriesShown(index));
 	}
 
-	void Graph::setSeriesColor(series_t& series, lv_color_t color)
+	void Graph::applyThemeColors()
 	{
 		ZoneScoped;
 		UI_LOCK();
-		m_chart.setSeriesColor(series.series, color);
-		series.color = color;
+		for (size_t i = 0; i < m_series.size(); i++)
+		{
+			const lv_color_t color = seriesColor(i);
+			m_chart.setSeriesColor(m_series[i].series, color);
+			m_series[i].legendItem->setColor(color);
+		}
+		m_chart.refresh();
+	}
 
-		series.legendObj->setStyleBgColor(color, LV_STATE_CHECKED);
-		series.legendObj->setStyleBgColor(s_hiddenColor, LV_STATE_DEFAULT);
+	std::string Graph::formatValue(int32_t value) const
+	{
+		if (m_valueFormat.empty())
+		{
+			return "";
+		}
+		try
+		{
+			return fmt::format(fmt::runtime(m_valueFormat), value);
+		}
+		catch (const fmt::format_error& e)
+		{
+			LOG_WARN("Graph value format \"{:s}\": {:s}", m_valueFormat, e.what());
+			return "";
+		}
 	}
 } // namespace UI

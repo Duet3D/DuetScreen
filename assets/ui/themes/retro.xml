@@ -1,10 +1,12 @@
 <!--
   Retro: a vintage control panel. Cream and dark brown, chunky dark outlines and hard drop shadows, burnt orange for
-  actions and olive for standby. A chosen button is pressed in: its shadow gone, it is tinted.
+  actions and olive for standby. A chosen button is pressed in: its shadow gone, it sits lower.
 -->
 <theme name="retro" extends="base">
 	<palette primary_hue="55" secondary_hue="115" chroma="0.035" dark="false">
-		<color name="bg_dark" lightness="0.9"/>
+		<color name="bg_dark" lightness="0.9" when="light"/>
+		<!-- The hard shadows: dark brown in light mode, near black in dark mode -->
+		<color name="shadow" from="text" when="light"/>
 		<color name="primary_muted" chroma="0.06"/>
 	</palette>
 
@@ -23,15 +25,16 @@
 	<styles>
 		<!-- Dark outlines and hard shadows -->
 		<style name="card" border_color="#text" shadow_width="0" shadow_offset_x="4" shadow_offset_y="4"
-			   shadow_color="#text" shadow_opa="100%"/>
+			   shadow_color="#shadow" shadow_opa="100%"/>
 		<style name="modal" shadow_width="0" shadow_spread="0" shadow_offset_x="6" shadow_offset_y="6"
-			   shadow_color="#text" shadow_opa="100%"/>
+			   shadow_color="#shadow" shadow_opa="100%"/>
 		<style name="tool_list_tool" border_color="#border" shadow_width="0" shadow_offset_x="0" shadow_offset_y="0"
 			   shadow_opa="0"/>
 		<style name="btn" border_color="#text" shadow_width="0" shadow_offset_x="3" shadow_offset_y="3"
-			   shadow_color="#text" shadow_opa="100%"/>
-		<!-- Pressed in: no shadow, and tinted -->
-		<style name="btn_checked" outline_width="0" shadow_opa="0"/>
+			   shadow_color="#shadow" shadow_opa="100%"/>
+		<!-- Pressed in: no shadow, moved down onto where it was, and tinted; a tab stays in line with the others -->
+		<style name="btn_checked" outline_width="0" shadow_opa="0" translate_x="2" translate_y="2"/>
+		<style name="tab_btn" translate_x="0" translate_y="0"/>
 		<style name="action_btn" border_color="#text"/>
 		<style name="heater_standby" border_color="#text"/>
 		<style name="heater_off" border_color="#text"/>
@@ -59,7 +62,7 @@
 		<style name="gauge_arc_indic" arc_rounded="false"/>
 		<style name="list_btn" border_color="#border"/>
 		<style name="estop" radius="0" border_color="#text" border_width="2" shadow_width="0" shadow_offset_x="3"
-			   shadow_offset_y="3" shadow_color="#text" shadow_opa="100%"/>
+			   shadow_offset_y="3" shadow_color="#shadow" shadow_opa="100%"/>
 
 		<!-- Files and folders follow the restyled buttons -->
 		<style name="folder" copy="btn"/>

@@ -4,15 +4,22 @@
 -->
 <theme name="neon" extends="base">
 	<palette primary_hue="345" secondary_hue="95" chroma="0.03" dark="true">
-		<!-- Bright, saturated accents: they are drawn on the dark screen, not filled behind text -->
-		<color name="primary" lightness="0.72" chroma="0.19"/>
-		<color name="secondary" lightness="0.88" chroma="0.17"/>
-		<color name="primary_muted" from="primary" lightness="0.36" chroma="0.12"/>
-		<color name="secondary_muted" from="secondary" lightness="0.38" chroma="0.08"/>
-		<!-- A darker screen, for the glow -->
-		<color name="bg_dark" lightness="0.12"/>
-		<color name="bg" lightness="0.165"/>
-		<color name="bg_light" lightness="0.22"/>
+		<!-- Saturated accents, drawn as outlines and text rather than filled behind text: bright on the dark screen,
+			 deep enough to read on a light one -->
+		<color name="primary" chroma="0.19"/>
+		<color name="secondary" chroma="0.17"/>
+		<color name="primary" lightness="0.72" when="dark"/>
+		<color name="secondary" lightness="0.88" when="dark"/>
+		<color name="primary" lightness="0.56" when="light"/>
+		<color name="secondary" lightness="0.6" when="light"/>
+		<color name="primary_muted" from="primary" lightness="0.36" chroma="0.12" when="dark"/>
+		<color name="secondary_muted" from="secondary" lightness="0.38" chroma="0.08" when="dark"/>
+		<color name="primary_muted" from="primary" lightness="0.9" chroma="0.06" when="light"/>
+		<color name="secondary_muted" from="secondary" lightness="0.9" chroma="0.06" when="light"/>
+		<!-- Dark: a darker screen, for the glow -->
+		<color name="bg_dark" lightness="0.12" when="dark"/>
+		<color name="bg" lightness="0.165" when="dark"/>
+		<color name="bg_light" lightness="0.22" when="dark"/>
 	</palette>
 
 	<styles>
@@ -36,7 +43,8 @@
 			   shadow_color="#secondary"/>
 		<style name="heater_off" shadow_width="0"/>
 		<style name="heater_fault" text_color="#text" shadow_color="#error"/>
-		<style name="unhomed" bg_color="#bg_light" text_color="#warning" recolor="#warning" shadow_color="#warning"/>
+		<style name="unhomed" bg_color="#bg_light" border_color="#secondary" text_color="#secondary" recolor="#secondary"
+			   shadow_color="#secondary"/>
 
 		<!-- Pressed: brighten a little -->
 		<style name="pressed" recolor="0xffffff" recolor_opa="25"/>

@@ -1,7 +1,7 @@
 /*
  * DsGraph.h
  *
- * <ds_graph>: a line graph of a History (see Binding/History.h), with a legend whose buttons show and hide series. Its
+ * <ds_graph>: a line graph of a History (see Binding/History.h), with a legend whose entries show and hide series. Its
  * attributes are in registerXml().
  *
  * With `legend_min_width`, the legend shows only while the graph is at least that wide, so a narrow graph keeps its

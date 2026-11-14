@@ -42,6 +42,10 @@ namespace UI::Xml::Api
 		std::string fonts;							// The fonts; empty if none
 		std::string lvglWidgets;					// A sample of LVGL's widgets; empty if none
 		std::string home;							// The home screen; empty if none
+		std::string otherMode;						// "dark" or "light": the mode the user can switch a
+													// customisable theme to; empty if it can't be
+		std::string homeOtherMode;					// The home screen in that mode; empty if none
+		std::string lvglWidgetsOtherMode;			// LVGL's widgets in that mode; empty if none
 		std::map<std::string, std::string> styles;	// Style name → its swatch
 		std::map<std::string, std::string> widgets; // Widget name → its example
 	};

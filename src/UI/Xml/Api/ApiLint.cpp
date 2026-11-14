@@ -427,6 +427,7 @@ namespace UI::Xml::Api
 					for (const auto& style : styles->children)
 					{
 						checkConsts(style, context);
+						checkNoThemeConsts(style, context);
 					}
 				}
 
@@ -1096,6 +1097,32 @@ namespace UI::Xml::Api
 					if (name.ends_with("text_font") && !m_fonts.contains(*value))
 					{
 						issue(context, element, fmt::format("no font `{:s}`", *value));
+					}
+				}
+			}
+
+			/**
+			 * A style in a component's `<styles>` is built once, when the component is loaded, so a theme's colour or
+			 * const in it (`#primary`, `#radius`) isn't the theme's: it may be unset then, and it doesn't follow a
+			 * theme change. What depends on the theme belongs in a theme style.
+			 */
+			void checkNoThemeConsts(const Element& style, const Context& context)
+			{
+				for (const auto& [name, raw] : style.attrs)
+				{
+					auto value = resolve(raw, style, context);
+					if (!value || !value->starts_with('#') || isHexColour(*value))
+					{
+						continue;
+					}
+					const std::string constName = value->substr(1);
+					if (m_consts.contains(constName) && !context.def->consts.contains(constName))
+					{
+						issue(context,
+							  style,
+							  fmt::format("`{:s}` is the theme's: a component's own style doesn't follow the theme, so "
+										  "put it in a theme style",
+										  *value));
 					}
 				}
 			}

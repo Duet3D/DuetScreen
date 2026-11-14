@@ -20,6 +20,8 @@
 #pragma once
 
 #include "Color.h"
+#include <array>
+#include <cstddef>
 #include <functional>
 #include <optional>
 #include <string>
@@ -28,6 +30,9 @@
 
 namespace UI::Themes
 {
+	/** How many colours a theme has for the series of a graph; more series reuse them in order */
+	inline constexpr size_t SERIES_COLOR_COUNT = 8;
+
 	/** The named colours of a theme */
 	struct ThemeColors
 	{
@@ -51,6 +56,10 @@ namespace UI::Themes
 		Color success; // Success state
 		Color warning; // Warning state
 		Color error;   // Error state
+
+		/** A graph's series in turn (series_1, series_2, …): the accents' hues first, then hues as far from those
+			as can be, all of one lightness so that no line stands out, readable on a card */
+		std::array<Color, SERIES_COLOR_COUNT> series;
 	};
 
 	/** Call `fn(name, colour)` for every colour, with the name theme files use */

@@ -4,11 +4,16 @@
 -->
 <theme name="soft" extends="base">
 	<palette primary_hue="275" secondary_hue="170" chroma="0.05" dark="false">
-		<color name="bg_dark" lightness="0.93"/>
-		<color name="bg" lightness="1.0"/>
-		<color name="bg_light" lightness="0.955"/>
-		<color name="primary" lightness="0.72"/>
-		<color name="secondary" lightness="0.8"/>
+		<!-- Light: white cards on a pale screen, pale chips on the cards, pastel accents -->
+		<color name="bg_dark" lightness="0.93" when="light"/>
+		<color name="bg" lightness="1.0" when="light"/>
+		<color name="bg_light" lightness="0.955" when="light"/>
+		<color name="primary" lightness="0.72" when="light"/>
+		<color name="secondary" lightness="0.8" when="light"/>
+		<!-- Dark: soft, not black; the shadows can't lift anything, so cards are told apart by tone -->
+		<color name="bg_dark" lightness="0.2" when="dark"/>
+		<color name="bg" lightness="0.25" when="dark"/>
+		<color name="bg_light" lightness="0.32" when="dark"/>
 	</palette>
 
 	<fonts>

@@ -24,6 +24,7 @@
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
+#include "src/widgets/chart/lv_chart_private.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
 #include <filesystem>
@@ -130,7 +131,7 @@ namespace
 		<component presenter="test_history">
 			<view extends="lv_obj" width="100%" height="100%">
 				<ds_graph name="graph" history="presenter.samples" seconds="2" y_min="0" y_max="100" bind_y_max="presenter.limit"
-						  width="100%" height="100%"/>
+						  legend_format="{}°C" width="100%" height="100%"/>
 			</view>
 		</component>)";
 
@@ -953,7 +954,7 @@ TEST_F(TestXmlUi, GraphStartsWithTheHistoryRecordedBeforeIt)
 		*m_views.emplace_back(std::make_unique<UI::Xml::XmlView>("history", screen, "history_screen", presenter));
 	auto& g = graph(view);
 	ASSERT_EQ(g.getSeriesCount(), 1u);
-	EXPECT_EQ(g.getSeries(0)->legendObj->getText(), "A");
+	EXPECT_EQ(g.getSeries(0)->legendItem->getName(), "A");
 	EXPECT_EQ(lv_chart_get_point_count(find(g, "chart")), 20u) << "2 seconds at 10 samples a second";
 	EXPECT_EQ(g.getXRange().min, -2);
 	EXPECT_EQ(shown(g, 0, 3), (std::vector<int32_t>{1, 2, 3}));
@@ -977,7 +978,7 @@ TEST_F(TestXmlUi, GraphFollowsSeriesAndSamples)
 
 	// Renamed series update their legend
 	presenter->setSeries({"A", "Bed"});
-	EXPECT_EQ(g.getSeries(1)->legendObj->getText(), "Bed");
+	EXPECT_EQ(g.getSeries(1)->legendItem->getName(), "Bed");
 
 	// Removed series go
 	presenter->setSeries({"A"});
@@ -988,6 +989,45 @@ TEST_F(TestXmlUi, GraphFollowsSeriesAndSamples)
 	EXPECT_EQ(g.getYRange().max, 250);
 	presenter->limit.set(50);
 	EXPECT_EQ(g.getYRange().max, 100);
+}
+
+TEST_F(TestXmlUi, GraphColoursSeriesFromTheThemeAndItsLegendShowsAndHidesThem)
+{
+	installHistoryScreen();
+	auto presenter = std::make_shared<HistoryPresenter>();
+	presenter->setSeries({"A", "B"});
+	auto& view =
+		*m_views.emplace_back(std::make_unique<UI::Xml::XmlView>("history", screen, "history_screen", presenter));
+	auto& g = graph(view);
+	ASSERT_EQ(g.getSeriesCount(), 2u);
+
+	// The theme's series colours in turn, the first in the primary hue
+	const auto colors = UI::Themes::getCurrentTheme()->getColors();
+	lv_obj_t* chart = find(g, "chart");
+	EXPECT_EQ(rgb(lv_chart_get_series_color(chart, g.getSeries(0)->series)), rgb(colors.series[0]));
+	EXPECT_EQ(rgb(lv_chart_get_series_color(chart, g.getSeries(1)->series)), rgb(colors.series[1]));
+	EXPECT_NEAR(colors.series[0].getH(), colors.primary.getH(), 0.5f);
+
+	// ...which follow the theme
+	UI::Themes::Theme* neon = UI::Themes::getThemeByName("neon");
+	ASSERT_NE(neon, nullptr);
+	neon->setThemeActive();
+	EXPECT_EQ(rgb(lv_chart_get_series_color(chart, g.getSeries(0)->series)), rgb(neon->getColors().series[0]));
+	UI::Themes::getThemeByName("duetscreen")->setThemeActive();
+
+	// The legend shows each series' latest value
+	presenter->history.record([](UI::Xml::SeriesRow&, size_t i) { return static_cast<int32_t>(20 + i); });
+	EXPECT_EQ(g.getSeries(1)->legendItem->getValue(), "21°C");
+
+	// Tapping an entry hides its series, and tapping it again shows it
+	lv_obj_t* entry = g.getSeries(1)->legendItem->getRootPtr();
+	lv_obj_send_event(entry, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(g.isSeriesShown(1));
+	EXPECT_TRUE(g.isSeriesShown(0));
+	EXPECT_TRUE(g.getSeries(1)->series->hidden);
+	lv_obj_send_event(entry, LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(g.isSeriesShown(1));
+	EXPECT_FALSE(g.getSeries(1)->series->hidden);
 }
 
 TEST_F(TestXmlUi, GraphOutlivesItsHistory)

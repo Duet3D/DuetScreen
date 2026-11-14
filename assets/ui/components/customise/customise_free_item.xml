@@ -2,84 +2,80 @@
   The edit overlay over each widget of a free layout while the user customises the screen: as customise_item.xml, with
   crop-tool handles on the selected widget: a bracket on each corner and a bar on each edge. They show where to drag:
   <ds_layout> resizes the widget from a drag that starts anywhere near an edge or corner (see DsLayout.h), so they
-  needn't be hit exactly.
+  needn't be hit exactly. The theme draws the handles (customise_handle).
 -->
 <component>
 	<api>
 		<prop name="key" type="string"/>
 	</api>
 
-	<styles>
-		<style name="bar" bg_color="#highlight" bg_opa="100%" radius="0" pad_all="0"/>
-	</styles>
-
 	<view extends="customise_item" key="$key">
 		<lv_obj name="handle_nw" align="top_left" width="32" height="32" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="top_left" width="32" height="5" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 			<lv_obj align="top_left" width="5" height="32" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_ne" align="top_right" width="32" height="32" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="top_right" width="32" height="5" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 			<lv_obj align="top_right" width="5" height="32" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_se" align="bottom_right" width="32" height="32" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="bottom_right" width="32" height="5" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 			<lv_obj align="bottom_right" width="5" height="32" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_sw" align="bottom_left" width="32" height="32" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="bottom_left" width="32" height="5" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 			<lv_obj align="bottom_left" width="5" height="32" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_n" align="top_mid" width="48" height="24" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="top_mid" width="32" height="5" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_s" align="bottom_mid" width="48" height="24" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="bottom_mid" width="32" height="5" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_e" align="right_mid" width="24" height="48" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="right_mid" width="5" height="32" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="handle_w" align="left_mid" width="24" height="48" clickable="false" scrollable="false">
 			<style name="pad_zero"/>
 			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
 			<lv_obj align="left_mid" width="5" height="32" clickable="false" scrollable="false">
-				<style name="bar"/>
+				<style name="customise_handle"/>
 			</lv_obj>
 		</lv_obj>
 	</view>

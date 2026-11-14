@@ -5,11 +5,13 @@
 #include "Palette.h"
 #include <algorithm>
 #include <charconv>
+#include <cmath>
 
 namespace UI::Themes
 {
 	static constexpr float s_minColorChroma = 0.12f; // Accents are never fully grey, nor dull
 	static constexpr float s_mutedChroma = 0.6f;	 // A muted accent's chroma, as a share of its accent's
+	static constexpr float s_seriesChroma = 0.14f;	 // A graph series' chroma: colourful, whatever the theme's
 	static constexpr float s_maxLineChroma = 0.04f;	 // Text and lines are only tinted: colourful text is hard to read
 
 	void forEachColor(ThemeColors& colors, const std::function<void(std::string_view name, Color& color)>& fn)
@@ -31,6 +33,12 @@ namespace UI::Themes
 		fn("success", colors.success);
 		fn("warning", colors.warning);
 		fn("error", colors.error);
+		static constexpr std::array<std::string_view, SERIES_COLOR_COUNT> seriesNames = {
+			"series_1", "series_2", "series_3", "series_4", "series_5", "series_6", "series_7", "series_8"};
+		for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+		{
+			fn(seriesNames[i], colors.series[i]);
+		}
 	}
 
 	float ColorAdjustment::Change::apply(float value) const
@@ -72,6 +80,66 @@ namespace UI::Themes
 			return std::nullopt;
 		}
 		return change;
+	}
+
+	/** How far apart two hues are, degrees (0 to 180) */
+	static float hueDistance(float a, float b)
+	{
+		const float d = std::fmod(std::fabs(a - b), 360.0f);
+		return std::min(d, 360.0f - d);
+	}
+
+	/**
+	 * Hues for a graph's series: the primary hue, then the secondary, then, from hues spaced evenly round the circle
+	 * from the primary, each time the one farthest from those already chosen
+	 */
+	static std::array<float, SERIES_COLOR_COUNT> seriesHues(float primaryHue, float secondaryHue)
+	{
+		std::array<float, SERIES_COLOR_COUNT> candidates;
+		for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+		{
+			candidates[i] = std::fmod(primaryHue + 360.0f * static_cast<float>(i) / SERIES_COLOR_COUNT, 360.0f);
+		}
+		std::array<float, SERIES_COLOR_COUNT> hues;
+		std::array<bool, SERIES_COLOR_COUNT> used{};
+		hues[0] = primaryHue;
+		hues[1] = secondaryHue;
+		used[0] = true;
+		// The candidate the secondary hue stands in for
+		size_t nearest = 1;
+		for (size_t i = 2; i < SERIES_COLOR_COUNT; i++)
+		{
+			if (hueDistance(candidates[i], secondaryHue) < hueDistance(candidates[nearest], secondaryHue))
+			{
+				nearest = i;
+			}
+		}
+		used[nearest] = true;
+		for (size_t n = 2; n < SERIES_COLOR_COUNT; n++)
+		{
+			size_t best = 0;
+			float bestDistance = -1.0f;
+			for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+			{
+				if (used[i])
+				{
+					continue;
+				}
+				float distance = 180.0f;
+				for (size_t j = 0; j < n; j++)
+				{
+					distance = std::min(distance, hueDistance(candidates[i], hues[j]));
+				}
+				if (distance > bestDistance)
+				{
+					best = i;
+					bestDistance = distance;
+				}
+			}
+			used[best] = true;
+			hues[n] = candidates[best];
+		}
+		return hues;
 	}
 
 	/**
@@ -119,6 +187,13 @@ namespace UI::Themes
 		colors.success = Color(stateL, std::max(0.14f, in.chroma), 150);
 		colors.warning = Color(in.dark ? 0.6f : 0.76f, std::max(0.14f, in.chroma), 75); // Amber is only amber if light
 		colors.error = Color(stateL, std::max(0.18f, in.chroma), 27);
+
+		// Lines on a card: light on a dark one, darker on a light one
+		const auto hues = seriesHues(in.primaryHue, in.secondaryHue);
+		for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+		{
+			colors.series[i] = Color(in.dark ? 0.74f : 0.58f, s_seriesChroma, hues[i]);
+		}
 		return colors;
 	}
 
