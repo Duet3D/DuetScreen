@@ -27,11 +27,12 @@ namespace UI::Xml::Api
 		std::vector<Field> rowFields = {}; // For a list, the fields every row has (including `index`); else empty
 	};
 
-	/** An action a view can raise with `<action name="…">` */
+	/** An action a view can raise with `<action name="presenter.…">` */
 	struct Action
 	{
-		std::string name;		 // e.g. "fans.set_speed"
+		std::string name;		 // As XML writes it, e.g. "presenter.fans.set_speed" or "actions.heater.toggle"
 		std::string description; // What it does and what it takes
+		std::string file = {};	 // For a global action, the source file that adds it, e.g. "src/…/HeaterActions.cpp"
 	};
 
 	/** A data source: printer data published as global names */

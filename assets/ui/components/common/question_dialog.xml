@@ -3,7 +3,7 @@
   subject named by `open` is non-zero.
 
       <question_dialog open="confirm" title="confirm_title" text="confirm_text"
-                       confirm="move.confirm" close="move.close_dialog"/>
+                       confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 
   `confirm` is raised by Yes; `close` by No, or when the question is closed any other way.
 -->

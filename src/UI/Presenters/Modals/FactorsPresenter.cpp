@@ -28,18 +28,18 @@ namespace UI
 			return static_cast<uint32_t>(std::lround(percent));
 		}
 
-		/** The shared dialogs' presenter, or nullptr if there is none */
-		FactorsPresenter* sharedFactors()
-		{
-			auto* view = findView<Xml::XmlView>("factors");
-			auto* presenter = view != nullptr ? dynamic_cast<FactorsPresenter*>(view->getPresenter()) : nullptr;
-			if (presenter == nullptr)
-			{
-				LOG_WARN("There are no factor dialogs (a view called 'factors' showing factors.xml)");
-			}
-			return presenter;
-		}
 	} // namespace
+
+	FactorsPresenter* FactorsPresenter::shared()
+	{
+		auto* view = findView<Xml::XmlView>("factors");
+		auto* presenter = view != nullptr ? dynamic_cast<FactorsPresenter*>(view->getPresenter()) : nullptr;
+		if (presenter == nullptr)
+		{
+			LOG_WARN("There are no factor dialogs (a view called 'factors' showing factors.xml)");
+		}
+		return presenter;
+	}
 
 	FactorsPresenter::FactorsPresenter()
 		: XmlPresenter("factors")
@@ -96,34 +96,6 @@ namespace UI
 	{
 		m_speed.fields(f);
 		m_extrusion.fields(f);
-	}
-
-	void FactorsPresenter::registerActions()
-	{
-		Xml::Actions::addGlobal("factors.speed",
-								"Open the dialog to change the speed factor",
-								[](const Xml::ActionArgs&)
-								{
-									if (auto* factors = sharedFactors())
-									{
-										factors->openSpeed();
-									}
-								});
-		Xml::Actions::addGlobal(
-			"factors.extrusion",
-			"Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every "
-			"extruder's",
-			[](const Xml::ActionArgs& args)
-			{
-				auto* factors = sharedFactors();
-				if (factors == nullptr)
-				{
-					return;
-				}
-				const auto* row = args.row<Xml::ToolRow>();
-				factors->openExtrusion(row != nullptr ? std::optional(static_cast<size_t>(row->number.get()))
-													  : std::nullopt);
-			});
 	}
 
 	void FactorsPresenter::openSpeed()

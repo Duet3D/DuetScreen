@@ -11,7 +11,7 @@
 <component>
 	<api>
 		<prop name="page" type="string" default=""/>
-		<prop name="action" type="string" default="nav.open"/>
+		<prop name="action" type="string" default="actions.navigation.open"/>
 		<prop name="label_tag" type="string" default=""/>
 		<prop name="icon" type="string" default=""/>
 		<prop name="flash" type="string" default=""/>

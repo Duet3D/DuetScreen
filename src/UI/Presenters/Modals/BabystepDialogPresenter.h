@@ -2,7 +2,7 @@
  * BabystepDialogPresenter.h
  *
  * Behaviour for the shared babystepping dialog (assets/ui/components/modals/babystep_dialog.xml), which any view opens
- * with the global action `babystep.open` (registerActions()). The babystepping inside it is babystep.xml, with its own
+ * with the global action `actions.babystep.open` (BabystepActions.cpp). The babystepping inside it is babystep.xml, with its own
  * presenter (Common/BabyStepPresenter.h).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
@@ -25,8 +25,8 @@ namespace UI
 		/** Declare the dialog's field */
 		void fields(Xml::FieldVisitor& f) override;
 
-		/** Register `babystep.open` as a global action, for every view */
-		static void registerActions();
+		/** The shared dialog's presenter: the view called `babystep_dialog`'s; nullptr, with a warning, if there is none */
+		static BabystepDialogPresenter* shared();
 
 		/** Open the dialog */
 		void open();

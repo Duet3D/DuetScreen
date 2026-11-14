@@ -12,7 +12,7 @@
 		<style name="pad_zero"/>
 		<ds_button name="button" text="$label" width="content" height="content">
 			<style name="pad_tiny"/>
-			<action trigger="clicked" name="gcode" arg="$gcode"/>
+			<action trigger="clicked" name="actions.gcode.send" arg="$gcode"/>
 		</ds_button>
 	</view>
 </component>

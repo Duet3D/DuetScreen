@@ -9,10 +9,10 @@
 		<lv_label name="name" bind_text="name" flex_grow="1" long_mode="dots"/>
 		<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
 			<style name="action_btn"/>
-			<action trigger="clicked" name="customise.load_saved"/>
+			<action trigger="clicked" name="presenter.customise.load_saved"/>
 		</ds_button>
 		<ds_button name="delete" translation_tag="tr.customise.delete" icon="clear.png">
-			<action trigger="clicked" name="customise.ask_delete"/>
+			<action trigger="clicked" name="presenter.customise.ask_delete"/>
 		</ds_button>
 	</view>
 </component>

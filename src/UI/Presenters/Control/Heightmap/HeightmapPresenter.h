@@ -5,7 +5,7 @@
  * height map files on the printer, and their statistics.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
- * (docs/XML_UI_API.md). Levelling and probing use the global `gcode` action (G32, G29).
+ * (docs/XML_UI_API.md). Levelling and probing use the global `actions.gcode.send` action (G32, G29).
  */
 
 #pragma once

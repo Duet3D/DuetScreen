@@ -59,7 +59,7 @@ namespace UI::Xml
 							"content is laid out in the dialog's card, which the lv_obj attributes apply to. Unless "
 							"`in_place`, it is deleted with the widget it was written in.",
 			 .example = R"(<ds_modal name="file_dialog" bind_open="dialog" width="70%" height="content">
-	<action trigger="dismissed" name="files.close_dialog"/>
+	<action trigger="dismissed" name="presenter.files.close_dialog"/>
 	…the dialog's content…
 </ds_modal>)",
 			 .attributes =

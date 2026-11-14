@@ -19,7 +19,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | List | A dynamic-length list of rows; each row has its own subjects, and may have lists of its own | [Binding/List.h](../src/UI/Xml/Binding/List.h) |
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
-| Action | A named request from XML (`<action name="…">`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
+| Action | A named request from XML (`<action name="presenter.…">` or `"actions.<group>.…"`) handled in C++ | [View/Actions.h](../src/UI/Xml/View/Actions.h) |
 | Widget | A DuetScreen XML element backed by C++, e.g. `ds_button`, `ds_list`, `ds_modal`; each registers a spec of its attributes | [Widgets/](../src/UI/Widgets), [reference](XML_UI_API.md#widgets) |
 | Page | A view inside a screen, opened by name: `<ds_view name="control" view="control"/>` | [Widgets/DsView.h](../src/UI/Widgets/Layout/DsView.h), [Navigation.h](../src/UI/Core/Navigation.h) |
 | Slot | A place whose widgets the user chooses: `<ds_layout slot="dashboard"/>` | [Widgets/DsLayout.h](../src/UI/Widgets/Layout/DsLayout.h) |
@@ -93,7 +93,7 @@ In XML, a page of a screen is a `<ds_view>`:
 
 `view` names the XML component shown, with its presenter. Every `<ds_view>` is registered with Navigation under its `name`:
 
-- `<action name="nav.open" arg="control"/>` opens it (also `nav.home` and `nav.back`)
+- `<action name="actions.navigation.open" arg="control"/>` opens it (also `actions.navigation.home` and `actions.navigation.back`)
 - C++ finds it with `findView<Xml::XmlView>("control")`, e.g. the shared `numberpad`
 - modals open over the view called `main_window` (`getModalHost()`)
 
@@ -173,7 +173,7 @@ Then add `/boot/ui/my-fans/fan_card.xml`, which here shows the speed as text and
 		<lv_label bind_text="name" flex_grow="1"/>
 		<lv_label bind_text="actual" bind_text-fmt="%d%%"/>
 		<ds_button text="50%">
-			<action trigger="clicked" name="gcode" arg="M106 P{number} S128"/>
+			<action trigger="clicked" name="actions.gcode.send" arg="M106 P{number} S128"/>
 		</ds_button>
 	</view>
 </component>
@@ -249,7 +249,7 @@ A dialog is a `<ds_modal>` whose subject says whether it is open, so the present
 
 ```xml
 <ds_modal name="file_dialog" bind_open="dialog" open_value="start_print" width="70%" height="content">
-    <action trigger="dismissed" name="files.close_dialog"/>
+    <action trigger="dismissed" name="presenter.files.close_dialog"/>
     …
 </ds_modal>
 ```
@@ -271,25 +271,25 @@ A value with - and + and a row of presets, such as the extruder's feed distance,
 
 Numbers are typed on the number pad. There is one, shared by the whole UI: `numberpad.xml`, hosted in the home screen as `<ds_view name="numberpad" view="numberpad"/>`. A presenter asks it for a number with `Services::askNumber({.header, .min, .max, .value, .onConfirm})`, or for digits and dots, such as an IP address, with `Services::askText({...})` ([Services.h](../src/UI/Xml/Runtime/Services.h)); a `ds_slider` with `numberpad="true"` asks it when its value is tapped. It answers one question at a time, and closes when the user confirms, dismisses it, or changes tab.
 
-A dialog that keeps a number pad beside its own controls, as the speed and extrusion factor dialogs (`factors_dialog.xml`) do, places `numberpad_panel.xml` and owns a `NumberEntry` for it ([NumberEntry.h](../src/UI/Xml/View/NumberEntry.h)), as a value selector owns a `ValueSelector`. Any view opens those dialogs with the global actions `factors.speed` and `factors.extrusion`.
+A dialog that keeps a number pad beside its own controls, as the speed and extrusion factor dialogs (`factors_dialog.xml`) do, places `numberpad_panel.xml` and owns a `NumberEntry` for it ([NumberEntry.h](../src/UI/Xml/View/NumberEntry.h)), as a value selector owns a `ValueSelector`. Any view opens those dialogs with the global actions `actions.factors.speed` and `actions.factors.extrusion`.
 
-A dialog the whole UI shares is hosted once by the home screen, from `modals/`, and opened with a global action, so any view, and any widget the user places, can open it: the number pad, the factor dialogs, babystepping (`babystep.open`) and the question before cancelling the job (`job.ask_cancel`, which cancels only if the user says so).
+A dialog the whole UI shares is hosted once by the home screen, from `modals/`, and opened with a global action, so any view, and any widget the user places, can open it: the number pad, the factor dialogs, babystepping (`actions.babystep.open`) and the question before cancelling the job (`actions.job.ask_cancel`, which cancels only if the user says so).
 
 When the user closes it another way (tapping outside, the back button) it raises `dismissed`, and the presenter clears the subject. It is shown over the main window but belongs to the view it is written in: its actions go to that view's presenter, and it is deleted with that view.
 
 ### Actions
 
 ```xml
-<action trigger="clicked" name="fans.set_speed" arg="100"/>
+<action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
 ```
 
-An action is resolved like a name: first the presenter of the nearest enclosing view, then the global actions. A handler can find the rows the widget is inside: `args.row<FanRow>()`, or from a heater row both `args.row<ToolHeaterRow>()` and `args.row<ToolRow>()`.
+An action's name says where it is: `presenter.<action>` is the presenter of the nearest enclosing view that handles it (then the next view out), and `actions.<group>.<action>` is a global action, added in `<Group>Actions.cpp`. A handler can find the rows the widget is inside: `args.row<FanRow>()`, or from a heater row both `args.row<ToolHeaterRow>()` and `args.row<ToolRow>()`.
 
 `trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...), `value_confirmed` (an edit finished) or `dismissed` (a `<ds_modal>` was closed by the user).
 
-`arg` may contain placeholders: `{value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{number} S{value}"`.
+`arg` may contain placeholders: `{event.value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{number} S{event.value}"`.
 
-The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program; the tool and heater actions are in [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp), `factors.speed` and `factors.extrusion`, which open the shared speed and extrusion factor dialogs, in [FactorsPresenter.cpp](../src/UI/Presenters/Modals/FactorsPresenter.cpp), the E-stop's `estop.dragged` in [EStopAction.cpp](../src/UI/Presenters/Sidebar/EStopAction.cpp), the job's `job.pause`, `job.resume` and `job.print_again` in [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp), the shared dialogs' in `src/UI/Presenters/Modals/`, and `customise.start` in [CustomisePresenter.cpp](../src/UI/Presenters/Customise/CustomisePresenter.cpp).
+The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program. A group's actions are added in `<Group>Actions.cpp`, so the name says where to look: `actions.heater.toggle` is in [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp), `actions.factors.speed` in [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp), `actions.gcode.send` in [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp); the reference lists each with its file, and a test keeps the rule.
 
 ## Layouts and widgets
 
@@ -393,7 +393,7 @@ A user bundle adds a widget the same way, and a slot for it to go in if none fit
 
 ### Customising on the screen
 
-*Settings › Display › Customise* starts customising the home screen (the global action `customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it anywhere it fits (sliding along a widget in its way) or along its strip. A tap on an empty place marks it, and a tap on the mark opens the widget pool to add a widget there, or as near as there is room. While *Snap* is on, a dragged edge near another widget's edge (lined up with it, touching it, or the gap away) or the area's snaps to it, and a guide line shows what it snapped to ([Snap.h](../src/UI/Xml/Layout/Snap.h)). The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, turns snapping on or off, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be; files and new folders are flushed to the card before a save counts as done).
+*Settings › Display › Customise* starts customising the home screen (the global action `actions.customise.start`). Every placed widget is covered by an edit overlay: a tap selects it, and a drag moves it anywhere it fits (sliding along a widget in its way) or along its strip. A tap on an empty place marks it, and a tap on the mark opens the widget pool to add a widget there, or as near as there is room. While *Snap* is on, a dragged edge near another widget's edge (lined up with it, touching it, or the gap away) or the area's snaps to it, and a guide line shows what it snapped to ([Snap.h](../src/UI/Xml/Layout/Snap.h)). The selected dashboard widget shows crop-tool handles on its corners and edges; a drag that starts near an edge (or a corner) moves it, so the handles needn't be hit exactly, and the middle always moves the whole widget. A toolbar adds, configures and removes widgets, turns snapping on or off, undoes, resets the slot, and ends customising, keeping the changes or throwing them away. Changes show at once; they are saved only at the end, safely (a copy of the old file is kept as `.bak`, and read if the new one can't be; files and new folders are flushed to the card before a save counts as done).
 
 The toolbar can also save every slot's layout under a name, typed when saving (letters, digits, spaces, `-` and `_`), and load one of them again, or delete it. A saved layout is one file, `/boot/ui/saved/<name>.json`, holding each slot's layout. Loading it is one change, which can be undone, and is kept only when customising ends with *Done*.
 

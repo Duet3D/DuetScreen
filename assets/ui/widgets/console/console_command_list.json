@@ -1,0 +1,20 @@
+{
+  "component": "console_command_list",
+  "title_tag": "tr.widget.console_command_list",
+  "description_tag": "tr.widget.console_command_list_desc",
+  "category_tag": "tr.widget.category_console",
+  "icon": "console.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      458,
+      278
+    ],
+    "min": [
+      272,
+      136
+    ]
+  }
+}

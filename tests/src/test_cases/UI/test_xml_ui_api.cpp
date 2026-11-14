@@ -227,6 +227,23 @@ TEST_F(XmlUiApi, BuiltInBundleUsesOnlyNamesTheUiProvides)
 	}
 }
 
+/* A global action's name says where to look: `actions.<group>.<action>` is added in `<Group>Actions.cpp` */
+TEST_F(XmlUiApi, GlobalActionsAreAddedInTheirGroupsFile)
+{
+	const auto reference = UI::Xml::Api::build();
+	ASSERT_FALSE(reference.globalActions.empty());
+	for (const auto& action : reference.globalActions)
+	{
+		ASSERT_TRUE(action.name.starts_with("actions.")) << action.name;
+		const std::string rest = action.name.substr(std::string_view("actions.").size());
+		const std::string group = rest.substr(0, rest.find('.'));
+		std::string stem = std::filesystem::path(action.file).stem().string();
+		std::transform(stem.begin(), stem.end(), stem.begin(), [](unsigned char c) { return std::tolower(c); });
+		EXPECT_NE(rest.find('.'), std::string::npos) << action.name << " has no group";
+		EXPECT_EQ(stem, group + "actions") << action.name << " is added in " << action.file;
+	}
+}
+
 /* A user bundle's mistakes are found, each where it is made */
 TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 {
@@ -244,8 +261,8 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<lv_label bind_text="no_such_subject"/>
 		<style name="no_such_style"/>
 		<ds_button translation_tag="tr.no.such.key">
-			<action name="no.such_action"/>
-			<action name="fans.set_speed" trigger="clickd"/>
+			<action name="presenter.no.such_action"/>
+			<action name="presenter.fans.set_speed" trigger="clickd"/>
 		</ds_button>
 		<ds_list list="om.fans" item="lint_fan"/>
 		<lint_dialog open="no_such_open"/>
@@ -257,6 +274,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<ds_list list="om.fans" key="index" value="2" item="lint_plain"/>
 		<lv_label translation_tag="fan.max"/>
 		<lv_label bind_text="om.fans[0].name|default:fine_tune.fan"/>
+		<ds_button><action name="fans.set_speed"/></ds_button>
 	</view>
 </component>)";
 
@@ -270,7 +288,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	<view extends="lv_obj">
 		<lv_label bind_text="rpm"/>
 		<lv_label bind_text="rpmx"/>
-		<ds_button><action name="gcode" arg="M106 P{index} S{value} X{nothing}"/></ds_button>
+		<ds_button><action name="actions.gcode.send" arg="M106 P{index} S{event.value} X{nothing}"/></ds_button>
 	</view>
 </component>)";
 
@@ -317,7 +335,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:3: no subject `no_such_subject` (in lint_screen)",
 		"lint_screen.xml:4: no style `no_such_style` (in lint_screen)",
 		"lint_screen.xml:5: no translation `tr.no.such.key` (in lint_screen)",
-		"lint_screen.xml:6: no action `no.such_action` (in lint_screen)",
+		"lint_screen.xml:6: no action `presenter.no.such_action` (in lint_screen)",
 		"lint_screen.xml:7: no trigger `clickd` (in lint_screen)",
 		"lint_screen.xml:11: <no_such_widget> is no widget, component or binding (in lint_screen)",
 		"lint_screen.xml:12: no const or colour `#no_such_const` (in lint_screen)",
@@ -326,6 +344,8 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
 		"lint_screen.xml:17: `fan.max`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:18: `fine_tune.fan`: translation keys are written `tr.<key>` (in lint_screen)",
+		"lint_screen.xml:19: `fans.set_speed`: actions are written `presenter.<action>` or `actions.<group>.<action>` "
+		"(in lint_screen)",
 		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));

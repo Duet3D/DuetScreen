@@ -44,10 +44,10 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
 			<bind_style name="action_btn" subject="confirmations" ref_value="0"/>
-			<action trigger="clicked" name="object_cancel.cancel_current"/>
+			<action trigger="clicked" name="presenter.object_cancel.cancel_current"/>
 		</ds_button>
 
 		<question_dialog name="confirm_object_cancel" open="confirm" title="confirm_title" text="confirm_text"
-						 confirm="object_cancel.confirm" close="object_cancel.close_dialog"/>
+						 confirm="presenter.object_cancel.confirm" close="presenter.object_cancel.close_dialog"/>
 	</view>
 </component>

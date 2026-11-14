@@ -2,7 +2,7 @@
  * JobCancelPresenter.h
  *
  * Behaviour for the shared question before cancelling the job (assets/ui/components/modals/job_cancel.xml), which
- * any view asks with the global action `job.ask_cancel` (registerActions()). Cancelling also turns the heaters off, so
+ * any view asks with the global action `actions.job.ask_cancel` (Dashboard/JobActions.cpp). Cancelling also turns the heaters off, so
  * the job is never cancelled without asking.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
@@ -25,8 +25,8 @@ namespace UI
 		/** Declare the question's field */
 		void fields(Xml::FieldVisitor& f) override;
 
-		/** Register `job.ask_cancel` as a global action, for every view */
-		static void registerActions();
+		/** The shared question's presenter: the view called `job_cancel`'s; nullptr, with a warning, if there is none */
+		static JobCancelPresenter* shared();
 
 		/** Ask whether to cancel the job */
 		void ask();

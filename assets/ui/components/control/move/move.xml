@@ -40,6 +40,6 @@
 		<move_jog_choices name="bottombar" width="100%" height="content"/>
 
 		<question_dialog name="confirm_msgbox" open="confirm" title="confirm_title" text="confirm_text"
-						 confirm="move.confirm" close="move.close_dialog"/>
+						 confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 	</view>
 </component>

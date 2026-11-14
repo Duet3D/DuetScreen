@@ -13,7 +13,7 @@
 
 	<view extends="ds_modal" name="file_browser_dialog" bind_open="dialog" width="70%" height="content" align="center"
 		  style_max_height="70%" flex_flow="column">
-		<action trigger="dismissed" name="files.close_dialog"/>
+		<action trigger="dismissed" name="presenter.files.close_dialog"/>
 
 		<lv_obj name="header" width="100%" height="content" flex_flow="row">
 			<style name="bg_color_header"/>
@@ -93,14 +93,14 @@
 		<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 			<ds_button name="delete" text="&#xF2ED;" width="content" height="content">
 				<bind_flag_if_eq subject="dialog_can_delete" flag="hidden" ref_value="0"/>
-				<action trigger="clicked" name="files.ask_delete"/>
+				<action trigger="clicked" name="presenter.files.ask_delete"/>
 			</ds_button>
 			<ds_button name="cancel" translation_tag="tr.common.cancel" height="content" flex_grow="1">
-				<action trigger="clicked" name="files.close_dialog"/>
+				<action trigger="clicked" name="presenter.files.close_dialog"/>
 			</ds_button>
 			<ds_button name="ok" translation_tag="tr.common.ok" height="content" flex_grow="1">
 				<style name="action_btn"/>
-				<action trigger="clicked" name="files.confirm"/>
+				<action trigger="clicked" name="presenter.files.confirm"/>
 			</ds_button>
 		</lv_obj>
 	</view>

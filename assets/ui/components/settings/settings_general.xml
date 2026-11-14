@@ -26,14 +26,14 @@
 		<lv_label name="row_label_2" translation_tag="tr.settings.language"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="language" options="languages" selected="language" action="settings.language"
+		<settings_dropdown name="language" options="languages" selected="language" action="presenter.settings.language"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_3" translation_tag="tr.settings.keyboard_layout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="keyboard_layout" options="keyboard_layouts" selected="keyboard_layout"
-						  action="settings.keyboard_layout"
+						  action="presenter.settings.keyboard_layout"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 
@@ -44,7 +44,7 @@
 				   bind_value="brightness" height="content" send="change"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
-			<action trigger="value_confirmed" name="settings.brightness"/>
+			<action trigger="value_confirmed" name="presenter.settings.brightness"/>
 		</ds_slider>
 		<lv_label name="row_label_5" translation_tag="tr.settings.screensaver_timeout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -53,7 +53,7 @@
 				   numberpad="true" min="0" max="300" bind_value="screensaver_timeout" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
-			<action trigger="value_confirmed" name="settings.screensaver_timeout"/>
+			<action trigger="value_confirmed" name="presenter.settings.screensaver_timeout"/>
 		</ds_slider>
 
 		<lv_label name="row_label_6" translation_tag="tr.settings.show_confirmation_dialogs"
@@ -63,7 +63,7 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="6" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.confirmations"/>
+			<action trigger="value_changed" name="presenter.settings.confirmations"/>
 		</ds_toggle>
 		<lv_label name="row_label_7" translation_tag="tr.settings.move_machine_position_mode"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -72,13 +72,13 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="7" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="machine_position_mode" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.machine_position_mode"/>
+			<action trigger="value_changed" name="presenter.settings.machine_position_mode"/>
 		</ds_toggle>
 		<lv_label name="row_label_8" translation_tag="tr.settings.job_progress_source"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="job_progress_source" options="progress_sources" selected="progress_source"
-						  action="settings.progress_source"
+						  action="presenter.settings.progress_source"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
 
@@ -95,13 +95,13 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="10" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="connected_message" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.connected_message"/>
+			<action trigger="value_changed" name="presenter.settings.connected_message"/>
 		</ds_toggle>
 		<lv_label name="row_label_11" translation_tag="tr.settings.notification_level"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="notification_level" options="notification_levels" selected="notification_level"
-						  action="settings.notification_level"
+						  action="presenter.settings.notification_level"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_12" translation_tag="tr.settings.notification_timeout"
@@ -111,7 +111,7 @@
 				   numberpad="true" min="0" max="5000" bind_value="notification_timeout" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="12" style_grid_cell_y_align="center">
-			<action trigger="value_confirmed" name="settings.notification_timeout"/>
+			<action trigger="value_confirmed" name="presenter.settings.notification_timeout"/>
 		</ds_slider>
 		<lv_label name="row_label_13" translation_tag="tr.settings.notification_auto_close_error"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -120,11 +120,11 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="13" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="error_notifications_stay" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.error_notifications_stay"/>
+			<action trigger="value_changed" name="presenter.settings.error_notifications_stay"/>
 		</ds_toggle>
 
 		<question_dialog name="language_confirm" open="language_confirm" title="language_confirm_title"
-						 text="language_confirm_text" confirm="settings.restart_in_language"
-						 close="settings.keep_language"/>
+						 text="language_confirm_text" confirm="presenter.settings.restart_in_language"
+						 close="presenter.settings.keep_language"/>
 	</view>
 </component>

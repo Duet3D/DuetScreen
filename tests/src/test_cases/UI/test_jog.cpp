@@ -41,7 +41,7 @@ TEST_F(TestJog, EveryViewSharesTheChosenDistance)
 	ASSERT_GE(distances.size(), 2u);
 
 	// Chosen in one view…
-	UI::Xml::Actions::dispatch(distance(a, 1), "move.distance", "");
+	UI::Xml::Actions::dispatch(distance(a, 1), "actions.jog.distance", "");
 	pump();
 
 	// …it is chosen in the other, and every jog goes that far

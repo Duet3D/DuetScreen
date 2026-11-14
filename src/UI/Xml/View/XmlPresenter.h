@@ -49,7 +49,7 @@ namespace UI::Xml
 
 	  protected:
 		/**
-		 * Handle `<action name="…">` raised in the view. Call from the constructor.
+		 * Handle `<action name="presenter.…">` raised in the view. Call from the constructor.
 		 * @param description What the action does and what it takes (`arg`, the edited value, the row it is in), for
 		 * the UI API reference
 		 */

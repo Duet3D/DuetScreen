@@ -46,7 +46,7 @@ namespace UI::Xml
 			 .example = R"(<ds_drag_button name="estop" translation_tag="tr.estop.label" icon="estop.png"
 				 hint_tag="tr.estop.prompt" width="80" height="80">
 	<style name="estop"/>
-	<action trigger="value_confirmed" name="estop.dragged"/>
+	<action trigger="value_confirmed" name="actions.estop.dragged"/>
 </ds_drag_button>)",
 			 .attributes = {{"text", "The text shown, if there is no `translation_tag`"},
 							{"translation_tag", "Translation key for the text", AttributeKind::Translation},

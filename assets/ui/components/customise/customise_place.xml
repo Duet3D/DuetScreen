@@ -11,6 +11,6 @@
 		<style name="place"/>
 		<style name="border_highlight"/>
 		<lv_label name="plus" text="+" align="center" style_text_font="font_header"/>
-		<action trigger="clicked" name="customise.open_catalogue"/>
+		<action trigger="clicked" name="actions.customise.open_catalogue"/>
 	</view>
 </component>

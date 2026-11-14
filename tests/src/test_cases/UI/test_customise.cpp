@@ -424,7 +424,7 @@ class TestCustomiseHome : public UiTestSuite
 	/** Start customising, as the Settings button does */
 	void start() const
 	{
-		UI::Xml::Actions::dispatch(m_home->getRootPtr(), "customise.start", "");
+		UI::Xml::Actions::dispatch(m_home->getRootPtr(), "actions.customise.start", "");
 		update();
 	}
 
@@ -765,7 +765,7 @@ TEST_F(TestCustomiseHome, LayoutsAreSavedUnderANameLoadedAndDeleted)
 	tapToolbar("load");
 	ASSERT_TRUE(shownOnScreen(loadDialog));
 	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(loadDialog, "none"))); // Nothing saved yet
-	UI::Xml::Actions::dispatch(UI::findView("customise")->getRootPtr(), "customise.close_load", "");
+	UI::Xml::Actions::dispatch(UI::findView("customise")->getRootPtr(), "presenter.customise.close_load", "");
 	update();
 
 	editor.select("dashboard", "temperature_graph");

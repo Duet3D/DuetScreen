@@ -9,7 +9,7 @@
   ],
   "props": {
     "page": "control",
-    "action": "nav.open",
+    "action": "actions.navigation.open",
     "label_tag": "tr.side_bar.control",
     "icon": "control.png"
   }

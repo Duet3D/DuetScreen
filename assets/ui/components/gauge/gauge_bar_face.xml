@@ -21,7 +21,7 @@
 
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="column">
 		<style name="pad_zero"/>
-		<action trigger="clicked" name="gauges.edit"/>
+		<action trigger="clicked" name="actions.gauge.edit"/>
 
 		<lv_obj name="header" width="100%" height="content" clickable="false" scrollable="false">
 			<style name="pad_zero"/>

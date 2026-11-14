@@ -13,12 +13,16 @@
 #include "Control/Temperature/ExtruderPresenter.h"
 #include "Control/Temperature/HeaterActions.h"
 #include "Control/Temperature/TemperaturePresenter.h"
+#include "Control/Temperature/ToolActions.h"
+#include "Customise/CustomiseActions.h"
 #include "Customise/CustomisePresenter.h"
 #include "Dashboard/JobActions.h"
 #include "FileBrowser/FileBrowserPresenter.h"
 #include "Gauge/GaugeActions.h"
 #include "HardwareTest/HardwareTestPresenter.h"
+#include "Modals/BabystepActions.h"
 #include "Modals/BabystepDialogPresenter.h"
+#include "Modals/FactorsActions.h"
 #include "Modals/FactorsPresenter.h"
 #include "Modals/JobCancelPresenter.h"
 #include "Modals/NumberPadPresenter.h"
@@ -29,7 +33,7 @@
 #include "Settings/GeneralSettingsPresenter.h"
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
-#include "Sidebar/EStopAction.h"
+#include "Sidebar/EStopActions.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
 namespace UI
@@ -47,12 +51,12 @@ namespace UI
 		HeaterActions::registerAll();
 		GaugeActions::registerAll();
 		JogActions::registerAll();
-		FactorsPresenter::registerActions();
-		EStopAction::registerAll();
+		ToolActions::registerAll();
+		FactorsActions::registerAll();
+		EStopActions::registerAll();
 		JobActions::registerAll();
-		JobCancelPresenter::registerActions();
-		BabystepDialogPresenter::registerActions();
-		CustomisePresenter::registerActions();
+		BabystepActions::registerAll();
+		CustomiseActions::registerAll();
 
 		/* Presenters */
 		Xml::Presenters::add<FanPresenter>("fans");

@@ -15,7 +15,7 @@
 			<ds_button name="heater_name" bind_text="name" width="100%" height="content">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
-				<action trigger="clicked" name="heaters.toggle"/>
+				<action trigger="clicked" name="actions.heater.toggle"/>
 			</ds_button>
 			<lv_label name="heater_state" bind_text="om.heat.heaters[{heater}].state|translate:tr.temperature.status" width="100%" height="content" style_text_align="center"/>
 		</lv_obj>
@@ -31,8 +31,8 @@
 				<style name="input"/>
 				<style name="temperature_bar_indic" selector="indicator"/>
 				<bind_state_if_eq subject="om.heat.heaters[{heater}].state" state="checked" ref_value="active"/>
-				<action trigger="clicked" name="heaters.set_active"/>
-				<action trigger="value_confirmed" name="heaters.set_active"/>
+				<action trigger="clicked" name="actions.heater.set_active"/>
+				<action trigger="value_confirmed" name="actions.heater.set_active"/>
 			</ds_bar_marker>
 			<ds_bar_marker name="standby_temperature" bar="current_temperature" bind_value="standby"
 						   bind_min="scale_min" bind_max="scale_max" label_format="{} °C" align="left_mid" y="31">
@@ -40,8 +40,8 @@
 				<style name="input"/>
 				<style name="temperature_bar_indic" selector="indicator"/>
 				<bind_state_if_eq subject="om.heat.heaters[{heater}].state" state="checked" ref_value="standby"/>
-				<action trigger="clicked" name="heaters.set_standby"/>
-				<action trigger="value_confirmed" name="heaters.set_standby"/>
+				<action trigger="clicked" name="actions.heater.set_standby"/>
+				<action trigger="value_confirmed" name="actions.heater.set_standby"/>
 			</ds_bar_marker>
 		</lv_obj>
 	</view>

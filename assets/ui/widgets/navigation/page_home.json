@@ -9,7 +9,7 @@
   ],
   "props": {
     "page": "",
-    "action": "nav.home",
+    "action": "actions.navigation.home",
     "label_tag": "tr.side_bar.home",
     "icon": "home.png"
   }

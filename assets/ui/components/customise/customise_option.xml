@@ -8,7 +8,7 @@
 		<style name="pad_zero"/>
 		<ds_button name="option" bind_text="title" width="100%">
 			<bind_state_if_eq subject="chosen" state="checked" ref_value="1"/>
-			<action trigger="clicked" name="customise.choose"/>
+			<action trigger="clicked" name="presenter.customise.choose"/>
 		</ds_button>
 	</view>
 </component>

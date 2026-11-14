@@ -20,7 +20,7 @@
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="om.tools[{number}].state|eq:active" state="checked" ref_value="1"/>
 				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
-				<action trigger="clicked" name="tools.toggle"/>
+				<action trigger="clicked" name="actions.tool.toggle"/>
 			</ds_button>
 			<lv_label name="tool_state" bind_text="om.tools[{number}].state|translate:tr.temperature.status" width="content" height="content"/>
 			<lv_obj name="tool_info_spacer" height="0" flex_grow="1"/>
@@ -37,19 +37,19 @@
 				<ds_dropdown name="filament_dropdown" bind_options="filaments" bind_text="filament_text"
 							 height="content" style_min_width="content" flex_grow="1">
 					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="value_changed" name="temperature.pick_filament"/>
+					<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
 				</ds_dropdown>
 				<ds_button name="filament_change" bind_text="change_text" width="content" height="100%">
 					<style name="action_btn"/>
 					<bind_flag_if_eq subject="change_shown" flag="hidden" ref_value="0"/>
 					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="clicked" name="temperature.change_filament"/>
+					<action trigger="clicked" name="presenter.temperature.change_filament"/>
 				</ds_button>
 				<ds_button name="filament_load_unload" translation_tag="tr.filament.unload" width="content" height="100%">
 					<style name="action_btn"/>
 					<bind_state_if_eq subject="filament_loaded" state="disabled" ref_value="0"/>
 					<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="clicked" name="temperature.unload_filament"/>
+					<action trigger="clicked" name="presenter.temperature.unload_filament"/>
 				</ds_button>
 			</lv_obj>
 		</lv_obj>

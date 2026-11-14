@@ -45,7 +45,7 @@ namespace UI::Xml
 			 .example =
 				 R"(<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
 		   numberpad="true" send="change" width="100%">
-	<action trigger="value_confirmed" name="settings.brightness"/>
+	<action trigger="value_confirmed" name="presenter.settings.brightness"/>
 </ds_slider>)",
 			 .attributes = {{"min", "Bottom of the range, may have a fraction (default 0)"},
 							{"max", "Top of the range, may have a fraction (default 100)"},

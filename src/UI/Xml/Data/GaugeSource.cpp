@@ -108,7 +108,7 @@ namespace UI::Xml
 				detail,
 				"A line about the value, e.g. \"Target 215°C\", \"Off\" or \"1200 RPM\"; empty if there is none");
 		f.field("state", state, "A heater's status key: active, standby, off, fault, tuning, offline; else empty");
-		f.field("editable", editable, "1 if gauges.edit changes it: a heater's target, a fan's speed, a factor");
+		f.field("editable", editable, "1 if actions.gauge.edit changes it: a heater's target, a fan's speed, a factor");
 	}
 
 	void GaugeRow::show(const Values& values)

@@ -8,6 +8,7 @@
 #include "UI/Xml/Om/OmName.h"
 #include "UI/Xml/Om/OmPath.h"
 #include "UI/Xml/Runtime/Translations.h"
+#include "UI/Xml/View/Actions.h"
 #include "XmlTree.h"
 #include "helix_xml.h"
 #include "src/xml/lv_xml_widget.h"
@@ -905,7 +906,8 @@ namespace UI::Xml::Api
 				}
 			}
 
-			/** Report the `{name}` placeholders of an action's `arg` that aren't subjects (`{value}` is the edit) */
+			/** Report the `{name}` placeholders of an action's `arg` that aren't subjects (`{event.value}` is the edit)
+			 */
 			void checkPlaceholders(const std::string& arg, const Element& element, const Context& context)
 			{
 				for (size_t open = arg.find('{'); open != std::string::npos; open = arg.find('{', open + 1))
@@ -916,7 +918,7 @@ namespace UI::Xml::Api
 						return;
 					}
 					const std::string name = arg.substr(open + 1, close - open - 1);
-					if (name != "value")
+					if (name != "event.value")
 					{
 						checkSubject(name, element, context);
 					}
@@ -961,6 +963,16 @@ namespace UI::Xml::Api
 			/** Report an action that no enclosing presenter, nor the globals, handle */
 			void checkAction(const std::string& name, const Element& element, const Context& context)
 			{
+				if (!name.starts_with(Actions::PRESENTER_PREFIX) && !name.starts_with(Actions::GLOBAL_PREFIX))
+				{
+					issue(context,
+						  element,
+						  fmt::format("`{:s}`: actions are written `{:s}<action>` or `{:s}<group>.<action>`",
+									  name,
+									  Actions::PRESENTER_PREFIX,
+									  Actions::GLOBAL_PREFIX));
+					return;
+				}
 				if (m_globalActions.contains(name))
 				{
 					return;

@@ -9,7 +9,7 @@
  *   - the job's progress, and the speed and extrusion factors, in percent
  *
  * A row's `id` names what it shows by what the user configured (`bed.0`, `tool.1.0`, `fan.2`), so a widget keeps
- * showing the same thing as other rows come and go. `gauges.edit` (see UI/Presenters/Gauge/GaugeActions.h) changes
+ * showing the same thing as other rows come and go. `actions.gauge.edit` (see UI/Presenters/Gauge/GaugeActions.h) changes
  * a row's value where that means something: a heater's target, a fan's speed, a factor.
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
@@ -42,7 +42,7 @@ namespace UI::Xml
 			int32_t target = 0;	   // What it is heading for; `min` if nothing
 			std::string detail;	   // A line about it, e.g. "Target 215°C" or "1200 RPM"; empty for none
 			std::string state;	   // A heater's status key (active, standby, off, fault, …); empty otherwise
-			bool editable = false; // Whether gauges.edit changes it
+			bool editable = false; // Whether actions.gauge.edit changes it
 		};
 
 		/** Declare the row's fields */
@@ -62,7 +62,7 @@ namespace UI::Xml
 		IntSubject target;			// What it is heading for; `min` if nothing
 		StringSubject<48> detail;	// A line about it; empty for none
 		StringSubject<16> state;	// A heater's status key; empty otherwise
-		IntSubject editable;		// 1 if gauges.edit changes it
+		IntSubject editable;		// 1 if actions.gauge.edit changes it
 	};
 
 	/** Publishes the `gauges` list */

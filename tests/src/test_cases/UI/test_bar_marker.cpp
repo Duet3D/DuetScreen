@@ -47,8 +47,8 @@ class TestBarMarker : public UiTestSuite
 					<ds_bar name="bar" min="0" max="100" width="100%" height="10" align="center"/>
 					<ds_bar_marker name="marker" bar="bar" min="0" max="100" bind_value="target"
 								   label_format="{} C" align="left_mid" y="-30">
-						<action trigger="clicked" name="test.tapped"/>
-						<action trigger="value_confirmed" name="test.set"/>
+						<action trigger="clicked" name="presenter.test.tapped"/>
+						<action trigger="value_confirmed" name="presenter.test.set"/>
 					</ds_bar_marker>
 				</view>
 			</component>)");

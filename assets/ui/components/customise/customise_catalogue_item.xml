@@ -10,6 +10,6 @@
 			<style name="text_emphasis"/>
 		</lv_label>
 		<lv_label name="description" bind_text="description" width="100%" long_mode="wrap"/>
-		<action trigger="clicked" name="customise.add"/>
+		<action trigger="clicked" name="presenter.customise.add"/>
 	</view>
 </component>

@@ -17,25 +17,25 @@
 		<ds_button name="customise" translation_tag="tr.settings.customise_start"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
-			<action trigger="clicked" name="customise.start"/>
+			<action trigger="clicked" name="actions.customise.start"/>
 		</ds_button>
 
 		<lv_label name="row_label_1" translation_tag="tr.settings.theme"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="theme" options="themes" selected="theme" action="settings.theme"
+		<settings_dropdown name="theme" options="themes" selected="theme" action="presenter.settings.theme"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_2" translation_tag="tr.settings.font"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="font" options="fonts" selected="font" action="settings.font"
+		<settings_dropdown name="font" options="fonts" selected="font" action="presenter.settings.font"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_3" translation_tag="tr.settings.icons"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="icons" options="icon_sets" selected="icon_set" action="settings.icon_set"
+		<settings_dropdown name="icons" options="icon_sets" selected="icon_set" action="presenter.settings.icon_set"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 
@@ -50,12 +50,12 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="animations" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.animations"/>
+			<action trigger="value_changed" name="presenter.settings.animations"/>
 		</ds_toggle>
 		<lv_label name="row_label_6" translation_tag="tr.settings.screen_rotation"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="screen_rotation" options="rotations" selected="rotation" action="settings.rotation"
+		<settings_dropdown name="screen_rotation" options="rotations" selected="rotation" action="presenter.settings.rotation"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
 

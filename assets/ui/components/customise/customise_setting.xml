@@ -11,20 +11,20 @@
 		<lv_label name="title" bind_text="title" flex_grow="1"/>
 		<ds_button name="value" bind_text="value" width="50%" long_mode="dots">
 			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="button"/>
-			<action trigger="clicked" name="customise.edit_setting"/>
+			<action trigger="clicked" name="presenter.customise.edit_setting"/>
 		</ds_button>
 		<ds_textarea name="text" bind_text="value" one_line="true" width="50%">
 			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="text"/>
-			<action trigger="ready" name="customise.set_text"/>
-			<action trigger="defocused" name="customise.set_text"/>
-			<action trigger="focused" name="customise.keyboard" arg="1"/>
-			<action trigger="defocused" name="customise.keyboard" arg="0"/>
-			<action trigger="ready" name="customise.keyboard" arg="0"/>
+			<action trigger="ready" name="presenter.customise.set_text"/>
+			<action trigger="defocused" name="presenter.customise.set_text"/>
+			<action trigger="focused" name="presenter.customise.keyboard" arg="1"/>
+			<action trigger="defocused" name="presenter.customise.keyboard" arg="0"/>
+			<action trigger="ready" name="presenter.customise.keyboard" arg="0"/>
 		</ds_textarea>
 		<ds_toggle name="toggle">
 			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="switch"/>
 			<bind_state_if_eq subject="on" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="customise.toggle_setting"/>
+			<action trigger="value_changed" name="presenter.customise.toggle_setting"/>
 		</ds_toggle>
 	</view>
 </component>

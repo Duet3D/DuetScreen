@@ -65,7 +65,7 @@ namespace UI::Xml
 			 .example =
 				 R"(<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
 			 width="300">
-	<action trigger="value_changed" name="alert.input"/>
+	<action trigger="value_changed" name="presenter.alert.input"/>
 </ds_textarea>)",
 			 .attributes =
 				 {{"bind_text",

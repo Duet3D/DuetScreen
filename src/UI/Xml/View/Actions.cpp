@@ -89,7 +89,10 @@ namespace UI::Xml
 			}
 		}
 
-		/** Replace each `{name}` in `text`: `{value}` by `value` (if any), others by the subject of that name */
+		/** What the edited value is called in an action's `arg`: `{event.value}` */
+		constexpr std::string_view EVENT_VALUE = "event.value";
+
+		/** Replace each `{name}` in `text`: `{event.value}` by `value` (if any), others by the subject of that name */
 		std::string fillPlaceholders(std::string_view text, lv_xml_subject_ctx_t* scope, std::optional<float> value)
 		{
 			std::string out;
@@ -107,7 +110,7 @@ namespace UI::Xml
 				out += text.substr(pos, open - pos);
 				const std::string name(text.substr(open + 1, close - open - 1));
 				std::optional<std::string> replacement;
-				if (name == "value")
+				if (name == EVENT_VALUE)
 				{
 					replacement = value ? std::optional(fmt::format("{:g}", *value)) : std::nullopt;
 				}
@@ -136,7 +139,7 @@ namespace UI::Xml
 			const auto* binding = static_cast<const Binding*>(lv_event_get_user_data(e));
 			auto* target = static_cast<lv_obj_t*>(lv_event_get_current_target(e));
 
-			// The edited value, if any, is needed to fill {value}
+			// The edited value, if any, is needed to fill {event.value}
 			ActionArgs probe{.name = binding->name, .arg = "", .event = e, .target = target};
 			const std::string arg = fillPlaceholders(binding->arg, binding->scope, probe.value());
 			Actions::dispatch(target, binding->name, arg, e);
@@ -315,9 +318,9 @@ namespace UI::Xml
 		return it != s_targets.end() && it->second.owner != nullptr ? it->second.owner : lv_obj_get_parent(obj);
 	}
 
-	bool ActionHandlerSet::dispatch(const ActionArgs& args) const
+	bool ActionHandlerSet::dispatch(std::string_view name, const ActionArgs& args) const
 	{
-		auto it = m_handlers.find(args.name);
+		auto it = m_handlers.find(name);
 		if (it == m_handlers.end())
 		{
 			return false;
@@ -336,21 +339,25 @@ namespace UI::Xml
 			Widgets::add(
 				{.name = "lv_obj-action",
 				 .description = "Written `<action>` inside any widget: run the named action when the widget raises the "
-								"trigger event. The action is looked for in the presenters of the views the widget is "
-								"in, innermost first, then in the global actions.",
-				 .example = R"(<action trigger="value_confirmed" name="gcode" arg="M106 P{number} S{value}"/>)",
-				 .attributes = {{"name", "The action to run (required)", AttributeKind::Action},
-								{"trigger",
-								 "The event that runs it (default `clicked`): an LVGL event name such as "
-								 "`value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is "
-								 "finished), `value_tapped` (a `<ds_slider numberpad=\"own\">`'s value was tapped to "
-								 "type one) or `dismissed` (a `<ds_modal>` was closed by the user)",
-								 AttributeKind::Trigger},
-								{"arg",
-								 "Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by "
-								 "the current value of the subject `name`, looked up from where the `<action>` is "
-								 "written",
-								 AttributeKind::ActionArg}},
+								"trigger event. `presenter.<action>` is looked for in the presenters of the views the "
+								"widget is in, innermost first; `actions.<group>.<action>` is a global action.",
+				 .example =
+					 R"(<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{number} S{event.value}"/>)",
+				 .attributes =
+					 {{"name",
+					   "The action to run (required): `presenter.<action>` or `actions.<group>.<action>`",
+					   AttributeKind::Action},
+					  {"trigger",
+					   "The event that runs it (default `clicked`): an LVGL event name such as "
+					   "`value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is "
+					   "finished), `value_tapped` (a `<ds_slider numberpad=\"own\">`'s value was tapped to "
+					   "type one) or `dismissed` (a `<ds_modal>` was closed by the user)",
+					   AttributeKind::Trigger},
+					  {"arg",
+					   "Passed to the handler. `{event.value}` is replaced by the edited value, and `{name}` by "
+					   "the current value of the subject `name`, looked up from where the `<action>` is "
+					   "written",
+					   AttributeKind::ActionArg}},
 				 .exampleSubjects = {{"number", "int", "1"}}},
 				actionCreate,
 				actionApply);
@@ -403,9 +410,10 @@ namespace UI::Xml
 			}
 		}
 
-		void addGlobal(std::string name, std::string description, ActionHandler handler)
+		void addGlobal(std::string name, std::string description, ActionHandler handler, std::source_location where)
 		{
-			s_globals.add(std::move(name), std::move(description), std::move(handler));
+			s_globals.add(
+				std::string(GLOBAL_PREFIX) + name, std::move(description), std::move(handler), where.file_name());
 		}
 
 		const ActionHandlerSet& globals()
@@ -442,19 +450,34 @@ namespace UI::Xml
 			ZoneScoped;
 			const ActionArgs args{.name = name, .arg = std::string(arg), .event = event, .target = from};
 
-			// The innermost presenter that handles it
-			for (lv_obj_t* obj = from; obj != nullptr; obj = ActionArgs::outerOf(obj))
+			if (name.starts_with(PRESENTER_PREFIX))
 			{
-				auto it = s_targets.find(obj);
-				if (it != s_targets.end() && it->second.handlers != nullptr && it->second.handlers->dispatch(args))
+				// The innermost presenter that handles it
+				const std::string_view action = name.substr(PRESENTER_PREFIX.size());
+				for (lv_obj_t* obj = from; obj != nullptr; obj = ActionArgs::outerOf(obj))
+				{
+					auto it = s_targets.find(obj);
+					if (it != s_targets.end() && it->second.handlers != nullptr &&
+						it->second.handlers->dispatch(action, args))
+					{
+						return true;
+					}
+				}
+			}
+			else if (name.starts_with(GLOBAL_PREFIX))
+			{
+				if (s_globals.dispatch(name, args))
 				{
 					return true;
 				}
 			}
-
-			if (s_globals.dispatch(args))
+			else
 			{
-				return true;
+				LOG_WARN("Action '{:s}': actions are written {:s}<action> or {:s}<group>.<action>",
+						 name,
+						 PRESENTER_PREFIX,
+						 GLOBAL_PREFIX);
+				return false;
 			}
 
 			LOG_WARN("No handler for action '{:s}'", name);

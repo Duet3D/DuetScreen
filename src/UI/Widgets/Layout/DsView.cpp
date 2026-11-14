@@ -126,7 +126,8 @@ namespace UI::Xml::DsView
 			 .extends = "lv_obj",
 			 .description =
 				 "A view inside a screen, e.g. a page of the home screen, registered with navigation as its `name` "
-				 "(default: its `view`) so it can be opened with `nav.open`. A view starts hidden, like any screen "
+				 "(default: its `view`) so it can be opened with `actions.navigation.open`. A view starts hidden, like "
+				 "any screen "
 				 "that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns.",
 			 .example = R"(<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs"/>)",
 			 .attributes =

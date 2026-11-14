@@ -9,7 +9,7 @@
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="column"
 		  style_flex_cross_place="center" style_flex_track_place="center">
 		<style name="pad_zero"/>
-		<action trigger="clicked" name="gauges.edit"/>
+		<action trigger="clicked" name="actions.gauge.edit"/>
 
 		<lv_label name="title" bind_text="name" width="100%" long_mode="scroll_circular" clickable="false">
 			<style name="widget_title"/>

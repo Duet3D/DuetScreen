@@ -3,7 +3,7 @@
   page at a time (the dashboard when nothing else is open).
 
   Pages are <ds_view>s showing XML components. Each is registered with Navigation under its name, which the sidebar
-  and <action name="nav.open" arg="…"/> use. Modals open over the view called main_window (see getModalHost() in
+  and <action name="actions.navigation.open" arg="…"/> use. Modals open over the view called main_window (see getModalHost() in
   src/UI/Core/Navigation.h).
 
   The console can sit beside the main window instead of being a page: give the grid a third column (fr(5)) and move

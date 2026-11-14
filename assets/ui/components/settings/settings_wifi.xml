@@ -26,7 +26,7 @@
 					<style name="list_title"/>
 				</lv_label>
 				<ds_button name="refresh" translation_tag="tr.settings.network.refresh">
-					<action trigger="clicked" name="wifi.refresh"/>
+					<action trigger="clicked" name="presenter.wifi.refresh"/>
 				</ds_button>
 			</lv_obj>
 			<ds_list name="list" list="networks" item="settings_wifi_network" width="100%" height="content" flex_flow="column"
@@ -35,7 +35,7 @@
 
 		<ds_modal name="wifi_password_modal" bind_open="password_open" width="80%" height="content" flex_flow="column">
 			<bind_style name="above_keyboard" subject="keyboard" ref_value="1"/>
-			<action trigger="dismissed" name="wifi.close_password"/>
+			<action trigger="dismissed" name="presenter.wifi.close_password"/>
 
 			<lv_obj name="header" width="100%" height="content" flex_flow="row">
 				<style name="bg_color_header"/>
@@ -47,21 +47,21 @@
 					style_flex_cross_place="center" style_bg_opa="0" style_border_width="0">
 				<ds_textarea name="wifi_password_input" bind_text="password" one_line="true" password_mode="true"
 							 placeholder_tag="tr.settings.network.enter_password_hint" height="content" flex_grow="1">
-					<action trigger="value_changed" name="wifi.password"/>
-					<action trigger="focused" name="wifi.keyboard" arg="1"/>
-					<action trigger="defocused" name="wifi.keyboard" arg="0"/>
-					<action trigger="ready" name="wifi.keyboard" arg="0"/>
+					<action trigger="value_changed" name="presenter.wifi.password"/>
+					<action trigger="focused" name="presenter.wifi.keyboard" arg="1"/>
+					<action trigger="defocused" name="presenter.wifi.keyboard" arg="0"/>
+					<action trigger="ready" name="presenter.wifi.keyboard" arg="0"/>
 				</ds_textarea>
 				<ds_password_toggle name="show_password" textarea="wifi_password_input" height="content"/>
 			</lv_obj>
 
 			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 				<ds_button name="cancel" translation_tag="tr.common.cancel" height="content" flex_grow="1">
-					<action trigger="clicked" name="wifi.close_password"/>
+					<action trigger="clicked" name="presenter.wifi.close_password"/>
 				</ds_button>
 				<ds_button name="ok" translation_tag="tr.common.ok" height="content" flex_grow="1">
 					<style name="action_btn"/>
-					<action trigger="clicked" name="wifi.join"/>
+					<action trigger="clicked" name="presenter.wifi.join"/>
 				</ds_button>
 			</lv_obj>
 		</ds_modal>

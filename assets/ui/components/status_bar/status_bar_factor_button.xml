@@ -5,7 +5,7 @@
 <component>
 	<api>
 		<prop name="value" type="string" default="move.speed_factor"/>
-		<prop name="action" type="string" default="factors.speed"/>
+		<prop name="action" type="string" default="actions.factors.speed"/>
 		<prop name="icon" type="string" default=""/>
 	</api>
 

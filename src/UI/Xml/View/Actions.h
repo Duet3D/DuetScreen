@@ -4,12 +4,13 @@
  * Actions are how an XML view asks for something to happen. A view never calls code; it names an action:
  *
  *     <ds_button translation_tag="tr.fan.max">
- *         <action trigger="clicked" name="fans.set_speed" arg="100"/>
+ *         <action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
  *     </ds_button>
  *
- * When the trigger fires, the action is resolved from the widget outwards, like a name in a scope:
- *   1. the presenter of the nearest enclosing XmlView, then the next one out, ...
- *   2. the global actions (registered with Actions::addGlobal(), e.g. `gcode`)
+ * The name says where the action is:
+ *   - `presenter.<action>`: the presenter of the nearest enclosing XmlView that handles it, then the next one out, ...
+ *   - `actions.<group>.<action>`: a global action, added with Actions::addGlobal() in `<Group>Actions.cpp`, e.g.
+ *     `actions.gcode.send` in GcodeActions.cpp
  *
  * The handler gets an ActionArgs, which can also find the list rows the widget is inside: `args.row<FanRow>()`.
  *
@@ -17,9 +18,9 @@
  * DuetScreen widgets raise once an edit is finished (a slider is released, or a value is typed in), and `dismissed`,
  * which a `<ds_modal>` raises when the user closes it (see Widgets/DsModal.h).
  *
- * `arg` may contain `{name}` placeholders. `{value}` is the edited value; any other name is replaced by the current
- * value of the subject of that name, looked up from where the `<action>` was written (row, then presenter, then
- * global). E.g. in a fan row: `<action name="gcode" arg="M106 P{number} S{value}"/>`.
+ * `arg` may contain `{name}` placeholders. `{event.value}` is the edited value; any other name is replaced by the
+ * current value of the subject of that name, looked up from where the `<action>` was written. E.g. in a fan row:
+ * `<action name="actions.gcode.send" arg="M106 P{number} S{event.value}"/>`.
  */
 
 #pragma once
@@ -30,6 +31,7 @@
 #include <functional>
 #include <map>
 #include <optional>
+#include <source_location>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -98,23 +100,25 @@ namespace UI::Xml
 		 * @param description What the action does and what it takes (`arg`, the edited value, the row it is in), for
 		 * the UI API reference
 		 */
-		void add(std::string name, std::string description, ActionHandler handler)
+		void add(std::string name, std::string description, ActionHandler handler, std::string file = {})
 		{
-			m_handlers[std::move(name)] = Entry{std::move(description), std::move(handler)};
+			m_handlers[std::move(name)] = Entry{std::move(description), std::move(handler), std::move(file)};
 		}
 
 		/** @return whether there is a handler for `name` */
 		bool has(std::string_view name) const { return m_handlers.find(name) != m_handlers.end(); }
 
-		/** Run the handler for `args.name`. @return whether there was one */
-		bool dispatch(const ActionArgs& args) const;
+		/** Run the handler for `name` with `args`. @return whether there was one */
+		bool dispatch(std::string_view name, const ActionArgs& args) const;
 
-		/** Call `fn(name, description)` for every action, in name order */
-		void forEach(const std::function<void(std::string_view name, std::string_view description)>& fn) const
+		/** Call `fn(name, description, file)` for every action, in name order; `file` is empty if not known */
+		void forEach(
+			const std::function<void(std::string_view name, std::string_view description, std::string_view file)>& fn)
+			const
 		{
 			for (const auto& [name, entry] : m_handlers)
 			{
-				fn(name, entry.description);
+				fn(name, entry.description, entry.file);
 			}
 		}
 
@@ -124,6 +128,7 @@ namespace UI::Xml
 		{
 			std::string description; // What it does, for the UI API reference
 			ActionHandler handler;	 // Runs it
+			std::string file;		 // The source file that added it, or empty
 		};
 
 		std::map<std::string, Entry, std::less<>> m_handlers; // Actions by name
@@ -131,6 +136,12 @@ namespace UI::Xml
 
 	namespace Actions
 	{
+		/** What an action of the presenter of an enclosing view is written after: `presenter.<action>` */
+		inline constexpr std::string_view PRESENTER_PREFIX = "presenter.";
+
+		/** What a global action is written after: `actions.<group>.<action>`, added in `<Group>Actions.cpp` */
+		inline constexpr std::string_view GLOBAL_PREFIX = "actions.";
+
 		/** Register the `<action>` element and the `value_confirmed` event. Call after lv_xml_init(). */
 		void init();
 
@@ -159,11 +170,20 @@ namespace UI::Xml
 		 */
 		void setOwner(lv_obj_t* obj, lv_obj_t* owner);
 
-		/** Handle `name` everywhere it isn't handled by a presenter, replacing any earlier handler. Lasts for the life
-		 * of the program, so it may be called before init(). `description` is as for ActionHandlerSet::add(). */
-		void addGlobal(std::string name, std::string description, ActionHandler handler);
+		/**
+		 * Handle `actions.<name>` from any view, replacing any earlier handler. Lasts for the life of the program, so
+		 * it may be called before init().
+		 * @param name `<group>.<action>`, e.g. "heater.toggle"; a group's actions are added in `<Group>Actions.cpp`
+		 *        (HeaterActions.cpp), so `actions.heater.toggle` says where to look
+		 * @param description As for ActionHandlerSet::add()
+		 * @param where Where it is added, recorded for the UI API reference
+		 */
+		void addGlobal(std::string name,
+					   std::string description,
+					   ActionHandler handler,
+					   std::source_location where = std::source_location::current());
 
-		/** The global actions (see addGlobal()) */
+		/** The global actions (see addGlobal()), by their full names (`actions.<group>.<action>`) */
 		const ActionHandlerSet& globals();
 
 		/** Every name `<action trigger="…">` accepts: LVGL's event names, `value_confirmed` and `dismissed` */
@@ -171,6 +191,8 @@ namespace UI::Xml
 
 		/**
 		 * Resolve and run an action as if an `<action>` on `from` had fired (placeholders in `arg` are not filled in)
+		 * @param name As written in XML: `presenter.<action>` (the presenters of the views around `from`, innermost
+		 *        first) or `actions.<group>.<action>` (the global actions)
 		 * @return whether a handler ran
 		 */
 		bool dispatch(lv_obj_t* from, std::string_view name, std::string_view arg, lv_event_t* event = nullptr);

@@ -14,14 +14,14 @@
 					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="retract_usable" state="disabled" ref_value="0"/>
-				<action trigger="clicked" name="extruder.retract"/>
+				<action trigger="clicked" name="presenter.extruder.retract"/>
 			</ds_button>
 			<ds_button name="extrude" translation_tag="tr.extrude.extrude" icon="extrude.png"
 					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="extrude_usable" state="disabled" ref_value="0"/>
-				<action trigger="clicked" name="extruder.extrude"/>
+				<action trigger="clicked" name="presenter.extruder.extrude"/>
 			</ds_button>
 
 			<value_selector name="distance_selector" selector="distance" title="distance.title"

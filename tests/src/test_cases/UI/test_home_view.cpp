@@ -1472,7 +1472,7 @@ TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 	EXPECT_FALSE(shownOnScreen(question));
 
 	// Any view can ask it, e.g. a button placed in the sidebar
-	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "job.ask_cancel", "");
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "actions.job.ask_cancel", "");
 	EXPECT_TRUE(shownOnScreen(question));
 	UI::closeAllModals();
 }

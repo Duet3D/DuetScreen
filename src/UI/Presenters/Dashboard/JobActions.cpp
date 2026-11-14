@@ -6,6 +6,7 @@
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
+#include "UI/Presenters/Modals/JobCancelPresenter.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include <fmt/format.h>
@@ -31,6 +32,16 @@ namespace UI::JobActions
 									if (!last.empty())
 									{
 										Xml::Services::sendGcode(fmt::format("M23 \"{:s}\"\nM24\n", last));
+									}
+								});
+		Xml::Actions::addGlobal("job.ask_cancel",
+								"Ask whether to cancel the job; it is cancelled, which also turns the heaters off, "
+								"only if the user says so",
+								[](const Xml::ActionArgs&)
+								{
+									if (auto* question = JobCancelPresenter::shared())
+									{
+										question->ask();
 									}
 								});
 	}

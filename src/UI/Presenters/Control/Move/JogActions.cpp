@@ -25,7 +25,7 @@ namespace UI::JogActions
 
 	void registerAll()
 	{
-		Xml::Actions::addGlobal("move.distance",
+		Xml::Actions::addGlobal("jog.distance",
 								"Use that jog distance. From a row of `jog.distances`.",
 								[](const Xml::ActionArgs& args)
 								{
@@ -34,7 +34,7 @@ namespace UI::JogActions
 										Xml::JogSource::chooseDistance(*i);
 									}
 								});
-		Xml::Actions::addGlobal("move.feedrate",
+		Xml::Actions::addGlobal("jog.feedrate",
 								"Use that jog speed. From a row of `jog.feedrates`.",
 								[](const Xml::ActionArgs& args)
 								{
@@ -44,7 +44,7 @@ namespace UI::JogActions
 									}
 								});
 		Xml::Actions::addGlobal(
-			"move.edit_distance",
+			"jog.edit_distance",
 			"Ask for a new value for that jog distance with a number pad, and use it. From a row of `jog.distances`.",
 			[](const Xml::ActionArgs& args)
 			{
@@ -67,7 +67,7 @@ namespace UI::JogActions
 										  .asker = nullptr});
 			});
 		Xml::Actions::addGlobal(
-			"move.edit_feedrate",
+			"jog.edit_feedrate",
 			"Ask for a new value for that jog speed with a number pad, and use it. From a row of `jog.feedrates`.",
 			[](const Xml::ActionArgs& args)
 			{

@@ -28,7 +28,7 @@
 			<lv_label name="version" bind_text="version"/>
 			<ds_textarea name="serial_input" bind_text="serial" one_line="true" keyboard="none"
 						 placeholder="Enter serial number" width="100%" height="content">
-				<action trigger="ready" name="hardware_test.serial"/>
+				<action trigger="ready" name="presenter.hardware_test.serial"/>
 			</ds_textarea>
 			<lv_label name="warning" text="Invalid serial number" width="100%">
 				<bind_flag_if_eq subject="serial_invalid" flag="hidden" ref_value="0"/>
@@ -41,7 +41,7 @@
 		<lv_obj name="touch_stage" style_bg_color="0x2196f3" style_bg_opa="100%">
 			<style name="hardware_test_stage"/>
 			<bind_flag_if_not_eq subject="stage" flag="hidden" ref_value="touch"/>
-			<action trigger="clicked" name="hardware_test.touched"/>
+			<action trigger="clicked" name="presenter.hardware_test.touched"/>
 			<lv_label name="hint" text="Tap the target" x="10%"/>
 			<ds_icon name="target" folder="hardware_test" icon="touch_target.png" width="50" height="50"
 					 floating="true" style_image_recolor="0xffffff" style_image_recolor_opa="100%">
@@ -65,13 +65,13 @@
 				<lv_label name="pass" text="Pass" align="center"/>
 			</lv_obj>
 			<ds_button name="start" text="Start" width="20%" height="20%" floating="true" align="center">
-				<action trigger="clicked" name="hardware_test.start_colours"/>
+				<action trigger="clicked" name="presenter.hardware_test.start_colours"/>
 			</ds_button>
 			<lv_obj name="colour" floating="true" style_bg_opa="100%">
 				<style name="hardware_test_stage"/>
 				<bind_style_prop prop="bg_color" subject="colour"/>
 				<bind_flag_if_eq subject="colour_shown" flag="hidden" ref_value="0"/>
-				<action trigger="clicked" name="hardware_test.colour_tapped"/>
+				<action trigger="clicked" name="presenter.hardware_test.colour_tapped"/>
 			</lv_obj>
 		</lv_obj>
 
@@ -97,7 +97,7 @@
 						 flex_grow="1" style_max_height="70%"/>
 			<ds_button name="continue" bind_text="usb_button" width="30%" height="content">
 				<bind_flag_if_eq subject="usb_button_shown" flag="hidden" ref_value="0"/>
-				<action trigger="clicked" name="hardware_test.usb_continue"/>
+				<action trigger="clicked" name="presenter.hardware_test.usb_continue"/>
 			</ds_button>
 		</lv_obj>
 
@@ -111,15 +111,15 @@
 			<lv_obj name="answers" width="50%" height="50%" flex_flow="row" style_bg_opa="0" style_border_width="0">
 				<ds_button name="no" text="No" height="100%" flex_grow="1">
 					<style name="hardware_test_no"/>
-					<action trigger="clicked" name="hardware_test.buzzer_heard" arg="0"/>
+					<action trigger="clicked" name="presenter.hardware_test.buzzer_heard" arg="0"/>
 				</ds_button>
 				<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
 					<style name="hardware_test_yes"/>
-					<action trigger="clicked" name="hardware_test.buzzer_heard" arg="1"/>
+					<action trigger="clicked" name="presenter.hardware_test.buzzer_heard" arg="1"/>
 				</ds_button>
 			</lv_obj>
 			<ds_button name="play_again" text="Play Again" width="30%" height="20%">
-				<action trigger="clicked" name="hardware_test.play_buzzer"/>
+				<action trigger="clicked" name="presenter.hardware_test.play_buzzer"/>
 			</ds_button>
 		</lv_obj>
 
@@ -137,16 +137,16 @@
 				<ds_button name="no" text="No" height="100%" flex_grow="1">
 					<style name="hardware_test_no"/>
 					<bind_state_if_eq subject="speaker_answerable" state="disabled" ref_value="0"/>
-					<action trigger="clicked" name="hardware_test.speaker_heard" arg="0"/>
+					<action trigger="clicked" name="presenter.hardware_test.speaker_heard" arg="0"/>
 				</ds_button>
 				<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
 					<style name="hardware_test_yes"/>
 					<bind_state_if_eq subject="speaker_answerable" state="disabled" ref_value="0"/>
-					<action trigger="clicked" name="hardware_test.speaker_heard" arg="1"/>
+					<action trigger="clicked" name="presenter.hardware_test.speaker_heard" arg="1"/>
 				</ds_button>
 			</lv_obj>
 			<ds_button name="play_sound" text="Play Sound" width="30%" height="20%">
-				<action trigger="clicked" name="hardware_test.play_speaker"/>
+				<action trigger="clicked" name="presenter.hardware_test.play_speaker"/>
 			</ds_button>
 		</lv_obj>
 
@@ -167,11 +167,11 @@
 			<lv_obj name="buttons" width="50%" height="content" flex_flow="row" style_bg_opa="0"
 					style_border_width="0">
 				<ds_button name="restart" text="Restart" height="content" flex_grow="1">
-					<action trigger="clicked" name="hardware_test.restart"/>
+					<action trigger="clicked" name="presenter.hardware_test.restart"/>
 				</ds_button>
 				<ds_button name="exit" text="Exit" height="content" flex_grow="1">
 					<bind_flag_if_eq subject="exit_shown" flag="hidden" ref_value="0"/>
-					<action trigger="clicked" name="hardware_test.exit"/>
+					<action trigger="clicked" name="presenter.hardware_test.exit"/>
 				</ds_button>
 			</lv_obj>
 		</lv_obj>

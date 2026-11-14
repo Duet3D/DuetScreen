@@ -10,7 +10,7 @@
 		<style name="file"/>
 		<style name="folder" selector="checked"/>
 		<bind_state_if_eq subject="is_folder" state="checked" ref_value="1"/>
-		<action trigger="clicked" name="files.open"/>
+		<action trigger="clicked" name="presenter.files.open"/>
 
 		<!-- Room for a thumbnail is kept while it loads, so the text doesn't move when it arrives -->
 		<lv_obj name="thumb_box" width="72" height="72" style_pad_all="0" scrollable="false"

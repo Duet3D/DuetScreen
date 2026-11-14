@@ -63,12 +63,17 @@ namespace UI::Xml::Api
 			std::vector<Field>& m_fields; // Where fields are collected
 		};
 
-		/** The actions in `set` */
-		std::vector<Action> actionsOf(const ActionHandlerSet& set)
+		/** The actions in `set`, each name after `prefix` as XML writes it */
+		std::vector<Action> actionsOf(const ActionHandlerSet& set, std::string_view prefix)
 		{
 			std::vector<Action> actions;
-			set.forEach([&](std::string_view name, std::string_view description)
-						{ actions.push_back({.name = std::string(name), .description = std::string(description)}); });
+			set.forEach(
+				[&](std::string_view name, std::string_view description, std::string_view file)
+				{
+					actions.push_back({.name = std::string(prefix) + std::string(name),
+									   .description = std::string(description),
+									   .file = std::string(file)});
+				});
 			return actions;
 		}
 
@@ -96,8 +101,11 @@ namespace UI::Xml::Api
 				{
 					continue;
 				}
-				Presenter& entry = result.emplace_back(Presenter{
-					.name = name, .fields = {}, .actions = actionsOf(presenter->getActions()), .components = {}});
+				Presenter& entry = result.emplace_back(
+					Presenter{.name = name,
+							  .fields = {},
+							  .actions = actionsOf(presenter->getActions(), Actions::PRESENTER_PREFIX),
+							  .components = {}});
 				FieldCollector collector(entry.fields);
 				presenter->fields(collector);
 				for (const auto& [componentName, info] : getComponents())
@@ -409,7 +417,7 @@ namespace UI::Xml::Api
 		}
 		reference.sources = sources();
 		reference.triggers = Actions::triggers();
-		reference.globalActions = actionsOf(Actions::globals());
+		reference.globalActions = actionsOf(Actions::globals(), "");
 		reference.presenters = presenters();
 		for (const WidgetSpec* spec : Widgets::specs())
 		{

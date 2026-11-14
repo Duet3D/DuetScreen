@@ -22,25 +22,6 @@ namespace UI::HeaterActions
 		return active ? _("temperature.status.active") : _("temperature.status.standby");
 	}
 
-	/** `tools.toggle`: select the tool, or deselect it if it is selected */
-	static void toggleTool(const Xml::ActionArgs& args)
-	{
-		ZoneScoped;
-		const auto* row = args.row<Xml::ToolRow>();
-		if (row == nullptr)
-		{
-			LOG_WARN("tools.toggle must come from a row of the tools list");
-			return;
-		}
-		const auto number = static_cast<size_t>(row->number.get());
-		bool active = false;
-		{
-			MODEL_LOCK();
-			active = Xml::PrinterModel::tool(number)["state"].text() == "active";
-		}
-		Xml::Services::sendGcode(active ? std::string("T-1\n") : fmt::format("T{:d}\n", number));
-	}
-
 	/**
 	 * Cycle one of tool `tool`'s heaters (`slot` in its list) on: active, then standby, then off, as M568 A sets the
 	 * tool's heaters; a heater with a fault is reset instead
@@ -123,7 +104,7 @@ namespace UI::HeaterActions
 		}
 	}
 
-	/** `heaters.toggle` */
+	/** `actions.heater.toggle` */
 	static void toggleHeater(const Xml::ActionArgs& args)
 	{
 		ZoneScoped;
@@ -229,7 +210,7 @@ namespace UI::HeaterActions
 		Xml::Services::askNumber(std::move(request));
 	}
 
-	/** `heaters.set_active` (`active`) and `heaters.set_standby`: set the edited value, or ask for one */
+	/** `actions.heater.set_active` (`active`) and `actions.heater.set_standby`: set the edited value, or ask for one */
 	static void setTemperature(const Xml::ActionArgs& args, bool active)
 	{
 		if (const auto* heaterRow = args.row<Xml::ToolHeaterRow>())
@@ -261,24 +242,22 @@ namespace UI::HeaterActions
 		}
 		else
 		{
-			LOG_WARN("heaters.set_active/standby must come from a tool heater, bed or chamber row");
+			LOG_WARN("actions.heater.set_active/standby must come from a tool heater, bed or chamber row");
 		}
 	}
 
 	void registerAll()
 	{
-		Xml::Actions::addGlobal(
-			"tools.toggle", "Select the tool, or deselect it if selected. From a row of `tools`.", toggleTool);
-		Xml::Actions::addGlobal("heaters.toggle",
+		Xml::Actions::addGlobal("heater.toggle",
 								"Cycle the heater through active, standby and off. From a tool's `heaters` row, or a "
 								"row of `beds` or `chambers`.",
 								toggleHeater);
-		Xml::Actions::addGlobal("heaters.set_active",
+		Xml::Actions::addGlobal("heater.set_active",
 								"Set the heater's active temperature to the edited value (`value_confirmed`), else ask "
-								"for it with a number pad. From the same rows as `heaters.toggle`.",
+								"for it with a number pad. From the same rows as `actions.heater.toggle`.",
 								[](const Xml::ActionArgs& args) { setTemperature(args, true); });
-		Xml::Actions::addGlobal("heaters.set_standby",
-								"As `heaters.set_active`, for the standby temperature",
+		Xml::Actions::addGlobal("heater.set_standby",
+								"As `actions.heater.set_active`, for the standby temperature",
 								[](const Xml::ActionArgs& args) { setTemperature(args, false); });
 	}
 } // namespace UI::HeaterActions

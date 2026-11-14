@@ -82,10 +82,10 @@ namespace
 				<lv_label name="heater_name" bind_text="name"/>
 				<lv_label name="title" bind_text="title"/>
 				<ds_button name="edit" text="Edit">
-					<action trigger="clicked" name="test.heater"/>
+					<action trigger="clicked" name="presenter.test.heater"/>
 				</ds_button>
 				<ds_button name="send" text="Send">
-					<action trigger="clicked" name="gcode" arg="T{number} H{index} {title}"/>
+					<action trigger="clicked" name="actions.gcode.send" arg="T{number} H{index} {title}"/>
 				</ds_button>
 			</view>
 		</component>)";
@@ -223,9 +223,9 @@ namespace
 		<component presenter="test_dialog">
 			<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
 				<ds_modal name="dialog" bind_open="dialog" open_value="ask" width="50%" height="content">
-					<action trigger="dismissed" name="test.dismissed"/>
+					<action trigger="dismissed" name="presenter.test.dismissed"/>
 					<ds_button name="ok" text="OK">
-						<action trigger="clicked" name="test.ok"/>
+						<action trigger="clicked" name="presenter.test.ok"/>
 					</ds_button>
 				</ds_modal>
 				<ds_tabs name="tabs" width="300" height="100">
@@ -595,7 +595,7 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 			<view extends="lv_obj" width="100%" height="content">
 				<lv_label name="custom" bind_text="name|default:tr.fine_tune.fan"/>
 				<ds_button name="home" text="Home">
-					<action trigger="clicked" name="gcode" arg="G28 ; from {name|default:tr.fine_tune.fan} at {index}"/>
+					<action trigger="clicked" name="actions.gcode.send" arg="G28 ; from {name|default:tr.fine_tune.fan} at {index}"/>
 				</ds_button>
 			</view>
 		</component>)");

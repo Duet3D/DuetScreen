@@ -13,17 +13,17 @@
 			<ds_button name="reset" bind_text="reset_text" width="100%" flex_grow="1" style_min_height="content">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="usable" state="disabled" ref_value="0"/>
-				<action trigger="clicked" name="babystep.reset"/>
+				<action trigger="clicked" name="presenter.babystep.reset"/>
 			</ds_button>
 			<ds_button name="increment" icon="babystep_increment.png" width="100%" flex_grow="3">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="usable" state="disabled" ref_value="0"/>
-				<action trigger="clicked" name="babystep.up"/>
+				<action trigger="clicked" name="presenter.babystep.up"/>
 			</ds_button>
 			<ds_button name="decrement" icon="babystep_decrement.png" width="100%" flex_grow="3">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="usable" state="disabled" ref_value="0"/>
-				<action trigger="clicked" name="babystep.down"/>
+				<action trigger="clicked" name="presenter.babystep.down"/>
 			</ds_button>
 			<ds_list name="value_list" list="steps" item="babystep_step" width="100%" flex_grow="2"
 					 style_min_height="content" flex_flow="row" style_pad_all="0"

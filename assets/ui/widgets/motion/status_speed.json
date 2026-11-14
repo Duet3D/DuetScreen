@@ -9,6 +9,6 @@
   ],
   "props": {
     "value": "move.speed_factor",
-    "action": "factors.speed"
+    "action": "actions.factors.speed"
   }
 }

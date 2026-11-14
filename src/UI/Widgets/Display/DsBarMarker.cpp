@@ -58,8 +58,8 @@ namespace UI::Xml
 	<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
 				   label_format="{} °C" align="left_mid" y="-30">
 		<style name="input"/>
-		<action trigger="clicked" name="heaters.set_active"/>
-		<action trigger="value_confirmed" name="heaters.set_active"/>
+		<action trigger="clicked" name="actions.heater.set_active"/>
+		<action trigger="value_confirmed" name="actions.heater.set_active"/>
 	</ds_bar_marker>
 </lv_obj>)",
 			 .attributes = {{"bar",

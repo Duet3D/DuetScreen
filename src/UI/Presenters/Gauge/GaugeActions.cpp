@@ -62,14 +62,14 @@ namespace UI::GaugeActions
 				 .asker = nullptr});
 		}
 
-		/** `gauges.edit` */
+		/** `actions.gauge.edit` */
 		void edit(const Xml::ActionArgs& args)
 		{
 			ZoneScoped;
 			const auto* row = args.row<Xml::GaugeRow>();
 			if (row == nullptr)
 			{
-				LOG_WARN("gauges.edit must come from a row of the gauges list");
+				LOG_WARN("actions.gauge.edit must come from a row of the gauges list");
 				return;
 			}
 			if (row->editable.get() == 0)
@@ -81,19 +81,19 @@ namespace UI::GaugeActions
 			const auto parts = partsOf(id);
 			if (id == "speed_factor")
 			{
-				Xml::Actions::dispatch(args.target, "factors.speed", "");
+				Xml::Actions::dispatch(args.target, "actions.factors.speed", "");
 				return;
 			}
 			if (id == "extrusion_factor")
 			{
-				Xml::Actions::dispatch(args.target, "factors.extrusion", "");
+				Xml::Actions::dispatch(args.target, "actions.factors.extrusion", "");
 				return;
 			}
 
 			const auto number = parts.size() > 1 ? numberOf(parts[1]) : std::nullopt;
 			if (!number)
 			{
-				LOG_WARN("gauges.edit: '{:s}' can't be changed", id);
+				LOG_WARN("actions.gauge.edit: '{:s}' can't be changed", id);
 				return;
 			}
 			// A heater on standby has its standby temperature set, any other its active one
@@ -122,14 +122,14 @@ namespace UI::GaugeActions
 			}
 			else
 			{
-				LOG_WARN("gauges.edit: '{:s}' can't be changed", id);
+				LOG_WARN("actions.gauge.edit: '{:s}' can't be changed", id);
 			}
 		}
 	} // namespace
 
 	void registerAll()
 	{
-		Xml::Actions::addGlobal("gauges.edit",
+		Xml::Actions::addGlobal("gauge.edit",
 								"Change the value a row of `gauges` shows: a heater's target (its standby one while "
 								"on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else "
 								"asking for it on the number pad; or open the speed or extrusion factor dialog. Does "

@@ -9,21 +9,16 @@
 
 namespace UI
 {
-	namespace
+	BabystepDialogPresenter* BabystepDialogPresenter::shared()
 	{
-		/** The shared dialog's presenter: the view called `babystep_dialog`'s; nullptr if there is none */
-		BabystepDialogPresenter* sharedDialog()
+		auto* view = findView<Xml::XmlView>("babystep_dialog");
+		auto* presenter = view != nullptr ? dynamic_cast<BabystepDialogPresenter*>(view->getPresenter()) : nullptr;
+		if (presenter == nullptr)
 		{
-			auto* view = findView<Xml::XmlView>("babystep_dialog");
-			auto* presenter = view != nullptr ? dynamic_cast<BabystepDialogPresenter*>(view->getPresenter()) : nullptr;
-			if (presenter == nullptr)
-			{
-				LOG_WARN(
-					"There is no babystepping dialog (a view called 'babystep_dialog' showing babystep_dialog.xml)");
-			}
-			return presenter;
+			LOG_WARN("There is no babystepping dialog (a view called 'babystep_dialog' showing babystep_dialog.xml)");
 		}
-	} // namespace
+		return presenter;
+	}
 
 	BabystepDialogPresenter::BabystepDialogPresenter()
 		: XmlPresenter("babystep_dialog")
@@ -34,19 +29,6 @@ namespace UI
 	void BabystepDialogPresenter::fields(Xml::FieldVisitor& f)
 	{
 		f.field("open", m_open, "1 while the dialog is open");
-	}
-
-	void BabystepDialogPresenter::registerActions()
-	{
-		Xml::Actions::addGlobal("babystep.open",
-								"Open the shared babystepping dialog",
-								[](const Xml::ActionArgs&)
-								{
-									if (auto* dialog = sharedDialog())
-									{
-										dialog->open();
-									}
-								});
 	}
 
 	void BabystepDialogPresenter::open()

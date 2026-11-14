@@ -15,7 +15,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="debug_level" options="debug_levels" selected="debug_level"
-						  action="settings.debug_level"
+						  action="presenter.settings.debug_level"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_1" translation_tag="tr.settings.enable_advanced_settings"
@@ -25,7 +25,7 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="advanced_settings" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.advanced_settings"/>
+			<action trigger="value_changed" name="presenter.settings.advanced_settings"/>
 		</ds_toggle>
 		<lv_label name="row_label_2" translation_tag="tr.settings.enable_second_usb_channel"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -34,7 +34,7 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="second_usb_channel" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.second_usb_channel"/>
+			<action trigger="value_changed" name="presenter.settings.second_usb_channel"/>
 		</ds_toggle>
 		<lv_label name="row_label_3" translation_tag="tr.settings.system_logging"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -43,7 +43,7 @@
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="system_logging" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.system_logging"/>
+			<action trigger="value_changed" name="presenter.settings.system_logging"/>
 		</ds_toggle>
 
 		<lv_obj name="controls" width="50%" height="content" flex_flow="row_wrap"
@@ -51,29 +51,29 @@
 				style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
 			<ds_button name="restart" translation_tag="tr.settings.restart" width="150" height="100">
-				<action trigger="clicked" name="settings.restart"/>
+				<action trigger="clicked" name="presenter.settings.restart"/>
 			</ds_button>
 			<ds_button name="erase_and_restart" translation_tag="tr.settings.erase_and_restart" width="150" height="100">
-				<action trigger="clicked" name="settings.erase_and_restart"/>
+				<action trigger="clicked" name="presenter.settings.erase_and_restart"/>
 			</ds_button>
 			<ds_button name="reboot" translation_tag="tr.settings.reboot" width="150" height="100">
-				<action trigger="clicked" name="settings.reboot"/>
+				<action trigger="clicked" name="presenter.settings.reboot"/>
 			</ds_button>
 			<ds_button name="start_hardware_test" translation_tag="tr.settings.start_hardware_test" width="150" height="100">
-				<action trigger="clicked" name="settings.hardware_test"/>
+				<action trigger="clicked" name="presenter.settings.hardware_test"/>
 			</ds_button>
 			<ds_button name="run_buildroot_setup" translation_tag="tr.settings.run_buildroot_setup" width="150" height="100">
 				<bind_flag_if_eq subject="developer_mode" flag="hidden" ref_value="0"/>
-				<action trigger="clicked" name="settings.buildroot_setup"/>
+				<action trigger="clicked" name="presenter.settings.buildroot_setup"/>
 			</ds_button>
 			<ds_button name="clear_duetscreen_cache" translation_tag="tr.settings.clear_duetscreen_cache" width="150" height="100">
-				<action trigger="clicked" name="settings.clear_cache"/>
+				<action trigger="clicked" name="presenter.settings.clear_cache"/>
 			</ds_button>
 			<ds_button name="upgrade_from_github" translation_tag="tr.settings.upgrade_from_github" width="150" height="100">
-				<action trigger="clicked" name="settings.upgrade_from_github"/>
+				<action trigger="clicked" name="presenter.settings.upgrade_from_github"/>
 			</ds_button>
 			<ds_button name="send_config_json" translation_tag="tr.settings.send_config_to_duet" width="150" height="100">
-				<action trigger="clicked" name="settings.send_config"/>
+				<action trigger="clicked" name="presenter.settings.send_config"/>
 			</ds_button>
 		</lv_obj>
 
@@ -101,7 +101,7 @@
 				   style_grid_cell_row_pos="7" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="debug_borders_shown" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="debug_borders" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.debug_borders"/>
+			<action trigger="value_changed" name="presenter.settings.debug_borders"/>
 		</ds_toggle>
 		<lv_label name="row_label_8" translation_tag="tr.settings.enable_ssh"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -113,7 +113,7 @@
 				   style_grid_cell_row_pos="8" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="developer_mode" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="ssh" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.ssh"/>
+			<action trigger="value_changed" name="presenter.settings.ssh"/>
 		</ds_toggle>
 		<lv_label name="row_label_9" translation_tag="tr.settings.enable_adb"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -125,7 +125,7 @@
 				   style_grid_cell_row_pos="9" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="developer_mode" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="adb" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.adb"/>
+			<action trigger="value_changed" name="presenter.settings.adb"/>
 		</ds_toggle>
 		<lv_label name="row_label_10" translation_tag="tr.settings.enable_system_monitor"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -137,7 +137,7 @@
 				   style_grid_cell_row_pos="10" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="system_monitor_shown" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="system_monitor" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="settings.system_monitor"/>
+			<action trigger="value_changed" name="presenter.settings.system_monitor"/>
 		</ds_toggle>
 	</view>
 </component>

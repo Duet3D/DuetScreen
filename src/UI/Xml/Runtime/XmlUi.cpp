@@ -4,8 +4,9 @@
 
 #include "XmlUi.h"
 #include "Debug.h"
-#include "GlobalActions.h"
+#include "GcodeActions.h"
 #include "HotReload.h"
+#include "NavigationActions.h"
 #include "ReloadState.h"
 #include "Services.h"
 #include "Subscribers/ResponseSubscribers.h"
@@ -108,7 +109,8 @@ namespace UI::Xml
 		Translations::sync();
 		Actions::init();
 		Widgets::registerAll();
-		GlobalActions::registerAll();
+		GcodeActions::registerAll();
+		NavigationActions::registerAll();
 		DataSources::start();
 		i18n::setLanguageChangedCallback(onLanguageChanged);
 

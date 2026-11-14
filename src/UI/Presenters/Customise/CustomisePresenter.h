@@ -9,8 +9,8 @@
  * edit's state is global data (`customise.*`, UI/Xml/Data/CustomiseSource.h).
  *
  * The home screen hosts customise.xml once, as `customise`. Any view starts customising with the global action
- * `customise.start` (Settings does), and opens the widget pool with `customise.open_catalogue` (the place marker in
- * a free layout does).
+ * `actions.customise.start` (Settings does), and opens the widget pool with `actions.customise.open_catalogue` (the
+ * place marker in a free layout does); both are in CustomiseActions.cpp.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).
@@ -99,8 +99,8 @@ namespace UI
 		/** Declare the toolbar's and dialogs' fields */
 		void fields(Xml::FieldVisitor& f) override;
 
-		/** Register `customise.start` and `customise.open_catalogue` as global actions, for every view */
-		static void registerActions();
+		/** The shared customise presenter: the view called `customise`'s; nullptr, with a warning, if there is none */
+		static CustomisePresenter* shared();
 
 		/** The edit changed: close the dialogs when it ends */
 		void onEditorChanged() override;

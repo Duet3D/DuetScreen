@@ -104,7 +104,7 @@ Each row of `gauges`:
 | `target` | int | What it is heading for, e.g. a heater's target; `min` if nothing |
 | `detail` | text | A line about the value, e.g. "Target 215°C", "Off" or "1200 RPM"; empty if there is none |
 | `state` | text | A heater's status key: active, standby, off, fault, tuning, offline; else empty |
-| `editable` | int | 1 if gauges.edit changes it: a heater's target, a fan's speed, a factor |
+| `editable` | int | 1 if actions.gauge.edit changes it: a heater's target, a fan's speed, a factor |
 
 ### tools
 
@@ -272,33 +272,33 @@ Each row of `temperatures`:
 
 ## Global actions
 
-Actions any view can raise with `<action name="…">`, whatever its presenter. A presenter's own action of the same name is found first.
+Actions any view can raise with `<action name="actions.<group>.<action>">`, whatever its presenter. A group's actions are added in `<Group>Actions.cpp`. A presenter's own actions are written `presenter.<action>`.
 
-| Action | Description |
-| --- | --- |
-| `babystep.open` | Open the shared babystepping dialog |
-| `customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose |
-| `customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed |
-| `estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it |
-| `factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's |
-| `factors.speed` | Open the dialog to change the speed factor |
-| `gauges.edit` | Change the value a row of `gauges` shows: a heater's target (its standby one while on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else asking for it on the number pad; or open the speed or extrusion factor dialog. Does nothing for a row that isn't `editable`. |
-| `gcode` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{value}"` |
-| `heaters.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `heaters.toggle`. |
-| `heaters.set_standby` | As `heaters.set_active`, for the standby temperature |
-| `heaters.toggle` | Cycle the heater through active, standby and off. From a tool's `heaters` row, or a row of `beds` or `chambers`. |
-| `job.ask_cancel` | Ask whether to cancel the job; it is cancelled, which also turns the heaters off, only if the user says so |
-| `job.pause` | Pause the job |
-| `job.print_again` | Start the last job again |
-| `job.resume` | Resume the paused job |
-| `move.distance` | Use that jog distance. From a row of `jog.distances`. |
-| `move.edit_distance` | Ask for a new value for that jog distance with a number pad, and use it. From a row of `jog.distances`. |
-| `move.edit_feedrate` | Ask for a new value for that jog speed with a number pad, and use it. From a row of `jog.feedrates`. |
-| `move.feedrate` | Use that jog speed. From a row of `jog.feedrates`. |
-| `nav.back` | Close the top modal, or else go back a screen |
-| `nav.home` | Close every screen and show the home screens |
-| `nav.open` | Open the screen registered as `arg`, e.g. `arg="control"` |
-| `tools.toggle` | Select the tool, or deselect it if selected. From a row of `tools`. |
+| Action | Description | Added in |
+| --- | --- | --- |
+| `actions.babystep.open` | Open the shared babystepping dialog | [BabystepActions.cpp](../src/UI/Presenters/Modals/BabystepActions.cpp) |
+| `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
+| `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
+| `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
+| `actions.factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.speed` | Open the dialog to change the speed factor | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.gauge.edit` | Change the value a row of `gauges` shows: a heater's target (its standby one while on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else asking for it on the number pad; or open the speed or extrusion factor dialog. Does nothing for a row that isn't `editable`. | [GaugeActions.cpp](../src/UI/Presenters/Gauge/GaugeActions.cpp) |
+| `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"` | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
+| `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
+| `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
+| `actions.heater.toggle` | Cycle the heater through active, standby and off. From a tool's `heaters` row, or a row of `beds` or `chambers`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
+| `actions.job.ask_cancel` | Ask whether to cancel the job; it is cancelled, which also turns the heaters off, only if the user says so | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.job.pause` | Pause the job | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.job.resume` | Resume the paused job | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.jog.distance` | Use that jog distance. From a row of `jog.distances`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
+| `actions.jog.edit_distance` | Ask for a new value for that jog distance with a number pad, and use it. From a row of `jog.distances`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
+| `actions.jog.edit_feedrate` | Ask for a new value for that jog speed with a number pad, and use it. From a row of `jog.feedrates`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
+| `actions.jog.feedrate` | Use that jog speed. From a row of `jog.feedrates`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
+| `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
+| `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
+| `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"` | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
+| `actions.tool.toggle` | Select the tool, or deselect it if selected. From a row of `tools`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`, `value_tapped`
 
@@ -326,11 +326,11 @@ Each row of `steps`:
 
 | Action | Description |
 | --- | --- |
-| `babystep.down` | Move Z down by the chosen step (M290) |
-| `babystep.edit` | Ask for a new size for that step with a number pad, and remember it. From a row of `steps`. |
-| `babystep.reset` | Undo all babystepping |
-| `babystep.select` | Use that step. From a row of `steps`. |
-| `babystep.up` | Move Z up by the chosen step (M290) |
+| `presenter.babystep.down` | Move Z down by the chosen step (M290) |
+| `presenter.babystep.edit` | Ask for a new size for that step with a number pad, and remember it. From a row of `steps`. |
+| `presenter.babystep.reset` | Undo all babystepping |
+| `presenter.babystep.select` | Use that step. From a row of `steps`. |
+| `presenter.babystep.up` | Move Z up by the chosen step (M290) |
 
 ### babystep_dialog
 
@@ -342,11 +342,11 @@ Used by `babystep_dialog`.
 
 | Action | Description |
 | --- | --- |
-| `babystep.close` | Close the babystepping dialog |
+| `presenter.babystep.close` | Close the babystepping dialog |
 
 ### console
 
-Used by `console`.
+Used by `console`, `console_command_list`.
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -366,12 +366,12 @@ Each row of `gcodes`:
 
 | Action | Description |
 | --- | --- |
-| `console.clear` | Empty the text box |
-| `console.input` | What is typed changed to the text box's text (`value_changed` on it): narrow the G-code list to match |
-| `console.pick` | Put the G-code in the text box. From a row of `gcodes`. |
-| `console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code |
-| `console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
-| `console.toggle_commands` | Show or fold away the G-code list, and remember which |
+| `presenter.console.clear` | Empty the text box |
+| `presenter.console.input` | What is typed changed to the text box's text (`value_changed` on it): narrow the G-code list to match |
+| `presenter.console.pick` | Put the G-code in the text box. From a row of `gcodes`. |
+| `presenter.console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code |
+| `presenter.console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
+| `presenter.console.toggle_commands` | Show or fold away the G-code list, and remember which |
 
 ### customise
 
@@ -447,32 +447,32 @@ Each row of `saved`:
 
 | Action | Description |
 | --- | --- |
-| `customise.add` | Add the widget of the widget pool's row where it was asked for, and close the pool |
-| `customise.ask_delete` | Ask whether to delete the saved layout of the row |
-| `customise.cancel` | Stop customising and throw the changes away |
-| `customise.choose` | Set the setting being changed to the value of the row, and close the values |
-| `customise.close_catalogue` | Close the widget pool |
-| `customise.close_delete` | Close the question without deleting |
-| `customise.close_load` | Close the saved layouts |
-| `customise.close_options` | Close the values without changing the setting |
-| `customise.close_save` | Close the question without saving |
-| `customise.close_settings` | Close the settings |
-| `customise.configure` | Show the selected widget's settings |
-| `customise.delete_saved` | Delete the saved layout the question is about |
-| `customise.done` | Stop customising and keep the changes |
-| `customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
-| `customise.keyboard` | Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away |
-| `customise.load` | List the saved layouts, to load one |
-| `customise.load_saved` | Show the saved layout of the row, as one change, and close the list |
-| `customise.remove` | Remove the selected widget |
-| `customise.reset` | Put the selected widget's slot (else the dashboard) back as it was before any customising |
-| `customise.save` | Ask for a name, to save every slot's layout as it is now under it |
-| `customise.save_name` | The name being typed changed (the text area's text) |
-| `customise.save_ok` | Save under the name typed |
-| `customise.set_text` | Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is pressed |
-| `customise.snap` | Turn snapping of dragged widgets on or off, in the selected widget's slot (else the dashboard) |
-| `customise.toggle_setting` | Turn the on or off setting of the row the other way |
-| `customise.undo` | Undo the last change |
+| `presenter.customise.add` | Add the widget of the widget pool's row where it was asked for, and close the pool |
+| `presenter.customise.ask_delete` | Ask whether to delete the saved layout of the row |
+| `presenter.customise.cancel` | Stop customising and throw the changes away |
+| `presenter.customise.choose` | Set the setting being changed to the value of the row, and close the values |
+| `presenter.customise.close_catalogue` | Close the widget pool |
+| `presenter.customise.close_delete` | Close the question without deleting |
+| `presenter.customise.close_load` | Close the saved layouts |
+| `presenter.customise.close_options` | Close the values without changing the setting |
+| `presenter.customise.close_save` | Close the question without saving |
+| `presenter.customise.close_settings` | Close the settings |
+| `presenter.customise.configure` | Show the selected widget's settings |
+| `presenter.customise.delete_saved` | Delete the saved layout the question is about |
+| `presenter.customise.done` | Stop customising and keep the changes |
+| `presenter.customise.edit_setting` | Change the setting of the row: on the number pad, a choice of its values, or typed |
+| `presenter.customise.keyboard` | Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away |
+| `presenter.customise.load` | List the saved layouts, to load one |
+| `presenter.customise.load_saved` | Show the saved layout of the row, as one change, and close the list |
+| `presenter.customise.remove` | Remove the selected widget |
+| `presenter.customise.reset` | Put the selected widget's slot (else the dashboard) back as it was before any customising |
+| `presenter.customise.save` | Ask for a name, to save every slot's layout as it is now under it |
+| `presenter.customise.save_name` | The name being typed changed (the text area's text) |
+| `presenter.customise.save_ok` | Save under the name typed |
+| `presenter.customise.set_text` | Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is pressed |
+| `presenter.customise.snap` | Turn snapping of dragged widgets on or off, in the selected widget's slot (else the dashboard) |
+| `presenter.customise.toggle_setting` | Turn the on or off setting of the row the other way |
+| `presenter.customise.undo` | Undo the last change |
 
 ### dashboard_jobs, dashboard_macros, files_jobs, files_macros
 
@@ -520,14 +520,14 @@ Each row of `crumbs`:
 
 | Action | Description |
 | --- | --- |
-| `files.ask_delete` | Ask to delete the file the dialog is about |
-| `files.close_dialog` | Close the dialog without doing anything |
-| `files.confirm` | Do what the dialog asks (start the job, run the macro or delete the file), and close it |
-| `files.crumb` | Open that folder. From a row of `crumbs`. |
-| `files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
-| `files.refresh` | Close the dialog and read the folder again |
-| `files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
-| `files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
+| `presenter.files.ask_delete` | Ask to delete the file the dialog is about |
+| `presenter.files.close_dialog` | Close the dialog without doing anything |
+| `presenter.files.confirm` | Do what the dialog asks (start the job, run the macro or delete the file), and close it |
+| `presenter.files.crumb` | Open that folder. From a row of `crumbs`. |
+| `presenter.files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
+| `presenter.files.refresh` | Close the dialog and read the folder again |
+| `presenter.files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
+| `presenter.files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
 
 ### factors
 
@@ -576,13 +576,13 @@ Each row of `extrusion_dialog.factors`:
 
 | Action | Description |
 | --- | --- |
-| `factor.close` | Close the dialog named by `arg` (its id), e.g. when it is dismissed |
-| `factor.dragged` | The slider moved (`value_changed`): the number pad follows it if it is for that factor. From a row of `factors`. |
-| `factor.edit` | Type a percentage for the factor on the dialog's number pad (`value_tapped`). From a row of `factors`. |
-| `factor.set` | Use the slider's edited percentage (`value_confirmed`) for its factor. From a row of `factors`. |
-| `numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
-| `numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
-| `numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
+| `presenter.factor.close` | Close the dialog named by `arg` (its id), e.g. when it is dismissed |
+| `presenter.factor.dragged` | The slider moved (`value_changed`): the number pad follows it if it is for that factor. From a row of `factors`. |
+| `presenter.factor.edit` | Type a percentage for the factor on the dialog's number pad (`value_tapped`). From a row of `factors`. |
+| `presenter.factor.set` | Use the slider's edited percentage (`value_confirmed`) for its factor. From a row of `factors`. |
+| `presenter.numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
+| `presenter.numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
+| `presenter.numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
 
 ### fans
 
@@ -590,7 +590,7 @@ Used by `dashboard_fan`, `fans`.
 
 | Action | Description |
 | --- | --- |
-| `fans.set_speed` | Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `om.fans`. |
+| `presenter.fans.set_speed` | Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `om.fans`. |
 
 ### hardware_test
 
@@ -636,17 +636,17 @@ Each row of `failed`:
 
 | Action | Description |
 | --- | --- |
-| `hardware_test.buzzer_heard` | Whether the buzzer was heard: `arg` 1 for yes, 0 for no |
-| `hardware_test.colour_tapped` | The screen was tapped while showing a colour (`clicked`): the right half for no dead pixels, the left for some |
-| `hardware_test.exit` | Leave the hardware test |
-| `hardware_test.play_buzzer` | Sound the buzzer again |
-| `hardware_test.play_speaker` | Play a tone on the speaker; then it can be said whether it was heard |
-| `hardware_test.restart` | Run every test again, from the serial number |
-| `hardware_test.serial` | Use the serial number typed in the box (`ready`) and start the tests, else say it is invalid |
-| `hardware_test.speaker_heard` | Whether the speaker was heard: `arg` 1 for yes, 0 for no |
-| `hardware_test.start_colours` | Fill the screen with each test colour in turn |
-| `hardware_test.touched` | The screen was tapped during the touch test: record where (`clicked`) |
-| `hardware_test.usb_continue` | The user has done what the USB test asked |
+| `presenter.hardware_test.buzzer_heard` | Whether the buzzer was heard: `arg` 1 for yes, 0 for no |
+| `presenter.hardware_test.colour_tapped` | The screen was tapped while showing a colour (`clicked`): the right half for no dead pixels, the left for some |
+| `presenter.hardware_test.exit` | Leave the hardware test |
+| `presenter.hardware_test.play_buzzer` | Sound the buzzer again |
+| `presenter.hardware_test.play_speaker` | Play a tone on the speaker; then it can be said whether it was heard |
+| `presenter.hardware_test.restart` | Run every test again, from the serial number |
+| `presenter.hardware_test.serial` | Use the serial number typed in the box (`ready`) and start the tests, else say it is invalid |
+| `presenter.hardware_test.speaker_heard` | Whether the speaker was heard: `arg` 1 for yes, 0 for no |
+| `presenter.hardware_test.start_colours` | Fill the screen with each test colour in turn |
+| `presenter.hardware_test.touched` | The screen was tapped during the touch test: record where (`clicked`) |
+| `presenter.hardware_test.usb_continue` | The user has done what the USB test asked |
 
 ### heightmap
 
@@ -677,9 +677,9 @@ Each row of `maps`:
 
 | Action | Description |
 | --- | --- |
-| `heightmap.mode` | Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range) |
-| `heightmap.show` | Show that height map. From a row of `maps`. |
-| `heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
+| `presenter.heightmap.mode` | Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range) |
+| `presenter.heightmap.show` | Show that height map. From a row of `maps`. |
+| `presenter.heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
 
 ### job_cancel
 
@@ -691,8 +691,8 @@ Used by `job_cancel`.
 
 | Action | Description |
 | --- | --- |
-| `job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
-| `job.close_cancel` | Close the question without cancelling the job |
+| `presenter.job.cancel` | Cancel the job, which also turns the heaters off, and close the question |
+| `presenter.job.close_cancel` | Close the question without cancelling the job |
 
 ### move
 
@@ -736,12 +736,12 @@ Each row of `axes`:
 
 | Action | Description |
 | --- | --- |
-| `move.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
-| `move.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
-| `move.disable_motors` | Disable the motors (M18), asking first if confirmations are on |
-| `move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if confirmations are on. |
-| `move.jog` | Jog by the chosen distance at the chosen speed. `arg` is `X+`, `Z-`, …; from a row of `axes`, `+` or `-`. |
-| `move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `axes`. |
+| `presenter.move.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
+| `presenter.move.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
+| `presenter.move.disable_motors` | Disable the motors (M18), asking first if confirmations are on |
+| `presenter.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if confirmations are on. |
+| `presenter.move.jog` | Jog by the chosen distance at the chosen speed. `arg` is `X+`, `Z-`, …; from a row of `axes`, `+` or `-`. |
+| `presenter.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `axes`. |
 
 ### notifications
 
@@ -798,17 +798,17 @@ Each row of `alert.axes`:
 
 | Action | Description |
 | --- | --- |
-| `alert.cancel` | Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it |
-| `alert.choose` | Answer the alert with the choice, and close it. From a row of `alert.choices`. |
-| `alert.dismissed` | Close the alert without an answer, e.g. on `dismissed` from its `<ds_modal>` |
-| `alert.input` | Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok` |
-| `alert.jog` | Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`. |
-| `alert.keyboard` | Set `alert.keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
-| `alert.ok` | Answer the alert with OK (M292), with the value typed if one was asked for, and close it |
-| `response.close` | Close the response showing and show the next |
-| `response.open_console` | Forget every response and open the console |
-| `update.close` | Close the update prompt without installing |
-| `update.confirm` | Install the update offered (nothing when a result is showing), and close |
+| `presenter.alert.cancel` | Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it |
+| `presenter.alert.choose` | Answer the alert with the choice, and close it. From a row of `alert.choices`. |
+| `presenter.alert.dismissed` | Close the alert without an answer, e.g. on `dismissed` from its `<ds_modal>` |
+| `presenter.alert.input` | Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok` |
+| `presenter.alert.jog` | Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`. |
+| `presenter.alert.keyboard` | Set `alert.keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
+| `presenter.alert.ok` | Answer the alert with OK (M292), with the value typed if one was asked for, and close it |
+| `presenter.response.close` | Close the response showing and show the next |
+| `presenter.response.open_console` | Forget every response and open the console |
+| `presenter.update.close` | Close the update prompt without installing |
+| `presenter.update.confirm` | Install the update offered (nothing when a result is showing), and close |
 
 ### numberpad
 
@@ -825,10 +825,10 @@ Used by `numberpad`.
 
 | Action | Description |
 | --- | --- |
-| `numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
-| `numberpad.close` | Close the dialog without answering, e.g. when it is dismissed |
-| `numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
-| `numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
+| `presenter.numberpad.clear` | Empty the box of the entry named by `arg` (its id) |
+| `presenter.numberpad.close` | Close the dialog without answering, e.g. when it is dismissed |
+| `presenter.numberpad.confirm` | Confirm what has been typed in the entry named by `arg` (its id), if it can be. From the keys' `ready` (their OK key). |
+| `presenter.numberpad.typed` | What has been typed in the box of the entry named by `arg` (its id) changed. From the box's `value_changed`. |
 
 ### object_cancel
 
@@ -863,10 +863,10 @@ Each row of `objects`:
 
 | Action | Description |
 | --- | --- |
-| `object_cancel.cancel_current` | Cancel the object being printed, asking first if confirmations are on |
-| `object_cancel.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
-| `object_cancel.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
-| `object_cancel.select` | Cancel the object, or resume it if cancelled, asking first. From a row of `objects`. |
+| `presenter.object_cancel.cancel_current` | Cancel the object being printed, asking first if confirmations are on |
+| `presenter.object_cancel.close_dialog` | Answer no to the question (`confirm`): close it without doing anything |
+| `presenter.object_cancel.confirm` | Answer yes to the question (`confirm`): close it and do what it asked |
+| `presenter.object_cancel.select` | Cancel the object, or resume it if cancelled, asking first. From a row of `objects`. |
 
 ### settings_connection
 
@@ -885,11 +885,11 @@ Used by `settings_connection`.
 
 | Action | Description |
 | --- | --- |
-| `settings.connection_method` | Connect to the Duet by the method at the edited index of `connection_methods`, setting the USB-C mode to suit |
-| `settings.duet_ip` | Ask for the Duet's IP address with the number pad, and use it |
-| `settings.duet_password` | Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password |
-| `settings.poll_interval` | Poll the Duet every edited value ms |
-| `settings.usb_mode` | Use the USB-C port in the mode at the edited index of `usb_modes` |
+| `presenter.settings.connection_method` | Connect to the Duet by the method at the edited index of `connection_methods`, setting the USB-C mode to suit |
+| `presenter.settings.duet_ip` | Ask for the Duet's IP address with the number pad, and use it |
+| `presenter.settings.duet_password` | Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password |
+| `presenter.settings.poll_interval` | Poll the Duet every edited value ms |
+| `presenter.settings.usb_mode` | Use the USB-C port in the mode at the edited index of `usb_modes` |
 
 ### settings_developer
 
@@ -914,22 +914,22 @@ Used by `settings_developer`.
 
 | Action | Description |
 | --- | --- |
-| `settings.adb` | Turn ADB on (edited value 1) or off (0) (developer mode builds) |
-| `settings.advanced_settings` | Show advanced settings if the edited value is 1, else hide them |
-| `settings.buildroot_setup` | Restart the system's setup service (developer mode builds) |
-| `settings.clear_cache` | Delete the cached settings and file information, then show the storage used again |
-| `settings.debug_borders` | Show debug borders if the edited value is 1, else hide them (builds with debug borders) |
-| `settings.debug_level` | Log at the level at the edited index of `debug_levels` |
-| `settings.erase_and_restart` | Erase every setting, then restart |
-| `settings.hardware_test` | Open the hardware test |
-| `settings.reboot` | Reboot the screen |
-| `settings.restart` | Restart the DuetScreen program |
-| `settings.second_usb_channel` | Use the second USB channel if the edited value is 1, else not |
-| `settings.send_config` | Upload the screen's settings to the Duet as duetscreen.json in its system directory |
-| `settings.ssh` | Turn SSH on (edited value 1) or off (0) (developer mode builds) |
-| `settings.system_logging` | Log system messages to the console if the edited value is 1, else not |
-| `settings.system_monitor` | Show the system monitor if the edited value is 1, else hide it |
-| `settings.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start |
+| `presenter.settings.adb` | Turn ADB on (edited value 1) or off (0) (developer mode builds) |
+| `presenter.settings.advanced_settings` | Show advanced settings if the edited value is 1, else hide them |
+| `presenter.settings.buildroot_setup` | Restart the system's setup service (developer mode builds) |
+| `presenter.settings.clear_cache` | Delete the cached settings and file information, then show the storage used again |
+| `presenter.settings.debug_borders` | Show debug borders if the edited value is 1, else hide them (builds with debug borders) |
+| `presenter.settings.debug_level` | Log at the level at the edited index of `debug_levels` |
+| `presenter.settings.erase_and_restart` | Erase every setting, then restart |
+| `presenter.settings.hardware_test` | Open the hardware test |
+| `presenter.settings.reboot` | Reboot the screen |
+| `presenter.settings.restart` | Restart the DuetScreen program |
+| `presenter.settings.second_usb_channel` | Use the second USB channel if the edited value is 1, else not |
+| `presenter.settings.send_config` | Upload the screen's settings to the Duet as duetscreen.json in its system directory |
+| `presenter.settings.ssh` | Turn SSH on (edited value 1) or off (0) (developer mode builds) |
+| `presenter.settings.system_logging` | Log system messages to the console if the edited value is 1, else not |
+| `presenter.settings.system_monitor` | Show the system monitor if the edited value is 1, else hide it |
+| `presenter.settings.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start |
 
 ### settings_display
 
@@ -949,11 +949,11 @@ Used by `settings_display`.
 
 | Action | Description |
 | --- | --- |
-| `settings.animations` | Turn UI animations on (edited value 1) or off (0) |
-| `settings.font` | Use the typeface at the edited index of `fonts` |
-| `settings.icon_set` | Use the icon set at the edited index of `icon_sets` |
-| `settings.rotation` | Rotate the screen as the edited index of `rotations` says |
-| `settings.theme` | Use the theme at the edited index of `themes` |
+| `presenter.settings.animations` | Turn UI animations on (edited value 1) or off (0) |
+| `presenter.settings.font` | Use the typeface at the edited index of `fonts` |
+| `presenter.settings.icon_set` | Use the icon set at the edited index of `icon_sets` |
+| `presenter.settings.rotation` | Rotate the screen as the edited index of `rotations` says |
+| `presenter.settings.theme` | Use the theme at the edited index of `themes` |
 
 ### settings_general
 
@@ -984,19 +984,19 @@ Used by `settings_general`.
 
 | Action | Description |
 | --- | --- |
-| `settings.brightness` | Set the screen brightness to the edited value, 0-100 |
-| `settings.confirmations` | Turn confirmation dialogs on (edited value 1) or off (0) |
-| `settings.connected_message` | Show a message on connecting if the edited value is 1, else not |
-| `settings.error_notifications_stay` | Keep error notifications open until closed if the edited value is 1, else not |
-| `settings.keep_language` | Answer no to `language_confirm`: keep the language in use |
-| `settings.keyboard_layout` | Use the USB keyboard layout at the edited index of `keyboard_layouts` |
-| `settings.language` | Ask whether to restart in the language at the edited index of `languages` |
-| `settings.machine_position_mode` | Use machine coordinates (G53) for absolute moves if the edited value is 1, else not |
-| `settings.notification_level` | Show notifications from the level at the edited index of `notification_levels` up |
-| `settings.notification_timeout` | Close notifications after the edited value, in ms |
-| `settings.progress_source` | Work out job progress with the source at the edited index of `progress_sources` |
-| `settings.restart_in_language` | Answer yes to `language_confirm`: store the language picked and restart |
-| `settings.screensaver_timeout` | Set the screensaver timeout to the edited value, in seconds |
+| `presenter.settings.brightness` | Set the screen brightness to the edited value, 0-100 |
+| `presenter.settings.confirmations` | Turn confirmation dialogs on (edited value 1) or off (0) |
+| `presenter.settings.connected_message` | Show a message on connecting if the edited value is 1, else not |
+| `presenter.settings.error_notifications_stay` | Keep error notifications open until closed if the edited value is 1, else not |
+| `presenter.settings.keep_language` | Answer no to `language_confirm`: keep the language in use |
+| `presenter.settings.keyboard_layout` | Use the USB keyboard layout at the edited index of `keyboard_layouts` |
+| `presenter.settings.language` | Ask whether to restart in the language at the edited index of `languages` |
+| `presenter.settings.machine_position_mode` | Use machine coordinates (G53) for absolute moves if the edited value is 1, else not |
+| `presenter.settings.notification_level` | Show notifications from the level at the edited index of `notification_levels` up |
+| `presenter.settings.notification_timeout` | Close notifications after the edited value, in ms |
+| `presenter.settings.progress_source` | Work out job progress with the source at the edited index of `progress_sources` |
+| `presenter.settings.restart_in_language` | Answer yes to `language_confirm`: store the language picked and restart |
+| `presenter.settings.screensaver_timeout` | Set the screensaver timeout to the edited value, in seconds |
 
 ### settings_theme_preview
 
@@ -1026,10 +1026,10 @@ Each row of `swatches`:
 
 | Action | Description |
 | --- | --- |
-| `preview.chroma` | Set the palette's chroma to the edited value, e.g. 0.02 |
-| `preview.dark` | Use the dark palette if the edited value is 1, else the light one |
-| `preview.primary_hue` | Set the palette's primary hue to the edited value, 0-360 |
-| `preview.secondary_hue` | Set the palette's secondary hue to the edited value, 0-360 |
+| `presenter.preview.chroma` | Set the palette's chroma to the edited value, e.g. 0.02 |
+| `presenter.preview.dark` | Use the dark palette if the edited value is 1, else the light one |
+| `presenter.preview.primary_hue` | Set the palette's primary hue to the edited value, 0-360 |
+| `presenter.preview.secondary_hue` | Set the palette's secondary hue to the edited value, 0-360 |
 
 ### settings_wifi
 
@@ -1058,13 +1058,13 @@ Each row of `networks`:
 
 | Action | Description |
 | --- | --- |
-| `wifi.close_password` | Stop asking for a password |
-| `wifi.connect` | Disconnect from the network if on it, connect to it if known, else ask for its password to join it. From a row of `networks`. |
-| `wifi.forget` | Forget the network. From a row of `networks`. |
-| `wifi.join` | Join the network asked about with the password typed |
-| `wifi.keyboard` | Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
-| `wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
-| `wifi.refresh` | Scan for networks now |
+| `presenter.wifi.close_password` | Stop asking for a password |
+| `presenter.wifi.connect` | Disconnect from the network if on it, connect to it if known, else ask for its password to join it. From a row of `networks`. |
+| `presenter.wifi.forget` | Forget the network. From a row of `networks`. |
+| `presenter.wifi.join` | Join the network asked about with the password typed |
+| `presenter.wifi.keyboard` | Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
+| `presenter.wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
+| `presenter.wifi.refresh` | Scan for networks now |
 
 ### temperature
 
@@ -1103,9 +1103,9 @@ Each row of `tools` › `heaters`:
 
 | Action | Description |
 | --- | --- |
-| `temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `tools`. |
-| `temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`. |
-| `temperature.unload_filament` | Unload the tool's filament. From a row of `tools`. |
+| `presenter.temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `tools`. |
+| `presenter.temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`. |
+| `presenter.temperature.unload_filament` | Unload the tool's filament. From a row of `tools`. |
 
 ### temperature_extrusion
 
@@ -1138,13 +1138,13 @@ Each row of `feedrate.choices`:
 
 | Action | Description |
 | --- | --- |
-| `extruder.extrude` | Extrude the chosen distance at the chosen feed rate with the selected tool |
-| `extruder.retract` | Retract the chosen distance at the chosen feed rate with the selected tool |
-| `selector.decrement` | Step the selector named by `arg` (its id) down |
-| `selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad |
-| `selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. |
-| `selector.increment` | Step the selector named by `arg` (its id) up |
-| `selector.pick` | Use the preset. From a row of a selector's `choices`. |
+| `presenter.extruder.extrude` | Extrude the chosen distance at the chosen feed rate with the selected tool |
+| `presenter.extruder.retract` | Retract the chosen distance at the chosen feed rate with the selected tool |
+| `presenter.selector.decrement` | Step the selector named by `arg` (its id) down |
+| `presenter.selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad |
+| `presenter.selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. |
+| `presenter.selector.increment` | Step the selector named by `arg` (its id) up |
+| `presenter.selector.pick` | Use the preset. From a row of a selector's `choices`. |
 
 ## Widgets
 
@@ -1206,8 +1206,8 @@ Also takes every `lv_obj` attribute.
 	<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
 				   label_format="{} °C" align="left_mid" y="-30">
 		<style name="input"/>
-		<action trigger="clicked" name="heaters.set_active"/>
-		<action trigger="value_confirmed" name="heaters.set_active"/>
+		<action trigger="clicked" name="actions.heater.set_active"/>
+		<action trigger="value_confirmed" name="actions.heater.set_active"/>
 	</ds_bar_marker>
 </lv_obj>
 ```
@@ -1232,7 +1232,7 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_button translation_tag="tr.fan.max" icon="fan.png">
-	<action trigger="clicked" name="fans.set_speed" arg="100"/>
+	<action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
 </ds_button>
 ```
 
@@ -1259,7 +1259,7 @@ Also takes every `lv_obj` attribute.
 <ds_drag_button name="estop" translation_tag="tr.estop.label" icon="estop.png"
 				 hint_tag="tr.estop.prompt" width="80" height="80">
 	<style name="estop"/>
-	<action trigger="value_confirmed" name="estop.dragged"/>
+	<action trigger="value_confirmed" name="actions.estop.dragged"/>
 </ds_drag_button>
 ```
 
@@ -1281,7 +1281,7 @@ Also takes every `lv_dropdown` attribute.
 
 ```xml
 <ds_dropdown bind_options="filaments" bind_text="filament_text">
-	<action trigger="value_changed" name="temperature.pick_filament"/>
+	<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
 </ds_dropdown>
 ```
 
@@ -1433,7 +1433,7 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_modal name="file_dialog" bind_open="dialog" width="70%" height="content">
-	<action trigger="dismissed" name="files.close_dialog"/>
+	<action trigger="dismissed" name="presenter.files.close_dialog"/>
 	…the dialog's content…
 </ds_modal>
 ```
@@ -1568,7 +1568,7 @@ Also takes every `lv_obj` attribute.
 ```xml
 <ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
 		   numberpad="true" send="change" width="100%">
-	<action trigger="value_confirmed" name="settings.brightness"/>
+	<action trigger="value_confirmed" name="presenter.settings.brightness"/>
 </ds_slider>
 ```
 
@@ -1634,7 +1634,7 @@ Also takes every `lv_obj` attribute.
 ```xml
 <ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
 			 width="300">
-	<action trigger="value_changed" name="alert.input"/>
+	<action trigger="value_changed" name="presenter.alert.input"/>
 </ds_textarea>
 ```
 
@@ -1677,7 +1677,7 @@ Also takes every `lv_obj` attribute.
 ```xml
 <ds_toggle>
 	<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
-	<action trigger="value_changed" name="settings.confirmations"/>
+	<action trigger="value_changed" name="presenter.settings.confirmations"/>
 </ds_toggle>
 ```
 
@@ -1685,7 +1685,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_view
 
-A view inside a screen, e.g. a page of the home screen, registered with navigation as its `name` (default: its `view`) so it can be opened with `nav.open`. A view starts hidden, like any screen that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns.
+A view inside a screen, e.g. a page of the home screen, registered with navigation as its `name` (default: its `view`) so it can be opened with `actions.navigation.open`. A view starts hidden, like any screen that isn't open. Every lv_obj attribute works except `hidden`, which navigation owns.
 
 Also takes every `lv_obj` attribute.
 
@@ -1702,17 +1702,17 @@ Also takes every `lv_obj` attribute.
 
 ### lv_obj-action
 
-Written `<action>` inside any widget: run the named action when the widget raises the trigger event. The action is looked for in the presenters of the views the widget is in, innermost first, then in the global actions.
+Written `<action>` inside any widget: run the named action when the widget raises the trigger event. `presenter.<action>` is looked for in the presenters of the views the widget is in, innermost first; `actions.<group>.<action>` is a global action.
 
 ```xml
-<action trigger="value_confirmed" name="gcode" arg="M106 P{number} S{value}"/>
+<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{number} S{event.value}"/>
 ```
 
 | Attribute | Description |
 | --- | --- |
-| `name` | The action to run (required) |
+| `name` | The action to run (required): `presenter.<action>` or `actions.<group>.<action>` |
 | `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `<ds_slider numberpad="own">`'s value was tapped to type one) or `dismissed` (a `<ds_modal>` was closed by the user) |
-| `arg` | Passed to the handler. `{value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `<action>` is written |
+| `arg` | Passed to the handler. `{event.value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `<action>` is written |
 
 ## Layouts
 
@@ -1810,6 +1810,18 @@ In Console; placed in `dashboard`; component `console` ([console.json](../assets
 At its smallest, 458×278 px:
 
 ![console at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_smallest.png)
+
+#### console_command_list
+
+**GCode command list**: Every G-code with what it does; tap one to put it in the console's input
+
+In Console; placed in `dashboard`; component `console_command_list` ([console_command_list.json](../assets/ui/widgets/console/console_command_list.json)). In a free layout it is 458×278 px, and at least 272×136 px.
+
+![console_command_list](../tests/ref_imgs/xml_ui_api/widgets/console_command_list.png)
+
+At its smallest, 272×136 px:
+
+![console_command_list at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_command_list_smallest.png)
 
 #### console_log
 
@@ -2232,7 +2244,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
 | `confirm_dialog` |  | `open`, `title_tag`, `text_tag`, `confirm`, `close` | `job_cancel` | [confirm_dialog.xml](../assets/ui/components/common/confirm_dialog.xml) |
 | [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
-| `console_gcode` |  |  | `console` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
+| `console_command_list` | `console` |  | `console`, `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
+| `console_gcode` |  |  | `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
 | `console_line` |  |  | `console`, `console_log` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | `console_log` |  |  | `console_log` | [console_log.xml](../assets/ui/components/console/console_log.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |

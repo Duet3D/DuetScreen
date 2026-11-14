@@ -8,6 +8,6 @@
 	<!-- Takes no room: its dialog opens over the main window -->
 	<view extends="lv_obj" width="0" height="0" floating="true">
 		<confirm_dialog name="confirm_cancel" open="confirm" title_tag="tr.status.print_cancel_title"
-						text_tag="tr.status.print_cancel_message" confirm="job.cancel" close="job.close_cancel"/>
+						text_tag="tr.status.print_cancel_message" confirm="presenter.job.cancel" close="presenter.job.close_cancel"/>
 	</view>
 </component>

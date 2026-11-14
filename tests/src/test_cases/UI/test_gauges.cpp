@@ -74,7 +74,7 @@ class TestGauges : public UiTestSuite
 			m_widget = lv_obj_create(screen.getRootPtr());
 		}
 		UI::Xml::Actions::setRow(m_widget, &row);
-		UI::Xml::Actions::dispatch(m_widget, "gauges.edit", arg);
+		UI::Xml::Actions::dispatch(m_widget, "actions.gauge.edit", arg);
 	}
 
 	std::vector<std::string> m_sent; // G-code sent

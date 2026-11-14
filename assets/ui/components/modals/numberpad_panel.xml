@@ -30,16 +30,16 @@
 			<style name="pad_small"/>
 			<ds_textarea name="text" bind_text="$text" bind_accepted_chars="$accepted" one_line="true" keyboard="none"
 						 height="content" flex_grow="1" scrollable="false">
-				<action trigger="value_changed" name="numberpad.typed" arg="$entry"/>
+				<action trigger="value_changed" name="presenter.numberpad.typed" arg="$entry"/>
 			</ds_textarea>
 			<ds_button name="clear" text="&#xF2ED;" width="20%" height="100%">
-				<action trigger="clicked" name="numberpad.clear" arg="$entry"/>
+				<action trigger="clicked" name="presenter.numberpad.clear" arg="$entry"/>
 			</ds_button>
 		</lv_obj>
 
 		<ds_keyboard name="keys" mode="numberpad" textarea="text" bind_ok_enabled="$confirmable"
 					 bind_sign_enabled="$signed" width="100%" flex_grow="1" style_min_width="100">
-			<action trigger="ready" name="numberpad.confirm" arg="$entry"/>
+			<action trigger="ready" name="presenter.numberpad.confirm" arg="$entry"/>
 		</ds_keyboard>
 	</view>
 </component>

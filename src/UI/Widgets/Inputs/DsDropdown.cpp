@@ -31,7 +31,7 @@ namespace UI::Xml
 				 "A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` "
 				 "action as its text (ActionArgs::text()) and its index (ActionArgs::value()).",
 			 .example = R"(<ds_dropdown bind_options="filaments" bind_text="filament_text">
-	<action trigger="value_changed" name="temperature.pick_filament"/>
+	<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
 </ds_dropdown>)",
 			 .attributes =
 				 {{"bind_options", "Follow a text subject holding the options, one per line", AttributeKind::Subject},

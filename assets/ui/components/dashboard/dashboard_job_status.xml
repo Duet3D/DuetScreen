@@ -73,7 +73,7 @@
 				<ds_button name="speed_multiplier" bind_text="move.speed_factor" width="content" height="content"
 						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<action trigger="clicked" name="factors.speed"/>
+					<action trigger="clicked" name="actions.factors.speed"/>
 				</ds_button>
 				<lv_bar name="requested_speed" max_value="1000" bind_value="move.speed_requested" height="content"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
@@ -106,7 +106,7 @@
 				<ds_button name="flow_multiplier" bind_text="move.extrusion_factor" width="content" height="content"
 						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
 						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<action trigger="clicked" name="factors.extrusion"/>
+					<action trigger="clicked" name="actions.factors.extrusion"/>
 				</ds_button>
 				<lv_bar name="extruder_feedrate" max_value="1000" bind_value="move.flow" height="content"
 						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
@@ -142,7 +142,7 @@
 				</lv_label>
 				<ds_button name="babystep_button" bind_text="move.babystep" width="100%" height="content"
 						   style_min_width="content">
-					<action trigger="clicked" name="babystep.open"/>
+					<action trigger="clicked" name="actions.babystep.open"/>
 				</ds_button>
 			</lv_obj>
 		</lv_obj>
@@ -155,27 +155,27 @@
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="job.pause_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.pause_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="job.pause"/>
+				<action trigger="clicked" name="actions.job.pause"/>
 			</ds_button>
 			<ds_button name="resume" translation_tag="tr.status.resume" icon="resume.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="job.resume_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.resume_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="job.resume"/>
+				<action trigger="clicked" name="actions.job.resume"/>
 			</ds_button>
 			<ds_button name="print_again" translation_tag="tr.status.print_again" icon="print_again.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="job.print_again_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.print_again_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="job.print_again"/>
+				<action trigger="clicked" name="actions.job.print_again"/>
 			</ds_button>
 			<ds_button name="cancel" translation_tag="tr.status.cancel" icon="cancel.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<bind_flag_if_eq subject="job.cancel_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.cancel_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="job.ask_cancel"/>
+				<action trigger="clicked" name="actions.job.ask_cancel"/>
 			</ds_button>
 		</lv_obj>
 	</view>

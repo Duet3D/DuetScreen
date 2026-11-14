@@ -29,7 +29,7 @@
 
 	<view extends="ds_modal" bind_open="$open" width="80%" height="content" flex_flow="row" scrollable="false"
 		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
-		<action trigger="dismissed" name="factor.close" arg="$dialog"/>
+		<action trigger="dismissed" name="presenter.factor.close" arg="$dialog"/>
 
 		<lv_obj name="factors" height="content" flex_grow="1" flex_flow="column">
 			<lv_label name="title" bind_text="$title" width="100%" height="content">

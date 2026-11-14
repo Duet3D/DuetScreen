@@ -133,11 +133,19 @@ namespace UI::Xml::Api
 			{
 				return;
 			}
-			out += "| Action | Description |\n| --- | --- |\n";
+			const bool files =
+				std::any_of(actions.begin(), actions.end(), [](const Action& action) { return !action.file.empty(); });
+			out += files ? "| Action | Description | Added in |\n| --- | --- | --- |\n"
+						 : "| Action | Description |\n| --- | --- |\n";
 			for (const auto& action : actions)
 			{
-				fmt::format_to(
-					std::back_inserter(out), "| {:s} | {:s} |\n", code(action.name), cell(action.description));
+				fmt::format_to(std::back_inserter(out), "| {:s} | {:s} |", code(action.name), cell(action.description));
+				if (files)
+				{
+					const std::string name = std::filesystem::path(action.file).filename().string();
+					fmt::format_to(std::back_inserter(out), " [{:s}](../{:s}) |", name, action.file);
+				}
+				out += "\n";
 			}
 			out += "\n";
 		}
@@ -212,8 +220,9 @@ namespace UI::Xml::Api
 		void writeGlobalActions(std::string& out, const Reference& reference)
 		{
 			out += "## Global actions\n\n"
-				   "Actions any view can raise with `<action name=\"…\">`, whatever its presenter. A presenter's own "
-				   "action of the same name is found first.\n\n";
+				   "Actions any view can raise with `<action name=\"actions.<group>.<action>\">`, whatever its "
+				   "presenter. A group's actions are added in `<Group>Actions.cpp`. A presenter's own actions are "
+				   "written `presenter.<action>`.\n\n";
 			writeActions(out, reference.globalActions);
 			fmt::format_to(std::back_inserter(out),
 						   "An action runs when its widget raises its `trigger` (default `clicked`): {:s}\n\n",

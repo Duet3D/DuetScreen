@@ -33,18 +33,6 @@ namespace UI
 			return tag.empty() ? fallback : std::string(_(tag.c_str()));
 		}
 
-		/** The shared customise presenter: the view called `customise`'s; nullptr if there is none */
-		CustomisePresenter* sharedCustomise()
-		{
-			auto* view = findView<Xml::XmlView>("customise");
-			auto* presenter = view != nullptr ? dynamic_cast<CustomisePresenter*>(view->getPresenter()) : nullptr;
-			if (presenter == nullptr)
-			{
-				LOG_WARN("There is no customise toolbar (a view called 'customise' showing customise.xml)");
-			}
-			return presenter;
-		}
-
 		/** The selected widget's definition, or nullptr */
 		const Xml::WidgetDef* selectedWidget()
 		{
@@ -89,6 +77,17 @@ namespace UI
 			}
 		}
 	} // namespace
+
+	CustomisePresenter* CustomisePresenter::shared()
+	{
+		auto* view = findView<Xml::XmlView>("customise");
+		auto* presenter = view != nullptr ? dynamic_cast<CustomisePresenter*>(view->getPresenter()) : nullptr;
+		if (presenter == nullptr)
+		{
+			LOG_WARN("There is no customise toolbar (a view called 'customise' showing customise.xml)");
+		}
+		return presenter;
+	}
 
 	void CatalogueRow::fields(Xml::FieldVisitor& f)
 	{
@@ -314,27 +313,6 @@ namespace UI
 		f.field("confirm_delete", m_confirmDelete, "1 while asking whether to delete a saved layout");
 		f.field("delete_title", m_deleteTitle, "That question's title");
 		f.field("delete_text", m_deleteText, "That question, naming the layout");
-	}
-
-	void CustomisePresenter::registerActions()
-	{
-		Xml::Actions::addGlobal("customise.start",
-								"Go to the home screen and start customising it: its widgets can be moved, resized, "
-								"added and removed, and their settings changed",
-								[](const Xml::ActionArgs&)
-								{
-									home();
-									editor().begin();
-								});
-		Xml::Actions::addGlobal("customise.open_catalogue",
-								"While customising, open the widget pool to add a widget where the user chose",
-								[](const Xml::ActionArgs&)
-								{
-									if (auto* customise = sharedCustomise())
-									{
-										customise->openCatalogue();
-									}
-								});
 	}
 
 	void CustomisePresenter::onEditorChanged()

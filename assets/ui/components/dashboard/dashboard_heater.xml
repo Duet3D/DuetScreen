@@ -17,21 +17,21 @@
 			<style name="border_color_card" selector="checked"/>
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
-			<action trigger="clicked" name="heaters.toggle"/>
+			<action trigger="clicked" name="actions.heater.toggle"/>
 		</ds_button>
 
 		<lv_label name="current" bind_text="om.heat.heaters[{heater}].current|fixed:1" flex_grow="2"/>
 
 		<ds_button name="active" bind_text="active" flex_grow="2">
 			<style name="input"/>
-			<action trigger="clicked" name="heaters.set_active"/>
+			<action trigger="clicked" name="actions.heater.set_active"/>
 		</ds_button>
 
 		<ds_button name="standby" bind_text="standby" flex_grow="2">
 			<style name="input"/>
 			<!-- The other columns need the room more, in all but a wide widget -->
 			<bind_flag_if cond="widget.width_class lt 2" flag="hidden"/>
-			<action trigger="clicked" name="heaters.set_standby"/>
+			<action trigger="clicked" name="actions.heater.set_standby"/>
 		</ds_button>
 	</view>
 </component>

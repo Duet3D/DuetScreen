@@ -6,7 +6,7 @@
 <component>
 	<view extends="ds_button" bind_text="text" height="100%" flex_grow="1" style_min_height="content">
 		<style name="long_press"/>
-		<action trigger="clicked" name="selector.pick"/>
-		<action trigger="long_pressed" name="selector.edit_choice"/>
+		<action trigger="clicked" name="presenter.selector.pick"/>
+		<action trigger="long_pressed" name="presenter.selector.edit_choice"/>
 	</view>
 </component>

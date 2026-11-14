@@ -575,6 +575,8 @@
       "console_desc": "La console : envoyer du G-code et lire les réponses",
       "console_log": "Journal de la console",
       "console_log_desc": "Les dernières réponses de l'imprimante ; touchez pour ouvrir la console",
+      "console_command_list": "Référence G-code",
+      "console_command_list_desc": "Chaque G-code et ce qu'il fait ; touchez-en un pour le mettre dans la saisie de la console",
       "category_console": "Console",
       "category_commands": "Commandes",
       "om_value": "Valeur du modèle objet",

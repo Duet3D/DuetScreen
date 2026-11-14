@@ -576,6 +576,8 @@
       "console_desc": "The console: send G-code and read the replies",
       "console_log": "Console log",
       "console_log_desc": "The printer's latest replies; tap to open the console",
+      "console_command_list": "GCode command list",
+      "console_command_list_desc": "Every G-code with what it does; tap one to put it in the console's input",
       "category_console": "Console",
       "category_commands": "Commands",
       "om_value": "Object model value",

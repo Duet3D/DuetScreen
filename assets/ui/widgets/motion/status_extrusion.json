@@ -9,6 +9,6 @@
   ],
   "props": {
     "value": "move.extrusion_factor",
-    "action": "factors.extrusion"
+    "action": "actions.factors.extrusion"
   }
 }

@@ -9,7 +9,7 @@
   ],
   "props": {
     "page": "console",
-    "action": "nav.open",
+    "action": "actions.navigation.open",
     "label_tag": "tr.side_bar.console",
     "icon": "console.png",
     "flash": "responses.count"

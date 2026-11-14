@@ -15,13 +15,13 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="connection_method" options="connection_methods" selected="connection_method"
-						  action="settings.connection_method"
+						  action="presenter.settings.connection_method"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_1" translation_tag="tr.settings.usb_mode"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="usb_mode" options="usb_modes" selected="usb_mode" action="settings.usb_mode"
+		<settings_dropdown name="usb_mode" options="usb_modes" selected="usb_mode" action="presenter.settings.usb_mode"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_2" translation_tag="tr.settings.duet_poll_interval"
@@ -31,7 +31,7 @@
 				   numberpad="true" min="100" max="2000" bind_value="poll_interval" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="center">
-			<action trigger="value_confirmed" name="settings.poll_interval"/>
+			<action trigger="value_confirmed" name="presenter.settings.poll_interval"/>
 		</ds_slider>
 
 		<!-- Over the network only -->
@@ -45,7 +45,7 @@
 						 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						 style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="network_shown" flag="hidden" ref_value="0"/>
-			<action trigger="clicked" name="settings.duet_ip"/>
+			<action trigger="clicked" name="presenter.settings.duet_ip"/>
 		</ds_textarea>
 		<lv_label name="row_label_4" translation_tag="tr.settings.duet_password"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
@@ -57,7 +57,7 @@
 						 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						 style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="network_shown" flag="hidden" ref_value="0"/>
-			<action trigger="ready" name="settings.duet_password"/>
+			<action trigger="ready" name="presenter.settings.duet_password"/>
 		</ds_textarea>
 
 		<!-- The screen's own networking -->

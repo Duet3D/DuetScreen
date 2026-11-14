@@ -9,7 +9,7 @@
   ],
   "props": {
     "page": "settings",
-    "action": "nav.open",
+    "action": "actions.navigation.open",
     "label_tag": "tr.side_bar.settings",
     "icon": "settings.png"
   }

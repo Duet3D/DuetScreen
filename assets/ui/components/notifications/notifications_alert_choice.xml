@@ -5,6 +5,6 @@
 -->
 <component>
 	<view extends="ds_button" bind_text="text" width="20%" height="content">
-		<action trigger="clicked" name="alert.choose"/>
+		<action trigger="clicked" name="presenter.alert.choose"/>
 	</view>
 </component>

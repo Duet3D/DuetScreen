@@ -11,7 +11,7 @@
 		<ds_drag_button name="button" translation_tag="tr.estop.label" icon="estop.png" hint_tag="tr.estop.prompt"
 						style_min_width="80" style_min_height="80" width="60%" height="60%" align="center">
 			<style name="estop"/>
-			<action trigger="value_confirmed" name="estop.dragged"/>
+			<action trigger="value_confirmed" name="actions.estop.dragged"/>
 		</ds_drag_button>
 	</view>
 </component>

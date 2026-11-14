@@ -7,6 +7,6 @@
 <component>
 	<view extends="ds_button" bind_text="om.move.extruders[{value}].factor|percent" bind_text-fmt="%d%%"
 		  width="content" height="content">
-		<action trigger="clicked" name="factors.extrusion"/>
+		<action trigger="clicked" name="actions.factors.extrusion"/>
 	</view>
 </component>

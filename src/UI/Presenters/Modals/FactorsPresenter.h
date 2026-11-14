@@ -2,7 +2,7 @@
  * FactorsPresenter.h
  *
  * Behaviour for the shared speed and extrusion factor dialogs (assets/ui/components/modals/factors.xml), which any
- * view opens with the global actions `factors.speed` and `factors.extrusion` (registerActions()).
+ * view opens with the global actions `actions.factors.speed` and `actions.factors.extrusion` (FactorsActions.cpp).
  *
  * Its names and actions, including those of its FactorDialogs, are declared in fields() and its constructor, and
  * listed in the UI API reference (docs/XML_UI_API.md).
@@ -27,8 +27,8 @@ namespace UI
 		/** Declare the dialogs' fields */
 		void fields(Xml::FieldVisitor& f) override;
 
-		/** Register `factors.speed` and `factors.extrusion` as global actions, for every view */
-		static void registerActions();
+		/** The shared dialogs' presenter: the view called `factors`'s; nullptr, with a warning, if there is none */
+		static FactorsPresenter* shared();
 
 		/** Open the speed factor dialog */
 		void openSpeed();

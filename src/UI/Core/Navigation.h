@@ -15,7 +15,7 @@ namespace UI
 	/*
 	 * Named views. A view registered by name can be found, and opened, by that name instead of through whatever owns
 	 * it. This is how the XML UI's `<ds_view>` makes the views it hosts available, e.g. `findView<XmlView>
-	 * ("numberpad")` or `<action name="nav.open" arg="control"/>`.
+	 * ("numberpad")` or `<action name="actions.navigation.open" arg="control"/>`.
 	 */
 
 	/** Make `view` findable as `name`, replacing any earlier view of that name */
