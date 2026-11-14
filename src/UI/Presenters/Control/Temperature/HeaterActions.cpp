@@ -312,6 +312,7 @@ namespace UI::HeaterActions
 			request.onConfirm(*value);
 			return;
 		}
+		request.unit = "°C";
 		Xml::Prompts::askNumber(std::move(request));
 	}
 

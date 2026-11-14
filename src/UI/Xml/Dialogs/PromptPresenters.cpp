@@ -42,7 +42,7 @@ namespace UI::Xml
 	{
 		m_step = &step;
 		m_text.reset();
-		m_pad.askNumber(request.min, request.max, request.value);
+		m_pad.askNumber(request.min, request.max, request.value, false, request.unit);
 		m_number = std::move(request);
 	}
 

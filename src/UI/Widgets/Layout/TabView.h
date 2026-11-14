@@ -44,6 +44,9 @@ namespace UI
 
 		bool disableTab(size_t index, bool disable);
 
+		/** Put tab `index`, and those after it, at the far end of the tab bar, e.g. the bottom of a bar down a side */
+		void pinToEnd(size_t index);
+
 		/** Whether tab `index`'s button is disabled; false if there is no such tab */
 		bool isTabDisabled(size_t index);
 
@@ -63,6 +66,7 @@ namespace UI
 
 		std::vector<std::unique_ptr<LvContainer>> m_tabs;
 		size_t m_currentTabIndex = -1;
-		lv_dir_t m_barSide = LV_DIR_TOP; // The side of the content the tab bar is on
+		lv_dir_t m_barSide = LV_DIR_TOP;			 // The side of the content the tab bar is on
+		std::unique_ptr<LvContainer> m_endSpacer; // Before the first tab pinned to the end (pinToEnd()), if any
 	};
 } // namespace UI

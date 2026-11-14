@@ -189,6 +189,7 @@ namespace UI
 		if (Themes::changeCurrentPalette(change))
 		{
 			showTheme();
+			Model::get().post<EventType::ThemeChanged>(); // E.g. for the colours the Display page shows
 		}
 	}
 } // namespace UI

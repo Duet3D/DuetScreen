@@ -8,14 +8,10 @@
 <component presenter="settings_theme_preview">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
 		<!-- The palette, if it can be changed -->
-		<lv_label name="palette_title" translation_tag="tr.settings.groups.palette">
-			<style name="setting_group_title"/>
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<lv_obj name="palette">
-			<style name="setting_group"/>
+		<ds_setting_group name="palette" title_tag="tr.settings.groups.palette">
 			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
 			<ds_setting name="primary_hue" title_tag="tr.theme.primary_hue">
 				<ds_hue_slider name="slider" label_tag="tr.theme.primary_hue" label_shown="false" numberpad="true"
@@ -38,18 +34,14 @@
 					<action trigger="value_confirmed" name="presenter.preview.chroma"/>
 				</ds_slider>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="roles_title" translation_tag="tr.settings.groups.colour_roles">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="roles">
-			<style name="setting_group"/>
+		<ds_setting_group name="roles" title_tag="tr.settings.groups.colour_roles">
 			<ds_list name="list" list="presenter.swatches" item="settings_theme_swatch" width="100%" height="content"
 					 flex_flow="row_wrap" style_flex_main_place="center" style_flex_cross_place="center"
 					 style_flex_track_place="start" style_pad_all="12">
 				<style name="setting_row"/>
 			</ds_list>
-		</lv_obj>
+		</ds_setting_group>
 	</view>
 </component>

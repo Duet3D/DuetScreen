@@ -1,7 +1,8 @@
 /*
  * test_setting.cpp
  *
- * <ds_setting> (src/UI/Widgets/Layout/DsSetting.h): a setting's row, which a tap anywhere on works its control.
+ * <ds_setting> (src/UI/Widgets/Layout/DsSetting.h): a setting's row, which a tap anywhere on works its control; and
+ * <ds_setting_group> (DsSettingGroup.h), a group of them under a title.
  */
 
 #include "UI/Widgets/Layout/DsSetting.h"
@@ -57,8 +58,7 @@ class TestSetting : public UiTestSuite
 		lv_xml_register_component_from_data("test_setting", R"(
 			<component>
 				<view extends="lv_obj" width="500" height="content" flex_flow="column">
-					<lv_obj name="group" width="100%">
-						<style name="setting_group"/>
+					<ds_setting_group name="group" title="Colours, and the rest">
 						<ds_setting name="switch_row" title="A switch" hint="With a hint">
 							<ds_toggle name="switch">
 								<bind_state_if_eq subject="presenter.on" state="checked" ref_value="1"/>
@@ -74,7 +74,7 @@ class TestSetting : public UiTestSuite
 						<ds_setting name="fact_row" title="A fact">
 							<lv_label text="42"/>
 						</ds_setting>
-					</lv_obj>
+					</ds_setting_group>
 				</view>
 			</component>)");
 		view = std::make_unique<UI::Xml::XmlView>("setting_view", screen, "test_setting", presenter);
@@ -144,4 +144,16 @@ TEST_F(TestSetting, ARowWithNothingToWorkIsNotPressed)
 	EXPECT_FALSE(lv_obj_has_state(part("fact_row"), LV_STATE_PRESSED));
 	lv_obj_send_event(part("switch_row"), LV_EVENT_PRESSED, nullptr);
 	EXPECT_TRUE(lv_obj_has_state(part("switch_row"), LV_STATE_PRESSED));
+}
+
+TEST_F(TestSetting, AGroupBoxesItsRowsUnderItsTitleInCapitals)
+{
+	lv_obj_t* group = part("group");
+	lv_obj_t* rows = lv_obj_find_by_name(group, "rows");
+	ASSERT_NE(rows, nullptr);
+	EXPECT_EQ(lv_obj_get_parent(part("switch_row")), rows) << "the rows written in the group are in its box";
+	EXPECT_EQ(lv_obj_get_parent(part("fact_row")), rows);
+	EXPECT_EQ(lv_obj_get_child_count(group), 2u) << "the group holds only its title and box";
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(group, "title")), "COLOURS, AND THE REST");
+	EXPECT_EQ(lv_obj_get_parent(part("choice")), part("choice_row")) << "what is in a row stays in the row";
 }

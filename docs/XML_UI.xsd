@@ -21,6 +21,7 @@
 			<xs:enumeration value="presenter.alert.pad.range"/>
 			<xs:enumeration value="presenter.alert.pad.signed"/>
 			<xs:enumeration value="presenter.alert.pad.text"/>
+			<xs:enumeration value="presenter.alert.pad.unit"/>
 			<xs:enumeration value="presenter.alert.pad_shown"/>
 			<xs:enumeration value="presenter.alert.progress"/>
 			<xs:enumeration value="presenter.alert.progress_shown"/>
@@ -134,6 +135,7 @@
 			<xs:enumeration value="presenter.number.range"/>
 			<xs:enumeration value="presenter.number.signed"/>
 			<xs:enumeration value="presenter.number.text"/>
+			<xs:enumeration value="presenter.number.unit"/>
 			<xs:enumeration value="presenter.objects"/>
 			<xs:enumeration value="presenter.open"/>
 			<xs:enumeration value="presenter.output"/>
@@ -141,6 +143,7 @@
 			<xs:enumeration value="presenter.poll_interval"/>
 			<xs:enumeration value="presenter.primary.chroma"/>
 			<xs:enumeration value="presenter.primary.lightness"/>
+			<xs:enumeration value="presenter.primary_color"/>
 			<xs:enumeration value="presenter.primary_hue"/>
 			<xs:enumeration value="presenter.progress_source"/>
 			<xs:enumeration value="presenter.progress_sources"/>
@@ -161,6 +164,7 @@
 			<xs:enumeration value="presenter.second_usb_channel"/>
 			<xs:enumeration value="presenter.secondary.chroma"/>
 			<xs:enumeration value="presenter.secondary.lightness"/>
+			<xs:enumeration value="presenter.secondary_color"/>
 			<xs:enumeration value="presenter.secondary_hue"/>
 			<xs:enumeration value="presenter.selected_tool"/>
 			<xs:enumeration value="presenter.serial"/>
@@ -1012,6 +1016,7 @@
 			<xs:enumeration value="ds_plot_rect"/>
 			<xs:enumeration value="ds_scope"/>
 			<xs:enumeration value="ds_setting"/>
+			<xs:enumeration value="ds_setting_group"/>
 			<xs:enumeration value="ds_slider"/>
 			<xs:enumeration value="ds_tabs"/>
 			<xs:enumeration value="ds_tabs-tab"/>
@@ -1260,6 +1265,7 @@
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="numpad_key_side"/>
 			<xs:enumeration value="numpad_readout"/>
+			<xs:enumeration value="numpad_unit"/>
 			<xs:enumeration value="numpad_value"/>
 			<xs:enumeration value="object_cancel_base"/>
 			<xs:enumeration value="object_cancel_cancelled"/>
@@ -1284,8 +1290,14 @@
 			<xs:enumeration value="setting_group_danger"/>
 			<xs:enumeration value="setting_group_title"/>
 			<xs:enumeration value="setting_hint"/>
-			<xs:enumeration value="setting_open"/>
+			<xs:enumeration value="setting_list"/>
+			<xs:enumeration value="setting_option"/>
+			<xs:enumeration value="setting_options"/>
+			<xs:enumeration value="setting_page"/>
 			<xs:enumeration value="setting_row"/>
+			<xs:enumeration value="setting_section"/>
+			<xs:enumeration value="setting_title"/>
+			<xs:enumeration value="setting_value"/>
 			<xs:enumeration value="sidebar"/>
 			<xs:enumeration value="sidebar_btn"/>
 			<xs:enumeration value="slider"/>
@@ -1295,9 +1307,11 @@
 			<xs:enumeration value="switch_knob"/>
 			<xs:enumeration value="ta_cursor"/>
 			<xs:enumeration value="ta_placeholder"/>
+			<xs:enumeration value="tab_bar_side"/>
 			<xs:enumeration value="tab_bg_focus"/>
 			<xs:enumeration value="tab_btn"/>
 			<xs:enumeration value="tab_button"/>
+			<xs:enumeration value="tab_button_side"/>
 			<xs:enumeration value="tab_card"/>
 			<xs:enumeration value="table"/>
 			<xs:enumeration value="table_cell"/>
@@ -2263,6 +2277,7 @@
 			<xs:enumeration value="font_normal"/>
 			<xs:enumeration value="font_small"/>
 			<xs:enumeration value="font_subdued"/>
+			<xs:enumeration value="font_title"/>
 			<xs:enumeration value="font_xlarge"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -3431,6 +3446,17 @@
 			<xs:annotation><xs:documentation>Follow a text subject for the hint, e.g. how something went; no hint while it is empty</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_setting_group.attributes">
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>The group's title, if there is no `title_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title_tag" type="translation">
+			<xs:annotation><xs:documentation>Translation key for the title; follows language changes</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="danger" type="xs:string">
+			<xs:annotation><xs:documentation>&quot;true&quot; for a group whose actions can't be undone, such as erasing every setting: the box is edged in the error colour (`setting_group_danger`)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_slider.attributes">
 		<xs:attribute name="min" type="xs:string">
 			<xs:annotation><xs:documentation>Bottom of the range, may have a fraction (default 0)</xs:documentation></xs:annotation>
@@ -3501,6 +3527,9 @@
 		</xs:attribute>
 		<xs:attribute name="icon" type="xs:string">
 			<xs:annotation><xs:documentation>Icon file from the icon set shown on the tab button, e.g. &quot;settings_display.png&quot;</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="end" type="xs:string">
+			<xs:annotation><xs:documentation>&quot;true&quot; to put the tab, and those after it, at the far end of the tab bar, e.g. the bottom of a bar down a side</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="title_tag" type="translation">
 			<xs:annotation><xs:documentation>Translation key for the tab button's text</xs:documentation></xs:annotation>
@@ -7319,6 +7348,15 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_setting.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_setting_group">
+		<xs:annotation><xs:documentation>A group of settings: its title, in capitals, over a box of the rows written inside it (`&lt;ds_setting&gt;`, or a `&lt;ds_list&gt;` of them with the `setting_list` style). Hiding the group hides its title too. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_setting_group.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

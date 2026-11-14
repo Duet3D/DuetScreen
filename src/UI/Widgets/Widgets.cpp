@@ -29,6 +29,7 @@
 #include "UI/Widgets/Layout/DsPages.h"
 #include "UI/Widgets/Layout/DsScope.h"
 #include "UI/Widgets/Layout/DsSetting.h"
+#include "UI/Widgets/Layout/DsSettingGroup.h"
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Widgets/Layout/DsView.h"
 #include "UI/Xml/Dialogs/DialogHost.h"
@@ -87,6 +88,7 @@ namespace UI::Xml::Widgets
 		DsPlotRect::registerXml();
 		DsScope::registerXml();
 		DsSetting::registerXml();
+		DsSettingGroup::registerXml();
 		DsTabs::registerXml();
 		DsTextarea::registerXml();
 		DsThumbnail::registerXml();

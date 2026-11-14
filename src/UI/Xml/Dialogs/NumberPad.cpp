@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
+#include <fmt/format.h>
 #include <limits>
 
 namespace UI::Xml
@@ -71,6 +72,7 @@ namespace UI::Xml
 	{
 		f.field(m_id + ".text", m_typed, "What has been typed");
 		f.field(m_id + ".range", m_range, "The numbers that can be typed, e.g. \"0 to 280\"; empty for any");
+		f.field(m_id + ".unit", m_unit, "The number's unit, shown after it, e.g. \"s\"; empty for none");
 		f.field(m_id + ".confirmable",
 				m_confirmable,
 				"1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits "
@@ -79,14 +81,15 @@ namespace UI::Xml
 		f.field(m_id + ".decimal", m_decimal, "1 if the number may have a fraction, so the dot key works");
 	}
 
-	void NumberPad::askNumber(float min, float max, std::optional<float> start, bool whole)
+	void NumberPad::askNumber(float min, float max, std::optional<float> start, bool whole, std::string_view unit)
 	{
 		m_number = true;
 		m_min = min;
 		m_max = max;
 		m_signed.set(min < 0.0f ? 1 : 0);
 		m_decimal.set(whole ? 0 : 1);
-		m_range.set(rangeOf(min, max));
+		m_unit.set(unit);
+		m_range.set(rangeOf(min, max, unit));
 		setText(start ? shown(*start) : std::string());
 		m_fresh = start.has_value();
 	}
@@ -96,6 +99,7 @@ namespace UI::Xml
 		m_number = false;
 		m_signed.set(0);
 		m_decimal.set(1);
+		m_unit.set("");
 		m_range.set("");
 		setText(start);
 		m_fresh = !start.empty();
@@ -116,19 +120,21 @@ namespace UI::Xml
 		return number >= m_min && number <= m_max;
 	}
 
-	std::string NumberPad::rangeOf(float min, float max)
+	std::string NumberPad::rangeOf(float min, float max, std::string_view unit)
 	{
 		const bool hasMin = min > -NO_LIMIT;
 		const bool hasMax = max < NO_LIMIT;
+		const auto limit = [unit](float value)
+		{ return unit.empty() ? shown(value) : fmt::format("{:s} {:s}", shown(value), unit); };
 		if (hasMin && hasMax)
 		{
-			return _("dialogs.range", shown(min), shown(max));
+			return _("dialogs.range", shown(min), limit(max));
 		}
 		if (hasMin)
 		{
-			return _("dialogs.at_least", shown(min));
+			return _("dialogs.at_least", limit(min));
 		}
-		return hasMax ? _("dialogs.at_most", shown(max)) : std::string();
+		return hasMax ? _("dialogs.at_most", limit(max)) : std::string();
 	}
 
 	std::string NumberPad::shown(float value)

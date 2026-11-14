@@ -33,6 +33,7 @@ namespace UI::Xml
 
 		m_title.setWidth(LV_PCT(100));
 		m_title.setLongMode(LV_LABEL_LONG_MODE_WRAP);
+		m_title.addStyle(Themes::getComponentStyles().setting_title);
 		m_title.setText("");
 
 		m_hint.setWidth(LV_PCT(100));

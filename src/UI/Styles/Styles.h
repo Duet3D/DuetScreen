@@ -310,6 +310,8 @@ namespace UI::Themes
 
 		/* Tabview */
 		Style tab_button;			 // Used in tabview tabs
+		Style tab_bar_side;			 // The panel of tabs down a side
+		Style tab_button_side;		 // A tab down a side, flat until it is the one selected
 
 		/* Slider */
 		Style slider_buttons;		 // Slider increment/decrement buttons
@@ -353,19 +355,26 @@ namespace UI::Themes
 		Style dialog_row;		  // A row of a list in a dialog (settings, choices): a rule under it
 		Style dialog_row_chosen;  // The value chosen in a list of choices
 
-		/* Settings (ds_setting): rows in boxed groups, each group under a heading */
-		Style setting_group;	   // A box of rows: its background shows in the gaps between them, as rules
-		Style setting_group_title; // The heading over a group
+		/* Settings: a page (setting_page) of groups (ds_setting_group) of rows (ds_setting) */
+		Style setting_page;		   // A page of settings, on top of the card: the room around and between its groups
+		Style setting_section;	   // A group: its title over its box
+		Style setting_group;	   // A group's box of rows: its background shows in the gaps between them, as rules
+		Style setting_group_title; // The title over a group's box
 		Style setting_group_danger; // A group whose actions can't be undone, on top of setting_group
+		Style setting_list;		   // Rows listed in a group's box (a ds_list), ruled as the box's own rows are
 		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
+		Style setting_title;	   // A row's title
 		Style setting_hint;		   // The line under a row's title that says more about it
-		Style setting_control;	   // A row's button or choice, or one of a few options: big enough to tap
-		Style setting_open;		   // A row's way into more (a page, a dialog): a chevron in a small square
+		Style setting_control;	   // A row's button: big enough to tap
+		Style setting_value;	   // A row's choice, or its way into more: the value and a chevron, plain on the row
+		Style setting_options;	   // One of a few options: the box the buttons are joined in
+		Style setting_option;	   // One of those buttons
 
 		/* The number pad (assets/ui/components/dialogs/dialog_number.xml) */
 		Style numpad;		   // The pad, and its grid of keys: the gaps between them
 		Style numpad_readout;  // The box showing what is typed, with the numbers that can be
 		Style numpad_value;	   // What is typed
+		Style numpad_unit;	   // The unit after it
 		Style numpad_key;	   // A key
 		Style numpad_key_side; // A key that edits rather than types: backspace, clear, the sign
 
@@ -414,6 +423,7 @@ namespace UI::Themes
 	struct Fonts
 	{
 		lv_font_t header;	// Headings
+		lv_font_t title;	// A name to read first, a step under a heading, e.g. a setting's or a category's
 		lv_font_t normal;	// Body text
 		lv_font_t emphasis; // Emphasised text
 		lv_font_t subdued;	// Secondary text
@@ -432,8 +442,9 @@ namespace UI::Themes
 	};
 
 	/** Every theme font, in the order themes list them */
-	inline constexpr std::array<FontRole, 8> FONT_ROLES = {{
+	inline constexpr std::array<FontRole, 9> FONT_ROLES = {{
 		{"header", "font_header", &Fonts::header},
+		{"title", "font_title", &Fonts::title},
 		{"normal", "font_normal", &Fonts::normal},
 		{"emphasis", "font_emphasis", &Fonts::emphasis},
 		{"subdued", "font_subdued", &Fonts::subdued},

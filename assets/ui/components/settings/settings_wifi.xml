@@ -1,15 +1,16 @@
 <!--
   The screen's WiFi, in groups of rows (ds_setting): its IP address, with how the last connection attempt went under
   it, and a row to scan again now; then the networks around it (settings_wifi_network.xml), scanned for every few
-  seconds while shown. Tapping a network opens it in a dialog: connect to it, leave it or forget it, or join it, typing its
-  password on the shared keyboard if it is secured.
+  seconds while shown. Tapping a network opens it in a dialog: connect to it, leave it or forget it, or join it,
+  typing its password on the shared keyboard if it is secured.
 
   Fields and actions: src/UI/Presenters/Settings/WifiPresenter.h
 -->
 <component presenter="settings_wifi">
-	<view extends="lv_obj" width="100%" height="content" flex_flow="column" style_pad_all="0">
-		<lv_obj name="screen">
-			<style name="setting_group"/>
+	<!-- The groups are spaced as a settings page's, inside the page that hosts them -->
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false" style_pad_all="0">
+		<style name="setting_page"/>
+		<ds_setting_group name="screen" title_tag="tr.settings.groups.wifi">
 			<ds_setting name="ip_address" title_tag="tr.settings.network.ip_title" bind_hint="presenter.status">
 				<lv_label name="value" bind_text="presenter.ip">
 					<style name="text_muted"/>
@@ -21,14 +22,13 @@
 					<action trigger="clicked" name="presenter.wifi.refresh"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="networks_title" translation_tag="tr.settings.network.available_wifi">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<ds_list name="list" list="presenter.networks" item="settings_wifi_network">
-			<style name="setting_group"/>
-		</ds_list>
+		<ds_setting_group name="networks" title_tag="tr.settings.network.available_wifi">
+			<ds_list name="list" list="presenter.networks" item="settings_wifi_network">
+				<style name="setting_list"/>
+			</ds_list>
+		</ds_setting_group>
 
 		<ds_dialog name="network_dialog" bind_open="presenter.network.open" bind_title="presenter.network.ssid"
 				   flex_flow="column">

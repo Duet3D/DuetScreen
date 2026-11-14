@@ -7,33 +7,26 @@
 <component presenter="settings_general">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="language_keyboard_title" translation_tag="tr.settings.groups.language_keyboard">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="language_keyboard">
-			<style name="setting_group"/>
+		<ds_setting_group name="language_keyboard" title_tag="tr.settings.groups.language_keyboard">
 			<ds_setting name="language" title_tag="tr.settings.language" hint_tag="tr.settings.hints.language">
 				<ds_choice name="choice" title_tag="tr.settings.language" bind_options="presenter.languages"
 						   bind_selected="presenter.language">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.language"/>
 				</ds_choice>
 			</ds_setting>
 			<ds_setting name="keyboard_layout" title_tag="tr.settings.keyboard_layout">
 				<ds_choice name="choice" title_tag="tr.settings.keyboard_layout" bind_options="presenter.keyboard_layouts"
 						   bind_selected="presenter.keyboard_layout">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.keyboard_layout"/>
 				</ds_choice>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="machine_title" translation_tag="tr.settings.groups.machine">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="machine">
-			<style name="setting_group"/>
+		<ds_setting_group name="machine" title_tag="tr.settings.groups.machine">
 			<ds_setting name="show_confirmation_dialogs" title_tag="tr.settings.show_confirmation_dialogs"
 						hint_tag="tr.settings.hints.confirmations">
 				<ds_toggle name="switch">
@@ -51,19 +44,20 @@
 			<!-- One of a few: the chosen one is checked -->
 			<ds_setting name="job_progress_source" title_tag="tr.settings.job_progress_source"
 						hint_tag="tr.settings.hints.job_progress">
-				<lv_obj name="options" width="content" height="content" flex_flow="row" style_pad_all="0">
+				<lv_obj name="options">
+					<style name="setting_options"/>
 					<ds_button name="duration" translation_tag="tr.settings.job_progress_source_options.duration">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.progress_source" state="checked" ref_value="0"/>
 						<action trigger="clicked" name="presenter.settings.progress_source" arg="0"/>
 					</ds_button>
 					<ds_button name="file" translation_tag="tr.settings.job_progress_source_options.file">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.progress_source" state="checked" ref_value="1"/>
 						<action trigger="clicked" name="presenter.settings.progress_source" arg="1"/>
 					</ds_button>
 				</lv_obj>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 	</view>
 </component>

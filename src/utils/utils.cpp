@@ -170,4 +170,85 @@ namespace utils
 		buffer << t.rdbuf();
 		return buffer.str();
 	}
+
+	namespace
+	{
+		/** The capital of code point `c`, or `c` if it has none here (see toUpper()) */
+		char32_t upperOf(char32_t c)
+		{
+			if (c >= U'a' && c <= U'z')
+			{
+				return c - 0x20;
+			}
+			// Latin-1: à-þ, except ÷; ÿ's capital is in Latin Extended-A
+			if (c >= 0xE0 && c <= 0xFE && c != 0xF7)
+			{
+				return c - 0x20;
+			}
+			if (c == 0xFF)
+			{
+				return 0x178;
+			}
+			// Latin Extended-A: pairs of capital then small letter, the small one odd...
+			if ((c >= 0x100 && c <= 0x137) || (c >= 0x14A && c <= 0x177))
+			{
+				return (c % 2 == 1) ? c - 1 : c;
+			}
+			// ...and from Ĺ to Ň, and Ź to Ž, the small one even
+			if ((c >= 0x139 && c <= 0x148) || (c >= 0x179 && c <= 0x17E))
+			{
+				return (c % 2 == 0) ? c - 1 : c;
+			}
+			return c;
+		}
+
+		/** Append code point `c` to `out` in UTF-8 */
+		void appendUtf8(std::string& out, char32_t c)
+		{
+			if (c < 0x80)
+			{
+				out += static_cast<char>(c);
+			}
+			else if (c < 0x800)
+			{
+				out += static_cast<char>(0xC0 | (c >> 6));
+				out += static_cast<char>(0x80 | (c & 0x3F));
+			}
+			else
+			{
+				out += static_cast<char>(0xE0 | (c >> 12));
+				out += static_cast<char>(0x80 | ((c >> 6) & 0x3F));
+				out += static_cast<char>(0x80 | (c & 0x3F));
+			}
+		}
+	} // namespace
+
+	std::string toUpper(std::string_view text)
+	{
+		std::string out;
+		out.reserve(text.size());
+		for (size_t i = 0; i < text.size();)
+		{
+			const auto byte = static_cast<unsigned char>(text[i]);
+			// Only one and two byte sequences hold letters toUpper() changes; anything else is copied as it is
+			if (byte < 0x80)
+			{
+				appendUtf8(out, upperOf(byte));
+				i++;
+			}
+			else if ((byte & 0xE0) == 0xC0 && i + 1 < text.size())
+			{
+				const char32_t c =
+					(static_cast<char32_t>(byte & 0x1F) << 6) | (static_cast<unsigned char>(text[i + 1]) & 0x3F);
+				appendUtf8(out, upperOf(c));
+				i += 2;
+			}
+			else
+			{
+				out += text[i];
+				i++;
+			}
+		}
+		return out;
+	}
 } // namespace utils

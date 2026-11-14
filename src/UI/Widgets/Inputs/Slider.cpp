@@ -73,6 +73,7 @@ namespace UI
 		m_input.setMinWidth(50);
 
 		m_unit.addStyle(Themes::getLvglStyles().text_muted);
+		m_unit.setText(""); // A label starts as "Text"
 		m_unit.hide();
 
 		m_slider.setMinHeight(LV_SIZE_CONTENT);

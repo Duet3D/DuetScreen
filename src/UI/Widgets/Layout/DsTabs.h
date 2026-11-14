@@ -40,7 +40,7 @@ namespace UI::Xml
 		/** `<ds_tabs-tab>` create callback: add a tab, whose content area its children are built in */
 		static void* xmlCreateTab(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_tabs-tab>` apply callback: lv_obj attributes on the content area, then `icon`, `bind_disabled` and
+		/** `<ds_tabs-tab>` apply callback: lv_obj attributes on the content area, then `icon`, `end`, `bind_disabled` and
 		 * `select_on` */
 		static void xmlApplyTab(lv_xml_parser_state_t* state, const char** attrs);
 

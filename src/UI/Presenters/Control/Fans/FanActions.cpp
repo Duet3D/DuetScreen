@@ -63,6 +63,7 @@ namespace UI::FanActions
 								 .min = 0,
 								 .max = 100,
 								 .value = current,
+								 .unit = "%",
 								 .onConfirm = [fan](float value) { setFanSpeed(fan, value); },
 								 .asker = nullptr});
 	}

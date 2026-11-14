@@ -1,10 +1,11 @@
 <!--
-  A number pad: what has been typed, large, with the numbers that can be, over the keys: the digits, the sign and the
-  dot, and beside them backspace and clear. It shows and types into the NumberPad (src/UI/Xml/Dialogs/NumberPad.h) of
-  the presenter around it called `pad`, e.g. the number prompt's (dialog_number.xml) or an alert's (notifications.xml).
+  A number pad: what has been typed, large, in its unit if it has one, with the numbers that can be, over the keys:
+  the digits, the sign and the dot, and beside them backspace and clear. It shows and types into the NumberPad
+  (src/UI/Xml/Dialogs/NumberPad.h) of the presenter around it called `pad`, e.g. the number prompt's (dialog_number.xml)
+  or an alert's (notifications.xml).
 
-  Fields and actions: a NumberPad's, under `pad`: ${pad}.text, ${pad}.range, ${pad}.signed, ${pad}.decimal; ${pad}.key,
-  ${pad}.backspace, ${pad}.sign, ${pad}.clear
+  Fields and actions: a NumberPad's, under `pad`: ${pad}.text, ${pad}.unit, ${pad}.range, ${pad}.signed,
+  ${pad}.decimal; ${pad}.key, ${pad}.backspace, ${pad}.sign, ${pad}.clear
 -->
 <component>
 	<api>
@@ -14,18 +15,21 @@
 		<style name="pad_zero"/>
 		<style name="numpad"/>
 
-		<!-- What has been typed, large, and the numbers that can be -->
+		<!-- What has been typed, large, in its unit, and the numbers that can be -->
 		<lv_obj name="readout" width="100%" height="content" flex_flow="row" scrollable="false"
 				style_flex_main_place="space_between" style_flex_cross_place="center" style_flex_track_place="center">
 			<style name="numpad_readout"/>
-			<lv_label name="text" bind_text="presenter.${pad}.text" flex_grow="1" long_mode="dots">
+			<lv_label name="text" bind_text="presenter.${pad}.text" long_mode="dots">
 				<style name="numpad_value"/>
 				<bind_flag_if_eq subject="presenter.${pad}.text" flag="hidden" ref_value=""/>
 			</lv_label>
 			<!-- Nothing typed is 0 -->
-			<lv_label name="zero" text="0" flex_grow="1" style_text_opa="50%">
+			<lv_label name="zero" text="0" style_text_opa="50%">
 				<style name="numpad_value"/>
 				<bind_flag_if_not_eq subject="presenter.${pad}.text" flag="hidden" ref_value=""/>
+			</lv_label>
+			<lv_label name="unit" bind_text="presenter.${pad}.unit" flex_grow="1">
+				<style name="numpad_unit"/>
 			</lv_label>
 			<lv_label name="range" bind_text="presenter.${pad}.range">
 				<style name="text_muted"/>

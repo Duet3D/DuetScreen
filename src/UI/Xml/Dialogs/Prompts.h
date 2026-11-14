@@ -32,6 +32,7 @@ namespace UI::Xml::Prompts
 		float min = 0.0f;						  // Smallest value accepted; below 0, the +/- key works
 		float max = 0.0f;						  // Largest value accepted
 		std::optional<float> value{};				  // Shown to start with; the box starts empty if not set
+		std::string unit{};							  // Shown after the number and its limits, e.g. "s"; empty for none
 		std::function<void(float)> onConfirm{};	  // Called with the value the user confirms
 		lv_obj_t* asker = nullptr;				  // The widget asking, which the prompt goes with
 	};

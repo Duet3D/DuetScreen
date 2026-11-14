@@ -1578,7 +1578,7 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 	lv_obj_t* dialog = openNumberPad();
 
 	// Typed on the keys, then OK
-	EXPECT_EQ(TestDialogs::text("range"), "100 or more");
+	EXPECT_EQ(TestDialogs::text("range"), "100 ms or more") << "in the slider's unit";
 	TestDialogs::enterOnPad("1234");
 	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
 	auto& slider = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(

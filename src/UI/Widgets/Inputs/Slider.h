@@ -62,6 +62,9 @@ namespace UI
 
 		/** Show `unit` after the value, e.g. "%" or "s"; empty for none */
 		void setUnit(std::string_view unit);
+
+		/** The value's unit, e.g. "%"; empty if it has none */
+		std::string_view getUnit() const { return m_unit.getText(); }
 		void setSendMode(SendMode mode) { m_sendMode = mode; }
 		void setLongPressedEnabled(bool enabled) { m_longPressEnabled = enabled; }
 		void setValueChangedCallback(value_changed_callback_t callback) { m_valueChangedCallback = callback; }

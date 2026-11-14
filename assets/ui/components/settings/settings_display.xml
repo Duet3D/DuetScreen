@@ -10,12 +10,9 @@
 <component presenter="settings_display">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="screen_title" translation_tag="tr.settings.groups.screen">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="screen">
-			<style name="setting_group"/>
+		<ds_setting_group name="screen" title_tag="tr.settings.groups.screen">
 			<ds_setting name="brightness" title_tag="tr.settings.brightness">
 				<ds_slider name="slider" label_tag="tr.settings.brightness" label_shown="false" numberpad="true" min="0"
 						   max="100" decimals="0" unit="%" bind_value="presenter.brightness" send="change" width="55%"
@@ -33,14 +30,15 @@
 			</ds_setting>
 			<!-- One of a few: the chosen one is checked -->
 			<ds_setting name="screen_rotation" title_tag="tr.settings.screen_rotation">
-				<lv_obj name="options" width="content" height="content" flex_flow="row" style_pad_all="0">
+				<lv_obj name="options">
+					<style name="setting_options"/>
 					<ds_button name="rotation_0" translation_tag="tr.settings.screen_rotation_options.rotation_0">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.rotation" state="checked" ref_value="0"/>
 						<action trigger="clicked" name="presenter.settings.rotation" arg="0"/>
 					</ds_button>
 					<ds_button name="rotation_180" translation_tag="tr.settings.screen_rotation_options.rotation_180">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.rotation" state="checked" ref_value="1"/>
 						<action trigger="clicked" name="presenter.settings.rotation" arg="1"/>
 					</ds_button>
@@ -52,17 +50,13 @@
 					<action trigger="value_changed" name="presenter.settings.animations"/>
 				</ds_toggle>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="appearance_title" translation_tag="tr.settings.groups.appearance">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="appearance">
-			<style name="setting_group"/>
+		<ds_setting_group name="appearance" title_tag="tr.settings.groups.appearance">
 			<ds_setting name="theme" title_tag="tr.settings.theme">
 				<ds_choice name="choice" title_tag="tr.settings.theme" bind_options="presenter.themes"
 						   bind_selected="presenter.theme">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.theme"/>
 				</ds_choice>
 			</ds_setting>
@@ -75,38 +69,46 @@
 				</ds_toggle>
 			</ds_setting>
 			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
+				<!-- The theme's accents -->
+				<lv_obj name="swatches" width="content" height="content" flex_flow="row" clickable="false"
+						style_pad_all="0" style_pad_column="6" style_bg_opa="0" style_border_width="0">
+					<lv_obj name="primary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
+						<style name="border"/>
+						<bind_style_prop prop="bg_color" subject="presenter.primary_color"/>
+					</lv_obj>
+					<lv_obj name="secondary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
+						<style name="border"/>
+						<bind_style_prop prop="bg_color" subject="presenter.secondary_color"/>
+					</lv_obj>
+				</lv_obj>
 				<ds_button name="open" text="&#xF054;">
-					<style name="setting_open"/>
+					<style name="setting_value"/>
 					<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
 				</ds_button>
 			</ds_setting>
 			<ds_setting name="font" title_tag="tr.settings.font">
 				<ds_choice name="choice" title_tag="tr.settings.font" bind_options="presenter.fonts"
 						   bind_selected="presenter.font">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.font"/>
 				</ds_choice>
 			</ds_setting>
 			<ds_setting name="icons" title_tag="tr.settings.icons">
 				<ds_choice name="choice" title_tag="tr.settings.icons" bind_options="presenter.icon_sets"
 						   bind_selected="presenter.icon_set">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.icon_set"/>
 				</ds_choice>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="home_title" translation_tag="tr.settings.groups.home">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="home">
-			<style name="setting_group"/>
+		<ds_setting_group name="home" title_tag="tr.settings.groups.home">
 			<ds_setting name="customise" title_tag="tr.settings.customise" hint_tag="tr.settings.hints.customise">
 				<ds_button name="start" translation_tag="tr.settings.customise_start">
 					<style name="setting_control"/>
 					<action trigger="clicked" name="actions.customise.start"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 	</view>
 </component>

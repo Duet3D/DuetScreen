@@ -11,7 +11,7 @@
 		</ds_icon>
 		<ds_icon name="signal" bind_icon="row.signal_icon" width="28" height="28"/>
 		<ds_button name="open" text="&#xF054;">
-			<style name="setting_open"/>
+			<style name="setting_value"/>
 			<action trigger="clicked" name="presenter.wifi.open"/>
 		</ds_button>
 	</view>

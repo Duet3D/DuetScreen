@@ -7,6 +7,7 @@
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
+#include "src/xml/lv_xml_base_types.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
 namespace UI::Xml
@@ -69,6 +70,9 @@ namespace UI::Xml
 			 .attributes = {{"title", "The tab button's text, if there is no `title_tag`"},
 							{"icon",
 							 "Icon file from the icon set shown on the tab button, e.g. \"settings_display.png\""},
+							{"end",
+							 "\"true\" to put the tab, and those after it, at the far end of the tab bar, e.g. the "
+							 "bottom of a bar down a side"},
 							{"title_tag", "Translation key for the tab button's text", AttributeKind::Translation},
 							{"bind_disabled",
 							 "Disable the tab's button while this int subject is non-zero",
@@ -153,6 +157,10 @@ namespace UI::Xml
 		if (const char* icon = lv_xml_get_value_of(attrs, "icon"))
 		{
 			tabs->getTabButton(index)->setIcon(icon);
+		}
+		if (const char* end = lv_xml_get_value_of(attrs, "end"); end != nullptr && lv_xml_to_bool(end))
+		{
+			tabs->pinToEnd(index);
 		}
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_disabled"))
 		{

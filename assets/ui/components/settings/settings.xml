@@ -28,7 +28,7 @@
 			<ds_tabs-tab name="system" icon="settings_system.png" title_tag="tr.settings.tabs.system">
 				<ds_view name="settings_system" view="settings_system" shown="true"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="developer" icon="settings_developer.png" title_tag="tr.settings.tabs.developer">
+			<ds_tabs-tab name="developer" icon="settings_developer.png" title_tag="tr.settings.tabs.developer" end="true">
 				<ds_view name="settings_developer" view="settings_developer" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>

@@ -7,7 +7,8 @@
  * read when the page is shown and applied as soon as it is changed.
  *
  * There is one action per setting, given the value from the widget (a number, an index, or 1/0 for a switch). Dark
- * mode, for a theme whose palette can be changed, posts ThemeChanged, as changing the theme does.
+ * mode, for a theme whose palette can be changed, posts ThemeChanged, as changing the theme does; the page shows the
+ * theme again whenever one is posted, e.g. after its colours change.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).
@@ -32,12 +33,15 @@ namespace UI
 		void fields(Xml::FieldVisitor& f) override;
 
 	  protected:
+		/** Listen for theme changes, which change dark mode and the colours shown */
+		void onInit() override;
+
 		/** Show the settings as they are now */
 		void onActivate() override;
 
 	  private:
-		/** Show whether the theme in use is in dark mode, and whether that can be changed */
-		void showDark();
+		/** Show the theme in use: whether it is in dark mode (and whether that can change), and its accents */
+		void showTheme();
 
 		std::vector<std::string> m_fonts;	  // Typefaces, in the order offered
 		std::vector<std::string> m_iconSets;  // Icon sets, in the order offered
@@ -55,5 +59,7 @@ namespace UI
 		Xml::IntSubject m_screensaverTimeout;	 // Seconds; 0 for never
 		Xml::IntSubject m_dark;					 // 1 if the theme in use is in dark mode
 		Xml::IntSubject m_darkShown;			 // 1 if the theme in use can change between dark and light
+		Xml::ColorSubject m_primary;			 // The theme's primary colour
+		Xml::ColorSubject m_secondary;			 // The theme's secondary colour
 	};
 } // namespace UI

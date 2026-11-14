@@ -9,27 +9,25 @@
 <component presenter="settings_connection">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="duet_title" translation_tag="tr.settings.groups.duet">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="duet">
-			<style name="setting_group"/>
+		<ds_setting_group name="duet" title_tag="tr.settings.groups.duet">
 			<!-- One of a few, in the order of `connection_methods`: the chosen one is checked -->
 			<ds_setting name="connection_method" title_tag="tr.settings.duet_connection_method">
-				<lv_obj name="options" width="content" height="content" flex_flow="row" style_pad_all="0">
+				<lv_obj name="options">
+					<style name="setting_options"/>
 					<ds_button name="usb" translation_tag="tr.connection_method.usb">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="0"/>
 						<action trigger="clicked" name="presenter.settings.connection_method" arg="0"/>
 					</ds_button>
 					<ds_button name="network" translation_tag="tr.connection_method.network">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="1"/>
 						<action trigger="clicked" name="presenter.settings.connection_method" arg="1"/>
 					</ds_button>
 					<ds_button name="uart" translation_tag="tr.connection_method.uart">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="2"/>
 						<action trigger="clicked" name="presenter.settings.connection_method" arg="2"/>
 					</ds_button>
@@ -57,7 +55,7 @@
 				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
 				<ds_choice name="choice" title_tag="tr.settings.usb_mode" bind_options="presenter.usb_modes"
 						   bind_selected="presenter.usb_mode">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.usb_mode"/>
 				</ds_choice>
 			</ds_setting>
@@ -70,11 +68,8 @@
 					<action trigger="value_confirmed" name="presenter.settings.poll_interval"/>
 				</ds_slider>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="wifi_title" translation_tag="tr.settings.groups.wifi">
-			<style name="setting_group_title"/>
-		</lv_label>
 		<ds_view name="settings_wifi" view="settings_wifi" shown="true" width="100%" height="content"/>
 	</view>
 </component>

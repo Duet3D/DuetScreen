@@ -119,6 +119,7 @@ namespace UI::Xml
 								   .min = lowest(),
 								   .max = highest(),
 								   .value = getValue(),
+								   .unit = std::string(getUnit()),
 								   .onConfirm = [this](float value) { setValue(value); },
 								   .asker = getRootPtr()});
 	}

@@ -8,12 +8,9 @@
 <component presenter="settings_system">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="about_title" translation_tag="tr.settings.groups.about">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="about">
-			<style name="setting_group"/>
+		<ds_setting_group name="about" title_tag="tr.settings.groups.about">
 			<ds_setting name="firmware" title_tag="tr.settings.firmware_version">
 				<lv_label name="value" bind_text="presenter.firmware">
 					<style name="text_muted"/>
@@ -38,13 +35,9 @@
 					<action trigger="clicked" name="presenter.settings.clear_cache"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="update_backup_title" translation_tag="tr.settings.groups.update_backup">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="update_backup">
-			<style name="setting_group"/>
+		<ds_setting_group name="update_backup" title_tag="tr.settings.groups.update_backup">
 			<ds_setting name="upgrade" title_tag="tr.settings.upgrade_from_github" hint_tag="tr.settings.hints.upgrade">
 				<ds_button name="update" translation_tag="tr.settings.update">
 					<style name="setting_control"/>
@@ -57,13 +50,9 @@
 					<action trigger="clicked" name="presenter.settings.send_config"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="restart_title" translation_tag="tr.settings.groups.restart">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="restarting">
-			<style name="setting_group"/>
+		<ds_setting_group name="restarting" title_tag="tr.settings.groups.restart">
 			<ds_setting name="restart" title_tag="tr.settings.restart_title" hint_tag="tr.settings.hints.restart">
 				<ds_button name="button" translation_tag="tr.settings.restart">
 					<style name="setting_control"/>
@@ -76,15 +65,10 @@
 					<action trigger="clicked" name="presenter.settings.reboot"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
 		<!-- Can't be undone: asks first -->
-		<lv_label name="erase_title" translation_tag="tr.settings.groups.erase">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="erasing">
-			<style name="setting_group"/>
-			<style name="setting_group_danger"/>
+		<ds_setting_group name="erasing" title_tag="tr.settings.groups.erase" danger="true">
 			<ds_setting name="erase" title_tag="tr.settings.erase_title" hint_tag="tr.settings.hints.erase">
 				<ds_button name="button" translation_tag="tr.settings.erase">
 					<style name="setting_control"/>
@@ -92,6 +76,6 @@
 					<action trigger="clicked" name="presenter.settings.erase_and_restart"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 	</view>
 </component>

@@ -38,8 +38,11 @@ namespace UI::Xml
 		/** Declare the pad's fields under its id */
 		void fields(FieldVisitor& f) override;
 
-		/** Ask for a number from `min` to `max` (whole if `whole`), starting at `start` (empty if not set) */
-		void askNumber(float min, float max, std::optional<float> start, bool whole = false);
+		/**
+		 * Ask for a number from `min` to `max` (whole if `whole`), starting at `start` (empty if not set), in `unit`
+		 * (shown after it and its limits, e.g. "s"; empty for none)
+		 */
+		void askNumber(float min, float max, std::optional<float> start, bool whole = false, std::string_view unit = {});
 
 		/** Ask for digits and dots, e.g. an IP address, starting with `start` */
 		void askText(std::string_view start);
@@ -56,8 +59,11 @@ namespace UI::Xml
 		/** Whether what is typed can be used: a number within the limits, or any digits and dots */
 		bool confirmable() const;
 
-		/** The numbers that can be typed from `min` to `max`, e.g. "0 to 280" or "0 or more"; empty for any */
-		static std::string rangeOf(float min, float max);
+		/**
+		 * The numbers that can be typed from `min` to `max`, in `unit` if it isn't empty, e.g. "0 to 280" or "0 s or
+		 * more"; empty for any
+		 */
+		static std::string rangeOf(float min, float max, std::string_view unit = {});
 
 		/** `value` as the user reads it, e.g. "0.1" for 0.1f rather than "0.100000001" */
 		static std::string shown(float value);
@@ -78,6 +84,7 @@ namespace UI::Xml
 
 		StringSubject<32> m_typed;	// `<id>.text`
 		StringSubject<64> m_range;	// `<id>.range`
+		StringSubject<16> m_unit;	// `<id>.unit`: the number's unit, or empty
 		IntSubject m_confirmable;	// `<id>.confirmable`
 		IntSubject m_signed;		// `<id>.signed`: 1 if the number may be negative
 		IntSubject m_decimal{1};	// `<id>.decimal`: 1 if the number may have a fraction

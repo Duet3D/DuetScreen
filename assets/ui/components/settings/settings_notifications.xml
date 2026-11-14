@@ -8,12 +8,9 @@
 <component presenter="settings_notifications">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="messages_title" translation_tag="tr.settings.groups.messages">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="messages">
-			<style name="setting_group"/>
+		<ds_setting_group name="messages" title_tag="tr.settings.groups.messages">
 			<ds_setting name="display_connected_message" title_tag="tr.settings.display_connected_message">
 				<ds_toggle name="switch">
 					<bind_state_if_eq subject="presenter.connected_message" state="checked" ref_value="1"/>
@@ -23,24 +20,25 @@
 			<!-- One of a few, in the order of `notification_levels`: the chosen one is checked -->
 			<ds_setting name="notification_level" title_tag="tr.settings.notification_level"
 						hint_tag="tr.settings.hints.notification_level">
-				<lv_obj name="options" width="content" height="content" flex_flow="row" style_pad_all="0">
+				<lv_obj name="options">
+					<style name="setting_options"/>
 					<ds_button name="info" translation_tag="tr.settings.severity.info">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="0"/>
 						<action trigger="clicked" name="presenter.settings.notification_level" arg="0"/>
 					</ds_button>
 					<ds_button name="success" translation_tag="tr.settings.severity.success">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="1"/>
 						<action trigger="clicked" name="presenter.settings.notification_level" arg="1"/>
 					</ds_button>
 					<ds_button name="warn" translation_tag="tr.settings.severity.warn">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="2"/>
 						<action trigger="clicked" name="presenter.settings.notification_level" arg="2"/>
 					</ds_button>
 					<ds_button name="error" translation_tag="tr.settings.severity.error">
-						<style name="setting_control"/>
+						<style name="setting_option"/>
 						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="3"/>
 						<action trigger="clicked" name="presenter.settings.notification_level" arg="3"/>
 					</ds_button>
@@ -60,6 +58,6 @@
 					<action trigger="value_changed" name="presenter.settings.error_notifications_stay"/>
 				</ds_toggle>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 	</view>
 </component>

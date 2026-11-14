@@ -19,6 +19,8 @@
 
 	<fonts>
 		<font name="header" size="18" weight="700" style="bold"/>
+		<!-- A name to read first, a step under a heading: a setting's, a category's -->
+		<font name="title" size="16" weight="500" style="normal"/>
 		<font name="normal" size="14" weight="400" style="normal"/>
 		<font name="emphasis" size="14" weight="700" style="bold"/>
 		<font name="subdued" size="12" weight="400" style="normal"/>
@@ -88,21 +90,38 @@
 			   border_side="bottom" border_width="1" border_color="#border_muted" border_opa="100%"/>
 		<style name="dialog_row_chosen" text_color="#primary"/>
 
-		<!-- Settings (ds_setting): rows in boxed groups under headings. A group's background shows in the gaps between
-			 its rows, as the rules between them. A row is tall enough to tap anywhere on. -->
+		<!-- Settings: a page (setting_page) of groups (ds_setting_group: setting_section, its title over its box) of
+			 rows (ds_setting). A group's background shows in the gaps between its rows, as the rules between them. A
+			 row is tall enough to tap anywhere on, a shade lighter than the page. -->
+		<style name="setting_page" pad_all="16" pad_row="16"/>
+		<style name="setting_section" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
+			   pad_row="6" bg_opa="0" border_width="0"/>
 		<style name="setting_group" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
 			   pad_row="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"
 			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
-		<style name="setting_group_title" text_color="#text_muted" text_font="font_emphasis" pad_left="4" pad_top="6"/>
+		<style name="setting_group_title" text_color="#text_muted" text_font="font_emphasis" text_letter_space="1"
+			   pad_left="4"/>
 		<!-- A group whose actions can't be undone: edged, and ruled, in the error colour -->
 		<style name="setting_group_danger" bg_color="#error" border_color="#error"/>
-		<style name="setting_row" width="100%" min_height="56" pad_hor="12" pad_ver="6" pad_column="16" radius="0"
-			   bg_color="#bg" bg_opa="100%" border_width="0"/>
+		<!-- Rows listed in a group's box (a ds_list): ruled as the box's own rows are -->
+		<style name="setting_list" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
+			   pad_row="#border_width" bg_opa="0" border_width="0"/>
+		<style name="setting_row" width="100%" min_height="56" pad_hor="14" pad_ver="8" pad_column="16" radius="0"
+			   bg_color="lighten(#bg, 0.025)" bg_opa="100%" border_width="0"/>
+		<style name="setting_title" text_color="#text" text_font="font_title"/>
 		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
-		<!-- A row's button or choice, or one of a few options: big enough to tap -->
+		<!-- A row's button: big enough to tap -->
 		<style name="setting_control" min_height="40" min_width="64" pad_hor="12"/>
-		<!-- A row's way into more, such as a page or a dialog of its own: a chevron in a small square -->
-		<style name="setting_open" width="44" height="40" pad_all="0"/>
+		<!-- A row's choice, or its way into more (a page, a dialog): the value, if any, and a chevron, plain on the row,
+			 which is tapped to open it -->
+		<style name="setting_value" min_height="40" pad_hor="4" pad_column="8" bg_opa="0" border_width="0"
+			   shadow_width="0" outline_width="0" text_color="#text_muted"/>
+		<!-- One of a few options: buttons joined in a box, the chosen one checked -->
+		<style name="setting_options" width="content" height="content" layout="flex" flex_flow="row" pad_all="0"
+			   pad_column="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
+		<style name="setting_option" min_height="40" min_width="64" pad_hor="14" radius="0" border_width="0"
+			   shadow_width="0"/>
 
 		<!-- The number pad: what is typed, large, in a box edged in the accent, over keys a size apart; the keys that
 			 edit rather than type are a step darker -->
@@ -110,6 +129,7 @@
 		<style name="numpad_readout" bg_color="#bg_dark" bg_opa="100%" border_color="#primary" border_width="1"
 			   border_opa="100%" radius="#radius" pad_hor="12" pad_ver="6" pad_column="12"/>
 		<style name="numpad_value" text_color="#text" text_font="font_xlarge"/>
+		<style name="numpad_unit" text_color="#text_muted" text_font="font_large" pad_left="6"/>
 		<style name="numpad_key" text_font="font_large" pad_all="0"/>
 		<style name="numpad_key_side" bg_color="#bg"/>
 
@@ -153,7 +173,7 @@
 			   min_width="25" min_height="25"/>
 		<!-- Checked (a chosen option, the open page): tinted, and edged in the accent by an outline drawn inside the
 			 edge, which (unlike a border) takes no layout space, so a content-sized button doesn't grow when checked -->
-		<style name="btn_checked" bg_color="#primary_muted" bg_grad_dir="none" outline_color="#primary"
+		<style name="btn_checked" bg_color="#primary_muted" bg_opa="100%" bg_grad_dir="none" outline_color="#primary"
 			   outline_width="#outline_width" outline_pad="-#outline_width" outline_opa="100%"/>
 		<!-- Acts on the machine: filled with the accent -->
 		<style name="action_btn" bg_opa="100%" bg_color="#primary" border_color="#primary"/>
@@ -275,6 +295,12 @@
 
 		<!-- Tabs: the selected one (as a checked button, tinted) is underlined in the accent, instead of edged -->
 		<style name="tab_btn" border_color="#primary" border_width="3" border_side="bottom" outline_width="0"/>
+		<!-- Tabs down a side (ds_tabs side="left"): a panel of their own; each flat until it is the one selected, which
+			 is checked (btn_checked) -->
+		<style name="tab_bar_side" bg_color="#bg" bg_opa="100%" radius="#radius" pad_all="8" pad_row="4"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
+		<style name="tab_button_side" min_height="52" pad_hor="12" pad_ver="8" pad_column="12" bg_opa="0"
+			   border_width="0" shadow_width="0" text_color="#text" text_font="font_title"/>
 		<style name="tab_bg_focus" outline_pad="-#border_width"/>
 
 		<!-- List -->

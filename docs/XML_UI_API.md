@@ -517,6 +517,7 @@ Used by `dialog_number`.
 | --- | --- | --- |
 | `presenter.number.text` | text | What has been typed |
 | `presenter.number.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for any |
+| `presenter.number.unit` | text | The number's unit, shown after it, e.g. "s"; empty for none |
 | `presenter.number.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
 | `presenter.number.signed` | int | 1 if the number may be negative, so the sign key works |
 | `presenter.number.decimal` | int | 1 if the number may have a fraction, so the dot key works |
@@ -756,6 +757,7 @@ Used by `notifications`.
 | `presenter.alert.pad_shown` | int | 1 if a number is asked for, typed on the pad (`alert.pad`) |
 | `presenter.alert.pad.text` | text | What has been typed |
 | `presenter.alert.pad.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for any |
+| `presenter.alert.pad.unit` | text | The number's unit, shown after it, e.g. "s"; empty for none |
 | `presenter.alert.pad.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
 | `presenter.alert.pad.signed` | int | 1 if the number may be negative, so the sign key works |
 | `presenter.alert.pad.decimal` | int | 1 if the number may have a fraction, so the dot key works |
@@ -904,6 +906,8 @@ Used by `settings_display`.
 | `presenter.screensaver_timeout` | int | Seconds without a touch before the screen dims; 0 for never |
 | `presenter.dark` | int | 1 if the theme in use is in dark mode |
 | `presenter.dark_shown` | int | 1 if the theme in use can change between dark and light mode |
+| `presenter.primary_color` | colour | The theme's primary colour |
+| `presenter.secondary_color` | colour | The theme's secondary colour |
 
 | Action | Description |
 | --- | --- |
@@ -1648,6 +1652,31 @@ Also takes every `lv_obj` attribute.
 | `hint_tag` | Translation key for the hint; follows language changes |
 | `bind_hint` | Follow a text subject for the hint, e.g. how something went; no hint while it is empty |
 
+### ds_setting_group
+
+A group of settings: its title, in capitals, over a box of the rows written inside it (`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style). Hiding the group hides its title too.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_setting_group title="Machine control">
+	<ds_setting title="Confirm before acting">
+		<ds_toggle/>
+	</ds_setting>
+	<ds_setting title="Absolute moves use machine coordinates">
+		<ds_toggle/>
+	</ds_setting>
+</ds_setting_group>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_setting_group.png)
+
+| Attribute | Description |
+| --- | --- |
+| `title` | The group's title, if there is no `title_tag` |
+| `title_tag` | Translation key for the title; follows language changes |
+| `danger` | "true" for a group whose actions can't be undone, such as erasing every setting: the box is edged in the error colour (`setting_group_danger`) |
+
 ### ds_slider
 
 A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send="change"` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also raises `value_changed` as it is dragged.
@@ -1718,6 +1747,7 @@ Also takes every `lv_obj` attribute.
 | --- | --- |
 | `title` | The tab button's text, if there is no `title_tag` |
 | `icon` | Icon file from the icon set shown on the tab button, e.g. "settings_display.png" |
+| `end` | "true" to put the tab, and those after it, at the far end of the tab bar, e.g. the bottom of a bar down a side |
 | `title_tag` | Translation key for the tab button's text |
 | `bind_disabled` | Disable the tab's button while this int subject is non-zero |
 | `select_on` | Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on="om.job.file.fileName"` |
@@ -3132,7 +3162,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
 | `tab_card` |  | *(not set)* |
 | `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#bg_light text_color=#text border_color=#border_muted border_width=#border_width border_opa=100% border_side=full min_width=25 min_height=25 |
-| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_color=#primary_muted bg_grad_dir=none outline_color=#primary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
+| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_color=#primary_muted bg_opa=100% bg_grad_dir=none outline_color=#primary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
 | `icon` |  | *(not set)* |
 | `icon_recolor` | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/icon_recolor.png) | recolor=#text recolor_opa=100% |
 | `pressed` | ![pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/pressed.png) | recolor=0x000000 recolor_opa=35 |
@@ -3235,6 +3265,8 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `heater_off` | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/heater_off.png) | bg_color=#bg_light border_color=#border_muted text_color=#text |
 | `heater_fault` |  | bg_color=#error border_color=#error |
 | `tab_button` |  | *(not set)* |
+| `tab_bar_side` | ![tab_bar_side](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_bar_side.png) | bg_color=#bg bg_opa=100% radius=#radius pad_all=8 pad_row=4 border_color=#border_muted border_width=#border_width border_opa=100% |
+| `tab_button_side` | ![tab_button_side](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_button_side.png) | min_height=52 pad_hor=12 pad_ver=8 pad_column=12 bg_opa=0 border_width=0 shadow_width=0 text_color=#text text_font=font_title |
 | `slider_buttons` |  | width=40 height=40 |
 | `list_header` |  | *(not set)* |
 | `list_title` | ![list_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_title.png) | merge=text_emphasis |
@@ -3265,16 +3297,23 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `dialog_button` |  | min_width=120 min_height=40 pad_hor=16 |
 | `dialog_row` | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row.png) | min_height=44 pad_hor=4 pad_ver=4 pad_column=10 radius=0 bg_opa=0 border_side=bottom border_width=1 border_color=#border_muted border_opa=100% |
 | `dialog_row_chosen` | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row_chosen.png) | text_color=#primary |
+| `setting_page` |  | pad_all=16 pad_row=16 |
+| `setting_section` | ![setting_section](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_section.png) | width=100% height=content layout=flex flex_flow=column pad_all=0 pad_row=6 bg_opa=0 border_width=0 |
 | `setting_group` | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group.png) | width=100% height=content layout=flex flex_flow=column pad_all=0 pad_row=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |
-| `setting_group_title` | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group_title.png) | text_color=#text_muted text_font=font_emphasis pad_left=4 pad_top=6 |
+| `setting_group_title` | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group_title.png) | text_color=#text_muted text_font=font_emphasis text_letter_space=1 pad_left=4 |
 | `setting_group_danger` |  | bg_color=#error border_color=#error |
-| `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | width=100% min_height=56 pad_hor=12 pad_ver=6 pad_column=16 radius=0 bg_color=#bg bg_opa=100% border_width=0 |
+| `setting_list` | ![setting_list](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_list.png) | width=100% height=content layout=flex flex_flow=column pad_all=0 pad_row=#border_width bg_opa=0 border_width=0 |
+| `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | width=100% min_height=56 pad_hor=14 pad_ver=8 pad_column=16 radius=0 bg_color=lighten(#bg, 0.025) bg_opa=100% border_width=0 |
+| `setting_title` | ![setting_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_title.png) | text_color=#text text_font=font_title |
 | `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | text_color=#text_muted text_font=font_subdued |
 | `setting_control` |  | min_height=40 min_width=64 pad_hor=12 |
-| `setting_open` |  | width=44 height=40 pad_all=0 |
+| `setting_value` | ![setting_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_value.png) | min_height=40 pad_hor=4 pad_column=8 bg_opa=0 border_width=0 shadow_width=0 outline_width=0 text_color=#text_muted |
+| `setting_options` | ![setting_options](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_options.png) | width=content height=content layout=flex flex_flow=row pad_all=0 pad_column=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |
+| `setting_option` |  | min_height=40 min_width=64 pad_hor=14 radius=0 border_width=0 shadow_width=0 |
 | `numpad` |  | pad_row=8 pad_column=8 |
 | `numpad_readout` | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_readout.png) | bg_color=#bg_dark bg_opa=100% border_color=#primary border_width=1 border_opa=100% radius=#radius pad_hor=12 pad_ver=6 pad_column=12 |
 | `numpad_value` | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_value.png) | text_color=#text text_font=font_xlarge |
+| `numpad_unit` | ![numpad_unit](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_unit.png) | text_color=#text_muted text_font=font_large pad_left=6 |
 | `numpad_key` | ![numpad_key](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_key.png) | text_font=font_large pad_all=0 |
 | `numpad_key_side` |  | bg_color=#bg |
 | `gauge_arc` |  | arc_color=#bg_light arc_width=10dpx arc_rounded=true bg_opa=0 pad_all=0 |
@@ -3327,7 +3366,7 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 
 ### Fonts
 
-Used as `style_text_font="…"`: `font_header`, `font_normal`, `font_emphasis`, `font_subdued`, `font_small`, `font_large`, `font_xlarge`, `font_huge`
+Used as `style_text_font="…"`: `font_header`, `font_title`, `font_normal`, `font_emphasis`, `font_subdued`, `font_small`, `font_large`, `font_xlarge`, `font_huge`
 
 ![The fonts](../tests/ref_imgs/xml_ui_api/themes/duetscreen/fonts.png)
 

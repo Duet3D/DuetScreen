@@ -86,7 +86,7 @@ namespace UI
 				   m_theme.set(static_cast<int32_t>(args.value().value_or(0)));
 				   theme->setThemeActive();
 				   StorageHelper::setData(ID_THEME, theme->getName());
-				   showDark();
+				   showTheme();
 				   Model::get().post<EventType::ThemeChanged>();
 			   });
 		action("settings.font",
@@ -125,7 +125,7 @@ namespace UI
 				   {
 					   Model::get().post<EventType::ThemeChanged>();
 				   }
-				   showDark();
+				   showTheme();
 			   });
 		setting("settings.brightness",
 				"Set the screen brightness to the edited value, 0-100",
@@ -172,6 +172,8 @@ namespace UI
 			"screensaver_timeout", m_screensaverTimeout, "Seconds without a touch before the screen dims; 0 for never");
 		f.field("dark", m_dark, "1 if the theme in use is in dark mode");
 		f.field("dark_shown", m_darkShown, "1 if the theme in use can change between dark and light mode");
+		f.field("primary_color", m_primary, "The theme's primary colour");
+		f.field("secondary_color", m_secondary, "The theme's secondary colour");
 	}
 
 	void DisplaySettingsPresenter::onActivate()
@@ -204,7 +206,7 @@ namespace UI
 		m_animations.set(StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) ? 1 : 0);
 		m_brightness.set(static_cast<int32_t>(DisplayHelper::getBrightness()));
 		m_screensaverTimeout.set(static_cast<int32_t>(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT).count()));
-		showDark();
+		showTheme();
 		for (size_t i = 0; i < ROTATIONS.size(); i++)
 		{
 			if (ROTATIONS[i].rotation == DisplayHelper::getRotation())
@@ -214,11 +216,27 @@ namespace UI
 		}
 	}
 
-	void DisplaySettingsPresenter::showDark()
+	void DisplaySettingsPresenter::onInit()
+	{
+		registerEventListener<EventType::ThemeChanged>(
+			[this]()
+			{
+				UI_LOCK();
+				showTheme();
+			});
+	}
+
+	void DisplaySettingsPresenter::showTheme()
 	{
 		const Themes::Theme* theme = Themes::getCurrentTheme();
 		const bool changeable = theme != nullptr && theme->isCustomisable();
 		m_darkShown.set(changeable ? 1 : 0);
 		m_dark.set(theme != nullptr && theme->getPalette().dark ? 1 : 0);
+		if (theme != nullptr)
+		{
+			const auto colors = theme->getColors();
+			m_primary.set(colors.primary);
+			m_secondary.set(colors.secondary);
+		}
 	}
 } // namespace UI

@@ -8,16 +8,13 @@
 <component presenter="settings_developer">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="logging_title" translation_tag="tr.settings.groups.logging">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="logging">
-			<style name="setting_group"/>
+		<ds_setting_group name="logging" title_tag="tr.settings.groups.logging">
 			<ds_setting name="debug_level" title_tag="tr.settings.debug_level">
 				<ds_choice name="choice" title_tag="tr.settings.debug_level" bind_options="presenter.debug_levels"
 						   bind_selected="presenter.debug_level">
-					<style name="setting_control"/>
+					<style name="setting_value"/>
 					<action trigger="value_confirmed" name="presenter.settings.debug_level"/>
 				</ds_choice>
 			</ds_setting>
@@ -28,13 +25,9 @@
 					<action trigger="value_changed" name="presenter.settings.system_logging"/>
 				</ds_toggle>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="options_title" translation_tag="tr.settings.groups.options">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="options">
-			<style name="setting_group"/>
+		<ds_setting_group name="options" title_tag="tr.settings.groups.options">
 			<ds_setting name="enable_advanced_settings" title_tag="tr.settings.enable_advanced_settings"
 						hint_tag="tr.settings.hints.advanced">
 				<ds_toggle name="switch">
@@ -48,13 +41,9 @@
 					<action trigger="value_changed" name="presenter.settings.second_usb_channel"/>
 				</ds_toggle>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
-		<lv_label name="tools_title" translation_tag="tr.settings.groups.tools">
-			<style name="setting_group_title"/>
-		</lv_label>
-		<lv_obj name="tools">
-			<style name="setting_group"/>
+		<ds_setting_group name="tools" title_tag="tr.settings.groups.tools">
 			<ds_setting name="hardware_test" title_tag="tr.settings.hardware_test"
 						hint_tag="tr.settings.hints.hardware_test">
 				<ds_button name="start" translation_tag="tr.settings.start">
@@ -62,15 +51,10 @@
 					<action trigger="clicked" name="presenter.settings.hardware_test"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 
 		<!-- In builds that have them -->
-		<lv_label name="build_only_title" translation_tag="tr.settings.groups.build_only">
-			<style name="setting_group_title"/>
-			<bind_flag_if_eq subject="presenter.build_tools_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<lv_obj name="build_only">
-			<style name="setting_group"/>
+		<ds_setting_group name="build_only" title_tag="tr.settings.groups.build_only">
 			<bind_flag_if_eq subject="presenter.build_tools_shown" flag="hidden" ref_value="0"/>
 			<ds_setting name="debug_borders" title_tag="tr.settings.debug_borders">
 				<bind_flag_if_eq subject="presenter.debug_borders_shown" flag="hidden" ref_value="0"/>
@@ -107,6 +91,6 @@
 					<action trigger="clicked" name="presenter.settings.buildroot_setup"/>
 				</ds_button>
 			</ds_setting>
-		</lv_obj>
+		</ds_setting_group>
 	</view>
 </component>
