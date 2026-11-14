@@ -1650,6 +1650,8 @@ Also takes every `lv_obj` attribute.
 | `bind_title` | Follow a text subject for the title |
 | `hint` | A line under the title saying more about the setting, if there is no `hint_tag` or `bind_hint` |
 | `hint_tag` | Translation key for the hint; follows language changes |
+| `badge` | A word after the title saying what sort of setting it is, e.g. "Advanced", if there is no `badge_tag` |
+| `badge_tag` | Translation key for the badge; follows language changes |
 | `bind_hint` | Follow a text subject for the hint, e.g. how something went; no hint while it is empty |
 
 ### ds_setting_group
@@ -3306,6 +3308,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | width=100% min_height=56 pad_hor=14 pad_ver=8 pad_column=16 radius=0 bg_color=lighten(#bg, 0.025) bg_opa=100% border_width=0 |
 | `setting_title` | ![setting_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_title.png) | text_color=#text text_font=font_title |
 | `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | text_color=#text_muted text_font=font_subdued |
+| `setting_badge` | ![setting_badge](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_badge.png) | text_color=#text_muted text_font=font_small text_letter_space=1 pad_hor=6 pad_ver=1 radius=#radius border_color=#border border_width=#border_width border_opa=100% |
 | `setting_control` |  | min_height=40 min_width=64 pad_hor=12 |
 | `setting_value` | ![setting_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_value.png) | min_height=40 pad_hor=4 pad_column=8 bg_opa=0 border_width=0 shadow_width=0 outline_width=0 text_color=#text_muted |
 | `setting_options` | ![setting_options](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_options.png) | width=content height=content layout=flex flex_flow=row pad_all=0 pad_column=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |

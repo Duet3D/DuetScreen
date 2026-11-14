@@ -1285,6 +1285,7 @@
 			<xs:enumeration value="screen"/>
 			<xs:enumeration value="scrollbar"/>
 			<xs:enumeration value="scrollbar_scrolled"/>
+			<xs:enumeration value="setting_badge"/>
 			<xs:enumeration value="setting_control"/>
 			<xs:enumeration value="setting_group"/>
 			<xs:enumeration value="setting_group_danger"/>
@@ -1806,6 +1807,7 @@
 			<xs:enumeration value="tr.object_cancel.current_object_prefix"/>
 			<xs:enumeration value="tr.object_cancel.objects_header"/>
 			<xs:enumeration value="tr.object_cancel.title"/>
+			<xs:enumeration value="tr.settings.advanced"/>
 			<xs:enumeration value="tr.settings.back_up"/>
 			<xs:enumeration value="tr.settings.backup_failed"/>
 			<xs:enumeration value="tr.settings.backup_saved"/>
@@ -3441,6 +3443,12 @@
 		</xs:attribute>
 		<xs:attribute name="hint_tag" type="translation">
 			<xs:annotation><xs:documentation>Translation key for the hint; follows language changes</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="badge" type="xs:string">
+			<xs:annotation><xs:documentation>A word after the title saying what sort of setting it is, e.g. &quot;Advanced&quot;, if there is no `badge_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="badge_tag" type="translation">
+			<xs:annotation><xs:documentation>Translation key for the badge; follows language changes</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="bind_hint" type="subject">
 			<xs:annotation><xs:documentation>Follow a text subject for the hint, e.g. how something went; no hint while it is empty</xs:documentation></xs:annotation>

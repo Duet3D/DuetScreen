@@ -365,6 +365,7 @@ namespace UI::Themes
 		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
 		Style setting_title;	   // A row's title
 		Style setting_hint;		   // The line under a row's title that says more about it
+		Style setting_badge;	   // A word after a row's title saying what sort of setting it is, e.g. "Advanced"
 		Style setting_control;	   // A row's button: big enough to tap
 		Style setting_value;	   // A row's choice, or its way into more: the value and a chevron, plain on the row
 		Style setting_options;	   // One of a few options: the box the buttons are joined in

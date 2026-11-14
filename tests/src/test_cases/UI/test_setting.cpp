@@ -71,7 +71,7 @@ class TestSetting : public UiTestSuite
 								<action trigger="value_confirmed" name="presenter.test.choose"/>
 							</ds_choice>
 						</ds_setting>
-						<ds_setting name="fact_row" title="A fact">
+						<ds_setting name="fact_row" title="A fact" badge="Advanced">
 							<lv_label text="42"/>
 						</ds_setting>
 					</ds_setting_group>
@@ -106,6 +106,8 @@ TEST_F(TestSetting, ARowShowsItsTitleAndAnyHint)
 	EXPECT_EQ(text("switch_row", "title"), "A switch");
 	EXPECT_EQ(text("switch_row", "hint"), "With a hint");
 	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(part("fact_row"), "hint"), LV_OBJ_FLAG_HIDDEN)) << "no hint";
+	EXPECT_EQ(text("fact_row", "badge"), "ADVANCED") << "a badge after the title, in capitals";
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(part("switch_row"), "badge"), LV_OBJ_FLAG_HIDDEN)) << "no badge";
 	EXPECT_EQ(text("choice_row", "title"), "Bound title");
 	presenter->title.set("Another");
 	EXPECT_EQ(text("choice_row", "title"), "Another");

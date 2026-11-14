@@ -427,7 +427,8 @@
         "system_logging": "Può rallentare lo schermo",
         "advanced": "Aggiunge la porta USB-C e la frequenza di aggiornamento a Connessione",
         "hardware_test": "Controlla display, cicalino, unità e altro, passo dopo passo"
-      }
+      },
+      "advanced": "Avanzata"
     },
     "side_bar": {
       "back": "Indietro",

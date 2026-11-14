@@ -426,7 +426,8 @@
         "system_logging": "Puede ralentizar la pantalla",
         "advanced": "Añade el puerto USB-C y la frecuencia de actualización en Conexión",
         "hardware_test": "Comprueba la pantalla, el zumbador, las unidades y más, paso a paso"
-      }
+      },
+      "advanced": "Avanzado"
     },
     "side_bar": {
       "back": "Atrás",

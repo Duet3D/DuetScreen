@@ -426,7 +426,8 @@
         "system_logging": "Peut ralentir l'écran",
         "advanced": "Ajoute le port USB-C et la fréquence d’actualisation à Connexion",
         "hardware_test": "Vérifie l'affichage, le buzzer, les lecteurs et plus, étape par étape"
-      }
+      },
+      "advanced": "Avancé"
     },
     "side_bar": {
       "back": "Retour",

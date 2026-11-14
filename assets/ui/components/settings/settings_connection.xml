@@ -51,7 +51,7 @@
 			</ds_setting>
 
 			<!-- With advanced settings shown -->
-			<ds_setting name="usb_mode" title_tag="tr.settings.usb_mode">
+			<ds_setting name="usb_mode" title_tag="tr.settings.usb_mode" badge_tag="tr.settings.advanced">
 				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
 				<ds_choice name="choice" title_tag="tr.settings.usb_mode" bind_options="presenter.usb_modes"
 						   bind_selected="presenter.usb_mode">
@@ -60,7 +60,7 @@
 				</ds_choice>
 			</ds_setting>
 			<ds_setting name="poll_interval" title_tag="tr.settings.duet_poll_interval"
-						hint_tag="tr.settings.hints.poll_interval">
+						hint_tag="tr.settings.hints.poll_interval" badge_tag="tr.settings.advanced">
 				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
 				<ds_slider name="slider" label_tag="tr.settings.duet_poll_interval" label_shown="false" numberpad="true"
 						   min="100" max="2000" increment="50" decimals="0" unit="ms" out_of_range="upper"

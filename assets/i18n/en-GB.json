@@ -427,7 +427,8 @@
         "system_logging": "Can slow the screen down",
         "advanced": "Adds the USB-C port and update rate to Connection",
         "hardware_test": "Checks the display, buzzer, drives and more, step by step"
-      }
+      },
+      "advanced": "Advanced"
     },
     "side_bar": { /* Side bar buttons */
       "back": "Back",

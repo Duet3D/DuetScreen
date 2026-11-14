@@ -1,8 +1,8 @@
 /*
  * DsSetting.h
  *
- * <ds_setting>: one setting, a row: its title, and under it a hint if it has one, then whatever changes it (its
- * children, at the end of the row). Tapping the row anywhere works its control, as tapping the control would, if that
+ * <ds_setting>: one setting, a row: its title, with a badge after it if it has one (e.g. "Advanced"), and under it a
+ * hint if it has one, then whatever changes it (its children, at the end of the row). Tapping the row anywhere works its control, as tapping the control would, if that
  * is a switch, a button or a choice. Its attributes are in registerXml().
  */
 
@@ -55,10 +55,16 @@ namespace UI::Xml
 		/** Show `hint` under the title, or no hint if it is empty */
 		void setHint(std::string_view hint);
 
-		LvContainer m_text{"titles", getRoot()}; // The title over the hint, taking the room the control leaves
-		LvLabel m_title{"title", m_text};	   // What the setting is
-		LvLabel m_hint{"hint", m_text};		   // More about it, if it needs saying
-		std::string m_titleTag;				   // `title_tag`, or empty if the title isn't translated
-		std::string m_hintTag;				   // `hint_tag`, or empty if the hint isn't translated
+		/** Show `badge`, in capitals, after the title, or no badge if it is empty */
+		void setBadge(std::string_view badge);
+
+		LvContainer m_text{"titles", getRoot()};  // The title over the hint, taking the room the control leaves
+		LvContainer m_heading{"heading", m_text}; // The title and its badge
+		LvLabel m_title{"title", m_heading};	  // What the setting is
+		LvLabel m_badge{"badge", m_heading};	  // What sort of setting it is, e.g. "Advanced", if that needs saying
+		LvLabel m_hint{"hint", m_text};			  // More about it, if it needs saying
+		std::string m_titleTag;					  // `title_tag`, or empty if the title isn't translated
+		std::string m_hintTag;					  // `hint_tag`, or empty if the hint isn't translated
+		std::string m_badgeTag;					  // `badge_tag`, or empty if the badge isn't translated
 	};
 } // namespace UI::Xml

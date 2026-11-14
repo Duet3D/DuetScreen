@@ -110,6 +110,9 @@
 			   bg_color="lighten(#bg, 0.025)" bg_opa="100%" border_width="0"/>
 		<style name="setting_title" text_color="#text" text_font="font_title"/>
 		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
+		<!-- A word after a row's title saying what sort of setting it is, e.g. "Advanced": a small tag -->
+		<style name="setting_badge" text_color="#text_muted" text_font="font_small" text_letter_space="1" pad_hor="6"
+			   pad_ver="1" radius="#radius" border_color="#border" border_width="#border_width" border_opa="100%"/>
 		<!-- A row's button: big enough to tap -->
 		<style name="setting_control" min_height="40" min_width="64" pad_hor="12"/>
 		<!-- A row's choice, or its way into more (a page, a dialog): the value, if any, and a chevron, plain on the row,

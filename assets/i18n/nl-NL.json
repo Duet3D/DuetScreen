@@ -426,7 +426,8 @@
         "system_logging": "Kan het scherm vertragen",
         "advanced": "Voegt de USB-C-poort en de verversingssnelheid toe aan Verbinding",
         "hardware_test": "Controleert het scherm, de zoemer, de schijven en meer, stap voor stap"
-      }
+      },
+      "advanced": "Geavanceerd"
     },
     "side_bar": {
       "back": "Terug",

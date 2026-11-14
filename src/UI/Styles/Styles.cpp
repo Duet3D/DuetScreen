@@ -361,6 +361,7 @@ namespace UI::Themes
 		{"setting_row", &ComponentStyles::setting_row},
 		{"setting_title", &ComponentStyles::setting_title},
 		{"setting_hint", &ComponentStyles::setting_hint},
+		{"setting_badge", &ComponentStyles::setting_badge},
 		{"setting_control", &ComponentStyles::setting_control},
 		{"setting_value", &ComponentStyles::setting_value},
 		{"setting_options", &ComponentStyles::setting_options},

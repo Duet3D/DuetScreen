@@ -426,7 +426,8 @@
         "system_logging": "Pode tornar o ecrã mais lento",
         "advanced": "Adiciona a porta USB-C e a frequência de atualização a Conexão",
         "hardware_test": "Verifica o ecrã, o besouro, as unidades e mais, passo a passo"
-      }
+      },
+      "advanced": "Avançado"
     },
     "side_bar": {
       "back": "Voltar",

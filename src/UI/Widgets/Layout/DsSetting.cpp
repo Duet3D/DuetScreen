@@ -8,10 +8,17 @@
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Runtime/Translations.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
+#include "utils/utils.h"
 
 namespace UI::Xml
 {
 	using namespace WidgetSupport;
+
+	namespace
+	{
+		/** The gap between the title and its badge */
+		constexpr lv_coord_t BADGE_GAP = 8;
+	} // namespace
 
 	DsSetting::DsSetting(const std::string& name, lv_obj_t* parent)
 		: LvContainer(name, parent)
@@ -31,10 +38,21 @@ namespace UI::Xml
 		m_text.setFlag(LV_OBJ_FLAG_CLICKABLE, false);
 		m_text.setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
 
-		m_title.setWidth(LV_PCT(100));
+		// A badge follows the title (see setBadge())
+		m_heading.setSize(LV_PCT(100), LV_SIZE_CONTENT);
+		m_heading.setStylePad(0);
+		m_heading.setStylePad(BADGE_GAP, 0, Padding::COLUMN);
+		m_heading.setFlexFlow(LV_FLEX_FLOW_ROW);
+		m_heading.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+		m_heading.setFlag(LV_OBJ_FLAG_CLICKABLE, false);
+		m_heading.setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
+
 		m_title.setLongMode(LV_LABEL_LONG_MODE_WRAP);
 		m_title.addStyle(Themes::getComponentStyles().setting_title);
 		m_title.setText("");
+
+		m_badge.addStyle(Themes::getComponentStyles().setting_badge);
+		setBadge("");
 
 		m_hint.setWidth(LV_PCT(100));
 		m_hint.setLongMode(LV_LABEL_LONG_MODE_WRAP);
@@ -70,6 +88,10 @@ namespace UI::Xml
 				  {"hint",
 				   "A line under the title saying more about the setting, if there is no `hint_tag` or `bind_hint`"},
 				  {"hint_tag", "Translation key for the hint; follows language changes", AttributeKind::Translation},
+				  {"badge",
+				   "A word after the title saying what sort of setting it is, e.g. \"Advanced\", if there is no "
+				   "`badge_tag`"},
+				  {"badge_tag", "Translation key for the badge; follows language changes", AttributeKind::Translation},
 				  {"bind_hint",
 				   "Follow a text subject for the hint, e.g. how something went; no hint while it is empty",
 				   AttributeKind::Subject}},
@@ -131,6 +153,15 @@ namespace UI::Xml
 		{
 			setting->setHint(hint);
 		}
+		if (const char* tag = lv_xml_get_value_of(attrs, "badge_tag"))
+		{
+			setting->m_badgeTag = tag;
+			setting->setBadge(Translations::translate(tag));
+		}
+		else if (const char* badge = lv_xml_get_value_of(attrs, "badge"))
+		{
+			setting->setBadge(badge);
+		}
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_hint"))
 		{
 			lv_subject_add_observer_obj(subject, hintObserverCb, setting->getRootPtr(), setting);
@@ -159,6 +190,10 @@ namespace UI::Xml
 		if (!setting->m_hintTag.empty())
 		{
 			setting->setHint(Translations::translate(setting->m_hintTag));
+		}
+		if (!setting->m_badgeTag.empty())
+		{
+			setting->setBadge(Translations::translate(setting->m_badgeTag));
 		}
 	}
 
@@ -195,6 +230,24 @@ namespace UI::Xml
 		else
 		{
 			lv_obj_send_event(control, LV_EVENT_CLICKED, nullptr);
+		}
+	}
+
+	void DsSetting::setBadge(std::string_view badge)
+	{
+		m_badge.setText(utils::toUpper(badge));
+		m_badge.setFlag(LV_OBJ_FLAG_HIDDEN, badge.empty());
+		// Alone, the title takes the whole line and wraps in it; with a badge, it is as wide as its text, up to the
+		// whole line, so the badge sits right after it
+		if (badge.empty())
+		{
+			m_title.setWidth(LV_PCT(100));
+			m_title.removeLocalStyleProp(LV_STYLE_MAX_WIDTH);
+		}
+		else
+		{
+			m_title.setWidth(LV_SIZE_CONTENT);
+			m_title.setMaxWidth(LV_PCT(100));
 		}
 	}
 

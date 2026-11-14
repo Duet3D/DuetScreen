@@ -426,7 +426,8 @@
         "system_logging": "Kann den Bildschirm verlangsamen",
         "advanced": "Fügt unter Verbindung den USB-C-Anschluss und die Aktualisierungsrate hinzu",
         "hardware_test": "Prüft Anzeige, Summer, Laufwerke und mehr, Schritt für Schritt"
-      }
+      },
+      "advanced": "Erweitert"
     },
     "side_bar": {
       "back": "Zurück",
