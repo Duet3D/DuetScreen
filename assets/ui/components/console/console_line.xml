@@ -8,5 +8,7 @@
 		<lv_spangroup-span bind_text="row.time" style="text_muted"/>
 		<lv_spangroup-span bind_text="row.command" style="text_emphasis"/>
 		<lv_spangroup-span bind_text="row.text" style="text"/>
+
+		<action trigger="clicked" name="actions.navigation.open" arg="console"/>
 	</view>
 </component>
