@@ -7,7 +7,7 @@
   never overlap. The temperatures are spans so the tool and the temperatures share a baseline whatever the theme's
   fonts.
 
-  Data:     machine.summary, machine.name (src/UI/Xml/Data/MachineSource.h); current_tool.*
+  Data:     machine.summary (src/UI/Xml/Data/MachineSource.h); the printer's name, om.network.name; current_tool.*
             (src/UI/Xml/Data/ToolSource.h)
 -->
 <component>
@@ -23,7 +23,7 @@
 		<lv_label name="status" bind_text="machine.summary" align="left_mid"/>
 
 		<!-- Long names scroll -->
-		<lv_label name="name" bind_text="machine.name" align="center" long_mode="scroll_circular"
+		<lv_label name="name" bind_text="om.network.name" align="center" long_mode="scroll_circular"
 				  style_max_width="40%" style_text_align="center"/>
 
 		<lv_obj name="right" align="right_mid" width="content" height="content" style_max_width="30%"

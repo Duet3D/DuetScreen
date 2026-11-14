@@ -25,7 +25,6 @@ namespace UI::Xml
 		f.field("machine.job_active",
 				m_jobActive,
 				"1 while there is a job (running, pausing, paused, resuming or simulating), else 0");
-		f.field("machine.name", m_name, "The printer's name; empty while it isn't connected");
 		f.field("machine.connection", m_connection, "How the screen is connected to the printer, e.g. \"USB\"");
 		f.field("machine.state", m_state, "The printer's state, translated, e.g. \"Idle\"");
 		f.field("machine.summary", m_summary, "The connection and the state, e.g. \"USB - Idle\"");
@@ -34,13 +33,11 @@ namespace UI::Xml
 	void MachineSource::onInit()
 	{
 		registerEventListener<EventType::Status>(this, &MachineSource::statusChanged);
-		registerEventListener<EventType::NetworkName>([this]() { nameChanged(); });
 	}
 
 	void MachineSource::update()
 	{
 		statusChanged(OM::GetStatus());
-		nameChanged();
 	}
 
 	void MachineSource::onConnect()
@@ -53,7 +50,6 @@ namespace UI::Xml
 	{
 		statusChanged(OM::GetStatus());
 		showState("disconnected");
-		m_name.set("");
 	}
 
 	void MachineSource::statusChanged(const OM::PrinterStatus& status)
@@ -69,10 +65,5 @@ namespace UI::Xml
 		m_connection.set(_(Comm::DUET.GetCommunicationTypeName()));
 		m_state.set(_(fmt::format("state.{:s}", state)));
 		m_summary.set(fmt::format("{:s} - {:s}", m_connection.get(), m_state.get()));
-	}
-
-	void MachineSource::nameChanged()
-	{
-		m_name.set(OM::GetPrinterName());
 	}
 } // namespace UI::Xml

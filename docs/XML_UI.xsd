@@ -187,7 +187,6 @@
 			<xs:enumeration value="loaded"/>
 			<xs:enumeration value="machine.connection"/>
 			<xs:enumeration value="machine.job_active"/>
-			<xs:enumeration value="machine.name"/>
 			<xs:enumeration value="machine.printing"/>
 			<xs:enumeration value="machine.state"/>
 			<xs:enumeration value="machine.status"/>

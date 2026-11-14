@@ -219,7 +219,6 @@ Each row of `jog.feedrates`:
 | `machine.status` | text | State key, e.g. idle, processing, paused; translated under state.* |
 | `machine.printing` | int | 1 while a job is running and not paused, else 0: controls that would change the job are disabled |
 | `machine.job_active` | int | 1 while there is a job (running, pausing, paused, resuming or simulating), else 0 |
-| `machine.name` | text | The printer's name; empty while it isn't connected |
 | `machine.connection` | text | How the screen is connected to the printer, e.g. "USB" |
 | `machine.state` | text | The printer's state, translated, e.g. "Idle" |
 | `machine.summary` | text | The connection and the state, e.g. "USB - Idle" |
