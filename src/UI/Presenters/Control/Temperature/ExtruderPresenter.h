@@ -38,6 +38,9 @@ namespace UI
 		void onDisconnect() override;
 
 	  private:
+		/** Extrude `distance` (retract if negative) at the selected feed rate, in the displayed units */
+		void extrude(float distance);
+
 		/** Work out whether the selected tool can extrude and retract */
 		void update();
 

@@ -5,7 +5,6 @@
 #include "TemperatureSource.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "ObjectModel/Heat.h"
 #include "PrinterModel.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"

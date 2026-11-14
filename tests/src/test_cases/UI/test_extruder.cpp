@@ -5,7 +5,6 @@
  * src/UI/Presenters/Control/Temperature/ExtruderPresenter.h).
  */
 
-#include "ObjectModel/Heat.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/View/XmlView.h"

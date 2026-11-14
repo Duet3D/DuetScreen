@@ -17,7 +17,6 @@
 
 namespace OM
 {
-	static std::string s_printerName;
 	static std::string s_uniqueId;
 	static PrinterStatus s_status = PrinterStatus::connecting;
 	static uint32_t s_channelIndex = 0;
@@ -102,22 +101,6 @@ namespace OM
 			 */
 			Model::get().post<EventType::Status>(GetStatus());
 		}
-	}
-
-	const std::string& GetPrinterName()
-	{
-		return s_printerName;
-	}
-
-	void SetPrinterName(const char* name)
-	{
-		if (s_printerName == name)
-		{
-			return;
-		}
-
-		s_printerName = name;
-		Model::get().post<EventType::NetworkName>();
 	}
 
 	const std::string& GetPrinterUniqueId()

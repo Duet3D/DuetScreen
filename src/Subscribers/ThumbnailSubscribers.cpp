@@ -1,5 +1,5 @@
 /*
- * FanSubscribers.cpp
+ * ThumbnailSubscribers.cpp
  *
  *  Created on: 4 Jan 2024
  *      Author: Andy Everitt

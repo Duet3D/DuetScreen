@@ -28,6 +28,7 @@
 #include "Patch.h"
 #include <functional>
 #include <mutex>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -66,15 +67,39 @@ namespace OM
 		/** Stop telling the listener addListener() returned `id` for */
 		void removeListener(size_t id);
 
+		/**
+		 * Call `callback` after each response (or clear()) that changes something at, below or above one of `paths`,
+		 * for what DuetScreen does itself as the printer changes (see Followers.h), not for showing it: it runs on the
+		 * connection's thread, without the model lock, as the response is applied. (The UI's watchers run on its own
+		 * thread: see UI/Xml/Om/OmBindings.h.)
+		 * @return what unwatch() takes
+		 */
+		size_t watch(std::vector<std::string> paths, Listener callback);
+
+		/** Stop the watcher watch() returned `id` for */
+		void unwatch(size_t id);
+
 	  private:
 		/** Tell the listeners, if there are changes they haven't been told about */
 		void notify();
+
+		/** Call the watchers of anything in `changes` */
+		void tellWatchers(const ChangeSet& changes);
+
+		/** One watch() */
+		struct Watcher
+		{
+			size_t id;						// What unwatch() takes
+			std::vector<std::string> paths; // Paths watched
+			Listener callback;				// Called after a change to one
+		};
 
 		Node m_root;					 // The object model
 		ChangeSet m_changes;			 // Changed since the last takeChanges()
 		bool m_notified = false;		 // Whether listeners have been told about m_changes
 		std::vector<std::pair<size_t, Listener>> m_listeners; // Told about changes, with their ids
 		size_t m_nextListenerId = 1;						   // Id of the next listener added
-		std::mutex m_listenersMutex;	 // Guards m_listeners
+		std::vector<Watcher> m_watchers;   // Called after the changes they watch
+		std::mutex m_listenersMutex;	 // Guards m_listeners and m_watchers
 	};
 } // namespace OM

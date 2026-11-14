@@ -4,10 +4,9 @@
 
 #include "HeightmapPresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
 #include "ObjectModel/PrinterStatus.h"
-#include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "i18n/i18n.h"
 #include <cmath>
 #include <limits>
@@ -84,22 +83,24 @@ namespace UI
 
 	void HeightmapPresenter::onInit()
 	{
-		registerEventListener<EventType::CompensationFile>(
-			[this]()
-			{
-				showFiles();
-				requestFiles();
-			});
+		// The map in use is noted here, on the UI's thread: the file list arrives on the connection's
+		m_compensationWatch = Xml::OmWatch({"move.compensation"},
+										   [this]
+										   {
+											   m_current = OM::GetCurrentHeightmap();
+											   showFiles();
+											   requestFiles();
+										   });
 		m_directoriesWatch = Xml::OmWatch({"directories"}, [this] { requestFiles(); });
-		registerEventListener<EventType::AxesData>([this]() { axesChanged(); });
+		m_axesWatch = Xml::OmWatch({"move.axes", "tools", "state.currentTool"}, [this] { axesChanged(); });
 		registerEventListener<EventType::Status>([this](const OM::PrinterStatus&) { showUsable(); });
 	}
 
 	void HeightmapPresenter::onActivate()
 	{
 		requestFiles();
-		const std::string_view current = OM::GetCurrentHeightmap();
-		load(current.empty() ? nullptr : OM::GetHeightmapData(current));
+		m_current = OM::GetCurrentHeightmap();
+		load(m_current.empty() ? nullptr : OM::GetHeightmapData(m_current));
 		showUsable();
 	}
 
@@ -161,22 +162,16 @@ namespace UI
 			clear();
 			return;
 		}
-		auto axis0 = map->meta.GetAxis(0);
-		auto axis1 = map->meta.GetAxis(1);
-		if (axis0 == nullptr || axis1 == nullptr)
+		// The map is drawn over the axes' travel, allowing for the tool's offset, in whole mm
+		const auto x = spanOf(map->meta.GetAxisLetter(0));
+		const auto y = spanOf(map->meta.GetAxisLetter(1));
+		if (!x || !y)
 		{
 			LOG_WARN("Heightmap axes are not valid");
 			return;
 		}
-
-		// The map is drawn over the axes' travel, allowing for the tool's offset, in whole mm
-		auto spanOf = [](const OM::Move::AxisPtr& axis) -> AxisRange
-		{
-			const float offset = OM::GetCurrentToolAxisOffset(axis);
-			return {axis->minPosition + offset, axis->maxPosition + offset};
-		};
-		const AxisRange xRange = spanOf(axis0);
-		const AxisRange yRange = spanOf(axis1);
+		const AxisRange xRange = *x;
+		const AxisRange yRange = *y;
 		Xml::Surface::Values values;
 		values.x = {std::trunc(xRange.min), std::trunc(xRange.max)};
 		values.y = {std::trunc(yRange.min), std::trunc(yRange.max)};
@@ -245,11 +240,10 @@ namespace UI
 	void HeightmapPresenter::showFiles()
 	{
 		UI_LOCK();
-		const std::string_view current = OM::GetCurrentHeightmap();
 		m_maps.sync(m_files.size(),
-					[this, current](HeightmapFileRow& row, size_t i)
+					[this](HeightmapFileRow& row, size_t i)
 					{
-						const bool loaded = m_files[i]->GetName() == current;
+						const bool loaded = m_files[i]->GetName() == m_current;
 						row.name.set(m_files[i]->GetName());
 						row.loaded.set(loaded ? 1 : 0);
 						row.loadText.set(loaded ? _("heightmap.unload") : _("heightmap.load"));
@@ -272,20 +266,29 @@ namespace UI
 		{
 			return;
 		}
-		auto axis0 = map->meta.GetAxis(0);
-		auto axis1 = map->meta.GetAxis(1);
-		if (axis0 == nullptr || axis1 == nullptr)
+		const auto xRange = spanOf(map->meta.GetAxisLetter(0));
+		const auto yRange = spanOf(map->meta.GetAxisLetter(1));
+		if (!xRange || !yRange)
 		{
 			return;
 		}
-		const float xOffset = OM::GetCurrentToolAxisOffset(axis0);
-		const float yOffset = OM::GetCurrentToolAxisOffset(axis1);
-		const AxisRange xRange{axis0->minPosition + xOffset, axis0->maxPosition + xOffset};
-		const AxisRange yRange{axis1->minPosition + yOffset, axis1->maxPosition + yOffset};
-		if (xRange != m_xRange || yRange != m_yRange)
+		if (*xRange != m_xRange || *yRange != m_yRange)
 		{
 			show(map);
 		}
+	}
+
+	std::optional<HeightmapPresenter::AxisRange> HeightmapPresenter::spanOf(char letter)
+	{
+		MODEL_LOCK();
+		const OM::Node& axis = Xml::PrinterModel::axis(letter);
+		if (!axis.exists())
+		{
+			return std::nullopt;
+		}
+		const float offset = Xml::PrinterModel::toolOffset(letter);
+		return AxisRange{static_cast<float>(axis["min"].number()) + offset,
+						 static_cast<float>(axis["max"].number()) + offset};
 	}
 
 	OM::FileSystem::ItemPtr HeightmapPresenter::fileOf(const Xml::ActionArgs& args) const

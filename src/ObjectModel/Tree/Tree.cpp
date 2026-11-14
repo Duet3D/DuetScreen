@@ -4,6 +4,7 @@
 
 #include "Tree.h"
 #include "LockWrapper.h"
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -156,16 +157,17 @@ namespace OM
 		{
 			return;
 		}
+		ChangeSet changes; // What this response changed
 		{
 			std::lock_guard lock(mutexModel);
-			Merger merger(m_changes, patch.live());
+			Merger merger(changes, patch.live());
 			Node& target = merger.reach(m_root, patch.root());
 			if (patch.partial())
 			{
 				// Only the elements sent are replaced; the last part sets the length
 				if (!target.isArray())
 				{
-					m_changes.add(patch.root().str());
+					changes.add(patch.root().str());
 					target.makeArray();
 				}
 				const size_t end = patch.first() + patch.count();
@@ -173,13 +175,13 @@ namespace OM
 				{
 					if (i >= target.size())
 					{
-						m_changes.add(patch.root().str());
+						changes.add(patch.root().str());
 					}
 					merger.assign(target.item(i), patch.result()[i], patch.root().index(i), false);
 				}
 				if (patch.last() && target.size() != end)
 				{
-					m_changes.add(patch.root().str());
+					changes.add(patch.root().str());
 					target.resize(end);
 				}
 			}
@@ -187,8 +189,10 @@ namespace OM
 			{
 				merger.assign(target, patch.result(), patch.root(), false);
 			}
+			m_changes.merge(changes);
 		}
 		notify();
+		tellWatchers(changes);
 	}
 
 	void Tree::clear()
@@ -204,6 +208,45 @@ namespace OM
 			m_changes.add(Path().str());
 		}
 		notify();
+		ChangeSet everything;
+		everything.add(Path().str());
+		tellWatchers(everything);
+	}
+
+	size_t Tree::watch(std::vector<std::string> paths, Listener callback)
+	{
+		std::lock_guard lock(m_listenersMutex);
+		const size_t id = m_nextListenerId++;
+		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback)});
+		return id;
+	}
+
+	void Tree::unwatch(size_t id)
+	{
+		std::lock_guard lock(m_listenersMutex);
+		std::erase_if(m_watchers, [id](const Watcher& watcher) { return watcher.id == id; });
+	}
+
+	void Tree::tellWatchers(const ChangeSet& changes)
+	{
+		// Called without the model lock, so a watcher may read the tree, and with a copy, so it may (un)watch
+		std::vector<Listener> told;
+		{
+			std::lock_guard lock(m_listenersMutex);
+			for (const auto& watcher : m_watchers)
+			{
+				if (std::any_of(watcher.paths.begin(),
+								watcher.paths.end(),
+								[&changes](const std::string& path) { return changes.touches(path); }))
+				{
+					told.push_back(watcher.callback);
+				}
+			}
+		}
+		for (const auto& callback : told)
+		{
+			callback();
+		}
 	}
 
 	ChangeSet Tree::takeChanges()

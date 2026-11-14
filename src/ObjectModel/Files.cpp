@@ -12,11 +12,12 @@
 #include "Comm/Communication.h"
 #include "Hardware/Duet.h"
 #include "Hardware/Usb.h"
-#include "ObjectModel/Job.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "utils/UnitSystem.h"
 #include <algorithm>
 #include <fstream>
+#include <mutex>
 
 namespace OM::FileSystem
 {
@@ -467,7 +468,12 @@ namespace OM::FileSystem
 	void PrintAgain()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcodef("M23 \"{:s}\"\nM24\n", OM::GetLastJobName());
+		std::string lastFile;
+		{
+			std::lock_guard lock(mutexModel);
+			lastFile = Tree::get().root()["job"]["lastFileName"].text();
+		}
+		Comm::DUET.SendGcodef("M23 \"{:s}\"\nM24\n", lastFile);
 	}
 
 	void ClearFileSystem()

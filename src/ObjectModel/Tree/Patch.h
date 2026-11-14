@@ -70,8 +70,14 @@ namespace OM
 		/** Whether a partial array result is the last part */
 		bool last() const { return m_next == 0; }
 
+		/** Where an array result continues, or 0 if it is complete */
+		size_t next() const { return m_next; }
+
 		/** The result; Tree::apply() takes its children */
 		Node& result() { return m_result; }
+
+		/** The result */
+		const Node& result() const { return m_result; }
 
 	  private:
 		/** `path` with the 'a' offset added to a root-array index */

@@ -13,10 +13,9 @@
 #include "Comm/Commands.h"
 #include "Comm/Communication.h"
 #include "Comm/ControlCommands.h"
+#include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/SerialIo.h"
-#include "ObjectModel/Alert.h"
-#include "ObjectModel/Job.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "ObjectModel/Utils.h"
 #include "UI/Core/Model.h"
@@ -247,7 +246,32 @@ namespace Comm
 		responseData = nullptr;
 
 		OM::Tree::get().apply(m_patch);
+		RequestMoreAxes();
 		m_patch.reset();
+	}
+
+	void JsonDecoder::RequestMoreAxes() const
+	{
+		if (!m_patch.hasResult() || m_patch.live())
+		{
+			return;
+		}
+		const std::string root = m_patch.root().str();
+		size_t from = 0;
+		if (root == "move")
+		{
+			// `move` holds the first MAX_REPORTED_AXES axes only: there may be more
+			const size_t sent = m_patch.result()["axes"].size();
+			from = sent >= MAX_REPORTED_AXES ? sent : 0;
+		}
+		else if (root == "move.axes")
+		{
+			from = m_patch.next();
+		}
+		if (from > 0)
+		{
+			DUET.RequestModel("move.axes", fmt::format("vna{:d}", from));
+		}
 	}
 
 	OM::Node::Kind JsonDecoder::ValueKind() const

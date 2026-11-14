@@ -91,9 +91,6 @@ namespace OM
 		bool AllFlagsSet() const { return flags.GetRaw() == GotAll; }
 		void Reset();
 	};
-
-	extern Alert g_currentAlert;
-	extern uint32_t g_lastAlertSeq;
 } // namespace OM
 
 #endif /* JNI_UI_ALERT_H_ */

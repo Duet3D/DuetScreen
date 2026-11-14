@@ -4,7 +4,6 @@
 #include "Debug.h"
 #include "Hardware/Duet.h"
 #include "Hardware/Usb.h"
-#include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "Presenter.h"
 #include "View.h"
@@ -24,7 +23,6 @@
 #include <utility>
 
 // Ensure ResponseType and OM types are complete for payload sizing in this TU
-#include "ObjectModel/Alert.h"
 #include "Subscribers/ResponseSubscribers.h"
 #include "utils/UpgradeHelper.h"
 

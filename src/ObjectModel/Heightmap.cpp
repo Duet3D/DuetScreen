@@ -8,6 +8,9 @@
 #include "Debug.h"
 
 #include "Heightmap.h"
+#include "LockWrapper.h"
+#include "Tree/Tree.h"
+#include <mutex>
 
 #include "Hardware/Duet.h"
 #include "ObjectModel/Directories.h"
@@ -19,7 +22,6 @@
 
 namespace OM
 {
-	static std::string s_currentHeightmapName;
 	static std::vector<HeightmapPtr> s_heightmapCache;
 	static std::string s_emptyStr = "";
 
@@ -99,16 +101,11 @@ namespace OM
 		}
 	}
 
-	std::shared_ptr<Move::Axis> HeightmapMeta::GetAxis(size_t index) const
+	char HeightmapMeta::GetAxisLetter(size_t index) const
 	{
 		ZoneScoped;
 		const std::string& label = m_axis[index];
-		auto axis = Move::GetAxisByLetter(label[0]);
-		if (axis == nullptr)
-		{
-			LOG_ERROR("Axis {:s} not found", label.c_str());
-		}
-		return axis;
+		return label.empty() ? '\0' : label[0];
 	}
 
 	void HeightmapMeta::CheckValidity()
@@ -436,27 +433,6 @@ namespace OM
 		return true;
 	}
 
-	void SetCurrentHeightmap(std::string_view filename)
-	{
-		ZoneScoped;
-		size_t pos = filename.find_last_of('/');
-		if (pos != std::string::npos)
-		{
-			s_currentHeightmapName = filename.substr(pos + 1);
-		}
-		else
-		{
-			s_currentHeightmapName = filename;
-		}
-		LOG_DBG("Set current heightmap to \"{:s}\" ({:s})", s_currentHeightmapName, filename);
-	}
-
-	void ClearCurrentHeightmap()
-	{
-		ZoneScoped;
-		s_currentHeightmapName = "";
-	}
-
 	/* Sends command to Duet to use the heightmap called `filename` */
 	void LoadHeightmap(std::string_view filename)
 	{
@@ -476,19 +452,21 @@ namespace OM
 	void ToggleHeightmap(std::string_view filename)
 	{
 		ZoneScoped;
-		if (s_currentHeightmapName != filename)
+		if (GetCurrentHeightmap() != filename)
 		{
 			LoadHeightmap(filename);
 			return;
 		}
 		UnloadHeightmap();
-		ClearCurrentHeightmap();
 	}
 
-	std::string_view GetCurrentHeightmap()
+	std::string GetCurrentHeightmap()
 	{
 		ZoneScoped;
-		return s_currentHeightmapName;
+		std::lock_guard lock(mutexModel);
+		const std::string_view path = Tree::get().root().at("move.compensation.file").text();
+		const size_t slash = path.find_last_of('/');
+		return std::string(slash == std::string_view::npos ? path : path.substr(slash + 1));
 	}
 
 	HeightmapPtr GetHeightmapData(std::string_view filename)

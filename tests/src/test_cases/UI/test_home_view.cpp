@@ -6,13 +6,7 @@
  */
 
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
-#include "ObjectModel/BedOrChamber.h"
-#include "ObjectModel/Fan.h"
-#include "ObjectModel/Heat.h"
-#include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
-#include "ObjectModel/Tool.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "Storage.h"
 #include "UI/Core/Navigation.h"
@@ -22,6 +16,7 @@
 #include "UI/Widgets/Inputs/Slider.h"
 #include "UI/Widgets/Layout/TabView.h"
 #include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Data/TemperatureSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
@@ -38,6 +33,18 @@
 
 namespace
 {
+	/** How many of the object model array at `path` are there (not null) */
+	size_t countOf(std::string_view path)
+	{
+		const OM::Node& items = UI::Xml::PrinterModel::root().at(path);
+		size_t count = 0;
+		for (size_t i = 0; i < items.size(); i++)
+		{
+			count += items[i].exists() ? 1 : 0;
+		}
+		return count;
+	}
+
 	/** The M291 alert the object model's message box describes now, as the notifications presenter builds it */
 	OM::Alert alertInObjectModel()
 	{
@@ -725,18 +732,21 @@ class TestHomeViewWithData : public TestHomeView
 TEST_F(TestHomeViewWithData, Dashboard)
 {
 	ZoneScoped;
-	EXPECT_EQ(OM::Heat::GetHeaterCount(), 4);
-	EXPECT_EQ(OM::GetToolCount(), 4);
+	EXPECT_EQ(countOf("heat.heaters"), 4u);
+	EXPECT_EQ(countOf("tools"), 4u);
 
 	/* Populate graph with fake sensor data, as the model ticks would */
 	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
 	ASSERT_NE(temperatures, nullptr);
-	auto sensor = OM::GetAnalogSensorBySlot(0);
-	sensor->lastReading = 25.0f;
+	int32_t reading = 25;
 	for (size_t i = 0; i < 1000; i++)
 	{
+		// A live response sends every sensor; the second keeps the test bench's reading
+		load_model_data(fmt::format(
+			R"json({{"key":"sensors","flags":"f","result":{{"analog":[{{"lastReading":{}}},{{"lastReading":22.32}}]}}}})json",
+			reading));
 		temperatures->sample();
-		sensor->lastReading = (int32_t)(sensor->lastReading + 1) % 300;
+		reading = (reading + 1) % 300;
 	}
 
 	temperatureGraph().showSeries(1, false);
@@ -784,10 +794,10 @@ TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
 	load_model_data_from_file("tests/object_model/5_axis/model_heat_v.json");
 	load_model_data_from_file("tests/object_model/5_axis/model_tools_v.json");
 
-	EXPECT_EQ(OM::Heat::GetHeaterCount(), 1);
-	EXPECT_EQ(OM::GetToolCount(), 1);
-	EXPECT_EQ(OM::GetBedCount(), 0);
-	EXPECT_EQ(OM::GetChamberCount(), 0);
+	EXPECT_EQ(countOf("heat.heaters"), 1u);
+	EXPECT_EQ(countOf("tools"), 1u);
+	EXPECT_TRUE(UI::Xml::PrinterModel::beds().empty());
+	EXPECT_TRUE(UI::Xml::PrinterModel::chambers().empty());
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/simple_printer.png");
 }

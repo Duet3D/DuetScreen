@@ -151,6 +151,56 @@ namespace OM
 		}
 	}
 
+	std::string Node::toJson() const
+	{
+		const auto quoted = [](std::string_view text)
+		{
+			std::string out = "\"";
+			for (const char c : text)
+			{
+				if (c == '"' || c == '\\')
+				{
+					out += '\\';
+				}
+				if (c == '\n')
+				{
+					out += "\\n";
+					continue;
+				}
+				out += c;
+			}
+			return out + "\"";
+		};
+		switch (m_kind)
+		{
+		case Kind::object:
+		{
+			std::string out = "{";
+			for (const auto& [name, child] : m_fields)
+			{
+				out += (out.size() > 1 ? "," : "") + quoted(name) + ":" + child->toJson();
+			}
+			return out + "}";
+		}
+		case Kind::array:
+		{
+			std::string out = "[";
+			for (const auto& item : m_items)
+			{
+				out += (out.size() > 1 ? "," : "") + item->toJson();
+			}
+			return out + "]";
+		}
+		case Kind::string:
+			return quoted(m_text);
+		case Kind::boolean:
+		case Kind::number:
+			return m_text;
+		default:
+			return "null";
+		}
+	}
+
 	bool Node::operator==(const Node& other) const
 	{
 		if (m_kind != other.m_kind || m_text != other.m_text)

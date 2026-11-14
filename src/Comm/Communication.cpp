@@ -9,6 +9,7 @@
  */
 
 #include "Debug.h"
+#include "ObjectModel/Followers.h"
 
 #include "Comm/Communication.h"
 #include <stdarg.h>
@@ -20,12 +21,7 @@
 #include "Hardware/SerialIo.h"
 
 #include "Comm/ControlCommands.h"
-#include "ObjectModel/Alert.h"
-#include "ObjectModel/Axis.h"
-#include "ObjectModel/BedOrChamber.h"
 #include "ObjectModel/PrinterStatus.h"
-#include "ObjectModel/Spindle.h"
-#include "ObjectModel/Tool.h"
 #include "ObjectModel/Utils.h"
 #include "nameof.hpp"
 #include "tracy/Tracy.hpp"
@@ -471,6 +467,7 @@ namespace Comm
 		std::filesystem::create_directories("/tmp/heightmaps");
 		std::filesystem::create_directories("/tmp/files");
 		SortFieldTable();
+		OM::Followers::start();
 		usbInit();
 		ResetSeqs();
 		KickWatchdog();

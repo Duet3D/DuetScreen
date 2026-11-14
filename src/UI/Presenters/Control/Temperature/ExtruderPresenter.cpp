@@ -4,15 +4,14 @@
 
 #include "ExtruderPresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
-#include "ObjectModel/Heat.h"
 #include "ObjectModel/PrinterStatus.h"
-#include "ObjectModel/Tool.h"
 #include "Storage.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/UnitSystem.h"
+#include <fmt/format.h>
 
 namespace UI
 {
@@ -32,10 +31,10 @@ namespace UI
 
 		action("extruder.extrude",
 			   "Extrude the chosen distance at the chosen feed rate with the selected tool",
-			   [this](const Xml::ActionArgs&) { OM::Move::Extrude(m_distance.value(), m_feedrate.value()); });
+			   [this](const Xml::ActionArgs&) { extrude(m_distance.value()); });
 		action("extruder.retract",
 			   "Retract the chosen distance at the chosen feed rate with the selected tool",
-			   [this](const Xml::ActionArgs&) { OM::Move::Extrude(-m_distance.value(), m_feedrate.value()); });
+			   [this](const Xml::ActionArgs&) { extrude(-m_distance.value()); });
 		for (auto& [name, description, handler] : Xml::ValueSelector::actions({&m_distance, &m_feedrate}))
 		{
 			action(name, description, handler);
@@ -56,6 +55,14 @@ namespace UI
 			"job is running");
 		m_distance.fields(f);
 		m_feedrate.fields(f);
+	}
+
+	void ExtruderPresenter::extrude(float distance)
+	{
+		// Relative extrusion (M83) inside M120/M121, so the printer's own mode is kept
+		Xml::Services::sendGcode(fmt::format("M120\nM83\nG1 E{:g} F{:g}\nM121\n",
+											 Units::convertDisplayedDistanceToDuetUnits(distance),
+											 Units::convertDisplayedSpeedToDuetUnits(m_feedrate.value())));
 	}
 
 	void ExtruderPresenter::onInit()

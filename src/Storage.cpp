@@ -9,11 +9,11 @@
 #include "Configuration.h"
 
 /* For types */
-#include "Comm/Usb.h"						 // Comm::UsbMode
-#include "Debug.h"							 // Log::DebugLevel
-#include "Hardware/Duet.h"					 // Comm::CommunicationType
-#include "ObjectModel/Files.h"				 // OM::FileSystem::SortBy
-#include "ObjectModel/Job.h"				 // OM::JobProgressSource
+#include "Comm/Usb.h"		   // Comm::UsbMode
+#include "Debug.h"			   // Log::DebugLevel
+#include "Hardware/Duet.h"	   // Comm::CommunicationType
+#include "ObjectModel/Files.h" // OM::FileSystem::SortBy
+#include "ObjectModel/JobProgressSource.h"
 #include "Subscribers/ResponseSubscribers.h" // ResponseType
 #include "utils/DisplayHelper.h"			 // DisplayRotation
 #include "utils/SystemHelper.h"				 // SystemHelper::Services

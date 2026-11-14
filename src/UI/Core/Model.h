@@ -2,19 +2,10 @@
 
 #include "Debug.h"
 #include "LockWrapper.h"
-#include "Subscribers/BoardSubscribers.h"
-#include "Subscribers/FanSubscribers.h"
 #include "Subscribers/FileSubscribers.h"
-#include "Subscribers/HeatSubscribers.h"
-#include "Subscribers/JobSubscribers.h"
-#include "Subscribers/MoveSubscribers.h"
 #include "Subscribers/ResponseSubscribers.h"
-#include "Subscribers/SensorSubscribers.h"
-#include "Subscribers/SpindleSubscribers.h"
-#include "Subscribers/StateSubscribers.h"
 #include "Subscribers/Subscribers.h"
 #include "Subscribers/ThumbnailSubscribers.h"
-#include "Subscribers/ToolSubscribers.h"
 #include "UI/Core/EventTypes.h"
 #include "lvgl/lvgl.h"
 #include "nameof.hpp"
@@ -167,18 +158,9 @@ class Model
 	void connected();
 	void disconnected();
 
-	BoardSubscribers m_boardSubscribers;
-	FanSubscribers m_fanSubscribers;
 	FileSubscribers m_fileSubscribers;
-	HeatSubscribers m_heatSubscribers;
-	JobSubscribers m_jobSubscribers;
-	MoveSubscribers m_moveSubscribers;
 	ResponseSubscribers m_responseSubscribers;
-	SensorSubscribers m_sensorSubscribers;
-	SpindleSubscribers m_spindleSubscribers;
-	StateSubscribers m_stateSubscribers;
 	ThumbnailSubscribers m_thumbnailSubscribers;
-	ToolSubscribers m_toolSubscribers;
 	std::list<std::weak_ptr<UI::BasePresenter>> m_presenters;
 
 	// Optimized event dispatch: map event -> presenters subscribed to that event

@@ -6,7 +6,7 @@
 #include "BuildDate.h"
 #include "Debug.h"
 #include "Hardware/Reset.h"
-#include "ObjectModel/Job.h"
+#include "ObjectModel/JobProgressSource.h"
 #include "Storage.h"
 #include "Subscribers/ResponseSubscribers.h"
 #include "i18n/i18n.h"

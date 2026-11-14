@@ -6,7 +6,6 @@
  * covered by test_home_view.cpp (control_view/fan.png), these tests check behaviour and structure.
  */
 
-#include "ObjectModel/Tool.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
@@ -17,6 +16,7 @@
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/History.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
@@ -759,18 +759,16 @@ TEST_F(TestXmlUi, NestedListsShowEachRowsOwnChildren)
 	ASSERT_EQ(lv_obj_get_child_count(find(view, "tools")), heaterCounts.size());
 	for (size_t slot = 0; slot < heaterCounts.size(); slot++)
 	{
-		auto tool = OM::GetToolBySlot(slot);
-		ASSERT_NE(tool, nullptr);
+		const size_t tool = UI::Xml::PrinterModel::tools()[slot];
 		lv_obj_t* card = toolCard(view, static_cast<int32_t>(slot));
-		EXPECT_EQ(text(card, "tool_name"), tool->GetName());
+		EXPECT_EQ(text(card, "tool_name"), UI::Xml::PrinterModel::toolName(tool));
 		ASSERT_EQ(lv_obj_get_child_count(find(card, "heaters")), heaterCounts[slot]) << "tool slot " << slot;
 
 		for (size_t h = 0; h < heaterCounts[slot]; h++)
 		{
 			lv_obj_t* row = heaterRow(view, static_cast<int32_t>(slot), static_cast<int32_t>(h));
-			const auto& heater = *tool->GetHeater(h)->heater;
-			const std::string expected =
-				heater.GetName().empty() ? _("temperature.heater", heater.index) : std::string(heater.GetName());
+			const size_t heater = UI::Xml::PrinterModel::toolHeater(tool, h).value();
+			const std::string expected = UI::Xml::PrinterModel::heaterName(heater);
 			EXPECT_EQ(text(row, "heater_name"), expected) << "the heater's own name, not the tool's";
 			EXPECT_EQ(text(row, "title"), "hot") << "names the rows don't have come from the presenter";
 		}

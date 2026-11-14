@@ -116,6 +116,9 @@ namespace Comm
 		/** Give a completed top-level or result value to the object model patch */
 		void FeedPatch(OM::Node::Kind kind);
 
+		/** Ask for the axes a `move` or `move.axes` response just applied didn't include */
+		void RequestMoreAxes() const;
+
 		// m_fieldId is the name of the field being received. A '^' character indicates the position of an _ecv_array
 		// index, and a ':' character indicates a field separator.
 		String<50> m_fieldPrefix;

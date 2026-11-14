@@ -4,7 +4,7 @@
  * The settings tabs (assets/ui/screens/settings_*.xml, src/UI/Presenters/Settings/).
  */
 
-#include "ObjectModel/Job.h"
+#include "ObjectModel/JobProgressSource.h"
 #include "Storage.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/View/XmlView.h"

@@ -102,6 +102,9 @@ namespace OM
 		/** Call `visit(name, child)` for each field of an object, in name order */
 		void forEachField(const std::function<void(std::string_view, const Node&)>& visit) const;
 
+		/** The node as JSON text, children included, e.g. for a log */
+		std::string toJson() const;
+
 		/** Whether two nodes hold the same thing, children included */
 		bool operator==(const Node& other) const;
 

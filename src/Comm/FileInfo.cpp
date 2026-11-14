@@ -13,7 +13,6 @@
 #include "Configuration.h"
 #include "Hardware/Duet.h"
 #include "ObjectModel/Files.h"
-#include "ObjectModel/Job.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "nameof.hpp"

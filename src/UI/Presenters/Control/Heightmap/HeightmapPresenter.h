@@ -19,6 +19,8 @@
 #include "UI/Xml/View/XmlPresenter.h"
 #include <memory>
 #include <mutex>
+#include <optional>
+#include <string>
 
 namespace UI
 {
@@ -95,6 +97,9 @@ namespace UI
 		/** The axes changed: show the map again if its span moved */
 		void axesChanged();
 
+		/** The span of the axis whose letter is `letter`, from the object model; nothing if there is no such axis */
+		static std::optional<AxisRange> spanOf(char letter);
+
 		/** The file a maps row is about, or nullptr */
 		OM::FileSystem::ItemPtr fileOf(const Xml::ActionArgs& args) const;
 
@@ -117,5 +122,8 @@ namespace UI
 		Xml::IntSubject m_modeSubject;				// `mode`
 		Xml::IntSubject m_levellingUsable;			// 1 if the bed can be levelled
 		Xml::OmWatch m_directoriesWatch;			// Asks for the height maps once the system folder is known
+		Xml::OmWatch m_compensationWatch;			// Notes the map in use as it changes
+		Xml::OmWatch m_axesWatch;					// Redraws the map if the axes' travel changes
+		std::string m_current;						// The map in use, noted on the UI's thread
 	};
 } // namespace UI

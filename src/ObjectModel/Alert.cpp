@@ -8,9 +8,6 @@
 
 namespace OM
 {
-	Alert g_currentAlert;
-	uint32_t g_lastAlertSeq = 0;
-
 	void Alert::Reset()
 	{
 		LOG_VERBOSE("Resetting alert");

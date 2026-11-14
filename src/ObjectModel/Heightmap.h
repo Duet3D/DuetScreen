@@ -10,7 +10,6 @@
 
 #include "Files.h"
 
-#include "Axis.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -29,7 +28,8 @@ namespace OM
 		void Reset();
 		void Parse(std::string_view meta);
 
-		std::shared_ptr<Move::Axis> GetAxis(size_t index) const;
+		/** The letter of the map's axis `index` (0 or 1), e.g. 'X'; '\0' if the map has none */
+		char GetAxisLetter(size_t index) const;
 		double GetMin(size_t index) const { return m_min[index]; }
 		double GetMax(size_t index) const { return m_max[index]; }
 		double GetSpacing(size_t index) const { return m_spacing[index]; }
@@ -110,9 +110,8 @@ namespace OM
 		std::vector<Point> m_heightmap;
 	};
 
-	void SetCurrentHeightmap(std::string_view filename);
-	void ClearCurrentHeightmap();
-	std::string_view GetCurrentHeightmap();
+	/** The height map the printer uses (move.compensation.file, without its folder); empty if none */
+	std::string GetCurrentHeightmap();
 
 	void LoadHeightmap(std::string_view filename);
 	void UnloadHeightmap();

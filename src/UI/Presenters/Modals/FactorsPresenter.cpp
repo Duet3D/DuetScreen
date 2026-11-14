@@ -4,7 +4,6 @@
 
 #include "FactorsPresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/Data/MoveSource.h"

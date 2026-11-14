@@ -6,7 +6,7 @@
 #include "Comm/FileInfo.h"
 #include "Comm/Thumbnail.h"
 #include "Debug.h"
-#include "ObjectModel/Job.h"
+#include "ObjectModel/JobProgressSource.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
