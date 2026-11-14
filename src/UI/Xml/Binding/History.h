@@ -12,6 +12,10 @@
  *
  * A history is a List (see List.h): its rows are the series, and `sync()` adds, removes and renames them, so a
  * `<ds_list>` can show the series too (e.g. a legend). `record()` then adds one value to every series.
+ *
+ * Whether a series is shown is the history's too (`row.shown`), not each graph's: hiding it from one graph's legend,
+ * or from a `<ds_graph_key>` (a series' colour key beside what it measures, found by its `row.key`), hides it in
+ * every graph of the history.
  */
 
 #pragma once
@@ -34,6 +38,8 @@ namespace UI::Xml
 		const std::deque<int32_t>& values() const { return m_values; }
 
 		StringSubject<> name; // Name shown for the series, e.g. in a legend
+		IntSubject key{-1};	  // What its source knows the series by, e.g. a sensor number; -1 for nothing
+		IntSubject shown{1};  // 1 while graphs draw the series, 0 while it is hidden
 
 	  private:
 		friend class History;

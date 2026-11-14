@@ -102,6 +102,9 @@ namespace UI::Themes
 	/** The active theme, or nullptr */
 	Theme* getCurrentTheme();
 
+	/** The colour of a graph's `index`th series: the active theme's series colours in turn (white with no theme) */
+	lv_color_t seriesColor(size_t index);
+
 	/** The `index`th theme in name order, or nullptr */
 	Theme* getTheme(size_t index);
 

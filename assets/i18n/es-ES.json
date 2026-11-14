@@ -518,6 +518,7 @@
       "setting_icon": "Icono",
       "setting_fan": "Ventilador",
       "setting_tool": "Herramienta",
+      "setting_graph_key": "Claves de color del gráfico",
       "estop": "Parada de emergencia",
       "category_navigation": "Navegación",
       "category_safety": "Seguridad",

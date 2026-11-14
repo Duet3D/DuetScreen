@@ -247,6 +247,7 @@
 			<xs:enumeration value="row.index"/>
 			<xs:enumeration value="row.is_folder"/>
 			<xs:enumeration value="row.jog_usable"/>
+			<xs:enumeration value="row.key"/>
 			<xs:enumeration value="row.kind"/>
 			<xs:enumeration value="row.known"/>
 			<xs:enumeration value="row.label"/>
@@ -262,6 +263,7 @@
 			<xs:enumeration value="row.output"/>
 			<xs:enumeration value="row.passed"/>
 			<xs:enumeration value="row.selected"/>
+			<xs:enumeration value="row.shown"/>
 			<xs:enumeration value="row.signal"/>
 			<xs:enumeration value="row.ssid"/>
 			<xs:enumeration value="row.text"/>
@@ -977,6 +979,7 @@
 			<xs:enumeration value="ds_drag_button"/>
 			<xs:enumeration value="ds_dropdown"/>
 			<xs:enumeration value="ds_graph"/>
+			<xs:enumeration value="ds_graph_key"/>
 			<xs:enumeration value="ds_heatmap"/>
 			<xs:enumeration value="ds_hue_slider"/>
 			<xs:enumeration value="ds_icon"/>
@@ -2099,6 +2102,7 @@
 			<xs:enumeration value="tr.widget.setting_fan"/>
 			<xs:enumeration value="tr.widget.setting_flow"/>
 			<xs:enumeration value="tr.widget.setting_gcode"/>
+			<xs:enumeration value="tr.widget.setting_graph_key"/>
 			<xs:enumeration value="tr.widget.setting_hold"/>
 			<xs:enumeration value="tr.widget.setting_hold_arg"/>
 			<xs:enumeration value="tr.widget.setting_icon"/>
@@ -2855,6 +2859,11 @@
 			<xs:annotation><xs:documentation>Prop `widget` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_bed.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_button.attributes">
 		<xs:attribute name="label" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
@@ -2872,6 +2881,26 @@
 			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_chamber.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_current_tool.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_current_tool_card.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_current_tool_heater.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_fan.attributes">
 		<xs:attribute name="fan" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `fan` (int)</xs:documentation></xs:annotation>
@@ -2887,10 +2916,16 @@
 		<xs:attribute name="standby" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_heater_card.attributes">
 		<xs:attribute name="label_tag" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_temperature_graph.attributes">
@@ -2918,9 +2953,27 @@
 			<xs:annotation><xs:documentation>Prop `background` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_tool.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_tool_card.attributes">
 		<xs:attribute name="tool" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `tool` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_tool_heater.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_tools.attributes">
+		<xs:attribute name="graph_key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `graph_key` (bool)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_arc.attributes">
@@ -3084,6 +3137,20 @@
 		</xs:attribute>
 		<xs:attribute name="legend_min_width" type="xs:string">
 			<xs:annotation><xs:documentation>With `legend` auto, show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_graph_key.attributes">
+		<xs:attribute name="history" type="list">
+			<xs:annotation><xs:documentation>The history the series is in (required), named like a list, e.g. `source.temperature.temperatures`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>The series' row.key, e.g. a sensor number</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_key" type="subject">
+			<xs:annotation><xs:documentation>Follow an int subject holding the series' row.key, e.g. `om.heat.heaters[{row.value}].sensor|int` for a heater's series in source.temperature.temperatures</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="enabled" type="xs:string">
+			<xs:annotation><xs:documentation>`false` hides the key whatever the series, e.g. to leave it to a widget setting (default true)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_heatmap.attributes">
@@ -6997,10 +7064,19 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_graph">
-		<xs:annotation><xs:documentation>A line graph of a history, with a legend whose entries show each series' colour, name and latest value, and show and hide it when tapped. Series are coloured by position from the theme's series colours (#series_1, #series_2, …), which follow the theme. The graph starts with what was recorded before it was built, and follows series being added, removed and renamed. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>A line graph of a history, with a legend whose entries show each series' colour, name and latest value, and show and hide it when tapped. Series are coloured by position from the theme's series colours (#series_1, #series_2, …), which follow the theme. Whether a series is drawn is its history row's `shown`, so every graph of a history, and every `&lt;ds_graph_key&gt;` for it, agree. The graph starts with what was recorded before it was built, and follows series being added, removed and renamed. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_graph.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_graph_key">
+		<xs:annotation><xs:documentation>One series' colour key, drawn as a graph's legend draws it, to put beside what the series measures (e.g. a heater) so it can be matched to its line in a `&lt;ds_graph&gt;` of the same history. The series is the history row whose `row.key` is the key, so it is found however the series are ordered, and its colour follows the theme as the graph's does. Tapping it shows or hides the series in every graph of the history; it is hollow while hidden. It hides itself while no series has the key, and while `enabled` is false (it sets its own `hidden` flag, so `enabled` is how to turn it off). Styled by the theme's graph_legend_swatch and graph_legend_swatch_shown; a tap reaches it from a little way around it (`ext_click_area`). Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_graph_key.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8540,7 +8616,10 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_bed.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="dashboard_heater_card.attributes"/>
+			<xs:attributeGroup ref="dashboard_bed.attributes"/>
+			<xs:attribute name="label_tag" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8558,7 +8637,10 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_chamber.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="dashboard_heater_card.attributes"/>
+			<xs:attributeGroup ref="dashboard_chamber.attributes"/>
+			<xs:attribute name="label_tag" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8567,6 +8649,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_current_tool.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8575,6 +8658,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_current_tool_card.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8583,6 +8667,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_current_tool_heater.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -9196,6 +9281,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tool.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_tool.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -9213,7 +9299,16 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tool_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="dashboard_heater.attributes"/>
+			<xs:attributeGroup ref="dashboard_tool_heater.attributes"/>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="active" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="standby" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -9222,6 +9317,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tools.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_tools.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

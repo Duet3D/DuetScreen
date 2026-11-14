@@ -29,7 +29,8 @@ namespace UI::Xml
 		f.list("temperatures",
 			   m_history,
 			   "One series per heater with a sensor, in slot order: its current temperature, sampled every model tick, "
-			   "whole °C. Heaters sharing a sensor are shown once.");
+			   "whole °C. Heaters sharing a sensor are shown once. Each series' row.key is its sensor number, e.g. "
+			   "for `<ds_graph_key bind_key=\"om.heat.heaters[{row.value}].sensor|int\">`.");
 		f.field("limit",
 				m_limit,
 				"Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis");
@@ -75,6 +76,7 @@ namespace UI::Xml
 					   [&](SeriesRow& row, size_t i)
 					   {
 						   row.name.set(PrinterModel::heaterName(heaters[i].heater));
+						   row.key.set(static_cast<int32_t>(heaters[i].sensor));
 						   limit = std::max(
 							   limit, static_cast<int32_t>(PrinterModel::heater(heaters[i].heater)["max"].number()));
 					   });

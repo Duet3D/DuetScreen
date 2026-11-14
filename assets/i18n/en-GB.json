@@ -519,6 +519,7 @@
       "setting_icon": "Icon",
       "setting_fan": "Fan",
       "setting_tool": "Tool",
+      "setting_graph_key": "Graph colour keys",
       "estop": "E-stop",
       "category_navigation": "Navigation",
       "category_safety": "Safety",

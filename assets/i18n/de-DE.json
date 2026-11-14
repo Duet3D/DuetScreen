@@ -518,6 +518,7 @@
       "setting_icon": "Symbol",
       "setting_fan": "Lüfter",
       "setting_tool": "Werkzeug",
+      "setting_graph_key": "Farbmarkierungen der Grafik",
       "estop": "Not-Aus",
       "category_navigation": "Navigation",
       "category_safety": "Sicherheit",

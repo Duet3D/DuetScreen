@@ -12,12 +12,14 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Lvgl/LvTextarea.h"
 #include "UI/Presenters/Notifications/NotificationsPresenter.h"
+#include "UI/Styles/Theme.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Inputs/Slider.h"
 #include "UI/Widgets/Layout/TabView.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Data/TemperatureSource.h"
+#include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/Actions.h"
@@ -28,6 +30,7 @@
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
+#include <algorithm>
 #include <fmt/format.h>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -800,7 +803,9 @@ TEST_F(TestHomeViewWithData, Dashboard)
 		reading = (reading + 1) % 300;
 	}
 
-	temperatureGraph().showSeries(1, false);
+	// Hidden from the legend, the Revo's line is hidden for its key in the tool list too, which shows it hollow
+	lv_obj_send_event(temperatureGraph().getSeries(1)->legendItem->getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(temperatureGraph().isSeriesShown(1));
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/temperature_graph.png");
 
@@ -812,6 +817,75 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
 	UI::closeDialogs();
+}
+
+TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
+{
+	// Build the tool list's rows
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
+	temperatures->sample();
+	ASSERT_EQ(temperatureGraph().getSeriesCount(), 3u);
+
+	// The first tool's heater is the Revo: the graph's second series, so its key has the second series colour
+	lv_obj_t* key = lv_obj_find_by_name(lv_obj_find_by_name(dashboardToolList(), "tools"), "graph_key");
+	ASSERT_NE(key, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(key, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_color_eq(lv_obj_get_style_bg_color(key, LV_PART_MAIN), UI::Themes::seriesColor(1)));
+	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
+
+	// Tapping the key hides the line, and the legend shows it hidden
+	lv_obj_send_event(key, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(temperatureGraph().isSeriesShown(1));
+	EXPECT_FALSE(lv_obj_has_state(key, LV_STATE_CHECKED));
+	EXPECT_TRUE(temperatureGraph().isSeriesShown(0));
+
+	// Tapping the legend shows it again, and the key follows
+	lv_obj_send_event(temperatureGraph().getSeries(1)->legendItem->getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(temperatureGraph().isSeriesShown(1));
+	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
+}
+
+TEST_F(TestHomeViewWithData, GraphKeysAreTheToolListsSetting)
+{
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
+	temperatures->sample();
+
+	// Every heater's key follows the setting; the widget is rebuilt with it at once
+	auto keysShown = []
+	{
+		std::vector<bool> shown;
+		lv_obj_tree_walk(
+			dashboardToolList(),
+			[](lv_obj_t* obj, void* user) -> lv_obj_tree_walk_res_t
+			{
+				const char* name = lv_obj_get_name(obj);
+				if (name != nullptr && std::string_view(name) == "graph_key")
+				{
+					static_cast<std::vector<bool>*>(user)->push_back(!lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN));
+				}
+				return LV_OBJ_TREE_WALK_NEXT;
+			},
+			&shown);
+		return shown;
+	};
+	const auto before = keysShown();
+	ASSERT_GE(before.size(), 3u); // At least the first tool's, the dual drive's two
+	EXPECT_TRUE(std::ranges::all_of(before, [](bool shown) { return shown; }));
+
+	auto& editor = UI::Xml::LayoutEditor::get();
+	editor.begin();
+	editor.select("dashboard", "tools");
+	ASSERT_TRUE(editor.setSetting("graph_key", false));
+	const auto after = keysShown();
+	EXPECT_EQ(after.size(), before.size());
+	EXPECT_TRUE(std::ranges::none_of(after, [](bool shown) { return shown; }));
+	editor.cancel();
 }
 
 TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)

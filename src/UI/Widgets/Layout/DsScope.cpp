@@ -54,7 +54,8 @@ namespace UI::Xml
 				 "Builds one component in a scope where names are relative to an object model element, as in a row of "
 				 "an object model list: `current`, `model.pid.p`, `heaters` as a list. When an index of the path is a "
 				 "subject's value, the names follow the element it points at, without rebuilding.",
-			 .example = R"(<ds_scope path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card"/>)",
+			 .example =
+				 R"(<ds_scope path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card" width="300"/>)",
 			 .attributes = {{"path",
 							 "The element (required): an `om.` path, whose indices may be `{name}`, a subject's value",
 							 AttributeKind::Subject},

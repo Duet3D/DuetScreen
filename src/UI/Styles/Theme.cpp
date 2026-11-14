@@ -749,6 +749,16 @@ namespace UI::Themes
 		return s_current.empty() ? nullptr : getThemeByName(s_current);
 	}
 
+	lv_color_t seriesColor(size_t index)
+	{
+		const Theme* theme = getCurrentTheme();
+		if (theme == nullptr)
+		{
+			return lv_color_white();
+		}
+		return theme->getColors().series[index % SERIES_COLOR_COUNT];
+	}
+
 	Theme* getTheme(size_t index)
 	{
 		if (index >= s_index.size())

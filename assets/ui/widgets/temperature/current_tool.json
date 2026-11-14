@@ -16,5 +16,13 @@
       272,
       89
     ]
-  }
+  },
+  "settings": [
+    {
+      "name": "graph_key",
+      "kind": "bool",
+      "title_tag": "tr.widget.setting_graph_key",
+      "default": true
+    }
+  ]
 }

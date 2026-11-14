@@ -218,7 +218,7 @@ From [TemperatureSource.cpp](../src/UI/Xml/Data/TemperatureSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.temperature.temperatures` | history | One series per heater with a sensor, in slot order: its current temperature, sampled every model tick, whole °C. Heaters sharing a sensor are shown once. |
+| `source.temperature.temperatures` | history | One series per heater with a sensor, in slot order: its current temperature, sampled every model tick, whole °C. Heaters sharing a sensor are shown once. Each series' row.key is its sensor number, e.g. for `<ds_graph_key bind_key="om.heat.heaters[{row.value}].sensor\|int">`. |
 | `source.temperature.limit` | int | Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis |
 
 Each row of `source.temperature.temperatures`:
@@ -227,6 +227,8 @@ Each row of `source.temperature.temperatures`:
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
 | `row.name` | text | Name of the series, e.g. for a legend |
+| `row.key` | int | What its source knows the series by, so a `<ds_graph_key>` can find it: for source.temperature.temperatures, its heaters' sensor number |
+| `row.shown` | int | 1 while graphs draw the series, 0 while it is hidden; tapping its legend entry or a `<ds_graph_key>` for it toggles it, in every graph of the history |
 
 ## Global actions
 
@@ -1285,7 +1287,7 @@ Also takes every `lv_dropdown` attribute.
 
 ### ds_graph
 
-A line graph of a history, with a legend whose entries show each series' colour, name and latest value, and show and hide it when tapped. Series are coloured by position from the theme's series colours (#series_1, #series_2, …), which follow the theme. The graph starts with what was recorded before it was built, and follows series being added, removed and renamed.
+A line graph of a history, with a legend whose entries show each series' colour, name and latest value, and show and hide it when tapped. Series are coloured by position from the theme's series colours (#series_1, #series_2, …), which follow the theme. Whether a series is drawn is its history row's `shown`, so every graph of a history, and every `<ds_graph_key>` for it, agree. The graph starts with what was recorded before it was built, and follows series being added, removed and renamed.
 
 Also takes every `lv_obj` attribute.
 
@@ -1306,6 +1308,25 @@ Also takes every `lv_obj` attribute.
 | `legend_format` | How the legend shows a series' latest value: a fmt format with one argument, e.g. `{}°C` (default: no value) |
 | `legend` | When the legend shows: `auto` (default) while the graph is at least `legend_min_width` wide, `shown` always, `hidden` never |
 | `legend_min_width` | With `legend` auto, show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown) |
+
+### ds_graph_key
+
+One series' colour key, drawn as a graph's legend draws it, to put beside what the series measures (e.g. a heater) so it can be matched to its line in a `<ds_graph>` of the same history. The series is the history row whose `row.key` is the key, so it is found however the series are ordered, and its colour follows the theme as the graph's does. Tapping it shows or hides the series in every graph of the history; it is hollow while hidden. It hides itself while no series has the key, and while `enabled` is false (it sets its own `hidden` flag, so `enabled` is how to turn it off). Styled by the theme's graph_legend_swatch and graph_legend_swatch_shown; a tap reaches it from a little way around it (`ext_click_area`).
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_graph_key history="source.temperature.temperatures" key="1"/>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_graph_key.png)
+
+| Attribute | Description |
+| --- | --- |
+| `history` | The history the series is in (required), named like a list, e.g. `source.temperature.temperatures` |
+| `key` | The series' row.key, e.g. a sensor number |
+| `bind_key` | Follow an int subject holding the series' row.key, e.g. `om.heat.heaters[{row.value}].sensor\|int` for a heater's series in source.temperature.temperatures |
+| `enabled` | `false` hides the key whatever the series, e.g. to leave it to a widget setting (default true) |
 
 ### ds_heatmap
 
@@ -1520,7 +1541,7 @@ Builds one component in a scope where names are relative to an object model elem
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_scope path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card"/>
+<ds_scope path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card" width="300"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_scope.png)
@@ -1917,6 +1938,10 @@ In Temperatures; placed in `dashboard`; component `dashboard_current_tool` ([cur
 At its smallest, 272×89 px:
 
 ![current_tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/current_tool_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `graph_key` | Graph colour keys | on or off | `true` |
 
 #### custom_arc
 
@@ -2653,6 +2678,7 @@ At its smallest, 458×100 px:
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
+| `graph_key` | Graph colour keys | on or off | `true` |
 
 #### tool_arc
 
@@ -2717,6 +2743,10 @@ At its smallest, 272×100 px:
 
 ![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
 
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `graph_key` | Graph colour keys | on or off | `true` |
+
 ## Components
 
 The components of the built-in bundle. A user bundle replaces one by giving its own the same name; a component is used as an element (`<fan_card/>`) or as a list's `item`.
@@ -2747,16 +2777,16 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
 | `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
-| `dashboard_bed` |  |  | `dashboard_tools` | [dashboard_bed.xml](../assets/ui/components/dashboard/dashboard_bed.xml) |
+| `dashboard_bed` |  | `graph_key` | `dashboard_tools` | [dashboard_bed.xml](../assets/ui/components/dashboard/dashboard_bed.xml) |
 | `dashboard_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `button`, `gcode_button` | [dashboard_button.xml](../assets/ui/components/dashboard/dashboard_button.xml) |
-| `dashboard_chamber` |  |  | `dashboard_tools` | [dashboard_chamber.xml](../assets/ui/components/dashboard/dashboard_chamber.xml) |
-| `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
-| `dashboard_current_tool_card` |  |  | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
-| `dashboard_current_tool_heater` |  |  | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
+| `dashboard_chamber` |  | `graph_key` | `dashboard_tools` | [dashboard_chamber.xml](../assets/ui/components/dashboard/dashboard_chamber.xml) |
+| `dashboard_current_tool` |  | `graph_key` | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
+| `dashboard_current_tool_card` |  | `graph_key` | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
+| `dashboard_current_tool_heater` |  | `graph_key` | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
 | `dashboard_fan` | `fans` | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
-| `dashboard_heater` |  | `label`, `active`, `standby` | `dashboard_heater_card`, `dashboard_tool_heater` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
-| `dashboard_heater_card` |  | `label_tag` | `dashboard_bed`, `dashboard_chamber` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
+| `dashboard_heater` |  | `label`, `active`, `standby`, `graph_key` | `dashboard_heater_card`, `dashboard_tool_heater` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
+| `dashboard_heater_card` |  | `label_tag`, `graph_key` | `dashboard_bed`, `dashboard_chamber` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
 | [`dashboard_job_status`](#dashboard_job_status) |  |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
@@ -2764,10 +2794,10 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
 | `dashboard_temperature_graph` |  | `seconds`, `legend` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
 | `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
-| `dashboard_tool` |  |  | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
-| `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
-| `dashboard_tool_heater` |  |  | `dashboard_tool` | [dashboard_tool_heater.xml](../assets/ui/components/dashboard/dashboard_tool_heater.xml) |
-| `dashboard_tools` |  |  | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| `dashboard_tool` |  | `graph_key` | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
+| `dashboard_tool_card` |  | `tool`, `graph_key` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
+| `dashboard_tool_heater` |  | `graph_key` | `dashboard_tool` | [dashboard_tool_heater.xml](../assets/ui/components/dashboard/dashboard_tool_heater.xml) |
+| `dashboard_tools` |  | `graph_key` | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
 | `dialog_choice` | `dialog_choice` |  |  | [dialog_choice.xml](../assets/ui/components/dialogs/dialog_choice.xml) |
 | `dialog_choice_row` |  |  | `dialog_choice` | [dialog_choice_row.xml](../assets/ui/components/dialogs/dialog_choice_row.xml) |
 | [`dialog_host`](#dialog_host) | `dialog_host` |  |  | [dialog_host.xml](../assets/ui/components/dialogs/dialog_host.xml) |

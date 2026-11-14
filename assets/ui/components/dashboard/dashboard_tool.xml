@@ -2,9 +2,14 @@
   One tool in the tool list: its name, which selects it, and a row per heater (dashboard_tool_heater.xml). Outlined
   while selected; a gap in the tools (a null item) isn't shown.
 
+  Props:    graph_key: whether its heaters' colour keys show (dashboard_heater.xml)
   Fields:   a row of om.tools: row.index (the tool number), row.name, row.state, row.heaters
 -->
 <component>
+	<api>
+		<prop name="graph_key" type="bool" default="true"/>
+	</api>
+
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
 		<style name="tool_list_tool"/>
 		<style name="tool_selected" selector="checked"/>
@@ -22,7 +27,8 @@
 		<lv_obj name="heaters" width="100%" height="content" flex_flow="column"
 				style_pad_bottom="0" style_pad_left="0" style_pad_right="0">
 			<bind_flag_if_eq subject="row.heaters|count" flag="hidden" ref_value="0"/>
-			<ds_list name="list" list="row.heaters" item="dashboard_tool_heater" width="100%" height="content"
+			<ds_list name="list" list="row.heaters" item="dashboard_tool_heater" item.graph_key="$graph_key"
+					 width="100%" height="content"
 					 flex_flow="column" style_pad_all="0"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
