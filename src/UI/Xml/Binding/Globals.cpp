@@ -3,6 +3,7 @@
  */
 
 #include "Globals.h"
+#include "Constants.h"
 #include "Resolver.h"
 #include "Scope.h"
 #include "Subjects.h"
@@ -58,10 +59,14 @@ namespace UI::Xml::Globals
 		return s_resolver;
 	}
 
-	/** The engine's global resolver callback: the global resolver (see Globals.h) */
+	/** The engine's global resolver callback: a constant (see Constants.h), else the global resolver's */
 	static lv_subject_t* resolveCb(const lv_xml_subject_ctx_t* origin, const char* name, void* /* userData */)
 	{
-		Subject* subject = resolver() != nullptr ? resolver()->findSubject(origin, name, name) : nullptr;
+		Subject* subject = Constants::find(name);
+		if (subject == nullptr && resolver() != nullptr)
+		{
+			subject = resolver()->findSubject(origin, name, name);
+		}
 		return subject ? subject->raw() : nullptr;
 	}
 
@@ -89,6 +94,7 @@ namespace UI::Xml::Globals
 	{
 		lv_xml_set_subject_resolver(nullptr, nullptr);
 		resolver() = nullptr;
+		Constants::clear();
 		for (const auto& name : subjectNames())
 		{
 			lv_xml_unregister_subject(nullptr, name.c_str());

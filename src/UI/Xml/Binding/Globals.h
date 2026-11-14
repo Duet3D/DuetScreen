@@ -4,8 +4,8 @@
  * Names every view can use, whatever scope it is built in: the printer data published by the data sources (see
  * Data/DataSource.h), e.g. the `source.jog.distances` list. They are searched after every scope.
  *
- * The globals can also have a resolver (see Resolver.h), asked after the global names, which gives names on demand:
- * the object model's `om.*` names.
+ * After the global names come constants (see Constants.h): `100`, `'text'` and `tr.<key>` bind anywhere. The globals
+ * can also have a resolver (see Resolver.h), asked last, which gives names on demand: the object model's `om.*` names.
  */
 
 #pragma once
@@ -44,7 +44,7 @@ namespace UI::Xml
 		/** Start answering the engine's lookups of names nobody has (after lv_xml_init()) */
 		void init();
 
-		/** Remove every global name and the resolver (when the XML engine shuts down) */
+		/** Remove every global name, every constant and the resolver (when the XML engine shuts down) */
 		void clear();
 	} // namespace Globals
 } // namespace UI::Xml

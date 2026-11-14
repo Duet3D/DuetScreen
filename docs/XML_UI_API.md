@@ -14,7 +14,8 @@ Every name starts with where it comes from, so a reader knows where to look ([Na
 | `row.<field>` | the list row (or `<ds_scope>` item) the widget is in | its list |
 | `parent.<field>` | the row around that one (`parent.parent.…` further out) | its list |
 | `widget.<field>` | the room the widget's place gives it | [Placed widgets' names](#placed-widgets-names) |
-| `tr.<key>` | a translation, in `translation_tag`, the `*_tag` attributes and converter arguments | [en-GB.json](../assets/i18n/en-GB.json) |
+| `tr.<key>` | a translation, in `translation_tag`, the `*_tag` attributes and converter arguments; where a subject is bound, a constant holding the translation | [en-GB.json](../assets/i18n/en-GB.json) |
+| `100`, `'text'` | where a subject is bound, a constant: a whole number, or the text between the quotes | [Constants.h](../src/UI/Xml/Binding/Constants.h) |
 | `presenter.<action>` | an action of the presenter of an enclosing view | [Presenters](#presenters) |
 | `actions.<group>.<action>` | a global action, added in `<Group>Actions.cpp` | [Global actions](#global-actions) |
 | `{event.value}` | in an action's `arg`, the edited value | |

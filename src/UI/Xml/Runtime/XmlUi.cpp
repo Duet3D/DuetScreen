@@ -15,6 +15,7 @@
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Binding/Constants.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
@@ -79,6 +80,7 @@ namespace UI::Xml
 		{
 			UI_LOCK();
 			Translations::sync();
+			Constants::retranslate();
 			DataSources::updateAll();
 		}
 	} // namespace

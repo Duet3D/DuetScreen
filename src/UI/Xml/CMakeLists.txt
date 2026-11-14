@@ -9,6 +9,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiLvgl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/ApiXsd.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Api/XmlTree.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Constants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Globals.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/History.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/List.cpp

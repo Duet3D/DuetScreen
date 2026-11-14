@@ -202,6 +202,8 @@ So in a heater row inside a tool card, `row.index` is the heater's position, `pa
 
 The [UI API reference](XML_UI_API.md) lists the names of each kind: the globals by data source, each presenter's, and the fields of every list's rows. Theme styles (`<style name="card"/>`), palette colours and consts (`style_bg_color="#primary"`, `style_radius="#radius"`) and fonts (`font_header`) are listed there too; they all follow theme changes. Translation keys are those in `assets/i18n/*.json`, written `tr.<key>` wherever XML or a widget file names one, so a key can't be mistaken for a subject: `translation_tag="tr.fan.title"` on labels and `ds_button`, the `*_tag` attributes and props, and converter arguments (`name|default:tr.fine_tune.fan`). Literal text (`text="XY"`) is shown as written, never looked up.
 
+Wherever a subject is bound, a constant may be given instead ([Constants.h](../src/UI/Xml/Binding/Constants.h)): a whole number (`100`), text between single quotes (`'Hotend'`) or a translation key (`tr.widget.job_progress`, which follows the language). So a component whose prop takes a name can be given data or a fixed value alike: `<gauge_bar value="source.job.progress" max="100" unit="'%'" title="tr.widget.job_progress"/>`.
+
 A string subject can be compared with `bind_*_if_eq`: the sidebar checks the button of the open page with `<bind_state_if_eq subject="source.navigation.screen" state="checked" ref_value="control"/>`.
 
 ### Lists

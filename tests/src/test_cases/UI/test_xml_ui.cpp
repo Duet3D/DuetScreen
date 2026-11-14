@@ -1414,3 +1414,33 @@ TEST_F(TestXmlUi, SafeModeLoadsOnlyTheBuiltinBundle)
 	ASSERT_EQ(issues.size(), 1u);
 	EXPECT_EQ(issues[0].message, "safe mode: only the built-in UI is loaded");
 }
+
+TEST_F(TestXmlUi, ConstantsBindWhereANameIsExpected)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/constants_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<lv_label name="text" bind_text="'Hot end: 5 °C'"/>
+				<lv_label name="translated" bind_text="tr.fan.title"/>
+				<lv_bar name="bar" bind_value="40" min_value="0" max_value="100"/>
+				<lv_label name="number" bind_text="-12"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	auto& view = makeView("constants_screen");
+	EXPECT_STREQ(lv_label_get_text(find(view, "text")), "Hot end: 5 °C");
+	EXPECT_EQ(lv_label_get_text(find(view, "translated")), _("fan.title"));
+	EXPECT_EQ(lv_bar_get_value(find(view, "bar")), 40);
+	EXPECT_STREQ(lv_label_get_text(find(view, "number")), "-12");
+
+	// A translation follows the language
+	const std::string english = _("fan.title");
+	ASSERT_TRUE(i18n::setLanguage("de-DE"));
+	EXPECT_EQ(lv_label_get_text(find(view, "translated")), _("fan.title"));
+	EXPECT_NE(lv_label_get_text(find(view, "translated")), english);
+	ASSERT_TRUE(i18n::setLanguage("en-GB"));
+	EXPECT_EQ(lv_label_get_text(find(view, "translated")), english);
+}

@@ -4,6 +4,7 @@
 
 #include "ApiLint.h"
 #include "ObjectModel/Tree/Schema.h"
+#include "UI/Xml/Binding/Constants.h"
 #include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Om/Converters.h"
 #include "UI/Xml/Om/OmName.h"
@@ -728,11 +729,19 @@ namespace UI::Xml::Api
 				return AttributeKind::Text;
 			}
 
-			/** Report a subject `name` that can't be found */
+			/** Report a subject `name` that can't be found, or a translation constant whose key doesn't exist */
 			void checkSubject(const std::string& name, const Element& element, const Context& context)
 			{
 				if (findField(name, context) || isLocalSubject(name, context))
 				{
+					return;
+				}
+				if (const auto constant = Constants::kindOf(name))
+				{
+					if (*constant == Constants::Kind::translation)
+					{
+						checkTranslation(name, element, context);
+					}
 					return;
 				}
 				if (!hasPrefix(name))

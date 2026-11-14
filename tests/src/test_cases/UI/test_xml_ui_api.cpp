@@ -274,7 +274,8 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	std::ofstream(userDir / "test" / "manifest.json")
 		<< R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "widgets": ["widgets/*.json"]})";
 
-	// A screen, nothing uses it, so it is a view of its own, with the fans presenter
+	// A screen, nothing uses it, so it is a view of its own, with the fans presenter. Constants (a number, quoted
+	// text, a translation key) bind where a name is expected.
 	std::ofstream(userDir / "test" / "components" / "lint_screen.xml") << R"(<component presenter="fans">
 	<view extends="lv_obj">
 		<lv_label bind_text="presenter.no_such_subject"/>
@@ -294,6 +295,10 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<lv_label translation_tag="fan.max"/>
 		<lv_label bind_text="om.fans[0].name|default:fine_tune.fan"/>
 		<ds_button><action name="fans.set_speed"/></ds_button>
+		<lv_bar bind_value="40"/>
+		<lv_label bind_text="'Any text'"/>
+		<lv_label bind_text="tr.fan.title"/>
+		<lv_label bind_text="tr.no.such.title"/>
 	</view>
 </component>)";
 
@@ -377,6 +382,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:18: `fine_tune.fan`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:19: `fans.set_speed`: actions are written `presenter.<action>` or `actions.<group>.<action>` "
 		"(in lint_screen)",
+		"lint_screen.xml:23: no translation `tr.no.such.title` (in lint_screen)",
 		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
