@@ -19,13 +19,16 @@ namespace UI::Xml
 					 OmBindings& bindings,
 					 OmBoundPath element,
 					 const std::string& item,
-					 lv_xml_subject_ctx_t* parentContext)
+					 lv_xml_subject_ctx_t* parentContext,
+					 const ItemAttributes& itemAttributes)
 		: m_scope(std::make_unique<Scope>(parentContext, Scope::Kind::row))
 	{
 		m_names.setItem(bindings, std::move(element));
 		m_scope->setResolver(&m_names, std::string(Names::ROW));
-		const char* attrs[] = {"name", "item", nullptr, nullptr};
-		m_obj = static_cast<lv_obj_t*>(lv_xml_create_with_ctx(container, item.c_str(), attrs, m_scope->context()));
+		const std::string name = "item";
+		const auto attrs = itemAttributes.attrsFor(name);
+		m_obj = static_cast<lv_obj_t*>(lv_xml_create_with_ctx(
+			container, item.c_str(), const_cast<const char**>(attrs.data()), m_scope->context()));
 		if (m_obj == nullptr)
 		{
 			LOG_ERROR("<ds_scope>: couldn't create item component '{:s}'", item);
@@ -55,7 +58,11 @@ namespace UI::Xml
 			 .attributes = {{"path",
 							 "The element (required): an `om.` path, whose indices may be `{name}`, a subject's value",
 							 AttributeKind::Subject},
-							{"item", "The component built (required)", AttributeKind::Component}}},
+							{"item", "The component built (required)", AttributeKind::Component},
+							{"item.<attribute>",
+							 "Given to the item as if written where it is used: a prop of the item component, or an "
+							 "attribute of its root. Its names are looked up in the item's scope.",
+							 AttributeKind::Items}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -95,6 +102,7 @@ namespace UI::Xml
 			return;
 		}
 		lv_obj_t* container = itemOf(state);
-		deleteWith(container, new DsScope(container, *bindings, std::move(*element), item, context));
+		deleteWith(container,
+				   new DsScope(container, *bindings, std::move(*element), item, context, ItemAttributes::from(attrs)));
 	}
 } // namespace UI::Xml

@@ -5,11 +5,12 @@
  * names are relative to the object model element at `path`, as in a row of an object model list (see
  * UI/Xml/Om/OmItemNames.h): `current`, `model.pid.p`, `heaters` as a list. So a component shows one element without
  * repeating its path, and when an index of the path is a subject's value, the names follow the element it points at
- * now, without rebuilding anything.
+ * now, without rebuilding anything. The item is given the ds_scope's `item.*` attributes (see ItemAttributes.h).
  */
 
 #pragma once
 
+#include "ItemAttributes.h"
 #include "UI/Xml/Binding/Scope.h"
 #include "UI/Xml/Om/OmItemNames.h"
 #include "helix_xml.h"
@@ -24,12 +25,14 @@ namespace UI::Xml
 		/**
 		 * Build `item` in `container`, its names relative to `element`
 		 * @param parentContext Context the ds_scope is built in; the item's scope is its child
+		 * @param itemAttributes Given to the item, as if written where it is used
 		 */
 		DsScope(lv_obj_t* container,
 				OmBindings& bindings,
 				OmBoundPath element,
 				const std::string& item,
-				lv_xml_subject_ctx_t* parentContext);
+				lv_xml_subject_ctx_t* parentContext,
+				const ItemAttributes& itemAttributes);
 
 		/** Delete the item's widgets, then their scope; runs while LVGL deletes the container */
 		~DsScope();

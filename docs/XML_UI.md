@@ -234,6 +234,17 @@ A keyed list shows only the rows whose `key` field (written `row.<field>`) is `v
 <ds_list list="om.heat.bedHeaters" key="row.index" value="$bed" item="dashboard_bed"/>
 ```
 
+An empty `key` shows every row, so a component can leave the choice to a prop.
+
+`item.<attribute>` is given to every item, as if written where the item is used: a prop of the item's component, or an attribute of its root. Its names are looked up in the item's own row, so one item component can show different fields ([ItemAttributes.h](../src/UI/Widgets/Layout/ItemAttributes.h)):
+
+```xml
+<ds_list list="om.fans" item="gauge_bar" item.title="row.name|default:tr.fine_tune.fan"
+         item.value="row.actualValue|percent" item.flex_grow="1" flex_flow="column"/>
+```
+
+`<ds_scope>` takes `item.*` the same way.
+
 Each item is still a row of the list, so its names and actions work as in the full list. The list watches every row's key, so it follows the data: an item appears when its fan does and goes when it goes, and stays right when the rows are refilled (removing fan 1 moves fan 2 into fan 1's row). Key on the item's number rather than its position (for an object model list, `row.index` is both). Any field of the rows can be a key, and every row that matches is shown, so `key="row.state" value="active"` shows every active heater. A keyed list can't be windowed.
 
 ### Graphs

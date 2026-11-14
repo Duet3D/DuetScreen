@@ -19,12 +19,14 @@ namespace UI::Xml
 				   ListBase& list,
 				   std::string item,
 				   lv_xml_subject_ctx_t* parentContext,
+				   ItemAttributes itemAttributes,
 				   std::optional<Window> window,
 				   bool followEnd,
 				   std::optional<Key> key)
 		: m_container(container)
 		, m_list(&list)
 		, m_item(std::move(item))
+		, m_itemAttributes(std::move(itemAttributes))
 		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
 		, m_key(std::move(key))
 		, m_window(window)
@@ -105,7 +107,8 @@ namespace UI::Xml
 				 "`windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of "
 				 "widgets; every item then has the same size, and the list places them itself (its own layout is "
 				 "ignored), with its style_pad_row and style_pad_column as the gaps. With `key` and `value`, only the "
-				 "rows whose `key` field is `value` are shown, e.g. one fan.",
+				 "rows whose `key` field is `value` are shown, e.g. one fan. Each item is given the list's `item.*` "
+				 "attributes.",
 			 .example =
 				 R"(<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
 			 .attributes =
@@ -128,10 +131,15 @@ namespace UI::Xml
 				   "unless the user has scrolled back (default false)"},
 				  {"key",
 				   "A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the "
-				   "data changes. Not with `windowed`."},
+				   "data changes. Not with `windowed`. Empty for every row, so a component can leave it to a prop."},
 				  {"value",
 				   "With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, "
-				   "e.g. `<ds_list list=\"om.fans\" key=\"row.index\" value=\"2\" item=\"…\"/>` shows fan 2"}}},
+				   "e.g. `<ds_list list=\"om.fans\" key=\"row.index\" value=\"2\" item=\"…\"/>` shows fan 2"},
+				  {"item.<attribute>",
+				   "Given to every item as if written where it is used: a prop of the item component, e.g. "
+				   "`item.title=\"row.name\"`, or an attribute of its root, e.g. `item.flex_grow=\"1\"`. Its names are "
+				   "looked up in the item's row.",
+				   AttributeKind::Items}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -223,6 +231,12 @@ namespace UI::Xml
 		std::optional<Key> key;
 		const char* keyField = lv_xml_get_value_of(attrs, "key");
 		const char* keyValue = lv_xml_get_value_of(attrs, "value");
+		// An empty key, which a prop may give, shows every row
+		if (keyField != nullptr && keyField[0] == '\0')
+		{
+			keyField = nullptr;
+			keyValue = nullptr;
+		}
 		if ((keyField == nullptr) != (keyValue == nullptr))
 		{
 			LOG_WARN("<ds_list list=\"{:s}\">: key= and value= go together", listName);
@@ -259,7 +273,10 @@ namespace UI::Xml
 
 		lv_obj_t* container = itemOf(state);
 		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
-		deleteWith(container, new DsList(container, *list, item, context, window, followEnd, std::move(key)));
+		deleteWith(
+			container,
+			new DsList(
+				container, *list, item, context, ItemAttributes::from(attrs), window, followEnd, std::move(key)));
 	}
 
 	Subject* DsList::keyOf(Row& row, std::string_view name)
@@ -308,9 +325,9 @@ namespace UI::Xml
 		row.allFields(binder);
 
 		const std::string name = std::to_string(index);
-		const char* attrs[] = {"name", name.c_str(), nullptr, nullptr};
-		auto* obj =
-			static_cast<lv_obj_t*>(lv_xml_create_with_ctx(m_container, m_item.c_str(), attrs, scope->context()));
+		const auto attrs = m_itemAttributes.attrsFor(name);
+		auto* obj = static_cast<lv_obj_t*>(lv_xml_create_with_ctx(
+			m_container, m_item.c_str(), const_cast<const char**>(attrs.data()), scope->context()));
 		if (obj == nullptr)
 		{
 			LOG_ERROR("<ds_list>: couldn't create item component '{:s}'", m_item);

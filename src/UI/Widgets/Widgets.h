@@ -28,6 +28,7 @@ namespace UI::Xml
 		Action,		 // An action
 		ActionArg,	 // An action's argument: `{name}` placeholders name subjects
 		Trigger,	 // An event that runs an action (see Actions::triggers())
+		Items,		 // `item.<attribute>`: any attribute so written, given to every item built (Layout/ItemAttributes.h)
 	};
 
 	/** One attribute a widget takes */

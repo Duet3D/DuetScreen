@@ -4,12 +4,13 @@
  * <ds_list>: one component per row of a List (see Binding/List.h). Its attributes are in registerXml().
  *
  * A keyed list (`key="number" value="2"`) shows only the rows whose `key` field equals `value`: one fan, a tool's
- * card, every active heater. It watches each row's key, so the rows shown follow the data even when a row is
+ * card, every active heater. Each item is given the list's `item.*` attributes (see ItemAttributes.h). It watches each row's key, so the rows shown follow the data even when a row is
  * refilled with another item (List::sync() fills rows by position, so removing fan 1 moves fan 2 into its row).
  */
 
 #pragma once
 
+#include "ItemAttributes.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Scope.h"
 #include "UI/Xml/Binding/Subjects.h"
@@ -45,6 +46,7 @@ namespace UI::Xml
 		/**
 		 * Show `list` in `container`, one `item` component per row
 		 * @param parentContext Context the list is built in; each row's scope is its child
+		 * @param itemAttributes Given to every item, as if written where it is used
 		 * @param window Build only the items on screen, placed like this; build every item if not given
 		 * @param key Show only the rows whose field `key.field` is `key.value`; every row if not given. Not with
 		 *        `window`. The rows must have the field (see keyOf()).
@@ -53,6 +55,7 @@ namespace UI::Xml
 			   ListBase& list,
 			   std::string item,
 			   lv_xml_subject_ctx_t* parentContext,
+			   ItemAttributes itemAttributes = {},
 			   std::optional<Window> window = std::nullopt,
 			   bool followEnd = false,
 			   std::optional<Key> key = std::nullopt);
@@ -146,6 +149,7 @@ namespace UI::Xml
 		lv_obj_t* m_container;				   // The ds_list widget
 		ListBase* m_list;					   // The list shown, or nullptr once it is destroyed
 		std::string m_item;					   // Component built for each row
+		ItemAttributes m_itemAttributes;	   // Given to every item
 		lv_xml_subject_ctx_t* m_parentContext; // Context the list was built in; holds a reference
 		std::vector<Entry> m_entries;		   // Eager: one per row
 		std::optional<Key> m_key;			   // Keyed: which rows are shown; nullopt shows every row

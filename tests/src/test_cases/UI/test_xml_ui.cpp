@@ -1444,3 +1444,47 @@ TEST_F(TestXmlUi, ConstantsBindWhereANameIsExpected)
 	ASSERT_TRUE(i18n::setLanguage("en-GB"));
 	EXPECT_EQ(lv_label_get_text(find(view, "translated")), english);
 }
+
+TEST_F(TestXmlUi, ItemAttributesReachEveryItemAsPropsOrRootAttributes)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/items_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<ds_list name="fans" list="om.fans" key="" value="" item="fan_line" item.speed="row.actualValue|percent"
+						 item.prefix="'Fan'" item.height="40" width="100%" height="content" flex_flow="column"/>
+				<ds_scope name="one" path="om.fans[1]" item="fan_line" item.speed="row.requestedValue|percent"
+						  item.prefix="tr.fan.title" width="100%" height="content"/>
+			</view>
+		</component>)");
+	writeFile(bundleFile("components/fan_line.xml"), R"(
+		<component>
+			<api>
+				<prop name="speed" type="string" default="0"/>
+				<prop name="prefix" type="string" default="''"/>
+			</api>
+			<view extends="lv_obj" width="100%" height="content" flex_flow="row">
+				<lv_label name="prefix" bind_text="$prefix"/>
+				<lv_label name="speed" bind_text="$speed"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	auto& view = makeView("items_screen");
+	load_model_data(THREE_FANS);
+	pump();
+
+	// An empty key shows every row; each item has the props, named in its own row, and the root attribute
+	lv_obj_t* fans = find(view, "fans");
+	ASSERT_EQ(lv_obj_get_child_count(fans), 3u);
+	lv_obj_t* second = lv_obj_get_child(fans, 1);
+	EXPECT_EQ(text(second, "prefix"), "Fan");
+	EXPECT_EQ(text(second, "speed"), "50");
+	EXPECT_EQ(text(lv_obj_get_child(fans, 0), "speed"), "30");
+	EXPECT_EQ(lv_obj_get_style_height(second, LV_PART_MAIN), 40);
+
+	lv_obj_t* one = find(view, "one");
+	EXPECT_EQ(text(one, "prefix"), _("fan.title"));
+	EXPECT_EQ(text(one, "speed"), "50");
+}

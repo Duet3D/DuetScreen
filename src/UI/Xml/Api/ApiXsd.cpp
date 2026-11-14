@@ -70,6 +70,7 @@ namespace UI::Xml::Api
 				return "trigger";
 			case AttributeKind::Text:
 			case AttributeKind::ActionArg:
+			case AttributeKind::Items:
 				break;
 			}
 			return "xs:string";
@@ -348,7 +349,11 @@ namespace UI::Xml::Api
 					std::vector<Attribute>& group = m_groups[widget.name];
 					for (const auto& attribute : widget.attributes)
 					{
-						group.push_back({attribute.name, attribute.description, typeOf(attribute.kind)});
+						// `item.<attribute>` stands for any attribute so written, which every element accepts
+						if (attribute.kind != AttributeKind::Items)
+						{
+							group.push_back({attribute.name, attribute.description, typeOf(attribute.kind)});
+						}
 					}
 				}
 				for (const auto& component : m_reference.components)

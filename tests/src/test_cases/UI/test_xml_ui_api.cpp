@@ -299,6 +299,15 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<lv_label bind_text="'Any text'"/>
 		<lv_label bind_text="tr.fan.title"/>
 		<lv_label bind_text="tr.no.such.title"/>
+		<ds_list list="om.fans" item="lint_fan_speed" item.speed="row.rpmz" item.flex_grow="1"/>
+	</view>
+</component>)";
+
+	// A list item given a prop by its list (`item.speed`): the name is checked in the item's row
+	std::ofstream(userDir / "test" / "components" / "lint_fan_speed.xml") << R"(<component>
+	<api><prop name="speed" type="string" default="0"/></api>
+	<view extends="lv_obj">
+		<lv_label bind_text="$speed"/>
 	</view>
 </component>)";
 
@@ -368,6 +377,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"source., om.) (in lint_screen › lint_fan)",
 		"lint_fan.xml:6: `rpm`: names are written with where they come from (row., parent., presenter., widget., "
 		"source., om.); here, `row.rpm` (in lint_screen › lint_fan)",
+		"lint_fan_speed.xml:4: no subject `row.rpmz` (in lint_screen › lint_fan_speed)",
 		"lint_screen.xml:3: no subject `presenter.no_such_subject` (in lint_screen)",
 		"lint_screen.xml:4: no style `no_such_style` (in lint_screen)",
 		"lint_screen.xml:5: no translation `tr.no.such.key` (in lint_screen)",

@@ -4,6 +4,7 @@
 
 #include "ApiLint.h"
 #include "ObjectModel/Tree/Schema.h"
+#include "UI/Widgets/Layout/ItemAttributes.h"
 #include "UI/Xml/Binding/Constants.h"
 #include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Om/Converters.h"
@@ -595,8 +596,7 @@ namespace UI::Xml::Api
 						scope.rows.insert(scope.rows.begin(),
 										  Row{.fields = field ? &field->rowFields : &m_reference.omRowFields,
 											  .item = omList ? std::optional(omList->index(0)) : std::nullopt});
-						const std::map<std::string, std::string> noProps;
-						instance(component->second, scope, noProps);
+						instance(component->second, scope, itemPropsOf(element, component->second, context));
 					}
 				}
 				else if (widget == "ds_scope")
@@ -609,8 +609,7 @@ namespace UI::Xml::Api
 					{
 						Scope scope = context.scope;
 						scope.rows.insert(scope.rows.begin(), Row{.fields = nullptr, .item = *element_});
-						const std::map<std::string, std::string> noProps;
-						instance(component->second, scope, noProps);
+						instance(component->second, scope, itemPropsOf(element, component->second, context));
 					}
 				}
 				else if (widget == "ds_view")
@@ -644,6 +643,7 @@ namespace UI::Xml::Api
 				switch (kind)
 				{
 				case AttributeKind::Text:
+				case AttributeKind::Items:
 					return;
 				case AttributeKind::Subject:
 					checkSubject(value, element, context);
@@ -1203,6 +1203,30 @@ namespace UI::Xml::Api
 						if (auto value = resolve(raw, element, context))
 						{
 							props[name] = *value;
+						}
+					}
+				}
+				return props;
+			}
+
+			/**
+			 * The props `element`, a widget building `component` for each row or item, gives it as `item.<prop>` (see
+			 * Widgets/Layout/ItemAttributes.h), resolved where `element` is written. Other `item.*` attributes are
+			 * the item's root's.
+			 */
+			std::map<std::string, std::string> itemPropsOf(const Element& element,
+														   const ComponentDef& component,
+														   const Context& context)
+			{
+				std::map<std::string, std::string> props;
+				for (const auto& [name, raw] : element.attrs)
+				{
+					const auto prop = Names::after(name, ItemAttributes::PREFIX);
+					if (prop && component.props.contains(std::string(*prop)))
+					{
+						if (auto value = resolve(raw, element, context))
+						{
+							props[std::string(*prop)] = *value;
 						}
 					}
 				}
