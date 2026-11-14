@@ -1,0 +1,28 @@
+{
+  "component": "gauge_arc",
+  "title_tag": "tr.widget.progress_arc",
+  "description_tag": "tr.widget.progress_gauge_desc",
+  "category_tag": "tr.widget.category_jobs",
+  "icon": "status.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      180,
+      184
+    ],
+    "min": [
+      134,
+      136
+    ]
+  },
+  "props": {
+    "frame": "card",
+    "title": "tr.widget.job_progress",
+    "value": "source.job.progress",
+    "text": "source.job.progress",
+    "unit": "'%'"
+  },
+  "settings": []
+}

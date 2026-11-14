@@ -197,6 +197,7 @@ namespace UI::Xml
 				setting.list = stringOf(json, "list", error);
 				setting.key = rowFieldOf(json, "key", error, "");
 				setting.label = rowFieldOf(json, "label", error, setting.key);
+				setting.skip = rowFieldOf(json, "skip", error, "");
 				if (error.empty() && (setting.list.empty() || setting.key.empty()))
 				{
 					error = fmt::format("setting \"{:s}\": a row setting needs \"list\" and \"key\"", setting.name);
@@ -341,6 +342,7 @@ namespace UI::Xml
 			FieldFinder keyField(key);
 			FieldFinder labelField(label);
 			FieldFinder existsField("exists");
+			FieldFinder skipField(skip);
 			rowList->row(i).allFields(keyField);
 			rowList->row(i).allFields(labelField);
 			rowList->row(i).allFields(existsField);
@@ -348,6 +350,16 @@ namespace UI::Xml
 			if (existsField.foundSubject != nullptr && existsField.foundSubject->equals("0"))
 			{
 				continue;
+			}
+			// Nor can a row the setting skips
+			if (!skip.empty())
+			{
+				rowList->row(i).allFields(skipField);
+				const Subject* skipped = skipField.subject();
+				if (skipped != nullptr && !skipped->text().empty() && skipped->text() != "0")
+				{
+					continue;
+				}
 			}
 			// A row of an object model list has names besides its fields (`name|default:…`): FieldFinder asks for them
 			if (const Subject* keySubject = keyField.subject())

@@ -1,0 +1,36 @@
+{
+  "component": "gauge_beds",
+  "title_tag": "tr.widget.bed_bar",
+  "description_tag": "tr.widget.bed_gauge_desc",
+  "category_tag": "tr.widget.category_temperature",
+  "icon": "temperature.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      272,
+      89
+    ],
+    "min": [
+      180,
+      89
+    ]
+  },
+  "props": {
+    "key": "row.index",
+    "look": "bar"
+  },
+  "settings": [
+    {
+      "name": "match",
+      "kind": "row",
+      "title_tag": "tr.widget.setting_bed",
+      "default": 0,
+      "list": "om.heat.bedHeaters",
+      "key": "row.index",
+      "label": "row.value|numbered:tr.temperature.bed_number",
+      "skip": "row.value|eq:-1"
+    }
+  ]
+}

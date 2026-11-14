@@ -110,32 +110,6 @@ From [CustomiseSource.cpp](../src/UI/Xml/Data/CustomiseSource.cpp).
 | `source.customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
 | `source.customise.title` | text | The selected widget's name, translated; empty if none is selected |
 
-### gauge
-
-From [GaugeSource.cpp](../src/UI/Xml/Data/GaugeSource.cpp).
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `source.gauge.gauges` | list | Every value a gauge can show, one row each, all with the same fields: the heaters, fans, analog sensors that no heater uses, the job's progress and the speed and extrusion factors |
-
-Each row of `source.gauge.gauges`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.id` | text | What it shows: bed.N, chamber.N, tool.T.H (tool T's Hth heater, from 0), fan.N, sensor.N, job.progress, speed_factor or extrusion_factor (as `row.id`) |
-| `row.name` | text | Display name, e.g. "Bed" or "Tool 0" |
-| `row.kind` | text | heater, fan, sensor or percent |
-| `row.value` | int | The value, whole units, e.g. °C or percent |
-| `row.min` | int | Bottom of its scale, e.g. 0 |
-| `row.max` | int | Top of its scale: a heater's maximum, 100 for a fan or the job, 200 for a factor |
-| `row.text` | text | The value as shown, without its unit, e.g. "61.2" |
-| `row.unit` | text | The value's unit, e.g. "°C" or "%" |
-| `row.target` | int | What it is heading for, e.g. a heater's target; `min` if nothing |
-| `row.detail` | text | A line about the value, e.g. "Target 215°C", "Off" or "1200 RPM"; empty if there is none |
-| `row.state` | text | A heater's status key: active, standby, off, fault, tuning, offline; else empty |
-| `row.editable` | int | 1 if actions.gauge.edit changes it: a heater's target, a fan's speed, a factor |
-
 ### tool
 
 From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
@@ -214,6 +188,7 @@ From [MoveSource.cpp](../src/UI/Xml/Data/MoveSource.cpp).
 | --- | --- | --- |
 | `source.move.speed_factor` | text | The speed override, e.g. "100%" |
 | `source.move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
+| `source.move.extrusion_percent` | int | `source.move.extrusion_factor` as a number, percent |
 | `source.move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
 | `source.move.speed_text` | text | The current move's top and requested speeds, e.g. "0/0 mm/s" |
 | `source.move.speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000), for a gauge |
@@ -266,7 +241,6 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.fan.set_speed` | Set a fan's speed in percent: the edited value (`value_confirmed`), else ask for it on the number pad. The fan is the row's, in a row of `om.fans`, else fan number `arg`. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
-| `actions.gauge.edit` | Change the value a row of `gauges` shows: a heater's target (its standby one while on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else asking for it on the number pad; or open the speed or extrusion factor dialog. Does nothing for a row that isn't `editable`. | [GaugeActions.cpp](../src/UI/Presenters/Gauge/GaugeActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
@@ -1389,7 +1363,7 @@ Also takes every `lv_obj` attribute.
 
 | Attribute | Description |
 | --- | --- |
-| `list` | The list shown (required), named like a subject: e.g. `presenter.files`, `source.gauge.gauges`, `om.fans`, or in a tool's row, its `row.heaters` |
+| `list` | The list shown (required), named like a subject: e.g. `presenter.files`, `source.jog.distances`, `om.fans`, or in a tool's row, its `row.heaters` |
 | `item` | The component built for each row (required) |
 | `windowed` | "true" to build only the rows on screen, building and deleting rows as the list scrolls (default false) |
 | `item_height` | Windowed: each item's height in pixels (required when windowed) |
@@ -1719,22 +1693,6 @@ A placed widget's component can use these, as well as its presenter's names and 
 
 Each widget is a component (with its props) and a widget file beside it, which says where it can be placed, its sizes in pixels, and its settings: props the user chooses on the screen. Each is pictured as placed, at its default size in its first slot, with its default settings; a free layout's widget is pictured at its smallest size too.
 
-#### arc_gauge
-
-**Arc gauge**: One value on an arc, such as a heater's temperature with its target; tap to change it
-
-In Gauges; placed in `dashboard`; component `gauge_arc` ([arc_gauge.json](../assets/ui/widgets/gauges/arc_gauge.json)). In a free layout it is 180×184 px, and at least 134×136 px.
-
-![arc_gauge](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge.png)
-
-At its smallest, 134×136 px:
-
-![arc_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/arc_gauge_smallest.png)
-
-| Setting | Shown as | Takes | Default |
-| --- | --- | --- | --- |
-| `source` | Shows | a row of `source.gauge.gauges`, by its `id`, shown by its `name` | `tool.0.0` |
-
 #### axes
 
 **Axis positions**: Where each axis is
@@ -1759,21 +1717,101 @@ At its smallest, 180×278 px:
 
 ![babystep at its smallest](../tests/ref_imgs/xml_ui_api/widgets/babystep_smallest.png)
 
-#### bar_gauge
+#### bed_arc
 
-**Bar gauge**: One value on a bar, such as a fan's speed or the job's progress; tap to change it
+**Bed arc**: A bed's temperature, heading for its target; tap to set the target
 
-In Gauges; placed in `dashboard`; component `gauge_bar` ([bar_gauge.json](../assets/ui/widgets/gauges/bar_gauge.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+In Temperatures; placed in `dashboard`; component `gauge_beds` ([bed_arc.json](../assets/ui/widgets/gauges/bed_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
 
-![bar_gauge](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge.png)
+![bed_arc](../tests/ref_imgs/xml_ui_api/widgets/bed_arc.png)
 
-At its smallest, 180×89 px:
+At its smallest, 134×136 px:
 
-![bar_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/bar_gauge_smallest.png)
+![bed_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/bed_arc_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `source` | Shows | a row of `source.gauge.gauges`, by its `id`, shown by its `name` | `bed.0` |
+| `match` | Bed | a row of `om.heat.bedHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.bed_number` | `0` |
+
+#### bed_bar
+
+**Bed bar**: A bed's temperature, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_beds` ([bed_bar.json](../assets/ui/widgets/gauges/bed_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![bed_bar](../tests/ref_imgs/xml_ui_api/widgets/bed_bar.png)
+
+At its smallest, 180×89 px:
+
+![bed_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/bed_bar_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Bed | a row of `om.heat.bedHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.bed_number` | `0` |
+
+#### bed_value
+
+**Bed number**: A bed's temperature, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_beds` ([bed_value.json](../assets/ui/widgets/gauges/bed_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![bed_value](../tests/ref_imgs/xml_ui_api/widgets/bed_value.png)
+
+At its smallest, 134×89 px:
+
+![bed_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/bed_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Bed | a row of `om.heat.bedHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.bed_number` | `0` |
+
+#### chamber_arc
+
+**Chamber arc**: A chamber's temperature, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_chambers` ([chamber_arc.json](../assets/ui/widgets/gauges/chamber_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![chamber_arc](../tests/ref_imgs/xml_ui_api/widgets/chamber_arc.png)
+
+At its smallest, 134×136 px:
+
+![chamber_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/chamber_arc_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Chamber | a row of `om.heat.chamberHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.chamber_number` | `0` |
+
+#### chamber_bar
+
+**Chamber bar**: A chamber's temperature, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_chambers` ([chamber_bar.json](../assets/ui/widgets/gauges/chamber_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![chamber_bar](../tests/ref_imgs/xml_ui_api/widgets/chamber_bar.png)
+
+At its smallest, 180×89 px:
+
+![chamber_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/chamber_bar_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Chamber | a row of `om.heat.chamberHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.chamber_number` | `0` |
+
+#### chamber_value
+
+**Chamber number**: A chamber's temperature, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_chambers` ([chamber_value.json](../assets/ui/widgets/gauges/chamber_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![chamber_value](../tests/ref_imgs/xml_ui_api/widgets/chamber_value.png)
+
+At its smallest, 134×89 px:
+
+![chamber_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/chamber_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Chamber | a row of `om.heat.chamberHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.chamber_number` | `0` |
 
 #### console
 
@@ -1835,6 +1873,113 @@ At its smallest, 272×89 px:
 
 ![current_tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/current_tool_smallest.png)
 
+#### custom_arc
+
+**Custom arc**: Any value the printer reports, by its object model name, doing what you choose when tapped or held
+
+In Gauges; placed in `dashboard`; component `gauge_arc` ([custom_arc.json](../assets/ui/widgets/gauges/custom_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![custom_arc](../tests/ref_imgs/xml_ui_api/widgets/custom_arc.png)
+
+At its smallest, 134×136 px:
+
+![custom_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/custom_arc_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `title` | Title | text, up to 40 bytes, given as a constant | `Heater 1` |
+| `value` | Value (a name) | text, up to 120 bytes | `om.heat.heaters[1].current|int` |
+| `text` | Value shown (a name) | text, up to 120 bytes | `om.heat.heaters[1].current|fixed:1` |
+| `unit` | Unit | text, up to 12 bytes, given as a constant | `°C` |
+| `min` | Minimum | int, -100000 to 100000 | `0` |
+| `max` | Maximum | int, -100000 to 100000 | `300` |
+| `target` | Target (a name) | text, up to 120 bytes | `om.heat.heaters[1]|heater_target` |
+| `detail` | Detail | text, up to 40 bytes, given as a constant | `` |
+| `tap_action` | On tap | an action offered to users, or none | `` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
+#### custom_bar
+
+**Custom bar**: Any value the printer reports, by its object model name, doing what you choose when tapped or held
+
+In Gauges; placed in `dashboard`; component `gauge_bar` ([custom_bar.json](../assets/ui/widgets/gauges/custom_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![custom_bar](../tests/ref_imgs/xml_ui_api/widgets/custom_bar.png)
+
+At its smallest, 180×89 px:
+
+![custom_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/custom_bar_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `title` | Title | text, up to 40 bytes, given as a constant | `Heater 1` |
+| `value` | Value (a name) | text, up to 120 bytes | `om.heat.heaters[1].current|int` |
+| `text` | Value shown (a name) | text, up to 120 bytes | `om.heat.heaters[1].current|fixed:1` |
+| `unit` | Unit | text, up to 12 bytes, given as a constant | `°C` |
+| `min` | Minimum | int, -100000 to 100000 | `0` |
+| `max` | Maximum | int, -100000 to 100000 | `300` |
+| `target` | Target (a name) | text, up to 120 bytes | `om.heat.heaters[1]|heater_target` |
+| `detail` | Detail | text, up to 40 bytes, given as a constant | `` |
+| `tap_action` | On tap | an action offered to users, or none | `` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
+#### custom_gauges
+
+**Custom gauge list**: A gauge for each item of an object model list you choose, by names in the item
+
+In Gauges; placed in `dashboard`; component `gauge_list` ([custom_gauges.json](../assets/ui/widgets/gauges/custom_gauges.json)). In a free layout it is 272×277 px, and at least 180×136 px.
+
+![custom_gauges](../tests/ref_imgs/xml_ui_api/widgets/custom_gauges.png)
+
+At its smallest, 180×136 px:
+
+![custom_gauges at its smallest](../tests/ref_imgs/xml_ui_api/widgets/custom_gauges_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `list` | List (a name) | text, up to 120 bytes | `om.heat.heaters` |
+| `title` | Title | text, up to 120 bytes | `om.sensors.analog[{row.sensor}].name|default:tr.temperature.heater:{row.index}` |
+| `value` | Value (a name) | text, up to 120 bytes | `row.current|int` |
+| `text` | Value shown (a name) | text, up to 120 bytes | `row.current|fixed:1` |
+| `unit` | Unit | text, up to 12 bytes, given as a constant | `°C` |
+| `min` | Minimum | int, -100000 to 100000 | `0` |
+| `max` | Maximum | int, -100000 to 100000 | `300` |
+| `target` | Target (a name) | text, up to 120 bytes | `row.value|heater_target` |
+| `look` | Look | one of `bar`, `arc`, `value` | `bar` |
+| `flow` | Arrangement | one of `column`, `row`, `pages` | `column` |
+| `tap_action` | On tap | an action offered to users, or none | `` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
+#### custom_value
+
+**Custom number**: Any value the printer reports, by its object model name, doing what you choose when tapped or held
+
+In Gauges; placed in `dashboard`; component `gauge_value` ([custom_value.json](../assets/ui/widgets/gauges/custom_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![custom_value](../tests/ref_imgs/xml_ui_api/widgets/custom_value.png)
+
+At its smallest, 134×89 px:
+
+![custom_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/custom_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `title` | Title | text, up to 40 bytes, given as a constant | `Heater 1` |
+| `value` | Value (a name) | text, up to 120 bytes | `om.heat.heaters[1].current|int` |
+| `text` | Value shown (a name) | text, up to 120 bytes | `om.heat.heaters[1].current|fixed:1` |
+| `unit` | Unit | text, up to 12 bytes, given as a constant | `°C` |
+| `detail` | Detail | text, up to 40 bytes, given as a constant | `` |
+| `tap_action` | On tap | an action offered to users, or none | `` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
 #### estop
 
 **E-stop**: Drag across to stop the printer at once
@@ -1855,6 +2000,42 @@ At its smallest, 272×372 px:
 
 ![extrude at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrude_smallest.png)
 
+#### extrusion_arc
+
+**Extrusion factor arc**: The extrusion factor; tap to change it
+
+In Motion; placed in `dashboard`; component `gauge_arc` ([extrusion_arc.json](../assets/ui/widgets/gauges/extrusion_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![extrusion_arc](../tests/ref_imgs/xml_ui_api/widgets/extrusion_arc.png)
+
+At its smallest, 134×136 px:
+
+![extrusion_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrusion_arc_smallest.png)
+
+#### extrusion_bar
+
+**Extrusion factor bar**: The extrusion factor; tap to change it
+
+In Motion; placed in `dashboard`; component `gauge_bar` ([extrusion_bar.json](../assets/ui/widgets/gauges/extrusion_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![extrusion_bar](../tests/ref_imgs/xml_ui_api/widgets/extrusion_bar.png)
+
+At its smallest, 180×89 px:
+
+![extrusion_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrusion_bar_smallest.png)
+
+#### extrusion_value
+
+**Extrusion factor number**: The extrusion factor; tap to change it
+
+In Motion; placed in `dashboard`; component `gauge_value` ([extrusion_value.json](../assets/ui/widgets/gauges/extrusion_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![extrusion_value](../tests/ref_imgs/xml_ui_api/widgets/extrusion_value.png)
+
+At its smallest, 134×89 px:
+
+![extrusion_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrusion_value_smallest.png)
+
 #### fan
 
 **Fan**: One fan's speed, to change it
@@ -1870,6 +2051,71 @@ At its smallest, 365×89 px:
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `fan` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:tr.fine_tune.fan` | `0` |
+
+#### fan_arc
+
+**Fan arc**: A fan's speed, with its RPM; tap to set the speed
+
+In Fans; placed in `dashboard`; component `gauge_fans` ([fan_arc.json](../assets/ui/widgets/gauges/fan_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![fan_arc](../tests/ref_imgs/xml_ui_api/widgets/fan_arc.png)
+
+At its smallest, 134×136 px:
+
+![fan_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_arc_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:tr.fine_tune.fan` | `0` |
+
+#### fan_bar
+
+**Fan bar**: A fan's speed, with its RPM; tap to set the speed
+
+In Fans; placed in `dashboard`; component `gauge_fans` ([fan_bar.json](../assets/ui/widgets/gauges/fan_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![fan_bar](../tests/ref_imgs/xml_ui_api/widgets/fan_bar.png)
+
+At its smallest, 180×89 px:
+
+![fan_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_bar_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:tr.fine_tune.fan` | `0` |
+
+#### fan_gauges
+
+**Fan gauges**: Every fan's speed, in a column, a row, or one at a time
+
+In Fans; placed in `dashboard`; component `gauge_fans` ([fan_gauges.json](../assets/ui/widgets/gauges/fan_gauges.json)). In a free layout it is 272×277 px, and at least 180×136 px.
+
+![fan_gauges](../tests/ref_imgs/xml_ui_api/widgets/fan_gauges.png)
+
+At its smallest, 180×136 px:
+
+![fan_gauges at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_gauges_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `look` | Look | one of `bar`, `arc`, `value` | `bar` |
+| `flow` | Arrangement | one of `column`, `row`, `pages` | `column` |
+
+#### fan_value
+
+**Fan number**: A fan's speed, with its RPM; tap to set the speed
+
+In Fans; placed in `dashboard`; component `gauge_fans` ([fan_value.json](../assets/ui/widgets/gauges/fan_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![fan_value](../tests/ref_imgs/xml_ui_api/widgets/fan_value.png)
+
+At its smallest, 134×89 px:
+
+![fan_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:tr.fine_tune.fan` | `0` |
 
 #### fans
 
@@ -1911,6 +2157,23 @@ At its smallest, 88×89 px:
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `Home` |
 | `gcode` | G-code | text, up to 120 bytes | `G28` |
+
+#### heater_gauges
+
+**Heater gauges**: Every heater's temperature, in a column, a row, or one at a time
+
+In Temperatures; placed in `dashboard`; component `gauge_heaters` ([heater_gauges.json](../assets/ui/widgets/gauges/heater_gauges.json)). In a free layout it is 272×277 px, and at least 180×136 px.
+
+![heater_gauges](../tests/ref_imgs/xml_ui_api/widgets/heater_gauges.png)
+
+At its smallest, 180×136 px:
+
+![heater_gauges at its smallest](../tests/ref_imgs/xml_ui_api/widgets/heater_gauges_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `look` | Look | one of `bar`, `arc`, `value` | `bar` |
+| `flow` | Arrangement | one of `column`, `row`, `pages` | `column` |
 
 #### heightmap
 
@@ -2028,24 +2291,6 @@ At its smallest, 458×278 px:
 
 ![object_cancel at its smallest](../tests/ref_imgs/xml_ui_api/widgets/object_cancel_smallest.png)
 
-#### om_value
-
-**Object model value**: Any value the printer reports, by its object model path, e.g. heat.heaters[1].current
-
-In Gauges; placed in `dashboard`; component `gauge_om_value` ([om_value.json](../assets/ui/widgets/gauges/om_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
-
-![om_value](../tests/ref_imgs/xml_ui_api/widgets/om_value.png)
-
-At its smallest, 134×89 px:
-
-![om_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/om_value_smallest.png)
-
-| Setting | Shown as | Takes | Default |
-| --- | --- | --- | --- |
-| `path` | Path | text, up to 120 bytes | `om.state.upTime|duration` |
-| `label` | Label | text, up to 40 bytes | `Up time` |
-| `unit` | Unit | text, up to 12 bytes | `` |
-
 #### page_console
 
 **Console**: Opens the console; flashes when the printer replies
@@ -2086,6 +2331,107 @@ In Navigation; placed in `sidebar`; component `sidebar_page_button` ([page_setti
 
 ![page_settings](../tests/ref_imgs/xml_ui_api/widgets/page_settings.png)
 
+#### progress_arc
+
+**Progress arc**: The job's progress
+
+In Jobs; placed in `dashboard`; component `gauge_arc` ([progress_arc.json](../assets/ui/widgets/gauges/progress_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![progress_arc](../tests/ref_imgs/xml_ui_api/widgets/progress_arc.png)
+
+At its smallest, 134×136 px:
+
+![progress_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/progress_arc_smallest.png)
+
+#### progress_bar
+
+**Progress bar**: The job's progress
+
+In Jobs; placed in `dashboard`; component `gauge_bar` ([progress_bar.json](../assets/ui/widgets/gauges/progress_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![progress_bar](../tests/ref_imgs/xml_ui_api/widgets/progress_bar.png)
+
+At its smallest, 180×89 px:
+
+![progress_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/progress_bar_smallest.png)
+
+#### progress_value
+
+**Progress number**: The job's progress
+
+In Jobs; placed in `dashboard`; component `gauge_value` ([progress_value.json](../assets/ui/widgets/gauges/progress_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![progress_value](../tests/ref_imgs/xml_ui_api/widgets/progress_value.png)
+
+At its smallest, 134×89 px:
+
+![progress_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/progress_value_smallest.png)
+
+#### sensor_arc
+
+**Sensor arc**: An analog sensor's reading
+
+In Temperatures; placed in `dashboard`; component `gauge_sensors` ([sensor_arc.json](../assets/ui/widgets/gauges/sensor_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![sensor_arc](../tests/ref_imgs/xml_ui_api/widgets/sensor_arc.png)
+
+At its smallest, 134×136 px:
+
+![sensor_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/sensor_arc_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Sensor | a row of `om.sensors.analog`, by its `index`, shown by its `name\|default:tr.widget.gauge_sensor` | `0` |
+
+#### sensor_bar
+
+**Sensor bar**: An analog sensor's reading
+
+In Temperatures; placed in `dashboard`; component `gauge_sensors` ([sensor_bar.json](../assets/ui/widgets/gauges/sensor_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![sensor_bar](../tests/ref_imgs/xml_ui_api/widgets/sensor_bar.png)
+
+At its smallest, 180×89 px:
+
+![sensor_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/sensor_bar_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Sensor | a row of `om.sensors.analog`, by its `index`, shown by its `name\|default:tr.widget.gauge_sensor` | `0` |
+
+#### sensor_gauges
+
+**Sensor gauges**: Every analog sensor's reading, in a column, a row, or one at a time
+
+In Temperatures; placed in `dashboard`; component `gauge_sensors` ([sensor_gauges.json](../assets/ui/widgets/gauges/sensor_gauges.json)). In a free layout it is 272×277 px, and at least 180×136 px.
+
+![sensor_gauges](../tests/ref_imgs/xml_ui_api/widgets/sensor_gauges.png)
+
+At its smallest, 180×136 px:
+
+![sensor_gauges at its smallest](../tests/ref_imgs/xml_ui_api/widgets/sensor_gauges_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `look` | Look | one of `bar`, `arc`, `value` | `bar` |
+| `flow` | Arrangement | one of `column`, `row`, `pages` | `column` |
+
+#### sensor_value
+
+**Sensor number**: An analog sensor's reading
+
+In Temperatures; placed in `dashboard`; component `gauge_sensors` ([sensor_value.json](../assets/ui/widgets/gauges/sensor_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![sensor_value](../tests/ref_imgs/xml_ui_api/widgets/sensor_value.png)
+
+At its smallest, 134×89 px:
+
+![sensor_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/sensor_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `match` | Sensor | a row of `om.sensors.analog`, by its `index`, shown by its `name\|default:tr.widget.gauge_sensor` | `0` |
+
 #### sidebar_gcode
 
 **G-code button**: A sidebar button that sends the G-code you choose
@@ -2099,6 +2445,42 @@ In Commands; placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gco
 | `label` | Label | text, up to 32 bytes | `Home` |
 | `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `fine_tune.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `status.png` | `send.png` |
 | `gcode` | G-code | text, up to 120 bytes | `G28` |
+
+#### speed_arc
+
+**Speed factor arc**: The speed factor; tap to change it
+
+In Motion; placed in `dashboard`; component `gauge_arc` ([speed_arc.json](../assets/ui/widgets/gauges/speed_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![speed_arc](../tests/ref_imgs/xml_ui_api/widgets/speed_arc.png)
+
+At its smallest, 134×136 px:
+
+![speed_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/speed_arc_smallest.png)
+
+#### speed_bar
+
+**Speed factor bar**: The speed factor; tap to change it
+
+In Motion; placed in `dashboard`; component `gauge_bar` ([speed_bar.json](../assets/ui/widgets/gauges/speed_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![speed_bar](../tests/ref_imgs/xml_ui_api/widgets/speed_bar.png)
+
+At its smallest, 180×89 px:
+
+![speed_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/speed_bar_smallest.png)
+
+#### speed_value
+
+**Speed factor number**: The speed factor; tap to change it
+
+In Motion; placed in `dashboard`; component `gauge_value` ([speed_value.json](../assets/ui/widgets/gauges/speed_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![speed_value](../tests/ref_imgs/xml_ui_api/widgets/speed_value.png)
+
+At its smallest, 134×89 px:
+
+![speed_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/speed_value_smallest.png)
 
 #### status_extrusion
 
@@ -2172,7 +2554,7 @@ At its smallest, 88×42 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `text` | Text | text, up to 120 bytes | `Printer` |
+| `text` | Value shown (a name) | text, up to 120 bytes | `Printer` |
 | `size` | Text size | one of `small`, `normal`, `emphasis`, `header`, `large`, `xlarge`, `huge` | `header` |
 | `colour` | Colour | one of `text`, `text_muted`, `primary`, `secondary`, `success`, `warning`, `error` | `text` |
 | `align` | Alignment | one of `left`, `center`, `right` | `center` |
@@ -2194,6 +2576,57 @@ At its smallest, 458×100 px:
 | --- | --- | --- | --- |
 | `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
 
+#### tool_arc
+
+**Tool arc**: A tool's heater, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_tool` ([tool_arc.json](../assets/ui/widgets/gauges/tool_arc.json)). In a free layout it is 180×184 px, and at least 134×136 px.
+
+![tool_arc](../tests/ref_imgs/xml_ui_api/widgets/tool_arc.png)
+
+At its smallest, 134×136 px:
+
+![tool_arc at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_arc_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
+| `match` | Heater of the tool (from 0) | int, 0 to 7 | `0` |
+
+#### tool_bar
+
+**Tool bar**: A tool's heater, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_tool` ([tool_bar.json](../assets/ui/widgets/gauges/tool_bar.json)). In a free layout it is 272×89 px, and at least 180×89 px.
+
+![tool_bar](../tests/ref_imgs/xml_ui_api/widgets/tool_bar.png)
+
+At its smallest, 180×89 px:
+
+![tool_bar at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_bar_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
+| `match` | Heater of the tool (from 0) | int, 0 to 7 | `0` |
+
+#### tool_value
+
+**Tool number**: A tool's heater, heading for its target; tap to set the target
+
+In Temperatures; placed in `dashboard`; component `gauge_tool` ([tool_value.json](../assets/ui/widgets/gauges/tool_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![tool_value](../tests/ref_imgs/xml_ui_api/widgets/tool_value.png)
+
+At its smallest, 134×89 px:
+
+![tool_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
+| `match` | Heater of the tool (from 0) | int, 0 to 7 | `0` |
+
 #### tools
 
 **Tools and heaters**: Every tool, bed and chamber with its temperatures
@@ -2205,22 +2638,6 @@ In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json
 At its smallest, 272×100 px:
 
 ![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
-
-#### value_gauge
-
-**Value**: One value as a large number, such as a temperature or a factor; tap to change it
-
-In Gauges; placed in `dashboard`; component `gauge_value` ([value_gauge.json](../assets/ui/widgets/gauges/value_gauge.json)). In a free layout it is 180×89 px, and at least 134×89 px.
-
-![value_gauge](../tests/ref_imgs/xml_ui_api/widgets/value_gauge.png)
-
-At its smallest, 134×89 px:
-
-![value_gauge at its smallest](../tests/ref_imgs/xml_ui_api/widgets/value_gauge_smallest.png)
-
-| Setting | Shown as | Takes | Default |
-| --- | --- | --- | --- |
-| `source` | Shows | a row of `source.gauge.gauges`, by its `id`, shown by its `name` | `job.progress` |
 
 ## Components
 
@@ -2286,14 +2703,18 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
-| `gauge_arc` |  | `source` | `arc_gauge` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
-| `gauge_arc_face` |  |  | `gauge_arc` | [gauge_arc_face.xml](../assets/ui/components/gauge/gauge_arc_face.xml) |
-| `gauge_bar` |  | `source` | `bar_gauge` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
-| `gauge_bar_face` |  |  | `gauge_bar` | [gauge_bar_face.xml](../assets/ui/components/gauge/gauge_bar_face.xml) |
-| `gauge_om_value` |  | `path`, `label`, `unit` | `om_value` | [gauge_om_value.xml](../assets/ui/components/gauge/gauge_om_value.xml) |
-| `gauge_reading` |  |  | `gauge_arc_face`, `gauge_bar_face`, `gauge_value_face` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
-| `gauge_value` |  | `source` | `value_gauge` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
-| `gauge_value_face` |  |  | `gauge_value` | [gauge_value_face.xml](../assets/ui/components/gauge/gauge_value_face.xml) |
+| `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
+| `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
+| `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |
+| `gauge_chambers` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `chamber_arc`, `chamber_bar`, `chamber_value` | [gauge_chambers.xml](../assets/ui/components/gauge/gauge_chambers.xml) |
+| `gauge_fans` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `fan_arc`, `fan_bar`, `fan_gauges`, `fan_value` | [gauge_fans.xml](../assets/ui/components/gauge/gauge_fans.xml) |
+| `gauge_heater_slots` |  | `list`, `title`, `key`, `match`, `look`, `flow`, `grow`, `portrait` | `gauge_beds`, `gauge_chambers`, `gauge_tool` | [gauge_heater_slots.xml](../assets/ui/components/gauge/gauge_heater_slots.xml) |
+| `gauge_heaters` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `heater_gauges` | [gauge_heaters.xml](../assets/ui/components/gauge/gauge_heaters.xml) |
+| `gauge_list` |  | `list`, `key`, `match`, `look`, `flow`, `frame`, `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `gauge_fans`, `gauge_heater_slots`, `gauge_heaters`, `gauge_sensors`, `custom_gauges` | [gauge_list.xml](../assets/ui/components/gauge/gauge_list.xml) |
+| `gauge_reading` |  | `text`, `unit`, `grow` | `gauge_arc`, `gauge_bar`, `gauge_value` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
+| `gauge_sensors` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `sensor_arc`, `sensor_bar`, `sensor_gauges`, `sensor_value` | [gauge_sensors.xml](../assets/ui/components/gauge/gauge_sensors.xml) |
+| `gauge_tool` |  | `tool`, `key`, `match`, `look`, `flow`, `grow`, `portrait` | `tool_arc`, `tool_bar`, `tool_value` | [gauge_tool.xml](../assets/ui/components/gauge/gauge_tool.xml) |
+| `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |

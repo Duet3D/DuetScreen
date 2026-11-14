@@ -51,8 +51,8 @@ src/UI/
     Theme/     ThemeStyles (theme styles and fonts made available to XML)
     Data/      DataSource, DataSources (the list of sources), one file per area: ToolSource (the current tool, as the status bar sums it up),
                ConsoleSource, JobSource, MachineSource, MoveSource, NavigationSource, ResponseSource,
-               TemperatureSource, GaugeSource (every value a gauge can show), JogSource (the jog distance and speed
-               every view shares), WidgetSource (widget.* for views that aren't placed widgets), and
+               TemperatureSource, JogSource (the jog distance and speed every view shares), WidgetSource (widget.*
+               for views that aren't placed widgets), and
                CustomiseSource (the state of customising the screen)
     Layout/    WidgetCatalogue (the widgets the user can place), Layout (layout files, and repairing them),
                LayoutStore (the layout each slot shows, and saving the user's), LayoutEditor (customising),
@@ -420,6 +420,32 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 - The lint checks each widget file (its component takes every prop and setting, a `row` setting's list and fields exist, every translation key exists) and each widget's component with its default settings.
 
 A user bundle adds a widget the same way, and a slot for it to go in if none fits.
+
+### Gauges
+
+Every gauge widget shows one of three faces (`components/gauge/`): `gauge_bar`, `gauge_arc` and `gauge_value` (a number). A face shows whatever names it is given, so a widget only says what it is about; they all take the same props:
+
+| Prop | Is |
+| --- | --- |
+| `title`, `value` (int), `text` (the value as shown), `unit`, `min` (int), `max` (int), `target` (int), `detail` | names of what it shows, or constants (`100`, `'°C'`, `tr.<key>`) |
+| `state` | a heater's state, which colours it (standby, off, fault) |
+| `shown` | an expression: hidden while false, e.g. `row.exists` |
+| `grow`, `portrait` | expressions: whether the reading grows with the widget's size class, and whether the gauge is tall and narrow (default `widget.portrait`) |
+| `frame` | its root's style: `card` for a widget of its own |
+| `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | the actions run when it is tapped or held (none while empty) |
+
+```xml
+<gauge_bar frame="card" title="tr.widget.job_progress" value="source.job.progress" text="source.job.progress" unit="'%'"/>
+```
+
+`gauge_list` shows a face (`look`: bar, arc or value) for each row of a list, passing the face's props to every row with `item.*`, so their names are each row's; with `key` and `match` it shows one row, as a single gauge does, and `flow` places them in a column, a row, or a page at a time. The gauges of one kind of thing extend it with that thing's names: `gauge_heaters`, `gauge_beds`, `gauge_chambers`, `gauge_tool`, `gauge_fans` and `gauge_sensors`. So a bed's bar gauge is a widget file and nothing else:
+
+```json
+{"component": "gauge_beds", "props": {"look": "bar", "key": "row.index"},
+ "settings": [{"name": "match", "kind": "row", "list": "om.heat.bedHeaters", "key": "row.index", "default": 0, …}]}
+```
+
+The custom gauges are a face, or `gauge_list`, with every prop a setting: the user types the names (with a `constant` text setting for the title and unit) and chooses the actions (`action` settings).
 
 ### Customising on the screen
 

@@ -252,8 +252,6 @@
 			<xs:enumeration value="row.current"/>
 			<xs:enumeration value="row.date"/>
 			<xs:enumeration value="row.description"/>
-			<xs:enumeration value="row.detail"/>
-			<xs:enumeration value="row.editable"/>
 			<xs:enumeration value="row.filament_loaded"/>
 			<xs:enumeration value="row.filament_shown"/>
 			<xs:enumeration value="row.filament_text"/>
@@ -282,14 +280,11 @@
 			<xs:enumeration value="row.selected"/>
 			<xs:enumeration value="row.signal"/>
 			<xs:enumeration value="row.ssid"/>
-			<xs:enumeration value="row.state"/>
-			<xs:enumeration value="row.target"/>
 			<xs:enumeration value="row.text"/>
 			<xs:enumeration value="row.text_style"/>
 			<xs:enumeration value="row.thumbnail"/>
 			<xs:enumeration value="row.time"/>
 			<xs:enumeration value="row.title"/>
-			<xs:enumeration value="row.unit"/>
 			<xs:enumeration value="row.value"/>
 			<xs:enumeration value="row.widgets"/>
 			<xs:enumeration value="row.x1"/>
@@ -306,7 +301,6 @@
 			<xs:enumeration value="source.customise.selected"/>
 			<xs:enumeration value="source.customise.snap"/>
 			<xs:enumeration value="source.customise.title"/>
-			<xs:enumeration value="source.gauge.gauges"/>
 			<xs:enumeration value="source.job.cancel_control"/>
 			<xs:enumeration value="source.job.elapsed"/>
 			<xs:enumeration value="source.job.elapsed_text"/>
@@ -331,6 +325,7 @@
 			<xs:enumeration value="source.machine.summary"/>
 			<xs:enumeration value="source.move.babystep"/>
 			<xs:enumeration value="source.move.extrusion_factor"/>
+			<xs:enumeration value="source.move.extrusion_percent"/>
 			<xs:enumeration value="source.move.flow"/>
 			<xs:enumeration value="source.move.flow_text"/>
 			<xs:enumeration value="source.move.speed_factor"/>
@@ -376,7 +371,6 @@
 			<xs:enumeration value="presenter.tools"/>
 			<xs:enumeration value="row.widgets"/>
 			<xs:enumeration value="source.console.lines"/>
-			<xs:enumeration value="source.gauge.gauges"/>
 			<xs:enumeration value="source.jog.distances"/>
 			<xs:enumeration value="source.jog.feedrates"/>
 			<xs:enumeration value="source.temperature.temperatures"/>
@@ -394,7 +388,6 @@
 			<xs:enumeration value="actions.factors.extrusion"/>
 			<xs:enumeration value="actions.factors.speed"/>
 			<xs:enumeration value="actions.fan.set_speed"/>
-			<xs:enumeration value="actions.gauge.edit"/>
 			<xs:enumeration value="actions.gcode.send"/>
 			<xs:enumeration value="actions.heater.set_active"/>
 			<xs:enumeration value="actions.heater.set_standby"/>
@@ -739,13 +732,17 @@
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
 			<xs:enumeration value="gauge_arc"/>
-			<xs:enumeration value="gauge_arc_face"/>
 			<xs:enumeration value="gauge_bar"/>
-			<xs:enumeration value="gauge_bar_face"/>
-			<xs:enumeration value="gauge_om_value"/>
+			<xs:enumeration value="gauge_beds"/>
+			<xs:enumeration value="gauge_chambers"/>
+			<xs:enumeration value="gauge_fans"/>
+			<xs:enumeration value="gauge_heater_slots"/>
+			<xs:enumeration value="gauge_heaters"/>
+			<xs:enumeration value="gauge_list"/>
 			<xs:enumeration value="gauge_reading"/>
+			<xs:enumeration value="gauge_sensors"/>
+			<xs:enumeration value="gauge_tool"/>
 			<xs:enumeration value="gauge_value"/>
-			<xs:enumeration value="gauge_value_face"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heightmap"/>
@@ -866,13 +863,17 @@
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
 			<xs:enumeration value="gauge_arc"/>
-			<xs:enumeration value="gauge_arc_face"/>
 			<xs:enumeration value="gauge_bar"/>
-			<xs:enumeration value="gauge_bar_face"/>
-			<xs:enumeration value="gauge_om_value"/>
+			<xs:enumeration value="gauge_beds"/>
+			<xs:enumeration value="gauge_chambers"/>
+			<xs:enumeration value="gauge_fans"/>
+			<xs:enumeration value="gauge_heater_slots"/>
+			<xs:enumeration value="gauge_heaters"/>
+			<xs:enumeration value="gauge_list"/>
 			<xs:enumeration value="gauge_reading"/>
+			<xs:enumeration value="gauge_sensors"/>
+			<xs:enumeration value="gauge_tool"/>
 			<xs:enumeration value="gauge_value"/>
-			<xs:enumeration value="gauge_value_face"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heightmap"/>
@@ -1020,13 +1021,17 @@
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
 			<xs:enumeration value="gauge_arc"/>
-			<xs:enumeration value="gauge_arc_face"/>
 			<xs:enumeration value="gauge_bar"/>
-			<xs:enumeration value="gauge_bar_face"/>
-			<xs:enumeration value="gauge_om_value"/>
+			<xs:enumeration value="gauge_beds"/>
+			<xs:enumeration value="gauge_chambers"/>
+			<xs:enumeration value="gauge_fans"/>
+			<xs:enumeration value="gauge_heater_slots"/>
+			<xs:enumeration value="gauge_heaters"/>
+			<xs:enumeration value="gauge_list"/>
 			<xs:enumeration value="gauge_reading"/>
+			<xs:enumeration value="gauge_sensors"/>
+			<xs:enumeration value="gauge_tool"/>
 			<xs:enumeration value="gauge_value"/>
-			<xs:enumeration value="gauge_value_face"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heightmap"/>
@@ -1969,16 +1974,16 @@
 			<xs:enumeration value="tr.widget.align_center"/>
 			<xs:enumeration value="tr.widget.align_left"/>
 			<xs:enumeration value="tr.widget.align_right"/>
-			<xs:enumeration value="tr.widget.arc_gauge"/>
-			<xs:enumeration value="tr.widget.arc_gauge_desc"/>
 			<xs:enumeration value="tr.widget.axes"/>
 			<xs:enumeration value="tr.widget.axes_desc"/>
 			<xs:enumeration value="tr.widget.babystep"/>
 			<xs:enumeration value="tr.widget.babystep_desc"/>
 			<xs:enumeration value="tr.widget.background_card"/>
 			<xs:enumeration value="tr.widget.background_none"/>
-			<xs:enumeration value="tr.widget.bar_gauge"/>
-			<xs:enumeration value="tr.widget.bar_gauge_desc"/>
+			<xs:enumeration value="tr.widget.bed_arc"/>
+			<xs:enumeration value="tr.widget.bed_bar"/>
+			<xs:enumeration value="tr.widget.bed_gauge_desc"/>
+			<xs:enumeration value="tr.widget.bed_value"/>
 			<xs:enumeration value="tr.widget.category_commands"/>
 			<xs:enumeration value="tr.widget.category_console"/>
 			<xs:enumeration value="tr.widget.category_fans"/>
@@ -1989,6 +1994,10 @@
 			<xs:enumeration value="tr.widget.category_safety"/>
 			<xs:enumeration value="tr.widget.category_temperature"/>
 			<xs:enumeration value="tr.widget.category_text"/>
+			<xs:enumeration value="tr.widget.chamber_arc"/>
+			<xs:enumeration value="tr.widget.chamber_bar"/>
+			<xs:enumeration value="tr.widget.chamber_gauge_desc"/>
+			<xs:enumeration value="tr.widget.chamber_value"/>
 			<xs:enumeration value="tr.widget.colour_error"/>
 			<xs:enumeration value="tr.widget.colour_muted"/>
 			<xs:enumeration value="tr.widget.colour_primary"/>
@@ -2005,21 +2014,42 @@
 			<xs:enumeration value="tr.widget.console_log_desc"/>
 			<xs:enumeration value="tr.widget.current_tool"/>
 			<xs:enumeration value="tr.widget.current_tool_desc"/>
+			<xs:enumeration value="tr.widget.custom_arc"/>
+			<xs:enumeration value="tr.widget.custom_bar"/>
+			<xs:enumeration value="tr.widget.custom_gauge_desc"/>
+			<xs:enumeration value="tr.widget.custom_gauges"/>
+			<xs:enumeration value="tr.widget.custom_gauges_desc"/>
+			<xs:enumeration value="tr.widget.custom_value"/>
 			<xs:enumeration value="tr.widget.estop"/>
 			<xs:enumeration value="tr.widget.estop_desc"/>
 			<xs:enumeration value="tr.widget.extrude"/>
 			<xs:enumeration value="tr.widget.extrude_desc"/>
+			<xs:enumeration value="tr.widget.extrusion_arc"/>
+			<xs:enumeration value="tr.widget.extrusion_bar"/>
+			<xs:enumeration value="tr.widget.extrusion_gauge_desc"/>
+			<xs:enumeration value="tr.widget.extrusion_value"/>
 			<xs:enumeration value="tr.widget.fan"/>
+			<xs:enumeration value="tr.widget.fan_arc"/>
+			<xs:enumeration value="tr.widget.fan_bar"/>
 			<xs:enumeration value="tr.widget.fan_desc"/>
+			<xs:enumeration value="tr.widget.fan_gauge_desc"/>
+			<xs:enumeration value="tr.widget.fan_gauges"/>
+			<xs:enumeration value="tr.widget.fan_gauges_desc"/>
+			<xs:enumeration value="tr.widget.fan_value"/>
 			<xs:enumeration value="tr.widget.fans"/>
 			<xs:enumeration value="tr.widget.fans_desc"/>
 			<xs:enumeration value="tr.widget.files"/>
 			<xs:enumeration value="tr.widget.files_desc"/>
+			<xs:enumeration value="tr.widget.flow_column"/>
+			<xs:enumeration value="tr.widget.flow_pages"/>
+			<xs:enumeration value="tr.widget.flow_row"/>
 			<xs:enumeration value="tr.widget.gauge_rpm"/>
 			<xs:enumeration value="tr.widget.gauge_sensor"/>
 			<xs:enumeration value="tr.widget.gauge_target"/>
 			<xs:enumeration value="tr.widget.gcode_button"/>
 			<xs:enumeration value="tr.widget.gcode_button_desc"/>
+			<xs:enumeration value="tr.widget.heater_gauges"/>
+			<xs:enumeration value="tr.widget.heater_gauges_desc"/>
 			<xs:enumeration value="tr.widget.heightmap_desc"/>
 			<xs:enumeration value="tr.widget.job_progress"/>
 			<xs:enumeration value="tr.widget.job_progress_desc"/>
@@ -2031,30 +2061,56 @@
 			<xs:enumeration value="tr.widget.jog_xy_desc"/>
 			<xs:enumeration value="tr.widget.jog_z"/>
 			<xs:enumeration value="tr.widget.jog_z_desc"/>
+			<xs:enumeration value="tr.widget.look_arc"/>
+			<xs:enumeration value="tr.widget.look_bar"/>
+			<xs:enumeration value="tr.widget.look_value"/>
 			<xs:enumeration value="tr.widget.macros_desc"/>
 			<xs:enumeration value="tr.widget.move_desc"/>
 			<xs:enumeration value="tr.widget.no_tool"/>
 			<xs:enumeration value="tr.widget.object_cancel_desc"/>
-			<xs:enumeration value="tr.widget.om_value"/>
-			<xs:enumeration value="tr.widget.om_value_desc"/>
 			<xs:enumeration value="tr.widget.page_console_desc"/>
 			<xs:enumeration value="tr.widget.page_control_desc"/>
 			<xs:enumeration value="tr.widget.page_files_desc"/>
 			<xs:enumeration value="tr.widget.page_home_desc"/>
 			<xs:enumeration value="tr.widget.page_settings_desc"/>
+			<xs:enumeration value="tr.widget.progress_arc"/>
+			<xs:enumeration value="tr.widget.progress_bar"/>
+			<xs:enumeration value="tr.widget.progress_gauge_desc"/>
+			<xs:enumeration value="tr.widget.progress_value"/>
+			<xs:enumeration value="tr.widget.sensor_arc"/>
+			<xs:enumeration value="tr.widget.sensor_bar"/>
+			<xs:enumeration value="tr.widget.sensor_gauge_desc"/>
+			<xs:enumeration value="tr.widget.sensor_gauges"/>
+			<xs:enumeration value="tr.widget.sensor_gauges_desc"/>
+			<xs:enumeration value="tr.widget.sensor_value"/>
 			<xs:enumeration value="tr.widget.setting_align"/>
 			<xs:enumeration value="tr.widget.setting_background"/>
+			<xs:enumeration value="tr.widget.setting_bed"/>
+			<xs:enumeration value="tr.widget.setting_chamber"/>
 			<xs:enumeration value="tr.widget.setting_colour"/>
+			<xs:enumeration value="tr.widget.setting_detail"/>
 			<xs:enumeration value="tr.widget.setting_fan"/>
+			<xs:enumeration value="tr.widget.setting_flow"/>
 			<xs:enumeration value="tr.widget.setting_gcode"/>
+			<xs:enumeration value="tr.widget.setting_hold"/>
+			<xs:enumeration value="tr.widget.setting_hold_arg"/>
 			<xs:enumeration value="tr.widget.setting_icon"/>
 			<xs:enumeration value="tr.widget.setting_label"/>
-			<xs:enumeration value="tr.widget.setting_path"/>
+			<xs:enumeration value="tr.widget.setting_list"/>
+			<xs:enumeration value="tr.widget.setting_look"/>
+			<xs:enumeration value="tr.widget.setting_max"/>
+			<xs:enumeration value="tr.widget.setting_min"/>
+			<xs:enumeration value="tr.widget.setting_sensor"/>
 			<xs:enumeration value="tr.widget.setting_size"/>
-			<xs:enumeration value="tr.widget.setting_source"/>
+			<xs:enumeration value="tr.widget.setting_tap"/>
+			<xs:enumeration value="tr.widget.setting_tap_arg"/>
+			<xs:enumeration value="tr.widget.setting_target"/>
 			<xs:enumeration value="tr.widget.setting_text"/>
+			<xs:enumeration value="tr.widget.setting_title"/>
 			<xs:enumeration value="tr.widget.setting_tool"/>
+			<xs:enumeration value="tr.widget.setting_tool_heater"/>
 			<xs:enumeration value="tr.widget.setting_unit"/>
+			<xs:enumeration value="tr.widget.setting_value"/>
 			<xs:enumeration value="tr.widget.sidebar_gcode_desc"/>
 			<xs:enumeration value="tr.widget.size_bold"/>
 			<xs:enumeration value="tr.widget.size_heading"/>
@@ -2063,6 +2119,10 @@
 			<xs:enumeration value="tr.widget.size_normal"/>
 			<xs:enumeration value="tr.widget.size_small"/>
 			<xs:enumeration value="tr.widget.size_xlarge"/>
+			<xs:enumeration value="tr.widget.speed_arc"/>
+			<xs:enumeration value="tr.widget.speed_bar"/>
+			<xs:enumeration value="tr.widget.speed_gauge_desc"/>
+			<xs:enumeration value="tr.widget.speed_value"/>
 			<xs:enumeration value="tr.widget.status_extrusion"/>
 			<xs:enumeration value="tr.widget.status_extrusion_desc"/>
 			<xs:enumeration value="tr.widget.status_gcode_desc"/>
@@ -2080,11 +2140,13 @@
 			<xs:enumeration value="tr.widget.text"/>
 			<xs:enumeration value="tr.widget.text_desc"/>
 			<xs:enumeration value="tr.widget.tool"/>
+			<xs:enumeration value="tr.widget.tool_arc"/>
+			<xs:enumeration value="tr.widget.tool_bar"/>
 			<xs:enumeration value="tr.widget.tool_desc"/>
+			<xs:enumeration value="tr.widget.tool_gauge_desc"/>
+			<xs:enumeration value="tr.widget.tool_value"/>
 			<xs:enumeration value="tr.widget.tools"/>
 			<xs:enumeration value="tr.widget.tools_desc"/>
-			<xs:enumeration value="tr.widget.value_gauge"/>
-			<xs:enumeration value="tr.widget.value_gauge_desc"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="translation">
@@ -3037,7 +3099,7 @@
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_list.attributes">
 		<xs:attribute name="list" type="list">
-			<xs:annotation><xs:documentation>The list shown (required), named like a subject: e.g. `presenter.files`, `source.gauge.gauges`, `om.fans`, or in a tool's row, its `row.heaters`</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>The list shown (required), named like a subject: e.g. `presenter.files`, `source.jog.distances`, `om.fans`, or in a tool's row, its `row.heaters`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="item" type="component">
 			<xs:annotation><xs:documentation>The component built for each row (required)</xs:documentation></xs:annotation>
@@ -3315,29 +3377,390 @@
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="gauge_arc.attributes">
-		<xs:attribute name="source" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `source` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="shown" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
-	</xs:attributeGroup>
-	<xs:attributeGroup name="gauge_bar.attributes">
-		<xs:attribute name="source" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `source` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
-	</xs:attributeGroup>
-	<xs:attributeGroup name="gauge_om_value.attributes">
-		<xs:attribute name="path" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `path` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="label" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="unit" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="min" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="max" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="target" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="detail" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="state" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="frame" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_bar.attributes">
+		<xs:attribute name="shown" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="min" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="max" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="target" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="detail" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="state" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="frame" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_beds.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_chambers.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_fans.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_heater_slots.attributes">
+		<xs:attribute name="list" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_heaters.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_list.attributes">
+		<xs:attribute name="list" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="frame" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="shown" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="min" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="max" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="target" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="detail" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="state" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_reading.attributes">
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_sensors.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_tool.attributes">
+		<xs:attribute name="tool" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tool` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="match" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `match` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="flow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `flow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="gauge_value.attributes">
-		<xs:attribute name="source" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `source` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="shown" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="min" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="max" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="target" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="detail" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="state" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="portrait" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `portrait` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="frame" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_arc.attributes">
@@ -8393,14 +8816,6 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="gauge_arc_face">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_arc_face.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="gauge_bar">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_bar.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -8410,19 +8825,290 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="gauge_bar_face">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_bar_face.xml.</xs:documentation></xs:annotation>
+	<xs:element name="gauge_beds">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_beds.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_beds.attributes"/>
+			<xs:attribute name="list" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="gauge_om_value">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_om_value.xml.</xs:documentation></xs:annotation>
+	<xs:element name="gauge_chambers">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_chambers.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="gauge_om_value.attributes"/>
+			<xs:attributeGroup ref="gauge_chambers.attributes"/>
+			<xs:attribute name="list" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_fans">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_fans.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_fans.attributes"/>
+			<xs:attribute name="list" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_heater_slots">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_heater_slots.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_heater_slots.attributes"/>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_heaters">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_heaters.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_heaters.attributes"/>
+			<xs:attribute name="list" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_list">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_list.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_list.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8431,6 +9117,121 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_reading.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_reading.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_sensors">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_sensors.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_sensors.attributes"/>
+			<xs:attribute name="list" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_tool">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_tool.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_tool.attributes"/>
+			<xs:attribute name="list" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `list` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="frame" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `frame` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="shown" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="value" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="text" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="unit" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="min" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `min` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="max" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `max` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="target" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `target` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="detail" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `state` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="tap_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_action" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hold_arg" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8440,14 +9241,6 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="gauge_value.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="gauge_value_face">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_value_face.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

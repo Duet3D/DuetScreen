@@ -1,19 +1,27 @@
 <!--
-  A gauge's value and its unit, e.g. "61.2 °C", larger the more room the widget has.
+  A gauge's value and its unit, e.g. "61.2 °C", larger the more room the widget has (unless `grow` is false).
 
-  Fields:   a source.gauge.gauges row: row.text, row.unit (src/UI/Xml/Data/GaugeSource.h); the placed widget's widget.size_class
+  Props:    text  the value as shown (a name)    unit  its unit (a name)
+            grow  an expression: whether the value grows with the widget's size class
+  Fields:   the placed widget's widget.size_class
 -->
 <component>
+	<api>
+		<prop name="text" type="string" default="''"/>
+		<prop name="unit" type="string" default="''"/>
+		<prop name="grow" type="string" default="1"/>
+	</api>
+
 	<view extends="lv_obj" width="content" height="content" flex_flow="row" style_flex_cross_place="end"
 		  clickable="false" scrollable="false">
 		<style name="pad_zero"/>
-		<lv_label name="value" bind_text="row.text">
+		<lv_label name="value" bind_text="$text">
 			<style name="widget_value"/>
 			<!-- The value is the gauge's point, so it grows with the room there is -->
-			<bind_style_if name="widget_value_large" cond="widget.size_class eq 1"/>
-			<bind_style_if name="widget_value_huge" cond="widget.size_class eq 2"/>
+			<bind_style_if name="widget_value_large" cond="(${grow}) and widget.size_class eq 1"/>
+			<bind_style_if name="widget_value_huge" cond="(${grow}) and widget.size_class eq 2"/>
 		</lv_label>
-		<lv_label name="unit" bind_text="row.unit" style_pad_bottom="3">
+		<lv_label name="unit" bind_text="$unit" style_pad_bottom="3">
 			<style name="widget_detail"/>
 		</lv_label>
 	</view>

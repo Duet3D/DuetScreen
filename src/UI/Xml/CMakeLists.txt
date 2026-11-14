@@ -19,7 +19,6 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/CustomiseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/Data/GaugeSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JogSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JobSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp

@@ -1,0 +1,152 @@
+{
+  "component": "gauge_list",
+  "title_tag": "tr.widget.custom_gauges",
+  "description_tag": "tr.widget.custom_gauges_desc",
+  "category_tag": "tr.widget.category_gauges",
+  "icon": "status.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      272,
+      277
+    ],
+    "min": [
+      180,
+      136
+    ]
+  },
+  "props": {
+    "grow": "0",
+    "portrait": "0",
+    "shown": "row.exists"
+  },
+  "settings": [
+    {
+      "name": "list",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_list",
+      "default": "om.heat.heaters",
+      "max_length": 120
+    },
+    {
+      "name": "title",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_title",
+      "default": "om.sensors.analog[{row.sensor}].name|default:tr.temperature.heater:{row.index}",
+      "max_length": 120
+    },
+    {
+      "name": "value",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_value",
+      "default": "row.current|int",
+      "max_length": 120
+    },
+    {
+      "name": "text",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_text",
+      "default": "row.current|fixed:1",
+      "max_length": 120
+    },
+    {
+      "name": "unit",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_unit",
+      "default": "°C",
+      "constant": true,
+      "max_length": 12
+    },
+    {
+      "name": "min",
+      "kind": "int",
+      "title_tag": "tr.widget.setting_min",
+      "default": 0,
+      "min": -100000,
+      "max": 100000
+    },
+    {
+      "name": "max",
+      "kind": "int",
+      "title_tag": "tr.widget.setting_max",
+      "default": 300,
+      "min": -100000,
+      "max": 100000
+    },
+    {
+      "name": "target",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_target",
+      "default": "row.value|heater_target",
+      "max_length": 120
+    },
+    {
+      "name": "look",
+      "kind": "choice",
+      "title_tag": "tr.widget.setting_look",
+      "default": "bar",
+      "options": [
+        {
+          "value": "bar",
+          "title_tag": "tr.widget.look_bar"
+        },
+        {
+          "value": "arc",
+          "title_tag": "tr.widget.look_arc"
+        },
+        {
+          "value": "value",
+          "title_tag": "tr.widget.look_value"
+        }
+      ]
+    },
+    {
+      "name": "flow",
+      "kind": "choice",
+      "title_tag": "tr.widget.setting_flow",
+      "default": "column",
+      "options": [
+        {
+          "value": "column",
+          "title_tag": "tr.widget.flow_column"
+        },
+        {
+          "value": "row",
+          "title_tag": "tr.widget.flow_row"
+        },
+        {
+          "value": "pages",
+          "title_tag": "tr.widget.flow_pages"
+        }
+      ]
+    },
+    {
+      "name": "tap_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_tap",
+      "default": ""
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_tap_arg",
+      "default": "",
+      "max_length": 120
+    },
+    {
+      "name": "hold_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_hold",
+      "default": ""
+    },
+    {
+      "name": "hold_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_hold_arg",
+      "default": "",
+      "max_length": 120
+    }
+  ]
+}

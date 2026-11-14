@@ -77,6 +77,7 @@ namespace UI::Xml
 
 		StringSubject<16> m_speedFactor;		 // e.g. "100%"
 		StringSubject<16> m_extrusionFactor;	 // e.g. "100%"
+		IntSubject m_extrusionPercent{100};		 // The extrusion override, percent
 		StringSubject<24> m_babystep;			 // e.g. "0 mm"
 		StringSubject<32> m_speedText;			 // Current and requested speed, e.g. "0/0 mm/s"
 		IntSubject m_speedTop;					 // Top speed, thousandths of the fastest axis' maximum

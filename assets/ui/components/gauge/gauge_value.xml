@@ -1,17 +1,49 @@
 <!--
-  One value as a number: the `value_gauge` widget (widgets/gauges/value_gauge.json). `source` chooses the value, as for
-  the arc gauge (gauge_arc.xml). Tap it to change the value, where that means something.
+  A value gauge: its title, then the reading large in the middle, with the detail below it.
 
-  Data:     the global source.gauge.gauges list (src/UI/Xml/Data/GaugeSource.h); Actions: actions.gauge.edit
+  One of the gauge faces (gauge_bar, gauge_arc, gauge_value), which take the same props: see gauge_bar.xml, and
+  Gauges in docs/XML_UI.md. It shows no scale, so it doesn't use `min`, `max`, `target` or `state`.
 -->
 <component>
 	<api>
-		<prop name="source" type="string" default="job.progress"/>
+		<prop name="shown" type="string" default="1"/>
+		<prop name="title" type="string" default="''"/>
+		<prop name="value" type="string" default="0"/>
+		<prop name="text" type="string" default="''"/>
+		<prop name="unit" type="string" default="''"/>
+		<prop name="min" type="string" default="0"/>
+		<prop name="max" type="string" default="100"/>
+		<prop name="target" type="string" default="0"/>
+		<prop name="detail" type="string" default="''"/>
+		<prop name="state" type="string" default="''"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+		<prop name="frame" type="string" default="pad_zero"/>
+		<prop name="tap_action" type="string" default=""/>
+		<prop name="tap_arg" type="string" default=""/>
+		<prop name="hold_action" type="string" default=""/>
+		<prop name="hold_arg" type="string" default=""/>
 	</api>
 
-	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
-		<style name="card"/>
-		<ds_list name="list" list="source.gauge.gauges" key="row.id" value="$source" item="gauge_value_face" width="100%"
-				 height="100%" scrollable="false" style_pad_all="0"/>
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="column"
+		  style_flex_cross_place="center" style_flex_track_place="center" style_min_width="100" style_min_height="60">
+		<style name="pad_zero"/>
+		<style name="$frame"/>
+		<bind_flag_if cond="not (${shown})" flag="hidden"/>
+		<action trigger="single_clicked" name="$tap_action" arg="$tap_arg"/>
+		<action trigger="long_pressed" name="$hold_action" arg="$hold_arg"/>
+
+		<lv_label name="title" bind_text="$title" width="100%" long_mode="scroll_circular" clickable="false">
+			<style name="widget_title"/>
+		</lv_label>
+		<lv_obj name="readout" width="100%" flex_grow="1" flex_flow="column" style_flex_main_place="center"
+				style_flex_cross_place="center" style_flex_track_place="center" clickable="false"
+				scrollable="false">
+			<style name="pad_zero"/>
+			<gauge_reading name="reading" text="$text" unit="$unit" grow="$grow"/>
+			<lv_label name="detail" bind_text="$detail" clickable="false">
+				<style name="widget_detail"/>
+			</lv_label>
+		</lv_obj>
 	</view>
 </component>

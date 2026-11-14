@@ -40,38 +40,55 @@ namespace UI::Xml
 
 		lv_obj_add_event_cb(m_container, sizeChangedCb, LV_EVENT_SIZE_CHANGED, this);
 		lv_obj_add_event_cb(m_container, scrollEndCb, LV_EVENT_SCROLL_END, this);
+		lv_obj_add_event_cb(m_container, childChangedCb, LV_EVENT_CHILD_CHANGED, this);
 	}
 
 	ListPages::~ListPages()
 	{
 		lv_obj_remove_event_cb_with_user_data(m_container, sizeChangedCb, this);
 		lv_obj_remove_event_cb_with_user_data(m_container, scrollEndCb, this);
+		lv_obj_remove_event_cb_with_user_data(m_container, childChangedCb, this);
 		// The dots call back here, so they go now rather than with the rest of the container's children
 		lv_obj_delete(m_dots);
 	}
 
 	void ListPages::refresh()
 	{
-		const auto shown = items();
+		// Moving the dots last tells the container its children changed, which comes back here
+		if (m_refreshing)
+		{
+			return;
+		}
+		m_refreshing = true;
+		const auto shown = pages();
 		m_shown = shown.empty() ? 0 : std::min(m_shown, shown.size() - 1);
-		lv_obj_move_foreground(m_dots);
+		if (lv_obj_get_index(m_dots) + 1 != static_cast<int32_t>(lv_obj_get_child_count(m_container)))
+		{
+			lv_obj_move_foreground(m_dots);
+		}
 		updateDots(shown.size());
-		sizeItems(shown);
+		sizeItems(items(false));
+		m_refreshing = false;
 	}
 
-	std::vector<lv_obj_t*> ListPages::items() const
+	std::vector<lv_obj_t*> ListPages::items(bool shownOnly) const
 	{
 		std::vector<lv_obj_t*> result;
 		const uint32_t count = lv_obj_get_child_count(m_container);
 		for (uint32_t i = 0; i < count; i++)
 		{
 			lv_obj_t* child = lv_obj_get_child(m_container, static_cast<int32_t>(i));
-			if (child != m_dots)
+			if (child != m_dots && (!shownOnly || !lv_obj_has_flag(child, LV_OBJ_FLAG_HIDDEN)))
 			{
 				result.push_back(child);
 			}
 		}
 		return result;
+	}
+
+	std::vector<lv_obj_t*> ListPages::pages() const
+	{
+		return items(true);
 	}
 
 	void ListPages::sizeItems(const std::vector<lv_obj_t*>& items)
@@ -141,7 +158,7 @@ namespace UI::Xml
 	void ListPages::sizeChangedCb(lv_event_t* e)
 	{
 		auto* pages = static_cast<ListPages*>(lv_event_get_user_data(e));
-		pages->sizeItems(pages->items());
+		pages->sizeItems(pages->items(false));
 		// Keep the same item shown. The items' positions are only worked out by the next layout, so the scroll is
 		// set from their new width rather than by scrolling one into view.
 		const int32_t step = lv_obj_get_content_width(pages->m_container) +
@@ -152,9 +169,19 @@ namespace UI::Xml
 	void ListPages::scrollEndCb(lv_event_t* e)
 	{
 		auto* pages = static_cast<ListPages*>(lv_event_get_user_data(e));
-		const auto shown = pages->items();
+		const auto shown = pages->pages();
 		pages->m_shown = pages->shownIndex(shown);
 		pages->updateDots(shown.size());
+	}
+
+	void ListPages::childChangedCb(lv_event_t* e)
+	{
+		// An item was shown or hidden (a row became a gap), or the children were reordered
+		auto* pages = static_cast<ListPages*>(lv_event_get_user_data(e));
+		if (static_cast<lv_obj_t*>(lv_event_get_param(e)) != pages->m_dots)
+		{
+			pages->refresh();
+		}
 	}
 
 	void ListPages::dotClickedCb(lv_event_t* e)
@@ -162,7 +189,7 @@ namespace UI::Xml
 		auto* pages = static_cast<ListPages*>(lv_event_get_user_data(e));
 		const auto* dot = static_cast<lv_obj_t*>(lv_event_get_current_target(e));
 		const auto index = static_cast<size_t>(lv_obj_get_index(dot));
-		const auto shown = pages->items();
+		const auto shown = pages->pages();
 		if (index < shown.size())
 		{
 			lv_obj_scroll_to_view(shown[index], LV_ANIM_ON);

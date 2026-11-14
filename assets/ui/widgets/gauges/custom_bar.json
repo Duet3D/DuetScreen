@@ -1,0 +1,112 @@
+{
+  "component": "gauge_bar",
+  "title_tag": "tr.widget.custom_bar",
+  "description_tag": "tr.widget.custom_gauge_desc",
+  "category_tag": "tr.widget.category_gauges",
+  "icon": "status.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      272,
+      89
+    ],
+    "min": [
+      180,
+      89
+    ]
+  },
+  "props": {
+    "frame": "card"
+  },
+  "settings": [
+    {
+      "name": "title",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_title",
+      "default": "Heater 1",
+      "constant": true,
+      "max_length": 40
+    },
+    {
+      "name": "value",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_value",
+      "default": "om.heat.heaters[1].current|int",
+      "max_length": 120
+    },
+    {
+      "name": "text",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_text",
+      "default": "om.heat.heaters[1].current|fixed:1",
+      "max_length": 120
+    },
+    {
+      "name": "unit",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_unit",
+      "default": "°C",
+      "constant": true,
+      "max_length": 12
+    },
+    {
+      "name": "min",
+      "kind": "int",
+      "title_tag": "tr.widget.setting_min",
+      "default": 0,
+      "min": -100000,
+      "max": 100000
+    },
+    {
+      "name": "max",
+      "kind": "int",
+      "title_tag": "tr.widget.setting_max",
+      "default": 300,
+      "min": -100000,
+      "max": 100000
+    },
+    {
+      "name": "target",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_target",
+      "default": "om.heat.heaters[1]|heater_target",
+      "max_length": 120
+    },
+    {
+      "name": "detail",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_detail",
+      "default": "",
+      "constant": true,
+      "max_length": 40
+    },
+    {
+      "name": "tap_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_tap",
+      "default": ""
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_tap_arg",
+      "default": "",
+      "max_length": 120
+    },
+    {
+      "name": "hold_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_hold",
+      "default": ""
+    },
+    {
+      "name": "hold_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_hold_arg",
+      "default": "",
+      "max_length": 120
+    }
+  ]
+}

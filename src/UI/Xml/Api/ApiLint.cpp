@@ -288,6 +288,7 @@ namespace UI::Xml::Api
 				// The widget file's key and label are row fields, kept without their `row.`
 				const std::string key = std::string(Names::ROW) + setting.key;
 				const std::string label = std::string(Names::ROW) + setting.label;
+				const std::string skip = setting.skip.empty() ? std::string() : std::string(Names::ROW) + setting.skip;
 				const Context global{.def = nullptr, .props = nullptr, .scope = {}};
 				if (const auto omList = omPath(setting.list, global, true))
 				{
@@ -300,12 +301,16 @@ namespace UI::Xml::Api
 										   setting.list,
 										   key));
 					}
-					if (!isRowField(m_reference.omRowFields, label) && !omPath(label, item, false))
+					for (const std::string* field : {&label, &skip})
 					{
-						report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
-										   setting.name,
-										   setting.list,
-										   label));
+						if (!field->empty() && !isRowField(m_reference.omRowFields, *field) &&
+							!omPath(*field, item, false))
+						{
+							report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
+											   setting.name,
+											   setting.list,
+											   *field));
+						}
 					}
 					// A label's converter may take a translation key, as `row.name|default:tr.fine_tune.fan` does
 					const auto parsed = OmName::parse(setting.label);

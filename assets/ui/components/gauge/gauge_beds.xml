@@ -1,0 +1,21 @@
+<!--
+  A gauge for each bed, or with `key`, the beds whose key is `match` (one bed): named for its heater's sensor, else
+  "Bed <n>". See gauge_heater_slots.xml.
+
+  Props:    key, match, look, flow, grow, portrait  as gauge_list.xml
+  Fields:   rows of om.heat.bedHeaters
+-->
+<component>
+	<api>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+	</api>
+
+	<view extends="gauge_heater_slots" list="om.heat.bedHeaters" key="$key" match="$match" look="$look" flow="$flow"
+		  grow="$grow" portrait="$portrait"
+		  title="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature.bed_number:{row.index}"/>
+</component>

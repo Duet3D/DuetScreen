@@ -1,0 +1,21 @@
+<!--
+  A gauge for each heater of tool `tool`, or with `key`, the heaters whose key is `match` (one of them), named for
+  the tool. See gauge_heater_slots.xml.
+
+  Props:    tool  the tool's number      key, match, look, flow, grow, portrait  as gauge_list.xml
+  Fields:   rows of om.tools[tool].heaters
+-->
+<component>
+	<api>
+		<prop name="tool" type="int" default="0"/>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+	</api>
+
+	<view extends="gauge_heater_slots" list="om.tools[${tool}].heaters" key="$key" match="$match" look="$look"
+		  flow="$flow" grow="$grow" portrait="$portrait" title="om.tools[${tool}].name|default:tr.temperature.default_tool_name:${tool}"/>
+</component>

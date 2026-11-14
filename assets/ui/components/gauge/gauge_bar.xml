@@ -1,17 +1,100 @@
 <!--
-  One value on a bar: the `bar_gauge` widget (widgets/gauges/bar_gauge.json). `source` chooses the value, as for the
-  arc gauge (gauge_arc.xml). Tap it to change the value, where that means something.
+  A bar gauge: its title and reading in a line above the bar, the target filled in muted colour under the value,
+  coloured by `state`, and a detail below. In a tall, narrow place (`portrait`) the title goes above the reading,
+  and the bar stands up (LVGL draws a bar taller than it is wide upright); otherwise the bar keeps to a line's height.
 
-  Data:     the global source.gauge.gauges list (src/UI/Xml/Data/GaugeSource.h); Actions: actions.gauge.edit
+  One of the gauge faces (gauge_bar, gauge_arc, gauge_value), which every gauge widget shows: each takes the same
+  props, the names of what it shows, so a widget only says what that is. See Gauges in docs/XML_UI.md.
+
+  Props:    shown   an expression: the gauge is hidden while it is false, e.g. `row.exists`
+            title, value (int), text (the value as shown), unit, min (int), max (int), target (int), detail, state
+                    names (or constants, e.g. `100` or `'°C'`) of what it shows; `state` is a heater's
+                    (standby, off and fault are coloured)
+            grow    an expression: whether the reading grows with the widget's size class
+            portrait  an expression: whether the gauge is tall and narrow (default `widget.portrait`; a list's gauges
+                    give their own shape)
+            frame   the style of its root, e.g. `card` for a widget of its own
+            tap_action, tap_arg, hold_action, hold_arg
+                    the actions run when it is tapped and held (none if empty)
 -->
 <component>
 	<api>
-		<prop name="source" type="string" default="bed.0"/>
+		<prop name="shown" type="string" default="1"/>
+		<prop name="title" type="string" default="''"/>
+		<prop name="value" type="string" default="0"/>
+		<prop name="text" type="string" default="''"/>
+		<prop name="unit" type="string" default="''"/>
+		<prop name="min" type="string" default="0"/>
+		<prop name="max" type="string" default="100"/>
+		<prop name="target" type="string" default="0"/>
+		<prop name="detail" type="string" default="''"/>
+		<prop name="state" type="string" default="''"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+		<prop name="frame" type="string" default="pad_zero"/>
+		<prop name="tap_action" type="string" default=""/>
+		<prop name="tap_arg" type="string" default=""/>
+		<prop name="hold_action" type="string" default=""/>
+		<prop name="hold_arg" type="string" default=""/>
 	</api>
 
-	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
-		<style name="card"/>
-		<ds_list name="list" list="source.gauge.gauges" key="row.id" value="$source" item="gauge_bar_face" width="100%" height="100%"
-				 scrollable="false" style_pad_all="0"/>
+	<styles>
+		<!-- The title beside the reading, or above it in a tall, narrow place. Styles rather than attributes, which
+			 would win over them -->
+		<style name="gauge_bar_beside" layout="flex" flex_flow="row" flex_main_place="space_between"
+			   flex_cross_place="end"/>
+		<style name="gauge_bar_stacked" layout="flex" flex_flow="column" flex_cross_place="start"/>
+		<!-- Beside the reading, the title takes what room is left (with a width, so a long one shortens rather than
+			 widening) -->
+		<style name="gauge_bar_title_beside" flex_grow="1" width="0"/>
+		<style name="gauge_bar_title_stacked" width="100%"/>
+		<!-- A bar lying flat keeps to a line's height however tall its place, rather than becoming a slab -->
+		<style name="gauge_bar_track_flat" max_height="24"/>
+	</styles>
+
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="column"
+		  style_flex_main_place="center" style_min_width="140" style_min_height="60">
+		<style name="pad_zero"/>
+		<style name="$frame"/>
+		<bind_flag_if cond="not (${shown})" flag="hidden"/>
+		<action trigger="single_clicked" name="$tap_action" arg="$tap_arg"/>
+		<action trigger="long_pressed" name="$hold_action" arg="$hold_arg"/>
+
+		<lv_obj name="header" width="100%" height="content" clickable="false" scrollable="false">
+			<style name="pad_zero"/>
+			<!-- Too narrow for the title beside the reading: one above the other -->
+			<bind_style_if name="gauge_bar_beside" cond="not (${portrait})"/>
+			<bind_style_if name="gauge_bar_stacked" cond="${portrait}"/>
+			<lv_label name="title" bind_text="$title" long_mode="scroll_circular" clickable="false">
+				<style name="widget_title"/>
+				<bind_style_if name="gauge_bar_title_beside" cond="not (${portrait})"/>
+				<bind_style_if name="gauge_bar_title_stacked" cond="${portrait}"/>
+			</lv_label>
+			<gauge_reading name="reading" text="$text" unit="$unit" grow="$grow"/>
+		</lv_obj>
+
+		<lv_obj name="track" width="100%" flex_grow="1" style_min_height="12" scrollable="false" clickable="false">
+			<style name="pad_zero"/>
+			<bind_style_if name="gauge_bar_track_flat" cond="not (${portrait})"/>
+			<ds_bar name="target" bind_value="$target" bind_min="$min" bind_max="$max" label_format="" width="100%"
+					height="100%">
+				<style name="gauge_bar"/>
+				<style name="gauge_bar_indic" selector="indicator"/>
+				<style name="gauge_bar_target" selector="indicator"/>
+				<bind_style_if_eq name="gauge_standby_target" subject="$state" ref_value="standby" selector="indicator"/>
+			</ds_bar>
+			<!-- Over the target, with no track of its own -->
+			<ds_bar name="value" bind_value="$value" bind_min="$min" bind_max="$max" label_format="" width="100%"
+					height="100%" style_bg_opa="0">
+				<style name="gauge_bar_indic" selector="indicator"/>
+				<bind_style_if_eq name="gauge_standby" subject="$state" ref_value="standby" selector="indicator"/>
+				<bind_style_if_eq name="gauge_off" subject="$state" ref_value="off" selector="indicator"/>
+				<bind_style_if_eq name="gauge_fault" subject="$state" ref_value="fault" selector="indicator"/>
+			</ds_bar>
+		</lv_obj>
+
+		<lv_label name="detail" bind_text="$detail" width="100%" long_mode="scroll_circular" clickable="false">
+			<style name="widget_detail"/>
+		</lv_label>
 	</view>
 </component>

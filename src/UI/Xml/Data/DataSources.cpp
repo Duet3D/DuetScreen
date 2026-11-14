@@ -7,7 +7,6 @@
 #include "CustomiseSource.h"
 #include "DataSource.h"
 #include "Debug.h"
-#include "GaugeSource.h"
 #include "JobSource.h"
 #include "JogSource.h"
 #include "MachineSource.h"
@@ -94,7 +93,6 @@ namespace UI::Xml::DataSources
 		s_sources = {
 			std::make_shared<ConsoleSource>(),
 			std::make_shared<CustomiseSource>(),
-			std::make_shared<GaugeSource>(),
 			std::make_shared<ToolSource>(),
 			std::make_shared<JobSource>(),
 			std::make_shared<JogSource>(),

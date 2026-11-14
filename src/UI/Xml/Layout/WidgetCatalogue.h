@@ -75,6 +75,8 @@ namespace UI::Xml
 		std::string list{};	 // Row: the global list whose rows are chosen from, e.g. "om.fans"
 		std::string key{};	 // Row: the rows' field whose value is stored, without `row.`, e.g. "index"
 		std::string label{}; // Row: the rows' field shown, without `row.`, e.g. "name|default:tr.fine_tune.fan"
+		std::string skip{};	 // Row: the rows' field, without `row.`, true (not 0 or empty) for rows that can't be
+							 // chosen, e.g. "value|eq:-1" for a bed slot without a heater; empty for none
 		size_t maxLength = 64;						// Text: longest value, in bytes
 		bool constant = false; // Text: given to the component as a constant, `'<text>'` (see Binding/Constants.h)
 

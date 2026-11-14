@@ -1,0 +1,53 @@
+<!--
+  A gauge for each row of a list, in a card: every fan, every heater, or with `key`, only the rows whose key is
+  `match` (one fan, one bed). Each row is a gauge face (gauge_`look`), given the face's props, whose names are looked
+  up in the row: `row.actualValue|percent` is that row's fan's speed. The gauge widgets of one kind of thing
+  (gauge_fans.xml, gauge_heaters.xml, …) extend this with their names, and the custom list gauge gives it the user's.
+
+  Props:    list   the list (required), e.g. `om.fans`
+            key    a field of the rows, `row.<field>`, to show only the rows whose field is `match`; empty for every row
+            match  with `key`, the value shown rows have
+            look   the face: bar, arc or value
+            flow   how the gauges are placed: column, row, or pages (one at a time, swiped through)
+            frame  the style of its root (default card)
+            and the face's props (see gauge_bar.xml): shown, title, value, text, unit, min, max, target, detail, state,
+            grow, portrait, tap_action, tap_arg, hold_action, hold_arg. A list of several gauges gives `grow` 0 and
+            `portrait` 0: the widget's size isn't each gauge's.
+-->
+<component>
+	<api>
+		<prop name="list" type="string" default=""/>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="frame" type="string" default="card"/>
+		<prop name="shown" type="string" default="1"/>
+		<prop name="title" type="string" default="''"/>
+		<prop name="value" type="string" default="0"/>
+		<prop name="text" type="string" default="''"/>
+		<prop name="unit" type="string" default="''"/>
+		<prop name="min" type="string" default="0"/>
+		<prop name="max" type="string" default="100"/>
+		<prop name="target" type="string" default="0"/>
+		<prop name="detail" type="string" default="''"/>
+		<prop name="state" type="string" default="''"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+		<prop name="tap_action" type="string" default=""/>
+		<prop name="tap_arg" type="string" default=""/>
+		<prop name="hold_action" type="string" default=""/>
+		<prop name="hold_arg" type="string" default=""/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="$frame"/>
+		<!-- The gauges share the room, each growing along the flow; pages size their gauges themselves -->
+		<ds_list name="list" list="$list" key="$key" value="$match" item="gauge_${look}" flow="$flow" width="100%"
+				 height="100%" style_pad_all="0" item.flex_grow="1" item.shown="$shown" item.title="$title"
+				 item.value="$value" item.text="$text" item.unit="$unit" item.min="$min" item.max="$max"
+				 item.target="$target" item.detail="$detail" item.state="$state" item.grow="$grow" item.portrait="$portrait"
+				 item.tap_action="$tap_action" item.tap_arg="$tap_arg" item.hold_action="$hold_action"
+				 item.hold_arg="$hold_arg"/>
+	</view>
+</component>

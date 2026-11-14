@@ -2,12 +2,12 @@
  * ListPages.h
  *
  * A `<ds_list flow="pages">` shows one item at a time: each item fills the list, the user swipes sideways between
- * them, and a dot per item below them says which is shown. A dot can be tapped to go to its item. With one item or
- * none, there are no dots and the item has the whole list.
+ * them, and a dot per item below them says which is shown. A dot can be tapped to go to its item. Hidden items (a
+ * list's gaps) are no pages. With one page or none, there are no dots and the item has the whole list.
  *
  * The dots are a floating child of the list, kept after its items so they never change the items' positions; the
- * list tells refresh() whenever its items change. The theme styles the dots: list_pages (the row of dots),
- * list_page_dot (a dot) and list_page_dot_current (the shown item's dot).
+ * list tells refresh() whenever it adds or removes items, and items shown or hidden are noticed here. The theme
+ * styles the dots: list_pages (the row of dots), list_page_dot (a dot) and list_page_dot_current (the shown item's).
  */
 
 #pragma once
@@ -34,8 +34,11 @@ namespace UI::Xml
 		void refresh();
 
 	  private:
-		/** The container's items: its children but the dots */
-		std::vector<lv_obj_t*> items() const;
+		/** The container's items: its children but the dots; only those not hidden if `shownOnly` */
+		std::vector<lv_obj_t*> items(bool shownOnly) const;
+
+		/** The pages: the items not hidden, in order */
+		std::vector<lv_obj_t*> pages() const;
 
 		/** Size every item to the list, less the room the dots take */
 		void sizeItems(const std::vector<lv_obj_t*>& items);
@@ -43,7 +46,7 @@ namespace UI::Xml
 		/** Make the number of dots `count`, and mark the shown item's */
 		void updateDots(size_t count);
 
-		/** The index of the item shown: the one whose middle is nearest the list's middle */
+		/** The index of the page shown, from how far the list is scrolled */
 		size_t shownIndex(const std::vector<lv_obj_t*>& items) const;
 
 		/** The height the dots take, with their padding; 0 if they aren't shown */
@@ -55,11 +58,15 @@ namespace UI::Xml
 		/** Scrolling ended: mark the shown item's dot */
 		static void scrollEndCb(lv_event_t* e);
 
+		/** An item was shown or hidden, or the children reordered: count the pages again */
+		static void childChangedCb(lv_event_t* e);
+
 		/** A dot was tapped: show its item */
 		static void dotClickedCb(lv_event_t* e);
 
 		lv_obj_t* m_container; // The ds_list
 		lv_obj_t* m_dots;	   // The row of dots, a floating child of the container
-		size_t m_shown = 0;	   // Index of the item shown
+		size_t m_shown = 0;	   // Index of the page shown
+		bool m_refreshing = false; // In refresh(), which moving the dots calls again
 	};
 } // namespace UI::Xml

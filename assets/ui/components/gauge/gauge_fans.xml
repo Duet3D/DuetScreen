@@ -1,0 +1,22 @@
+<!--
+  A gauge for each fan, or with `key`, the fans whose key is `match` (one fan): its speed, heading for the speed it
+  was set to, and its RPM if it reports one. Tap it to set the speed (not a thermostatic fan's).
+
+  Props:    key, match, look, flow, grow, portrait  as gauge_list.xml
+  Fields:   rows of om.fans              Actions: actions.fan.set_speed
+-->
+<component>
+	<api>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+	</api>
+
+	<view extends="gauge_list" list="om.fans" key="$key" match="$match" look="$look" flow="$flow" grow="$grow" portrait="$portrait"
+		  shown="row.exists" title="row.name|default:tr.fine_tune.fan" value="row.actualValue|percent"
+		  text="row.actualValue|percent" unit="'%'" max="100" target="row.requestedValue|percent"
+		  detail="row.rpm|format:tr.widget.gauge_rpm" tap_action="actions.fan.set_speed"/>
+</component>

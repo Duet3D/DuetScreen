@@ -1,0 +1,35 @@
+{
+  "component": "gauge_fans",
+  "title_tag": "tr.widget.fan_bar",
+  "description_tag": "tr.widget.fan_gauge_desc",
+  "category_tag": "tr.widget.category_fans",
+  "icon": "fine_tune.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      272,
+      89
+    ],
+    "min": [
+      180,
+      89
+    ]
+  },
+  "props": {
+    "key": "row.index",
+    "look": "bar"
+  },
+  "settings": [
+    {
+      "name": "match",
+      "kind": "row",
+      "title_tag": "tr.widget.setting_fan",
+      "default": 0,
+      "list": "om.fans",
+      "key": "row.index",
+      "label": "row.name|default:tr.fine_tune.fan"
+    }
+  ]
+}
