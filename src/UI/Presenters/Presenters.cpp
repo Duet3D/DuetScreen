@@ -22,7 +22,6 @@
 #include "Modals/BabystepActions.h"
 #include "Modals/BabystepDialogPresenter.h"
 #include "Modals/FactorsActions.h"
-#include "Modals/FactorsPresenter.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
 #include "Settings/DeveloperSettingsPresenter.h"
@@ -60,7 +59,6 @@ namespace UI
 		/* Presenters */
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
-		Xml::Presenters::add<FactorsPresenter>("factors");
 		Xml::Presenters::add<BabystepDialogPresenter>("babystep_dialog");
 		Xml::Presenters::add<CustomisePresenter>("customise");
 		Xml::Presenters::add<ConsolePresenter>("console");

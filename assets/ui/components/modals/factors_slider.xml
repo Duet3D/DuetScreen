@@ -3,11 +3,11 @@
   Its range may be a window that follows the value (the speed factor's); the value may be anything from 1% up, typed
   or reset, wherever the window is.
 
-  Fields:   a factors row: row.label, row.value, row.min, row.max (src/UI/Presenters/Modals/FactorDialog.h)
+  Fields:   a factors row: row.label, row.value, row.min, row.max (src/UI/Xml/View/FactorDialog.h)
 -->
 <component>
 	<view extends="ds_slider" bind_label="row.label" bind_value="row.value" bind_min="row.min" bind_max="row.max" min="0" max="200"
 		  increment="1" decimals="0" default="100" lowest="1" out_of_range="upper" numberpad="true" width="100%" height="content">
-		<action trigger="value_confirmed" name="presenter.factor.set"/>
+		<action trigger="value_confirmed" name="actions.factors.set"/>
 	</view>
 </component>

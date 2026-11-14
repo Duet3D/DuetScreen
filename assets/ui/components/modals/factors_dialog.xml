@@ -2,10 +2,11 @@
   A dialog of percentages, such as the speed factor or each extruder's extrusion factor, each on a slider. Tapping a
   slider's value types it on a number pad, the dialog's next step.
 
-      <factors_dialog dialog="speed" open="speed.open" title="speed.title" factors="speed.factors"/>
+      <factors_dialog dialog="speed" open="source.factors.speed.open" title="source.factors.speed.title"
+                      factors="source.factors.speed.factors"/>
 
-  `dialog` is the dialog's id, the arg of its actions; the others name its fields. The presenter showing it owns a
-  FactorDialog, which declares those fields and handles the actions (src/UI/Presenters/Modals/FactorDialog.h).
+  `dialog` is the dialog's id, the arg of actions.factors.close; the others name its fields, published by
+  FactorsSource (src/UI/Xml/Data/FactorsSource.h, src/UI/Xml/View/FactorDialog.h).
 -->
 <component>
 	<api>
@@ -16,7 +17,7 @@
 	</api>
 
 	<view extends="ds_dialog" bind_open="$open" bind_title="$title" width="70%" flex_flow="column" scrollable="false">
-		<action trigger="dismissed" name="presenter.factor.close" arg="$dialog"/>
+		<action trigger="dismissed" name="actions.factors.close" arg="$dialog"/>
 		<ds_list name="list" list="$factors" item="factors_slider" width="100%" height="content" flex_flow="column"
 				 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 	</view>

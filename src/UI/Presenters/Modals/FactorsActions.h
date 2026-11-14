@@ -1,8 +1,10 @@
 /*
  * FactorsActions.h
  *
- * The global actions that open the shared speed and extrusion factor dialogs (FactorsPresenter.h), for any view:
- * `actions.factors.speed` and `actions.factors.extrusion`.
+ * The global actions of the shared speed and extrusion factor dialogs (src/UI/Xml/Data/FactorsSource.h), for any
+ * view: `actions.factors.speed` and `actions.factors.extrusion` open them, `actions.factors.set` and
+ * `actions.factors.close` are raised by the dialogs. What each does is in its registration, and in the UI API
+ * reference (docs/XML_UI_API.md).
  */
 
 #pragma once

@@ -27,6 +27,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/CustomiseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/FactorsSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JogSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JobSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp
@@ -64,6 +65,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/XmlUi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Theme/ThemeStyles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/Actions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/View/FactorDialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/ValueSelector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/View/XmlView.cpp

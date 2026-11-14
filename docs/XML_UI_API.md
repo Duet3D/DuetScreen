@@ -118,6 +118,39 @@ From [CustomiseSource.cpp](../src/UI/Xml/Data/CustomiseSource.cpp).
 | `source.customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
 | `source.customise.title` | text | The selected widget's name, translated; empty if none is selected |
 
+### factors
+
+From [FactorsSource.cpp](../src/UI/Xml/Data/FactorsSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.factors.speed.open` | int | 1 while the dialog is open |
+| `source.factors.speed.title` | text | Above the sliders, e.g. "Speed Factor" |
+| `source.factors.speed.factors` | list | The percentages, each with `label`, `value`, `min` and `max` (actions.factors.set) |
+| `source.factors.extrusion.open` | int | 1 while the dialog is open |
+| `source.factors.extrusion.title` | text | Above the sliders, e.g. "Speed Factor" |
+| `source.factors.extrusion.factors` | list | The percentages, each with `label`, `value`, `min` and `max` (actions.factors.set) |
+
+Each row of `source.factors.speed.factors`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.label` | text | What it is, e.g. "Extruder 0" |
+| `row.value` | int | The percentage, e.g. 100 |
+| `row.min` | int | The bottom of its slider |
+| `row.max` | int | The top of its slider |
+
+Each row of `source.factors.extrusion.factors`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.label` | text | What it is, e.g. "Extruder 0" |
+| `row.value` | int | The percentage, e.g. 100 |
+| `row.min` | int | The bottom of its slider |
+| `row.max` | int | The top of its slider |
+
 ### tool
 
 From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
@@ -248,7 +281,9 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
+| `actions.factors.close` | Close the dialog named by `arg`, `speed` or `extrusion`, e.g. when it is dismissed | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of a dialog's `factors`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.fan.set_speed` | Set a fan's speed in percent. In a row of `om.fans` the fan is the row's, and the speed the edited value (`value_confirmed`), else `arg` (e.g. 0 or 100 for off and full). Elsewhere `arg` is the fan's number, and the speed the edited value. Without a speed it is asked for on the number pad. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
@@ -557,44 +592,6 @@ Used by `dialog_question`.
 | --- | --- |
 | `presenter.question.no` | Don't agree, and go back |
 | `presenter.question.yes` | Agree, and go back |
-
-### factors
-
-Used by `factors`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.speed_dialog.open` | int | 1 while the dialog is open |
-| `presenter.speed_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
-| `presenter.speed_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
-| `presenter.extrusion_dialog.open` | int | 1 while the dialog is open |
-| `presenter.extrusion_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
-| `presenter.extrusion_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
-
-Each row of `presenter.speed_dialog.factors`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.label` | text | What it is, e.g. "Extruder 0" |
-| `row.value` | int | The percentage, e.g. 100 |
-| `row.min` | int | The bottom of its slider |
-| `row.max` | int | The top of its slider |
-
-Each row of `presenter.extrusion_dialog.factors`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.label` | text | What it is, e.g. "Extruder 0" |
-| `row.value` | int | The percentage, e.g. 100 |
-| `row.min` | int | The bottom of its slider |
-| `row.max` | int | The top of its slider |
-
-| Action | Description |
-| --- | --- |
-| `presenter.factor.close` | Close the dialog named by `arg` (its id), e.g. when it is dismissed |
-| `presenter.factor.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of `factors`. |
 
 ### hardware_test
 
@@ -2942,7 +2939,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`dialog_host`](#dialog_host) | `dialog_host` |  |  | [dialog_host.xml](../assets/ui/components/dialogs/dialog_host.xml) |
 | [`dialog_number`](#dialog_number) | `dialog_number` |  |  | [dialog_number.xml](../assets/ui/components/dialogs/dialog_number.xml) |
 | [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
-| `factors` | `factors` |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
+| `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `dialog`, `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |

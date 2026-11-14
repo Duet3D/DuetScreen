@@ -76,9 +76,6 @@
 			<xs:enumeration value="presenter.error_notifications_stay"/>
 			<xs:enumeration value="presenter.exit_shown"/>
 			<xs:enumeration value="presenter.extrude_usable"/>
-			<xs:enumeration value="presenter.extrusion_dialog.factors"/>
-			<xs:enumeration value="presenter.extrusion_dialog.open"/>
-			<xs:enumeration value="presenter.extrusion_dialog.title"/>
 			<xs:enumeration value="presenter.failed"/>
 			<xs:enumeration value="presenter.feedrate.choices"/>
 			<xs:enumeration value="presenter.feedrate.title"/>
@@ -179,9 +176,6 @@
 			<xs:enumeration value="presenter.sort_name"/>
 			<xs:enumeration value="presenter.sort_size"/>
 			<xs:enumeration value="presenter.speaker_answerable"/>
-			<xs:enumeration value="presenter.speed_dialog.factors"/>
-			<xs:enumeration value="presenter.speed_dialog.open"/>
-			<xs:enumeration value="presenter.speed_dialog.title"/>
 			<xs:enumeration value="presenter.ssh"/>
 			<xs:enumeration value="presenter.stage"/>
 			<xs:enumeration value="presenter.stats.area"/>
@@ -303,6 +297,12 @@
 			<xs:enumeration value="source.customise.selected"/>
 			<xs:enumeration value="source.customise.snap"/>
 			<xs:enumeration value="source.customise.title"/>
+			<xs:enumeration value="source.factors.extrusion.factors"/>
+			<xs:enumeration value="source.factors.extrusion.open"/>
+			<xs:enumeration value="source.factors.extrusion.title"/>
+			<xs:enumeration value="source.factors.speed.factors"/>
+			<xs:enumeration value="source.factors.speed.open"/>
+			<xs:enumeration value="source.factors.speed.title"/>
 			<xs:enumeration value="source.job.cancel_control"/>
 			<xs:enumeration value="source.job.elapsed"/>
 			<xs:enumeration value="source.job.elapsed_text"/>
@@ -356,7 +356,6 @@
 			<xs:enumeration value="presenter.choices"/>
 			<xs:enumeration value="presenter.crumbs"/>
 			<xs:enumeration value="presenter.distance.choices"/>
-			<xs:enumeration value="presenter.extrusion_dialog.factors"/>
 			<xs:enumeration value="presenter.failed"/>
 			<xs:enumeration value="presenter.feedrate.choices"/>
 			<xs:enumeration value="presenter.files"/>
@@ -367,13 +366,14 @@
 			<xs:enumeration value="presenter.passed"/>
 			<xs:enumeration value="presenter.saved"/>
 			<xs:enumeration value="presenter.settings"/>
-			<xs:enumeration value="presenter.speed_dialog.factors"/>
 			<xs:enumeration value="presenter.steps"/>
 			<xs:enumeration value="presenter.swatches"/>
 			<xs:enumeration value="presenter.tools"/>
 			<xs:enumeration value="row.widgets"/>
 			<xs:enumeration value="source.console.lines"/>
 			<xs:enumeration value="source.console.recent"/>
+			<xs:enumeration value="source.factors.extrusion.factors"/>
+			<xs:enumeration value="source.factors.speed.factors"/>
 			<xs:enumeration value="source.jog.distances"/>
 			<xs:enumeration value="source.jog.feedrates"/>
 			<xs:enumeration value="source.temperature.temperatures"/>
@@ -388,7 +388,9 @@
 			<xs:enumeration value="actions.customise.open_catalogue"/>
 			<xs:enumeration value="actions.customise.start"/>
 			<xs:enumeration value="actions.estop.dragged"/>
+			<xs:enumeration value="actions.factors.close"/>
 			<xs:enumeration value="actions.factors.extrusion"/>
+			<xs:enumeration value="actions.factors.set"/>
 			<xs:enumeration value="actions.factors.speed"/>
 			<xs:enumeration value="actions.fan.set_speed"/>
 			<xs:enumeration value="actions.gcode.send"/>
@@ -461,8 +463,6 @@
 			<xs:enumeration value="presenter.dialog.outside"/>
 			<xs:enumeration value="presenter.extruder.extrude"/>
 			<xs:enumeration value="presenter.extruder.retract"/>
-			<xs:enumeration value="presenter.factor.close"/>
-			<xs:enumeration value="presenter.factor.set"/>
 			<xs:enumeration value="presenter.files.ask_delete"/>
 			<xs:enumeration value="presenter.files.close_dialog"/>
 			<xs:enumeration value="presenter.files.confirm"/>
@@ -653,7 +653,6 @@
 			<xs:enumeration value="dialog_host"/>
 			<xs:enumeration value="dialog_number"/>
 			<xs:enumeration value="dialog_question"/>
-			<xs:enumeration value="factors"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
 			<xs:enumeration value="hardware_test"/>
@@ -9567,7 +9566,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="factors">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/factors.xml, with presenter factors.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/factors.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
