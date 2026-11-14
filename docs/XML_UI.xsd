@@ -7255,7 +7255,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_toggle">
-		<xs:annotation><xs:documentation>An on/off setting, drawn as the build's toggle (a check box or a switch), so every setting looks the same. Raises `value_changed` when it is changed; the action's value is 1 when turned on and 0 when off. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>An on/off setting, drawn as a switch. Raises `value_changed` when it is changed; the action's value is 1 when turned on and 0 when off. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

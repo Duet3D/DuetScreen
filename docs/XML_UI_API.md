@@ -1665,7 +1665,7 @@ Also takes every `lv_image` attribute.
 
 ### ds_toggle
 
-An on/off setting, drawn as the build's toggle (a check box or a switch), so every setting looks the same. Raises `value_changed` when it is changed; the action's value is 1 when turned on and 0 when off.
+An on/off setting, drawn as a switch. Raises `value_changed` when it is changed; the action's value is 1 when turned on and 0 when off.
 
 Also takes every `lv_obj` attribute.
 

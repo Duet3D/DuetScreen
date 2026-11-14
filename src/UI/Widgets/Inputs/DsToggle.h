@@ -1,20 +1,18 @@
 /*
  * DsToggle.h
  *
- * <ds_toggle>: an on/off setting, drawn as the build's toggle (a check box, or a switch if built with
- * DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET=LvSwitch). Its attributes are in registerXml().
+ * <ds_toggle>: an on/off setting, drawn as a switch. Its attributes are in registerXml().
  */
 
 #pragma once
 
-#include "UI/Lvgl/LvCheckbox.h"
 #include "UI/Lvgl/LvSwitch.h"
 #include "helix_xml.h"
 #include <string>
 
 namespace UI::Xml
 {
-	class DsToggle : public UI_SETTINGS_TOGGLE_WIDGET
+	class DsToggle : public LvSwitch
 	{
 	  public:
 		/** Create a toggle inside `parent` */

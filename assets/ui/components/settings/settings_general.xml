@@ -60,7 +60,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
 		<ds_toggle name="show_confirmation_dialogs"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="6" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.confirmations"/>
@@ -69,7 +69,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="7" style_grid_cell_y_align="center"/>
 		<ds_toggle name="move_machine_position_mode"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="7" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.machine_position_mode" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.machine_position_mode"/>
@@ -92,7 +92,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="10" style_grid_cell_y_align="center"/>
 		<ds_toggle name="display_connected_message"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="10" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.connected_message" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.connected_message"/>
@@ -117,7 +117,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="13" style_grid_cell_y_align="center"/>
 		<ds_toggle name="notification_auto_close_error"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="13" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.error_notifications_stay" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.error_notifications_stay"/>

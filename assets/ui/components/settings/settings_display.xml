@@ -47,7 +47,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
 		<ds_toggle name="enable_animations"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.animations" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.animations"/>

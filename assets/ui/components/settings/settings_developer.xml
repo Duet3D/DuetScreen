@@ -22,7 +22,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<ds_toggle name="enable_advanced_settings"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.advanced_settings" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.advanced_settings"/>
@@ -31,7 +31,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<ds_toggle name="enable_second_usb_channel"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.second_usb_channel" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.second_usb_channel"/>
@@ -40,7 +40,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 		<ds_toggle name="system_logging"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
 			<bind_state_if_eq subject="presenter.system_logging" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.system_logging"/>
@@ -97,7 +97,7 @@
 			<bind_flag_if_eq subject="presenter.debug_borders_shown" flag="hidden" ref_value="0"/>
 		</lv_label>
 		<ds_toggle name="debug_borders"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="7" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="presenter.debug_borders_shown" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="presenter.debug_borders" state="checked" ref_value="1"/>
@@ -109,7 +109,7 @@
 			<bind_flag_if_eq subject="presenter.developer_mode" flag="hidden" ref_value="0"/>
 		</lv_label>
 		<ds_toggle name="enable_ssh"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="8" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="presenter.developer_mode" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="presenter.ssh" state="checked" ref_value="1"/>
@@ -121,7 +121,7 @@
 			<bind_flag_if_eq subject="presenter.developer_mode" flag="hidden" ref_value="0"/>
 		</lv_label>
 		<ds_toggle name="enable_adb"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="9" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="presenter.developer_mode" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="presenter.adb" state="checked" ref_value="1"/>
@@ -133,7 +133,7 @@
 			<bind_flag_if_eq subject="presenter.system_monitor_shown" flag="hidden" ref_value="0"/>
 		</lv_label>
 		<ds_toggle name="enable_system_monitor"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
 				   style_grid_cell_row_pos="10" style_grid_cell_y_align="center">
 			<bind_flag_if_eq subject="presenter.system_monitor_shown" flag="hidden" ref_value="0"/>
 			<bind_state_if_eq subject="presenter.system_monitor" state="checked" ref_value="1"/>
