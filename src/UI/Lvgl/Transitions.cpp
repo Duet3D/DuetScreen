@@ -8,6 +8,7 @@
 #include "Transitions.h"
 #include "LvAnim.h"
 #include "UI/Styles/Styles.h"
+#include "lvgl/src/lvgl_private.h" // lv_obj_t::is_deleting
 #include "lvgl/src/misc/lv_math.h" // LV_BEZIER_VAL_FLOAT, LV_BEZIER_VAL_MAX
 #include "utils/StorageHelper.h"
 
@@ -72,6 +73,42 @@ namespace UI::Transitions
 				return;
 			obj->removeLocalStyleProp(LV_STYLE_OPA);
 			obj->setFlag(LV_OBJ_FLAG_HIDDEN, true);
+		}
+
+		/* Drives the x position of a sliding page each animation tick */
+		static void slideXAnimCb(void* var, int32_t v)
+		{
+			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(var));
+			if (obj == nullptr)
+				return;
+			obj->setX(static_cast<lv_coord_t>(v));
+		}
+
+		/* The page a slide moves, unless it is being deleted: LVGL ends a deleted widget's animations after its C++
+		 * wrapper has let go of it (or been destroyed), so there is nothing left to tidy */
+		static LvObj* slidingPage(lv_anim_t* a)
+		{
+			auto* page = static_cast<lv_obj_t*>(a->var);
+			return page->is_deleting ? nullptr : LvObj::fromPtr(page);
+		}
+
+		/* The page slid out (or its slide cut short): back where it started, hidden */
+		static void slideOutDeletedCb(lv_anim_t* a)
+		{
+			LvObj* obj = slidingPage(a);
+			if (obj == nullptr)
+				return;
+			obj->setX(0);
+			obj->hide();
+		}
+
+		/* The page slid in (or its slide cut short): where it belongs */
+		static void slideInDeletedCb(lv_anim_t* a)
+		{
+			LvObj* obj = slidingPage(a);
+			if (obj == nullptr)
+				return;
+			obj->setX(0);
 		}
 
 		static void scaleInCompletedCb(lv_anim_t* a)
@@ -174,4 +211,54 @@ namespace UI::Transitions
 		anim.start();
 	}
 
+	void slide(LvObj* from, LvObj& to, int32_t direction, lv_coord_t width, bool animate)
+	{
+		if (from != nullptr)
+		{
+			stopSlide(*from);
+		}
+		stopSlide(to);
+
+		if (from == nullptr || !animate || !animationsEnabled())
+		{
+			if (from != nullptr)
+			{
+				from->hide();
+			}
+			to.show(true);
+			return;
+		}
+
+		const auto startX = static_cast<int32_t>(direction * width);
+		const uint32_t durationMs = themeAnimDurationMs();
+		to.setX(static_cast<lv_coord_t>(startX));
+		to.show(true);
+
+		LvAnim outgoing;
+		outgoing.setVar(from->getRootPtr());
+		outgoing.setValues(0, -startX);
+		outgoing.setExecCb(slideXAnimCb);
+		outgoing.setDuration(durationMs);
+		outgoing.setPathCb(lv_anim_path_ease_in_out);
+		outgoing.setDeletedCb(slideOutDeletedCb);
+		outgoing.start();
+
+		LvAnim incoming;
+		incoming.setVar(to.getRootPtr());
+		incoming.setValues(startX, 0);
+		incoming.setExecCb(slideXAnimCb);
+		incoming.setDuration(durationMs);
+		incoming.setPathCb(lv_anim_path_ease_in_out);
+		incoming.setDeletedCb(slideInDeletedCb);
+		incoming.start();
+	}
+
+	void stopSlide(LvObj& obj)
+	{
+		// Deleting the animation runs its deleted callback, which would hide a page sliding out: keep the flag
+		const bool hidden = obj.hasFlag(LV_OBJ_FLAG_HIDDEN);
+		lv_anim_delete(obj.getRootPtr(), slideXAnimCb);
+		obj.setX(0);
+		obj.setFlag(LV_OBJ_FLAG_HIDDEN, hidden);
+	}
 } // namespace UI::Transitions

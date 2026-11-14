@@ -65,4 +65,25 @@ namespace UI::Transitions
 	 * @param delayMs    Delay before the animation starts.
 	 */
 	void fadeOutAndHide(LvObj& obj, uint32_t durationMs = 0, uint32_t delayMs = 0);
+
+	/**
+	 * @brief Replace `from` with `to`, two pages in the same place: `to` slides in across `width` while `from` slides
+	 * out, or, with animations off, swaps at once.
+	 *
+	 * `direction` 1 brings `to` in from the right (going forward, e.g. to a later tab or a sub-page), -1 from the left
+	 * (going back). `from` ends hidden and `to` shown and in front, both where they started. A slide in flight on either
+	 * is cut short first. Uses the theme's `anim` duration.
+	 *
+	 * @param from      The page shown now, or nullptr for none (then `to` is shown at once).
+	 * @param to        The page to show.
+	 * @param direction 1 or -1, as above.
+	 * @param width     How far the pages slide: the width of the area they share.
+	 * @param animate   False to swap at once even with animations on.
+	 */
+	void slide(LvObj* from, LvObj& to, int32_t direction, lv_coord_t width, bool animate = true);
+
+	/**
+	 * @brief Cut short a slide (see slide()) of `obj`, leaving it where it started; its hidden flag is left as it is.
+	 */
+	void stopSlide(LvObj& obj);
 } // namespace UI::Transitions

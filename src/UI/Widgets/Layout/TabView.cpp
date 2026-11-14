@@ -8,10 +8,7 @@
 #include "TabView.h"
 #include "Debug.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Lvgl/LvAnim.h"
 #include "UI/Lvgl/Transitions.h"
-#include "lvgl/src/lvgl_private.h"
-#include "utils/StorageHelper.h"
 
 namespace UI
 {
@@ -28,49 +25,6 @@ namespace UI
 
 		/** How far a tab bar over or under the content overlaps it, so the selected tab joins its page */
 		constexpr lv_coord_t TOP_TAB_OVERLAP = 5;
-
-		static void tabSetXAnimCb(void* var, int32_t value)
-		{
-			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(var));
-			if (obj == nullptr)
-			{
-				return;
-			}
-			obj->setX(static_cast<lv_coord_t>(value));
-		}
-
-		/**
-		 * The tab an animation moves, unless it is being deleted: LVGL ends a deleted widget's animations after its
-		 * C++ wrapper has let go of it (or been destroyed), so there is nothing left to tidy
-		 */
-		LvObj* animatedTab(lv_anim_t* anim)
-		{
-			auto* tab = static_cast<lv_obj_t*>(anim->var);
-			return tab->is_deleting ? nullptr : LvObj::fromPtr(tab);
-		}
-
-		static void outgoingTabDeletedCb(lv_anim_t* anim)
-		{
-			LvObj* obj = animatedTab(anim);
-			if (obj == nullptr)
-			{
-				return;
-			}
-
-			obj->setX(0);
-			obj->hide();
-		}
-
-		static void incomingTabDeletedCb(lv_anim_t* anim)
-		{
-			LvObj* obj = animatedTab(anim);
-			if (obj == nullptr)
-			{
-				return;
-			}
-
-			obj->setX(0);
-		}
 	} // namespace
 
 	TabView::TabView(const std::string& name, LvObj& parent)
@@ -221,12 +175,10 @@ namespace UI
 			// Nothing on screen to show or hide: the tabs' views come alive or not when the tab view is shown
 			if (previous_tab != nullptr)
 			{
-				lv_anim_delete(previous_tab->getRootPtr(), tabSetXAnimCb);
-				previous_tab->setX(0);
+				Transitions::stopSlide(*previous_tab);
 				previous_tab->setFlag(LV_OBJ_FLAG_HIDDEN, true);
 			}
-			lv_anim_delete(next_tab.getRootPtr(), tabSetXAnimCb);
-			next_tab.setX(0);
+			Transitions::stopSlide(next_tab);
 			next_tab.setFlag(LV_OBJ_FLAG_HIDDEN, false);
 			return;
 		}
@@ -234,51 +186,8 @@ namespace UI
 		// A dialog opened from the tab being left goes with it, as one the tab hosted itself would
 		closeDialogsNotAround(getRootPtr());
 
-		if (!animate || !StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) || previous_tab == nullptr)
-		{
-			if (previous_tab != nullptr)
-			{
-				previous_tab->setX(0);
-				previous_tab->hide();
-			}
-
-			next_tab.setX(0);
-			next_tab.show(true);
-			return;
-		}
-
-		const lv_coord_t width = m_tabContent.getWidth();
 		const int32_t direction = (index > previous_index) ? 1 : -1;
-		const lv_coord_t start_x = static_cast<lv_coord_t>(direction * width);
-		const lv_coord_t end_x = static_cast<lv_coord_t>(-direction * width);
-
-		/* Cancel any in-flight position animations before starting a new transition. */
-		lv_anim_delete(previous_tab->getRootPtr(), tabSetXAnimCb);
-		lv_anim_delete(next_tab.getRootPtr(), tabSetXAnimCb);
-
-		previous_tab->setX(0);
-		next_tab.setX(start_x);
-		next_tab.show(true);
-
-		const uint32_t slideDurationMs = Transitions::animDurationMs();
-
-		LvAnim outgoing_anim;
-		outgoing_anim.setVar(previous_tab->getRootPtr());
-		outgoing_anim.setValues(0, end_x);
-		outgoing_anim.setExecCb(tabSetXAnimCb);
-		outgoing_anim.setDuration(slideDurationMs);
-		outgoing_anim.setPathCb(lv_anim_path_ease_in_out);
-		outgoing_anim.setDeletedCb(outgoingTabDeletedCb);
-		outgoing_anim.start();
-
-		LvAnim incoming_anim;
-		incoming_anim.setVar(next_tab.getRootPtr());
-		incoming_anim.setValues(start_x, 0);
-		incoming_anim.setExecCb(tabSetXAnimCb);
-		incoming_anim.setDuration(slideDurationMs);
-		incoming_anim.setPathCb(lv_anim_path_ease_in_out);
-		incoming_anim.setDeletedCb(incomingTabDeletedCb);
-		incoming_anim.start();
+		Transitions::slide(previous_tab, next_tab, direction, m_tabContent.getWidth(), animate);
 	}
 
 	void TabView::styleTabButton(TabButton& button)
