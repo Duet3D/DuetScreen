@@ -737,6 +737,8 @@
       "move_jog": "Muovi un asse",
       "move_home": "Azzera gli assi",
       "move_disable_motors": "Disattiva i motori",
+      "system_restart": "Riavvia DuetScreen",
+      "system_reboot": "Riavvia lo schermo",
       "job_pause": "Metti in pausa il lavoro",
       "job_resume": "Riprendi il lavoro",
       "job_ask_cancel": "Annulla il lavoro",

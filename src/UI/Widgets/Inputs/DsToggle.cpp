@@ -28,10 +28,10 @@ namespace UI::Xml
 					  .description = "An on/off setting, drawn as a switch. Raises `value_changed` when it is changed; "
 									 "the action's value is 1 when turned on and 0 when off.",
 					  .example = R"(<ds_toggle>
-	<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
-	<action trigger="value_changed" name="presenter.settings.confirmations"/>
+	<bind_state_if_eq subject="source.settings.confirmations" state="checked" ref_value="1"/>
+	<action trigger="value_changed" name="actions.settings.set" arg="confirmations"/>
 </ds_toggle>)",
-					  .exampleSubjects = {{"presenter.confirmations", "int", "1"}}},
+					  .exampleSubjects = {{"source.settings.confirmations", "int", "1"}}},
 					 xmlCreate,
 					 xmlApply);
 	}

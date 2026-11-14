@@ -73,7 +73,6 @@ namespace UI
 		Xml::IntSubject m_yMin;					 // …
 		Xml::IntSubject m_yMax;					 // …
 		Xml::List<JobObjectRow> m_objects;		 // The job's objects
-		Xml::IntSubject m_confirmations;		 // 1 if actions are confirmed
 		Xml::OmWatch m_watch;					 // Shows the objects again as the job, axes or tool change
 	};
 } // namespace UI

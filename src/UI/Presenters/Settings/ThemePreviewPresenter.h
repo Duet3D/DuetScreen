@@ -4,7 +4,7 @@
  * Behaviour for the theme's colours (assets/ui/components/settings/settings_theme_preview.xml, Settings > Display >
  * Colours): a swatch of each colour the theme in use gives its styles, and, for a theme whose palette can be changed,
  * sliders for its hues and chroma, which change it as they move. Dark mode is on the Display page
- * (DisplaySettingsPresenter.h).
+ * (source.settings.dark, src/UI/Presenters/Settings/DisplaySettings.h).
  *
  * Actions change the palette as the controls move.
  *

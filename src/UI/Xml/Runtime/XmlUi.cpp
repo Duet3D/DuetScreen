@@ -69,6 +69,9 @@ namespace UI::Xml
 						 s_loaded.issues);
 			LayoutLibrary::setFolder(canSave ? s_paths.user / LayoutLibrary::SAVED_FOLDER : std::filesystem::path());
 
+			// Sources describe what the bundles bring too, e.g. the themes to choose from
+			DataSources::updateAll();
+
 			for (const auto& issue : s_loaded.issues)
 			{
 				Model::get().post<EventType::Response>(

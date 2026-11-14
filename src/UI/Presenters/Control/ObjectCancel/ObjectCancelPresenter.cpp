@@ -4,13 +4,11 @@
 
 #include "ObjectCancelPresenter.h"
 #include "Debug.h"
-#include "Storage.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
-#include "utils/StorageHelper.h"
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -94,7 +92,6 @@ namespace UI
 		f.field("y_min", m_yMin, "Lowest Y of the bed, whole mm; as `x_min`");
 		f.field("y_max", m_yMax, "Highest Y of the bed, whole mm; as `x_min`");
 		f.list("objects", m_objects, "The job's objects");
-		f.field("confirmations", m_confirmations, "1 if actions are confirmed first (the setting)");
 	}
 
 	void ObjectCancelPresenter::onInit()
@@ -104,7 +101,6 @@ namespace UI
 
 	void ObjectCancelPresenter::onActivate()
 	{
-		m_confirmations.set(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS) ? 1 : 0);
 		showObjects();
 	}
 

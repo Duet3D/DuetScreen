@@ -1,13 +1,16 @@
 <!--
   The Display settings page: the screen (brightness, screensaver, rotation, animations), its appearance (the theme,
   dark mode, the way to the theme's colours, the font and icons) and customising the home screen (the global action
-  customise.start, src/UI/Presenters/Customise/CustomisePresenter.h). The colours are a page of their own
+  customise.start, src/UI/Presenters/Customise/CustomiseActions.h). The colours are a page of their own
   (settings_theme_preview.xml), opened in place. Each setting is a row (ds_setting) in a group, applied as soon as it is
   changed.
 
-  Fields and actions: src/UI/Presenters/Settings/DisplaySettingsPresenter.h. Numbers are typed on the shared number pad.
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/DisplaySettings.cpp)
+  Actions:  actions.settings.set; numbers are typed on the shared number pad
+            source.theme.* (src/UI/Xml/Data/ThemeSource.h): the theme's colours, and whether it has a dark mode
 -->
-<component presenter="settings_display">
+<component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
 		<style name="setting_page"/>
@@ -15,17 +18,17 @@
 		<ds_setting_group name="screen" title_tag="tr.settings.groups.screen">
 			<ds_setting name="brightness" title_tag="tr.settings.brightness">
 				<ds_slider name="slider" label_tag="tr.settings.brightness" label_shown="false" numberpad="true" min="0"
-						   max="100" decimals="0" unit="%" bind_value="presenter.brightness" send="change" width="55%"
+						   max="100" decimals="0" unit="%" bind_value="source.settings.brightness" send="change" width="55%"
 						   height="content">
-					<action trigger="value_confirmed" name="presenter.settings.brightness"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="brightness"/>
 				</ds_slider>
 			</ds_setting>
 			<ds_setting name="screensaver_timeout" title_tag="tr.settings.screensaver_timeout"
 						hint_tag="tr.settings.hints.screensaver">
 				<ds_slider name="slider" label_tag="tr.settings.screensaver_timeout" label_shown="false" numberpad="true"
 						   min="0" max="300" increment="10" decimals="0" unit="s" out_of_range="upper"
-						   bind_value="presenter.screensaver_timeout" width="55%" height="content">
-					<action trigger="value_confirmed" name="presenter.settings.screensaver_timeout"/>
+						   bind_value="source.settings.screensaver_timeout" width="55%" height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="screensaver_timeout"/>
 				</ds_slider>
 			</ds_setting>
 			<!-- One of a few: the chosen one is checked -->
@@ -34,38 +37,38 @@
 					<style name="setting_options"/>
 					<ds_button name="rotation_0" translation_tag="tr.settings.screen_rotation_options.rotation_0">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.rotation" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="presenter.settings.rotation" arg="0"/>
+						<bind_state_if_eq subject="source.settings.rotation" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="actions.settings.set" arg="rotation=0"/>
 					</ds_button>
 					<ds_button name="rotation_180" translation_tag="tr.settings.screen_rotation_options.rotation_180">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.rotation" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="presenter.settings.rotation" arg="1"/>
+						<bind_state_if_eq subject="source.settings.rotation" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="actions.settings.set" arg="rotation=1"/>
 					</ds_button>
 				</lv_obj>
 			</ds_setting>
 			<ds_setting name="enable_animations" title_tag="tr.settings.enable_animations">
 				<ds_toggle name="switch">
-					<bind_state_if_eq subject="presenter.animations" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.settings.animations"/>
+					<bind_state_if_eq subject="source.settings.animations" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="actions.settings.set" arg="animations"/>
 				</ds_toggle>
 			</ds_setting>
 		</ds_setting_group>
 
 		<ds_setting_group name="appearance" title_tag="tr.settings.groups.appearance">
 			<ds_setting name="theme" title_tag="tr.settings.theme">
-				<ds_choice name="choice" title_tag="tr.settings.theme" bind_options="presenter.themes"
-						   bind_selected="presenter.theme">
+				<ds_choice name="choice" title_tag="tr.settings.theme" bind_options="source.settings.theme_options"
+						   bind_selected="source.settings.theme">
 					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="presenter.settings.theme"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="theme"/>
 				</ds_choice>
 			</ds_setting>
 			<!-- For a theme whose palette can be changed -->
 			<ds_setting name="dark_mode" title_tag="tr.theme.dark_mode">
-				<bind_flag_if_eq subject="presenter.dark_shown" flag="hidden" ref_value="0"/>
+				<bind_flag_if_eq subject="source.theme.customisable" flag="hidden" ref_value="0"/>
 				<ds_toggle name="switch">
-					<bind_state_if_eq subject="presenter.dark" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.settings.dark"/>
+					<bind_state_if_eq subject="source.settings.dark" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="actions.settings.set" arg="dark"/>
 				</ds_toggle>
 			</ds_setting>
 			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
@@ -74,11 +77,11 @@
 						style_pad_all="0" style_pad_column="6" style_bg_opa="0" style_border_width="0">
 					<lv_obj name="primary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
 						<style name="border"/>
-						<bind_style_prop prop="bg_color" subject="presenter.primary_color"/>
+						<bind_style_prop prop="bg_color" subject="source.theme.primary"/>
 					</lv_obj>
 					<lv_obj name="secondary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
 						<style name="border"/>
-						<bind_style_prop prop="bg_color" subject="presenter.secondary_color"/>
+						<bind_style_prop prop="bg_color" subject="source.theme.secondary"/>
 					</lv_obj>
 				</lv_obj>
 				<ds_button name="open" text="&#xF054;">
@@ -87,17 +90,17 @@
 				</ds_button>
 			</ds_setting>
 			<ds_setting name="font" title_tag="tr.settings.font">
-				<ds_choice name="choice" title_tag="tr.settings.font" bind_options="presenter.fonts"
-						   bind_selected="presenter.font">
+				<ds_choice name="choice" title_tag="tr.settings.font" bind_options="source.settings.font_options"
+						   bind_selected="source.settings.font">
 					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="presenter.settings.font"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="font"/>
 				</ds_choice>
 			</ds_setting>
 			<ds_setting name="icons" title_tag="tr.settings.icons">
-				<ds_choice name="choice" title_tag="tr.settings.icons" bind_options="presenter.icon_sets"
-						   bind_selected="presenter.icon_set">
+				<ds_choice name="choice" title_tag="tr.settings.icons" bind_options="source.settings.icon_set_options"
+						   bind_selected="source.settings.icon_set">
 					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="presenter.settings.icon_set"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="icon_set"/>
 				</ds_choice>
 			</ds_setting>
 		</ds_setting_group>

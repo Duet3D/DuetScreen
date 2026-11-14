@@ -347,6 +347,70 @@ From [ResponseSource.cpp](../src/UI/Xml/Data/ResponseSource.cpp).
 | --- | --- | --- |
 | `source.response.count` | int | Number of responses received; changes with every response |
 
+### settings
+
+From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.settings.language` | int | Index of the language in use; choosing another asks to restart in it (actions.settings.set) |
+| `source.settings.language_options` | text | What `source.settings.language` can be, one per line, translated |
+| `source.settings.keyboard_layout` | int | Index of the USB keyboard layout in use (actions.settings.set) |
+| `source.settings.keyboard_layout_options` | text | What `source.settings.keyboard_layout` can be, one per line, translated |
+| `source.settings.confirmations` | int | 1 if actions on the machine are confirmed first (actions.settings.set) |
+| `source.settings.machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) (actions.settings.set) |
+| `source.settings.progress_source` | int | Index of how a job's progress is worked out (actions.settings.set) |
+| `source.settings.progress_source_options` | text | What `source.settings.progress_source` can be, one per line, translated |
+| `source.settings.theme` | int | Index of the theme in use (actions.settings.set) |
+| `source.settings.theme_options` | text | What `source.settings.theme` can be, one per line, translated |
+| `source.settings.font` | int | Index of the typeface in use (actions.settings.set) |
+| `source.settings.font_options` | text | What `source.settings.font` can be, one per line, translated |
+| `source.settings.icon_set` | int | Index of the icon set in use (actions.settings.set) |
+| `source.settings.icon_set_options` | text | What `source.settings.icon_set` can be, one per line, translated |
+| `source.settings.rotation` | int | Index of the screen's rotation (actions.settings.set) |
+| `source.settings.rotation_options` | text | What `source.settings.rotation` can be, one per line, translated |
+| `source.settings.animations` | int | 1 if the UI animates (actions.settings.set) |
+| `source.settings.dark` | int | 1 if the theme in use is in dark mode; it changes only if its palette can (source.theme.customisable) (actions.settings.set) |
+| `source.settings.brightness` | int | The screen's brightness, 0-100 (actions.settings.set) |
+| `source.settings.screensaver_timeout` | int | Seconds without a touch before the screen dims; 0 for never (actions.settings.set) |
+| `source.settings.connected_message` | int | 1 if a message shows when the Duet connects (actions.settings.set) |
+| `source.settings.notification_level` | int | Index of the lowest level of message shown (actions.settings.set) |
+| `source.settings.notification_level_options` | text | What `source.settings.notification_level` can be, one per line, translated |
+| `source.settings.notification_timeout` | int | ms before a message closes itself (actions.settings.set) |
+| `source.settings.error_notifications_stay` | int | 1 if errors stay until closed (actions.settings.set) |
+| `source.settings.connection_method` | int | Index of how the screen connects to the Duet (USB, UART or network); choosing one sets the USB-C port's mode to suit (actions.settings.set) |
+| `source.settings.connection_method_options` | text | What `source.settings.connection_method` can be, one per line, translated |
+| `source.settings.network_shown` | int | 1 if the Duet is reached over the network, so its IP address and password apply |
+| `source.settings.usb_mode` | int | Index of the USB-C port's mode (actions.settings.set) |
+| `source.settings.usb_mode_options` | text | What `source.settings.usb_mode` can be, one per line, translated |
+| `source.settings.poll_interval` | int | ms between polls of the Duet (actions.settings.set) |
+| `source.settings.debug_level` | int | Index of the level logged from (actions.settings.set) |
+| `source.settings.debug_level_options` | text | What `source.settings.debug_level` can be, one per line, translated |
+| `source.settings.advanced_settings` | int | 1 if advanced settings are shown (actions.settings.set) |
+| `source.settings.second_usb_channel` | int | 1 if the second USB channel is used (actions.settings.set) |
+| `source.settings.system_logging` | int | 1 if system messages are logged to the console (actions.settings.set) |
+| `source.settings.debug_borders` | int | 1 if debug borders are shown (builds with debug borders) (actions.settings.set) |
+| `source.settings.ssh` | int | 1 if ssh is on (developer mode builds) (actions.settings.set) |
+| `source.settings.adb` | int | 1 if adb is on (developer mode builds) (actions.settings.set) |
+| `source.settings.system_monitor` | int | 1 if the system monitor is shown (actions.settings.set) |
+| `source.settings.duet_ip` | text | The Duet's IP address (actions.settings.set, actions.settings.ask) |
+| `source.settings.duet_password` | text | The Duet's password (actions.settings.set) |
+
+### system
+
+From [SystemSource.cpp](../src/UI/Xml/Data/SystemSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.system.firmware` | text | DuetScreen's version and build time |
+| `source.system.buildroot` | text | Buildroot's version |
+| `source.system.storage_info` | text | Storage used, e.g. "256.00 MB / 16.00 GB (1%)" |
+| `source.system.cache_size` | text | Size of the cache, e.g. "10.00 KB (100 files)" |
+| `source.system.debug_borders_shown` | int | 1 if the build has debug borders |
+| `source.system.developer_mode` | int | 1 in developer mode builds (SSH, ADB, setup) |
+| `source.system.system_monitor_shown` | int | 1 if the build has the system monitor |
+| `source.system.build_tools_shown` | int | 1 if the build has any of debug borders, developer mode or the system monitor |
+
 ### temperature
 
 From [TemperatureSource.cpp](../src/UI/Xml/Data/TemperatureSource.cpp).
@@ -364,6 +428,16 @@ Each row of `source.temperature.temperatures`:
 | `row.name` | text | Name of the series, e.g. for a legend |
 | `row.key` | int | What its source knows the series by, so a `<ds_graph_key>` can find it: for source.temperature.temperatures, its heaters' sensor number |
 | `row.shown` | int | 1 while graphs draw the series, 0 while it is hidden; tapping its legend entry or a `<ds_graph_key>` for it toggles it, in every graph of the history |
+
+### theme
+
+From [ThemeSource.cpp](../src/UI/Xml/Data/ThemeSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.theme.primary` | colour | The theme's primary colour |
+| `source.theme.secondary` | colour | The theme's secondary colour |
+| `source.theme.customisable` | int | 1 if the theme's palette can be changed: between dark and light (source.settings.dark), and its hues |
 
 ## Global actions
 
@@ -412,6 +486,16 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.selector.increment` | Step the selector named by `arg` (its id) up | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.selector.pick` | Use the preset. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
+| `actions.settings.ask` | Ask for the text setting `arg` names on the number keys, e.g. the Duet's IP address | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
+| `actions.settings.set` | Change the setting `arg` names (source.settings.<name>) to the edited value: a switch's 0 or 1, a choice's index, a slider's value, or a text area's text. `arg="<name>=<value>"` sets it to that value instead, e.g. from a row of buttons. | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
+| `actions.system.buildroot_setup` | Restart the system's setup service (developer mode builds) | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.clear_cache` | Delete the cached settings and file information, show the storage used again, and say so | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.erase_and_restart` | Ask whether to erase every setting, the WiFi networks and the layouts made on the screen, then restart | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.hardware_test` | Open the hardware test | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.reboot` | Reboot the screen. Offered to users for their widgets' action settings, as `tr.actions.system_reboot`. | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.restart` | Restart the DuetScreen program. Offered to users for their widgets' action settings, as `tr.actions.system_restart`. | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.send_config` | Back the screen's settings up to the Duet, as duetscreen.json in its system folder, and say whether it worked | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.system.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
@@ -821,7 +905,6 @@ Used by `object_cancel`.
 | `presenter.y_min` | int | Lowest Y of the bed, whole mm; as `x_min` |
 | `presenter.y_max` | int | Highest Y of the bed, whole mm; as `x_min` |
 | `presenter.objects` | list | The job's objects |
-| `presenter.confirmations` | int | 1 if actions are confirmed first (the setting) |
 
 Each row of `presenter.objects`:
 
@@ -841,158 +924,6 @@ Each row of `presenter.objects`:
 | --- | --- |
 | `presenter.object_cancel.cancel_current` | Cancel the object being printed, asking first if confirmations are on |
 | `presenter.object_cancel.select` | Cancel the object, or resume it if cancelled, asking first. From a row of `objects`. |
-
-### settings_connection
-
-Used by `settings_connection`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.connection_methods` | text | Connection methods offered (USB, UART or network), one per line |
-| `presenter.connection_method` | int | Index of the one in use, in `connection_methods` |
-| `presenter.usb_modes` | text | Modes of the USB-C port offered, one per line |
-| `presenter.usb_mode` | int | Index of the one in use, in `usb_modes` |
-| `presenter.poll_interval` | int | ms between polls of the Duet |
-| `presenter.network_shown` | int | 1 if the Duet is reached over the network, so its IP address and password are shown |
-| `presenter.advanced_shown` | int | 1 if advanced settings are shown (the USB-C port's mode and the poll interval) |
-| `presenter.duet_ip` | text | The Duet's IP address |
-| `presenter.duet_password` | text | The Duet's password |
-
-| Action | Description |
-| --- | --- |
-| `presenter.settings.connection_method` | Connect to the Duet by the method at the edited index of `connection_methods`, setting the USB-C mode to suit |
-| `presenter.settings.duet_ip` | Ask for the Duet's IP address with the number pad, and use it |
-| `presenter.settings.duet_password` | Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password |
-| `presenter.settings.poll_interval` | Poll the Duet every edited value ms |
-| `presenter.settings.usb_mode` | Use the USB-C port in the mode at the edited index of `usb_modes` |
-
-### settings_developer
-
-Used by `settings_developer`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.debug_levels` | text | Log levels offered, one per line |
-| `presenter.debug_level` | int | Index of the one in use, in `debug_levels` |
-| `presenter.advanced_settings` | int | 1 if advanced settings are shown |
-| `presenter.second_usb_channel` | int | 1 if the second USB channel is used |
-| `presenter.system_logging` | int | 1 if system messages are logged to the console |
-| `presenter.debug_borders_shown` | int | 1 if the build has debug borders |
-| `presenter.debug_borders` | int | 1 if debug borders are on (builds with debug borders) |
-| `presenter.developer_mode` | int | 1 in developer mode (SSH, ADB, setup) |
-| `presenter.ssh` | int | 1 if SSH is on (developer mode builds) |
-| `presenter.adb` | int | 1 if ADB is on (developer mode builds) |
-| `presenter.system_monitor_shown` | int | 1 if the build has the system monitor |
-| `presenter.system_monitor` | int | 1 if the system monitor is on |
-| `presenter.build_tools_shown` | int | 1 if the build has any of debug borders, developer mode or the system monitor |
-
-| Action | Description |
-| --- | --- |
-| `presenter.settings.adb` | Turn ADB on (edited value 1) or off (0) (developer mode builds) |
-| `presenter.settings.advanced_settings` | Show advanced settings if the edited value is 1, else hide them |
-| `presenter.settings.buildroot_setup` | Restart the system's setup service (developer mode builds) |
-| `presenter.settings.debug_borders` | Show debug borders if the edited value is 1, else hide them (builds with debug borders) |
-| `presenter.settings.debug_level` | Log at the level at the edited index of `debug_levels` |
-| `presenter.settings.hardware_test` | Open the hardware test |
-| `presenter.settings.second_usb_channel` | Use the second USB channel if the edited value is 1, else not |
-| `presenter.settings.ssh` | Turn SSH on (edited value 1) or off (0) (developer mode builds) |
-| `presenter.settings.system_logging` | Log system messages to the console if the edited value is 1, else not |
-| `presenter.settings.system_monitor` | Show the system monitor if the edited value is 1, else hide it |
-
-### settings_display
-
-Used by `settings_display`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.themes` | text | Themes offered, one per line |
-| `presenter.theme` | int | Index of the theme in use |
-| `presenter.fonts` | text | Typefaces offered, one per line |
-| `presenter.font` | int | Index of the typeface in use |
-| `presenter.icon_sets` | text | Icon sets offered, one per line |
-| `presenter.icon_set` | int | Index of the icon set in use |
-| `presenter.rotations` | text | Screen rotations offered, one per line |
-| `presenter.rotation` | int | Index of the rotation in use |
-| `presenter.animations` | int | 1 if the UI animates |
-| `presenter.brightness` | int | Brightness, 0-100 |
-| `presenter.screensaver_timeout` | int | Seconds without a touch before the screen dims; 0 for never |
-| `presenter.dark` | int | 1 if the theme in use is in dark mode |
-| `presenter.dark_shown` | int | 1 if the theme in use can change between dark and light mode |
-| `presenter.primary_color` | colour | The theme's primary colour |
-| `presenter.secondary_color` | colour | The theme's secondary colour |
-
-| Action | Description |
-| --- | --- |
-| `presenter.settings.animations` | Turn UI animations on (edited value 1) or off (0) |
-| `presenter.settings.brightness` | Set the screen brightness to the edited value, 0-100 |
-| `presenter.settings.dark` | Put the theme in use in dark mode (edited value 1) or light mode (0), if its palette can be changed |
-| `presenter.settings.font` | Use the typeface at the edited index of `fonts` |
-| `presenter.settings.icon_set` | Use the icon set at the edited index of `icon_sets` |
-| `presenter.settings.rotation` | Rotate the screen as the edited index of `rotations` says |
-| `presenter.settings.screensaver_timeout` | Dim the screen after the edited value, in seconds, without a touch; 0 for never |
-| `presenter.settings.theme` | Use the theme at the edited index of `themes` |
-
-### settings_general
-
-Used by `settings_general`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.languages` | text | Languages offered, one per line |
-| `presenter.language` | int | Index of the language in use, in `languages` |
-| `presenter.keyboard_layouts` | text | USB keyboard layouts, one per line |
-| `presenter.keyboard_layout` | int | Index of the layout in use, in `keyboard_layouts` |
-| `presenter.confirmations` | int | 1 if actions are confirmed first |
-| `presenter.machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) |
-| `presenter.progress_sources` | text | How a job's progress can be worked out, one per line |
-| `presenter.progress_source` | int | Index of the one used, in `progress_sources` |
-
-| Action | Description |
-| --- | --- |
-| `presenter.settings.confirmations` | Ask first before acting on the machine (edited value 1), or not (0) |
-| `presenter.settings.keyboard_layout` | Use the USB keyboard layout at the edited index of `keyboard_layouts` |
-| `presenter.settings.language` | Ask whether to restart in the language at the edited index of `languages` |
-| `presenter.settings.machine_position_mode` | Use machine coordinates (G53) for absolute moves if the edited value is 1, else not |
-| `presenter.settings.progress_source` | Work out job progress with the source at the edited index of `progress_sources` |
-
-### settings_notifications
-
-Used by `settings_notifications`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.connected_message` | int | 1 if a message shows when the Duet connects |
-| `presenter.notification_levels` | text | Message levels, one per line |
-| `presenter.notification_level` | int | Index of the lowest level shown, in `notification_levels` |
-| `presenter.notification_timeout` | int | ms before a message closes itself |
-| `presenter.error_notifications_stay` | int | 1 if errors stay until closed |
-
-| Action | Description |
-| --- | --- |
-| `presenter.settings.connected_message` | Show a message when the Duet connects if the edited value is 1, else not |
-| `presenter.settings.error_notifications_stay` | Keep errors open until closed if the edited value is 1, else close them as other messages |
-| `presenter.settings.notification_level` | Show messages from the level at the edited index of `notification_levels` up |
-| `presenter.settings.notification_timeout` | Close messages after the edited value, in seconds |
-
-### settings_system
-
-Used by `settings_system`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.firmware` | text | DuetScreen's version and build time |
-| `presenter.buildroot` | text | Buildroot's version |
-| `presenter.storage_info` | text | Storage used, e.g. "256.00 MB / 16.00 GB (1%)" |
-| `presenter.cache_size` | text | Size of the cache, e.g. "10.00 KB (100 files)" |
-
-| Action | Description |
-| --- | --- |
-| `presenter.settings.clear_cache` | Delete the cached settings and file information, show the storage used again, and say so |
-| `presenter.settings.erase_and_restart` | Ask whether to erase every setting, the WiFi networks and the layouts made on the screen, then restart |
-| `presenter.settings.reboot` | Reboot the screen |
-| `presenter.settings.restart` | Restart the DuetScreen program |
-| `presenter.settings.send_config` | Back the screen's settings up to the Duet, as duetscreen.json in its system folder, and say whether it worked |
-| `presenter.settings.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start |
 
 ### settings_theme_preview
 
@@ -1204,9 +1135,9 @@ A button showing the option chosen, with a chevron. Tapping it opens the choice 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_choice title_tag="tr.settings.language" bind_options="presenter.languages"
-		   bind_selected="presenter.language" width="300">
-	<action trigger="value_confirmed" name="presenter.settings.language"/>
+<ds_choice title_tag="tr.settings.language" bind_options="source.settings.language_options"
+		   bind_selected="source.settings.language" width="300">
+	<action trigger="value_confirmed" name="actions.settings.set" arg="language"/>
 </ds_choice>
 ```
 
@@ -1606,8 +1537,8 @@ Also takes every `lv_obj` attribute.
 <ds_setting title_tag="tr.settings.show_confirmation_dialogs"
 			hint="Ask first before actions that change the machine">
 	<ds_toggle>
-		<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
-		<action trigger="value_changed" name="presenter.settings.confirmations"/>
+		<bind_state_if_eq subject="source.settings.confirmations" state="checked" ref_value="1"/>
+		<action trigger="value_changed" name="actions.settings.set" arg="confirmations"/>
 	</ds_toggle>
 </ds_setting>
 ```
@@ -1657,9 +1588,9 @@ A slider with a label, its value and -/+ buttons, and optionally a number pad. R
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="presenter.brightness"
+<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="source.settings.brightness"
 		   numberpad="true" send="change" width="100%">
-	<action trigger="value_confirmed" name="presenter.settings.brightness"/>
+	<action trigger="value_confirmed" name="actions.settings.set" arg="brightness"/>
 </ds_slider>
 ```
 
@@ -1776,8 +1707,8 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_toggle>
-	<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
-	<action trigger="value_changed" name="presenter.settings.confirmations"/>
+	<bind_state_if_eq subject="source.settings.confirmations" state="checked" ref_value="1"/>
+	<action trigger="value_changed" name="actions.settings.set" arg="confirmations"/>
 </ds_toggle>
 ```
 
@@ -2953,12 +2884,12 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
-| [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
-| [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
-| [`settings_display`](#settings_display) | `settings_display` |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
-| [`settings_general`](#settings) | `settings_general` |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
-| [`settings_notifications`](#settings_notifications) | `settings_notifications` |  | `settings` | [settings_notifications.xml](../assets/ui/components/settings/settings_notifications.xml) |
-| [`settings_system`](#settings_system) | `settings_system` |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
+| [`settings_connection`](#settings_connection) |  |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
+| [`settings_developer`](#settings_developer) |  |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
+| [`settings_display`](#settings_display) |  |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
+| [`settings_general`](#settings) |  |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
+| [`settings_notifications`](#settings_notifications) |  |  | `settings` | [settings_notifications.xml](../assets/ui/components/settings/settings_notifications.xml) |
+| [`settings_system`](#settings_system) |  |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
 | [`settings_theme_preview`](#settings_theme_preview) | `settings_theme_preview` |  | `settings` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |

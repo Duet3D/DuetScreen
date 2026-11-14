@@ -77,8 +77,8 @@ namespace UI::Xml
 			 .example = R"(<ds_setting title_tag="tr.settings.show_confirmation_dialogs"
 			hint="Ask first before actions that change the machine">
 	<ds_toggle>
-		<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
-		<action trigger="value_changed" name="presenter.settings.confirmations"/>
+		<bind_state_if_eq subject="source.settings.confirmations" state="checked" ref_value="1"/>
+		<action trigger="value_changed" name="actions.settings.set" arg="confirmations"/>
 	</ds_toggle>
 </ds_setting>)",
 			 .attributes =
@@ -95,7 +95,7 @@ namespace UI::Xml
 				  {"bind_hint",
 				   "Follow a text subject for the hint, e.g. how something went; no hint while it is empty",
 				   AttributeKind::Subject}},
-			 .exampleSubjects = {{"presenter.confirmations", "int", "1"}}},
+			 .exampleSubjects = {{"source.settings.confirmations", "int", "1"}}},
 			xmlCreate,
 			xmlApply);
 	}

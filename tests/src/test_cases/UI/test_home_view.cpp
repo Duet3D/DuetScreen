@@ -19,6 +19,7 @@
 #include "UI/Widgets/Layout/TabView.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Data/SettingsSource.h"
 #include "UI/Xml/Data/TemperatureSource.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Runtime/Services.h"
@@ -38,6 +39,14 @@
 
 namespace
 {
+
+	/** Change setting `name` to `value` as the UI does, so every view shows it */
+	void setSetting(std::string_view name, int32_t value)
+	{
+		auto* settings = UI::Xml::DataSources::find<UI::Xml::SettingsSource>();
+		ASSERT_NE(settings, nullptr);
+		ASSERT_TRUE(settings->set(name, static_cast<float>(value))) << name;
+	}
 	/** How many of the object model array at `path` are there (not null) */
 	size_t countOf(std::string_view path)
 	{
@@ -1187,7 +1196,7 @@ TEST_F(TestHomeViewWithData, SettingsView)
 		lv_obj_scroll_to_y(root, LV_COORD_MAX, LV_ANIM_OFF);
 	};
 	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
-	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So Connection shows every row
+	setSetting("advanced_settings", 1); // So Connection shows every row
 
 	UI::openScreen(std::string_view("settings"));
 	auto& settings = settingsPage();
@@ -1228,7 +1237,7 @@ TEST_F(TestHomeViewWithData, SettingsView)
 	settings.setActiveTab(SETTINGS_DEVELOPER);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
 
-	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
+	setSetting("advanced_settings", advanced ? 1 : 0);
 }
 
 TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
@@ -1620,8 +1629,8 @@ namespace
 TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
 	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
-	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So the poll interval shows
-	deliverModelEvents();									   // Fill the lists from the object model
+	setSetting("advanced_settings", 1); // So the poll interval shows
+	deliverModelEvents();				// Fill the lists from the object model
 	{
 		lv_obj_t* toolList = dashboardToolList();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
@@ -1656,7 +1665,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	UI::closeDialogs();
 	UI::back();
 	runTimers();
-	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
+	setSetting("advanced_settings", advanced ? 1 : 0);
 }
 
 TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
@@ -1692,7 +1701,7 @@ TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
 TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 {
 	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
-	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So the poll interval shows
+	setSetting("advanced_settings", 1); // So the poll interval shows
 	UI::openScreen(std::string_view("settings"), false);
 	settingsPage().setActiveTab(SETTINGS_CONNECTION);
 	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
@@ -1713,7 +1722,7 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
 	EXPECT_EQ(slider.getValue(), 1234.0f);
 	UI::closeDialogs();
-	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
+	setSetting("advanced_settings", advanced ? 1 : 0);
 }
 
 TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)

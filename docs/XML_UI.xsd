@@ -3,9 +3,6 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:simpleType name="subject.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="presenter.adb"/>
-			<xs:enumeration value="presenter.advanced_settings"/>
-			<xs:enumeration value="presenter.advanced_shown"/>
 			<xs:enumeration value="presenter.alert.axes"/>
 			<xs:enumeration value="presenter.alert.axes_shown"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
@@ -29,11 +26,6 @@
 			<xs:enumeration value="presenter.alert.text_shown"/>
 			<xs:enumeration value="presenter.alert.title"/>
 			<xs:enumeration value="presenter.alert.warning"/>
-			<xs:enumeration value="presenter.animations"/>
-			<xs:enumeration value="presenter.brightness"/>
-			<xs:enumeration value="presenter.build_tools_shown"/>
-			<xs:enumeration value="presenter.buildroot"/>
-			<xs:enumeration value="presenter.cache_size"/>
 			<xs:enumeration value="presenter.can_close"/>
 			<xs:enumeration value="presenter.can_go_back"/>
 			<xs:enumeration value="presenter.can_save"/>
@@ -43,42 +35,23 @@
 			<xs:enumeration value="presenter.chroma"/>
 			<xs:enumeration value="presenter.colour"/>
 			<xs:enumeration value="presenter.colour_shown"/>
-			<xs:enumeration value="presenter.confirmations"/>
-			<xs:enumeration value="presenter.connected_message"/>
-			<xs:enumeration value="presenter.connection_method"/>
-			<xs:enumeration value="presenter.connection_methods"/>
 			<xs:enumeration value="presenter.controls_shown"/>
 			<xs:enumeration value="presenter.crumbs"/>
 			<xs:enumeration value="presenter.current_object"/>
-			<xs:enumeration value="presenter.dark"/>
-			<xs:enumeration value="presenter.dark_shown"/>
-			<xs:enumeration value="presenter.debug_borders"/>
-			<xs:enumeration value="presenter.debug_borders_shown"/>
-			<xs:enumeration value="presenter.debug_level"/>
-			<xs:enumeration value="presenter.debug_levels"/>
-			<xs:enumeration value="presenter.developer_mode"/>
 			<xs:enumeration value="presenter.dialog"/>
 			<xs:enumeration value="presenter.dialog_can_delete"/>
 			<xs:enumeration value="presenter.dialog_has_image"/>
 			<xs:enumeration value="presenter.dialog_image"/>
 			<xs:enumeration value="presenter.dialog_text"/>
 			<xs:enumeration value="presenter.dialog_title"/>
-			<xs:enumeration value="presenter.duet_ip"/>
-			<xs:enumeration value="presenter.duet_password"/>
-			<xs:enumeration value="presenter.error_notifications_stay"/>
 			<xs:enumeration value="presenter.exit_shown"/>
 			<xs:enumeration value="presenter.failed"/>
 			<xs:enumeration value="presenter.filaments"/>
 			<xs:enumeration value="presenter.files"/>
-			<xs:enumeration value="presenter.firmware"/>
-			<xs:enumeration value="presenter.font"/>
-			<xs:enumeration value="presenter.fonts"/>
 			<xs:enumeration value="presenter.from"/>
 			<xs:enumeration value="presenter.gcodes"/>
 			<xs:enumeration value="presenter.has_saved"/>
 			<xs:enumeration value="presenter.header_shown"/>
-			<xs:enumeration value="presenter.icon_set"/>
-			<xs:enumeration value="presenter.icon_sets"/>
 			<xs:enumeration value="presenter.info_date"/>
 			<xs:enumeration value="presenter.info_generated_by"/>
 			<xs:enumeration value="presenter.info_height"/>
@@ -87,13 +60,8 @@
 			<xs:enumeration value="presenter.info_shown"/>
 			<xs:enumeration value="presenter.info_size"/>
 			<xs:enumeration value="presenter.ip"/>
-			<xs:enumeration value="presenter.keyboard_layout"/>
-			<xs:enumeration value="presenter.keyboard_layouts"/>
-			<xs:enumeration value="presenter.language"/>
-			<xs:enumeration value="presenter.languages"/>
 			<xs:enumeration value="presenter.levelling_usable"/>
 			<xs:enumeration value="presenter.load_open"/>
-			<xs:enumeration value="presenter.machine_position_mode"/>
 			<xs:enumeration value="presenter.maps"/>
 			<xs:enumeration value="presenter.message"/>
 			<xs:enumeration value="presenter.mode"/>
@@ -106,12 +74,8 @@
 			<xs:enumeration value="presenter.network.security"/>
 			<xs:enumeration value="presenter.network.signal"/>
 			<xs:enumeration value="presenter.network.ssid"/>
-			<xs:enumeration value="presenter.network_shown"/>
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.no"/>
-			<xs:enumeration value="presenter.notification_level"/>
-			<xs:enumeration value="presenter.notification_levels"/>
-			<xs:enumeration value="presenter.notification_timeout"/>
 			<xs:enumeration value="presenter.number.confirmable"/>
 			<xs:enumeration value="presenter.number.decimal"/>
 			<xs:enumeration value="presenter.number.range"/>
@@ -122,30 +86,21 @@
 			<xs:enumeration value="presenter.open"/>
 			<xs:enumeration value="presenter.output"/>
 			<xs:enumeration value="presenter.passed"/>
-			<xs:enumeration value="presenter.poll_interval"/>
 			<xs:enumeration value="presenter.primary.chroma"/>
 			<xs:enumeration value="presenter.primary.lightness"/>
-			<xs:enumeration value="presenter.primary_color"/>
 			<xs:enumeration value="presenter.primary_hue"/>
-			<xs:enumeration value="presenter.progress_source"/>
-			<xs:enumeration value="presenter.progress_sources"/>
 			<xs:enumeration value="presenter.response.open"/>
 			<xs:enumeration value="presenter.response.progress"/>
 			<xs:enumeration value="presenter.response.text"/>
 			<xs:enumeration value="presenter.response.title"/>
 			<xs:enumeration value="presenter.response.type"/>
-			<xs:enumeration value="presenter.rotation"/>
-			<xs:enumeration value="presenter.rotations"/>
 			<xs:enumeration value="presenter.save_name"/>
 			<xs:enumeration value="presenter.save_open"/>
 			<xs:enumeration value="presenter.save_problem"/>
 			<xs:enumeration value="presenter.saved"/>
-			<xs:enumeration value="presenter.screensaver_timeout"/>
 			<xs:enumeration value="presenter.search"/>
-			<xs:enumeration value="presenter.second_usb_channel"/>
 			<xs:enumeration value="presenter.secondary.chroma"/>
 			<xs:enumeration value="presenter.secondary.lightness"/>
-			<xs:enumeration value="presenter.secondary_color"/>
 			<xs:enumeration value="presenter.secondary_hue"/>
 			<xs:enumeration value="presenter.selected_tool"/>
 			<xs:enumeration value="presenter.serial"/>
@@ -157,7 +112,6 @@
 			<xs:enumeration value="presenter.sort_name"/>
 			<xs:enumeration value="presenter.sort_size"/>
 			<xs:enumeration value="presenter.speaker_answerable"/>
-			<xs:enumeration value="presenter.ssh"/>
 			<xs:enumeration value="presenter.stage"/>
 			<xs:enumeration value="presenter.stats.area"/>
 			<xs:enumeration value="presenter.stats.max"/>
@@ -166,17 +120,11 @@
 			<xs:enumeration value="presenter.stats.points"/>
 			<xs:enumeration value="presenter.stats.rms"/>
 			<xs:enumeration value="presenter.status"/>
-			<xs:enumeration value="presenter.storage_info"/>
 			<xs:enumeration value="presenter.surface"/>
 			<xs:enumeration value="presenter.swatches"/>
-			<xs:enumeration value="presenter.system_logging"/>
-			<xs:enumeration value="presenter.system_monitor"/>
-			<xs:enumeration value="presenter.system_monitor_shown"/>
 			<xs:enumeration value="presenter.target_x"/>
 			<xs:enumeration value="presenter.target_y"/>
 			<xs:enumeration value="presenter.text"/>
-			<xs:enumeration value="presenter.theme"/>
-			<xs:enumeration value="presenter.themes"/>
 			<xs:enumeration value="presenter.tiles"/>
 			<xs:enumeration value="presenter.title"/>
 			<xs:enumeration value="presenter.tools"/>
@@ -188,8 +136,6 @@
 			<xs:enumeration value="presenter.usb_button"/>
 			<xs:enumeration value="presenter.usb_button_shown"/>
 			<xs:enumeration value="presenter.usb_drives"/>
-			<xs:enumeration value="presenter.usb_mode"/>
-			<xs:enumeration value="presenter.usb_modes"/>
 			<xs:enumeration value="presenter.version"/>
 			<xs:enumeration value="presenter.x_max"/>
 			<xs:enumeration value="presenter.x_min"/>
@@ -339,8 +285,61 @@
 			<xs:enumeration value="source.move.speed_top"/>
 			<xs:enumeration value="source.navigation.screen"/>
 			<xs:enumeration value="source.response.count"/>
+			<xs:enumeration value="source.settings.adb"/>
+			<xs:enumeration value="source.settings.advanced_settings"/>
+			<xs:enumeration value="source.settings.animations"/>
+			<xs:enumeration value="source.settings.brightness"/>
+			<xs:enumeration value="source.settings.confirmations"/>
+			<xs:enumeration value="source.settings.connected_message"/>
+			<xs:enumeration value="source.settings.connection_method"/>
+			<xs:enumeration value="source.settings.connection_method_options"/>
+			<xs:enumeration value="source.settings.dark"/>
+			<xs:enumeration value="source.settings.debug_borders"/>
+			<xs:enumeration value="source.settings.debug_level"/>
+			<xs:enumeration value="source.settings.debug_level_options"/>
+			<xs:enumeration value="source.settings.duet_ip"/>
+			<xs:enumeration value="source.settings.duet_password"/>
+			<xs:enumeration value="source.settings.error_notifications_stay"/>
+			<xs:enumeration value="source.settings.font"/>
+			<xs:enumeration value="source.settings.font_options"/>
+			<xs:enumeration value="source.settings.icon_set"/>
+			<xs:enumeration value="source.settings.icon_set_options"/>
+			<xs:enumeration value="source.settings.keyboard_layout"/>
+			<xs:enumeration value="source.settings.keyboard_layout_options"/>
+			<xs:enumeration value="source.settings.language"/>
+			<xs:enumeration value="source.settings.language_options"/>
+			<xs:enumeration value="source.settings.machine_position_mode"/>
+			<xs:enumeration value="source.settings.network_shown"/>
+			<xs:enumeration value="source.settings.notification_level"/>
+			<xs:enumeration value="source.settings.notification_level_options"/>
+			<xs:enumeration value="source.settings.notification_timeout"/>
+			<xs:enumeration value="source.settings.poll_interval"/>
+			<xs:enumeration value="source.settings.progress_source"/>
+			<xs:enumeration value="source.settings.progress_source_options"/>
+			<xs:enumeration value="source.settings.rotation"/>
+			<xs:enumeration value="source.settings.rotation_options"/>
+			<xs:enumeration value="source.settings.screensaver_timeout"/>
+			<xs:enumeration value="source.settings.second_usb_channel"/>
+			<xs:enumeration value="source.settings.ssh"/>
+			<xs:enumeration value="source.settings.system_logging"/>
+			<xs:enumeration value="source.settings.system_monitor"/>
+			<xs:enumeration value="source.settings.theme"/>
+			<xs:enumeration value="source.settings.theme_options"/>
+			<xs:enumeration value="source.settings.usb_mode"/>
+			<xs:enumeration value="source.settings.usb_mode_options"/>
+			<xs:enumeration value="source.system.build_tools_shown"/>
+			<xs:enumeration value="source.system.buildroot"/>
+			<xs:enumeration value="source.system.cache_size"/>
+			<xs:enumeration value="source.system.debug_borders_shown"/>
+			<xs:enumeration value="source.system.developer_mode"/>
+			<xs:enumeration value="source.system.firmware"/>
+			<xs:enumeration value="source.system.storage_info"/>
+			<xs:enumeration value="source.system.system_monitor_shown"/>
 			<xs:enumeration value="source.temperature.limit"/>
 			<xs:enumeration value="source.temperature.temperatures"/>
+			<xs:enumeration value="source.theme.customisable"/>
+			<xs:enumeration value="source.theme.primary"/>
+			<xs:enumeration value="source.theme.secondary"/>
 			<xs:enumeration value="source.tool.current.fault"/>
 			<xs:enumeration value="source.tool.current.heaters"/>
 			<xs:enumeration value="source.tool.current.label"/>
@@ -428,6 +427,16 @@
 			<xs:enumeration value="actions.selector.edit_choice"/>
 			<xs:enumeration value="actions.selector.increment"/>
 			<xs:enumeration value="actions.selector.pick"/>
+			<xs:enumeration value="actions.settings.ask"/>
+			<xs:enumeration value="actions.settings.set"/>
+			<xs:enumeration value="actions.system.buildroot_setup"/>
+			<xs:enumeration value="actions.system.clear_cache"/>
+			<xs:enumeration value="actions.system.erase_and_restart"/>
+			<xs:enumeration value="actions.system.hardware_test"/>
+			<xs:enumeration value="actions.system.reboot"/>
+			<xs:enumeration value="actions.system.restart"/>
+			<xs:enumeration value="actions.system.send_config"/>
+			<xs:enumeration value="actions.system.upgrade_from_github"/>
 			<xs:enumeration value="actions.tool.toggle"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
 			<xs:enumeration value="presenter.alert.choose"/>
@@ -499,44 +508,6 @@
 			<xs:enumeration value="presenter.reference.search"/>
 			<xs:enumeration value="presenter.response.close"/>
 			<xs:enumeration value="presenter.response.open_console"/>
-			<xs:enumeration value="presenter.settings.adb"/>
-			<xs:enumeration value="presenter.settings.advanced_settings"/>
-			<xs:enumeration value="presenter.settings.animations"/>
-			<xs:enumeration value="presenter.settings.brightness"/>
-			<xs:enumeration value="presenter.settings.buildroot_setup"/>
-			<xs:enumeration value="presenter.settings.clear_cache"/>
-			<xs:enumeration value="presenter.settings.confirmations"/>
-			<xs:enumeration value="presenter.settings.connected_message"/>
-			<xs:enumeration value="presenter.settings.connection_method"/>
-			<xs:enumeration value="presenter.settings.dark"/>
-			<xs:enumeration value="presenter.settings.debug_borders"/>
-			<xs:enumeration value="presenter.settings.debug_level"/>
-			<xs:enumeration value="presenter.settings.duet_ip"/>
-			<xs:enumeration value="presenter.settings.duet_password"/>
-			<xs:enumeration value="presenter.settings.erase_and_restart"/>
-			<xs:enumeration value="presenter.settings.error_notifications_stay"/>
-			<xs:enumeration value="presenter.settings.font"/>
-			<xs:enumeration value="presenter.settings.hardware_test"/>
-			<xs:enumeration value="presenter.settings.icon_set"/>
-			<xs:enumeration value="presenter.settings.keyboard_layout"/>
-			<xs:enumeration value="presenter.settings.language"/>
-			<xs:enumeration value="presenter.settings.machine_position_mode"/>
-			<xs:enumeration value="presenter.settings.notification_level"/>
-			<xs:enumeration value="presenter.settings.notification_timeout"/>
-			<xs:enumeration value="presenter.settings.poll_interval"/>
-			<xs:enumeration value="presenter.settings.progress_source"/>
-			<xs:enumeration value="presenter.settings.reboot"/>
-			<xs:enumeration value="presenter.settings.restart"/>
-			<xs:enumeration value="presenter.settings.rotation"/>
-			<xs:enumeration value="presenter.settings.screensaver_timeout"/>
-			<xs:enumeration value="presenter.settings.second_usb_channel"/>
-			<xs:enumeration value="presenter.settings.send_config"/>
-			<xs:enumeration value="presenter.settings.ssh"/>
-			<xs:enumeration value="presenter.settings.system_logging"/>
-			<xs:enumeration value="presenter.settings.system_monitor"/>
-			<xs:enumeration value="presenter.settings.theme"/>
-			<xs:enumeration value="presenter.settings.upgrade_from_github"/>
-			<xs:enumeration value="presenter.settings.usb_mode"/>
 			<xs:enumeration value="presenter.temperature.change_filament"/>
 			<xs:enumeration value="presenter.temperature.pick_filament"/>
 			<xs:enumeration value="presenter.temperature.unload_filament"/>
@@ -645,12 +616,6 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="object_cancel"/>
-			<xs:enumeration value="settings_connection"/>
-			<xs:enumeration value="settings_developer"/>
-			<xs:enumeration value="settings_display"/>
-			<xs:enumeration value="settings_general"/>
-			<xs:enumeration value="settings_notifications"/>
-			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="temperature"/>
@@ -1348,6 +1313,8 @@
 			<xs:enumeration value="tr.actions.move_jog"/>
 			<xs:enumeration value="tr.actions.navigation_open"/>
 			<xs:enumeration value="tr.actions.none"/>
+			<xs:enumeration value="tr.actions.system_reboot"/>
+			<xs:enumeration value="tr.actions.system_restart"/>
 			<xs:enumeration value="tr.actions.tool_toggle"/>
 			<xs:enumeration value="tr.app_drawer.console"/>
 			<xs:enumeration value="tr.app_drawer.fan"/>
@@ -11803,7 +11770,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_connection">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_connection.xml, with presenter settings_connection.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_connection.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -11811,7 +11778,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_developer">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_developer.xml, with presenter settings_developer.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_developer.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -11819,7 +11786,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_display">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_display.xml, with presenter settings_display.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_display.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -11827,7 +11794,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_general">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_general.xml, with presenter settings_general.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_general.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -11835,7 +11802,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_notifications">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_notifications.xml, with presenter settings_notifications.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_notifications.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -11843,7 +11810,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="settings_system">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_system.xml, with presenter settings_system.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_system.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

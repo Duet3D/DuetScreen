@@ -21,12 +21,13 @@
 #include "HardwareTest/HardwareTestPresenter.h"
 #include "Modals/FactorsActions.h"
 #include "Notifications/NotificationsPresenter.h"
-#include "Settings/ConnectionSettingsPresenter.h"
-#include "Settings/DeveloperSettingsPresenter.h"
-#include "Settings/DisplaySettingsPresenter.h"
-#include "Settings/GeneralSettingsPresenter.h"
-#include "Settings/NotificationSettingsPresenter.h"
-#include "Settings/SystemSettingsPresenter.h"
+#include "Settings/ConnectionSettings.h"
+#include "Settings/DeveloperSettings.h"
+#include "Settings/DisplaySettings.h"
+#include "Settings/GeneralSettings.h"
+#include "Settings/NotificationSettings.h"
+#include "Settings/SettingsActions.h"
+#include "Settings/SystemActions.h"
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
 #include "Sidebar/EStopActions.h"
@@ -43,12 +44,21 @@ namespace UI
 
 	void registerPresenters()
 	{
+		/* The settings: source.settings.* */
+		GeneralSettings::registerAll();
+		DisplaySettings::registerAll();
+		NotificationSettings::registerAll();
+		ConnectionSettings::registerAll();
+		DeveloperSettings::registerAll();
+
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
 		FanActions::registerAll();
 		ConsoleActions::registerAll();
 		ExtruderActions::registerAll();
 		MoveActions::registerAll();
+		SettingsActions::registerAll();
+		SystemActions::registerAll();
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
 		EStopActions::registerAll();
@@ -64,14 +74,8 @@ namespace UI
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");
-		Xml::Presenters::add<GeneralSettingsPresenter>("settings_general");
-		Xml::Presenters::add<ConnectionSettingsPresenter>("settings_connection");
 		Xml::Presenters::add<WifiPresenter>("settings_wifi");
-		Xml::Presenters::add<DisplaySettingsPresenter>("settings_display");
 		Xml::Presenters::add<ThemePreviewPresenter>("settings_theme_preview");
-		Xml::Presenters::add<NotificationSettingsPresenter>("settings_notifications");
-		Xml::Presenters::add<SystemSettingsPresenter>("settings_system");
-		Xml::Presenters::add<DeveloperSettingsPresenter>("settings_developer");
 
 		/* The file browsers (file_browser.xml): one per placement, each remembering its own order and display */
 		using Browser = FileBrowserPresenter;

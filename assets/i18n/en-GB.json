@@ -737,6 +737,8 @@
       "move_jog": "Jog an axis",
       "move_home": "Home axes",
       "move_disable_motors": "Disable the motors",
+      "system_restart": "Restart DuetScreen",
+      "system_reboot": "Reboot the screen",
       "job_pause": "Pause the job",
       "job_resume": "Resume the job",
       "job_ask_cancel": "Cancel the job",

@@ -7,6 +7,8 @@
 #include "ObjectModel/JobProgressSource.h"
 #include "Storage.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Data/SettingsSource.h"
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
@@ -14,6 +16,17 @@
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include <gtest/gtest.h>
+
+namespace
+{
+	/** Change setting `name` to `value` as the UI does, so every view shows it */
+	void setSetting(std::string_view name, int32_t value)
+	{
+		auto* settings = UI::Xml::DataSources::find<UI::Xml::SettingsSource>();
+		ASSERT_NE(settings, nullptr);
+		ASSERT_TRUE(settings->set(name, static_cast<float>(value))) << name;
+	}
+} // namespace
 
 class TestGeneralSettings : public UiTestSuite
 {
@@ -35,9 +48,7 @@ class TestGeneralSettings : public UiTestSuite
 
 TEST_F(TestGeneralSettings, TogglesAreStored)
 {
-	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
-	tab.hide();
-	tab.show(); // Read again
+	setSetting("confirmations", 1);
 	lv_obj_t* toggle = lv_obj_find_by_name(part("show_confirmation_dialogs"), "switch");
 	ASSERT_NE(toggle, nullptr);
 	EXPECT_TRUE(lv_obj_has_state(toggle, LV_STATE_CHECKED));
@@ -212,7 +223,7 @@ class TestConnectionSettings : public UiTestSuite
 	/** Show the page, with advanced settings shown or not */
 	void show(bool advanced)
 	{
-		StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
+		setSetting("advanced_settings", advanced ? 1 : 0);
 		tab.setSize(800, 600);
 		tab.show();
 	}

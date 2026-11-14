@@ -18,7 +18,10 @@
 #include "NavigationSource.h"
 #include "ObjectModelSource.h"
 #include "ResponseSource.h"
+#include "SettingsSource.h"
+#include "SystemSource.h"
 #include "TemperatureSource.h"
+#include "ThemeSource.h"
 #include "ToolSource.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Globals.h"
@@ -109,7 +112,10 @@ namespace UI::Xml::DataSources
 			std::make_shared<NavigationSource>(),
 			std::make_shared<ObjectModelSource>(),
 			std::make_shared<ResponseSource>(),
+			std::make_shared<SettingsSource>(),
+			std::make_shared<SystemSource>(),
 			std::make_shared<TemperatureSource>(),
+			std::make_shared<ThemeSource>(),
 		};
 
 		for (auto& source : s_sources)

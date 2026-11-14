@@ -736,6 +736,8 @@
       "move_jog": "Déplacer un axe",
       "move_home": "Mettre les axes à l'origine",
       "move_disable_motors": "Désactiver les moteurs",
+      "system_restart": "Redémarrer DuetScreen",
+      "system_reboot": "Redémarrer l'écran",
       "job_pause": "Mettre la tâche en pause",
       "job_resume": "Reprendre la tâche",
       "job_ask_cancel": "Annuler la tâche",

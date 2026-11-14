@@ -736,6 +736,8 @@
       "move_jog": "Een as verplaatsen",
       "move_home": "Assen homen",
       "move_disable_motors": "Motoren uitschakelen",
+      "system_restart": "DuetScreen herstarten",
+      "system_reboot": "Het scherm opnieuw opstarten",
       "job_pause": "Taak pauzeren",
       "job_resume": "Taak hervatten",
       "job_ask_cancel": "Taak annuleren",

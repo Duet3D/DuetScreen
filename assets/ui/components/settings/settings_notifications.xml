@@ -2,10 +2,11 @@
   The Notifications settings page: which of the Duet's messages show, and how long they stay. Each setting is a row
   (ds_setting), stored as soon as it is changed.
 
-  Fields and actions: src/UI/Presenters/Settings/NotificationSettingsPresenter.h. Numbers are typed on the shared
-  number pad.
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/NotificationSettings.cpp)
+  Actions:  actions.settings.set; numbers are typed on the shared number pad
 -->
-<component presenter="settings_notifications">
+<component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
 		<style name="setting_page"/>
@@ -13,8 +14,8 @@
 		<ds_setting_group name="messages" title_tag="tr.settings.groups.messages">
 			<ds_setting name="display_connected_message" title_tag="tr.settings.display_connected_message">
 				<ds_toggle name="switch">
-					<bind_state_if_eq subject="presenter.connected_message" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.settings.connected_message"/>
+					<bind_state_if_eq subject="source.settings.connected_message" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="actions.settings.set" arg="connected_message"/>
 				</ds_toggle>
 			</ds_setting>
 			<!-- One of a few, in the order of `notification_levels`: the chosen one is checked -->
@@ -24,38 +25,38 @@
 					<style name="setting_options"/>
 					<ds_button name="info" translation_tag="tr.settings.severity.info">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="presenter.settings.notification_level" arg="0"/>
+						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="actions.settings.set" arg="notification_level=0"/>
 					</ds_button>
 					<ds_button name="success" translation_tag="tr.settings.severity.success">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="presenter.settings.notification_level" arg="1"/>
+						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="actions.settings.set" arg="notification_level=1"/>
 					</ds_button>
 					<ds_button name="warn" translation_tag="tr.settings.severity.warn">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="2"/>
-						<action trigger="clicked" name="presenter.settings.notification_level" arg="2"/>
+						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="2"/>
+						<action trigger="clicked" name="actions.settings.set" arg="notification_level=2"/>
 					</ds_button>
 					<ds_button name="error" translation_tag="tr.settings.severity.error">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.notification_level" state="checked" ref_value="3"/>
-						<action trigger="clicked" name="presenter.settings.notification_level" arg="3"/>
+						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="3"/>
+						<action trigger="clicked" name="actions.settings.set" arg="notification_level=3"/>
 					</ds_button>
 				</lv_obj>
 			</ds_setting>
 			<ds_setting name="notification_timeout" title_tag="tr.settings.notification_timeout">
 				<ds_slider name="slider" label_tag="tr.settings.notification_timeout" label_shown="false"
 						   numberpad="true" min="0" max="10" increment="0.5" decimals="1" value_scale="1000" unit="s"
-						   out_of_range="upper" bind_value="presenter.notification_timeout" width="55%"
+						   out_of_range="upper" bind_value="source.settings.notification_timeout" width="55%"
 						   height="content">
-					<action trigger="value_confirmed" name="presenter.settings.notification_timeout"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="notification_timeout"/>
 				</ds_slider>
 			</ds_setting>
 			<ds_setting name="notification_auto_close_error" title_tag="tr.settings.notification_auto_close_error">
 				<ds_toggle name="switch">
-					<bind_state_if_eq subject="presenter.error_notifications_stay" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.settings.error_notifications_stay"/>
+					<bind_state_if_eq subject="source.settings.error_notifications_stay" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="actions.settings.set" arg="error_notifications_stay"/>
 				</ds_toggle>
 			</ds_setting>
 		</ds_setting_group>

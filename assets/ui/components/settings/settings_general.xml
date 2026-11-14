@@ -2,26 +2,28 @@
   The General settings page: the language and USB keyboard layout, and how the screen works the machine. Each setting
   is a row (ds_setting) in a group, stored as soon as it is changed.
 
-  Fields and actions: src/UI/Presenters/Settings/GeneralSettingsPresenter.h
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/GeneralSettings.cpp)
+  Actions:  actions.settings.set
 -->
-<component presenter="settings_general">
+<component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
 		<style name="setting_page"/>
 
 		<ds_setting_group name="language_keyboard" title_tag="tr.settings.groups.language_keyboard">
 			<ds_setting name="language" title_tag="tr.settings.language" hint_tag="tr.settings.hints.language">
-				<ds_choice name="choice" title_tag="tr.settings.language" bind_options="presenter.languages"
-						   bind_selected="presenter.language">
+				<ds_choice name="choice" title_tag="tr.settings.language" bind_options="source.settings.language_options"
+						   bind_selected="source.settings.language">
 					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="presenter.settings.language"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="language"/>
 				</ds_choice>
 			</ds_setting>
 			<ds_setting name="keyboard_layout" title_tag="tr.settings.keyboard_layout">
-				<ds_choice name="choice" title_tag="tr.settings.keyboard_layout" bind_options="presenter.keyboard_layouts"
-						   bind_selected="presenter.keyboard_layout">
+				<ds_choice name="choice" title_tag="tr.settings.keyboard_layout" bind_options="source.settings.keyboard_layout_options"
+						   bind_selected="source.settings.keyboard_layout">
 					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="presenter.settings.keyboard_layout"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="keyboard_layout"/>
 				</ds_choice>
 			</ds_setting>
 		</ds_setting_group>
@@ -30,15 +32,15 @@
 			<ds_setting name="show_confirmation_dialogs" title_tag="tr.settings.show_confirmation_dialogs"
 						hint_tag="tr.settings.hints.confirmations">
 				<ds_toggle name="switch">
-					<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.settings.confirmations"/>
+					<bind_state_if_eq subject="source.settings.confirmations" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="actions.settings.set" arg="confirmations"/>
 				</ds_toggle>
 			</ds_setting>
 			<ds_setting name="move_machine_position_mode" title_tag="tr.settings.move_machine_position_mode"
 						hint_tag="tr.settings.hints.machine_coordinates">
 				<ds_toggle name="switch">
-					<bind_state_if_eq subject="presenter.machine_position_mode" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.settings.machine_position_mode"/>
+					<bind_state_if_eq subject="source.settings.machine_position_mode" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="actions.settings.set" arg="machine_position_mode"/>
 				</ds_toggle>
 			</ds_setting>
 			<!-- One of a few: the chosen one is checked -->
@@ -48,13 +50,13 @@
 					<style name="setting_options"/>
 					<ds_button name="duration" translation_tag="tr.settings.job_progress_source_options.duration">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.progress_source" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="presenter.settings.progress_source" arg="0"/>
+						<bind_state_if_eq subject="source.settings.progress_source" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="actions.settings.set" arg="progress_source=0"/>
 					</ds_button>
 					<ds_button name="file" translation_tag="tr.settings.job_progress_source_options.file">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.progress_source" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="presenter.settings.progress_source" arg="1"/>
+						<bind_state_if_eq subject="source.settings.progress_source" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="actions.settings.set" arg="progress_source=1"/>
 					</ds_button>
 				</lv_obj>
 			</ds_setting>

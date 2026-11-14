@@ -43,7 +43,7 @@
 				   style_min_height="content"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
-			<bind_style name="action_btn" subject="presenter.confirmations" ref_value="0"/>
+			<bind_style name="action_btn" subject="source.settings.confirmations" ref_value="0"/>
 			<action trigger="clicked" name="presenter.object_cancel.cancel_current"/>
 		</ds_button>
 

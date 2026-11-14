@@ -49,9 +49,9 @@ namespace UI::Xml
 				 "option chosen marked; the option picked reaches a `value_confirmed` action as its index "
 				 "(ActionArgs::value()). It shows what `bind_selected` says is chosen, so the action sets that "
 				 "subject; without `bind_selected` it shows the option picked.",
-			 .example = R"(<ds_choice title_tag="tr.settings.language" bind_options="presenter.languages"
-		   bind_selected="presenter.language" width="300">
-	<action trigger="value_confirmed" name="presenter.settings.language"/>
+			 .example = R"(<ds_choice title_tag="tr.settings.language" bind_options="source.settings.language_options"
+		   bind_selected="source.settings.language" width="300">
+	<action trigger="value_confirmed" name="actions.settings.set" arg="language"/>
 </ds_choice>)",
 			 .attributes = {{"bind_options",
 							 "Follow a text subject holding the options, one per line",
@@ -64,8 +64,8 @@ namespace UI::Xml
 							 AttributeKind::Subject},
 							{"title", "The choice dialog's title, if there is no `title_tag`"},
 							{"title_tag", "Translation key for the choice dialog's title", AttributeKind::Translation}},
-			 .exampleSubjects = {{"presenter.languages", "string", "English (UK)\nDeutsch\nFrançais"},
-								 {"presenter.language", "int", "0"}}},
+			 .exampleSubjects = {{"source.settings.language_options", "string", "English (UK)\nDeutsch\nFrançais"},
+								 {"source.settings.language", "int", "0"}}},
 			xmlCreate,
 			xmlApply);
 	}

@@ -736,6 +736,8 @@
       "move_jog": "Achse verfahren",
       "move_home": "Achsen referenzieren",
       "move_disable_motors": "Motoren deaktivieren",
+      "system_restart": "DuetScreen neu starten",
+      "system_reboot": "Bildschirm neu booten",
       "job_pause": "Auftrag pausieren",
       "job_resume": "Auftrag fortsetzen",
       "job_ask_cancel": "Auftrag abbrechen",

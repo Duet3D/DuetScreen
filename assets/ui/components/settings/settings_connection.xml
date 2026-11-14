@@ -3,10 +3,12 @@
   password), then, with advanced settings shown (Developer), the USB-C port's mode and how often the Duet is polled;
   and the screen's own WiFi (settings_wifi.xml). Each setting is a row (ds_setting), applied as soon as it is changed.
 
-  Fields and actions: src/UI/Presenters/Settings/ConnectionSettingsPresenter.h. Numbers and the IP address are typed on
-  the shared number pad; the password on the shared keyboard.
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/ConnectionSettings.cpp)
+  Actions:  actions.settings.set; actions.settings.ask for the IP address. Numbers and the IP
+            address are typed on the shared number pad; the password on the shared keyboard.
 -->
-<component presenter="settings_connection">
+<component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
 		<style name="setting_page"/>
@@ -18,54 +20,54 @@
 					<style name="setting_options"/>
 					<ds_button name="usb" translation_tag="tr.connection_method.usb">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="presenter.settings.connection_method" arg="0"/>
+						<bind_state_if_eq subject="source.settings.connection_method" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="actions.settings.set" arg="connection_method=0"/>
 					</ds_button>
 					<ds_button name="network" translation_tag="tr.connection_method.network">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="presenter.settings.connection_method" arg="1"/>
+						<bind_state_if_eq subject="source.settings.connection_method" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="actions.settings.set" arg="connection_method=1"/>
 					</ds_button>
 					<ds_button name="uart" translation_tag="tr.connection_method.uart">
 						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.connection_method" state="checked" ref_value="2"/>
-						<action trigger="clicked" name="presenter.settings.connection_method" arg="2"/>
+						<bind_state_if_eq subject="source.settings.connection_method" state="checked" ref_value="2"/>
+						<action trigger="clicked" name="actions.settings.set" arg="connection_method=2"/>
 					</ds_button>
 				</lv_obj>
 			</ds_setting>
 
 			<!-- Over the network only -->
 			<ds_setting name="duet_ip_address" title_tag="tr.settings.duet_ip_address">
-				<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
-				<ds_textarea name="field" bind_text="presenter.duet_ip" one_line="true" keyboard="none"
+				<bind_flag_if_eq subject="source.settings.network_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="field" bind_text="source.settings.duet_ip" one_line="true" keyboard="none"
 							 placeholder_tag="tr.settings.duet_ip_address_prompt" width="45%" height="content">
-					<action trigger="clicked" name="presenter.settings.duet_ip"/>
+					<action trigger="clicked" name="actions.settings.ask" arg="duet_ip"/>
 				</ds_textarea>
 			</ds_setting>
 			<ds_setting name="duet_password" title_tag="tr.settings.duet_password">
-				<bind_flag_if_eq subject="presenter.network_shown" flag="hidden" ref_value="0"/>
-				<ds_textarea name="field" bind_text="presenter.duet_password" one_line="true" password_mode="true"
+				<bind_flag_if_eq subject="source.settings.network_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="field" bind_text="source.settings.duet_password" one_line="true" password_mode="true"
 							 placeholder_tag="tr.settings.duet_password_prompt" width="45%" height="content">
-					<action trigger="ready" name="presenter.settings.duet_password"/>
+					<action trigger="ready" name="actions.settings.set" arg="duet_password"/>
 				</ds_textarea>
 			</ds_setting>
 
 			<!-- With advanced settings shown -->
 			<ds_setting name="usb_mode" title_tag="tr.settings.usb_mode" badge_tag="tr.settings.advanced">
-				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
-				<ds_choice name="choice" title_tag="tr.settings.usb_mode" bind_options="presenter.usb_modes"
-						   bind_selected="presenter.usb_mode">
+				<bind_flag_if_eq subject="source.settings.advanced_settings" flag="hidden" ref_value="0"/>
+				<ds_choice name="choice" title_tag="tr.settings.usb_mode" bind_options="source.settings.usb_mode_options"
+						   bind_selected="source.settings.usb_mode">
 					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="presenter.settings.usb_mode"/>
+					<action trigger="value_confirmed" name="actions.settings.set" arg="usb_mode"/>
 				</ds_choice>
 			</ds_setting>
 			<ds_setting name="poll_interval" title_tag="tr.settings.duet_poll_interval"
 						hint_tag="tr.settings.hints.poll_interval" badge_tag="tr.settings.advanced">
-				<bind_flag_if_eq subject="presenter.advanced_shown" flag="hidden" ref_value="0"/>
+				<bind_flag_if_eq subject="source.settings.advanced_settings" flag="hidden" ref_value="0"/>
 				<ds_slider name="slider" label_tag="tr.settings.duet_poll_interval" label_shown="false" numberpad="true"
 						   min="100" max="2000" increment="50" decimals="0" unit="ms" out_of_range="upper"
-						   bind_value="presenter.poll_interval" width="55%" height="content">
-					<action trigger="value_confirmed" name="presenter.settings.poll_interval"/>
+						   bind_value="source.settings.poll_interval" width="55%" height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="poll_interval"/>
 				</ds_slider>
 			</ds_setting>
 		</ds_setting_group>
