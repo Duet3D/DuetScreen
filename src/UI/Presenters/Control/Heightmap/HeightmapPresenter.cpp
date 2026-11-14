@@ -8,6 +8,7 @@
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/PrinterModel.h"
 #include "i18n/i18n.h"
+#include "utils/UnitSystem.h"
 #include <cmath>
 #include <limits>
 
@@ -69,12 +70,13 @@ namespace UI
 		f.field("surface", m_surface, "The height map shown, sampled for <ds_heatmap>");
 		f.field("title", m_title, "E.g. \"Heightmap: heightmap.csv\"");
 		f.list("maps", m_maps, "The height map files");
-		f.field("stats.points", m_points, "Number of points, as text, e.g. \"Number of points: 0;\"");
-		f.field("stats.area", m_area, "Probed area, as text");
-		f.field("stats.min", m_min, "Lowest deviation, as text");
-		f.field("stats.max", m_max, "Highest deviation, as text");
-		f.field("stats.mean", m_mean, "Mean error, as text");
-		f.field("stats.rms", m_rms, "RMS error, as text");
+		f.field("has_maps", m_hasMaps, "1 if there are height map files, else 0");
+		f.field("stats.points", m_points, "Number of points, e.g. \"121\"");
+		f.field("stats.area", m_area, "Probed area, in cm² or in² as the displayed unit is, e.g. \"400 cm²\"");
+		f.field("stats.min", m_min, "Lowest deviation in the displayed unit, e.g. \"-0.12 mm\"");
+		f.field("stats.max", m_max, "Highest deviation in the displayed unit");
+		f.field("stats.mean", m_mean, "Mean error in the displayed unit");
+		f.field("stats.rms", m_rms, "RMS error in the displayed unit");
 		f.field("mode", m_modeSubject, "How values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range)");
 		f.field("levelling_usable",
 				m_levellingUsable,
@@ -117,6 +119,7 @@ namespace UI
 		}
 		m_files.clear();
 		m_maps.clear();
+		m_hasMaps.set(0);
 		clear();
 		showUsable();
 	}
@@ -200,24 +203,36 @@ namespace UI
 		m_yRange = yRange;
 		m_title.set(_("heightmap.title", map->GetFileName()));
 		m_surface.set(std::move(values));
-		m_points.set(_("heightmap.num_points", map->GetPointCount()));
-		m_area.set(_("heightmap.area", map->GetArea() / 100));
-		m_min.set(_("heightmap.min_error", map->GetMinError()));
-		m_max.set(_("heightmap.max_error", map->GetMaxError()));
-		m_mean.set(_("heightmap.mean_error", map->GetMeanError()));
-		m_rms.set(_("heightmap.std_dev", map->GetStdDev()));
+		showStats(static_cast<int>(map->GetPointCount()),
+				  static_cast<float>(map->GetArea()),
+				  static_cast<float>(map->GetMinError()),
+				  static_cast<float>(map->GetMaxError()),
+				  static_cast<float>(map->GetMeanError()),
+				  static_cast<float>(map->GetStdDev()));
+	}
+
+	void HeightmapPresenter::showStats(int points, float areaMm2, float min, float max, float mean, float rms)
+	{
+		// In the displayed unit: millimetres to 0.001, or inches to 0.0001; the area in cm² or in²
+		const std::string& unit = Units::getDisplayedDistanceUnit();
+		const bool metric = Units::getCurrentDisplayedUnitSystem() == Units::UnitSystem::Metric;
+		const float step = metric ? 1000.0f : 10000.0f;
+		const auto distance = [step](float mm)
+		{ return std::round(Units::convertDistanceToCurrentDisplayedUnit(mm) * step) / step; };
+		const float area = metric ? areaMm2 / 100.0f : areaMm2 / (25.4f * 25.4f);
+		m_points.set(_("heightmap.num_points", points));
+		m_area.set(_("heightmap.area", std::round(area * 10.0f) / 10.0f, metric ? "cm" : unit));
+		m_min.set(_("heightmap.min_error", distance(min), unit));
+		m_max.set(_("heightmap.max_error", distance(max), unit));
+		m_mean.set(_("heightmap.mean_error", distance(mean), unit));
+		m_rms.set(_("heightmap.std_dev", distance(rms), unit));
 	}
 
 	void HeightmapPresenter::clear()
 	{
 		m_title.set(_("heightmap.title", ""));
 		m_surface.clear();
-		m_points.set(_("heightmap.num_points", 0));
-		m_area.set(_("heightmap.area", 0.0));
-		m_min.set(_("heightmap.min_error", 0.0));
-		m_max.set(_("heightmap.max_error", 0.0));
-		m_mean.set(_("heightmap.mean_error", 0.0));
-		m_rms.set(_("heightmap.std_dev", 0.0));
+		showStats(0, 0, 0, 0, 0, 0);
 	}
 
 	void HeightmapPresenter::requestFiles()
@@ -248,6 +263,7 @@ namespace UI
 						row.loaded.set(loaded ? 1 : 0);
 						row.loadText.set(loaded ? _("heightmap.unload") : _("heightmap.load"));
 					});
+		m_hasMaps.set(m_files.empty() ? 0 : 1);
 	}
 
 	void HeightmapPresenter::showUsable()

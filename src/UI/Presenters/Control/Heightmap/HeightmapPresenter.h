@@ -66,6 +66,9 @@ namespace UI
 		void onDisconnect() override;
 
 	  private:
+		/** Show a map's statistics: its points, area (mm²) and deviations (mm), in the displayed unit */
+		void showStats(int points, float areaMm2, float min, float max, float mean, float rms);
+
 		/** The X or Y span of a height map's axis, allowing for the current tool's offset */
 		struct AxisRange
 		{
@@ -113,6 +116,7 @@ namespace UI
 		Xml::Surface m_surface;						// The map shown
 		Xml::StringSubject<96> m_title;				// "Heightmap: …"
 		Xml::List<HeightmapFileRow> m_maps;			// The files
+		Xml::IntSubject m_hasMaps;					// `has_maps`
 		Xml::StringSubject<48> m_points;			// Statistics, as text
 		Xml::StringSubject<48> m_area;				// …
 		Xml::StringSubject<48> m_min;				// …

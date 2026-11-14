@@ -822,12 +822,13 @@ Used by `heightmap`.
 | `presenter.surface` | surface | The height map shown, sampled for <ds_heatmap> |
 | `presenter.title` | text | E.g. "Heightmap: heightmap.csv" |
 | `presenter.maps` | list | The height map files |
-| `presenter.stats.points` | text | Number of points, as text, e.g. "Number of points: 0;" |
-| `presenter.stats.area` | text | Probed area, as text |
-| `presenter.stats.min` | text | Lowest deviation, as text |
-| `presenter.stats.max` | text | Highest deviation, as text |
-| `presenter.stats.mean` | text | Mean error, as text |
-| `presenter.stats.rms` | text | RMS error, as text |
+| `presenter.has_maps` | int | 1 if there are height map files, else 0 |
+| `presenter.stats.points` | text | Number of points, e.g. "121" |
+| `presenter.stats.area` | text | Probed area, in cm² or in² as the displayed unit is, e.g. "400 cm²" |
+| `presenter.stats.min` | text | Lowest deviation in the displayed unit, e.g. "-0.12 mm" |
+| `presenter.stats.max` | text | Highest deviation in the displayed unit |
+| `presenter.stats.mean` | text | Mean error in the displayed unit |
+| `presenter.stats.rms` | text | RMS error in the displayed unit |
 | `presenter.mode` | int | How values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range) |
 | `presenter.levelling_usable` | int | 1 if the bed can be levelled or probed: connected and no job running |
 
