@@ -54,7 +54,7 @@
 		<style name="slider_knob" radius="0" border_color="#text"/>
 		<style name="cb_marker" radius="0" border_color="#text"/>
 		<style name="bg_switch" radius="0"/>
-		<style name="switch_knob" radius="0"/>
+		<style name="switch_knob" radius="0" border_color="#text"/>
 		<style name="bar_label_bg" radius="0"/>
 		<style name="gauge_bar" radius="0"/>
 		<style name="gauge_bar_indic" radius="0"/>

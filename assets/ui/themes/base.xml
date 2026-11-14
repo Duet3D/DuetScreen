@@ -223,9 +223,10 @@
 
 		<!-- Switch -->
 		<style name="bg_switch" bg_color="#highlight" bg_opa="100%" radius="circle"/>
-		<!-- The knob is white, with a shadow to lift it off a light track -->
+		<!-- The knob is white, edged and with a shadow to lift it off a light track -->
 		<style name="switch_knob" pad_all="-4dpx" bg_color="0xffffff" radius="circle" shadow_width="4" shadow_offset_y="1"
-			   shadow_color="0x000000" shadow_opa="30%"/>
+			   shadow_color="0x000000" shadow_opa="30%" border_color="#border" border_width="#border_width"
+			   border_opa="100%"/>
 
 		<!-- Line -->
 		<style name="line" line_width="1" line_color="#highlight"/>

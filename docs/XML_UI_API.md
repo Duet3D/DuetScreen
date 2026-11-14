@@ -3181,7 +3181,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `cb_marker` | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker.png) | pad_all=3dpx border_width=2 border_color=#primary bg_color=#bg bg_opa=100% radius=3 |
 | `cb_marker_checked` | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker_checked.png) | bg_image_src=symbol_ok |
 | `bg_switch` | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_switch.png) | bg_color=#highlight bg_opa=100% radius=circle |
-| `switch_knob` | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/switch_knob.png) | pad_all=-4dpx bg_color=0xffffff radius=circle shadow_width=4 shadow_offset_y=1 shadow_color=0x000000 shadow_opa=30% |
+| `switch_knob` | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/switch_knob.png) | pad_all=-4dpx bg_color=0xffffff radius=circle shadow_width=4 shadow_offset_y=1 shadow_color=0x000000 shadow_opa=30% border_color=#border border_width=#border_width border_opa=100% |
 | `line` |  | line_width=1 line_color=#highlight |
 | `table` |  | radius=0 |
 | `table_cell` | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/table_cell.png) | bg_color=#bg bg_opa=100% text_color=#text border_width=1dpx border_color=#border_muted border_side=top\|bottom |
