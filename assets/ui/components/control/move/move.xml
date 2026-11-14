@@ -1,6 +1,6 @@
 <!--
-  The Move tab. On the left: every axis' position (tap one to move to a position), X and Y on a pad and every other
-  axis in a column, then the jog step and speed. On the right: homing; the Z offset on a printer, or work zero on a
+  The Move tab. On the left: every axis' position (tap one to move to a position), X and Y on a pad, Z in a column,
+  and one more column for the axis chosen from any others, then the jog step and speed. On the right: homing; the Z offset on a printer, or work zero on a
   CNC; and the speed factor, which scales jogging too.
 
   Data:     source.axes.* (src/UI/Xml/Data/AxesSource.h), source.jog.* (src/UI/Xml/Data/JogSource.h),
@@ -17,8 +17,8 @@
 
 			<move_positions name="positions" width="100%"/>
 
-			<!-- X and Y on a pad, then a column for Z and each other axis. The spacers centre them while they fit;
-				 when there are more than fit, they take no room, so the row starts at its left and scrolls sideways -->
+			<!-- X and Y on a pad, Z in a column, then any other axes. The spacers centre them while they fit; on a
+				 narrow screen they take no room, so the row starts at its left and scrolls sideways -->
 			<lv_obj name="jog" width="100%" flex_grow="1" flex_flow="row" scroll_dir="hor"
 					style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="pad_zero"/>
@@ -28,9 +28,20 @@
 				</lv_obj>
 				<!-- As tall as there is room for, at most 240 -->
 				<move_xy name="xy_control" width="240" height="100%" style_max_height="240"/>
-				<ds_list name="columns" list="source.axes.columns" item="move_axis" width="content" height="100%"
-						 style_max_height="240" flex_flow="row" style_pad_all="0" style_pad_column="10"
-						 scrollable="false"/>
+				<move_axis name="z_control" letter="'Z'" usable="source.axes.z.jog_usable" plus="Z+" minus="Z-"
+						   style_max_height="240"/>
+				<!-- Any other axes: the one chosen beside it is jogged, so there is never more than one more column -->
+				<lv_obj name="others" width="content" height="100%" style_max_height="240" flex_flow="row"
+						scrollable="false">
+					<style name="pad_zero"/>
+					<style name="pad_gap"/>
+					<bind_flag_if_eq subject="source.axes.others_shown" flag="hidden" ref_value="0"/>
+					<ds_list name="choices" list="source.axes.others" item="move_axis_choice" width="content"
+							 height="100%" flex_flow="column_wrap" style_pad_all="0" style_pad_row="#pad"
+							 style_pad_column="#pad" scrollable="false"/>
+					<move_axis name="other_control" letter="source.axes.other.letter"
+							   usable="source.axes.other.jog_usable" plus="other+" minus="other-"/>
+				</lv_obj>
 				<lv_obj name="end_spacer" width="0" height="1" flex_grow="1" clickable="false">
 					<style name="pad_zero"/>
 				</lv_obj>

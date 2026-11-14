@@ -84,6 +84,7 @@ namespace UI::Xml
 		const std::string name = id.substr(id.find('.') + 1);
 		f.field(name + ".title", m_title, "The title, e.g. \"Feed Distance (mm)\"");
 		f.field(name + ".value", m_valueText, "The value, e.g. \"0.1\" (actions.selector.* with arg `" + id + "`)");
+		f.field(name + ".unit", m_unitText, "The value's unit, e.g. \"mm\"; empty if it has none");
 		f.list(name + ".choices",
 			   m_choices,
 			   "The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice)");
@@ -97,6 +98,7 @@ namespace UI::Xml
 	void ValueSelector::setUnit(std::string_view unit)
 	{
 		m_unit = unit;
+		m_unitText.set(unit);
 	}
 
 	void ValueSelector::setValue(float value)

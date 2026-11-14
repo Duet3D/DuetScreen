@@ -1253,10 +1253,9 @@ TEST_F(TestHomeViewWithData, TheScreenShowsItsOwnUnitsWhateverTheDuetUses)
 	ASSERT_TRUE(settings->set("units", 1.0f));
 	deliverModelEvents();
 	EXPECT_EQ(firstTile(), "1.00");
-	EXPECT_NE(std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(move, "distance"), "title")))
-				  .find(_("units.inches")),
-			  std::string::npos)
-		<< "the step's title says inches";
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(move, "distance"), "hint"))),
+			  _("units.inches"))
+		<< "the step's unit is inches";
 
 	// A jog of 10 inches goes to the Duet in its millimetres
 	lv_obj_send_event(lv_obj_find_by_name(move, "x_increment"), LV_EVENT_CLICKED, nullptr);

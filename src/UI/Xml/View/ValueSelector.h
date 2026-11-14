@@ -118,6 +118,7 @@ namespace UI::Xml
 
 		StringSubject<64> m_title;		// `<name>.title`
 		StringSubject<16> m_valueText;	// `<name>.value`
+		StringSubject<16> m_unitText;	// `<name>.unit`
 		List<ValueChoiceRow> m_choices; // `<name>.choices`
 	};
 } // namespace UI::Xml

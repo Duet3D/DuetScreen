@@ -198,6 +198,7 @@
       "numberpad_new_value_header": "Introduzir novo valor"
     },
     "move": {
+      "speed": "Velocidade",
       "step": "Passo",
       "home_all": "Home todos",
       "axis_home": "Home {:s}",

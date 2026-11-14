@@ -87,11 +87,17 @@ From [AxesSource.cpp](../src/UI/Xml/Data/AxesSource.cpp).
 | `source.axes.x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
 | `source.axes.y.homed` | int | 1 when homed |
 | `source.axes.y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.z.homed` | int | 1 when homed |
+| `source.axes.z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
 | `source.axes.all` | list | Every axis the user sees, in the printer's order |
 | `source.axes.all_homed` | int | 1 when every axis the user sees is homed |
 | `source.axes.home_all_usable` | int | 1 if all axes can be homed |
 | `source.axes.disable_motors_usable` | int | 1 if the motors can be disabled |
-| `source.axes.columns` | list | The axes the user sees other than X and Y, each jogged in a column of its own: Z, then any others |
+| `source.axes.others` | list | The axes the user sees other than X, Y and Z: one is chosen to be jogged |
+| `source.axes.others_shown` | int | 1 if there are axes other than X, Y and Z |
+| `source.axes.other.letter` | text | The letter of the axis chosen from `others`, e.g. "U" |
+| `source.axes.other.homed` | int | 1 when the chosen axis is homed |
+| `source.axes.other.jog_usable` | int | 1 if the chosen axis can be jogged |
 
 Each row of `source.axes.all`:
 
@@ -103,8 +109,9 @@ Each row of `source.axes.all`:
 | `row.homed` | int | 1 when homed |
 | `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
 | `row.home_usable` | int | 1 if it can be homed |
+| `row.chosen` | int | In `source.axes.others`: 1 for the axis chosen to be jogged, else 0 |
 
-Each row of `source.axes.columns`:
+Each row of `source.axes.others`:
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -114,6 +121,7 @@ Each row of `source.axes.columns`:
 | `row.homed` | int | 1 when homed |
 | `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
 | `row.home_usable` | int | 1 if it can be homed |
+| `row.chosen` | int | In `source.axes.others`: 1 for the axis chosen to be jogged, else 0 |
 
 ### babystep
 
@@ -125,6 +133,7 @@ From [BabystepSource.cpp](../src/UI/Xml/Data/BabystepSource.cpp).
 | `source.babystep.dialog_open` | int | 1 while the shared babystepping dialog is open |
 | `source.babystep.step.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `source.babystep.step.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `babystep.step`) |
+| `source.babystep.step.unit` | text | The value's unit, e.g. "mm"; empty if it has none |
 | `source.babystep.step.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
 
 Each row of `source.babystep.step.choices`:
@@ -189,9 +198,11 @@ From [ExtruderSource.cpp](../src/UI/Xml/Data/ExtruderSource.cpp).
 | `source.extruder.retract_usable` | int | 1 if the current tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
 | `source.extruder.distance.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `source.extruder.distance.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `extruder.distance`) |
+| `source.extruder.distance.unit` | text | The value's unit, e.g. "mm"; empty if it has none |
 | `source.extruder.distance.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
 | `source.extruder.feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `source.extruder.feedrate.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `extruder.feedrate`) |
+| `source.extruder.feedrate.unit` | text | The value's unit, e.g. "mm"; empty if it has none |
 | `source.extruder.feedrate.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
 
 Each row of `source.extruder.distance.choices`:
@@ -281,9 +292,11 @@ From [JogSource.cpp](../src/UI/Xml/Data/JogSource.cpp).
 | --- | --- | --- |
 | `source.jog.distance.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `source.jog.distance.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `jog.distance`) |
+| `source.jog.distance.unit` | text | The value's unit, e.g. "mm"; empty if it has none |
 | `source.jog.distance.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
 | `source.jog.feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `source.jog.feedrate.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `jog.feedrate`) |
+| `source.jog.feedrate.unit` | text | The value's unit, e.g. "mm"; empty if it has none |
 | `source.jog.feedrate.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
 
 Each row of `source.jog.distance.choices`:
@@ -475,12 +488,13 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.job.pause` | Pause the job. Offered to users for their widgets' action settings, as `tr.actions.job_pause`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.resume` | Resume the paused job. Offered to users for their widgets' action settings, as `tr.actions.job_resume`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.move.choose_axis` | Choose the axis other than X, Y and Z that is jogged: raise it from a row of `source.axes.others`, or `arg` is its letter | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
 | `actions.move.disable_motors` | Disable the motors (M18), asking first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_disable_motors`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `source.axes.all` or `columns`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_home`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.jog` | Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; from a row of `source.axes.all` or `columns`, `+` or `-`. Offered to users for their widgets' action settings, as `tr.actions.move_jog`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `source.axes.all` or `columns`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `source.axes.all` or `others`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_home`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.jog` | Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; `other+` or `other-` for the axis chosen from source.axes.others; from a row of `source.axes.all` or `others`, `+` or `-`. Offered to users for their widgets' action settings, as `tr.actions.move_jog`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `source.axes.all` or `others`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
 | `actions.move.workplace` | Use workplace `arg`, 1-9: G54 to G59, then G59.1 to G59.3. Offered to users for their widgets' action settings, as `tr.actions.move_workplace`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.zero` | Make the current position work zero in the workplace in use (G10 L20): `arg` is the axis letter or `all`, or raise it from a row of `source.axes.all` or `columns`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_zero`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.zero` | Make the current position work zero in the workplace in use (G10 L20): `arg` is the axis letter or `all`, or raise it from a row of `source.axes.all` or `others`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_zero`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
@@ -2869,7 +2883,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
-| `move_axis` |  |  | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
+| `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
+| `move_axis_choice` |  |  | `move` | [move_axis_choice.xml](../assets/ui/components/control/move/move_axis_choice.xml) |
 | `move_home_axis` |  |  | `move_homing` | [move_home_axis.xml](../assets/ui/components/control/move/move_home_axis.xml) |
 | `move_homing` |  |  | `move` | [move_homing.xml](../assets/ui/components/control/move/move_homing.xml) |
 | `move_jog_choices` |  |  | `move`, `jog_choices` | [move_jog_choices.xml](../assets/ui/components/control/move/move_jog_choices.xml) |

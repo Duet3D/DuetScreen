@@ -22,14 +22,20 @@ namespace UI::MoveActions
 {
 	namespace
 	{
-		/** The axis letter an action is about: its row of `source.axes.all` or `columns`, else its `arg`'s first
-		 * character */
+		/**
+		 * The axis letter an action is about: its row of `source.axes.all` or `others`; the chosen other axis if its
+		 * `arg` starts with `other`; else its `arg`'s first character
+		 */
 		char axisOf(const Xml::ActionArgs& args)
 		{
 			if (const auto* row = args.row<Xml::AxisRow>())
 			{
 				const auto letter = row->letter.get();
 				return letter.empty() ? '\0' : letter.front();
+			}
+			if (args.arg.starts_with("other"))
+			{
+				return Xml::AxesSource::chosenAxis().value_or('\0');
 			}
 			return args.arg.empty() ? '\0' : args.arg.front();
 		}
@@ -195,7 +201,8 @@ namespace UI::MoveActions
 	{
 		Xml::Actions::addGlobal("move.jog",
 								"Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; "
-								"from a row of `source.axes.all` or `columns`, `+` or `-`.",
+								"`other+` or `other-` for the axis chosen from source.axes.others; from a row of "
+								"`source.axes.all` or `others`, `+` or `-`.",
 								"tr.actions.move_jog",
 								[](const Xml::ActionArgs& args)
 								{
@@ -206,12 +213,12 @@ namespace UI::MoveActions
 								});
 		Xml::Actions::addGlobal("move.home",
 								"Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of "
-								"`source.axes.all` or `columns`. Asks first if confirmations are on.",
+								"`source.axes.all` or `others`. Asks first if confirmations are on.",
 								"tr.actions.move_home",
 								homeAction);
 		Xml::Actions::addGlobal("move.set_position",
 								"Ask for a position and move there. `arg` is the axis letter, or raise it from a row "
-								"of `source.axes.all` or `columns`.",
+								"of `source.axes.all` or `others`.",
 								[](const Xml::ActionArgs& args)
 								{
 									if (const char letter = axisOf(args))
@@ -219,9 +226,13 @@ namespace UI::MoveActions
 										askPosition(letter);
 									}
 								});
+		Xml::Actions::addGlobal("move.choose_axis",
+								"Choose the axis other than X, Y and Z that is jogged: raise it from a row of "
+								"`source.axes.others`, or `arg` is its letter",
+								[](const Xml::ActionArgs& args) { Xml::AxesSource::choose(axisOf(args)); });
 		Xml::Actions::addGlobal("move.zero",
 								"Make the current position work zero in the workplace in use (G10 L20): `arg` is the "
-								"axis letter or `all`, or raise it from a row of `source.axes.all` or `columns`. Asks "
+								"axis letter or `all`, or raise it from a row of `source.axes.all` or `others`. Asks "
 								"first if confirmations are on.",
 								"tr.actions.move_zero",
 								zeroAction);

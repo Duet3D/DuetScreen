@@ -198,6 +198,7 @@
       "numberpad_new_value_header": "Nieuwe waarde invoeren"
     },
     "move": {
+      "speed": "Snelheid",
       "step": "Stap",
       "home_all": "Alles homen",
       "axis_home": "{:s} homen",

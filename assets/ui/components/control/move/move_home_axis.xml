@@ -5,7 +5,7 @@
   Actions:  actions.move.home (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
-	<view extends="ds_button" bind_text="row.letter" height="content" flex_grow="1" style_min_width="56"
+	<view extends="ds_button" bind_text="row.letter" height="content" flex_grow="1" style_min_width="40"
 		  style_min_height="40">
 		<style name="unhomed" selector="checked"/>
 		<bind_state_if_eq subject="row.homed" state="checked" ref_value="0"/>

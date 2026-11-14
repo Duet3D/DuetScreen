@@ -3,6 +3,7 @@
  */
 
 #include "AxesSource.h"
+#include "DataSources.h"
 #include "Debug.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "PrinterModel.h"
@@ -72,6 +73,7 @@ namespace UI::Xml
 		f.field("homed", homed, "1 when homed");
 		f.field("jog_usable", jogUsable, "1 if the axis can be jogged or set (homed, or moves before homing allowed)");
 		f.field("home_usable", homeUsable, "1 if it can be homed");
+		f.field("chosen", chosen, "In `source.axes.others`: 1 for the axis chosen to be jogged, else 0");
 	}
 
 	AxesSource::AxesSource()
@@ -81,7 +83,7 @@ namespace UI::Xml
 
 	void AxesSource::fields(FieldVisitor& f)
 	{
-		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}};
+		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}, {"z", &m_z}};
 		for (const auto& [prefix, axis] : named)
 		{
 			f.field(fmt::format("{}.homed", prefix), axis->homed, "1 when homed");
@@ -93,9 +95,11 @@ namespace UI::Xml
 		f.field("all_homed", m_allHomed, "1 when every axis the user sees is homed");
 		f.field("home_all_usable", m_homeAllUsable, "1 if all axes can be homed");
 		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
-		f.list("columns",
-			   m_columns,
-			   "The axes the user sees other than X and Y, each jogged in a column of its own: Z, then any others");
+		f.list("others", m_others, "The axes the user sees other than X, Y and Z: one is chosen to be jogged");
+		f.field("others_shown", m_othersShown, "1 if there are axes other than X, Y and Z");
+		f.field("other.letter", m_otherLetter, "The letter of the axis chosen from `others`, e.g. \"U\"");
+		f.field("other.homed", m_otherHomed, "1 when the chosen axis is homed");
+		f.field("other.jog_usable", m_otherJogUsable, "1 if the chosen axis can be jogged");
 	}
 
 	void AxesSource::onInit()
@@ -114,10 +118,10 @@ namespace UI::Xml
 		m_homeAllUsable.set(homeable ? 1 : 0);
 		m_disableMotorsUsable.set(homeable ? 1 : 0);
 
-		// X and Y have controls of their own, the XY pad; disabled if the printer has no such axis
-		NamedAxis* named[] = {&m_x, &m_y};
-		const char letters[] = {'X', 'Y'};
-		for (size_t i = 0; i < 2; i++)
+		// X, Y and Z have controls of their own; disabled if the printer has no such axis
+		NamedAxis* named[] = {&m_x, &m_y, &m_z};
+		const char letters[] = {'X', 'Y', 'Z'};
+		for (size_t i = 0; i < 3; i++)
 		{
 			const OM::Node& axis = PrinterModel::axis(letters[i]);
 			const bool exists = axis.exists();
@@ -125,9 +129,9 @@ namespace UI::Xml
 			named[i]->jogUsable.set(connected && exists && canMove(axis) ? 1 : 0);
 		}
 
-		// Every axis the user sees, and those with a column of their own: all but X and Y
+		// Every axis the user sees, and those other than X, Y and Z
 		std::vector<size_t> all;
-		std::vector<size_t> columns;
+		std::vector<size_t> others;
 		if (connected)
 		{
 			for (const size_t number : PrinterModel::visibleAxes())
@@ -138,9 +142,9 @@ namespace UI::Xml
 					continue;
 				}
 				all.push_back(number);
-				if (letter.front() != 'X' && letter.front() != 'Y')
+				if (letter.front() != 'X' && letter.front() != 'Y' && letter.front() != 'Z')
 				{
-					columns.push_back(number);
+					others.push_back(number);
 				}
 			}
 		}
@@ -155,7 +159,27 @@ namespace UI::Xml
 			row.homeUsable.set(homeable ? 1 : 0);
 		};
 		m_all.sync(all.size(), [&](AxisRow& row, size_t i) { show(row, all[i]); });
-		m_columns.sync(columns.size(), [&](AxisRow& row, size_t i) { show(row, columns[i]); });
+
+		// One of the others is jogged: the one chosen, or the first while the chosen one isn't there
+		const auto letterOf = [](size_t number)
+		{ return PrinterModel::root()["move"]["axes"][number]["letter"].text().front(); };
+		const auto chosen =
+			std::find_if(others.begin(), others.end(), [&](size_t number) { return letterOf(number) == m_chosen; });
+		if (chosen == others.end())
+		{
+			m_chosen = others.empty() ? '\0' : letterOf(others.front());
+		}
+		m_others.sync(others.size(),
+					  [&](AxisRow& row, size_t i)
+					  {
+						  show(row, others[i]);
+						  row.chosen.set(letterOf(others[i]) == m_chosen ? 1 : 0);
+					  });
+		m_othersShown.set(others.empty() ? 0 : 1);
+		const OM::Node& other = PrinterModel::axis(m_chosen); // Doesn't exist while none is chosen
+		m_otherLetter.set(m_chosen != '\0' ? std::string(1, m_chosen) : std::string());
+		m_otherHomed.set(other.exists() && other["homed"].boolean() ? 1 : 0);
+		m_otherJogUsable.set(other.exists() && canMove(other) ? 1 : 0);
 		m_allHomed.set(!all.empty() &&
 							   std::all_of(all.begin(),
 										   all.end(),
@@ -168,7 +192,26 @@ namespace UI::Xml
 	void AxesSource::clear()
 	{
 		m_all.clear();
-		m_columns.clear();
+		m_others.clear();
 		update();
+	}
+	std::optional<char> AxesSource::chosenAxis()
+	{
+		const auto* source = DataSources::find<AxesSource>();
+		if (source == nullptr || source->m_chosen == '\0')
+		{
+			return std::nullopt;
+		}
+		return source->m_chosen;
+	}
+
+	void AxesSource::choose(char letter)
+	{
+		auto* source = DataSources::find<AxesSource>();
+		if (source != nullptr && letter != '\0')
+		{
+			source->m_chosen = letter;
+			source->update();
+		}
 	}
 } // namespace UI::Xml

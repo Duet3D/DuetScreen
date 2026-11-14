@@ -198,6 +198,7 @@
       "numberpad_new_value_header": "Entrer la nouvelle valeur"
     },
     "move": {
+      "speed": "Vitesse",
       "step": "Pas",
       "home_all": "Tout référencer",
       "axis_home": "Référencer {:s}",

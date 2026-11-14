@@ -199,6 +199,7 @@
       "numberpad_new_value_header": "Enter new value"
     },
     "move": { /* Move screen */
+      "speed": "Speed",
       "step": "Step",
       "home_all": "Home all",
       "axis_home": "Home {:s}",
