@@ -43,19 +43,31 @@ namespace UI::Xml::KeyboardRoom
 
 	void make(lv_obj_t* keyboard, lv_obj_t* textarea)
 	{
-		giveBack();
 		lv_obj_update_layout(keyboard);
 		lv_area_t keys;
 		lv_obj_get_coords(keyboard, &keys);
 
-		if (DialogHost* host = DialogHost::holding(textarea))
+		// Handed on to another box where the room is made already, it stays, and only the box is scrolled to
+		DialogHost* host = DialogHost::holding(textarea);
+		lv_obj_t* container = host == nullptr ? scrollingAround(textarea) : nullptr;
+		if (host != nullptr && host == s_room.dialog)
+		{
+			host->makeRoom(keys.y1, textarea);
+			return;
+		}
+		if (container != nullptr && container == s_room.padded)
+		{
+			lv_obj_scroll_to_view_recursive(textarea, LV_ANIM_ON);
+			return;
+		}
+
+		giveBack();
+		if (host != nullptr)
 		{
 			host->makeRoom(keys.y1, textarea);
 			s_room.dialog = host;
 			return;
 		}
-
-		lv_obj_t* container = scrollingAround(textarea);
 		if (container == nullptr)
 		{
 			return;

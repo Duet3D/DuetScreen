@@ -101,7 +101,6 @@ namespace UI::Themes
 		Style bg_color_error; // Error background
 		Style bg_color_header; // Translucent header strip
 		Style bg_color_list_item; // List item background
-		Style bg_modal; // Translucent backdrop behind modals
 
 		/* Text */
 		Style text; // Body text
@@ -123,7 +122,6 @@ namespace UI::Themes
 		Style scrollbar_scrolled; // Scrollbars while scrolling
 		Style card; // Cards and panels
 		Style tab_card; // Tab page panels
-		Style modal; // Modal dialogs
 		Style btn; // Buttons
 		Style btn_checked; // Checked buttons
 

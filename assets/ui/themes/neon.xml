@@ -27,7 +27,7 @@
 		<style name="card" border_color="#primary" border_opa="35%" shadow_width="14" shadow_spread="0"
 			   shadow_color="#primary" shadow_opa="12%" shadow_offset_x="0" shadow_offset_y="0"/>
 
-		<style name="modal" border_opa="70%" shadow_color="#primary" shadow_opa="30%" shadow_offset_y="0"/>
+		<style name="dialog" border_opa="70%" shadow_color="#primary" shadow_opa="30%" shadow_offset_y="0"/>
 
 		<!-- Actions: outlined in neon, with neon text and icons, and a glow -->
 		<style name="action_btn" bg_color="#bg_light" border_color="#primary" text_color="#primary" recolor="#primary"

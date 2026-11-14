@@ -30,8 +30,9 @@
 					<bind_flag_if_eq subject="presenter.can_go_back" flag="hidden" ref_value="0"/>
 					<action trigger="clicked" name="presenter.dialog.back"/>
 				</ds_button>
+				<!-- As tall as the buttons beside it, so a header without them (a blocking step) keeps its height -->
 				<lv_obj name="titles" height="content" flex_grow="1" flex_flow="column" scrollable="false"
-						clickable="false">
+						clickable="false" style_min_height="48" style_flex_main_place="center">
 					<style name="pad_zero"/>
 					<lv_label name="title" bind_text="presenter.title" width="100%" long_mode="wrap">
 						<style name="dialog_title"/>
@@ -53,8 +54,8 @@
 			</lv_obj>
 
 			<!-- The step's own buttons (its <ds_dialog_footer>), under its content wherever that is scrolled -->
-			<lv_obj name="footer" width="100%" height="content" scrollable="false" hidden="true" style_pad_top="0">
-				<style name="dialog_body"/>
+			<lv_obj name="footer" width="100%" height="content" scrollable="false" hidden="true">
+				<style name="pad_zero"/>
 			</lv_obj>
 		</lv_obj>
 	</view>

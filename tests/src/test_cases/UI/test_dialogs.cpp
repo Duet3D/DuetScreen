@@ -82,6 +82,9 @@ namespace
 				<ds_dialog name="alert" bind_open="presenter.alert" title="Alert" alert="true">
 					<action trigger="dismissed" name="presenter.test.dismissed_alert"/>
 					<lv_label name="text" text="Alert"/>
+					<ds_dialog_footer name="footer">
+						<ds_button name="done" text="Done"/>
+					</ds_dialog_footer>
 				</ds_dialog>
 				<ds_keyboard name="keyboard" hidden="true" width="100%" height="50%" align="bottom_mid" floating="true"/>
 			</view>
@@ -115,6 +118,21 @@ namespace
 					<ds_textarea name="box_9" one_line="true" width="100%"/>
 					<ds_textarea name="box_10" one_line="true" width="100%"/>
 					<ds_textarea name="box_11" one_line="true" width="100%"/>
+					<ds_textarea name="box_12" one_line="true" width="100%"/>
+					<ds_textarea name="box_13" one_line="true" width="100%"/>
+					<ds_textarea name="box_14" one_line="true" width="100%"/>
+					<ds_textarea name="box_15" one_line="true" width="100%"/>
+					<ds_textarea name="box_16" one_line="true" width="100%"/>
+					<ds_textarea name="box_17" one_line="true" width="100%"/>
+					<ds_textarea name="box_18" one_line="true" width="100%"/>
+					<ds_textarea name="box_19" one_line="true" width="100%"/>
+					<ds_textarea name="box_20" one_line="true" width="100%"/>
+					<ds_textarea name="box_21" one_line="true" width="100%"/>
+					<ds_textarea name="box_22" one_line="true" width="100%"/>
+					<ds_textarea name="box_23" one_line="true" width="100%"/>
+					<ds_dialog_footer name="footer">
+						<ds_button name="done" text="Done"/>
+					</ds_dialog_footer>
 				</ds_dialog>
 				<ds_keyboard name="keyboard" hidden="true" width="100%" height="50%" align="bottom_mid" floating="true"/>
 			</view>
@@ -357,10 +375,27 @@ TEST_F(DialogSurface, APromptGoesWithItsAsker)
 	EXPECT_EQ(answers, 0);
 }
 
+TEST_F(DialogSurface, ATallDialogScrollsWithinTheRoomAndKeepsItsFooterInView)
+{
+	show("form_screen");
+	lv_area_t room;
+	lv_area_t card;
+	lv_area_t footer;
+	lv_obj_get_coords(chrome("backdrop"), &room);
+	lv_obj_get_coords(chrome("card"), &card);
+	ASSERT_NE(TestDialogs::find("done"), nullptr);
+	lv_obj_get_coords(TestDialogs::find("done"), &footer);
+	EXPECT_GE(card.y1, room.y1);
+	EXPECT_LE(card.y2, room.y2) << "the card fits the room";
+	EXPECT_LE(footer.y2, card.y2) << "its footer shows";
+	EXPECT_TRUE(lv_obj_has_flag(chrome("body"), LV_OBJ_FLAG_SCROLLABLE));
+	EXPECT_GT(lv_obj_get_scroll_bottom(chrome("body")), 0) << "the rest scrolls";
+}
+
 TEST_F(DialogSurface, TheCardKeepsAboveTheKeyboardAndShowsTheBoxTypedIn)
 {
 	show("form_screen");
-	lv_obj_t* last = TestDialogs::find("box_11");
+	lv_obj_t* last = TestDialogs::find("box_23");
 	ASSERT_NE(last, nullptr);
 	lv_obj_send_event(last, LV_EVENT_FOCUSED, nullptr);
 	pump();
@@ -430,6 +465,26 @@ TEST_F(DialogSurface, ScrollingTheCardKeepsTheKeyboardButTappingOutsidePutsItAwa
 	drag({body.x1 + 8, body.y2 - 8}, {body.x1 + 8, body.y1 + 8});
 	EXPECT_GT(lv_obj_get_scroll_y(chrome("body")), scrolled);
 	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// Tapping another box hands the keyboard on: it stays up, and the card stays where it is scrolled to
+	const int32_t at = lv_obj_get_scroll_y(chrome("body"));
+	lv_obj_t* other = nullptr;
+	for (int i = 23; i >= 0 && other == nullptr; i--)
+	{
+		lv_obj_t* box = TestDialogs::find(fmt::format("box_{:d}", i).c_str());
+		lv_area_t area;
+		lv_obj_get_coords(box, &area);
+		if (area.y1 >= body.y1 && area.y2 <= body.y2)
+		{
+			other = box; // The lowest box in view
+		}
+	}
+	ASSERT_NE(other, nullptr);
+	const lv_point_t next = middleOf(other);
+	drag(next, next);
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(lv_keyboard_get_textarea(keyboard), other);
+	EXPECT_EQ(lv_obj_get_scroll_y(chrome("body")), at);
 
 	// A tap on the card's title, outside the box, puts it away
 	const lv_point_t title = middleOf(chrome("title"));

@@ -338,11 +338,17 @@ namespace UI::Xml
 
 	void DialogHost::makeRoom(int32_t keyboardTop, lv_obj_t* focused)
 	{
+		// Handed on to another box, with the room made already, the card stays as it is: laying it out again would
+		// lose where it is scrolled to
+		const bool made = m_keyboardTop == keyboardTop;
 		m_keyboardTop = keyboardTop;
 		m_focused = focused;
 		if (m_top != nullptr)
 		{
-			layout(*m_top);
+			if (!made)
+			{
+				layout(*m_top);
+			}
 			// LVGL scrolls a box into view as it is focused, in the card as it was; the box is scrolled to once the
 			// smaller card is laid out, which also replaces that scroll
 			lv_async_call_cancel(scrollToFocusedCb, this);
@@ -510,6 +516,12 @@ namespace UI::Xml
 		DialogStep* next = stack.empty() ? nullptr : stack.back().step;
 		// Only a card already showing slides to its next step; one opening fades in
 		const bool wasHidden = lv_obj_has_flag(root, LV_OBJ_FLAG_HIDDEN);
+		if (next != nullptr && wasHidden)
+		{
+			// Shown before the step is laid out: LVGL lays out nothing hidden, so the card couldn't be measured
+			lv_obj_remove_flag(root, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_move_foreground(root);
+		}
 
 		if (next != m_top)
 		{
@@ -546,8 +558,6 @@ namespace UI::Xml
 		}
 		else if (wasHidden)
 		{
-			lv_obj_remove_flag(root, LV_OBJ_FLAG_HIDDEN);
-			lv_obj_move_foreground(root);
 			if (animate())
 			{
 				lv_anim_t anim;

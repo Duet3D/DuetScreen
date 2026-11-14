@@ -3,7 +3,6 @@ target_sources(
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/DsLayout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsList.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/DsModal.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsMoveHandle.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsScope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsTabs.cpp

@@ -226,7 +226,7 @@ namespace UI
 		}
 
 		// A dialog opened from the tab being left goes with it, as one the tab hosted itself would
-		closeModalsNotAround(getRootPtr());
+		closeDialogsNotAround(getRootPtr());
 
 		if (!animate || !StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) || previous_tab == nullptr)
 		{

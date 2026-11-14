@@ -58,7 +58,7 @@ namespace UI
 	/** Make `view` findable as `name`, replacing any earlier view of that name */
 	void registerView(std::string name, LvObj* view);
 
-	/** Forget `view`: its name and any home, open, returnable or modal entry. Call before destroying a view. */
+	/** Forget `view`: its name and any home, open or returnable entry. Call before destroying a view. */
 	void forgetView(LvObj* view);
 
 	/** The view registered as `name`, or nullptr */
@@ -77,12 +77,6 @@ namespace UI
 	/** The name `view` is registered under, or empty */
 	std::string_view getViewName(const LvObj* view);
 
-	/**
-	 * Where modals belong: the view registered as `main_window` (the area beside the sidebar and below the status
-	 * bar), so their backdrop dims the page and not the navigation. nullptr if there is none.
-	 */
-	LvObj* getModalHost();
-
 	/** Open the screen registered as `name` (see openScreen()). @return false if there is no such view */
 	bool openScreen(std::string_view name, bool closePrevious = true);
 
@@ -98,35 +92,27 @@ namespace UI
 
 	/**
 	 * Go back to `state`, e.g. once a reload has rebuilt the views: open its screens again, and let the back button
-	 * return to its returnable ones. Unlike openScreen(), open modals are left alone and nothing fades in. Names with
+	 * return to its returnable ones. Unlike openScreen(), an open dialog is left alone and nothing fades in. Names with
 	 * no view any more are skipped.
 	 */
 	void restoreNavigationState(const NavigationState& state);
 
-	// Internal helpers used by template APIs; not part of public modal type contract
+	// Internal helpers used by the template APIs
 	namespace detail
 	{
-		void openModalImpl(LvObj* view);
-		bool closeModalImpl(LvObj* view);
 		void addHomeScreenImpl(LvObj* view);
 		void removeHomeScreenImpl(LvObj* view, bool close);
 		void openScreenImpl(LvObj* view, bool closePrevious);
 		bool closeScreenImpl(LvObj* view, bool returnable);
 	} // namespace detail
 
-	template <typename T>
-	concept NotModalType = std::derived_from<T, LvObj> && !requires { typename T::modal_base_marker; };
-
-	template <typename T>
-	concept ModalType = std::derived_from<T, LvObj> && requires { typename T::modal_base_marker; };
-
-	template <NotModalType T>
+	template <std::derived_from<LvObj> T>
 	void addHomeScreen(T* view)
 	{
 		detail::addHomeScreenImpl(static_cast<LvObj*>(view));
 	}
 
-	template <NotModalType T>
+	template <std::derived_from<LvObj> T>
 	void removeHomeScreen(T* view, bool close = true)
 	{
 		detail::removeHomeScreenImpl(static_cast<LvObj*>(view), close);
@@ -134,13 +120,13 @@ namespace UI
 
 	void clearHomeScreens();
 
-	template <NotModalType T>
+	template <std::derived_from<LvObj> T>
 	void openScreen(T* view, bool closePrevious = true)
 	{
 		detail::openScreenImpl(static_cast<LvObj*>(view), closePrevious);
 	}
 
-	template <NotModalType T>
+	template <std::derived_from<LvObj> T>
 	bool closeScreen(T* view, bool returnable = true)
 	{
 		return detail::closeScreenImpl(static_cast<LvObj*>(view), returnable);
@@ -148,27 +134,4 @@ namespace UI
 
 	LvObj* getCurrentScreen();
 	bool closeLastScreen();
-
-	/* Modal-only APIs: only accept types deriving from Modal<...> */
-
-	template <ModalType T>
-	void openModal(T* view)
-	{
-		detail::openModalImpl(static_cast<LvObj*>(view));
-	}
-
-	template <ModalType T>
-	bool closeModal(T* view)
-	{
-		return detail::closeModalImpl(static_cast<LvObj*>(view));
-	}
-
-	void closeAllModals();
-
-	/**
-	 * Close every open modal except those `obj` is inside, e.g. when a tab view changes tab: a dialog opened from the
-	 * tab left behind goes with it, but not a dialog the tab view is in
-	 */
-	void closeModalsNotAround(lv_obj_t* obj);
-	bool closeLastModal();
 } // namespace UI

@@ -12,7 +12,7 @@
 	<styles>
 		<style name="card" border_width="0"/>
 		<!-- A dialog stands out by its tone alone, a step lighter than a card -->
-		<style name="modal" border_width="0" shadow_opa="0" bg_color="#bg_light"/>
+		<style name="dialog" border_width="0" shadow_opa="0" bg_color="#bg_light"/>
 		<style name="btn" border_width="0"/>
 		<!-- A choice is filled with the muted accent, without an edge -->
 		<style name="btn_checked" outline_width="0"/>

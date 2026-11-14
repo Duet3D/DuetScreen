@@ -156,11 +156,8 @@ namespace UI
 			"alert.input",
 			"Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok`",
 			[this](const Xml::ActionArgs& args) { validateInput(args.text()); });
-		action("alert.keyboard",
-			   "Set `alert.keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away",
-			   [this](const Xml::ActionArgs& args) { m_alertKeyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
 		action("alert.dismissed",
-			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_modal>`",
+			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>`",
 			   [this](const Xml::ActionArgs&) { closeAlert(); });
 	}
 
@@ -204,7 +201,6 @@ namespace UI
 		f.field("alert.min", m_alertMin, "Lower limit shown beside the value; empty if none");
 		f.field("alert.max", m_alertMax, "Upper limit shown beside the value; empty if none");
 		f.field("alert.warning", m_alertWarning, "Why the value isn't valid; empty if it is");
-		f.field("alert.keyboard", m_alertKeyboard, "1 while the keyboard is up, so the alert moves out of its way");
 		f.field("alert.progress", m_alertProgress, "Time left before the alert closes itself, 0-100");
 		f.field("alert.progress_shown", m_alertProgressShown, "1 if the alert closes itself");
 	}
@@ -332,7 +328,6 @@ namespace UI
 		// A value to type
 		m_alertInputShown.set(input ? 1 : 0);
 		m_alertWarning.set("");
-		m_alertKeyboard.set(0);
 		m_alertMin.set("");
 		m_alertMax.set("");
 		std::string value;
@@ -414,7 +409,6 @@ namespace UI
 	void NotificationsPresenter::closeAlert()
 	{
 		m_alertCountdown = {};
-		m_alertKeyboard.set(0);
 		m_alertOpen.set(0);
 		showFirstResponse();
 	}

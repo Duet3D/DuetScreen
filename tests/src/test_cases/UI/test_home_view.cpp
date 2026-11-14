@@ -218,22 +218,24 @@ class TestHomeView : public UiTestSuite
 		return static_cast<UI::NotificationsPresenter&>(*page<UI::Xml::XmlView>("notifications").getPresenter());
 	}
 
-	/** The widget called `name` in the notifications */
+	/** The widget called `name` in the notifications, or in the alert or update prompt the dialog surface shows */
 	static lv_obj_t* notificationPart(const char* name)
 	{
-		return lv_obj_find_by_name(page<UI::LvObj>("notifications").getRootPtr(), name);
+		lv_obj_t* found = lv_obj_find_by_name(page<UI::LvObj>("notifications").getRootPtr(), name);
+		return found != nullptr ? found : TestDialogs::find(name);
 	}
+
+	/** Whether the dialog surface shows the notifications' dialog called `name` (the alert, the update prompt) */
+	static bool notificationShown(const char* name) { return TestDialogs::shownNamed(name) != nullptr; }
 
 	/** The update prompt's checks shared by the update result tests */
 	static void expectUpdateResult()
 	{
-		lv_obj_t* prompt = notificationPart("update_prompt");
-		ASSERT_NE(prompt, nullptr);
-		EXPECT_FALSE(lv_obj_has_flag(prompt, LV_OBJ_FLAG_HIDDEN));
-		EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(prompt, "ok"), LV_OBJ_FLAG_HIDDEN));
-		EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(prompt, "cancel"), LV_OBJ_FLAG_HIDDEN));
-		EXPECT_STRNE(lv_label_get_text(lv_obj_find_by_name(prompt, "title")), "");
-		EXPECT_STRNE(lv_label_get_text(lv_obj_find_by_name(prompt, "text")), "");
+		ASSERT_TRUE(notificationShown("update_prompt"));
+		EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("ok"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_NE(TestDialogs::title(), "");
+		EXPECT_NE(TestDialogs::text("text"), "");
 	}
 
 	/** The M291 alert's text box */
@@ -1168,28 +1170,26 @@ TEST_F(TestHomeView, AlertFollowsTheMessageBox)
 		Model::get().startEventLoop();
 		Model::get().stopEventLoop();
 	};
-	lv_obj_t* alert = notificationPart("alert");
-
 	// A new message box opens the alert
 	load_model_data_from_file("tests/object_model/m291/s3.json");
 	deliver();
-	EXPECT_FALSE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(notificationShown("alert"));
 
 	// Once answered, the same box sent again (the same sequence number) doesn't open it again
-	lv_obj_send_event(lv_obj_find_by_name(alert, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(notificationShown("alert"));
 	load_model_data_from_file("tests/object_model/m291/s3.json");
 	deliver();
-	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(notificationShown("alert"));
 
 	// Another box opens it, and the box going away closes it
 	load_model_data_from_file("tests/object_model/m291/s0.json");
 	deliver();
-	EXPECT_FALSE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(notificationShown("alert"));
 	load_model_data(R"({"key":"state","flags":"vn","result":{"messageBox":null}})"
 					"\n");
 	deliver();
-	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(notificationShown("alert"));
 }
 
 TEST_F(TestHomeView, TappingOutsideATextBoxPutsTheKeyboardAway)
@@ -1237,7 +1237,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	lv_obj_t* response = notificationPart("response");
-	auto alertPart = [](const char* name) { return lv_obj_find_by_name(notificationPart("alert"), name); };
+	auto alertPart = [](const char* name) { return TestDialogs::find(name); };
 	auto click = [&](const char* name) { lv_obj_send_event(alertPart(name), LV_EVENT_CLICKED, nullptr); };
 
 	// A response waits while an alert is open
@@ -1250,7 +1250,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	const uint32_t seq3 = alertInObjectModel().seq;
 	click("cancel");
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 P1 S{:d}\n", seq3)}));
-	EXPECT_TRUE(lv_obj_has_flag(notificationPart("alert"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(notificationShown("alert"));
 	EXPECT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN)) << "then the response shows";
 	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
 
@@ -1258,7 +1258,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	sent.clear();
 	load_model_data_from_file("tests/object_model/m291/s4.json");
 	notifications().newAlertData(alertInObjectModel());
-	lv_obj_t* choices = lv_obj_find_by_name(notificationPart("choices_list"), "list");
+	lv_obj_t* choices = notificationPart("choices");
 	ASSERT_EQ(lv_obj_get_child_count(choices), 3u);
 	lv_obj_send_event(lv_obj_get_child(choices, 1), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{1}} S{:d}\n", alertInObjectModel().seq)}));

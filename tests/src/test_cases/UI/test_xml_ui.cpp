@@ -12,7 +12,6 @@
 #include "UI/Widgets/Buttons/Button.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Inputs/Slider.h"
-#include "UI/Widgets/Layout/DsModal.h"
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/History.h"
@@ -26,6 +25,7 @@
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "src/widgets/chart/lv_chart_private.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
 #include <filesystem>
@@ -218,12 +218,12 @@ namespace
 	constexpr std::string_view DIALOG_SCREEN = R"(
 		<component presenter="test_dialog">
 			<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
-				<ds_modal name="dialog" bind_open="presenter.dialog" open_value="ask" width="50%" height="content">
+				<ds_dialog name="dialog" bind_open="presenter.dialog" open_value="ask" title="Ask" width="50%">
 					<action trigger="dismissed" name="presenter.test.dismissed"/>
 					<ds_button name="ok" text="OK">
 						<action trigger="clicked" name="presenter.test.ok"/>
 					</ds_button>
-				</ds_modal>
+				</ds_dialog>
 				<ds_tabs name="tabs" width="300" height="100">
 					<ds_tabs-tab name="first" title="First"/>
 					<ds_tabs-tab name="second" title="Second" bind_disabled="presenter.busy"/>
@@ -1121,55 +1121,50 @@ TEST_F(TestXmlUi, TabDisabledWhileItsSubjectIsSet)
 	EXPECT_FALSE(tabs.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
-TEST_F(TestXmlUi, ModalFollowsItsSubjectFromTheModalHost)
+TEST_F(TestXmlUi, DialogFollowsItsSubject)
 {
 	installDialogScreens();
-	UI::LvContainer mainWindow("main_window", screen);
-	UI::registerView("main_window", &mainWindow);
-
 	auto& view = makeView("dialog_screen");
 	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
-	lv_obj_t* dialog = find(mainWindow, "dialog");
-	ASSERT_NE(dialog, nullptr) << "the dialog is in the modal host";
-	EXPECT_EQ(find(view, "dialog"), nullptr);
+	lv_obj_t* dialog = find(view, "dialog");
+	ASSERT_NE(dialog, nullptr) << "its content stays in its view while closed";
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 
 	// Its subject opens and closes it, raising nothing
 	presenter.dialog.set("ask");
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(TestDialogs::shown(), dialog);
 	presenter.dialog.set("other");
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "open_value must match";
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "open_value must match";
 	EXPECT_TRUE(presenter.calls.empty());
 
-	// Actions in it reach the view it was written in
+	// Actions in it reach the view it was written in, wherever it shows
 	presenter.dialog.set("ask");
 	lv_obj_send_event(find(dialog, "ok"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok"}));
 
-	// Closed by navigation, it says so, and the presenter's answer doesn't reopen it
-	UI::closeAllModals();
+	// Closed by the user, it says so, and the presenter's answer doesn't reopen it
+	TestDialogs::tapHeader("close");
 	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok", "dismissed"}));
 	EXPECT_EQ(presenter.dialog.get(), "");
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-
-	// It goes with the view it was written in
-	m_views.clear();
-	EXPECT_EQ(find(mainWindow, "dialog"), nullptr);
-	UI::forgetView(&mainWindow);
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	EXPECT_EQ(lv_obj_get_parent(dialog), view.getRootPtr()) << "back where it is written";
 }
 
-TEST_F(TestXmlUi, ModalGoesWithItsHost)
+TEST_F(TestXmlUi, DialogOutlivesItsSurface)
 {
 	installDialogScreens();
-	auto mainWindow = std::make_unique<UI::LvContainer>("main_window", screen);
-	UI::registerView("main_window", mainWindow.get());
 	auto& view = makeView("dialog_screen");
-	ASSERT_NE(find(*mainWindow, "dialog"), nullptr);
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	presenter.dialog.set("ask");
+	lv_obj_t* dialog = TestDialogs::shown();
+	ASSERT_NE(dialog, nullptr);
 
-	UI::forgetView(mainWindow.get());
-	mainWindow.reset(); // Deletes the dialog
-	m_views.clear();	// Mustn't touch it again
-	(void)view;
+	// The surface goes: the dialog goes home, and opens on a new surface next time
+	lv_obj_delete(TestDialogs::host().root());
+	EXPECT_EQ(lv_obj_get_parent(dialog), view.getRootPtr());
+	presenter.dialog.set("");
+	presenter.dialog.set("ask");
+	EXPECT_EQ(TestDialogs::shown(), dialog);
 }
 
 TEST_F(TestXmlUi, WindowedListBuildsOnlyRowsOnScreen)

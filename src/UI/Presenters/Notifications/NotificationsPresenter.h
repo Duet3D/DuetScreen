@@ -170,7 +170,6 @@ namespace UI
 		Xml::StringSubject<24> m_alertMin;			// Lower limit text, or empty
 		Xml::StringSubject<24> m_alertMax;			// Upper limit text, or empty
 		Xml::StringSubject<96> m_alertWarning;		// Why the value isn't valid, or empty
-		Xml::IntSubject m_alertKeyboard;			// 1 while the keyboard is up
 		Xml::IntSubject m_alertProgress;			// Time left, 0-100
 		Xml::IntSubject m_alertProgressShown;		// 1 if the alert closes itself
 		std::optional<uint32_t> m_lastAlertSeq;		// Sequence number of the alert shown, or none

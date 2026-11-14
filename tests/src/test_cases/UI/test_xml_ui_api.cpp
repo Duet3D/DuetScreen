@@ -336,7 +336,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	// A component with a prop: the value given where it is used is checked there
 	std::ofstream(userDir / "test" / "components" / "lint_dialog.xml") << R"(<component>
 	<api><prop name="open" type="string"/></api>
-	<view extends="ds_modal" bind_open="$open">
+	<view extends="ds_dialog" bind_open="$open">
 		<lv_label bind_text="$missing_prop"/>
 	</view>
 </component>)";

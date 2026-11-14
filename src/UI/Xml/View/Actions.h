@@ -16,7 +16,7 @@
  *
  * Triggers are LVGL's event names (`clicked`, `value_changed`, `long_pressed`, ...) plus `value_confirmed`, which
  * DuetScreen widgets raise once an edit is finished (a slider is released, or a value is typed in), and `dismissed`,
- * which a `<ds_modal>` raises when the user closes it (see Widgets/DsModal.h).
+ * which a `<ds_dialog>` raises when the user leaves it without answering (see Xml/Dialogs/DsDialog.h).
  *
  * `arg` may contain `{name}` placeholders. `{event.value}` is the edited value; any other name is replaced by the
  * current value of the subject of that name, looked up from where the `<action>` was written. E.g. in a fan row:

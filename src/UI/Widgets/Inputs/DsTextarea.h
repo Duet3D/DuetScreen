@@ -76,6 +76,12 @@ namespace UI::Xml
 		/** Show `keyboard` for this box, or put it away */
 		void showKeyboard(lv_obj_t* keyboard, bool show);
 
+		/**
+		 * Whether this box lost focus to another box being tapped that types on the same `keyboard`: the keyboard is
+		 * handed on, staying up and keeping the room made for it, rather than going and coming straight back
+		 */
+		bool handingOn(lv_obj_t* keyboard) const;
+
 		std::string m_accepted; // Characters that may be typed; LVGL keeps a pointer to them
 		lv_keyboard_mode_t m_mode = LV_KEYBOARD_MODE_TEXT_LOWER; // Keyboard layout to show
 		std::string m_keyboard = "keyboard";					 // Name of the keyboard to use

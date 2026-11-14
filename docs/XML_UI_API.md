@@ -751,7 +751,6 @@ Used by `notifications`.
 | `presenter.alert.min` | text | Lower limit shown beside the value; empty if none |
 | `presenter.alert.max` | text | Upper limit shown beside the value; empty if none |
 | `presenter.alert.warning` | text | Why the value isn't valid; empty if it is |
-| `presenter.alert.keyboard` | int | 1 while the keyboard is up, so the alert moves out of its way |
 | `presenter.alert.progress` | int | Time left before the alert closes itself, 0-100 |
 | `presenter.alert.progress_shown` | int | 1 if the alert closes itself |
 
@@ -774,10 +773,9 @@ Each row of `presenter.alert.axes`:
 | --- | --- |
 | `presenter.alert.cancel` | Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it |
 | `presenter.alert.choose` | Answer the alert with the choice, and close it. From a row of `alert.choices`. |
-| `presenter.alert.dismissed` | Close the alert without an answer, e.g. on `dismissed` from its `<ds_modal>` |
+| `presenter.alert.dismissed` | Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>` |
 | `presenter.alert.input` | Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok` |
 | `presenter.alert.jog` | Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`. |
-| `presenter.alert.keyboard` | Set `alert.keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away |
 | `presenter.alert.ok` | Answer the alert with OK (M292), with the value typed if one was asked for, and close it |
 | `presenter.response.close` | Close the response showing and show the next |
 | `presenter.response.open_console` | Forget every response and open the console |
@@ -1409,26 +1407,6 @@ Also takes every `lv_obj` attribute.
 | `key` | A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. Empty for every row, so a component can leave it to a prop. |
 | `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="om.fans" key="row.index" value="2" item="…"/>` shows fan 2 |
 | `item.<attribute>` | Given to every item as if written where it is used: a prop of the item component, e.g. `item.title="row.name"`, or an attribute of its root, e.g. `item.flex_grow="1"`. Its names are looked up in the item's row. |
-
-### ds_modal
-
-A dialog over the main window with a dimmed backdrop. Its subject alone decides whether it is open, so a presenter opens and closes it by setting a subject. Closed any other way (tapped outside, the back button, navigation closing every modal), it raises `dismissed` so the presenter can update the subject; closing it by its subject raises nothing. The content is laid out in the dialog's card, which the lv_obj attributes apply to. Unless `in_place`, it is deleted with the widget it was written in.
-
-Also takes every `lv_obj` attribute.
-
-```xml
-<ds_modal name="file_dialog" bind_open="presenter.dialog" width="70%" height="content">
-	<action trigger="dismissed" name="presenter.files.close_dialog"/>
-	…the dialog's content…
-</ds_modal>
-```
-
-| Attribute | Description |
-| --- | --- |
-| `bind_open` | Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it |
-| `open_value` | The value `bind_open` must have for the dialog to be open |
-| `blocking` | "true" so that tapping outside doesn't close it (default false) |
-| `in_place` | "true" to stay in the widget it is written in rather than move to the main window, so the backdrop covers only that widget, e.g. alerts covering the whole screen (default false) |
 
 ### ds_move_handle
 
@@ -2983,7 +2961,6 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `bg_color_error` | ![bg_color_error](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_error.png) | bg_color=#error bg_opa=100% bg_grad_dir=none |
 | `bg_color_header` | ![bg_color_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_header.png) | bg_color=#bg_light bg_opa=100% |
 | `bg_color_list_item` | ![bg_color_list_item](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_list_item.png) | bg_color=#bg bg_opa=100% bg_grad_color=#bg_light |
-| `bg_modal` | ![bg_modal](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_modal.png) | bg_color=#bg_dark bg_opa=75% |
 | `text` | ![text](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text.png) | text_color=#text text_font=font_normal |
 | `text_muted` | ![text_muted](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_muted.png) | text_color=#text_muted text_font=font_subdued |
 | `text_emphasis` | ![text_emphasis](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_emphasis.png) | text_color=#text text_font=font_emphasis |
@@ -3000,7 +2977,6 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `scrollbar_scrolled` | ![scrollbar_scrolled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar_scrolled.png) | bg_opa=100% |
 | `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
 | `tab_card` |  | *(not set)* |
-| `modal` |  | align=center border_color=#border shadow_width=32 shadow_spread=2 shadow_offset_y=6 shadow_color=0x000000 shadow_opa=40% |
 | `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#bg_light text_color=#text border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
 | `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_color=#primary_muted bg_grad_dir=none outline_color=#primary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
 | `icon` |  | *(not set)* |
@@ -3127,7 +3103,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `dialog_from` | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_from.png) | text_color=#text_muted text_font=font_subdued |
 | `dialog_icon_button` |  | width=48 height=48 pad_all=0 |
 | `dialog_body` |  | pad_all=#pad_large |
-| `dialog_footer` | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_footer.png) | width=100% height=content layout=flex flex_flow=row flex_main_place=end pad_all=0 pad_column=#pad |
+| `dialog_footer` | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_footer.png) | width=100% height=content layout=flex flex_flow=row flex_main_place=end pad_all=#pad_large pad_top=0 pad_column=#pad |
 | `dialog_button` |  | pad_left=24 pad_right=24 |
 | `gauge_arc` |  | arc_color=#bg_light arc_width=10dpx arc_rounded=true bg_opa=0 pad_all=0 |
 | `gauge_arc_indic` |  | arc_color=#primary arc_width=10dpx arc_rounded=true |

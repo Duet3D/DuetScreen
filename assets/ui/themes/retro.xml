@@ -26,7 +26,7 @@
 		<!-- Dark outlines and hard shadows -->
 		<style name="card" border_color="#text" shadow_width="0" shadow_offset_x="4" shadow_offset_y="4"
 			   shadow_color="#shadow" shadow_opa="100%"/>
-		<style name="modal" shadow_width="0" shadow_spread="0" shadow_offset_x="6" shadow_offset_y="6"
+		<style name="dialog" shadow_width="0" shadow_spread="0" shadow_offset_x="6" shadow_offset_y="6"
 			   shadow_color="#shadow" shadow_opa="100%"/>
 		<style name="tool_list_tool" border_color="#border" shadow_width="0" shadow_offset_x="0" shadow_offset_y="0"
 			   shadow_opa="0"/>

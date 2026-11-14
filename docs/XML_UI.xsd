@@ -15,7 +15,6 @@
 			<xs:enumeration value="presenter.alert.footer_shown"/>
 			<xs:enumeration value="presenter.alert.input"/>
 			<xs:enumeration value="presenter.alert.input_shown"/>
-			<xs:enumeration value="presenter.alert.keyboard"/>
 			<xs:enumeration value="presenter.alert.keyboard_mode"/>
 			<xs:enumeration value="presenter.alert.max"/>
 			<xs:enumeration value="presenter.alert.min"/>
@@ -391,7 +390,6 @@
 			<xs:enumeration value="presenter.alert.dismissed"/>
 			<xs:enumeration value="presenter.alert.input"/>
 			<xs:enumeration value="presenter.alert.jog"/>
-			<xs:enumeration value="presenter.alert.keyboard"/>
 			<xs:enumeration value="presenter.alert.ok"/>
 			<xs:enumeration value="presenter.babystep.close"/>
 			<xs:enumeration value="presenter.babystep.down"/>
@@ -970,7 +968,6 @@
 			<xs:enumeration value="ds_keyboard"/>
 			<xs:enumeration value="ds_layout"/>
 			<xs:enumeration value="ds_list"/>
-			<xs:enumeration value="ds_modal"/>
 			<xs:enumeration value="ds_move_handle"/>
 			<xs:enumeration value="ds_password_toggle"/>
 			<xs:enumeration value="ds_plot"/>
@@ -1112,7 +1109,6 @@
 			<xs:enumeration value="bg_color_warning"/>
 			<xs:enumeration value="bg_dark"/>
 			<xs:enumeration value="bg_light"/>
-			<xs:enumeration value="bg_modal"/>
 			<xs:enumeration value="bg_switch"/>
 			<xs:enumeration value="border"/>
 			<xs:enumeration value="border_color_card"/>
@@ -1210,7 +1206,6 @@
 			<xs:enumeration value="menu_section"/>
 			<xs:enumeration value="menu_separator"/>
 			<xs:enumeration value="menu_sidebar_cont"/>
-			<xs:enumeration value="modal"/>
 			<xs:enumeration value="msgbox_backdrop_bg"/>
 			<xs:enumeration value="no_border"/>
 			<xs:enumeration value="no_radius"/>
@@ -3132,20 +3127,6 @@
 		</xs:attribute>
 		<xs:attribute name="value" type="xs:string">
 			<xs:annotation><xs:documentation>With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `&lt;ds_list list=&quot;om.fans&quot; key=&quot;row.index&quot; value=&quot;2&quot; item=&quot;…&quot;/&gt;` shows fan 2</xs:documentation></xs:annotation>
-		</xs:attribute>
-	</xs:attributeGroup>
-	<xs:attributeGroup name="ds_modal.attributes">
-		<xs:attribute name="bind_open" type="subject">
-			<xs:annotation><xs:documentation>Open while this subject is non-zero (int) or non-empty (text), or, with `open_value`, equal to it</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="open_value" type="xs:string">
-			<xs:annotation><xs:documentation>The value `bind_open` must have for the dialog to be open</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="blocking" type="xs:string">
-			<xs:annotation><xs:documentation>&quot;true&quot; so that tapping outside doesn't close it (default false)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="in_place" type="xs:string">
-			<xs:annotation><xs:documentation>&quot;true&quot; to stay in the widget it is written in rather than move to the main window, so the backdrop covers only that widget, e.g. alerts covering the whole screen (default false)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_password_toggle.attributes">
@@ -7028,15 +7009,6 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_list.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="ds_modal">
-		<xs:annotation><xs:documentation>A dialog over the main window with a dimmed backdrop. Its subject alone decides whether it is open, so a presenter opens and closes it by setting a subject. Closed any other way (tapped outside, the back button, navigation closing every modal), it raises `dismissed` so the presenter can update the subject; closing it by its subject raises nothing. The content is laid out in the dialog's card, which the lv_obj attributes apply to. Unless `in_place`, it is deleted with the widget it was written in. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="ds_modal.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

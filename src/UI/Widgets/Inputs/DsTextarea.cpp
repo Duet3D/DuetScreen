@@ -266,6 +266,18 @@ namespace UI::Xml
 		lv_obj_add_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
 	}
 
+	bool DsTextarea::handingOn(lv_obj_t* keyboard) const
+	{
+		// While a tap moves the focus, the object it is on is the active one
+		lv_obj_t* tapped = lv_indev_active() != nullptr ? lv_indev_get_active_obj() : nullptr;
+		if (tapped == nullptr || tapped == getRootPtr() || lv_obj_get_user_data(tapped) == nullptr)
+		{
+			return false;
+		}
+		const auto* next = dynamic_cast<const DsTextarea*>(LvObj::fromPtr(tapped));
+		return next != nullptr && next->m_hideOnDefocus && next->findKeyboard() == keyboard;
+	}
+
 	void DsTextarea::keyboardEventCb(lv_event_t* e)
 	{
 		auto* textarea = static_cast<DsTextarea*>(lv_event_get_user_data(e));
@@ -283,6 +295,11 @@ namespace UI::Xml
 		case LV_EVENT_DEFOCUSED:
 			if (textarea->m_hideOnDefocus)
 			{
+				textarea->stopWatchingLeave();
+				if (textarea->handingOn(keyboard))
+				{
+					break;
+				}
 				lv_keyboard_set_textarea(keyboard, nullptr);
 				textarea->showKeyboard(keyboard, false);
 			}

@@ -148,7 +148,6 @@ endif()
 # UI Options
 set(DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET "LvCheckbox" CACHE STRING "Widget type for settings toggles: 'LvCheckbox' or 'LvSwitch'")
 set_property(CACHE DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET PROPERTY STRINGS LvCheckbox LvSwitch) # constrain valid values
-option(DUETSCREEN_UI_MODAL_CLOSE_BUTTON "Enable close button on modals" OFF)
 
 if(NOT DEFINED PROCESSOR)
   message(
