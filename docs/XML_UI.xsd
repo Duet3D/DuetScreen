@@ -153,7 +153,6 @@
 			<xs:enumeration value="job.cancel_control"/>
 			<xs:enumeration value="job.elapsed"/>
 			<xs:enumeration value="job.elapsed_text"/>
-			<xs:enumeration value="job.file"/>
 			<xs:enumeration value="job.finished"/>
 			<xs:enumeration value="job.latest_file"/>
 			<xs:enumeration value="job.pause_control"/>

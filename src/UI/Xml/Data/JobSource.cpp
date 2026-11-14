@@ -23,7 +23,6 @@ namespace UI::Xml
 
 	void JobSource::fields(FieldVisitor& f)
 	{
-		f.field("job.file", m_file, "The current job's file, e.g. \"0:/gcodes/part.gcode\"; empty when there is none");
 		f.field("job.latest_file",
 				m_latest,
 				"The latest job's file: the current job's, or the last job's when it has finished");
@@ -101,7 +100,6 @@ namespace UI::Xml
 
 	void JobSource::clear()
 	{
-		m_file.set("");
 		m_latest.set("");
 		m_finished.set(0);
 		m_thumbnail.set("");
@@ -166,7 +164,6 @@ namespace UI::Xml
 
 	void JobSource::fileChanged(const std::string& file)
 	{
-		m_file.set(file);
 		m_latest.set(file);
 		m_finished.set(0);
 		showThumbnail(file);

@@ -1,8 +1,9 @@
 /*
  * JobSource.h
  *
- * Publishes the job: the current one's file, progress and times; the latest one (the current job, else the last) with
- * its thumbnail; and which of pause, resume, print again and cancel the printer's state allows.
+ * Publishes what the job needs worked out: its progress, measured as the user chose, and times as text; the latest
+ * job (the current one, else the last) with its thumbnail; and which of pause, resume, print again and cancel the
+ * printer's state allows. The current job's file is the object model's, om.job.file.fileName.
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -87,7 +88,6 @@ namespace UI::Xml
 		/** A thumbnail arrived: show it if it is the latest job's */
 		void thumbnailReceived(const std::string& file);
 
-		StringSubject<256> m_file;		 // Current job's file, or empty
 		StringSubject<256> m_latest;	 // The current job's file, else the last job's
 		IntSubject m_finished;			 // 1 when the latest job is the last one, finished
 		StringSubject<256> m_thumbnail;	 // The latest job's thumbnail path, or empty

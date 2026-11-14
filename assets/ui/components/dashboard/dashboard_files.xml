@@ -13,7 +13,7 @@
 			<ds_tabs-tab name="macros" title_tag="file.macros">
 				<ds_view name="dashboard_macros" view="file_browser" presenter="dashboard_macros" shown="true"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="status" title_tag="app_drawer.status" select_on="job.file">
+			<ds_tabs-tab name="status" title_tag="app_drawer.status" select_on="om.job.file.fileName">
 				<ds_view name="dashboard_job_status" view="dashboard_job_status" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>

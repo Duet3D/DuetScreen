@@ -173,7 +173,6 @@ Each row of `chambers`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `job.file` | text | The current job's file, e.g. "0:/gcodes/part.gcode"; empty when there is none |
 | `job.latest_file` | text | The latest job's file: the current job's, or the last job's when it has finished |
 | `job.finished` | int | 1 when the latest job is the last one, finished, else 0 |
 | `job.thumbnail` | text | The latest job's thumbnail path, or empty until it arrives |
