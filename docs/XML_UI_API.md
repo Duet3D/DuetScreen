@@ -1388,7 +1388,7 @@ Also takes every `lv_obj` attribute.
 | `windowed` | "true" to build only the rows on screen, building and deleting rows as the list scrolls (default false) |
 | `item_height` | Windowed: each item's height in pixels (required when windowed) |
 | `item_width` | Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; the list scrolls sideways); the list's full width if not given |
-| `flow` | Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit |
+| `flow` | How the items are placed: `column`, one per line; `row`, side by side; `row_wrap`, as many per line as fit; or `pages`, one at a time, each filling the list, swiped through sideways with a dot per item below (styled by the theme's list_pages, list_page_dot and list_page_dot_current). Without it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed list takes `column` or `row_wrap`. |
 | `follow_end` | "true" to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false) |
 | `key` | A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. Empty for every row, so a component can leave it to a prop. |
 | `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="om.fans" key="row.index" value="2" item="…"/>` shows fan 2 |
@@ -2575,6 +2575,9 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `slider_buttons` |  | width=40 height=40 |
 | `list_header` |  | *(not set)* |
 | `list_title` | ![list_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_title.png) | merge=text_emphasis |
+| `list_pages` | ![list_pages](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_pages.png) | pad_top=#pad pad_column=#pad |
+| `list_page_dot` | ![list_page_dot](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_page_dot.png) | width=8 height=8 radius=circle bg_color=#border_muted bg_opa=100% |
+| `list_page_dot_current` |  | bg_color=#primary |
 | `graph_legend` |  | width=30% min_width=130 max_width=220 pad_all=0 pad_row=#pad |
 | `graph_legend_item` | ![graph_legend_item](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_item.png) | pad_all=#pad pad_column=#pad text_color=#text_muted |
 | `graph_legend_item_shown` | ![graph_legend_item_shown](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_item_shown.png) | text_color=#text |

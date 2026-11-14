@@ -4,13 +4,15 @@
  * <ds_list>: one component per row of a List (see Binding/List.h). Its attributes are in registerXml().
  *
  * A keyed list (`key="number" value="2"`) shows only the rows whose `key` field equals `value`: one fan, a tool's
- * card, every active heater. Each item is given the list's `item.*` attributes (see ItemAttributes.h). It watches each row's key, so the rows shown follow the data even when a row is
+ * card, every active heater. Each item is given the list's `item.*` attributes (see ItemAttributes.h). With
+ * `flow="pages"` it shows one item at a time (see ListPages.h). It watches each row's key, so the rows shown follow the data even when a row is
  * refilled with another item (List::sync() fills rows by position, so removing fan 1 moves fan 2 into its row).
  */
 
 #pragma once
 
 #include "ItemAttributes.h"
+#include "ListPages.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Scope.h"
 #include "UI/Xml/Binding/Subjects.h"
@@ -50,6 +52,7 @@ namespace UI::Xml
 		 * @param window Build only the items on screen, placed like this; build every item if not given
 		 * @param key Show only the rows whose field `key.field` is `key.value`; every row if not given. Not with
 		 *        `window`. The rows must have the field (see keyOf()).
+		 * @param pages Show one item at a time (see ListPages.h). Not with `window`.
 		 */
 		DsList(lv_obj_t* container,
 			   ListBase& list,
@@ -58,7 +61,8 @@ namespace UI::Xml
 			   ItemAttributes itemAttributes = {},
 			   std::optional<Window> window = std::nullopt,
 			   bool followEnd = false,
-			   std::optional<Key> key = std::nullopt);
+			   std::optional<Key> key = std::nullopt,
+			   bool pages = false);
 
 		/** Delete the rows' widgets, then their scopes, and stop listening; runs while LVGL deletes the container */
 		~DsList() override;
@@ -84,6 +88,12 @@ namespace UI::Xml
 
 		/** `<ds_list>` create callback: a plain container */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
+
+		/**
+		 * Lay `container` out for `flow` (see registerXml()): a flex flow, or none for "" or a windowed list
+		 * @return whether it shows a page at a time, or nothing if `flow` isn't one of the flows
+		 */
+		static std::optional<bool> applyFlow(lv_obj_t* container, std::string_view flow, bool windowed);
 
 		/** `<ds_list>` apply callback: lv_obj attributes, then start showing the list */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
@@ -125,6 +135,9 @@ namespace UI::Xml
 		/** Eager: forget rows, deleting their widgets, until `count` remain */
 		void truncate(size_t count);
 
+		/** The items changed: tell the pages, if shown a page at a time */
+		void itemsChanged();
+
 		/** Keyed: build row `index`'s item if its key matches, else delete it */
 		void showIfMatches(size_t index);
 
@@ -162,5 +175,6 @@ namespace UI::Xml
 		bool m_atEnd = true;			 // follow_end: the user hasn't scrolled away from the end
 		bool m_laidOut = false;			 // follow_end: laid out since the display last finished laying out
 		lv_display_t* m_display = nullptr; // follow_end: the display telling us when layout is done
+		std::unique_ptr<ListPages> m_pages; // flow="pages": shows the items one at a time; nullptr otherwise
 	};
 } // namespace UI::Xml

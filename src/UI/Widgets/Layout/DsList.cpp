@@ -22,7 +22,8 @@ namespace UI::Xml
 				   ItemAttributes itemAttributes,
 				   std::optional<Window> window,
 				   bool followEnd,
-				   std::optional<Key> key)
+				   std::optional<Key> key,
+				   bool pages)
 		: m_container(container)
 		, m_list(&list)
 		, m_item(std::move(item))
@@ -43,6 +44,10 @@ namespace UI::Xml
 		}
 		if (!m_window)
 		{
+			if (pages)
+			{
+				m_pages = std::make_unique<ListPages>(m_container);
+			}
 			build(0, m_list->size());
 			return;
 		}
@@ -125,7 +130,13 @@ namespace UI::Xml
 				   "Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; "
 				   "the list scrolls sideways); the list's full width if not given"},
 				  {"flow",
-				   "Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit"},
+				   "How the items are placed: `column`, one per line; `row`, side by side; `row_wrap`, as many per "
+				   "line as fit; or `pages`, one at a time, each filling the list, swiped through sideways with a dot "
+				   "per item below (styled by the theme's list_pages, list_page_dot and list_page_dot_current). "
+				   "Without "
+				   "it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed "
+				   "list "
+				   "takes `column` or `row_wrap`."},
 				  {"follow_end",
 				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
 				   "unless the user has scrolled back (default false)"},
@@ -272,11 +283,55 @@ namespace UI::Xml
 		}
 
 		lv_obj_t* container = itemOf(state);
+		const auto pages = applyFlow(container, attrOr(attrs, "flow", ""), window.has_value());
+		if (!pages)
+		{
+			LOG_WARN("<ds_list list=\"{:s}\" flow=\"{:s}\">: no such flow{:s}",
+					 listName,
+					 attrOr(attrs, "flow", ""),
+					 window ? " for a windowed list (column or row_wrap)" : " (column, row, row_wrap or pages)");
+			return;
+		}
 		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
-		deleteWith(
-			container,
-			new DsList(
-				container, *list, item, context, ItemAttributes::from(attrs), window, followEnd, std::move(key)));
+		deleteWith(container,
+				   new DsList(container,
+							  *list,
+							  item,
+							  context,
+							  ItemAttributes::from(attrs),
+							  window,
+							  followEnd,
+							  std::move(key),
+							  *pages));
+	}
+
+	std::optional<bool> DsList::applyFlow(lv_obj_t* container, std::string_view flow, bool windowed)
+	{
+		// A windowed list places its items itself (see Window), and reads `flow` there
+		if (windowed)
+		{
+			return flow.empty() || flow == "column" || flow == "row_wrap" ? std::optional(false) : std::nullopt;
+		}
+		if (flow.empty())
+		{
+			return false;
+		}
+		if (flow == "pages")
+		{
+			return true;
+		}
+		static constexpr std::pair<std::string_view, lv_flex_flow_t> FLOWS[] = {
+			{"column", LV_FLEX_FLOW_COLUMN}, {"row", LV_FLEX_FLOW_ROW}, {"row_wrap", LV_FLEX_FLOW_ROW_WRAP}};
+		for (const auto& [name, flex] : FLOWS)
+		{
+			if (flow == name)
+			{
+				lv_obj_set_layout(container, LV_LAYOUT_FLEX);
+				lv_obj_set_flex_flow(container, flex);
+				return false;
+			}
+		}
+		return std::nullopt;
 	}
 
 	Subject* DsList::keyOf(Row& row, std::string_view name)
@@ -390,6 +445,14 @@ namespace UI::Xml
 		}
 	}
 
+	void DsList::itemsChanged()
+	{
+		if (m_pages)
+		{
+			m_pages->refresh();
+		}
+	}
+
 	void DsList::build(size_t from, size_t to)
 	{
 		for (size_t i = from; i < to; i++)
@@ -411,6 +474,7 @@ namespace UI::Xml
 			entry.keyObserver = lv_subject_add_observer(entry.key->raw(), keyObserverCb, this);
 			showIfMatches(i);
 		}
+		itemsChanged();
 	}
 
 	void DsList::truncate(size_t count)
@@ -425,6 +489,7 @@ namespace UI::Xml
 			deleteRow(entry);
 			m_entries.pop_back();
 		}
+		itemsChanged();
 	}
 
 	void DsList::showIfMatches(size_t index)
@@ -447,6 +512,11 @@ namespace UI::Xml
 			deleteRow(entry);
 			entry.scope.reset();
 		}
+		else
+		{
+			return;
+		}
+		itemsChanged();
 	}
 
 	uint32_t DsList::itemsBefore(size_t index) const

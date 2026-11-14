@@ -1208,6 +1208,9 @@
 			<xs:enumeration value="list_btn"/>
 			<xs:enumeration value="list_header"/>
 			<xs:enumeration value="list_item_grow"/>
+			<xs:enumeration value="list_page_dot"/>
+			<xs:enumeration value="list_page_dot_current"/>
+			<xs:enumeration value="list_pages"/>
 			<xs:enumeration value="list_title"/>
 			<xs:enumeration value="long_press"/>
 			<xs:enumeration value="menu_bg"/>
@@ -3036,7 +3039,7 @@
 			<xs:annotation><xs:documentation>Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; the list scrolls sideways); the list's full width if not given</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="flow" type="xs:string">
-			<xs:annotation><xs:documentation>Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>How the items are placed: `column`, one per line; `row`, side by side; `row_wrap`, as many per line as fit; or `pages`, one at a time, each filling the list, swiped through sideways with a dot per item below (styled by the theme's list_pages, list_page_dot and list_page_dot_current). Without it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed list takes `column` or `row_wrap`.</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="follow_end" type="xs:string">
 			<xs:annotation><xs:documentation>&quot;true&quot; to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false)</xs:documentation></xs:annotation>

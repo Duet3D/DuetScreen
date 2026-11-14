@@ -9,5 +9,6 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/DsTabs.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ItemAttributes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ListPages.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/TabView.cpp
 )

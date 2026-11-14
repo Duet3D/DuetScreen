@@ -279,6 +279,12 @@
 
 		<style name="list_title" merge="text_emphasis"/>
 
+		<!-- A list shown a page at a time (ds_list flow="pages"): a dot per item below it, the shown item's in the
+			 accent. A dot's height must be in pixels: the list works out from it how much room the dots take. -->
+		<style name="list_pages" pad_top="#pad" pad_column="#pad"/>
+		<style name="list_page_dot" width="8" height="8" radius="circle" bg_color="#border_muted" bg_opa="100%"/>
+		<style name="list_page_dot_current" bg_color="#primary"/>
+
 		<style name="slider_buttons" width="40" height="40"/>
 
 		<!-- Graph legend, beside the plot: an entry per series, a neutral button (it shows and hides the series) with

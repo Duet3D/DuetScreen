@@ -314,6 +314,9 @@ namespace UI::Themes
 		/* List */
 		Style list_header; // List header strip
 		Style list_title; // List title text
+		Style list_pages;			 // The row of dots under a list shown a page at a time (ds_list flow="pages")
+		Style list_page_dot;		 // A dot, one per item: sets its size and colour
+		Style list_page_dot_current; // The dot of the item shown
 
 		/* Graph */
 		Style graph_legend;				 // A graph's legend, beside its plot: sets its width

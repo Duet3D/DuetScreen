@@ -1488,3 +1488,64 @@ TEST_F(TestXmlUi, ItemAttributesReachEveryItemAsPropsOrRootAttributes)
 	EXPECT_EQ(text(one, "prefix"), _("fan.title"));
 	EXPECT_EQ(text(one, "speed"), "50");
 }
+
+TEST_F(TestXmlUi, ListFlowPlacesItemsInARowOrAPageAtATime)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/flow_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<ds_list name="row" list="om.fans" item="fan_line" flow="row" width="400" height="100"/>
+				<ds_list name="pages" list="om.fans" item="fan_line" item.speed="row.actualValue|percent" flow="pages"
+						 width="400" height="200" style_pad_all="0"/>
+			</view>
+		</component>)");
+	writeFile(bundleFile("components/fan_line.xml"), R"(
+		<component>
+			<api><prop name="speed" type="string" default="0"/></api>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="speed" bind_text="$speed"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	auto& view = makeView("flow_screen");
+	load_model_data(THREE_FANS);
+	pump();
+	lv_obj_update_layout(view.getRootPtr());
+
+	EXPECT_EQ(lv_obj_get_style_flex_flow(find(view, "row"), LV_PART_MAIN), LV_FLEX_FLOW_ROW);
+
+	// Three items filling the list but for the dots, which come after them
+	lv_obj_t* pages = find(view, "pages");
+	ASSERT_EQ(lv_obj_get_child_count(pages), 4u);
+	lv_obj_t* dots = lv_obj_get_child(pages, 3);
+	ASSERT_EQ(lv_obj_get_child_count(dots), 3u);
+	EXPECT_FALSE(lv_obj_has_flag(dots, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_t* first = lv_obj_get_child(pages, 0);
+	EXPECT_EQ(lv_obj_get_width(first), 400);
+	EXPECT_LT(lv_obj_get_height(first), 200);
+	EXPECT_GT(lv_obj_get_height(first), 150);
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_get_child(dots, 0), LV_STATE_CHECKED));
+
+	// Tapping the third dot shows the third item, and marks its dot
+	lv_obj_send_event(lv_obj_get_child(dots, 2), LV_EVENT_CLICKED, nullptr);
+	for (int i = 0; i < 20; i++)
+	{
+		lv_tick_inc(50);
+		lv_timer_handler();
+	}
+	EXPECT_EQ(lv_obj_get_scroll_x(pages), 2 * (400 + lv_obj_get_style_pad_column(pages, LV_PART_MAIN)));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_get_child(dots, 2), LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_get_child(dots, 0), LV_STATE_CHECKED));
+	EXPECT_EQ(text(lv_obj_get_child(pages, 2), "speed"), "0");
+
+	// One item has the whole list, and no dots
+	load_model_data(ONE_FAN);
+	pump();
+	lv_obj_update_layout(view.getRootPtr());
+	ASSERT_EQ(lv_obj_get_child_count(pages), 2u);
+	EXPECT_TRUE(lv_obj_has_flag(dots, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(lv_obj_get_height(lv_obj_get_child(pages, 0)), 200);
+}

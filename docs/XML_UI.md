@@ -220,6 +220,12 @@ builds one `dashboard_tool` per row of `om.tools` (see [dashboard_tools.xml](../
 
 Lists add and remove rows at the end, so existing rows keep their scroll position and in-progress edits when the list changes length.
 
+`flow` says how the items are placed: `column`, `row`, `row_wrap`, or `pages`, one at a time, each filling the list, swiped through sideways with a dot per item below them ([ListPages.h](../src/UI/Widgets/Layout/ListPages.h)). Without it, the list is laid out by its own flex attributes.
+
+```xml
+<ds_list list="om.fans" item="fan_card" flow="pages" width="100%" height="200"/>
+```
+
 A long list should be windowed: only the rows on screen are built, and rows are built and deleted as it scrolls. Every item then has the same size, set by the list:
 
 ```xml
