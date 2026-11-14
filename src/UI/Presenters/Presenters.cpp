@@ -6,7 +6,6 @@
 #include "Common/BabyStepPresenter.h"
 #include "Console/ConsolePresenter.h"
 #include "Control/Fans/FanActions.h"
-#include "Control/Fans/FanPresenter.h"
 #include "Control/Heightmap/HeightmapPresenter.h"
 #include "Control/Move/JogActions.h"
 #include "Control/Move/MovePresenter.h"
@@ -59,7 +58,6 @@ namespace UI
 		CustomiseActions::registerAll();
 
 		/* Presenters */
-		Xml::Presenters::add<FanPresenter>("fans");
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<FactorsPresenter>("factors");

@@ -250,7 +250,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
 | `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
-| `actions.fan.set_speed` | Set a fan's speed in percent: the edited value (`value_confirmed`), else ask for it on the number pad. The fan is the row's, in a row of `om.fans`, else fan number `arg`. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
+| `actions.fan.set_speed` | Set a fan's speed in percent. In a row of `om.fans` the fan is the row's, and the speed the edited value (`value_confirmed`), else `arg` (e.g. 0 or 100 for off and full). Elsewhere `arg` is the fan's number, and the speed the edited value. Without a speed it is asked for on the number pad. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
@@ -595,14 +595,6 @@ Each row of `presenter.extrusion_dialog.factors`:
 | --- | --- |
 | `presenter.factor.close` | Close the dialog named by `arg` (its id), e.g. when it is dismissed |
 | `presenter.factor.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of `factors`. |
-
-### fans
-
-Used by `dashboard_fan`, `fans`.
-
-| Action | Description |
-| --- | --- |
-| `presenter.fans.set_speed` | Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `om.fans`. |
 
 ### hardware_test
 
@@ -1219,8 +1211,8 @@ A button showing text, an icon or both
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_button translation_tag="tr.fan.max" icon="fan.png">
-	<action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
+<ds_button translation_tag="tr.move.home_all" icon="home_axis.png">
+	<action trigger="clicked" name="actions.gcode.send" arg="G28"/>
 </ds_button>
 ```
 
@@ -2930,7 +2922,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_current_tool` |  | `graph_key` | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_current_tool_card` |  | `graph_key` | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
 | `dashboard_current_tool_heater` |  | `graph_key` | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
-| `dashboard_fan` | `fans` | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
+| `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
 | `dashboard_heater` |  | `label`, `active`, `standby`, `graph_key` | `dashboard_heater_card`, `dashboard_tool_heater` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
 | `dashboard_heater_card` |  | `label_tag`, `graph_key` | `dashboard_bed`, `dashboard_chamber` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
@@ -2954,7 +2946,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `factors_dialog` |  | `dialog`, `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
-| [`fans`](#fans) | `fans` |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
+| [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
 | `file_browser_dialog` |  |  | `file_browser` | [file_browser_dialog.xml](../assets/ui/components/file_browser/file_browser_dialog.xml) |

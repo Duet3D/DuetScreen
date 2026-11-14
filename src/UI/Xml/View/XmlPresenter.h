@@ -3,7 +3,7 @@
  *
  * The C++ side of an XML view. A component names its presenter on its root element:
  *
- *     <component presenter="fans"> ... </component>
+ *     <component presenter="console"> ... </component>
  *
  * When an XmlView builds that component it first creates the presenter, then binds the names the presenter declares
  * in `fields()` into the view's scope as `presenter.<name>`, so the view's widgets can bind to them. `<action>`s in the

@@ -3,8 +3,8 @@
  *
  * Actions are how an XML view asks for something to happen. A view never calls code; it names an action:
  *
- *     <ds_button translation_tag="tr.fan.max">
- *         <action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
+ *     <ds_button translation_tag="tr.move.home_all">
+ *         <action trigger="clicked" name="actions.gcode.send" arg="G28"/>
  *     </ds_button>
  *
  * The name says where the action is:

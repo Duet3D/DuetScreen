@@ -258,9 +258,9 @@ namespace
 			</view>
 		</component>)";
 
-	/* One fan, picked by a prop, with the built-in fan card and the fans presenter's actions */
+	/* One fan, picked by a prop, with the built-in fan card */
 	constexpr std::string_view ONE_FAN_SCREEN = R"(
-		<component presenter="fans">
+		<component>
 			<view extends="lv_obj" width="100%" height="100%">
 				<fan_pick name="pick" fan="2"/>
 			</view>
@@ -455,9 +455,9 @@ TEST_F(TestXmlUi, BuiltinBundleLoadsCleanly)
 {
 	EXPECT_TRUE(UI::Xml::getIssues().empty());
 
-	const auto* screen = UI::Xml::findComponent("fans");
+	const auto* screen = UI::Xml::findComponent("heightmap");
 	ASSERT_NE(screen, nullptr);
-	EXPECT_EQ(screen->presenter, "fans");
+	EXPECT_EQ(screen->presenter, "heightmap");
 	EXPECT_EQ(screen->bundle, "duetscreen");
 
 	const auto* card = UI::Xml::findComponent("fan_card");
@@ -467,10 +467,11 @@ TEST_F(TestXmlUi, BuiltinBundleLoadsCleanly)
 
 TEST_F(TestXmlUi, ViewHasItsPresenterAndTranslatedText)
 {
-	auto& view = makeView();
-	ASSERT_NE(view.getPresenter(), nullptr);
-	EXPECT_EQ(view.getPresenter()->getName(), "fans");
+	auto& heightmap = makeView("heightmap");
+	ASSERT_NE(heightmap.getPresenter(), nullptr);
+	EXPECT_EQ(heightmap.getPresenter()->getName(), "heightmap");
 
+	auto& view = makeView();
 	lv_obj_t* title = find(view, "title");
 	ASSERT_NE(title, nullptr);
 	EXPECT_STREQ(lv_label_get_text(title), _("fan.title").c_str());
@@ -579,7 +580,7 @@ TEST_F(TestXmlUi, ListGrowsAndShrinksAtTheEnd)
 	EXPECT_EQ(lv_obj_get_child_count(fanList(view)), 0u);
 }
 
-TEST_F(TestXmlUi, ButtonsReachThePresenterWithTheirFan)
+TEST_F(TestXmlUi, FanButtonsActOnTheirRowsFan)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
@@ -664,12 +665,13 @@ TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
 TEST_F(TestXmlUi, OverrideNamingAnUnknownPresenterIsRejected)
 {
 	writeFile(bundleFile("manifest.json"), manifest());
-	writeFile(bundleFile("components/fans.xml"), R"(<component presenter="nope"><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/heightmap.xml"),
+			  R"(<component presenter="nope"><view extends="lv_obj"/></component>)");
 	restartWithUserBundles();
 
 	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
 	EXPECT_NE(UI::Xml::getIssues()[0].message.find("unknown presenter 'nope'"), std::string::npos);
-	EXPECT_EQ(UI::Xml::findComponent("fans")->presenter, "fans");
+	EXPECT_EQ(UI::Xml::findComponent("heightmap")->presenter, "heightmap");
 }
 
 TEST_F(TestXmlUi, BundleForAnotherUiApiIsNotLoaded)
@@ -687,8 +689,7 @@ TEST_F(TestXmlUi, DoubleStarFolderFindsComponentsInEveryFolderBelow)
 {
 	writeFile(bundleFile("manifest.json"), R"({"id": "test", "ui_api": "1.0", "components": ["components/**/*.xml"]})");
 	writeFile(bundleFile("components/fan_card.xml"), R"(<component><view extends="lv_obj"/></component>)");
-	writeFile(bundleFile("components/control/fans/fans.xml"),
-			  R"(<component presenter="fans"><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/control/fans/fans.xml"), R"(<component><view extends="lv_obj"/></component>)");
 	writeFile(bundleFile("components/control/fans/notes.txt"), "not a component");
 	restartWithUserBundles();
 

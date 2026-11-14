@@ -26,8 +26,8 @@ namespace UI::Xml
 			{.name = "ds_button",
 			 .extends = "lv_obj",
 			 .description = "A button showing text, an icon or both",
-			 .example = R"(<ds_button translation_tag="tr.fan.max" icon="fan.png">
-	<action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
+			 .example = R"(<ds_button translation_tag="tr.move.home_all" icon="home_axis.png">
+	<action trigger="clicked" name="actions.gcode.send" arg="G28"/>
 </ds_button>)",
 			 .attributes =
 				 {{"text", "The text shown, if there is no `translation_tag`"},

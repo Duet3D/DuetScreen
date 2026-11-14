@@ -126,10 +126,10 @@ TEST_F(XmlUiApi, DescribesEveryKindOfName)
 	}
 
 	// Presenters know the components that name them
-	auto fans = std::find_if(
-		reference.presenters.begin(), reference.presenters.end(), [](const auto& p) { return p.name == "fans"; });
-	ASSERT_NE(fans, reference.presenters.end());
-	EXPECT_FALSE(fans->components.empty());
+	auto heightmap = std::find_if(
+		reference.presenters.begin(), reference.presenters.end(), [](const auto& p) { return p.name == "heightmap"; });
+	ASSERT_NE(heightmap, reference.presenters.end());
+	EXPECT_FALSE(heightmap->components.empty());
 
 	// Every widget says what it is, and what each attribute does
 	EXPECT_FALSE(reference.widgets.empty());
@@ -272,15 +272,15 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	std::ofstream(userDir / "test" / "manifest.json")
 		<< R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"], "widgets": ["widgets/*.json"]})";
 
-	// A screen, nothing uses it, so it is a view of its own, with the fans presenter. Constants (a number, quoted
+	// A screen, nothing uses it, so it is a view of its own, with the heightmap presenter. Constants (a number, quoted
 	// text, a translation key) bind where a name is expected.
-	std::ofstream(userDir / "test" / "components" / "lint_screen.xml") << R"(<component presenter="fans">
+	std::ofstream(userDir / "test" / "components" / "lint_screen.xml") << R"(<component presenter="heightmap">
 	<view extends="lv_obj">
 		<lv_label bind_text="presenter.no_such_subject"/>
 		<style name="no_such_style"/>
 		<ds_button translation_tag="tr.no.such.key">
 			<action name="presenter.no.such_action"/>
-			<action name="presenter.fans.set_speed" trigger="clickd"/>
+			<action name="presenter.heightmap.mode" trigger="clickd"/>
 		</ds_button>
 		<ds_list list="om.fans" item="lint_fan"/>
 		<lint_dialog open="presenter.no_such_open"/>
@@ -292,7 +292,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<ds_list list="om.fans" key="row.index" value="2" item="lint_plain"/>
 		<lv_label translation_tag="fan.max"/>
 		<lv_label bind_text="om.fans[0].name|default:fine_tune.fan"/>
-		<ds_button><action name="fans.set_speed"/></ds_button>
+		<ds_button><action name="heightmap.mode"/></ds_button>
 		<lv_bar bind_value="40"/>
 		<lv_label bind_text="'Any text'"/>
 		<lv_label bind_text="tr.fan.title"/>
@@ -388,7 +388,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:14: rows of `om.fans` have no field `row.numbr` (in lint_screen)",
 		"lint_screen.xml:17: `fan.max`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:18: `fine_tune.fan`: translation keys are written `tr.<key>` (in lint_screen)",
-		"lint_screen.xml:19: `fans.set_speed`: actions are written `presenter.<action>` or `actions.<group>.<action>` "
+		"lint_screen.xml:19: `heightmap.mode`: actions are written `presenter.<action>` or `actions.<group>.<action>` "
 		"(in lint_screen)",
 		"lint_screen.xml:23: no translation `tr.no.such.title` (in lint_screen)",
 		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",

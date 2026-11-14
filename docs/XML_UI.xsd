@@ -463,7 +463,6 @@
 			<xs:enumeration value="presenter.extruder.retract"/>
 			<xs:enumeration value="presenter.factor.close"/>
 			<xs:enumeration value="presenter.factor.set"/>
-			<xs:enumeration value="presenter.fans.set_speed"/>
 			<xs:enumeration value="presenter.files.ask_delete"/>
 			<xs:enumeration value="presenter.files.close_dialog"/>
 			<xs:enumeration value="presenter.files.confirm"/>
@@ -655,7 +654,6 @@
 			<xs:enumeration value="dialog_number"/>
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="factors"/>
-			<xs:enumeration value="fans"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
 			<xs:enumeration value="hardware_test"/>
@@ -8879,7 +8877,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="dashboard_fan">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_fan.xml, with presenter fans.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_fan.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="dashboard_fan.attributes"/>
@@ -10136,7 +10134,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="fans">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fans.xml, with presenter fans.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fans.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
