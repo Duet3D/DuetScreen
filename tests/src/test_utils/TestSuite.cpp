@@ -15,14 +15,16 @@
 #include "test_utils/utils.h"
 #include "utils/StorageHelper.h"
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
+#include <unistd.h>
 
 TestSuite::TestSuite()
 {
 	ZoneScoped;
 	/* Run at start of each test */
-	std::filesystem::remove("tests/config.json");
-	StorageHelper::setConfigFile("tests/config.json");
+	std::filesystem::remove(configFile());
+	StorageHelper::setConfigFile(configFile().string());
 	// Log::SetDebugLevel(Log::DebugLevel::Debug);
 	Log::Init();
 
@@ -42,6 +44,12 @@ TestSuite::~TestSuite()
 	/* Run at end of each test */
 	OM::RemoveAll();
 	std::filesystem::remove_all("/tmp/thumbnails");
+	std::filesystem::remove(configFile());
+}
+
+std::filesystem::path TestSuite::configFile()
+{
+	return std::filesystem::temp_directory_path() / fmt::format("duetscreen-tests-{:d}.json", ::getpid());
 }
 
 bool TestSuite::load_model_data_from_file(std::string_view filename)
