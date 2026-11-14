@@ -90,7 +90,6 @@ namespace UI
 	XX(Time)                                                                                                           \
 	XX(ToolData)                                                                                                       \
 	XX(ToolHeaterData, size_t)                                                                                         \
-	XX(Directories)                                                                                                    \
 	XX(NavigationHomeEnable, bool)                                                                                     \
 	XX(NavigationBackEnable, bool)                                                                                     \
 	XX(NavigationCurrentScreen, UI::LvObj*)                                                                            \

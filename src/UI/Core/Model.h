@@ -3,7 +3,6 @@
 #include "Debug.h"
 #include "LockWrapper.h"
 #include "Subscribers/BoardSubscribers.h"
-#include "Subscribers/DirectoriesSubscribers.h"
 #include "Subscribers/FanSubscribers.h"
 #include "Subscribers/FileSubscribers.h"
 #include "Subscribers/HeatSubscribers.h"
@@ -169,7 +168,6 @@ class Model
 	void disconnected();
 
 	BoardSubscribers m_boardSubscribers;
-	DirectoriesSubscribers m_directoriesSubscribers;
 	FanSubscribers m_fanSubscribers;
 	FileSubscribers m_fileSubscribers;
 	HeatSubscribers m_heatSubscribers;

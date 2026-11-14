@@ -3,6 +3,9 @@
  *
  *  Created on: 2025-04-09
  *      Author: Andy Everitt
+ *
+ * The printer's folders, as its object model gives them (`directories`, e.g. "0:/gcodes/"): where jobs, macros,
+ * filaments and system files are. Read from the object model (Tree.h) each time; empty until the printer sends them.
  */
 
 #pragma once
@@ -11,6 +14,7 @@
 
 namespace OM::Directories
 {
+	/** A folder of the printer's */
 	enum class DirectoryType
 	{
 		FILAMENTS,
@@ -22,23 +26,12 @@ namespace OM::Directories
 		WEB
 	};
 
-	std::string_view GetDirectory(DirectoryType type);
+	/** The folder of kind `type`, e.g. "0:/gcodes/"; empty if the printer hasn't sent it */
+	std::string GetDirectory(DirectoryType type);
 
-	std::string_view GetFilamentsDirectory();
-	std::string_view GetFirmwareDirectory();
-	std::string_view GetGcodesDirectory();
-	std::string_view GetMacrosDirectory();
-	std::string_view GetMenuDirectory();
-	std::string_view GetSystemDirectory();
-	std::string_view GetWebDirectory();
+	/** The jobs' folder */
+	std::string GetGcodesDirectory();
 
-	void SetFilamentsDirectory(std::string_view dir);
-	void SetFirmwareDirectory(std::string_view dir);
-	void SetGcodesDirectory(std::string_view dir);
-	void SetMacrosDirectory(std::string_view dir);
-	void SetMenuDirectory(std::string_view dir);
-	void SetSystemDirectory(std::string_view dir);
-	void SetWebDirectory(std::string_view dir);
-
-	void Reset();
+	/** The system folder */
+	std::string GetSystemDirectory();
 } // namespace OM::Directories

@@ -15,6 +15,7 @@
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/Binding/Surface.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <memory>
 #include <mutex>
@@ -115,5 +116,6 @@ namespace UI
 		Xml::StringSubject<48> m_rms;				// …
 		Xml::IntSubject m_modeSubject;				// `mode`
 		Xml::IntSubject m_levellingUsable;			// 1 if the bed can be levelled
+		Xml::OmWatch m_directoriesWatch;			// Asks for the height maps once the system folder is known
 	};
 } // namespace UI

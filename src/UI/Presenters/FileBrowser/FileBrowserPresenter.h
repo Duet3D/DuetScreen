@@ -18,6 +18,7 @@
 #include "Storage.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <string>
 #include <string_view>
@@ -145,11 +146,14 @@ namespace UI
 		/** A thumbnail arrived: show it on its file, and in the dialog if it is about that file */
 		void thumbnailReceived(const std::string& path);
 
-		/** The base folder's path, e.g. "0:/gcodes" */
-		std::string_view baseFolderPath() const;
+		/** The base folder's path, e.g. "0:/gcodes". It reads the object model, so call it only on the UI's thread,
+		 * not from a reply's callback (see m_baseFolder). */
+		std::string baseFolderPath() const;
 
 		Settings m_settings;					  // What is shown and where settings are kept
 		std::string m_folder;					  // Open folder below the base folder, e.g. "parts/"; "" for the base
+		std::string m_baseFolder;				  // The base folder, e.g. "0:/gcodes", noted on the UI's thread
+		Xml::OmWatch m_directoriesWatch;		  // Notes the base folder as the printer's folders change
 		OM::FileSystem::ItemList m_items;		  // The open folder's contents, in shown order
 		SortBy m_sortBy = SortBy::DATE;			  // Order
 		bool m_sortDescending = true;			  // Direction

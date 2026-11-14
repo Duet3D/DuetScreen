@@ -90,7 +90,7 @@ namespace UI
 				showFiles();
 				requestFiles();
 			});
-		registerEventListener<EventType::Directories>([this]() { requestFiles(); });
+		m_directoriesWatch = Xml::OmWatch({"directories"}, [this] { requestFiles(); });
 		registerEventListener<EventType::AxesData>([this]() { axesChanged(); });
 		registerEventListener<EventType::Status>([this](const OM::PrinterStatus&) { showUsable(); });
 	}

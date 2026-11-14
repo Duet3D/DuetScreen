@@ -2,7 +2,6 @@ target_sources(
   DuetScreen.lib
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/FanSubscribers.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/BoardSubscribers.cpp
-          ${CMAKE_CURRENT_SOURCE_DIR}/DirectoriesSubscribers.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/FileSubscribers.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/HeatSubscribers.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/JobSubscribers.cpp

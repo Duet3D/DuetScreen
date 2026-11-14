@@ -45,7 +45,6 @@ namespace OM
 		RemoveTool(0, true);
 		ClearCurrentHeightmap();
 		ClearHeightmapCache();
-		Directories::Reset();
 		FileSystem::ClearFileSystem();
 		SetPrinterName("");
 		SetPrinterUniqueId("");

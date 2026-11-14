@@ -179,6 +179,13 @@ namespace UI
 		registerEventListener<EventType::ThumbnailData>(this, &FileBrowserPresenter::thumbnailReceived);
 		// A different printer has different folders
 		registerEventListener<EventType::PrinterUniqueId>([this]() { openFolder(""); });
+		// The base folder can arrive after the browser opens; it is noted here, on the UI's thread
+		m_directoriesWatch = Xml::OmWatch({"directories"},
+										  [this]
+										  {
+											  m_baseFolder = baseFolderPath();
+											  showCrumbs();
+										  });
 
 		m_sortBy = StorageHelper::getData(m_settings.sortBy);
 		m_sortDescending = StorageHelper::getData(m_settings.sortDescending);
@@ -213,6 +220,7 @@ namespace UI
 		{
 			m_folder += '/';
 		}
+		m_baseFolder = baseFolderPath();
 		showCrumbs();
 		requestFiles();
 	}
@@ -220,6 +228,9 @@ namespace UI
 	void FileBrowserPresenter::requestFiles()
 	{
 		ZoneScoped;
+		// The listing arrives on the connection's thread, where the object model can't be read under the UI lock:
+		// note the base folder now, for its path
+		m_baseFolder = baseFolderPath();
 		// The reply may come after the browser has gone
 		std::weak_ptr<XmlPresenter> self = weak_from_this();
 		OM::FileSystem::RequestFiles(
@@ -268,7 +279,7 @@ namespace UI
 	void FileBrowserPresenter::showCrumbs()
 	{
 		// The base folder, e.g. "0:/gcodes", then each folder below it
-		std::string_view base = baseFolderPath();
+		const std::string& base = m_baseFolder;
 		std::vector<std::pair<std::string, std::string>> crumbs; // Name and path below the base folder
 		if (!base.empty())
 		{
@@ -326,7 +337,7 @@ namespace UI
 			closeDialog();
 			// The folder's path below the base folder
 			std::string path = item.GetPath();
-			const std::string_view base = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
+			const std::string base = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
 			openFolder(path.starts_with(base) ? path.substr(base.size()) : path);
 			return;
 		}
@@ -445,12 +456,12 @@ namespace UI
 		}
 	}
 
-	std::string_view FileBrowserPresenter::baseFolderPath() const
+	std::string FileBrowserPresenter::baseFolderPath() const
 	{
-		std::string_view path = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
+		std::string path = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
 		if (!path.empty() && path.back() == '/')
 		{
-			path.remove_suffix(1);
+			path.pop_back();
 		}
 		return path;
 	}
