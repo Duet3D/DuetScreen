@@ -241,10 +241,6 @@
         "notifications": "Notificações",
         "system": "Sistema"
       },
-      "headers": {
-        "notifications": "Notificações Duet",
-        "screen_networking": "Rede do ecrã"
-      },
       "send_config_to_duet": "Cópia de segurança das definições no Duet",
       "network": {
         "available_wifi": "Redes próximas",
@@ -253,12 +249,10 @@
         "disconnect": "Desconectar",
         "join": "Juntar",
         "enable": "Ativar WiFi",
-        "password_for": "Introduzir palavra-passe para: {:s}",
         "refresh": "Procurar",
         "enter_password_title": "Palavra-passe",
         "enter_password_hint": "Introduzir palavra-passe",
         "forget": "Esquecer",
-        "ip_address": "Endereço IP: {:s}",
         "known": "Conhecida",
         "signal": "Sinal",
         "ssid": "SSID",
@@ -303,7 +297,6 @@
       "enable_adb": "ADB",
       "enable_ssh": "SSH",
       "enable_system_monitor": "Monitor do sistema",
-      "erase_and_restart": "Apagar e reiniciar",
       "firmware_version": "DuetScreen",
       "font": "Tipo de letra",
       "icons": "Ícones",
@@ -351,7 +344,6 @@
       "usb_mode_device": "USB-C Dispositivo",
       "usb_mode_host": "USB-C Host",
       "usb_mode_internal_wifi": "WiFi interno",
-      "start_hardware_test": "Iniciar teste de hardware",
       "style": {
         "bg_dark": "Fundo escuro",
         "bg": "Fundo",
@@ -378,7 +370,6 @@
       "customise": "Personalizar o esquema",
       "customise_start": "Personalizar",
       "colours": "Cores",
-      "colours_open": "Alterar",
       "groups": {
         "language_keyboard": "Idioma e teclado",
         "machine": "Controlo da máquina",

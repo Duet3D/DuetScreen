@@ -241,10 +241,6 @@
         "notifications": "Meldingen",
         "system": "Systeem"
       },
-      "headers": {
-        "notifications": "Duet-meldingen",
-        "screen_networking": "Schermnetwerk"
-      },
       "send_config_to_duet": "Instellingen back-uppen naar de Duet",
       "network": {
         "available_wifi": "Netwerken in de buurt",
@@ -253,12 +249,10 @@
         "disconnect": "Verbreken",
         "join": "Deelnemen",
         "enable": "WiFi inschakelen",
-        "password_for": "Wachtwoord invoeren voor: {:s}",
         "refresh": "Zoeken",
         "enter_password_title": "Wachtwoord",
         "enter_password_hint": "Wachtwoord invoeren",
         "forget": "Vergeten",
-        "ip_address": "IP-adres: {:s}",
         "known": "Bekend",
         "signal": "Signaal",
         "ssid": "SSID",
@@ -303,7 +297,6 @@
       "enable_adb": "ADB",
       "enable_ssh": "SSH",
       "enable_system_monitor": "Systeemmonitor",
-      "erase_and_restart": "Wissen en herstarten",
       "firmware_version": "DuetScreen",
       "font": "Lettertype",
       "icons": "Pictogrammen",
@@ -351,7 +344,6 @@
       "usb_mode_device": "USB-C Apparaat",
       "usb_mode_host": "USB-C Host",
       "usb_mode_internal_wifi": "Interne WiFi",
-      "start_hardware_test": "Hardwaretest starten",
       "style": {
         "bg_dark": "Achtergrond donker",
         "bg": "Achtergrond",
@@ -378,7 +370,6 @@
       "customise": "Indeling aanpassen",
       "customise_start": "Aanpassen",
       "colours": "Kleuren",
-      "colours_open": "Wijzigen",
       "groups": {
         "language_keyboard": "Taal en toetsenbord",
         "machine": "Machinebediening",

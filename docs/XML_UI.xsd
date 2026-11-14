@@ -1801,7 +1801,6 @@
 			<xs:enumeration value="tr.settings.cache_cleared"/>
 			<xs:enumeration value="tr.settings.clear_duetscreen_cache"/>
 			<xs:enumeration value="tr.settings.colours"/>
-			<xs:enumeration value="tr.settings.colours_open"/>
 			<xs:enumeration value="tr.settings.connectivity_header"/>
 			<xs:enumeration value="tr.settings.customise"/>
 			<xs:enumeration value="tr.settings.customise_start"/>
@@ -1826,7 +1825,6 @@
 			<xs:enumeration value="tr.settings.enable_ssh"/>
 			<xs:enumeration value="tr.settings.enable_system_monitor"/>
 			<xs:enumeration value="tr.settings.erase"/>
-			<xs:enumeration value="tr.settings.erase_and_restart"/>
 			<xs:enumeration value="tr.settings.erase_confirm.text"/>
 			<xs:enumeration value="tr.settings.erase_confirm.title"/>
 			<xs:enumeration value="tr.settings.erase_confirm.yes"/>
@@ -1852,8 +1850,6 @@
 			<xs:enumeration value="tr.settings.groups.update_backup"/>
 			<xs:enumeration value="tr.settings.groups.wifi"/>
 			<xs:enumeration value="tr.settings.hardware_test"/>
-			<xs:enumeration value="tr.settings.headers.notifications"/>
-			<xs:enumeration value="tr.settings.headers.screen_networking"/>
 			<xs:enumeration value="tr.settings.hints.advanced"/>
 			<xs:enumeration value="tr.settings.hints.backup"/>
 			<xs:enumeration value="tr.settings.hints.cache"/>
@@ -1889,12 +1885,10 @@
 			<xs:enumeration value="tr.settings.network.enter_password_hint"/>
 			<xs:enumeration value="tr.settings.network.enter_password_title"/>
 			<xs:enumeration value="tr.settings.network.forget"/>
-			<xs:enumeration value="tr.settings.network.ip_address"/>
 			<xs:enumeration value="tr.settings.network.ip_title"/>
 			<xs:enumeration value="tr.settings.network.join"/>
 			<xs:enumeration value="tr.settings.network.known"/>
 			<xs:enumeration value="tr.settings.network.open"/>
-			<xs:enumeration value="tr.settings.network.password_for"/>
 			<xs:enumeration value="tr.settings.network.refresh"/>
 			<xs:enumeration value="tr.settings.network.saved"/>
 			<xs:enumeration value="tr.settings.network.scan_hint"/>
@@ -1943,7 +1937,6 @@
 			<xs:enumeration value="tr.settings.severity.warn"/>
 			<xs:enumeration value="tr.settings.show_confirmation_dialogs"/>
 			<xs:enumeration value="tr.settings.start"/>
-			<xs:enumeration value="tr.settings.start_hardware_test"/>
 			<xs:enumeration value="tr.settings.storage_info"/>
 			<xs:enumeration value="tr.settings.storage_info_format"/>
 			<xs:enumeration value="tr.settings.style.bg"/>
