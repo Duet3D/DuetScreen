@@ -1,0 +1,25 @@
+<!--
+  A small status bar button labelled `label` that runs the actions it is given when tapped and when held: the
+  `status_button` widget, which the user sets up, and `status_gcode`, which sends G-code (widgets/commands/).
+
+  Props:    label  the button's text
+            tap_action, tap_arg, hold_action, hold_arg  the actions run when it is tapped and held (none if empty)
+-->
+<component>
+	<api>
+		<prop name="label" type="string" default=""/>
+		<prop name="tap_action" type="string" default=""/>
+		<prop name="tap_arg" type="string" default=""/>
+		<prop name="hold_action" type="string" default=""/>
+		<prop name="hold_arg" type="string" default=""/>
+	</api>
+
+	<view extends="lv_obj" width="content" height="content" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_button name="button" text="$label" width="content" height="content">
+			<style name="pad_tiny"/>
+			<action trigger="short_clicked" name="$tap_action" arg="$tap_arg"/>
+			<action trigger="long_pressed" name="$hold_action" arg="$hold_arg"/>
+		</ds_button>
+	</view>
+</component>

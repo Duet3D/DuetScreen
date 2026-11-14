@@ -1627,3 +1627,30 @@ TEST_F(TestXmlUi, HeaterAndFanActionsWorkFromAnyHeaterOrFanTheyAreGiven)
 	const std::vector<std::string> expected = {"M140 P0 S60\n", "M568 P0 S210\n", "M141 P1 S40\n", "M106 P1 S204\n"};
 	EXPECT_EQ(m_sent, expected);
 }
+
+TEST_F(TestXmlUi, EachSlotsButtonRunsItsTapAndHoldActions)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/buttons_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<dashboard_button name="dashboard" label="Home" tap_action="actions.gcode.send" tap_arg="G28"
+								  hold_action="actions.gcode.send" hold_arg="G28 Z" width="180" height="89"/>
+				<sidebar_button name="sidebar" label="Level" icon="move.png" tap_action="actions.gcode.send"
+								tap_arg="G29" width="100" height="100"/>
+				<status_bar_button name="status" label="Off" hold_action="actions.gcode.send" hold_arg="M18"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	auto& view = makeView("buttons_screen");
+	const auto button = [&](const char* name) { return find(find(view, name), "button"); };
+	lv_obj_send_event(button("dashboard"), LV_EVENT_SHORT_CLICKED, nullptr);
+	lv_obj_send_event(button("dashboard"), LV_EVENT_LONG_PRESSED, nullptr);
+	lv_obj_send_event(button("sidebar"), LV_EVENT_SHORT_CLICKED, nullptr);
+	lv_obj_send_event(button("status"), LV_EVENT_SHORT_CLICKED, nullptr); // It has no tap action
+	lv_obj_send_event(button("status"), LV_EVENT_LONG_PRESSED, nullptr);
+	const std::vector<std::string> expected = {"G28\n", "G28 Z\n", "G29\n", "M18\n"};
+	EXPECT_EQ(m_sent, expected);
+}

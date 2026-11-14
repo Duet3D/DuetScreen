@@ -700,13 +700,13 @@
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
 			<xs:enumeration value="dashboard_bed"/>
+			<xs:enumeration value="dashboard_button"/>
 			<xs:enumeration value="dashboard_chamber"/>
 			<xs:enumeration value="dashboard_current_tool"/>
 			<xs:enumeration value="dashboard_current_tool_card"/>
 			<xs:enumeration value="dashboard_current_tool_heater"/>
 			<xs:enumeration value="dashboard_fan"/>
 			<xs:enumeration value="dashboard_files"/>
-			<xs:enumeration value="dashboard_gcode_button"/>
 			<xs:enumeration value="dashboard_heater"/>
 			<xs:enumeration value="dashboard_heater_card"/>
 			<xs:enumeration value="dashboard_job_progress"/>
@@ -779,12 +779,12 @@
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
+			<xs:enumeration value="sidebar_button"/>
 			<xs:enumeration value="sidebar_estop"/>
-			<xs:enumeration value="sidebar_gcode_button"/>
 			<xs:enumeration value="sidebar_page_button"/>
 			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="status_bar_button"/>
 			<xs:enumeration value="status_bar_factor_button"/>
-			<xs:enumeration value="status_bar_gcode_button"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_bed"/>
 			<xs:enumeration value="temperature_chamber"/>
@@ -831,13 +831,13 @@
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
 			<xs:enumeration value="dashboard_bed"/>
+			<xs:enumeration value="dashboard_button"/>
 			<xs:enumeration value="dashboard_chamber"/>
 			<xs:enumeration value="dashboard_current_tool"/>
 			<xs:enumeration value="dashboard_current_tool_card"/>
 			<xs:enumeration value="dashboard_current_tool_heater"/>
 			<xs:enumeration value="dashboard_fan"/>
 			<xs:enumeration value="dashboard_files"/>
-			<xs:enumeration value="dashboard_gcode_button"/>
 			<xs:enumeration value="dashboard_heater"/>
 			<xs:enumeration value="dashboard_heater_card"/>
 			<xs:enumeration value="dashboard_job_progress"/>
@@ -910,12 +910,12 @@
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
+			<xs:enumeration value="sidebar_button"/>
 			<xs:enumeration value="sidebar_estop"/>
-			<xs:enumeration value="sidebar_gcode_button"/>
 			<xs:enumeration value="sidebar_page_button"/>
 			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="status_bar_button"/>
 			<xs:enumeration value="status_bar_factor_button"/>
-			<xs:enumeration value="status_bar_gcode_button"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_bed"/>
 			<xs:enumeration value="temperature_chamber"/>
@@ -962,13 +962,13 @@
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
 			<xs:enumeration value="dashboard_bed"/>
+			<xs:enumeration value="dashboard_button"/>
 			<xs:enumeration value="dashboard_chamber"/>
 			<xs:enumeration value="dashboard_current_tool"/>
 			<xs:enumeration value="dashboard_current_tool_card"/>
 			<xs:enumeration value="dashboard_current_tool_heater"/>
 			<xs:enumeration value="dashboard_fan"/>
 			<xs:enumeration value="dashboard_files"/>
-			<xs:enumeration value="dashboard_gcode_button"/>
 			<xs:enumeration value="dashboard_heater"/>
 			<xs:enumeration value="dashboard_heater_card"/>
 			<xs:enumeration value="dashboard_job_progress"/>
@@ -1094,12 +1094,12 @@
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
+			<xs:enumeration value="sidebar_button"/>
 			<xs:enumeration value="sidebar_estop"/>
-			<xs:enumeration value="sidebar_gcode_button"/>
 			<xs:enumeration value="sidebar_page_button"/>
 			<xs:enumeration value="status_bar"/>
+			<xs:enumeration value="status_bar_button"/>
 			<xs:enumeration value="status_bar_factor_button"/>
-			<xs:enumeration value="status_bar_gcode_button"/>
 			<xs:enumeration value="temperature"/>
 			<xs:enumeration value="temperature_bed"/>
 			<xs:enumeration value="temperature_chamber"/>
@@ -1984,6 +1984,8 @@
 			<xs:enumeration value="tr.widget.bed_bar"/>
 			<xs:enumeration value="tr.widget.bed_gauge_desc"/>
 			<xs:enumeration value="tr.widget.bed_value"/>
+			<xs:enumeration value="tr.widget.button"/>
+			<xs:enumeration value="tr.widget.button_desc"/>
 			<xs:enumeration value="tr.widget.category_commands"/>
 			<xs:enumeration value="tr.widget.category_console"/>
 			<xs:enumeration value="tr.widget.category_fans"/>
@@ -2111,6 +2113,7 @@
 			<xs:enumeration value="tr.widget.setting_tool_heater"/>
 			<xs:enumeration value="tr.widget.setting_unit"/>
 			<xs:enumeration value="tr.widget.setting_value"/>
+			<xs:enumeration value="tr.widget.sidebar_button_desc"/>
 			<xs:enumeration value="tr.widget.sidebar_gcode_desc"/>
 			<xs:enumeration value="tr.widget.size_bold"/>
 			<xs:enumeration value="tr.widget.size_heading"/>
@@ -2123,6 +2126,7 @@
 			<xs:enumeration value="tr.widget.speed_bar"/>
 			<xs:enumeration value="tr.widget.speed_gauge_desc"/>
 			<xs:enumeration value="tr.widget.speed_value"/>
+			<xs:enumeration value="tr.widget.status_button_desc"/>
 			<xs:enumeration value="tr.widget.status_extrusion"/>
 			<xs:enumeration value="tr.widget.status_extrusion_desc"/>
 			<xs:enumeration value="tr.widget.status_gcode_desc"/>
@@ -2858,17 +2862,26 @@
 			<xs:annotation><xs:documentation>Prop `widget` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="dashboard_fan.attributes">
-		<xs:attribute name="fan" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `fan` (int)</xs:documentation></xs:annotation>
-		</xs:attribute>
-	</xs:attributeGroup>
-	<xs:attributeGroup name="dashboard_gcode_button.attributes">
+	<xs:attributeGroup name="dashboard_button.attributes">
 		<xs:attribute name="label" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="gcode" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `gcode` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_fan.attributes">
+		<xs:attribute name="fan" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `fan` (int)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_heater.attributes">
@@ -5315,15 +5328,24 @@
 			<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="sidebar_gcode_button.attributes">
+	<xs:attributeGroup name="sidebar_button.attributes">
 		<xs:attribute name="label" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="icon" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `icon` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="gcode" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `gcode` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="sidebar_page_button.attributes">
@@ -5343,6 +5365,23 @@
 			<xs:annotation><xs:documentation>Prop `flash` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="status_bar_button.attributes">
+		<xs:attribute name="label" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="hold_arg" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="status_bar_factor_button.attributes">
 		<xs:attribute name="value" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
@@ -5352,14 +5391,6 @@
 		</xs:attribute>
 		<xs:attribute name="icon" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `icon` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-	</xs:attributeGroup>
-	<xs:attributeGroup name="status_bar_gcode_button.attributes">
-		<xs:attribute name="label" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="gcode" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `gcode` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="styledef.attributes">
@@ -8034,6 +8065,15 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="dashboard_button">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_button.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_button.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="dashboard_chamber">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_chamber.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -8080,15 +8120,6 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_files.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="dashboard_gcode_button">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_gcode_button.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="dashboard_gcode_button.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -11077,19 +11108,19 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="sidebar_estop">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/sidebar/sidebar_estop.xml.</xs:documentation></xs:annotation>
+	<xs:element name="sidebar_button">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/sidebar/sidebar_button.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="sidebar_button.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="sidebar_gcode_button">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/sidebar/sidebar_gcode_button.xml.</xs:documentation></xs:annotation>
+	<xs:element name="sidebar_estop">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/sidebar/sidebar_estop.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="sidebar_gcode_button.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -11111,20 +11142,20 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="status_bar_button">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar/status_bar_button.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="status_bar_button.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="status_bar_factor_button">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar/status_bar_factor_button.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="status_bar_factor_button.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="status_bar_gcode_button">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/status_bar/status_bar_gcode_button.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="status_bar_gcode_button.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

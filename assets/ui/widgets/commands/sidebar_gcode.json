@@ -1,5 +1,5 @@
 {
-  "component": "sidebar_gcode_button",
+  "component": "sidebar_button",
   "title_tag": "tr.widget.gcode_button",
   "description_tag": "tr.widget.sidebar_gcode_desc",
   "category_tag": "tr.widget.category_commands",
@@ -7,6 +7,9 @@
   "slots": [
     "sidebar"
   ],
+  "props": {
+    "tap_action": "actions.gcode.send"
+  },
   "settings": [
     {
       "name": "label",
@@ -88,7 +91,7 @@
       ]
     },
     {
-      "name": "gcode",
+      "name": "tap_arg",
       "kind": "text",
       "title_tag": "tr.widget.setting_gcode",
       "default": "G28",

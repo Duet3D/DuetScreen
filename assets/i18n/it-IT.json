@@ -650,7 +650,11 @@
       "look_value": "Numero",
       "flow_column": "Colonna",
       "flow_row": "Riga",
-      "flow_pages": "Uno alla volta"
+      "flow_pages": "Uno alla volta",
+      "button": "Pulsante",
+      "button_desc": "Un pulsante che fa ciò che scegli al tocco o alla pressione prolungata",
+      "sidebar_button_desc": "Un pulsante della barra laterale che fa ciò che scegli al tocco o alla pressione prolungata",
+      "status_button_desc": "Un piccolo pulsante che fa ciò che scegli al tocco o alla pressione prolungata"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Niente",

@@ -1765,6 +1765,26 @@ At its smallest, 134×89 px:
 | --- | --- | --- | --- |
 | `match` | Bed | a row of `om.heat.bedHeaters`, by its `index`, shown by its `value\|numbered:tr.temperature.bed_number` | `0` |
 
+#### button
+
+**Button**: A button that does what you choose when tapped or held
+
+In Commands; placed in `dashboard`; component `dashboard_button` ([button.json](../assets/ui/widgets/commands/button.json)). In a free layout it is 180×89 px, and at least 88×89 px.
+
+![button](../tests/ref_imgs/xml_ui_api/widgets/button.png)
+
+At its smallest, 88×89 px:
+
+![button at its smallest](../tests/ref_imgs/xml_ui_api/widgets/button_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `label` | Label | text, up to 32 bytes | `Babystep` |
+| `tap_action` | On tap | an action offered to users, or none | `actions.babystep.open` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
 #### chamber_arc
 
 **Chamber arc**: A chamber's temperature, heading for its target; tap to set the target
@@ -2145,7 +2165,7 @@ At its smallest, 272×278 px:
 
 **G-code button**: Sends the G-code you choose, e.g. M98 P"0:/macros/name" to run a macro
 
-In Commands; placed in `dashboard`; component `dashboard_gcode_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a free layout it is 180×89 px, and at least 88×89 px.
+In Commands; placed in `dashboard`; component `dashboard_button` ([gcode_button.json](../assets/ui/widgets/commands/gcode_button.json)). In a free layout it is 180×89 px, and at least 88×89 px.
 
 ![gcode_button](../tests/ref_imgs/xml_ui_api/widgets/gcode_button.png)
 
@@ -2156,7 +2176,7 @@ At its smallest, 88×89 px:
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `Home` |
-| `gcode` | G-code | text, up to 120 bytes | `G28` |
+| `tap_arg` | G-code | text, up to 120 bytes | `G28` |
 
 #### heater_gauges
 
@@ -2432,11 +2452,28 @@ At its smallest, 134×89 px:
 | --- | --- | --- | --- |
 | `match` | Sensor | a row of `om.sensors.analog`, by its `index`, shown by its `name\|default:tr.widget.gauge_sensor` | `0` |
 
+#### sidebar_button
+
+**Button**: A sidebar button that does what you choose when tapped or held
+
+In Commands; placed in `sidebar`; component `sidebar_button` ([sidebar_button.json](../assets/ui/widgets/commands/sidebar_button.json)).
+
+![sidebar_button](../tests/ref_imgs/xml_ui_api/widgets/sidebar_button.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `label` | Label | text, up to 32 bytes | `Babystep` |
+| `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `fine_tune.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `status.png` | `babystep.png` |
+| `tap_action` | On tap | an action offered to users, or none | `actions.babystep.open` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
 #### sidebar_gcode
 
 **G-code button**: A sidebar button that sends the G-code you choose
 
-In Commands; placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gcode.json](../assets/ui/widgets/commands/sidebar_gcode.json)).
+In Commands; placed in `sidebar`; component `sidebar_button` ([sidebar_gcode.json](../assets/ui/widgets/commands/sidebar_gcode.json)).
 
 ![sidebar_gcode](../tests/ref_imgs/xml_ui_api/widgets/sidebar_gcode.png)
 
@@ -2444,7 +2481,7 @@ In Commands; placed in `sidebar`; component `sidebar_gcode_button` ([sidebar_gco
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `Home` |
 | `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `fine_tune.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `status.png` | `send.png` |
-| `gcode` | G-code | text, up to 120 bytes | `G28` |
+| `tap_arg` | G-code | text, up to 120 bytes | `G28` |
 
 #### speed_arc
 
@@ -2482,6 +2519,22 @@ At its smallest, 134×89 px:
 
 ![speed_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/speed_value_smallest.png)
 
+#### status_button
+
+**Button**: A small button that does what you choose when tapped or held
+
+In Commands; placed in `status_bar`; component `status_bar_button` ([status_button.json](../assets/ui/widgets/commands/status_button.json)).
+
+![status_button](../tests/ref_imgs/xml_ui_api/widgets/status_button.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `label` | Label | text, up to 32 bytes | `Babystep` |
+| `tap_action` | On tap | an action offered to users, or none | `actions.babystep.open` |
+| `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
+| `hold_action` | On hold | an action offered to users, or none | `` |
+| `hold_arg` | On hold: argument | text, up to 120 bytes | `` |
+
 #### status_extrusion
 
 **Extrusion factor**: Shows the extrusion factor; tap to change it
@@ -2494,14 +2547,14 @@ In Motion; placed in `status_bar`; component `status_bar_factor_button` ([status
 
 **G-code button**: A small button that sends the G-code you choose
 
-In Commands; placed in `status_bar`; component `status_bar_gcode_button` ([status_gcode.json](../assets/ui/widgets/commands/status_gcode.json)).
+In Commands; placed in `status_bar`; component `status_bar_button` ([status_gcode.json](../assets/ui/widgets/commands/status_gcode.json)).
 
 ![status_gcode](../tests/ref_imgs/xml_ui_api/widgets/status_gcode.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `G28` |
-| `gcode` | G-code | text, up to 120 bytes | `G28` |
+| `tap_arg` | G-code | text, up to 120 bytes | `G28` |
 
 #### status_speed
 
@@ -2672,13 +2725,13 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
 | `dashboard_bed` |  |  | `dashboard_tools` | [dashboard_bed.xml](../assets/ui/components/dashboard/dashboard_bed.xml) |
+| `dashboard_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `button`, `gcode_button` | [dashboard_button.xml](../assets/ui/components/dashboard/dashboard_button.xml) |
 | `dashboard_chamber` |  |  | `dashboard_tools` | [dashboard_chamber.xml](../assets/ui/components/dashboard/dashboard_chamber.xml) |
 | `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_current_tool_card` |  |  | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
 | `dashboard_current_tool_heater` |  |  | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
 | `dashboard_fan` | `fans` | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
-| `dashboard_gcode_button` |  | `label`, `gcode` | `gcode_button` | [dashboard_gcode_button.xml](../assets/ui/components/dashboard/dashboard_gcode_button.xml) |
 | `dashboard_heater` |  | `label`, `active`, `standby` | `dashboard_heater_card`, `dashboard_tool_heater` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
 | `dashboard_heater_card` |  | `label_tag` | `dashboard_bed`, `dashboard_chamber` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
@@ -2751,12 +2804,12 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
 | `settings_wifi_network` |  |  | `settings_wifi` | [settings_wifi_network.xml](../assets/ui/components/settings/settings_wifi_network.xml) |
 | [`sidebar`](#home) |  |  | `home` | [sidebar.xml](../assets/ui/components/sidebar/sidebar.xml) |
+| `sidebar_button` |  | `label`, `icon`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `sidebar_button`, `sidebar_gcode` | [sidebar_button.xml](../assets/ui/components/sidebar/sidebar_button.xml) |
 | `sidebar_estop` |  |  | `estop` | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
-| `sidebar_gcode_button` |  | `label`, `icon`, `gcode` | `sidebar_gcode` | [sidebar_gcode_button.xml](../assets/ui/components/sidebar/sidebar_gcode_button.xml) |
 | `sidebar_page_button` |  | `page`, `action`, `label_tag`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
+| `status_bar_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `status_button`, `status_gcode` | [status_bar_button.xml](../assets/ui/components/status_bar/status_bar_button.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
-| `status_bar_gcode_button` |  | `label`, `gcode` | `status_gcode` | [status_bar_gcode_button.xml](../assets/ui/components/status_bar/status_bar_gcode_button.xml) |
 | [`temperature`](#temperature) | `temperature` |  | `control`, `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_bed` |  |  | `temperature` | [temperature_bed.xml](../assets/ui/components/control/temperature/temperature_bed.xml) |
 | `temperature_chamber` |  |  | `temperature` | [temperature_chamber.xml](../assets/ui/components/control/temperature/temperature_chamber.xml) |

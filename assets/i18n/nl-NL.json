@@ -650,7 +650,11 @@
       "look_value": "Getal",
       "flow_column": "Kolom",
       "flow_row": "Rij",
-      "flow_pages": "Eén tegelijk"
+      "flow_pages": "Eén tegelijk",
+      "button": "Knop",
+      "button_desc": "Een knop die doet wat u kiest bij tikken of vasthouden",
+      "sidebar_button_desc": "Een zijbalkknop die doet wat u kiest bij tikken of vasthouden",
+      "status_button_desc": "Een kleine knop die doet wat u kiest bij tikken of vasthouden"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Niets",

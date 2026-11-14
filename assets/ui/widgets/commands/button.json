@@ -1,0 +1,55 @@
+{
+  "component": "dashboard_button",
+  "title_tag": "tr.widget.button",
+  "description_tag": "tr.widget.button_desc",
+  "category_tag": "tr.widget.category_commands",
+  "icon": "apps.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      180,
+      89
+    ],
+    "min": [
+      88,
+      89
+    ]
+  },
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_label",
+      "default": "Babystep",
+      "max_length": 32
+    },
+    {
+      "name": "tap_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_tap",
+      "default": "actions.babystep.open"
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_tap_arg",
+      "default": "",
+      "max_length": 120
+    },
+    {
+      "name": "hold_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_hold",
+      "default": ""
+    },
+    {
+      "name": "hold_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_hold_arg",
+      "default": "",
+      "max_length": 120
+    }
+  ]
+}

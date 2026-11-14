@@ -1,5 +1,5 @@
 {
-  "component": "dashboard_gcode_button",
+  "component": "dashboard_button",
   "title_tag": "tr.widget.gcode_button",
   "description_tag": "tr.widget.gcode_button_desc",
   "category_tag": "tr.widget.category_commands",
@@ -17,6 +17,9 @@
       89
     ]
   },
+  "props": {
+    "tap_action": "actions.gcode.send"
+  },
   "settings": [
     {
       "name": "label",
@@ -26,7 +29,7 @@
       "max_length": 32
     },
     {
-      "name": "gcode",
+      "name": "tap_arg",
       "kind": "text",
       "title_tag": "tr.widget.setting_gcode",
       "default": "G28",

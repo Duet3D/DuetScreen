@@ -650,7 +650,11 @@
       "look_value": "Zahl",
       "flow_column": "Spalte",
       "flow_row": "Zeile",
-      "flow_pages": "Einzeln"
+      "flow_pages": "Einzeln",
+      "button": "Schaltfläche",
+      "button_desc": "Eine Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen",
+      "sidebar_button_desc": "Eine Seitenleisten-Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen",
+      "status_button_desc": "Eine kleine Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nichts",

@@ -651,7 +651,11 @@
       "look_value": "Number",
       "flow_column": "Column",
       "flow_row": "Row",
-      "flow_pages": "One at a time"
+      "flow_pages": "One at a time",
+      "button": "Button",
+      "button_desc": "A button that does what you choose when tapped or held",
+      "sidebar_button_desc": "A sidebar button that does what you choose when tapped or held",
+      "status_button_desc": "A small button that does what you choose when tapped or held"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nothing",

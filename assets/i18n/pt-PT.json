@@ -650,7 +650,11 @@
       "look_value": "Número",
       "flow_column": "Coluna",
       "flow_row": "Linha",
-      "flow_pages": "Um de cada vez"
+      "flow_pages": "Um de cada vez",
+      "button": "Botão",
+      "button_desc": "Um botão que faz o que escolher ao tocar ou manter",
+      "sidebar_button_desc": "Um botão da barra lateral que faz o que escolher ao tocar ou manter",
+      "status_button_desc": "Um botão pequeno que faz o que escolher ao tocar ou manter"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nada",
