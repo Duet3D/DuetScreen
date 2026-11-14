@@ -84,6 +84,7 @@ namespace UI
 
 		Xml::List<TemperatureToolRow> m_tools;	   // Tools with heaters
 		Xml::StringSubject<2048> m_filaments;	   // Known filaments, one per line
+		std::vector<std::string> m_filamentNames;  // Known filaments, in the order of `m_filaments`
 		Xml::StringSubject<64> m_selectedTool;	   // "Selected Tool: …"
 		Xml::OmWatch m_watch;					   // Shows the tools again as the object model changes
 	};

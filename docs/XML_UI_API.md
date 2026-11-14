@@ -1043,7 +1043,7 @@ Each row of `presenter.tools`:
 | Action | Description |
 | --- | --- |
 | `presenter.temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `presenter.tools`. |
-| `presenter.temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `presenter.tools`. |
+| `presenter.temperature.pick_filament` | Pick the filament at the confirmed index of `filaments` (`value_confirmed`) to load next. From a row of `presenter.tools`. |
 | `presenter.temperature.unload_filament` | Unload the tool's filament. From a row of `presenter.tools`. |
 
 ### temperature_extrusion
@@ -1188,6 +1188,29 @@ Also takes every `lv_obj` attribute.
 | `long_mode` | What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip |
 | `flash_on` | Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `source.response.count`; style the flash with `<style … selector="user_1"/>` |
 
+### ds_choice
+
+A button showing the option chosen, with a chevron. Tapping it opens the choice dialog, with the option chosen marked; the option picked reaches a `value_confirmed` action as its index (ActionArgs::value()). It shows what `bind_selected` says is chosen, so the action sets that subject; without `bind_selected` it shows the option picked.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_choice title_tag="tr.settings.language" bind_options="presenter.languages"
+		   bind_selected="presenter.language" width="300">
+	<action trigger="value_confirmed" name="presenter.settings.language"/>
+</ds_choice>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_choice.png)
+
+| Attribute | Description |
+| --- | --- |
+| `bind_options` | Follow a text subject holding the options, one per line |
+| `bind_selected` | Follow an int subject for the index of the option chosen; -1 for none |
+| `bind_text` | Follow a text subject shown instead of the option chosen, e.g. the filament loaded |
+| `title` | The choice dialog's title, if there is no `title_tag` |
+| `title_tag` | Translation key for the choice dialog's title |
+
 ### ds_dialog
 
 A dialog, shown by the dialog surface (`<ds_dialog_host>`) while its subject says so, as the dialog or as the next step of the one open, which the card slides to. Its content stays where it is written, hidden, so its actions go to that view. The surface draws its title, a close button (and a back button on a later step); closed by them, by tapping outside or by the back key, it raises `dismissed` so the view can update the subject. Closing it by its subject takes any steps opened from it too. The lv_obj attributes apply to its content.
@@ -1264,26 +1287,6 @@ Also takes every `lv_obj` attribute.
 | `icon` | Icon file from the icon set, e.g. "estop.png" |
 | `hint` | Shown curved around the edge until it is held, if there is no `hint_tag` |
 | `hint_tag` | Translation key for the hint |
-
-### ds_dropdown
-
-A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` action as its text (ActionArgs::text()) and its index (ActionArgs::value()).
-
-Also takes every `lv_dropdown` attribute.
-
-```xml
-<ds_dropdown bind_options="presenter.filaments" bind_text="presenter.filament_text">
-	<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
-</ds_dropdown>
-```
-
-![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_dropdown.png)
-
-| Attribute | Description |
-| --- | --- |
-| `bind_options` | Follow a text subject holding the options, one per line |
-| `bind_text` | Follow a text subject shown on the button instead of the chosen option, e.g. what is loaded |
-| `bind_selected` | Follow an int subject for the index of the option shown chosen, kept when the options change |
 
 ### ds_graph
 
@@ -2853,7 +2856,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_connection`](#settings_connection) | `settings_connection` |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) | `settings_developer` |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
 | [`settings_display`](#settings_display) | `settings_display` |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
-| `settings_dropdown` |  | `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_dropdown.xml](../assets/ui/components/settings/settings_dropdown.xml) |
+| `settings_dropdown` |  | `title`, `options`, `selected`, `action` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_dropdown.xml](../assets/ui/components/settings/settings_dropdown.xml) |
 | [`settings_general`](#settings) | `settings_general` |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
 | [`settings_theme_preview`](#settings_display) | `settings_theme_preview` |  | `settings_display` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |

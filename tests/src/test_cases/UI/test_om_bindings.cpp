@@ -35,14 +35,7 @@ class TestOmBindings : public UiTestSuite
 	static void receive(std::string_view response)
 	{
 		load_model_data(std::string(response) + "\n");
-		pump();
-	}
-
-	/** Deliver queued model events */
-	static void pump()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 	}
 
 	/** Register `xml` as component `name` and show it */
@@ -220,7 +213,7 @@ TEST_F(TestOmBindings, FieldsBindBeforeTheDataArrivesAndFollowIt)
 	EXPECT_FALSE(lv_obj_has_flag(hot, LV_OBJ_FLAG_HIDDEN));
 
 	OM::RemoveAll();
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(text(view, "current"), "") << "a disconnect empties every field";
 	EXPECT_EQ(text(view, "count"), "0");
 }

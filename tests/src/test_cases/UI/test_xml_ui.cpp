@@ -326,13 +326,6 @@ class TestXmlUi : public UiTestSuite
 		return *m_views.back();
 	}
 
-	/** Deliver queued model events, as the event loop would */
-	static void pump()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	}
-
 	static lv_obj_t* find(UI::LvObj& root, const char* name) { return lv_obj_find_by_name(root.getRootPtr(), name); }
 	static lv_obj_t* find(lv_obj_t* root, const char* name) { return lv_obj_find_by_name(root, name); }
 
@@ -353,7 +346,7 @@ class TestXmlUi : public UiTestSuite
 		load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
 		load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
 		auto& view = makeView("tools_screen");
-		pump();
+		deliverModelEvents();
 		return view;
 	}
 
@@ -485,7 +478,7 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
 
@@ -508,7 +501,7 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 
 	// Updating the model updates only that card
 	load_model_data(FAN_1_AT_80);
-	pump();
+	deliverModelEvents();
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 2)).getValue(), 0.0f);
 }
@@ -518,7 +511,7 @@ TEST_F(TestXmlUi, TwoViewsShareOneModel)
 	auto& a = makeView();
 	auto& b = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(fanList(a)), 3u);
 	ASSERT_EQ(lv_obj_get_child_count(fanList(b)), 3u);
@@ -530,24 +523,24 @@ TEST_F(TestXmlUi, ListGrowsAndShrinksAtTheEnd)
 {
 	auto& view = makeView();
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
 	lv_obj_t* first = fanCard(view, 0);
 
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
 	EXPECT_EQ(fanCard(view, 0), first) << "existing cards are kept when the list grows";
 
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
 	EXPECT_EQ(fanCard(view, 0), first);
 
 	// Disconnecting empties the list: the connection forgets the object model
 	OM::RemoveAll();
 	Model::get().post<EventType::Disconnected>();
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(lv_obj_get_child_count(fanList(view)), 0u);
 }
 
@@ -555,7 +548,7 @@ TEST_F(TestXmlUi, ButtonsReachThePresenterWithTheirFan)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	lv_obj_send_event(find(fanCard(view, 1), "max"), LV_EVENT_CLICKED, nullptr);
 	lv_obj_send_event(find(fanCard(view, 2), "max"), LV_EVENT_CLICKED, nullptr);
@@ -570,7 +563,7 @@ TEST_F(TestXmlUi, SliderEditsSendButBindingUpdatesDont)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(m_sent.empty()) << "showing the model's values is not an edit";
 
 	slider(fanCard(view, 2)).setValue(40.0f);
@@ -578,7 +571,7 @@ TEST_F(TestXmlUi, SliderEditsSendButBindingUpdatesDont)
 
 	m_sent.clear();
 	load_model_data(FAN_1_AT_80);
-	pump();
+	deliverModelEvents();
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
 	EXPECT_TRUE(m_sent.empty());
 }
@@ -602,7 +595,7 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	// The built-in screen now uses the user's card, and thermostatic fans are no longer hidden
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
@@ -629,7 +622,7 @@ TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	EXPECT_NE(find(fanCard(view, 1), "slider"), nullptr);
 }
 
@@ -696,7 +689,7 @@ TEST_F(TestXmlUi, ReloadRebuildsLiveViewsAndKeepsThePresenter)
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	ASSERT_NE(find(fanCard(view, 0), "v1"), nullptr);
 	auto* presenter = view.getPresenter();
 	const int32_t index = lv_obj_get_index(view.getRootPtr());
@@ -781,7 +774,7 @@ TEST_F(TestXmlUi, BedsAndChambersAreNamedAndTheirActionsKnowWhichTheyAre)
 	load_model_data(
 		R"({"key":"sensors","flags":"v","result":{"analog":[{"name":"Bed plate"},null,null,{"name":""}]}})");
 	auto& view = makeView("dashboard_tools");
-	pump();
+	deliverModelEvents();
 
 	lv_obj_t* beds = find(find(view, "beds"), "list");
 	ASSERT_EQ(lv_obj_get_child_count(beds), 2u);
@@ -822,7 +815,7 @@ TEST_F(TestXmlUi, NestedListFollowsItsRowsLength)
 	lv_obj_t* firstCard = toolCard(view, 0);
 
 	load_model_data(ONE_TOOL);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(find(view, "tools")), 1u);
 	EXPECT_EQ(toolCard(view, 0), firstCard) << "the remaining card is kept";
@@ -1337,7 +1330,7 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 	auto& view = makeView("one_fan_screen");
 	lv_obj_t* list = find(find(view, "pick"), "list");
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(list), 1u);
 	EXPECT_EQ(slider(lv_obj_get_child(list, 0)).getLabelText(), _("fine_tune.fan", 2));
@@ -1346,10 +1339,10 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 
 	// The fan's card goes with the fan, and comes back with it
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(lv_obj_get_child_count(list), 0u);
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(lv_obj_get_child_count(list), 1u);
 }
 
@@ -1469,7 +1462,7 @@ TEST_F(TestXmlUi, ItemAttributesReachEveryItemAsPropsOrRootAttributes)
 
 	auto& view = makeView("items_screen");
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	// An empty key shows every row; each item has the props, named in its own row, and the root attribute
 	lv_obj_t* fans = find(view, "fans");
@@ -1508,7 +1501,7 @@ TEST_F(TestXmlUi, ListFlowPlacesItemsInARowOrAPageAtATime)
 
 	auto& view = makeView("flow_screen");
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	lv_obj_update_layout(view.getRootPtr());
 
 	EXPECT_EQ(lv_obj_get_style_flex_flow(find(view, "row"), LV_PART_MAIN), LV_FLEX_FLOW_ROW);
@@ -1539,7 +1532,7 @@ TEST_F(TestXmlUi, ListFlowPlacesItemsInARowOrAPageAtATime)
 
 	// One item has the whole list, and no dots
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	lv_obj_update_layout(view.getRootPtr());
 	ASSERT_EQ(lv_obj_get_child_count(pages), 2u);
 	EXPECT_TRUE(lv_obj_has_flag(dots, LV_OBJ_FLAG_HIDDEN));
@@ -1605,7 +1598,7 @@ TEST_F(TestXmlUi, HeaterAndFanActionsWorkFromAnyHeaterOrFanTheyAreGiven)
 	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
 	load_model_data(THREE_FANS);
 	auto& view = makeView("heater_actions_screen");
-	pump();
+	deliverModelEvents();
 
 	// A row of the heaters acts on what the heater heats: heater 0 is bed 0, 2 tool 0's, 3 chamber 1
 	const auto confirm = [](lv_obj_t* obj, float value)

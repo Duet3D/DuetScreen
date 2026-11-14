@@ -1,7 +1,7 @@
 target_sources(
   DuetScreen.lib
   PRIVATE
-  ${CMAKE_CURRENT_SOURCE_DIR}/DsDropdown.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsChoice.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsHueSlider.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsKeyboard.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsSlider.cpp

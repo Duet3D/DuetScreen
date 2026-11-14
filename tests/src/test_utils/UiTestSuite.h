@@ -28,5 +28,11 @@ class UiTestSuite : public UiTestSuiteInner
 	UiTestSuite();
 	virtual ~UiTestSuite() = default;
 
+	/** Deliver the queued model events, as the event loop would */
+	static void deliverModelEvents();
+
+	/** Run what waits for the next ticks (a dialog open from the start, a scroll, a deletion), and lay the screen out */
+	static void runTimers();
+
 	UI::Screen screen{"test_screen"};
 };

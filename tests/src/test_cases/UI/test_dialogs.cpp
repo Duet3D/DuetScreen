@@ -174,23 +174,12 @@ class DialogSurface : public UiTestSuite
 		m_view = std::make_unique<UI::Xml::XmlView>(component, lv_screen_active(), component);
 		m_view->setSize(lv_pct(100), lv_pct(100));
 		m_view->show();
-		pump();
+		runTimers();
 		return *m_view;
 	}
 
 	/** The dialogs screen's presenter */
 	DialogsPresenter& presenter() const { return static_cast<DialogsPresenter&>(*m_view->getPresenter()); }
-
-	/** Run what waits for the next tick (a dialog open from the start, a scroll), and lay the screen out */
-	static void pump()
-	{
-		for (int i = 0; i < 30; i++)
-		{
-			lv_tick_inc(20);
-			lv_timer_handler();
-		}
-		lv_obj_update_layout(lv_screen_active());
-	}
 
 	/** The surface's widget called `name` (its backdrop, card, header buttons) */
 	static lv_obj_t* chrome(const char* name) { return lv_obj_find_by_name(TestDialogs::host().root(), name); }
@@ -348,13 +337,11 @@ TEST_F(DialogSurface, PromptsHandTheirAnswerBackOnceGone)
 								 .choices = {{.value = "r", .title = "Red"}, {.value = "g", .title = "Green"}},
 								 .chosen = "g",
 								 .onChoose = [&](const std::string& v) { chosen = v; }});
-	lv_obj_t* choices = TestDialogs::shownNamed("dialog_choice");
-	ASSERT_NE(choices, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_choice"), nullptr);
 	EXPECT_EQ(TestDialogs::host().shownSteps(), 2u);
-	lv_obj_t* list = lv_obj_find_by_name(choices, "list");
-	ASSERT_EQ(lv_obj_get_child_count(list), 2u);
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(lv_obj_get_child(list, 1), "choice"), LV_STATE_CHECKED));
-	lv_obj_send_event(lv_obj_find_by_name(lv_obj_get_child(list, 0), "choice"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(TestDialogs::choiceCount(), 2u);
+	EXPECT_EQ(TestDialogs::chosenIndex(), 1);
+	TestDialogs::choose(0);
 	EXPECT_EQ(chosen, "r");
 	EXPECT_NE(TestDialogs::shownNamed("a"), nullptr);
 
@@ -368,7 +355,7 @@ TEST_F(DialogSurface, PromptsHandTheirAnswerBackOnceGone)
 	EXPECT_EQ(yes, 0);
 	EXPECT_NE(TestDialogs::shownNamed("a"), nullptr);
 	presenter().a.set(0);
-	pump(); // The prompts gone are deleted after the event that answered them
+	runTimers(); // The prompts gone are deleted after the event that answered them
 }
 
 TEST_F(DialogSurface, TheNumberPadTypesLikeACalculator)
@@ -423,14 +410,14 @@ TEST_F(DialogSurface, TheNumberPadTypesLikeACalculator)
 	// Cancel goes back, handing nothing back
 	TestDialogs::tap("cancel");
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
-	pump();
+	runTimers();
 	EXPECT_TRUE(numbers.empty());
 
 	// A number that may be negative: the sign key works
 	ask(-50);
 	TestDialogs::enterOnPad("25-");
 	EXPECT_EQ(numbers, std::vector<float>{-25});
-	pump();
+	runTimers();
 }
 
 TEST_F(DialogSurface, APromptGoesWithItsAsker)
@@ -443,7 +430,7 @@ TEST_F(DialogSurface, APromptGoesWithItsAsker)
 	ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
 	lv_obj_delete(asker);
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
-	pump();
+	runTimers();
 	EXPECT_EQ(answers, 0);
 }
 
@@ -470,7 +457,7 @@ TEST_F(DialogSurface, TheCardKeepsAboveTheKeyboardAndShowsTheBoxTypedIn)
 	lv_obj_t* last = TestDialogs::find("box_23");
 	ASSERT_NE(last, nullptr);
 	lv_obj_send_event(last, LV_EVENT_FOCUSED, nullptr);
-	pump();
+	runTimers();
 
 	lv_obj_t* keyboard = lv_obj_find_by_name(m_view->getRootPtr(), "keyboard");
 	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
@@ -489,7 +476,7 @@ TEST_F(DialogSurface, TheCardKeepsAboveTheKeyboardAndShowsTheBoxTypedIn)
 
 	// The keyboard going gives the room back
 	lv_obj_send_event(last, LV_EVENT_READY, nullptr);
-	pump();
+	runTimers();
 	lv_obj_get_coords(chrome("card"), &card);
 	EXPECT_GT(card.y2, keys.y1);
 }
@@ -516,7 +503,7 @@ TEST_F(DialogSurface, ScrollingTheCardKeepsTheKeyboardButTappingOutsidePutsItAwa
 		}
 		lv_test_mouse_release();
 		lv_indev_read(mouse);
-		pump();
+		runTimers();
 	};
 	const auto middleOf = [](lv_obj_t* obj)
 	{

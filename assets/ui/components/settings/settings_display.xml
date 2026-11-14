@@ -23,19 +23,19 @@
 		<lv_label name="row_label_1" translation_tag="tr.settings.theme"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="theme" options="presenter.themes" selected="presenter.theme" action="presenter.settings.theme"
+		<settings_dropdown title="tr.settings.theme" name="theme" options="presenter.themes" selected="presenter.theme" action="presenter.settings.theme"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_2" translation_tag="tr.settings.font"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="font" options="presenter.fonts" selected="presenter.font" action="presenter.settings.font"
+		<settings_dropdown title="tr.settings.font" name="font" options="presenter.fonts" selected="presenter.font" action="presenter.settings.font"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_3" translation_tag="tr.settings.icons"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="icons" options="presenter.icon_sets" selected="presenter.icon_set" action="presenter.settings.icon_set"
+		<settings_dropdown title="tr.settings.icons" name="icons" options="presenter.icon_sets" selected="presenter.icon_set" action="presenter.settings.icon_set"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 
@@ -55,7 +55,7 @@
 		<lv_label name="row_label_6" translation_tag="tr.settings.screen_rotation"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="screen_rotation" options="presenter.rotations" selected="presenter.rotation" action="presenter.settings.rotation"
+		<settings_dropdown title="tr.settings.screen_rotation" name="screen_rotation" options="presenter.rotations" selected="presenter.rotation" action="presenter.settings.rotation"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
 

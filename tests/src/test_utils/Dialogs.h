@@ -2,7 +2,7 @@
  * Dialogs.h
  *
  * What the dialog surface of the screen shown shows (src/UI/Xml/Dialogs/DialogHost.h), for tests: the step on top,
- * its title, and its widgets.
+ * its title, and its widgets; and answering the prompts on it (src/UI/Xml/Dialogs/Prompts.h) as the user would.
  */
 
 #pragma once
@@ -84,6 +84,44 @@ namespace TestDialogs
 	{
 		typeOnPad(keys);
 		tap("ok");
+	}
+
+	/** The rows of the choice prompt shown, or nullptr if it isn't one */
+	inline lv_obj_t* choiceList()
+	{
+		lv_obj_t* choices = shownNamed("dialog_choice");
+		return choices != nullptr ? lv_obj_find_by_name(choices, "list") : nullptr;
+	}
+
+	/** How many values the choice prompt shown offers; 0 if it isn't one */
+	inline uint32_t choiceCount()
+	{
+		lv_obj_t* list = choiceList();
+		return list != nullptr ? lv_obj_get_child_count(list) : 0;
+	}
+
+	/** Index of the value the choice prompt shown marks chosen, or -1 if none is (or it isn't one) */
+	inline int32_t chosenIndex()
+	{
+		lv_obj_t* list = choiceList();
+		for (uint32_t i = 0; list != nullptr && i < lv_obj_get_child_count(list); i++)
+		{
+			if (lv_obj_has_state(lv_obj_find_by_name(lv_obj_get_child(list, i), "choice"), LV_STATE_CHECKED))
+			{
+				return static_cast<int32_t>(i);
+			}
+		}
+		return -1;
+	}
+
+	/** Tap value `index` of the choice prompt shown */
+	inline void choose(uint32_t index)
+	{
+		lv_obj_t* list = choiceList();
+		if (list != nullptr && index < lv_obj_get_child_count(list))
+		{
+			lv_obj_send_event(lv_obj_find_by_name(lv_obj_get_child(list, index), "choice"), LV_EVENT_CLICKED, nullptr);
+		}
 	}
 
 	/** Tap a button of the card's header: "back" or "close" */

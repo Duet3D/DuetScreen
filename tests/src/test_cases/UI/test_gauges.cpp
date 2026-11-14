@@ -63,7 +63,7 @@ class TestGauges : public UiTestSuite
 		load_model_data_from_file("tests/object_model/test_bench/model_fans_v.json");
 		load_model_data_from_file("tests/object_model/test_bench/model_sensors_v.json");
 		m_view = std::make_unique<UI::Xml::XmlView>("gauges", screen, "gauges_screen");
-		pump();
+		deliverModelEvents();
 	}
 
 	~TestGauges() override
@@ -71,13 +71,6 @@ class TestGauges : public UiTestSuite
 		m_view.reset();
 		UI::Xml::Services::setGcodeSender(nullptr);
 		fs::remove_all(m_userDir);
-	}
-
-	/** Deliver queued model events, as the event loop would */
-	static void pump()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
 	}
 
 	/** The widget called `name` */

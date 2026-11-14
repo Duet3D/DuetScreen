@@ -63,7 +63,7 @@ src/UI/
                dragged widgets)
   Widgets/     every ds_* widget, beside the C++ class behind it; Widgets.cpp registers them
     Buttons/   ds_button, ds_drag_button, ds_password_toggle
-    Inputs/    ds_slider, ds_hue_slider, ds_textarea, ds_keyboard, ds_dropdown, ds_toggle
+    Inputs/    ds_slider, ds_hue_slider, ds_textarea, ds_keyboard, ds_choice, ds_toggle
     Display/   ds_bar, ds_bar_marker, ds_graph, ds_heatmap, ds_plot (layer, rect), ds_icon, ds_thumbnail
     Layout/    ds_tabs, ds_list, ds_view, ds_layout
   Presenters/  the presenters and global actions, a folder per part of the UI, mirroring assets/ui/components/

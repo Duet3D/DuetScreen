@@ -56,12 +56,15 @@ namespace UI
 		: XmlPresenter("temperature")
 	{
 		action("temperature.pick_filament",
-			   "Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `presenter.tools`.",
-			   [](const Xml::ActionArgs& args)
+			   "Pick the filament at the confirmed index of `filaments` (`value_confirmed`) to load next. From a row "
+			   "of `presenter.tools`.",
+			   [this](const Xml::ActionArgs& args)
 			   {
-				   if (auto* row = args.row<TemperatureToolRow>())
+				   auto* row = args.row<TemperatureToolRow>();
+				   const auto index = args.value();
+				   if (row != nullptr && index && *index >= 0 && static_cast<size_t>(*index) < m_filamentNames.size())
 				   {
-					   row->pick(args.text());
+					   row->pick(m_filamentNames[static_cast<size_t>(*index)]);
 				   }
 			   });
 		action("temperature.change_filament",
@@ -136,6 +139,7 @@ namespace UI
 
 	void TemperaturePresenter::showFilaments(const std::vector<std::string>& filaments)
 	{
+		m_filamentNames = filaments;
 		m_filaments.set(fmt::format("{}", fmt::join(filaments, "\n")));
 	}
 

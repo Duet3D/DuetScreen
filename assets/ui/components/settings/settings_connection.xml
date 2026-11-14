@@ -14,14 +14,14 @@
 		<lv_label name="row_label_0" translation_tag="tr.settings.duet_connection_method"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="connection_method" options="presenter.connection_methods" selected="presenter.connection_method"
+		<settings_dropdown title="tr.settings.duet_connection_method" name="connection_method" options="presenter.connection_methods" selected="presenter.connection_method"
 						  action="presenter.settings.connection_method"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_1" translation_tag="tr.settings.usb_mode"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="usb_mode" options="presenter.usb_modes" selected="presenter.usb_mode" action="presenter.settings.usb_mode"
+		<settings_dropdown title="tr.settings.usb_mode" name="usb_mode" options="presenter.usb_modes" selected="presenter.usb_mode" action="presenter.settings.usb_mode"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_2" translation_tag="tr.settings.duet_poll_interval"

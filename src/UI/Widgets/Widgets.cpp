@@ -17,7 +17,7 @@
 #include "UI/Widgets/Display/DsPlotLayer.h"
 #include "UI/Widgets/Display/DsPlotRect.h"
 #include "UI/Widgets/Display/DsThumbnail.h"
-#include "UI/Widgets/Inputs/DsDropdown.h"
+#include "UI/Widgets/Inputs/DsChoice.h"
 #include "UI/Widgets/Inputs/DsHueSlider.h"
 #include "UI/Widgets/Inputs/DsKeyboard.h"
 #include "UI/Widgets/Inputs/DsSlider.h"
@@ -65,8 +65,8 @@ namespace UI::Xml::Widgets
 		DsBar::registerXml();
 		DsBarMarker::registerXml();
 		DsButton::registerXml();
+		DsChoice::registerXml();
 		DsDragButton::registerXml();
-		DsDropdown::registerXml();
 		DialogHost::registerXml();
 		DsGraph::registerXml();
 		DsGraphKey::registerXml();

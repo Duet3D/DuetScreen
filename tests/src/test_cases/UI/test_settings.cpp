@@ -26,15 +26,8 @@ class TestGeneralSettings : public UiTestSuite
 	/** The widget called `name` in the tab */
 	lv_obj_t* part(const char* name) { return lv_obj_find_by_name(tab.getRootPtr(), name); }
 
-	/** The dropdown of the setting called `name` */
-	lv_obj_t* dropdownOf(const char* name) { return lv_obj_find_by_name(part(name), "dropdown"); }
-
-	/** Pick option `index` of `dropdown`, as the user would */
-	static void pick(lv_obj_t* dropdown, uint32_t index)
-	{
-		lv_dropdown_set_selected(dropdown, index);
-		lv_obj_send_event(dropdown, LV_EVENT_VALUE_CHANGED, nullptr);
-	}
+	/** The choice of the setting called `name` */
+	lv_obj_t* choiceOf(const char* name) { return lv_obj_find_by_name(part(name), "choice"); }
 
 	UI::Xml::XmlView tab{"settings_general", screen, "settings_general"};
 };
@@ -57,30 +50,40 @@ TEST_F(TestGeneralSettings, TogglesAreStored)
 	EXPECT_TRUE(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS));
 }
 
-TEST_F(TestGeneralSettings, DropdownChoicesAreStored)
+TEST_F(TestGeneralSettings, ChoicesAreStored)
 {
-	const auto stored = StorageHelper::getData(ID_JOB_PROGRESS_SOURCE);
-	pick(dropdownOf("job_progress_source"), 1);
+	const auto stored = static_cast<uint32_t>(StorageHelper::getData(ID_JOB_PROGRESS_SOURCE));
+	lv_obj_send_event(choiceOf("job_progress_source"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(TestDialogs::chosenIndex(), static_cast<int32_t>(stored));
+	TestDialogs::choose(1);
 	EXPECT_EQ(StorageHelper::getData(ID_JOB_PROGRESS_SOURCE), OM::JobProgressSource(1));
-	pick(dropdownOf("job_progress_source"), static_cast<uint32_t>(stored));
+
+	lv_obj_send_event(choiceOf("job_progress_source"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::choose(stored);
+	runTimers(); // The prompt gone is deleted after the event that answered it
 }
 
 TEST_F(TestGeneralSettings, ALanguageIsOnlyChangedAfterAsking)
 {
-	lv_obj_t* language = dropdownOf("language");
+	lv_obj_t* language = choiceOf("language");
 	ASSERT_NE(language, nullptr);
 	const auto current = static_cast<uint32_t>(i18n::getLanguageIndex(i18n::getCurrentLanguage()));
-	ASSERT_GE(lv_dropdown_get_option_count(language), 2u);
-	EXPECT_EQ(lv_dropdown_get_selected(language), current);
 
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
-	pick(language, current == 0 ? 1 : 0);
+	lv_obj_send_event(language, LV_EVENT_CLICKED, nullptr);
+	ASSERT_GE(TestDialogs::choiceCount(), 2u);
+	EXPECT_EQ(TestDialogs::chosenIndex(), static_cast<int32_t>(current));
+	TestDialogs::choose(current == 0 ? 1 : 0);
 	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr) << "asks before restarting";
 	EXPECT_EQ(TestDialogs::title(), _("settings.language_confirm.title"));
 
 	TestDialogs::tap("no");
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
-	EXPECT_EQ(lv_dropdown_get_selected(language), current) << "No shows the language in use again";
+	runTimers();
+	lv_obj_send_event(language, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(TestDialogs::chosenIndex(), static_cast<int32_t>(current)) << "No keeps the language in use";
+	TestDialogs::tapHeader("close");
+	runTimers();
 }
 
 class TestDisplaySettings : public UiTestSuite
@@ -97,21 +100,23 @@ class TestDisplaySettings : public UiTestSuite
 
 TEST_F(TestDisplaySettings, PickingAThemeUsesAndStoresIt)
 {
-	lv_obj_t* themes = lv_obj_find_by_name(lv_obj_find_by_name(tab.getRootPtr(), "theme"), "dropdown");
+	lv_obj_t* themes = lv_obj_find_by_name(lv_obj_find_by_name(tab.getRootPtr(), "theme"), "choice");
 	ASSERT_NE(themes, nullptr);
-	ASSERT_GE(lv_dropdown_get_option_count(themes), 2u);
-	const uint32_t original = lv_dropdown_get_selected(themes);
+	lv_obj_send_event(themes, LV_EVENT_CLICKED, nullptr);
+	ASSERT_GE(TestDialogs::choiceCount(), 2u);
+	const auto original = static_cast<uint32_t>(TestDialogs::chosenIndex());
 	const uint32_t other = original == 0 ? 1 : 0;
 
-	lv_dropdown_set_selected(themes, other);
-	lv_obj_send_event(themes, LV_EVENT_VALUE_CHANGED, nullptr);
+	TestDialogs::choose(other);
 	ASSERT_NE(UI::Themes::getTheme(other), nullptr);
 	EXPECT_EQ(UI::Themes::getCurrentTheme(), UI::Themes::getTheme(other));
 	EXPECT_EQ(StorageHelper::getData(ID_THEME), UI::Themes::getTheme(other)->getName());
+	runTimers();
 
-	lv_dropdown_set_selected(themes, original);
-	lv_obj_send_event(themes, LV_EVENT_VALUE_CHANGED, nullptr);
+	lv_obj_send_event(themes, LV_EVENT_CLICKED, nullptr);
+	TestDialogs::choose(original);
 	EXPECT_EQ(UI::Themes::getCurrentTheme(), UI::Themes::getTheme(original));
+	runTimers();
 }
 
 class TestDeveloperSettings : public UiTestSuite

@@ -296,14 +296,12 @@ TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
 					R"json({"cancelled":false,"name":"gear (Instance 5)","x":[100,150],"y":[100,150]}]}}})json"
 					"\n");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/set_object_name.png");
 
 	load_model_data(R"({"key":"","flags":"d99f","result":{"job":{"build":{"currentObject":-1}}}})"
 					"\n");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/clear_object_name.png");
 }
 
@@ -491,24 +489,19 @@ TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 	// Each page's button, in the widget placed for the page
 	auto button = [sidebar](const char* name)
 	{ return lv_obj_find_by_name(lv_obj_find_by_name(sidebar, name), "button"); };
-	auto pump = []
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	};
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
 	// Each button raises nav.open with its page's name
 	lv_obj_send_event(button("control"), LV_EVENT_CLICKED, nullptr);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(UI::findView("control")->isVisible());
 	EXPECT_FALSE(UI::findView("dashboard")->isVisible());
 	EXPECT_TRUE(lv_obj_has_state(button("control"), LV_STATE_CHECKED));
 	EXPECT_FALSE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
 	lv_obj_send_event(button("settings"), LV_EVENT_CLICKED, nullptr);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(UI::findView("settings")->isVisible());
 	EXPECT_FALSE(UI::findView("control")->isVisible());
 	EXPECT_TRUE(lv_obj_has_state(button("settings"), LV_STATE_CHECKED));
@@ -516,7 +509,7 @@ TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 
 	// nav.home closes them all
 	lv_obj_send_event(button("home"), LV_EVENT_CLICKED, nullptr);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(UI::findView("dashboard")->isVisible());
 	EXPECT_FALSE(UI::findView("settings")->isVisible());
 	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
@@ -597,13 +590,11 @@ TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 	ASSERT_NE(files.getTabButton(1), nullptr);
 
 	Model::get().post<EventType::Status>(OM::PrinterStatus::paused);
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED)) << "a paused job can't be replaced either";
 
 	Model::get().post<EventType::Status>(OM::PrinterStatus::idle);
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_FALSE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
@@ -822,8 +813,7 @@ TEST_F(TestHomeViewWithData, Dashboard)
 TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
 {
 	// Build the tool list's rows
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
 	ASSERT_NE(temperatures, nullptr);
 	temperatures->sample();
@@ -850,8 +840,7 @@ TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
 
 TEST_F(TestHomeViewWithData, GraphKeysAreTheToolListsSetting)
 {
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
 	ASSERT_NE(temperatures, nullptr);
 	temperatures->sample();
@@ -891,8 +880,7 @@ TEST_F(TestHomeViewWithData, GraphKeysAreTheToolListsSetting)
 TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 {
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	lv_obj_t* toolList = dashboardToolList();
 	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
 	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
@@ -907,8 +895,7 @@ TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "active"), LV_STATE_DISABLED));
 
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
 }
@@ -941,8 +928,7 @@ TEST_F(TestHomeViewWithData, ConsoleView)
 	Model::get().post<EventType::Response>(ResponseType::ERROR, std::string("Error response"));
 	Model::get().post<EventType::LogMessage>(
 		Log::DebugLevel::Info, Log::log_time_t{}, std::string("Testing log message"));
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/duet_responses.png")
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list.png");
@@ -995,8 +981,7 @@ TEST_F(TestHomeViewWithData, ConsoleFollowsNewLines)
 		Model::get().post<EventType::Response>(
 			ResponseType::INFO,
 			fmt::format("response {:d}{:s}", i, i % 3 == 0 ? std::string(150, 'x') : std::string("\nsecond line")));
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 		lv_refr_now(nullptr);
 
 		lv_obj_t* last = lv_obj_get_child(output, -1);
@@ -1095,8 +1080,7 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	for (int i = 0; i < 50 && lv_obj_get_child_count(networks) == 0; i++) // Scanned on a thread of its own
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 	}
 	ASSERT_GT(lv_obj_get_child_count(networks), 0u);
 
@@ -1205,8 +1189,7 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 
 		UI::home();
 		dashboardTabs().setActiveTab(STATUS_TAB);
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 		UI::Xml::reload();
 		lv_refr_now(nullptr);
 	}
@@ -1271,8 +1254,7 @@ TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
 {
 	// Built while a job runs, the dashboard's Jobs tab is disabled from the start
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	UI::Xml::reload();
 
 	auto& tabs = dashboardTabs();
@@ -1302,11 +1284,7 @@ TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
 
 TEST_F(TestHomeView, AlertFollowsTheMessageBox)
 {
-	const auto deliver = []
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	};
+	const auto deliver = [] { deliverModelEvents(); };
 	// A new message box opens the alert
 	load_model_data_from_file("tests/object_model/m291/s3.json");
 	deliver();
@@ -1416,13 +1394,6 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 
 namespace
 {
-	/** Run the Model's queued events, as the main loop would */
-	void runEvents()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	}
-
 	/** Whether `obj` and every widget it is in are shown */
 	bool shownOnScreen(lv_obj_t* obj)
 	{
@@ -1471,7 +1442,7 @@ namespace
 
 TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
-	runEvents(); // Fill the lists from the object model
+	deliverModelEvents(); // Fill the lists from the object model
 	{
 		lv_obj_t* toolList = dashboardToolList();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
@@ -1500,7 +1471,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 
 TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
 {
-	runEvents();
+	deliverModelEvents();
 	openControlTab(1);
 	lv_obj_t* factors = lv_obj_find_by_name(UI::findView("temperature")->getRootPtr(), "extrusion_factors");
 	ASSERT_NE(factors, nullptr);
@@ -1554,12 +1525,12 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
 {
 	// The fans go while one's question is open, taking its slider: the question goes, and nothing answers the slider
-	runEvents();
+	deliverModelEvents();
 	openControlTab(4);
 	ASSERT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true));
 	load_model_data(R"({"key":"fans","flags":"v","result":[]})"
 					"\n");
-	runEvents();
+	deliverModelEvents();
 	EXPECT_EQ(openNumberPad(), nullptr);
 }
 
@@ -1567,7 +1538,7 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 {
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
-	runEvents();
+	deliverModelEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "flow_multiplier"),
 					  LV_EVENT_CLICKED,
@@ -1605,7 +1576,7 @@ TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 	auto letGo = [estop](float fraction)
 	{
 		lv_obj_send_event(estop, UI::Xml::Actions::valueConfirmedEvent(), &fraction);
-		runEvents();
+		deliverModelEvents();
 	};
 
 	letGo(0.7f); // Dragged most of the way, then let go: nothing
@@ -1624,7 +1595,7 @@ TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 {
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
-	runEvents();
+	deliverModelEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
@@ -1654,7 +1625,7 @@ TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
 	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
 	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"speedFactor":2}}})"
 					"\n");
-	runEvents();
+	deliverModelEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
 					  LV_EVENT_CLICKED,

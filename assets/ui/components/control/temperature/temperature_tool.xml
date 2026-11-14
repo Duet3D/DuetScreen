@@ -34,11 +34,11 @@
 			<lv_obj name="filament_select" width="content" height="content" style_min_width="content" flex_grow="1"
 					flex_flow="row">
 				<bind_flag_if_eq subject="row.filament_shown" flag="hidden" ref_value="0"/>
-				<ds_dropdown name="filament_dropdown" bind_options="presenter.filaments" bind_text="row.filament_text"
-							 height="content" style_min_width="content" flex_grow="1">
+				<ds_choice name="filament_choice" title_tag="tr.filament.select" bind_options="presenter.filaments"
+						   bind_text="row.filament_text" height="content" style_min_width="content" flex_grow="1">
 					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
-				</ds_dropdown>
+					<action trigger="value_confirmed" name="presenter.temperature.pick_filament"/>
+				</ds_choice>
 				<ds_button name="filament_change" bind_text="row.change_text" width="content" height="100%">
 					<style name="action_btn"/>
 					<bind_flag_if_eq subject="row.change_shown" flag="hidden" ref_value="0"/>
