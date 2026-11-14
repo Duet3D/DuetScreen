@@ -3,6 +3,7 @@
  */
 
 #include "ApiLint.h"
+#include "ObjectModel/Tree/Schema.h"
 #include "UI/Xml/Om/Converters.h"
 #include "UI/Xml/Om/OmName.h"
 #include "UI/Xml/Om/OmPath.h"
@@ -45,8 +46,9 @@ namespace UI::Xml::Api
 			std::vector<const std::vector<Field>*> fields{}; // Innermost first: list rows, then the view's presenter
 			std::vector<const Presenter*> handlers{};		 // Presenters actions go to, innermost view first
 			std::string where{};							 // Path of components to here, for messages
-			bool omItem = false; // Inside an object model item (a row of an `om.` list, or a <ds_scope>), whose
-								 // fields have names relative to it
+			std::vector<OM::Path> omItems{}; // The object model items (rows of `om.` lists, <ds_scope>s) this is in,
+											 // innermost first, any index as 0. Their fields have names relative to
+											 // them, looked up innermost first.
 		};
 
 		/** One use of a component: where it is, and its props */
@@ -522,12 +524,16 @@ namespace UI::Xml::Api
 					{
 						checkKey(*key, *field, element, context);
 					}
-					if (component != m_components.end() && (field || (list && isOmName(*list, context, false))))
+					const auto omList = field || !list ? std::nullopt : omPath(*list, context, true);
+					if (component != m_components.end() && (field || omList))
 					{
 						// An object model list's rows have names relative to their item besides their fields
 						Scope scope = context.scope;
 						scope.fields.insert(scope.fields.begin(), field ? &field->rowFields : &m_reference.omRowFields);
-						scope.omItem = field == nullptr;
+						if (omList)
+						{
+							scope.omItems.insert(scope.omItems.begin(), omList->index(0));
+						}
 						const std::map<std::string, std::string> noProps;
 						instance(component->second, scope, noProps);
 					}
@@ -535,11 +541,13 @@ namespace UI::Xml::Api
 				else if (widget == "ds_scope")
 				{
 					auto item = valueOf(element, "item", context);
+					auto path = valueOf(element, "path", context);
+					auto element_ = path ? omPath(*path, context, false) : std::nullopt;
 					auto component = item ? m_components.find(*item) : m_components.end();
-					if (component != m_components.end())
+					if (component != m_components.end() && element_)
 					{
 						Scope scope = context.scope;
-						scope.omItem = true;
+						scope.omItems.insert(scope.omItems.begin(), *element_);
 						const std::map<std::string, std::string> noProps;
 						instance(component->second, scope, noProps);
 					}
@@ -579,7 +587,7 @@ namespace UI::Xml::Api
 				case AttributeKind::List:
 					if (const Field* field = findField(value, context); !field || field->rowFields.empty())
 					{
-						if (!isLocalSubject(value, context) && !isOmName(value, context, false))
+						if (!isLocalSubject(value, context) && !omPath(value, context, true))
 						{
 							issue(context, element, fmt::format("no list `{:s}`", value));
 						}
@@ -659,7 +667,7 @@ namespace UI::Xml::Api
 				{
 					return;
 				}
-				if (!isOmName(name, context, true))
+				if (!omPath(name, context, false))
 				{
 					issue(context, element, fmt::format("no subject `{:s}`", name));
 					return;
@@ -679,19 +687,75 @@ namespace UI::Xml::Api
 				}
 			}
 
+			/** `path` with every `{…}` index as 0: any item of an array has the same fields */
+			static OM::Path anyItem(const OmTemplate& path)
+			{
+				OM::Path result;
+				for (const auto& segment : path.segments())
+				{
+					if (const auto* name = std::get_if<std::string>(&segment))
+					{
+						result = result.field(*name);
+					}
+					else if (const auto* index = std::get_if<size_t>(&segment))
+					{
+						result = result.index(*index);
+					}
+					else
+					{
+						result = result.index(0);
+					}
+				}
+				return result;
+			}
+
 			/**
-			 * Whether `name` is an object model name: an `om.` path, or inside an object model item, a path relative to
-			 * it, either with a converter if `subject` (see Om/OmName.h)
+			 * The object model path `name` stands for (see Om/OmName.h): an `om.` path, or inside object model items, a
+			 * path relative to the innermost that has it (`value|…` is the innermost item itself). With a schema, only
+			 * a path it lists, and for a `list`, only an array.
+			 * @return the path, any `{…}` index as 0, or nothing if `name` isn't an object model name here
 			 */
-			static bool isOmName(const std::string& name, const Context& context, bool subject)
+			static std::optional<OM::Path> omPath(const std::string& name, const Context& context, bool list)
 			{
 				const auto parsed = OmName::parse(name);
-				if (!parsed || (!parsed->absolute && !context.scope.omItem) || (!subject && !parsed->converter.empty()))
+				if (!parsed || (list && !parsed->converter.empty()))
 				{
-					return false;
+					return std::nullopt;
 				}
-				// `value|int` in an item converts the item itself
-				return OmTemplate::parse(parsed->path).has_value() || (!parsed->absolute && parsed->path == "value");
+				const auto& schema = OM::Schema::get();
+				/* With a schema, only a path it lists, and for a list, only an array */
+				const auto fits = [&](const OM::Path& path)
+				{
+					if (schema.empty())
+					{
+						return true;
+					}
+					const auto type = schema.typeAt(path);
+					return type && (!list || *type == "any" || type->ends_with("[]"));
+				};
+				if (parsed->absolute)
+				{
+					const auto parsedPath = OmTemplate::parse(parsed->path);
+					if (parsedPath && fits(anyItem(*parsedPath)))
+					{
+						return anyItem(*parsedPath);
+					}
+					return std::nullopt;
+				}
+				if (parsed->path == "value" && !parsed->converter.empty() && !list && !context.scope.omItems.empty())
+				{
+					return context.scope.omItems.front();
+				}
+				// Relative: the innermost item that has the field, as the UI looks it up
+				const auto parsedPath = OmTemplate::parse(parsed->path);
+				for (const auto& item : context.scope.omItems)
+				{
+					if (parsedPath && fits(item / anyItem(*parsedPath)))
+					{
+						return item / anyItem(*parsedPath);
+					}
+				}
+				return std::nullopt;
 			}
 
 			/**

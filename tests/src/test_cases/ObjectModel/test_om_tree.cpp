@@ -5,12 +5,16 @@
  * Every recorded response in tests/object_model must arrive whole; the merge rules are checked with small responses.
  */
 
+#include "ObjectModel/Tree/Schema.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "test_utils/TestSuite.h"
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <set>
 
 using OM::ChangeSet;
 using OM::Node;
@@ -296,4 +300,79 @@ TEST_F(TestOmTree, ListenersAreToldOnceUntilTheChangesAreTaken)
 	tree.removeListener(id);
 	tree.apply(patch);
 	EXPECT_EQ(told, 3) << "a removed listener isn't told";
+}
+
+TEST_F(TestOmTree, TheSchemaKnowsTheShapeOfTheObjectModel)
+{
+	OM::Schema schema;
+	EXPECT_TRUE(schema.empty());
+	EXPECT_FALSE(schema.typeAt(*Path::parse("heat")));
+	EXPECT_FALSE(schema.load("tests/no_such_schema.json"));
+
+	ASSERT_TRUE(schema.load("assets/object_model/schema.json"));
+	EXPECT_TRUE(schema.source().starts_with("@duet3d/objectmodel"));
+	EXPECT_EQ(schema.typeAt(*Path::parse("heat.heaters[3].current")), "number");
+	EXPECT_EQ(schema.typeAt(*Path::parse("heat.heaters")), "Heater[]");
+	EXPECT_EQ(schema.typeAt(*Path::parse("tools[0].heaters[1]")), "number") << "any index of an array";
+	EXPECT_EQ(schema.typeAt(*Path::parse("heat.heaters[0].state")), "HeaterState");
+	ASSERT_NE(schema.enumValues("HeaterState"), nullptr);
+	const auto& states = *schema.enumValues("HeaterState");
+	EXPECT_NE(std::find(states.begin(), states.end(), std::string("fault")), states.end());
+	EXPECT_TRUE(schema.typeAt(*Path::parse("move.kinematics.deltaRadius"))) << "a type has its family's fields";
+	EXPECT_EQ(schema.typeAt(*Path::parse("global.anything")), "any") << "a field name chosen by the printer";
+	EXPECT_FALSE(schema.typeAt(*Path::parse("heat.heaters[0].curent")));
+	EXPECT_FALSE(schema.typeAt(*Path::parse("heat.heaters.current"))) << "an array has items, not fields";
+
+	size_t fields = 0;
+	bool sawCurrent = false;
+	schema.forEachField(
+		[&](const std::string& path, const std::string&)
+		{
+			fields++;
+			sawCurrent |= path == "heat.heaters[].current";
+		});
+	EXPECT_GT(fields, 500u);
+	EXPECT_TRUE(sawCurrent);
+}
+
+TEST_F(TestOmTree, TheSchemaListsEveryFieldOfTheRecordedResponses)
+{
+	// Fields from other firmware versions, or RRF's own bookkeeping, that DWC's model doesn't list
+	const std::set<std::string> unlisted = {
+		"job.build.m486Names", "job.build.m486Numbers", "seqs", "state.thisActive", "volumes[].partitionSize"};
+	OM::Schema schema;
+	ASSERT_TRUE(schema.load("assets/object_model/schema.json"));
+	load_model_data_from_file("tests/object_model/5_axis/model_all_d99f.json");
+	for (const auto& folder : {"5_axis", "test_bench", "job", "m291"})
+	{
+		for (const auto& entry : std::filesystem::directory_iterator(std::string("tests/object_model/") + folder))
+		{
+			load_model_data_from_file(entry.path().string());
+		}
+	}
+
+	std::set<std::string> missing;
+	std::function<void(const Node&, const Path&, const std::string&)> walk;
+	walk = [&](const Node& node, const Path& path, const std::string& written)
+	{
+		if (!path.empty() && !schema.typeAt(path))
+		{
+			missing.insert(written);
+			return;
+		}
+		if (node.isArray())
+		{
+			for (size_t i = 0; i < node.size(); i++)
+			{
+				walk(node[i], path.index(i), written + "[]");
+			}
+		}
+		node.forEachField(
+			[&](std::string_view name, const Node& child)
+			{
+				walk(child, path.field(name), written.empty() ? std::string(name) : written + "." + std::string(name));
+			});
+	};
+	walk(Tree::get().root(), Path(), "");
+	EXPECT_EQ(missing, unlisted);
 }

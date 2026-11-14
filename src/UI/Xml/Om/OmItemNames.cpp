@@ -62,7 +62,7 @@ namespace UI::Xml
 		if (!last)
 		{
 			const auto item = m_item.resolve();
-			if (!item || !m_bindings->has(item->field(relativePath->firstField())))
+			if (!item || !m_bindings->isField(item->field(relativePath->firstField())))
 			{
 				return std::nullopt;
 			}

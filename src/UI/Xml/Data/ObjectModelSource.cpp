@@ -3,8 +3,10 @@
  */
 
 #include "ObjectModelSource.h"
+#include "ObjectModel/Tree/Schema.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
+#include "UI/Styles/Styles.h"
 #include "UI/Xml/Binding/Globals.h"
 
 namespace UI::Xml
@@ -12,6 +14,10 @@ namespace UI::Xml
 	ObjectModelSource::ObjectModelSource()
 		: DataSource("om")
 	{
+		if (OM::Schema::get().empty())
+		{
+			OM::Schema::get().load(ASSETS_FOLDER "object_model/schema.json");
+		}
 		Globals::setResolver(&m_bindings);
 		OmBindings::setCurrent(&m_bindings);
 		// Called on the decoder's thread: the flush happens on the UI's, through the event

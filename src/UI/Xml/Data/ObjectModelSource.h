@@ -19,7 +19,8 @@ namespace UI::Xml
 	class ObjectModelSource : public DataSource
 	{
 	  public:
-		/** Start giving `om.*` names and following the object model */
+		/** Read the object model's schema if it hasn't been, and start giving `om.*` names and following the object
+		 * model */
 		ObjectModelSource();
 
 		/** Stop giving `om.*` names and following the object model */

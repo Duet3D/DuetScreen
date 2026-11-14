@@ -4,6 +4,7 @@
 
 #include "OmBindings.h"
 #include "Debug.h"
+#include "ObjectModel/Tree/Schema.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "OmForward.h"
 #include "OmName.h"
@@ -59,8 +60,12 @@ namespace UI::Xml
 		return m_lists.emplace(std::move(key), std::move(list)).first->second.get();
 	}
 
-	bool OmBindings::has(const OM::Path& path) const
+	bool OmBindings::isField(const OM::Path& path) const
 	{
+		if (OM::Schema::get().typeAt(path))
+		{
+			return true;
+		}
 		MODEL_LOCK();
 		return OM::Tree::get().root().at(path).kind() != OM::Node::Kind::missing;
 	}

@@ -24,4 +24,7 @@ namespace UI::Xml::Api
 
 	/** Every built-in theme, as a Markdown document (docs/XML_UI_THEMES.md), with its pictures; see toMarkdown() */
 	std::string toThemesMarkdown(const Reference& reference, const Images& images, std::string_view imageRoot);
+
+	/** The object model's fields, as docs/XML_UI_OBJECT_MODEL.md holds them, from the object model schema */
+	std::string toObjectModelMarkdown();
 } // namespace UI::Xml::Api

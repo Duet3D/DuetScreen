@@ -471,3 +471,29 @@ TEST_F(TestOmJoins, AScopeNamesOneElement)
 	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "current"), "50");
 	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "active"), "220°C");
 }
+
+TEST_F(TestOmBindings, AnItemClaimsItsSchemaFieldsBeforeThePrinterSendsThem)
+{
+	// Without the schema an item couldn't tell its `state` from the global one until the printer sent it
+	UI::Xml::StringSubject<16> outer("outer");
+	UI::Xml::Globals::add("state", outer);
+	lv_xml_register_component_from_data("schema_heater", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="state" bind_text="state"/>
+			</view>
+		</component>)");
+	auto& view = show("schema_scope", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_scope name="heater" path="om.heat.heaters[1]" item="schema_heater" width="100%" height="content"/>
+			</view>
+		</component>)");
+	EXPECT_EQ(text(view, "state"), "") << "the heater's state, not sent yet";
+
+	receive(HEAT);
+	EXPECT_EQ(text(view, "state"), "off");
+
+	m_views.clear();
+	UI::Xml::Globals::remove("state");
+}

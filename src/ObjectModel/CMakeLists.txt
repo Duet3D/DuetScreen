@@ -17,5 +17,6 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Node.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Patch.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Path.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Schema.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Tree.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Utils.cpp)

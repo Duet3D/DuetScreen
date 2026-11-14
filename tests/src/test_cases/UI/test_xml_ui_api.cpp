@@ -1,12 +1,12 @@
 /*
  * test_xml_ui_api.cpp
  *
- * The UI API reference, docs/XML_UI_API.md, its schema, docs/XML_UI.xsd, and the built-in themes,
- * docs/XML_UI_THEMES.md, are generated from the code (src/UI/Xml/Api). These tests check that the committed copies
- * match the code; when one doesn't, the file is rewritten and the test fails, so the change shows in `git diff` to be
- * reviewed and committed. Their pictures are reference images (tests/ref_imgs/xml_ui_api/), compared like every other
- * screenshot: a changed one is written beside it as `_err`, for run_tests.py to review. The tests also lint the
- * built-in bundle.
+ * The UI API reference, docs/XML_UI_API.md, its schema, docs/XML_UI.xsd, the built-in themes,
+ * docs/XML_UI_THEMES.md, and the object model's fields, docs/XML_UI_OBJECT_MODEL.md, are generated from the code
+ * (src/UI/Xml/Api) and the object model schema. These tests check that the committed copies match the code; when one
+ * doesn't, the file is rewritten and the test fails, so the change shows in `git diff` to be reviewed and committed.
+ * Their pictures are reference images (tests/ref_imgs/xml_ui_api/), compared like every other screenshot: a changed one
+ * is written beside it as `_err`, for run_tests.py to review. The tests also lint the built-in bundle.
  *
  * Presenters and global actions are registered for the life of the program, so the reference must be built in a
  * process that has registered only the firmware's own: ctest runs each test in a process of its own. Running the test
@@ -36,11 +36,12 @@
 namespace
 {
 	// Relative to the repository, where tests run
-	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md";	  // The reference
-	constexpr const char* SCHEMA_PATH = "docs/XML_UI.xsd";			  // Its schema
-	constexpr const char* LVGL_API_PATH = "libraries/helix-xml/xmls"; // What the XML engine's own elements take
-	constexpr const char* THEMES_PATH = "docs/XML_UI_THEMES.md";	  // The built-in themes
-	constexpr const char* IMAGE_ROOT = "../tests/ref_imgs/";		  // The reference images, from docs/
+	constexpr const char* REFERENCE_PATH = "docs/XML_UI_API.md";			 // The reference
+	constexpr const char* SCHEMA_PATH = "docs/XML_UI.xsd";					 // Its schema
+	constexpr const char* LVGL_API_PATH = "libraries/helix-xml/xmls";		 // What the XML engine's own elements take
+	constexpr const char* THEMES_PATH = "docs/XML_UI_THEMES.md";			 // The built-in themes
+	constexpr const char* OBJECT_MODEL_PATH = "docs/XML_UI_OBJECT_MODEL.md"; // The object model's fields
+	constexpr const char* IMAGE_ROOT = "../tests/ref_imgs/";				 // The reference images, from docs/
 
 	/** Object model replies describing the printer the views are pictured with */
 	constexpr const char* SAMPLE_PRINTER[] = {
@@ -204,6 +205,7 @@ TEST_F(XmlUiApi, ReferenceIsUpToDate)
 
 	expectUpToDate(REFERENCE_PATH, UI::Xml::Api::toMarkdown(reference, images, IMAGE_ROOT) + "\n");
 	expectUpToDate(THEMES_PATH, UI::Xml::Api::toThemesMarkdown(reference, images, IMAGE_ROOT) + "\n");
+	expectUpToDate(OBJECT_MODEL_PATH, UI::Xml::Api::toObjectModelMarkdown());
 }
 
 /* docs/XML_UI.xsd matches the code; if not, it is rewritten for review */
@@ -321,6 +323,78 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:14: rows of `fans` have no field `numbr` (in lint_screen)",
 		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
 		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",
+	};
+	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
+}
+
+/* Object model names are checked against the schema: absolute ones, and inside an object model list or <ds_scope>,
+ * names relative to the item, looked up innermost item first */
+TEST_F(XmlUiApi, LintChecksObjectModelNames)
+{
+	namespace fs = std::filesystem;
+	const fs::path userDir = fs::temp_directory_path() / fmt::format("duetscreen-xml-ui-om-{:d}", getpid());
+	fs::remove_all(userDir);
+	fs::create_directories(userDir / "test" / "components");
+	std::ofstream(userDir / "test" / "manifest.json")
+		<< R"({"id": "test", "ui_api": "1.0", "components": ["components/*.xml"]})";
+
+	std::ofstream(userDir / "test" / "components" / "lint_om_screen.xml") << R"(<component>
+	<view extends="lv_obj">
+		<lv_label bind_text="om.heat.heaters[1].current|fixed:1"/>
+		<lv_label bind_text="om.heat.heaters[1].curent"/>
+		<lv_label bind_text="om.heat.heaters[1].current|nonsense"/>
+		<lv_label bind_text="om.heat.heaters[{no_such_index}].current"/>
+		<bind_flag_if cond="om.state.currentTool|int lt 0 or om.state.curentTool|int lt 0" flag="hidden"/>
+		<ds_list list="om.heat.heaters[1].current" item="lint_om_tool"/>
+		<ds_list list="om.tools" item="lint_om_tool"/>
+		<ds_scope path="om.heat.heaters[{om.state.currentTool}]" item="lint_om_heater"/>
+	</view>
+</component>)";
+
+	// A tool: its fields, its heaters as a list, and in a heater row, the tool's `active` by the row's index
+	std::ofstream(userDir / "test" / "components" / "lint_om_tool.xml") << R"(<component>
+	<view extends="lv_obj">
+		<lv_label bind_text="name"/>
+		<lv_label bind_text="nme"/>
+		<ds_list list="heaters" item="lint_om_tool_heater"/>
+	</view>
+</component>)";
+	std::ofstream(userDir / "test" / "components" / "lint_om_tool_heater.xml") << R"(<component>
+	<view extends="lv_obj">
+		<lv_label bind_text="value|int"/>
+		<lv_label bind_text="active[{index}]"/>
+		<lv_label bind_text="om.heat.heaters[{value}].state|tr:temperature.status"/>
+	</view>
+</component>)";
+	std::ofstream(userDir / "test" / "components" / "lint_om_heater.xml") << R"(<component>
+	<view extends="lv_obj">
+		<lv_label bind_text="current"/>
+		<lv_label bind_text="currnt"/>
+	</view>
+</component>)";
+
+	UI::Xml::deinit();
+	UI::Xml::init(UI::Xml::Paths{.builtin = "assets/ui", .user = userDir});
+	const auto issues = UI::Xml::Api::lint(UI::Xml::Api::build());
+	fs::remove_all(userDir);
+
+	std::vector<std::string> found;
+	for (const auto& issue : issues)
+	{
+		if (issue.file.find("lint_om") != std::string::npos)
+		{
+			found.push_back(fmt::format(
+				"{:s}:{:d}: {:s}", std::filesystem::path(issue.file).filename().string(), issue.line, issue.message));
+		}
+	}
+	const std::vector<std::string> expected = {
+		"lint_om_heater.xml:4: no subject `currnt` (in lint_om_screen › lint_om_heater)",
+		"lint_om_screen.xml:4: no subject `om.heat.heaters[1].curent` (in lint_om_screen)",
+		"lint_om_screen.xml:5: `om.heat.heaters[1].current|nonsense`: no converter `nonsense` (in lint_om_screen)",
+		"lint_om_screen.xml:6: no subject `no_such_index` (in lint_om_screen)",
+		"lint_om_screen.xml:7: no subject `om.state.curentTool|int` (in lint_om_screen)",
+		"lint_om_screen.xml:8: no list `om.heat.heaters[1].current` (in lint_om_screen)",
+		"lint_om_tool.xml:4: no subject `nme` (in lint_om_screen › lint_om_tool)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
 }

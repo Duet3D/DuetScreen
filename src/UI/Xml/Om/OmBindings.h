@@ -68,8 +68,9 @@ namespace UI::Xml
 		/** Make `bindings` the running UI's (nullptr: none) */
 		static void setCurrent(OmBindings* bindings);
 
-		/** Whether the object model has something at `path` now */
-		bool has(const OM::Path& path) const;
+		/** Whether `path` is a field of the object model: the printer has sent it, or the schema says it can (see
+		 * ObjectModel/Tree/Schema.h) */
+		bool isField(const OM::Path& path) const;
 
 		/** Update everything at, below or above the paths the object model changed since the last flush */
 		void flush();

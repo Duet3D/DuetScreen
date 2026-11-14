@@ -3,6 +3,7 @@
  */
 
 #include "ApiMarkdown.h"
+#include "ObjectModel/Tree/Schema.h"
 #include "i18n/i18n.h"
 #include <algorithm>
 #include <filesystem>
@@ -144,19 +145,28 @@ namespace UI::Xml::Api
 		/** The object model section */
 		void writeObjectModel(std::string& out, const Reference& reference)
 		{
-			out += "## Object model\n\n"
-				   "Every field of the printer's object model has a name, written as RepRapFirmware writes its path "
-				   "after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The "
-				   "names need no code: a field a newer firmware adds can be used as soon as the printer sends it. See "
-				   "[ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).\n\n"
-				   "- A name binds before the printer has sent the field, and follows it: while the field isn't there "
-				   "(or is null) its subject holds empty text, or 0.\n"
-				   "- An array is a list: `<ds_list list=\"om.heat.heaters\" item=\"…\">` makes a row per item, nulls "
-				   "included, so a row's `index` is the item's index (the heater number). Inside a row, the item's "
-				   "fields have names relative to it, `current` or `model.pid.p`, found before any other name, and its "
-				   "arrays are lists: `<ds_list list=\"heaters\">` in a row of `om.tools`.\n"
-				   "- The name sets what the subject holds: the value as text, or after `|` what a converter makes of "
-				   "it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.\n\n";
+			out +=
+				"## Object model\n\n"
+				"Every field of the printer's object model has a name, written as RepRapFirmware writes its path "
+				"after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The "
+				"names need no code: a field a newer firmware adds can be used as soon as the printer sends it. "
+				"Every field is listed in [XML_UI_OBJECT_MODEL.md](XML_UI_OBJECT_MODEL.md); see also "
+				"[ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).\n\n"
+				"- A name binds before the printer has sent the field, and follows it: while the field isn't there "
+				"(or is null) its subject holds empty text, or 0.\n"
+				"- An array is a list: `<ds_list list=\"om.heat.heaters\" item=\"…\">` makes a row per item, nulls "
+				"included, so a row's `index` is the item's index (the heater number). Inside a row, the item's "
+				"fields have names relative to it, `current` or `model.pid.p`, found before any other name, and its "
+				"arrays are lists: `<ds_list list=\"heaters\">` in a row of `om.tools`. A name the item doesn't have "
+				"is looked up outside it, so in a row of a tool's `heaters`, `active[{index}]` is the tool's.\n"
+				"- An index can be another subject's value, written `{name}`, which joins one part of the object "
+				"model to another: `om.heat.heaters[{value}].current` in a row of a tool's heaters, or "
+				"`om.tools[{om.state.currentTool}].name`. The name follows when the index changes; nothing is "
+				"rebuilt.\n"
+				"- `<ds_scope path=\"om.…\" item=\"…\">` builds a component whose names are relative to one "
+				"element, as in a list row.\n"
+				"- The name sets what the subject holds: the value as text, or after `|` what a converter makes of "
+				"it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.\n\n";
 			out += "Each row of an object model list:\n\n| Name | Type | Description |\n| --- | --- | --- |\n";
 			for (const auto& field : reference.omRowFields)
 			{
@@ -756,6 +766,44 @@ namespace UI::Xml::Api
 		{
 			out.pop_back();
 		}
+		return out;
+	}
+	std::string toObjectModelMarkdown()
+	{
+		const auto& schema = OM::Schema::get();
+		std::string out = fmt::format(
+			"# Object model fields\n\n"
+			"<!-- Generated from assets/object_model/schema.json (scripts/generate_om_schema.py) by "
+			"tests/src/test_cases/UI/test_xml_ui_api.cpp. Don't edit it here. -->\n\n"
+			"Every field the printer's object model can have, from {:s}, for the `om.*` names XML binds to (see "
+			"[Object model](XML_UI_API.md#object-model)). `[]` stands for an index, e.g. `heat.heaters[1].current`, "
+			"and `{{}}` for a name the printer chooses, e.g. a global variable's. A field this doesn't list (one a "
+			"newer "
+			"firmware added) can still be used once the printer sends it.\n\n"
+			"Types: a number, string (text) or boolean (shown as true or false; `|int` gives 1 or 0), an object of the "
+			"named type, an enum (text, one of its values), or `T[]`, an array of T. A field can also be null, which "
+			"shows as empty text, or 0.\n",
+			schema.source().empty() ? "no schema" : schema.source());
+
+		std::string section;
+		schema.forEachField(
+			[&](const std::string& path, const std::string& type)
+			{
+				// A table per top-level field
+				const std::string top = path.substr(0, path.find_first_of(".["));
+				if (top != section)
+				{
+					section = top;
+					fmt::format_to(std::back_inserter(out), "\n## {:s}\n\n| Field | Type |\n| --- | --- |\n", top);
+				}
+				std::string described = type;
+				const std::string base = type.substr(0, type.find('['));
+				if (const auto* values = schema.enumValues(base))
+				{
+					described += fmt::format(": {}", fmt::join(*values, ", "));
+				}
+				fmt::format_to(std::back_inserter(out), "| {:s} | {:s} |\n", code(path), cell(described));
+			});
 		return out;
 	}
 } // namespace UI::Xml::Api
