@@ -6,6 +6,10 @@
  * isn't showing, so they are there when it is opened. Commands are recorded from the ConsoleCommand event, which
  * whatever sends them posts; the latest few distinct ones are also kept as the recent commands, to send again.
  *
+ * It also holds what is typed, and whether it goes to the shell, so every console input shares them: the console
+ * page's, and any placed as widgets beside a G-code reference. The global actions `actions.console.*` change and send
+ * them (src/UI/Presenters/Console/ConsoleActions.h).
+ *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
 
@@ -60,8 +64,20 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		ConsoleSource();
 
-		/** Declare `source.console.lines` and `source.console.recent` */
+		/** Declare `source.console.*` */
 		void fields(FieldVisitor& f) override;
+
+		/** What is typed, in every console input */
+		std::string_view input() const { return m_input.get(); }
+
+		/** Type `text`, replacing what is typed */
+		void setInput(std::string_view text) { m_input.set(text); }
+
+		/** Whether what is sent goes to the shell instead of the Duet */
+		bool shell() const { return m_shell.get() != 0; }
+
+		/** Send to the shell (true), if this build can, or to the Duet */
+		void setShell(bool shell) { m_shell.set(shell && m_shellAvailable.get() != 0 ? 1 : 0); }
 
 		/** Nothing to re-read: lines are events */
 		void update() override {}
@@ -98,5 +114,8 @@ namespace UI::Xml
 		std::deque<std::string> m_recent;	 // Recent distinct commands, newest first
 		List<ConsoleLineRow> m_rows;		 // Shown lines
 		List<ConsoleRecentRow> m_recentRows; // Shown recent commands
+		StringSubject<256> m_input;			 // `input`
+		IntSubject m_shellAvailable;		 // `shell_available`
+		IntSubject m_shell;					 // `shell`
 	};
 } // namespace UI::Xml

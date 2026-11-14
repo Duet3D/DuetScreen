@@ -86,7 +86,6 @@
 			<xs:enumeration value="presenter.info_print_time"/>
 			<xs:enumeration value="presenter.info_shown"/>
 			<xs:enumeration value="presenter.info_size"/>
-			<xs:enumeration value="presenter.input"/>
 			<xs:enumeration value="presenter.ip"/>
 			<xs:enumeration value="presenter.keyboard_layout"/>
 			<xs:enumeration value="presenter.keyboard_layouts"/>
@@ -120,6 +119,7 @@
 			<xs:enumeration value="presenter.number.text"/>
 			<xs:enumeration value="presenter.number.unit"/>
 			<xs:enumeration value="presenter.objects"/>
+			<xs:enumeration value="presenter.open"/>
 			<xs:enumeration value="presenter.output"/>
 			<xs:enumeration value="presenter.passed"/>
 			<xs:enumeration value="presenter.poll_interval"/>
@@ -129,7 +129,6 @@
 			<xs:enumeration value="presenter.primary_hue"/>
 			<xs:enumeration value="presenter.progress_source"/>
 			<xs:enumeration value="presenter.progress_sources"/>
-			<xs:enumeration value="presenter.reference_open"/>
 			<xs:enumeration value="presenter.response.open"/>
 			<xs:enumeration value="presenter.response.progress"/>
 			<xs:enumeration value="presenter.response.text"/>
@@ -153,8 +152,6 @@
 			<xs:enumeration value="presenter.serial_invalid"/>
 			<xs:enumeration value="presenter.settings"/>
 			<xs:enumeration value="presenter.settings_open"/>
-			<xs:enumeration value="presenter.shell"/>
-			<xs:enumeration value="presenter.shell_available"/>
 			<xs:enumeration value="presenter.sort"/>
 			<xs:enumeration value="presenter.sort_date"/>
 			<xs:enumeration value="presenter.sort_name"/>
@@ -278,8 +275,11 @@
 			<xs:enumeration value="source.babystep.step.title"/>
 			<xs:enumeration value="source.babystep.step.value"/>
 			<xs:enumeration value="source.babystep.usable"/>
+			<xs:enumeration value="source.console.input"/>
 			<xs:enumeration value="source.console.lines"/>
 			<xs:enumeration value="source.console.recent"/>
+			<xs:enumeration value="source.console.shell"/>
+			<xs:enumeration value="source.console.shell_available"/>
 			<xs:enumeration value="source.customise.can_configure"/>
 			<xs:enumeration value="source.customise.can_remove"/>
 			<xs:enumeration value="source.customise.can_undo"/>
@@ -391,6 +391,11 @@
 			<xs:enumeration value="actions.babystep.open"/>
 			<xs:enumeration value="actions.babystep.reset"/>
 			<xs:enumeration value="actions.babystep.up"/>
+			<xs:enumeration value="actions.console.clear"/>
+			<xs:enumeration value="actions.console.input"/>
+			<xs:enumeration value="actions.console.recall"/>
+			<xs:enumeration value="actions.console.send"/>
+			<xs:enumeration value="actions.console.shell"/>
 			<xs:enumeration value="actions.customise.open_catalogue"/>
 			<xs:enumeration value="actions.customise.start"/>
 			<xs:enumeration value="actions.dialog.close"/>
@@ -435,14 +440,6 @@
 			<xs:enumeration value="presenter.alert.pad.key"/>
 			<xs:enumeration value="presenter.alert.pad.sign"/>
 			<xs:enumeration value="presenter.choice.choose"/>
-			<xs:enumeration value="presenter.console.clear"/>
-			<xs:enumeration value="presenter.console.input"/>
-			<xs:enumeration value="presenter.console.open_reference"/>
-			<xs:enumeration value="presenter.console.pick"/>
-			<xs:enumeration value="presenter.console.recall"/>
-			<xs:enumeration value="presenter.console.search"/>
-			<xs:enumeration value="presenter.console.send"/>
-			<xs:enumeration value="presenter.console.shell"/>
 			<xs:enumeration value="presenter.customise.add"/>
 			<xs:enumeration value="presenter.customise.ask_delete"/>
 			<xs:enumeration value="presenter.customise.cancel"/>
@@ -497,6 +494,9 @@
 			<xs:enumeration value="presenter.preview.secondary_hue"/>
 			<xs:enumeration value="presenter.question.no"/>
 			<xs:enumeration value="presenter.question.yes"/>
+			<xs:enumeration value="presenter.reference.open"/>
+			<xs:enumeration value="presenter.reference.pick"/>
+			<xs:enumeration value="presenter.reference.search"/>
 			<xs:enumeration value="presenter.response.close"/>
 			<xs:enumeration value="presenter.response.open_console"/>
 			<xs:enumeration value="presenter.settings.adb"/>
@@ -631,7 +631,6 @@
 	</xs:simpleType>
 	<xs:simpleType name="presenter.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="console"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="dashboard_jobs"/>
 			<xs:enumeration value="dashboard_macros"/>
@@ -641,6 +640,7 @@
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
+			<xs:enumeration value="gcode_reference"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="notifications"/>
@@ -8095,7 +8095,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console.xml, with presenter console.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console.xml, with presenter gcode_reference.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -8103,7 +8103,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console_command_list">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_command_list.xml, with presenter console.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_command_list.xml, with presenter gcode_reference.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -8119,7 +8119,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console_input">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_input.xml, with presenter console.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_input.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="console_input.attributes"/>

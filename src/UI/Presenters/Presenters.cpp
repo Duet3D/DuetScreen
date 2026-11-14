@@ -4,7 +4,8 @@
 
 #include "Presenters.h"
 #include "Common/BabystepActions.h"
-#include "Console/ConsolePresenter.h"
+#include "Console/ConsoleActions.h"
+#include "Console/GcodeReferencePresenter.h"
 #include "Control/Fans/FanActions.h"
 #include "Control/Heightmap/HeightmapPresenter.h"
 #include "Control/Move/MoveActions.h"
@@ -45,6 +46,7 @@ namespace UI
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
 		FanActions::registerAll();
+		ConsoleActions::registerAll();
 		ExtruderActions::registerAll();
 		MoveActions::registerAll();
 		ToolActions::registerAll();
@@ -58,7 +60,7 @@ namespace UI
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<CustomisePresenter>("customise");
-		Xml::Presenters::add<ConsolePresenter>("console");
+		Xml::Presenters::add<GcodeReferencePresenter>("gcode_reference");
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");

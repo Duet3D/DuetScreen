@@ -92,6 +92,9 @@ namespace UI::Xml
 	ConsoleSource::ConsoleSource()
 		: DataSource("console")
 	{
+#if ENABLE_CONSOLE_SHELL
+		m_shellAvailable.set(1);
+#endif
 	}
 
 	void ConsoleSource::fields(FieldVisitor& f)
@@ -100,6 +103,14 @@ namespace UI::Xml
 		f.list("recent",
 			   m_recentRows,
 			   "The commands sent from the console lately, newest first, each once, at most ConsoleSource::MAX_RECENT");
+		f.field("input",
+				m_input,
+				"What is typed, shared by every console input, kept equal to the text box (actions.console.input) so "
+				"picking a G-code or a recent command can replace it");
+		f.field("shell_available",
+				m_shellAvailable,
+				"1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds)");
+		f.field("shell", m_shell, "1 while what is sent goes to the shell instead of the Duet (actions.console.shell)");
 	}
 
 	void ConsoleSource::onInit()

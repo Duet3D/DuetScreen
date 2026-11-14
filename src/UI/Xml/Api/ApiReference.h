@@ -30,7 +30,7 @@ namespace UI::Xml::Api
 	/** An action a view can raise with `<action name="presenter.…">` */
 	struct Action
 	{
-		std::string name;		 // As XML writes it, e.g. "presenter.console.send" or "actions.heater.toggle"
+		std::string name;		 // As XML writes it, e.g. "presenter.heightmap.mode" or "actions.heater.toggle"
 		std::string description; // What it does and what it takes
 		std::string file = {};	 // For a global action, the source file that adds it, e.g. "src/…/HeaterActions.cpp"
 		std::string titleTag = {}; // For a global action offered to users, its title's key (`tr.<key>`); else empty

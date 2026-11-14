@@ -1,10 +1,11 @@
 <!--
-  The G-code reference as a list: every G-code and what it does. It is the `console_command_list` widget, with a
-  console presenter of its own; the console page shows the same rows in its reference dialog (console.xml).
+  The G-code reference as a list: every G-code and what it does; tap one to type it in the console's input, which
+  every view shares. It is the `console_command_list` widget; the console page shows the same rows in its reference
+  dialog (console.xml).
 
-  Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
+  Fields and actions: src/UI/Presenters/Console/GcodeReferencePresenter.h
 -->
-<component presenter="console">
+<component presenter="gcode_reference">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
 		<ds_list name="list" list="presenter.gcodes" item="console_gcode" windowed="true" item_height="44"

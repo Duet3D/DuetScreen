@@ -1,14 +1,14 @@
 <!--
-  One G-code in the console's reference: the code and what it does, a row as tall as a dialog's. Tap it to type it.
+  One G-code in the G-code reference: the code and what it does, a row as tall as a dialog's. Tap it to type it.
 
-  Fields:   a gcodes row: row.gcode, row.description (src/UI/Presenters/Console/ConsolePresenter.h)
+  Fields:   a gcodes row: row.gcode, row.description (src/UI/Presenters/Console/GcodeReferencePresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="44" flex_flow="row" scrollable="false"
 		  style_flex_cross_place="center" style_flex_track_place="center">
 		<style name="dialog_row"/>
 		<style name="pressed" selector="pressed"/>
-		<action trigger="clicked" name="presenter.console.pick"/>
+		<action trigger="clicked" name="presenter.reference.pick"/>
 		<lv_label name="gcode" bind_text="row.gcode" width="64" clickable="false">
 			<style name="text_emphasis"/>
 		</lv_label>

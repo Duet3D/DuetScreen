@@ -2,13 +2,13 @@
   A command sent from the console lately, as a button: tap it to put it back in the text box, to send again.
 
   Fields:   a source.console.recent row: row.command (src/UI/Xml/Data/ConsoleSource.h)
-  Actions:  src/UI/Presenters/Console/ConsolePresenter.h
+  Actions:  actions.console.recall (src/UI/Presenters/Console/ConsoleActions.h)
 -->
 <component>
 	<view extends="lv_obj" width="content" height="content" scrollable="false">
 		<style name="pad_zero"/>
 		<ds_button name="command" bind_text="row.command" height="content" style_min_height="36">
-			<action trigger="clicked" name="presenter.console.recall"/>
+			<action trigger="clicked" name="actions.console.recall"/>
 		</ds_button>
 	</view>
 </component>

@@ -142,6 +142,9 @@ From [ConsoleSource.cpp](../src/UI/Xml/Data/ConsoleSource.cpp).
 | --- | --- | --- |
 | `source.console.lines` | list | What the console shows, oldest first, at most MAX_RESPONSE_LINES |
 | `source.console.recent` | list | The commands sent from the console lately, newest first, each once, at most ConsoleSource::MAX_RECENT |
+| `source.console.input` | text | What is typed, shared by every console input, kept equal to the text box (actions.console.input) so picking a G-code or a recent command can replace it |
+| `source.console.shell_available` | int | 1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds) |
+| `source.console.shell` | int | 1 while what is sent goes to the shell instead of the Duet (actions.console.shell) |
 
 Each row of `source.console.lines`:
 
@@ -372,6 +375,11 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.babystep.open` | Open the shared babystepping dialog. Offered to users for their widgets' action settings, as `tr.actions.babystep_open`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.babystep.reset` | Undo all babystepping | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.babystep.up` | Move Z up by the chosen step (M290). Offered to users for their widgets' action settings, as `tr.actions.babystep_up`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
+| `actions.console.clear` | Empty the text box | [ConsoleActions.cpp](../src/UI/Presenters/Console/ConsoleActions.cpp) |
+| `actions.console.input` | What is typed changed to the text box's text (`value_changed` on it) | [ConsoleActions.cpp](../src/UI/Presenters/Console/ConsoleActions.cpp) |
+| `actions.console.recall` | Put a recent command in the text box, to send again. From a row of `source.console.recent`. | [ConsoleActions.cpp](../src/UI/Presenters/Console/ConsoleActions.cpp) |
+| `actions.console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code | [ConsoleActions.cpp](../src/UI/Presenters/Console/ConsoleActions.cpp) |
+| `actions.console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` | [ConsoleActions.cpp](../src/UI/Presenters/Console/ConsoleActions.cpp) |
 | `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.dialog.close` | Close the dialog step the widget is in, and any opened from it, as the user closing it does: a `<ds_dialog>` empties its subject and raises `dismissed`. E.g. on a Cancel button. | [DialogActions.cpp](../src/UI/Xml/Dialogs/DialogActions.cpp) |
@@ -411,38 +419,6 @@ An action runs when its widget raises its `trigger` (default `clicked`): `all`, 
 ## Presenters
 
 A component names its presenter with `<component presenter="…">`. Its view can then bind to the presenter's names and raise its actions, as well as the global ones.
-
-### console
-
-Used by `console`, `console_command_list`, `console_input`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.input` | text | What is typed, kept equal to the text box so picking a G-code can replace it |
-| `presenter.search` | text | What the G-code reference is searched for |
-| `presenter.reference_open` | int | 1 while the G-code reference dialog is open |
-| `presenter.shell_available` | int | 1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds) |
-| `presenter.shell` | int | 1 while what is sent goes to the shell instead of the Duet |
-| `presenter.gcodes` | list | The G-codes the search matches: their code starts with it, or their description contains it, ignoring case; every G-code while the search is empty |
-
-Each row of `presenter.gcodes`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.gcode` | text | The G-code, e.g. "G28" |
-| `row.description` | text | What it does, e.g. "Home" |
-
-| Action | Description |
-| --- | --- |
-| `presenter.console.clear` | Empty the text box |
-| `presenter.console.input` | What is typed changed to the text box's text (`value_changed` on it) |
-| `presenter.console.open_reference` | Open the G-code reference, searched for the first word typed |
-| `presenter.console.pick` | Put the G-code in the text box and close the reference. From a row of `gcodes`. |
-| `presenter.console.recall` | Put a recent command in the text box, to send again. From a row of `source.console.recent`. |
-| `presenter.console.search` | Search the reference for the search box's text (`value_changed` on it) |
-| `presenter.console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code |
-| `presenter.console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
 
 ### customise
 
@@ -648,6 +624,30 @@ Used by `dialog_question`.
 | --- | --- |
 | `presenter.question.no` | Don't agree, and go back |
 | `presenter.question.yes` | Agree, and go back |
+
+### gcode_reference
+
+Used by `console`, `console_command_list`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.search` | text | What the reference is searched for |
+| `presenter.open` | int | 1 while the reference dialog is open |
+| `presenter.gcodes` | list | The G-codes the search matches: their code starts with it, or their description contains it, ignoring case; every G-code while the search is empty |
+
+Each row of `presenter.gcodes`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.gcode` | text | The G-code, e.g. "G28" |
+| `row.description` | text | What it does, e.g. "Home" |
+
+| Action | Description |
+| --- | --- |
+| `presenter.reference.open` | Open the G-code reference dialog, searched for the first word typed in the console |
+| `presenter.reference.pick` | Type the G-code in the console's input, and close the reference dialog. From a row of `gcodes`. |
+| `presenter.reference.search` | Search the reference for the search box's text (`value_changed` on it) |
 
 ### hardware_test
 
@@ -2860,10 +2860,10 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | --- | --- | --- | --- | --- |
 | [`babystep`](#control) |  | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
-| [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
-| `console_command_list` | `console` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
+| [`console`](#console) | `gcode_reference` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
+| `console_command_list` | `gcode_reference` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
 | `console_gcode` |  |  | `console`, `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
-| `console_input` | `console` | `keyboard` | `console`, `console_input` | [console_input.xml](../assets/ui/components/console/console_input.xml) |
+| `console_input` |  | `keyboard` | `console`, `console_input` | [console_input.xml](../assets/ui/components/console/console_input.xml) |
 | `console_line` |  |  | `console`, `console_log` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | `console_log` |  |  | `console_log` | [console_log.xml](../assets/ui/components/console/console_log.xml) |
 | `console_recent` |  |  | `console` | [console_recent.xml](../assets/ui/components/console/console_recent.xml) |
