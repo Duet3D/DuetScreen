@@ -54,7 +54,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="move.axes" item="dashboard_axis" width="100%" height="content"
+				<ds_list name="list" list="om.move.axes" item="dashboard_axis" width="100%" height="content"
 						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="start"
 						 style_flex_track_place="start"/>
 			</lv_obj>

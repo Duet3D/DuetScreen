@@ -228,7 +228,6 @@ Each row of `jog.feedrates`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `move.axes` | list | One row per axis, in slot order |
 | `move.speed_factor` | text | The speed override, e.g. "100%" |
 | `move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
 | `move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
@@ -237,16 +236,6 @@ Each row of `jog.feedrates`:
 | `move.speed_requested` | int | The current move's requested speed, in thousandths of the fastest axis' maximum (0-1000) |
 | `move.flow_text` | text | The volumetric flow, e.g. "0.0 mm³/s" |
 | `move.flow` | int | The volumetric flow, in thousandths of the current tool's fastest extruder's maximum (0-1000) |
-
-Each row of `move.axes`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `letter` | text | The axis' letter, e.g. "X" |
-| `position` | text | User position, two decimal places, e.g. "12.50" |
-| `homed` | int | 1 when the axis is homed, else 0 |
-| `visible` | int | 1 if the axis is shown to the user, else 0 |
 
 ### navigation
 

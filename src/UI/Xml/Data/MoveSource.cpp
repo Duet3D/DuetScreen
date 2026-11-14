@@ -21,14 +21,6 @@ namespace UI::Xml
 		}
 	} // namespace
 
-	void AxisRow::fields(FieldVisitor& f)
-	{
-		f.field("letter", letter, "The axis' letter, e.g. \"X\"");
-		f.field("position", position, "User position, two decimal places, e.g. \"12.50\"");
-		f.field("homed", homed, "1 when the axis is homed, else 0");
-		f.field("visible", visible, "1 if the axis is shown to the user, else 0");
-	}
-
 	MoveSource::MoveSource()
 		: DataSource("move")
 	{
@@ -36,7 +28,6 @@ namespace UI::Xml
 
 	void MoveSource::fields(FieldVisitor& f)
 	{
-		f.list("move.axes", m_axes, "One row per axis, in slot order");
 		f.field("move.speed_factor", m_speedFactor, "The speed override, e.g. \"100%\"");
 		f.field("move.extrusion_factor",
 				m_extrusionFactor,
@@ -72,7 +63,6 @@ namespace UI::Xml
 
 	void MoveSource::clear()
 	{
-		m_axes.clear();
 		m_speedFactor.set(_("status.speed_multiplier", 100u));
 		m_extrusionFactor.set(_("status.flow_multiplier", 100u));
 		m_babystep.set(_("status.babystep_value", 0.0f));
@@ -138,32 +128,18 @@ namespace UI::Xml
 		ZoneScoped;
 		{
 			MODEL_LOCK();
-			// The axes there are, in order
-			std::vector<size_t> axes;
-			for (size_t number = 0; number < move()["axes"].size(); ++number)
-			{
-				if (move()["axes"][number].exists())
-				{
-					axes.push_back(number);
-				}
-			}
+			// The fastest axis sets the speed gauges' range; the axis' speed is in mm/min
 			int32_t maxSpeed = 1;
 			double babystep = 0;
-			m_axes.sync(axes.size(),
-						[&](AxisRow& row, size_t slot)
-						{
-							const OM::Node& axis = move()["axes"][axes[slot]];
-							row.letter.set(axis["letter"].text());
-							row.position.set(fmt::format("{:.2f}", static_cast<float>(axis["userPosition"].number())));
-							row.homed.set(axis["homed"].boolean() ? 1 : 0);
-							row.visible.set(axis["visible"].boolean(true) ? 1 : 0);
-							// The axis' speed is in mm/min
-							maxSpeed = std::max(maxSpeed, static_cast<int32_t>(axis["speed"].integer(0) / 60));
-							if (axis["letter"].text() == "Z")
-							{
-								babystep = axis["babystep"].number();
-							}
-						});
+			const OM::Node& axes = move()["axes"];
+			for (size_t number = 0; number < axes.size(); ++number)
+			{
+				maxSpeed = std::max(maxSpeed, static_cast<int32_t>(axes[number]["speed"].integer(0) / 60));
+				if (axes[number]["letter"].text() == "Z")
+				{
+					babystep = axes[number]["babystep"].number();
+				}
+			}
 			m_maxSpeed = maxSpeed;
 			m_babystep.set(_("status.babystep_value", static_cast<float>(babystep)));
 		}

@@ -199,7 +199,6 @@
 			<xs:enumeration value="min"/>
 			<xs:enumeration value="mode"/>
 			<xs:enumeration value="mode_icon"/>
-			<xs:enumeration value="move.axes"/>
 			<xs:enumeration value="move.babystep"/>
 			<xs:enumeration value="move.extrusion_factor"/>
 			<xs:enumeration value="move.flow"/>
@@ -233,7 +232,6 @@
 			<xs:enumeration value="password_open"/>
 			<xs:enumeration value="password_title"/>
 			<xs:enumeration value="poll_interval"/>
-			<xs:enumeration value="position"/>
 			<xs:enumeration value="primary.chroma"/>
 			<xs:enumeration value="primary.lightness"/>
 			<xs:enumeration value="primary_hue"/>
@@ -330,7 +328,6 @@
 			<xs:enumeration value="usb_modes"/>
 			<xs:enumeration value="value"/>
 			<xs:enumeration value="version"/>
-			<xs:enumeration value="visible"/>
 			<xs:enumeration value="widget.height_class"/>
 			<xs:enumeration value="widget.portrait"/>
 			<xs:enumeration value="widget.size_class"/>
@@ -384,7 +381,6 @@
 			<xs:enumeration value="jog.distances"/>
 			<xs:enumeration value="jog.feedrates"/>
 			<xs:enumeration value="maps"/>
-			<xs:enumeration value="move.axes"/>
 			<xs:enumeration value="networks"/>
 			<xs:enumeration value="objects"/>
 			<xs:enumeration value="options"/>

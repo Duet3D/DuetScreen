@@ -1,8 +1,9 @@
 /*
  * MoveSource.h
  *
- * Publishes the printer's motion: each axis' position, the speed and extrusion overrides, the Z babystep, and the
- * current move's speed and volumetric flow, also as gauges.
+ * Publishes what the printer's motion needs worked out: the speed and extrusion overrides and the Z babystep as
+ * translated text, and the current move's speed and volumetric flow, also as gauges scaled to the fastest axis and
+ * extruder. The axes themselves are the object model's (om.move.axes).
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -10,26 +11,12 @@
 #pragma once
 
 #include "DataSource.h"
-#include "UI/Xml/Binding/List.h"
 #include "ObjectModel/Tree/Node.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include <vector>
 
 namespace UI::Xml
 {
-	/** One axis */
-	class AxisRow : public Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(FieldVisitor& f) override;
-
-		StringSubject<4> letter;	// e.g. "X"
-		StringSubject<16> position; // User position, e.g. "12.50"
-		IntSubject homed;			// 1 when homed
-		IntSubject visible;			// 1 if the axis is shown to the user
-	};
-
 	/** Publishes `move.*` */
 	class MoveSource : public DataSource
 	{
@@ -70,7 +57,7 @@ namespace UI::Xml
 		 * rate; 0 with no current tool */
 		static float volumetricFlow();
 
-		/** Show every axis and the babystep */
+		/** Find the speed gauges' range, and show the babystep */
 		void showAxes();
 
 		/** Show the speed override */
@@ -88,7 +75,6 @@ namespace UI::Xml
 		int32_t m_maxSpeed = 1;			// Fastest axis' maximum speed, mm/s: the top of the speed gauges
 		int32_t m_maxExtrusionRate = 1; // The current tool's fastest extruder's maximum: the top of the flow gauge
 
-		List<AxisRow> m_axes;					 // One row per axis
 		StringSubject<16> m_speedFactor;		 // e.g. "100%"
 		StringSubject<16> m_extrusionFactor;	 // e.g. "100%"
 		StringSubject<24> m_babystep;			 // e.g. "0 mm"
