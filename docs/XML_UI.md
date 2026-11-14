@@ -164,13 +164,13 @@ If a user component is malformed, names an unknown presenter, or comes from a bu
 
 ### Example: change how every fan is shown
 
-To override `fan_card` everywhere fans are listed, create `/boot/ui/my-fans/manifest.json`:
+To override `fan_row` everywhere fans are listed, create `/boot/ui/my-fans/manifest.json`:
 
 ```json
-{ "id": "my-fans", "ui_api": "1.0", "components": ["fan_card.xml"] }
+{ "id": "my-fans", "ui_api": "1.0", "components": ["fan_row.xml"] }
 ```
 
-Then add `/boot/ui/my-fans/fan_card.xml`, which here shows the speed as text and has a 50% button:
+Then add `/boot/ui/my-fans/fan_row.xml`, which here shows the speed as text and has a 50% button:
 
 ```xml
 <component>
@@ -229,7 +229,7 @@ Lists add and remove rows at the end, so existing rows keep their scroll positio
 `flow` says how the items are placed: `column`, `row`, `row_wrap`, or `pages`, one at a time, each filling the list, swiped through sideways with a dot per item below them ([ListPages.h](../src/UI/Widgets/Layout/ListPages.h)). Without it, the list is laid out by its own flex attributes.
 
 ```xml
-<ds_list list="om.fans" item="fan_card" flow="pages" width="100%" height="200"/>
+<ds_list list="om.fans" item="fan_row" flow="pages" width="100%" height="200"/>
 ```
 
 A long list should be windowed: only the rows on screen are built, and rows are built and deleted as it scrolls. Every item then has the same size, set by the list:
@@ -242,7 +242,7 @@ A long list should be windowed: only the rows on screen are built, and rows are 
 A keyed list shows only the rows whose `key` field (written `row.<field>`) is `value`, for a widget about one fan, bed or tool:
 
 ```xml
-<ds_list list="om.fans" key="row.index" value="2" item="fan_card"/>
+<ds_list list="om.fans" key="row.index" value="2" item="fan_row"/>
 <ds_list list="om.heat.bedHeaters" key="row.index" value="$bed" item="dashboard_bed"/>
 ```
 
@@ -407,7 +407,7 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 	</api>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
 		<style name="pad_zero"/>
-		<ds_list list="om.fans" key="row.index" value="$fan" item="fan_card" width="100%" height="content"/>
+		<ds_list list="om.fans" key="row.index" value="$fan" item="fan_row" width="100%" height="content"/>
 	</view>
 </component>
 ```

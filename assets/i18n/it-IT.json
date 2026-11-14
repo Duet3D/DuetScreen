@@ -90,10 +90,11 @@
       "feedrate_header": "Imposta velocità di estrusione ({:s})"
     },
     "fan": {
-      "title": "Ventole controllabili:",
+      "title": "Ventole",
       "header": "Ventola {:d}",
       "off": "Spento",
-      "max": "Max"
+      "max": "Max",
+      "automatic": "Automatica: accesa sopra {:d} °C"
     },
     "filament": {
       "management_header": "Filamento attualmente caricato",

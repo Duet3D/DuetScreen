@@ -685,7 +685,7 @@
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
 			<xs:enumeration value="factors_slider"/>
-			<xs:enumeration value="fan_card"/>
+			<xs:enumeration value="fan_row"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
 			<xs:enumeration value="file_browser_crumb"/>
@@ -830,7 +830,7 @@
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
 			<xs:enumeration value="factors_slider"/>
-			<xs:enumeration value="fan_card"/>
+			<xs:enumeration value="fan_row"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
 			<xs:enumeration value="file_browser_crumb"/>
@@ -1009,7 +1009,7 @@
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
 			<xs:enumeration value="factors_slider"/>
-			<xs:enumeration value="fan_card"/>
+			<xs:enumeration value="fan_row"/>
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
 			<xs:enumeration value="file_browser_crumb"/>
@@ -1443,6 +1443,7 @@
 			<xs:enumeration value="tr.extrude.feedrate_header"/>
 			<xs:enumeration value="tr.extrude.retract"/>
 			<xs:enumeration value="tr.extrude.tool_select"/>
+			<xs:enumeration value="tr.fan.automatic"/>
 			<xs:enumeration value="tr.fan.header"/>
 			<xs:enumeration value="tr.fan.max"/>
 			<xs:enumeration value="tr.fan.off"/>
@@ -9670,8 +9671,8 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="fan_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fan_card.xml.</xs:documentation></xs:annotation>
+	<xs:element name="fan_row">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fan_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

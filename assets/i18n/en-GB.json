@@ -91,10 +91,11 @@
       "feedrate_header": "Set Extrusion Feedrate ({:s})"
     },
     "fan": { /* Fan screen */
-      "title": "Controllable Fans:",
+      "title": "Fans",
       "header": "Fan {:d}",
       "off": "Off",
-      "max": "Max"
+      "max": "Max",
+      "automatic": "Automatic: on above {:d} °C"
     },
     "filament": { /* Filament management widgets */
       "management_header": "Currently Loaded Filament",

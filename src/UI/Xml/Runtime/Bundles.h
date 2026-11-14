@@ -8,7 +8,7 @@
  *       "name": "My dashboard",
  *       "version": "1.0.0",
  *       "ui_api": "1.0",
- *       "components": ["components/fan_card.xml", "screens/main.xml"],
+ *       "components": ["components/fan_row.xml", "screens/main.xml"],
  *       "themes": ["themes/midnight.xml"],
  *       "widgets": ["widgets/fan.json"],
  *       "layouts": ["layouts/dashboard.json"]

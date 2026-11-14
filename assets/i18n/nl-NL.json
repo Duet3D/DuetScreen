@@ -90,10 +90,11 @@
       "feedrate_header": "Extrusiesnelheid instellen ({:s})"
     },
     "fan": {
-      "title": "Regelbare ventilatoren:",
+      "title": "Ventilatoren",
       "header": "Ventilator {:d}",
       "off": "Uit",
-      "max": "Max"
+      "max": "Max",
+      "automatic": "Automatisch: aan boven {:d} °C"
     },
     "filament": {
       "management_header": "Huidig geladen filament",

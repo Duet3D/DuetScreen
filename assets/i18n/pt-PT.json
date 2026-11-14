@@ -90,10 +90,11 @@
       "feedrate_header": "Definir velocidade de extrusão ({:s})"
     },
     "fan": {
-      "title": "Ventoinhas controláveis:",
+      "title": "Ventoinhas",
       "header": "Ventoinha {:d}",
       "off": "Desligado",
-      "max": "Máx"
+      "max": "Máx",
+      "automatic": "Automática: liga acima de {:d} °C"
     },
     "filament": {
       "management_header": "Filamento atualmente carregado",

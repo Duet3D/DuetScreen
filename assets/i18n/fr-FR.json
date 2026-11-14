@@ -90,10 +90,11 @@
       "feedrate_header": "Régler la vitesse d'extrusion ({:s})"
     },
     "fan": {
-      "title": "Ventilateurs contrôlables :",
+      "title": "Ventilateurs",
       "header": "Ventilateur {:d}",
       "off": "Arrêt",
-      "max": "Max"
+      "max": "Max",
+      "automatic": "Automatique : en marche au-dessus de {:d} °C"
     },
     "filament": {
       "management_header": "Filament actuellement chargé",

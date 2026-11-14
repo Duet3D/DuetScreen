@@ -2797,7 +2797,7 @@ At its smallest, 272×100 px:
 
 ## Components
 
-The components of the built-in bundle. A user bundle replaces one by giving its own the same name; a component is used as an element (`<fan_card/>`) or as a list's `item`.
+The components of the built-in bundle. A user bundle replaces one by giving its own the same name; a component is used as an element (`<fan_row/>`) or as a list's `item`.
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
@@ -2853,7 +2853,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
-| `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
+| `fan_row` |  |  | `dashboard_fan`, `fans` | [fan_row.xml](../assets/ui/components/control/fans/fan_row.xml) |
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |

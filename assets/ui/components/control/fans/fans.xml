@@ -1,27 +1,18 @@
 <!--
-  Fan screen: one card per fan in the object model.
+  The Fans tab, and the `fans` widget: a row per fan (fan_row.xml), in one group. A fan you set has a slider; a fan
+  the firmware runs by temperature shows its speed.
 
-  Data:     the object model's fans (om.fans). Each fan_card binds to its own fan's fields.
+  Data:     the object model's fans (om.fans). Each fan_row binds to its own fan's fields.
   Actions:  actions.fan.set_speed (src/UI/Presenters/Control/Fans/FanActions.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="100%"
-		  flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="center">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
 		<style name="bg_dark"/>
 		<style name="card"/>
-
-		<lv_obj name="controllable_fans" width="100%" height="content" flex_flow="column">
-			<lv_obj name="header" width="100%" height="content" style_min_width="content"
-					flex_flow="row" style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-				<style name="bg_color_header"/>
-				<style name="list_header"/>
-				<lv_label name="title" width="content" height="content" translation_tag="tr.fan.title">
-					<style name="list_title"/>
-				</lv_label>
-			</lv_obj>
-
-			<ds_list name="list" list="om.fans" item="fan_card" width="100%" height="content"
-					 flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
-		</lv_obj>
+		<ds_setting_group name="fans" title_tag="tr.fan.title" width="100%">
+			<ds_list name="list" list="om.fans" item="fan_row">
+				<style name="setting_list"/>
+			</ds_list>
+		</ds_setting_group>
 	</view>
 </component>

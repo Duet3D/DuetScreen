@@ -90,10 +90,10 @@ namespace UI::Xml::Api
 		/** How it is used */
 		enum class As
 		{
-			Element, // As an element: `<fan_card/>`
-			Item,	 // As a list's item: `<ds_list item="fan_card">`
+			Element, // As an element: `<fan_row/>`
+			Item,	 // As a list's item: `<ds_list item="fan_row">`
 			View,	 // As a view: `<ds_view view="fans">`
-			Base,	 // As the base of a view: `<view extends="fan_card">`
+			Base,	 // As the base of a view: `<view extends="fan_row">`
 			Widget,	 // As a widget the user places: its widget file names it (see Layout/WidgetCatalogue.h)
 		};
 

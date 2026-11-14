@@ -2,7 +2,7 @@
   One fan, chosen by its number (`fan`), with its speed and buttons: the `fan` widget (widgets/fans/fan.json), the fan's
   card as the Fans page shows it. It shows nothing while the printer has no such fan.
 
-  Data:     the object model's fans (om.fans); Actions: actions.fan.set_speed (in fan_card.xml)
+  Data:     the object model's fans (om.fans); Actions: actions.fan.set_speed (in fan_row.xml)
 -->
 <component>
 	<api>
@@ -12,6 +12,6 @@
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="column"
 		  style_flex_main_place="center">
 		<style name="pad_zero"/>
-		<ds_list name="list" list="om.fans" key="row.index" value="$fan" item="fan_card" width="100%" height="content"/>
+		<ds_list name="list" list="om.fans" key="row.index" value="$fan" item="fan_row" width="100%" height="content"/>
 	</view>
 </component>

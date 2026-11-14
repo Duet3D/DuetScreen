@@ -486,7 +486,7 @@ namespace UI::Xml::Api
 		{
 			out += "## Components\n\n"
 				   "The components of the built-in bundle. A user bundle replaces one by giving its own the same name; "
-				   "a component is used as an element (`<fan_card/>`) or as a list's `item`.\n\n"
+				   "a component is used as an element (`<fan_row/>`) or as a list's `item`.\n\n"
 				   "| Component | Presenter | Props | Used by | File |\n| --- | --- | --- | --- | --- |\n";
 			for (const auto& component : reference.components)
 			{

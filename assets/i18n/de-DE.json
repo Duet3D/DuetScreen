@@ -90,10 +90,11 @@
       "feedrate_header": "Extrusionsvorschub einstellen ({:s})"
     },
     "fan": {
-      "title": "Steuerbare Lüfter:",
+      "title": "Lüfter",
       "header": "Lüfter {:d}",
       "off": "Aus",
-      "max": "Max"
+      "max": "Max",
+      "automatic": "Automatisch: an über {:d} °C"
     },
     "filament": {
       "management_header": "Aktuell geladenes Filament",

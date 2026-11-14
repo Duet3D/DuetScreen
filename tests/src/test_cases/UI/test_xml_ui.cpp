@@ -272,7 +272,7 @@ namespace
 		<component>
 			<api><prop name="fan" type="int"/></api>
 			<view extends="lv_obj" width="100%" height="content">
-				<ds_list name="list" list="om.fans" key="row.index" value="$fan" item="fan_card" width="100%"
+				<ds_list name="list" list="om.fans" key="row.index" value="$fan" item="fan_row" width="100%"
 						 height="content"/>
 			</view>
 		</component>)";
@@ -462,7 +462,7 @@ TEST_F(TestXmlUi, BuiltinBundleLoadsCleanly)
 	EXPECT_EQ(screen->presenter, "heightmap");
 	EXPECT_EQ(screen->bundle, "duetscreen");
 
-	const auto* card = UI::Xml::findComponent("fan_card");
+	const auto* card = UI::Xml::findComponent("fan_row");
 	ASSERT_NE(card, nullptr);
 	EXPECT_TRUE(card->presenter.empty());
 }
@@ -476,7 +476,10 @@ TEST_F(TestXmlUi, ViewHasItsPresenterAndTranslatedText)
 	auto& view = makeView();
 	lv_obj_t* title = find(view, "title");
 	ASSERT_NE(title, nullptr);
-	EXPECT_STREQ(lv_label_get_text(title), _("fan.title").c_str());
+	// A group's title is in capitals (setting_group_title)
+	std::string expected = _("fan.title");
+	std::transform(expected.begin(), expected.end(), expected.begin(), [](unsigned char c) { return std::toupper(c); });
+	EXPECT_EQ(lv_label_get_text(title), expected);
 }
 
 TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
@@ -489,18 +492,22 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 
 	// Attributes the engine doesn't know are only logged, and LVGL logging is off in this build, so check that the
 	// layout attributes in the bundle actually reached the widgets
-	EXPECT_EQ(lv_obj_get_style_flex_flow(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_FLOW_ROW);
+	EXPECT_EQ(lv_obj_get_style_flex_flow(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_FLOW_ROW_WRAP);
 	EXPECT_EQ(lv_obj_get_style_flex_cross_place(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
-	EXPECT_EQ(lv_obj_get_style_flex_track_place(view.getRootPtr(), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
-	EXPECT_EQ(lv_obj_get_style_flex_cross_place(find(view, "header"), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
 
-	// Thermostatic fans are hidden by a binding in fan_card.xml, not filtered in C++
-	EXPECT_TRUE(lv_obj_has_flag(fanCard(view, 0), LV_OBJ_FLAG_HIDDEN));
-	EXPECT_FALSE(lv_obj_has_flag(fanCard(view, 1), LV_OBJ_FLAG_HIDDEN));
-	EXPECT_FALSE(lv_obj_has_flag(fanCard(view, 2), LV_OBJ_FLAG_HIDDEN));
+	// A thermostatic fan shows its speed, set by the firmware, instead of a slider: a binding in fan_row.xml, not C++
+	const auto hidden = [&](int32_t fan, const char* name)
+	{ return lv_obj_has_flag(lv_obj_find_by_name(fanCard(view, fan), name), LV_OBJ_FLAG_HIDDEN); };
+	EXPECT_FALSE(lv_obj_has_flag(fanCard(view, 0), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(hidden(0, "controls"));
+	EXPECT_FALSE(hidden(0, "reading"));
+	EXPECT_FALSE(hidden(1, "controls"));
+	EXPECT_TRUE(hidden(1, "reading"));
 
-	EXPECT_EQ(slider(fanCard(view, 1)).getLabelText(), _("fine_tune.fan", 1));
-	EXPECT_EQ(slider(fanCard(view, 2)).getLabelText(), _("fine_tune.fan", 2));
+	const auto title = [&](int32_t fan)
+	{ return std::string(lv_label_get_text(lv_obj_find_by_name(fanCard(view, fan), "title"))); };
+	EXPECT_EQ(title(1), _("fan.header", 1));
+	EXPECT_EQ(title(2), _("fan.header", 2));
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 50.0f);
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 2)).getValue(), 0.0f);
 
@@ -553,8 +560,8 @@ TEST_F(TestXmlUi, TwoViewsShareOneModel)
 
 	ASSERT_EQ(lv_obj_get_child_count(fanList(a)), 3u);
 	ASSERT_EQ(lv_obj_get_child_count(fanList(b)), 3u);
-	EXPECT_EQ(slider(fanCard(a, 2)).getLabelText(), _("fine_tune.fan", 2));
-	EXPECT_EQ(slider(fanCard(b, 2)).getLabelText(), _("fine_tune.fan", 2));
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(fanCard(a, 2), "title"))), _("fan.header", 2));
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(fanCard(b, 2), "title"))), _("fan.header", 2));
 }
 
 TEST_F(TestXmlUi, ListGrowsAndShrinksAtTheEnd)
@@ -617,7 +624,7 @@ TEST_F(TestXmlUi, SliderEditsSendButBindingUpdatesDont)
 TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 {
 	writeFile(bundleFile("manifest.json"), manifest());
-	writeFile(bundleFile("components/fan_card.xml"), R"(
+	writeFile(bundleFile("components/fan_row.xml"), R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
 				<lv_label name="custom" bind_text="row.name|default:tr.fine_tune.fan"/>
@@ -629,7 +636,7 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 	restartWithUserBundles();
 
 	EXPECT_TRUE(UI::Xml::getIssues().empty());
-	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "test");
+	EXPECT_EQ(UI::Xml::findComponent("fan_row")->bundle, "test");
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
@@ -650,13 +657,13 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
 {
 	writeFile(bundleFile("manifest.json"), manifest());
-	writeFile(bundleFile("components/fan_card.xml"), "<component>\n<view>\n<lv_label>\n</view>\n</component>\n");
+	writeFile(bundleFile("components/fan_row.xml"), "<component>\n<view>\n<lv_label>\n</view>\n</component>\n");
 	restartWithUserBundles();
 
 	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
-	EXPECT_EQ(UI::Xml::getIssues()[0].file.filename(), "fan_card.xml");
+	EXPECT_EQ(UI::Xml::getIssues()[0].file.filename(), "fan_row.xml");
 	EXPECT_NE(UI::Xml::getIssues()[0].message.find("line 4"), std::string::npos) << UI::Xml::getIssues()[0].message;
-	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
+	EXPECT_EQ(UI::Xml::findComponent("fan_row")->bundle, "duetscreen");
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
@@ -679,24 +686,24 @@ TEST_F(TestXmlUi, OverrideNamingAnUnknownPresenterIsRejected)
 TEST_F(TestXmlUi, BundleForAnotherUiApiIsNotLoaded)
 {
 	writeFile(bundleFile("manifest.json"), manifest("2.0"));
-	writeFile(bundleFile("components/fan_card.xml"), R"(<component><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/fan_row.xml"), R"(<component><view extends="lv_obj"/></component>)");
 	restartWithUserBundles();
 
 	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
 	EXPECT_NE(UI::Xml::getIssues()[0].message.find("needs UI API 2.0"), std::string::npos);
-	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
+	EXPECT_EQ(UI::Xml::findComponent("fan_row")->bundle, "duetscreen");
 }
 
 TEST_F(TestXmlUi, DoubleStarFolderFindsComponentsInEveryFolderBelow)
 {
 	writeFile(bundleFile("manifest.json"), R"({"id": "test", "ui_api": "1.0", "components": ["components/**/*.xml"]})");
-	writeFile(bundleFile("components/fan_card.xml"), R"(<component><view extends="lv_obj"/></component>)");
+	writeFile(bundleFile("components/fan_row.xml"), R"(<component><view extends="lv_obj"/></component>)");
 	writeFile(bundleFile("components/control/fans/fans.xml"), R"(<component><view extends="lv_obj"/></component>)");
 	writeFile(bundleFile("components/control/fans/notes.txt"), "not a component");
 	restartWithUserBundles();
 
 	EXPECT_TRUE(UI::Xml::getIssues().empty());
-	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "test");
+	EXPECT_EQ(UI::Xml::findComponent("fan_row")->bundle, "test");
 	EXPECT_EQ(UI::Xml::findComponent("fans")->bundle, "test");
 	EXPECT_EQ(UI::Xml::findComponent("notes"), nullptr);
 }
@@ -704,24 +711,24 @@ TEST_F(TestXmlUi, DoubleStarFolderFindsComponentsInEveryFolderBelow)
 TEST_F(TestXmlUi, TwoComponentsOfOneNameInABundleAreReported)
 {
 	writeFile(bundleFile("manifest.json"), R"({"id": "test", "ui_api": "1.0", "components": ["components/**/*.xml"]})");
-	writeFile(bundleFile("components/a/fan_card.xml"),
+	writeFile(bundleFile("components/a/fan_row.xml"),
 			  R"(<component><view extends="lv_obj"><lv_label name="first"/></view></component>)");
-	writeFile(bundleFile("components/b/fan_card.xml"),
+	writeFile(bundleFile("components/b/fan_row.xml"),
 			  R"(<component><view extends="lv_obj"><lv_label name="second"/></view></component>)");
 	restartWithUserBundles();
 
 	// The first (in path order) is used; the second is reported, naming the first
 	ASSERT_EQ(UI::Xml::getIssues().size(), 1u);
-	EXPECT_EQ(UI::Xml::getIssues()[0].file, bundleFile("components/b/fan_card.xml"));
+	EXPECT_EQ(UI::Xml::getIssues()[0].file, bundleFile("components/b/fan_row.xml"));
 	EXPECT_NE(UI::Xml::getIssues()[0].message.find("same name as"), std::string::npos);
-	EXPECT_NE(UI::Xml::getIssues()[0].message.find("components/a/fan_card.xml"), std::string::npos);
-	EXPECT_EQ(UI::Xml::findComponent("fan_card")->source, bundleFile("components/a/fan_card.xml"));
+	EXPECT_NE(UI::Xml::getIssues()[0].message.find("components/a/fan_row.xml"), std::string::npos);
+	EXPECT_EQ(UI::Xml::findComponent("fan_row")->source, bundleFile("components/a/fan_row.xml"));
 }
 
 TEST_F(TestXmlUi, ReloadRebuildsLiveViewsAndKeepsThePresenter)
 {
 	writeFile(bundleFile("manifest.json"), manifest());
-	writeFile(bundleFile("components/fan_card.xml"),
+	writeFile(bundleFile("components/fan_row.xml"),
 			  R"(<component><view extends="lv_obj" height="content"><lv_label name="v1"/></view></component>)");
 	restartWithUserBundles();
 
@@ -732,7 +739,7 @@ TEST_F(TestXmlUi, ReloadRebuildsLiveViewsAndKeepsThePresenter)
 	auto* presenter = view.getPresenter();
 	const int32_t index = lv_obj_get_index(view.getRootPtr());
 
-	writeFile(bundleFile("components/fan_card.xml"),
+	writeFile(bundleFile("components/fan_row.xml"),
 			  R"(<component><view extends="lv_obj" height="content"><lv_label name="v2"/></view></component>)");
 	UI::Xml::reload();
 
@@ -1378,7 +1385,8 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(list), 1u);
-	EXPECT_EQ(slider(lv_obj_get_child(list, 0)).getLabelText(), _("fine_tune.fan", 2));
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(list, 0), "title"))),
+			  _("fan.header", 2));
 	lv_obj_send_event(find(lv_obj_get_child(list, 0), "max"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(m_sent, (std::vector<std::string>{"M106 P2 S255\n"}));
 
@@ -1439,11 +1447,11 @@ TEST_F(TestXmlUi, BrokenLayoutFallsBackToTheCopySavedBeforeIt)
 TEST_F(TestXmlUi, SafeModeLoadsOnlyTheBuiltinBundle)
 {
 	writeFile(bundleFile("manifest.json"), manifest());
-	writeFile(bundleFile("components/fan_card.xml"), "<component><view extends=\"lv_obj\"/></component>");
+	writeFile(bundleFile("components/fan_row.xml"), "<component><view extends=\"lv_obj\"/></component>");
 	writeFile(m_userDir / "SAFE_MODE", "");
 	restartWithUserBundles();
 
-	EXPECT_EQ(UI::Xml::findComponent("fan_card")->bundle, "duetscreen");
+	EXPECT_EQ(UI::Xml::findComponent("fan_row")->bundle, "duetscreen");
 	const auto& issues = UI::Xml::getIssues();
 	ASSERT_EQ(issues.size(), 1u);
 	EXPECT_EQ(issues[0].message, "safe mode: only the built-in UI is loaded");
