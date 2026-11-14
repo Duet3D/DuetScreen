@@ -22,6 +22,7 @@
 #include "UI/Xml/Om/OmList.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
+#include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "src/widgets/chart/lv_chart_private.h"
@@ -1578,4 +1579,51 @@ TEST_F(TestXmlUi, ActionsCanComeFromPropsAndAnEmptyOneIsNone)
 	EXPECT_TRUE(m_sent.empty());
 	lv_obj_send_event(find(view, "sends"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(m_sent, std::vector<std::string>{"G28\n"});
+}
+
+TEST_F(TestXmlUi, HeaterAndFanActionsWorkFromAnyHeaterOrFanTheyAreGiven)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/heater_actions_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<ds_list name="heaters" list="om.heat.heaters" item="heater_target_button" width="100%" height="content"/>
+				<ds_button name="fan" text="Fan 1">
+					<action trigger="value_confirmed" name="actions.fan.set_speed" arg="1"/>
+				</ds_button>
+				<ds_button name="thermostatic" text="Fan 0">
+					<action trigger="value_confirmed" name="actions.fan.set_speed" arg="0"/>
+				</ds_button>
+			</view>
+		</component>)");
+	writeFile(bundleFile("components/heater_target_button.xml"), R"(
+		<component>
+			<view extends="ds_button" text="Heater">
+				<action trigger="value_confirmed" name="actions.heater.set_target"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	load_model_data_from_file("tests/object_model/test_bench/model_sensors_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
+	load_model_data(THREE_FANS);
+	auto& view = makeView("heater_actions_screen");
+	pump();
+
+	// A row of the heaters acts on what the heater heats: heater 0 is bed 0, 2 tool 0's, 3 chamber 1
+	const auto confirm = [](lv_obj_t* obj, float value)
+	{ lv_obj_send_event(obj, UI::Xml::Actions::valueConfirmedEvent(), &value); };
+	lv_obj_t* heaters = find(view, "heaters");
+	confirm(lv_obj_get_child(heaters, 0), 60);
+	confirm(lv_obj_get_child(heaters, 2), 210);
+	confirm(lv_obj_get_child(heaters, 3), 40);
+
+	// A fan by its number; a thermostatic one can't be set
+	confirm(find(view, "fan"), 80);
+	confirm(find(view, "thermostatic"), 80);
+
+	const std::vector<std::string> expected = {"M140 P0 S60\n", "M568 P0 S210\n", "M141 P1 S40\n", "M106 P1 S204\n"};
+	EXPECT_EQ(m_sent, expected);
 }

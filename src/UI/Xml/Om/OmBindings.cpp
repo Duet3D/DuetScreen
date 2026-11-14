@@ -10,6 +10,7 @@
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Scope.h"
 #include <algorithm>
+#include <set>
 
 namespace UI::Xml
 {
@@ -80,6 +81,7 @@ namespace UI::Xml
 				it->second->update(root);
 			}
 		}
+		updateFieldsAbove(changes, root);
 
 		// A list changes with its array's length and its items, so any change at, below or above it counts. Rows a
 		// refresh adds can make lists of their own: the map's iterators survive that.
@@ -105,6 +107,37 @@ namespace UI::Xml
 		for (const auto& callback : told)
 		{
 			callback();
+		}
+	}
+
+	void OmBindings::updateFieldsAbove(const OM::ChangeSet& changes, const OM::Node& root)
+	{
+		// Every path above a change, once
+		std::set<std::string, std::less<>> above;
+		for (const auto& changed : changes.paths())
+		{
+			const auto path = OM::Path::parse(changed);
+			for (OM::Path up = path ? path->parent() : OM::Path(); !up.empty(); up = up.parent())
+			{
+				if (!above.insert(up.str()).second)
+				{
+					break; // Its ancestors are in already
+				}
+			}
+		}
+		// A field's key is its path, then `|` and its converter if it has one
+		for (const auto& path : above)
+		{
+			if (auto it = m_fields.find(path); it != m_fields.end())
+			{
+				it->second->update(root);
+			}
+			const std::string converted = path + "|";
+			for (auto it = m_fields.lower_bound(converted); it != m_fields.end() && it->first.starts_with(converted);
+				 ++it)
+			{
+				it->second->update(root);
+			}
 		}
 	}
 

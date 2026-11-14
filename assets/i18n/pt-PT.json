@@ -605,7 +605,8 @@
       "job_pause": "Pausar o trabalho",
       "job_resume": "Retomar o trabalho",
       "job_ask_cancel": "Cancelar o trabalho",
-      "tool_toggle": "Selecionar ou desselecionar uma ferramenta"
+      "tool_toggle": "Selecionar ou desselecionar uma ferramenta",
+      "fan_set_speed": "Definir a velocidade de uma ventoinha"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

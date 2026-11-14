@@ -605,7 +605,8 @@
       "job_pause": "Mettre la tâche en pause",
       "job_resume": "Reprendre la tâche",
       "job_ask_cancel": "Annuler la tâche",
-      "tool_toggle": "Choisir ou libérer un outil"
+      "tool_toggle": "Choisir ou libérer un outil",
+      "fan_set_speed": "Régler la vitesse d'un ventilateur"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

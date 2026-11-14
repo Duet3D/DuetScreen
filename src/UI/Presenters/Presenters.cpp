@@ -5,6 +5,7 @@
 #include "Presenters.h"
 #include "Common/BabyStepPresenter.h"
 #include "Console/ConsolePresenter.h"
+#include "Control/Fans/FanActions.h"
 #include "Control/Fans/FanPresenter.h"
 #include "Control/Heightmap/HeightmapPresenter.h"
 #include "Control/Move/JogActions.h"
@@ -49,6 +50,7 @@ namespace UI
 	{
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
+		FanActions::registerAll();
 		GaugeActions::registerAll();
 		JogActions::registerAll();
 		ToolActions::registerAll();

@@ -605,7 +605,8 @@
       "job_pause": "Taak pauzeren",
       "job_resume": "Taak hervatten",
       "job_ask_cancel": "Taak annuleren",
-      "tool_toggle": "Gereedschap kiezen of vrijgeven"
+      "tool_toggle": "Gereedschap kiezen of vrijgeven",
+      "fan_set_speed": "Ventilatorsnelheid instellen"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

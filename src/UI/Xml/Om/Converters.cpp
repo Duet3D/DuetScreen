@@ -236,6 +236,56 @@ namespace UI::Xml
 			return translation != nullptr && *translation != key ? *translation : std::string(node.text());
 		}
 
+		/** The translation of the argument (`tr.<key>`) with the value as a whole number in it; empty for a value that
+		 * isn't a number, or is below 0, which RepRapFirmware uses for none (a fan's `rpm` without a tachometer) */
+		std::string formatted(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			if (!isNumeric(node) || node.number(0) < 0)
+			{
+				return "";
+			}
+			return translatedWith(argument, static_cast<int64_t>(std::round(node.number(0))));
+		}
+
+		/** The smallest multiple of the argument above the value, and at least the argument: a scale's top */
+		int32_t scaleTop(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			const double step = std::max(1.0, toDouble(argument, 100));
+			return toInt32(std::max(step, (std::floor(node.number(0) / step) + 1) * step));
+		}
+
+		/** A heater's (`heat.heaters[n]`) target: its active temperature while active, its standby one on standby */
+		double heaterTargetOf(const OM::Node& heater)
+		{
+			const std::string_view state = heater["state"].text();
+			return state == "active"	? heater["active"].number(0)
+				   : state == "standby" ? heater["standby"].number(0)
+										: 0;
+		}
+
+		/** A heater's target, else 0 (see heaterTargetOf()) */
+		int32_t heaterTarget(const OM::Node& node, const OM::Path&, std::string_view)
+		{
+			return toInt32(heaterTargetOf(node));
+		}
+
+		/** "Target 215°C" while a heater heats to a target, else its state translated, e.g. "Off" or "Fault" */
+		std::string heaterDetail(const OM::Node& node, const OM::Path&, std::string_view)
+		{
+			if (!node.isObject())
+			{
+				return "";
+			}
+			const int32_t target = toInt32(heaterTargetOf(node));
+			if (target > 0)
+			{
+				return _("widget.gauge_target", target);
+			}
+			const std::string key = fmt::format("temperature.status.{:s}", node["state"].text());
+			const std::string* translation = i18n::find(key);
+			return translation != nullptr && *translation != key ? *translation : std::string(node["state"].text());
+		}
+
 		// The converters, the default first
 		const std::array s_converters = {
 			Converter{.name = "",
@@ -350,6 +400,42 @@ namespace UI::Xml
 					  .toInteger = nullptr,
 					  .toText = translated,
 					  .argumentKind = Converter::Argument::translationGroup},
+			Converter{.name = "format",
+					  .type = Converter::Type::text,
+					  .description =
+						  "The translation of the argument with the value, rounded, as its number; empty for "
+						  "anything not a number or below 0 (RepRapFirmware's \"none\"), e.g. "
+						  "`om.fans[0].rpm|format:tr.widget.gauge_rpm` gives \"1200 RPM\", or nothing for a "
+						  "fan without a tachometer",
+					  .argument = "The translation key, `tr.<key>`; `{:d}` in the translation is the number",
+					  .toInteger = nullptr,
+					  .toText = formatted,
+					  .argumentKind = Converter::Argument::translationKey},
+			Converter{.name = "scale_top",
+					  .type = Converter::Type::integer,
+					  .description =
+						  "The smallest multiple of the argument above the value, and at least the argument: "
+						  "the top of a scale for a value with no known range, e.g. a sensor's reading of 25 "
+						  "gives 100 with `scale_top:100`, and 130 gives 200",
+					  .argument = "The step, e.g. 100",
+					  .toInteger = scaleTop,
+					  .toText = nullptr},
+			Converter{.name = "heater_target",
+					  .type = Converter::Type::integer,
+					  .description = "Of a heater, `heat.heaters[n]`: what it heats to, its active temperature while "
+									 "active and its standby one on standby, else 0, e.g. "
+									 "`om.heat.heaters[1]|heater_target`",
+					  .argument = "",
+					  .toInteger = heaterTarget,
+					  .toText = nullptr},
+			Converter{.name = "heater_detail",
+					  .type = Converter::Type::text,
+					  .description =
+						  "Of a heater, `heat.heaters[n]`: \"Target 215°C\" while it heats to a target, else "
+						  "its state, translated, e.g. \"Off\" or \"Fault\"",
+					  .argument = "",
+					  .toInteger = nullptr,
+					  .toText = heaterDetail},
 		};
 	} // namespace
 

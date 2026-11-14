@@ -220,6 +220,12 @@ namespace UI::Xml
 
 	std::optional<float> ActionArgs::value() const
 	{
+		const auto edit = edited();
+		return edit ? edit : parseFloat(arg);
+	}
+
+	std::optional<float> ActionArgs::edited() const
+	{
 		if (event != nullptr)
 		{
 			const lv_event_code_t code = lv_event_get_code(event);
@@ -256,8 +262,7 @@ namespace UI::Xml
 				}
 			}
 		}
-
-		return parseFloat(arg);
+		return std::nullopt;
 	}
 
 	std::optional<int32_t> ActionArgs::argInt() const

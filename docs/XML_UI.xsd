@@ -393,10 +393,12 @@
 			<xs:enumeration value="actions.estop.dragged"/>
 			<xs:enumeration value="actions.factors.extrusion"/>
 			<xs:enumeration value="actions.factors.speed"/>
+			<xs:enumeration value="actions.fan.set_speed"/>
 			<xs:enumeration value="actions.gauge.edit"/>
 			<xs:enumeration value="actions.gcode.send"/>
 			<xs:enumeration value="actions.heater.set_active"/>
 			<xs:enumeration value="actions.heater.set_standby"/>
+			<xs:enumeration value="actions.heater.set_target"/>
 			<xs:enumeration value="actions.heater.toggle"/>
 			<xs:enumeration value="actions.job.ask_cancel"/>
 			<xs:enumeration value="actions.job.pause"/>
@@ -1291,6 +1293,7 @@
 			<xs:enumeration value="tr.actions.babystep_open"/>
 			<xs:enumeration value="tr.actions.factors_extrusion"/>
 			<xs:enumeration value="tr.actions.factors_speed"/>
+			<xs:enumeration value="tr.actions.fan_set_speed"/>
 			<xs:enumeration value="tr.actions.gcode_send"/>
 			<xs:enumeration value="tr.actions.job_ask_cancel"/>
 			<xs:enumeration value="tr.actions.job_pause"/>

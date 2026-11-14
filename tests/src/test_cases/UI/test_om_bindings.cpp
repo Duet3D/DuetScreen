@@ -10,6 +10,7 @@
 #include "UI/Xml/Om/Converters.h"
 #include "UI/Xml/Om/OmName.h"
 #include "UI/Xml/View/XmlView.h"
+#include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 
@@ -145,6 +146,45 @@ TEST_F(TestOmBindings, ConvertersGiveWhatTheySay)
 	EXPECT_EQ(findConverter("clamp")->toInteger(below, {}, "0:50"), 0);
 	EXPECT_EQ(findConverter("clamp")->toInteger(number, {}, "0:100"), 61);
 	EXPECT_EQ(findConverter("nonsense"), nullptr);
+}
+
+/* Converters for gauges: a heater's target and detail follow its state and temperatures, as the item changes */
+TEST_F(TestOmBindings, GaugeConvertersFollowAHeatersStateAndTargets)
+{
+	using UI::Xml::findConverter;
+	const OM::Node rpm(OM::Node::Kind::number, "1200.4");
+	const OM::Node none(OM::Node::Kind::number, "-1");
+	const OM::Node reading(OM::Node::Kind::number, "130");
+	const OM::Node cool(OM::Node::Kind::number, "25");
+	EXPECT_EQ(findConverter("format")->toText(rpm, {}, "tr.widget.gauge_rpm"), "1200 RPM");
+	EXPECT_EQ(findConverter("format")->toText(none, {}, "tr.widget.gauge_rpm"), "") << "below 0 is none";
+	EXPECT_EQ(findConverter("format")->toText(OM::Node::missing(), {}, "tr.widget.gauge_rpm"), "");
+	EXPECT_EQ(findConverter("scale_top")->toInteger(reading, {}, "100"), 200);
+	EXPECT_EQ(findConverter("scale_top")->toInteger(cool, {}, "100"), 100);
+	EXPECT_EQ(findConverter("scale_top")->toInteger(OM::Node::missing(), {}, "100"), 100);
+
+	auto& view = show("om_heater_gauge", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<lv_label name="off_target" bind_text="om.heat.heaters[1]|heater_target" bind_text-fmt="%d"/>
+				<lv_label name="off_detail" bind_text="om.heat.heaters[1]|heater_detail"/>
+				<lv_label name="target" bind_text="om.heat.heaters[2]|heater_target" bind_text-fmt="%d"/>
+				<lv_label name="detail" bind_text="om.heat.heaters[2]|heater_detail"/>
+				<lv_label name="state" bind_text="om.heat.heaters[2].state"/>
+			</view>
+		</component>)");
+	receive(HEAT);
+	EXPECT_EQ(text(view, "off_target"), "0");
+	EXPECT_EQ(text(view, "off_detail"), _("temperature.status.off"));
+	EXPECT_EQ(text(view, "target"), "60");
+	EXPECT_EQ(text(view, "detail"), _("widget.gauge_target", 60));
+
+	// On standby, the standby temperature is the target
+	receive(
+		R"({"key":"","flags":"d99f","result":{"heat":{"heaters":[null,{"state":"off"},{"standby":45,"state":"standby"}]}}})");
+	EXPECT_EQ(text(view, "state"), "standby");
+	EXPECT_EQ(text(view, "target"), "45");
+	EXPECT_EQ(text(view, "detail"), _("widget.gauge_target", 45));
 }
 
 TEST_F(TestOmBindings, FieldsBindBeforeTheDataArrivesAndFollowIt)

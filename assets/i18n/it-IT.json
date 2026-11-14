@@ -605,7 +605,8 @@
       "job_pause": "Metti in pausa il lavoro",
       "job_resume": "Riprendi il lavoro",
       "job_ask_cancel": "Annulla il lavoro",
-      "tool_toggle": "Seleziona o deseleziona un utensile"
+      "tool_toggle": "Seleziona o deseleziona un utensile",
+      "fan_set_speed": "Imposta la velocità di una ventola"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

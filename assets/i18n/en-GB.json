@@ -606,7 +606,8 @@
       "job_pause": "Pause the job",
       "job_resume": "Resume the job",
       "job_ask_cancel": "Cancel the job",
-      "tool_toggle": "Select or deselect a tool"
+      "tool_toggle": "Select or deselect a tool",
+      "fan_set_speed": "Set a fan's speed"
     },
     "gcodes": { /* G-code descriptions */
       "gcode_G0_desc": "Rapid move",

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "ObjectModel/Tree/ChangeSet.h"
+#include "ObjectModel/Tree/Node.h"
 #include "ObjectModel/Tree/Path.h"
 #include "OmField.h"
 #include "OmList.h"
@@ -101,6 +103,12 @@ namespace UI::Xml
 						   std::string_view written) override;
 
 	  private:
+		/**
+		 * Update the fields of the objects and arrays above each changed path, which a converter reads whole (e.g.
+		 * `heat.heaters[1]|heater_target` follows the heater's `state`)
+		 */
+		void updateFieldsAbove(const OM::ChangeSet& changes, const OM::Node& root);
+
 		/**
 		 * The `om.` name `name`'s path, its `{name}` indices looked up from `origin`
 		 * @return the path, or nothing (with a warning) if the name isn't an `om.` name that can be bound

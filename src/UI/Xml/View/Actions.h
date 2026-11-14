@@ -50,6 +50,9 @@ namespace UI::Xml
 		 * option's index) or checkable), or the value tapped (`value_tapped`), else `arg` as a number */
 		std::optional<float> value() const;
 
+		/** As value(), but only an edit's or a tap's value, never `arg` */
+		std::optional<float> edited() const;
+
 		/** `arg` as an integer, if it is one */
 		std::optional<int32_t> argInt() const;
 

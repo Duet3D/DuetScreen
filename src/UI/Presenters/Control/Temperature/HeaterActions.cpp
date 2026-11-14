@@ -114,8 +114,57 @@ namespace UI::HeaterActions
 	};
 
 	/**
+	 * What heater `heater` heats: the bed or chamber it is the heater of, else the first tool it is a heater of;
+	 * nothing if none uses it
+	 */
+	static std::optional<HeaterOf> userOf(size_t heater)
+	{
+		MODEL_LOCK();
+		for (const bool bed : {true, false})
+		{
+			for (const auto& place : bed ? Xml::PrinterModel::beds() : Xml::PrinterModel::chambers())
+			{
+				if (place.heater == heater)
+				{
+					return HeaterOf{
+						.what = bed ? Heated::Bed : Heated::Chamber, .number = place.number, .slot = place.number};
+				}
+			}
+		}
+		for (const size_t tool : Xml::PrinterModel::tools())
+		{
+			for (size_t slot = 0; slot < Xml::PrinterModel::tool(tool)["heaters"].size(); ++slot)
+			{
+				if (Xml::PrinterModel::toolHeater(tool, slot) == heater)
+				{
+					return HeaterOf{.what = Heated::ToolHeater, .number = tool, .slot = slot};
+				}
+			}
+		}
+		return std::nullopt;
+	}
+
+	/** The number of the heater `of` is about, if it has one. Call with the model locked. */
+	static std::optional<size_t> heaterNumberOf(const HeaterOf& of)
+	{
+		if (of.what == Heated::ToolHeater)
+		{
+			return Xml::PrinterModel::toolHeater(of.number, of.slot);
+		}
+		for (const auto& place : of.what == Heated::Bed ? Xml::PrinterModel::beds() : Xml::PrinterModel::chambers())
+		{
+			if (place.number == of.number)
+			{
+				return place.heater;
+			}
+		}
+		return std::nullopt;
+	}
+
+	/**
 	 * The heater the object model row the action came from is about: an item of `tools[N].heaters` (tool N's heater
-	 * at that slot), `heat.bedHeaters` (that bed) or `heat.chamberHeaters` (that chamber); nothing for anything else
+	 * at that slot), `heat.bedHeaters` (that bed), `heat.chamberHeaters` (that chamber), or `heat.heaters` (what that
+	 * heater heats, see userOf()); nothing for anything else
 	 */
 	static std::optional<HeaterOf> heaterOf(const Xml::ActionArgs& args)
 	{
@@ -149,6 +198,10 @@ namespace UI::HeaterActions
 			{
 				return HeaterOf{.what = Heated::Chamber, .number = *index(2), .slot = *index(2)};
 			}
+			if (field(1) == "heaters")
+			{
+				return userOf(*index(2));
+			}
 		}
 		return std::nullopt;
 	}
@@ -160,7 +213,8 @@ namespace UI::HeaterActions
 		const auto heater = heaterOf(args);
 		if (!heater)
 		{
-			LOG_WARN("actions.heater.toggle must come from a row of a tool's heaters, the beds or the chambers");
+			LOG_WARN("actions.heater.toggle must come from a row of a tool's heaters, the beds, the chambers or the "
+					 "heaters");
 			return;
 		}
 		if (heater->what == Heated::ToolHeater)
@@ -254,25 +308,37 @@ namespace UI::HeaterActions
 		Xml::Services::askNumber(std::move(request));
 	}
 
-	/** `actions.heater.set_active` (`active`) and `actions.heater.set_standby`: set the edited value, or ask for one */
-	static void setTemperature(const Xml::ActionArgs& args, bool active)
+	/**
+	 * `actions.heater.set_active` (`active`) and `actions.heater.set_standby`: set the edited value, or ask for one.
+	 * Without `active`, `actions.heater.set_target`: the standby temperature while the heater is on standby, else the
+	 * active one.
+	 */
+	static void setTemperature(const Xml::ActionArgs& args, std::optional<bool> active)
 	{
 		const auto heater = heaterOf(args);
 		if (!heater)
 		{
-			LOG_WARN("actions.heater.set_active/standby must come from a row of a tool's heaters, the beds or the "
-					 "chambers");
+			LOG_WARN("actions.heater.set_* must come from a row of a tool's heaters, the beds, the chambers or the "
+					 "heaters");
 			return;
 		}
-		setTemperature(heater->what, heater->number, heater->slot, active, args.value());
+		if (!active)
+		{
+			MODEL_LOCK();
+			const auto number = heaterNumberOf(*heater);
+			active = !number || Xml::PrinterModel::heaterState(*number) != "standby";
+		}
+		setTemperature(heater->what, heater->number, heater->slot, *active, args.value());
 	}
 
 	void registerAll()
 	{
-		Xml::Actions::addGlobal("heater.toggle",
-								"Cycle the heater through active, standby and off. From a row of a tool's heaters "
-								"(`om.tools[…].heaters`), or of `om.heat.bedHeaters` or `om.heat.chamberHeaters`.",
-								toggleHeater);
+		Xml::Actions::addGlobal(
+			"heater.toggle",
+			"Cycle the heater through active, standby and off. From a row of a tool's heaters "
+			"(`om.tools[…].heaters`), of `om.heat.bedHeaters` or `om.heat.chamberHeaters`, or of "
+			"`om.heat.heaters` (the bed or chamber it heats, else the first tool it is a heater of).",
+			toggleHeater);
 		Xml::Actions::addGlobal("heater.set_active",
 								"Set the heater's active temperature to the edited value (`value_confirmed`), else ask "
 								"for it with a number pad. From the same rows as `actions.heater.toggle`.",
@@ -280,5 +346,9 @@ namespace UI::HeaterActions
 		Xml::Actions::addGlobal("heater.set_standby",
 								"As `actions.heater.set_active`, for the standby temperature",
 								[](const Xml::ActionArgs& args) { setTemperature(args, false); });
+		Xml::Actions::addGlobal("heater.set_target",
+								"As `actions.heater.set_active`, for the target the heater heats to: its standby "
+								"temperature while on standby, else its active one",
+								[](const Xml::ActionArgs& args) { setTemperature(args, std::nullopt); });
 	}
 } // namespace UI::HeaterActions
