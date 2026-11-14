@@ -345,6 +345,15 @@ namespace UI::Themes
 		Style dialog_body;		  // Around the step's content
 		Style dialog_footer;	  // A row of a step's buttons, its main one last
 		Style dialog_button;	  // A button in that row
+		Style dialog_row;		  // A row of a list in a dialog (settings, choices): a rule under it
+		Style dialog_row_chosen;  // The value chosen in a list of choices
+
+		/* The number pad (assets/ui/components/dialogs/dialog_number.xml) */
+		Style numpad;		   // The pad, and its grid of keys: the gaps between them
+		Style numpad_readout;  // The box showing what is typed, with the numbers that can be
+		Style numpad_value;	   // What is typed
+		Style numpad_key;	   // A key
+		Style numpad_key_side; // A key that edits rather than types: backspace, clear, the sign
 
 		/* Gauges */
 		Style gauge_arc;		// An arc gauge's track

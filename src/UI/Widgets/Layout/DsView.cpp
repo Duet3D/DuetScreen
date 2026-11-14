@@ -9,6 +9,10 @@
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
+#include <map>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace UI::Xml::DsView
 {
@@ -53,6 +57,24 @@ namespace UI::Xml::DsView
 			return presenter;
 		}
 
+		/** The attributes giving the component's props, `prop_<name>="value"` */
+		constexpr std::string_view PROP_PREFIX = "prop_";
+
+		/** The props `attrs` give the component, by name */
+		std::map<std::string, std::string> propsIn(const char** attrs)
+		{
+			std::map<std::string, std::string> props;
+			for (size_t i = 0; attrs != nullptr && attrs[i] != nullptr; i += 2)
+			{
+				const std::string_view name = attrs[i];
+				if (name.starts_with(PROP_PREFIX) && name.size() > PROP_PREFIX.size())
+				{
+					props.emplace(name.substr(PROP_PREFIX.size()), attrs[i + 1]);
+				}
+			}
+			return props;
+		}
+
 		/** Create the view: the XML component of that name, with its presenter */
 		void* create(lv_xml_parser_state_t* state, const char** attrs)
 		{
@@ -66,7 +88,7 @@ namespace UI::Xml::DsView
 
 			lv_obj_t* parent = parentOf(state);
 			// A missing component still gets an XmlView, which shows what is missing
-			auto* object = new XmlView(name, parent, view, presenterFor(attrs));
+			auto* object = new XmlView(name, parent, view, presenterFor(attrs), propsIn(attrs));
 
 			lv_obj_t* root = object->getRootPtr();
 			lv_obj_add_event_cb(root, deletedCb, LV_EVENT_DELETE, static_cast<LvObj*>(object));
@@ -74,10 +96,21 @@ namespace UI::Xml::DsView
 			return root;
 		}
 
-		/** lv_obj attributes, then the starting state */
+		/** lv_obj attributes (the props are the component's), then the starting state */
 		void apply(lv_xml_parser_state_t* state, const char** attrs)
 		{
-			lv_xml_obj_apply(state, attrs);
+			std::vector<const char*> own;
+			for (size_t i = 0; attrs != nullptr && attrs[i] != nullptr; i += 2)
+			{
+				if (!std::string_view(attrs[i]).starts_with(PROP_PREFIX))
+				{
+					own.push_back(attrs[i]);
+					own.push_back(attrs[i + 1]);
+				}
+			}
+			own.push_back(nullptr);
+			own.push_back(nullptr);
+			lv_xml_obj_apply(state, own.data());
 
 			const char* view = lv_xml_get_value_of(attrs, "view");
 			if (view == nullptr)
@@ -137,6 +170,9 @@ namespace UI::Xml::DsView
 				   "can show different data in different places",
 				   AttributeKind::Presenter},
 				  {"home", "\"true\" to make it a home screen: shown when nothing else is open (default false)"},
+				  {"prop_<name>",
+				   "A value for the component's prop <name>, e.g. `prop_hide_title=\"true\"`, as an attribute would be "
+				   "where the component is written"},
 				  {"shown",
 				   "\"true\" to show it without taking part in navigation, for always-present parts such as a status "
 				   "bar or the page in a tab: shown, and its presenter active, whenever what it is in is shown "

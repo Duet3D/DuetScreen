@@ -85,7 +85,7 @@
 				   flex_flow="column">
 			<action trigger="dismissed" name="presenter.customise.close_settings"/>
 			<ds_list name="list" list="presenter.settings" item="customise_setting" width="100%" height="content"
-					 flex_flow="column"/>
+					 flex_flow="column" style_pad_row="0"/>
 			<ds_dialog_footer name="footer">
 				<ds_button name="done" translation_tag="tr.customise.done">
 					<style name="dialog_button"/>
@@ -123,13 +123,13 @@
 
 		<!-- Loading: the saved layouts; deleting one asks first, the next step -->
 		<ds_dialog name="load_dialog" bind_open="presenter.load_open" title_tag="tr.customise.saved_title"
-				   height="70%" flex_flow="column">
+				   flex_flow="column">
 			<action trigger="dismissed" name="presenter.customise.close_load"/>
 			<lv_label name="none" translation_tag="tr.customise.none_saved" width="100%" long_mode="wrap">
 				<bind_flag_if_eq subject="presenter.has_saved" flag="hidden" ref_value="1"/>
 			</lv_label>
-			<ds_list name="list" list="presenter.saved" item="customise_saved_layout" width="100%" flex_grow="1"
-					 flex_flow="column"/>
+			<ds_list name="list" list="presenter.saved" item="customise_saved_layout" width="100%" height="content"
+					 flex_flow="column" style_pad_row="0"/>
 		</ds_dialog>
 	</view>
 </component>

@@ -1423,8 +1423,7 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 
 	// Typed on the keys, then OK
 	EXPECT_EQ(TestDialogs::text("range"), "100 or more");
-	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "1234");
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "keys"), LV_EVENT_READY, nullptr);
+	TestDialogs::enterOnPad("1234");
 	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
 	auto& slider = static_cast<UI::Slider&>(
 		*UI::LvObj::fromPtr(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval")));
@@ -1433,8 +1432,7 @@ TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 	// Out of range: OK does nothing
 	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
 	dialog = openNumberPad();
-	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "5");
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "keys"), LV_EVENT_READY, nullptr);
+	TestDialogs::enterOnPad("5");
 	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
 	EXPECT_EQ(slider.getValue(), 1234.0f);
 	UI::closeDialogs();
@@ -1477,8 +1475,7 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
 
 	// Type 95 and confirm: sent, and back to the factors
-	lv_textarea_set_text(lv_obj_find_by_name(pad, "text"), "95");
-	lv_obj_send_event(lv_obj_find_by_name(pad, "keys"), LV_EVENT_READY, nullptr);
+	TestDialogs::enterOnPad("95");
 	ASSERT_EQ(sent.size(), 1u);
 	EXPECT_EQ(sent[0], "M221 D1 S95\n");
 	EXPECT_EQ(TestDialogs::shown(), dialog);
@@ -1534,32 +1531,6 @@ TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 	// Any view can ask it, e.g. a button placed in the sidebar
 	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "actions.job.ask_cancel", "");
 	EXPECT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
-	UI::closeDialogs();
-}
-
-TEST_F(TestHomeViewWithData, NumberPadTextStartsUnscrolled)
-{
-	// The pad's text is written before the pad is shown and has a size; once shown, it must not scroll out of view
-	runEvents();
-	dashboardTabs().setActiveTab(STATUS_TAB);
-	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
-					  LV_EVENT_CLICKED,
-					  nullptr);
-	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");
-	ASSERT_NE(dialog, nullptr);
-	auto& speed =
-		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0)));
-	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
-	ASSERT_NE(openNumberPad(), nullptr);
-	for (int i = 0; i < 10; i++) // Let any scroll animation finish
-	{
-		lv_tick_inc(100);
-		lv_timer_handler();
-	}
-
-	lv_obj_t* text = TestDialogs::find("text");
-	EXPECT_EQ(lv_obj_get_scroll_x(text), 0);
-	EXPECT_EQ(lv_obj_get_scroll_y(text), 0);
 	UI::closeDialogs();
 }
 

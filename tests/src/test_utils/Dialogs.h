@@ -9,6 +9,7 @@
 
 #include "UI/Xml/Dialogs/DialogHost.h"
 #include <string>
+#include <string_view>
 
 namespace TestDialogs
 {
@@ -66,6 +67,23 @@ namespace TestDialogs
 		{
 			lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
 		}
+	}
+
+	/** Type `keys` on the number pad shown, a key at a time ('-' is the sign key), without confirming */
+	inline void typeOnPad(std::string_view keys)
+	{
+		for (const char key : keys)
+		{
+			const std::string name = key == '-' ? "sign" : key == '.' ? "key_dot" : std::string("key_") + key;
+			tap(name.c_str());
+		}
+	}
+
+	/** Type `keys` on the number pad shown, then tap OK */
+	inline void enterOnPad(std::string_view keys)
+	{
+		typeOnPad(keys);
+		tap("ok");
 	}
 
 	/** Tap a button of the card's header: "back" or "close" */

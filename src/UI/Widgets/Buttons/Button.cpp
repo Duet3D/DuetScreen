@@ -49,8 +49,7 @@ namespace UI
 		setFlexFlow(LV_FLEX_FLOW_COLUMN);
 		setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-		setMinHeight(25);
-		setMinWidth(25);
+		// Its least size is the theme's (the `btn` style), so a style such as a dialog's buttons can make it larger
 
 		// Initialise the label obj
 		setText(text);

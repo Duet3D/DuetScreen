@@ -7,6 +7,7 @@
 #include "i18n/i18n.h"
 #include "utils/utils.h"
 #include <algorithm>
+#include <cctype>
 #include <cstdlib>
 #include <limits>
 
@@ -14,8 +15,8 @@ namespace UI::Xml
 {
 	namespace
 	{
-		constexpr std::string_view UNSIGNED_CHARS = "0123456789."; // What a box for a number of 0 or more takes
-		constexpr std::string_view SIGNED_CHARS = "0123456789.-";  // What a box for any number takes
+		/** The most characters a number pad shows */
+		constexpr size_t MAX_TYPED = 20;
 
 		/** The most decimals a number shows: a float holds no more that a user means */
 		constexpr int DECIMALS = 3;
@@ -59,21 +60,52 @@ namespace UI::Xml
 
 	NumberPrompt::NumberPrompt()
 		: XmlPresenter("dialog_number")
-		, m_accepted(UNSIGNED_CHARS)
 	{
-		action("number.typed",
-			   "What has been typed in the box changed. From the box's `value_changed`.",
-			   [this](const ActionArgs& args) { setText(args.text()); });
-		action("number.clear", "Empty the box", [this](const ActionArgs&) { setText(""); });
+		action("number.key",
+			   "Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with.",
+			   [this](const ActionArgs& args)
+			   {
+				   if (args.arg.size() == 1)
+				   {
+					   type(args.arg[0]);
+				   }
+			   });
+		action("number.backspace",
+			   "Remove the last character shown, whether typed or the value the pad starts with",
+			   [this](const ActionArgs&)
+			   {
+				   const std::string typed(m_typed.get());
+				   setText(typed.empty() ? std::string() : typed.substr(0, typed.size() - 1));
+			   });
+		action("number.sign",
+			   "Make the number negative, or positive again, if it may be negative",
+			   [this](const ActionArgs&)
+			   {
+				   if (m_signed.get() == 0)
+				   {
+					   return;
+				   }
+				   const std::string typed(m_typed.get());
+				   setText(typed.starts_with('-') ? typed.substr(1) : "-" + typed);
+			   });
+		action("number.clear", "Empty what is typed", [this](const ActionArgs&) { setText(""); });
 		action("number.confirm",
-			   "Hand back what has been typed, if it can be, and go back. From the keys' `ready` (their OK key).",
+			   "Hand back what is typed, if it can be, and go back",
 			   [this](const ActionArgs&) { confirm(); });
+		action("number.cancel",
+			   "Go back without handing anything back, as the back button does",
+			   [this](const ActionArgs&)
+			   {
+				   if (m_step != nullptr)
+				   {
+					   m_step->cancel();
+				   }
+			   });
 	}
 
 	void NumberPrompt::fields(FieldVisitor& f)
 	{
 		f.field("text", m_typed, "What has been typed");
-		f.field("accepted", m_accepted, "The characters the box takes, for `bind_accepted_chars`");
 		f.field("range", m_range, "The numbers that can be typed, e.g. \"0 to 280\"; empty for digits and dots");
 		f.field("confirmable",
 				m_confirmable,
@@ -86,11 +118,11 @@ namespace UI::Xml
 		m_step = &step;
 		m_text.reset();
 		m_signed.set(request.min < 0.0f ? 1 : 0);
-		m_accepted.set(request.min < 0.0f ? SIGNED_CHARS : UNSIGNED_CHARS);
 		m_range.set(rangeOf(request.min, request.max));
 		const std::optional<float> start = request.value;
 		m_number = std::move(request);
 		setText(start ? shown(*start) : std::string());
+		m_fresh = start.has_value();
 	}
 
 	void NumberPrompt::ask(Prompts::TextRequest request, PromptStep& step)
@@ -98,15 +130,35 @@ namespace UI::Xml
 		m_step = &step;
 		m_number.reset();
 		m_signed.set(0);
-		m_accepted.set(UNSIGNED_CHARS);
 		m_range.set("");
 		const std::string start = request.text;
 		m_text = std::move(request);
 		setText(start);
+		m_fresh = !start.empty();
+	}
+
+	void NumberPrompt::type(char key)
+	{
+		if (!std::isdigit(static_cast<unsigned char>(key)) && key != '.')
+		{
+			return;
+		}
+		std::string typed = m_fresh ? std::string() : std::string(m_typed.get());
+		// A number has one dot at most; an address any number of them
+		if (key == '.' && m_number && typed.find('.') != std::string::npos)
+		{
+			return;
+		}
+		if (typed.size() < MAX_TYPED)
+		{
+			typed += key;
+		}
+		setText(typed);
 	}
 
 	void NumberPrompt::setText(std::string_view text)
 	{
+		m_fresh = false;
 		m_typed.set(text);
 		m_confirmable.set(confirmable() ? 1 : 0);
 	}
@@ -115,6 +167,7 @@ namespace UI::Xml
 	{
 		if (m_number)
 		{
+			// Nothing typed (or only a sign or a dot) is 0, as it reads
 			const float value = parse(m_typed.get());
 			return value >= m_number->min && value <= m_number->max;
 		}

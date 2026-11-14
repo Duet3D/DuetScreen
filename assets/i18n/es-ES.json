@@ -191,8 +191,8 @@
       "warning_text_length": "La entrada debe tener entre {:d} y {:d} caracteres"
     },
     "multi_value_selector": {
-      "numberpad_input_header": "Introducir valor:",
-      "numberpad_new_value_header": "Introducir nuevo valor:"
+      "numberpad_input_header": "Introducir valor",
+      "numberpad_new_value_header": "Introducir nuevo valor"
     },
     "move": {
       "home_all": "Origen todos",

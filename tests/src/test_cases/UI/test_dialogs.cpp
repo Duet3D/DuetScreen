@@ -326,8 +326,7 @@ TEST_F(DialogSurface, PromptsHandTheirAnswerBackOnceGone)
 	ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
 	EXPECT_EQ(TestDialogs::title(), "Speed");
 	EXPECT_EQ(TestDialogs::text("range"), "0 to 100");
-	lv_textarea_set_text(TestDialogs::find("text"), "75");
-	lv_obj_send_event(TestDialogs::find("keys"), LV_EVENT_READY, nullptr);
+	TestDialogs::enterOnPad("75");
 	EXPECT_EQ(numbers, std::vector<float>{75});
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
@@ -359,6 +358,68 @@ TEST_F(DialogSurface, PromptsHandTheirAnswerBackOnceGone)
 	EXPECT_NE(TestDialogs::shownNamed("a"), nullptr);
 	presenter().a.set(0);
 	pump(); // The prompts gone are deleted after the event that answered them
+}
+
+TEST_F(DialogSurface, TheNumberPadTypesLikeACalculator)
+{
+	show("dialogs_screen");
+	std::vector<float> numbers;
+	const auto ask = [&](float min)
+	{
+		UI::Xml::Prompts::askNumber({.header = "Speed",
+									 .min = min,
+									 .max = 100,
+									 .value = 50,
+									 .onConfirm = [&](float v) { numbers.push_back(v); }});
+		ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
+	};
+	const auto typed = [] { return TestDialogs::text("text"); };
+	const auto okEnabled = [] { return !lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED); };
+
+	// Backspace takes the last character, of the value it starts with too
+	ask(0);
+	EXPECT_EQ(typed(), "50");
+	TestDialogs::tap("backspace");
+	EXPECT_EQ(typed(), "5");
+	TestDialogs::tap("cancel");
+
+	// The first key replaces the value it starts with; then keys add to it
+	ask(0);
+	EXPECT_EQ(typed(), "50");
+	TestDialogs::typeOnPad("7");
+	EXPECT_EQ(typed(), "7");
+	TestDialogs::typeOnPad("2.5.");
+	EXPECT_EQ(typed(), "72.5") << "one dot at most";
+
+	// Backspace takes the last key; the sign does nothing for a number that can't be negative
+	TestDialogs::tap("backspace");
+	EXPECT_EQ(typed(), "72.");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("sign"), LV_STATE_DISABLED));
+	TestDialogs::tap("sign");
+	EXPECT_EQ(typed(), "72.");
+
+	// OK only for a number within the limits
+	EXPECT_TRUE(okEnabled());
+	TestDialogs::typeOnPad("9");
+	TestDialogs::tap("clear");
+	EXPECT_EQ(typed(), "");
+	EXPECT_TRUE(okEnabled()) << "nothing typed is 0";
+	TestDialogs::typeOnPad("101");
+	EXPECT_FALSE(okEnabled());
+	TestDialogs::tap("ok");
+	EXPECT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
+
+	// Cancel goes back, handing nothing back
+	TestDialogs::tap("cancel");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	pump();
+	EXPECT_TRUE(numbers.empty());
+
+	// A number that may be negative: the sign key works
+	ask(-50);
+	TestDialogs::enterOnPad("25-");
+	EXPECT_EQ(numbers, std::vector<float>{-25});
+	pump();
 }
 
 TEST_F(DialogSurface, APromptGoesWithItsAsker)

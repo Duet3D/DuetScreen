@@ -191,8 +191,8 @@
       "warning_text_length": "L'input deve avere tra {:d} e {:d} caratteri"
     },
     "multi_value_selector": {
-      "numberpad_input_header": "Inserire valore:",
-      "numberpad_new_value_header": "Inserire nuovo valore:"
+      "numberpad_input_header": "Inserire valore",
+      "numberpad_new_value_header": "Inserire nuovo valore"
     },
     "move": {
       "home_all": "Home tutti",

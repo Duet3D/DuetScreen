@@ -191,8 +191,8 @@
       "warning_text_length": "Invoer moet tussen {:d} en {:d} tekens bevatten"
     },
     "multi_value_selector": {
-      "numberpad_input_header": "Waarde invoeren:",
-      "numberpad_new_value_header": "Nieuwe waarde invoeren:"
+      "numberpad_input_header": "Waarde invoeren",
+      "numberpad_new_value_header": "Nieuwe waarde invoeren"
     },
     "move": {
       "home_all": "Alles homen",

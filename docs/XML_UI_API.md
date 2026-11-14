@@ -512,16 +512,18 @@ Used by `dialog_number`.
 | Name | Type | Description |
 | --- | --- | --- |
 | `presenter.text` | text | What has been typed |
-| `presenter.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
 | `presenter.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for digits and dots |
 | `presenter.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
 | `presenter.signed` | int | 1 if the number may be negative, so the +/- key works |
 
 | Action | Description |
 | --- | --- |
-| `presenter.number.clear` | Empty the box |
-| `presenter.number.confirm` | Hand back what has been typed, if it can be, and go back. From the keys' `ready` (their OK key). |
-| `presenter.number.typed` | What has been typed in the box changed. From the box's `value_changed`. |
+| `presenter.number.backspace` | Remove the last character shown, whether typed or the value the pad starts with |
+| `presenter.number.cancel` | Go back without handing anything back, as the back button does |
+| `presenter.number.clear` | Empty what is typed |
+| `presenter.number.confirm` | Hand back what is typed, if it can be, and go back |
+| `presenter.number.key` | Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with. |
+| `presenter.number.sign` | Make the number negative, or positive again, if it may be negative |
 
 ### dialog_question
 
@@ -1352,7 +1354,7 @@ Also takes every `lv_image` attribute.
 
 ### ds_keyboard
 
-An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and types into it, so it is usually written `hidden="true"`; or, with `textarea`, it always types into one box, as the number pad's keys do. Its OK key raises `ready`.
+An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and types into it, so it is usually written `hidden="true"`; or, with `textarea`, it always types into one box. Its OK key raises `ready`.
 
 Also takes every `lv_obj` attribute.
 
@@ -1364,10 +1366,8 @@ Also takes every `lv_obj` attribute.
 
 | Attribute | Description |
 | --- | --- |
-| `mode` | Key layout: `text` (default), `text_upper`, `number` or `numberpad` |
+| `mode` | Key layout: `text` (default), `text_upper` or `number` |
 | `textarea` | Always type into the text box of this name: the nearest one around the keyboard, written before it |
-| `bind_ok_enabled` | Follow an int subject: the OK key works only while it is non-zero |
-| `bind_sign_enabled` | Follow an int subject: the `numberpad` layout's +/- key works only while it is non-zero |
 
 ### ds_layout
 
@@ -1664,6 +1664,7 @@ Also takes every `lv_obj` attribute.
 | `view` | The XML component shown, with its presenter |
 | `presenter` | Show the component with this registered presenter instead of the one it names, so one component can show different data in different places |
 | `home` | "true" to make it a home screen: shown when nothing else is open (default false) |
+| `prop_<name>` | A value for the component's prop <name>, e.g. `prop_hide_title="true"`, as an attribute would be where the component is written |
 | `shown` | "true" to show it without taking part in navigation, for always-present parts such as a status bar or the page in a tab: shown, and its presenter active, whenever what it is in is shown (default false) |
 
 ### lv_obj-action
@@ -2714,7 +2715,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| [`babystep`](#control) | `babystep` |  | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| [`babystep`](#control) | `babystep` | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` | `babystep_dialog` |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
 | [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
@@ -2805,6 +2806,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
+| `numpad_key` |  | `key`, `column`, `row` | `dialog_number` | [numpad_key.xml](../assets/ui/components/dialogs/numpad_key.xml) |
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control`, `object_cancel` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
@@ -2977,7 +2979,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `scrollbar_scrolled` | ![scrollbar_scrolled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar_scrolled.png) | bg_opa=100% |
 | `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
 | `tab_card` |  | *(not set)* |
-| `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#bg_light text_color=#text border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
+| `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#bg_light text_color=#text border_color=#border_muted border_width=#border_width border_opa=100% border_side=full min_width=25 min_height=25 |
 | `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_color=#primary_muted bg_grad_dir=none outline_color=#primary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
 | `icon` |  | *(not set)* |
 | `icon_recolor` | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/icon_recolor.png) | recolor=#text recolor_opa=100% |
@@ -3098,13 +3100,20 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `widget_detail` | ![widget_detail](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_detail.png) | text_color=#text_muted text_font=font_small |
 | `dialog` | ![dialog](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog.png) | pad_all=0 pad_row=0 clip_corner=true border_color=#border shadow_width=32 shadow_spread=2 shadow_offset_y=6 shadow_color=0x000000 shadow_opa=40% |
 | `dialog_backdrop` | ![dialog_backdrop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_backdrop.png) | bg_color=#bg_dark bg_opa=75% pad_all=#pad_large |
-| `dialog_header` | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_header.png) | bg_color=#bg_light bg_opa=100% pad_all=#pad pad_column=#pad |
+| `dialog_header` | ![dialog_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_header.png) | bg_color=#bg_light bg_opa=100% pad_ver=8 pad_left=14 pad_right=8 pad_column=10 |
 | `dialog_title` | ![dialog_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_title.png) | text_color=#text_header text_font=font_header |
 | `dialog_from` | ![dialog_from](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_from.png) | text_color=#text_muted text_font=font_subdued |
-| `dialog_icon_button` |  | width=48 height=48 pad_all=0 |
-| `dialog_body` |  | pad_all=#pad_large |
-| `dialog_footer` | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_footer.png) | width=100% height=content layout=flex flex_flow=row flex_main_place=end pad_all=#pad_large pad_top=0 pad_column=#pad |
-| `dialog_button` |  | pad_left=24 pad_right=24 |
+| `dialog_icon_button` |  | width=40 height=40 pad_all=8 |
+| `dialog_body` |  | pad_hor=14 pad_ver=12 |
+| `dialog_footer` | ![dialog_footer](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_footer.png) | width=100% height=content layout=flex flex_flow=row flex_main_place=end pad_hor=14 pad_top=0 pad_bottom=12 pad_column=8 |
+| `dialog_button` |  | min_width=120 min_height=40 pad_hor=16 |
+| `dialog_row` | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row.png) | min_height=44 pad_hor=4 pad_ver=4 pad_column=10 radius=0 bg_opa=0 border_side=bottom border_width=1 border_color=#border_muted border_opa=100% |
+| `dialog_row_chosen` | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row_chosen.png) | text_color=#primary |
+| `numpad` |  | pad_row=8 pad_column=8 |
+| `numpad_readout` | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_readout.png) | bg_color=#bg_dark bg_opa=100% border_color=#primary border_width=1 border_opa=100% radius=#radius pad_hor=12 pad_ver=6 pad_column=12 |
+| `numpad_value` | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_value.png) | text_color=#text text_font=font_xlarge |
+| `numpad_key` | ![numpad_key](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_key.png) | text_font=font_large pad_all=0 |
+| `numpad_key_side` |  | bg_color=#bg |
 | `gauge_arc` |  | arc_color=#bg_light arc_width=10dpx arc_rounded=true bg_opa=0 pad_all=0 |
 | `gauge_arc_indic` |  | arc_color=#primary arc_width=10dpx arc_rounded=true |
 | `gauge_arc_target` |  | arc_color=#primary_muted |

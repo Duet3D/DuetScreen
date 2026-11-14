@@ -1,13 +1,15 @@
 <!--
-  One setting of the selected widget: its name and its value. Text is typed in place, on the shared keyboard; on or
-  off settings are a switch; tapping the value of any other opens what changes it as the dialog's next step (a number
-  pad, or a choice of values).
+  One setting of the selected widget, a row of the settings: its name and its value. Text is typed in place, on the
+  shared keyboard; on or off settings are a switch; tapping the value of any other (marked with a chevron) opens what
+  changes it as the dialog's next step (a number pad, or a choice of values).
 
   Fields:   a settings row: row.name, row.title, row.kind, row.control, row.value, row.on (src/UI/Presenters/Customise/CustomisePresenter.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center"
+		  scrollable="false">
 		<style name="pad_zero"/>
+		<style name="dialog_row"/>
 		<lv_label name="title" bind_text="row.title" flex_grow="1"/>
 		<ds_button name="value" bind_text="row.value" width="50%" long_mode="dots">
 			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="button"/>
@@ -18,6 +20,11 @@
 			<action trigger="ready" name="presenter.customise.set_text"/>
 			<action trigger="defocused" name="presenter.customise.set_text"/>
 		</ds_textarea>
+		<!-- A value that opens a step -->
+		<lv_label name="chevron" text="&#xF054;">
+			<style name="text_muted"/>
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="button"/>
+		</lv_label>
 		<ds_toggle name="toggle">
 			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="switch"/>
 			<bind_state_if_eq subject="row.on" state="checked" ref_value="1"/>

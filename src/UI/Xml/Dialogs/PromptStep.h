@@ -73,6 +73,9 @@ namespace UI::Xml
 		/** Answer: leave the surface, then run `handBack` with the answer, unless the asker has gone */
 		void finish(const std::function<void()>& handBack);
 
+		/** Leave without answering, as the back button does (a prompt's own Cancel): then run onDismissed, if set */
+		void cancel();
+
 	  private:
 		/** The asker is being deleted: the prompt goes, answering nothing */
 		static void askerDeletedCb(lv_event_t* e);

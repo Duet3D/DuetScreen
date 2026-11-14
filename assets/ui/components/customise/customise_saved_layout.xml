@@ -4,8 +4,9 @@
   Fields:   a saved row: row.name (src/UI/Presenters/Customise/CustomisePresenter.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
-		<style name="card"/>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center"
+		  scrollable="false">
+		<style name="dialog_row"/>
 		<lv_label name="name" bind_text="row.name" flex_grow="1" long_mode="dots"/>
 		<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
 			<style name="action_btn"/>

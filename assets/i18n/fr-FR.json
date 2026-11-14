@@ -191,8 +191,8 @@
       "warning_text_length": "La saisie doit comporter entre {:d} et {:d} caractères"
     },
     "multi_value_selector": {
-      "numberpad_input_header": "Entrer la valeur :",
-      "numberpad_new_value_header": "Entrer la nouvelle valeur :"
+      "numberpad_input_header": "Entrer la valeur",
+      "numberpad_new_value_header": "Entrer la nouvelle valeur"
     },
     "move": {
       "home_all": "Tout référencer",

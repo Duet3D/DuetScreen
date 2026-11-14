@@ -74,14 +74,28 @@
 		<style name="dialog_backdrop" bg_color="#bg_dark" bg_opa="75%" pad_all="#pad_large"/>
 		<style name="dialog" pad_all="0" pad_row="0" clip_corner="true" border_color="#border" shadow_width="32"
 			   shadow_spread="2" shadow_offset_y="6" shadow_color="0x000000" shadow_opa="40%"/>
-		<style name="dialog_header" bg_color="#bg_light" bg_opa="100%" pad_all="#pad" pad_column="#pad"/>
+		<style name="dialog_header" bg_color="#bg_light" bg_opa="100%" pad_ver="8" pad_left="14" pad_right="8"
+			   pad_column="10"/>
 		<style name="dialog_title" text_color="#text_header" text_font="font_header"/>
 		<style name="dialog_from" text_color="#text_muted" text_font="font_subdued"/>
-		<style name="dialog_icon_button" width="48" height="48" pad_all="0"/>
-		<style name="dialog_body" pad_all="#pad_large"/>
+		<style name="dialog_icon_button" width="40" height="40" pad_all="8"/>
+		<style name="dialog_body" pad_hor="14" pad_ver="12"/>
 		<style name="dialog_footer" width="100%" height="content" layout="flex" flex_flow="row" flex_main_place="end"
-			   pad_all="#pad_large" pad_top="0" pad_column="#pad"/>
-		<style name="dialog_button" pad_left="24" pad_right="24"/>
+			   pad_hor="14" pad_top="0" pad_bottom="12" pad_column="8"/>
+		<style name="dialog_button" min_width="120" min_height="40" pad_hor="16"/>
+		<!-- A list in a dialog reads as rows, a rule under each, rather than as a stack of buttons -->
+		<style name="dialog_row" min_height="44" pad_hor="4" pad_ver="4" pad_column="10" radius="0" bg_opa="0"
+			   border_side="bottom" border_width="1" border_color="#border_muted" border_opa="100%"/>
+		<style name="dialog_row_chosen" text_color="#primary"/>
+
+		<!-- The number pad: what is typed, large, in a box edged in the accent, over keys a size apart; the keys that
+			 edit rather than type are a step darker -->
+		<style name="numpad" pad_row="8" pad_column="8"/>
+		<style name="numpad_readout" bg_color="#bg_dark" bg_opa="100%" border_color="#primary" border_width="1"
+			   border_opa="100%" radius="#radius" pad_hor="12" pad_ver="6" pad_column="12"/>
+		<style name="numpad_value" text_color="#text" text_font="font_xlarge"/>
+		<style name="numpad_key" text_font="font_large" pad_all="0"/>
+		<style name="numpad_key_side" bg_color="#bg"/>
 
 		<!-- Text -->
 		<style name="text" text_color="#text" text_font="font_normal"/>
@@ -119,7 +133,8 @@
 
 		<!-- Buttons: a neutral control, edged so it shows on a light card -->
 		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#bg_light" text_color="#text"
-			   border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"/>
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"
+			   min_width="25" min_height="25"/>
 		<!-- Checked (a chosen option, the open page): tinted, and edged in the accent by an outline drawn inside the
 			 edge, which (unlike a border) takes no layout space, so a content-sized button doesn't grow when checked -->
 		<style name="btn_checked" bg_color="#primary_muted" bg_grad_dir="none" outline_color="#primary"

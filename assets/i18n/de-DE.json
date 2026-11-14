@@ -191,8 +191,8 @@
       "warning_text_length": "Eingabe muss zwischen {:d} und {:d} Zeichen lang sein"
     },
     "multi_value_selector": {
-      "numberpad_input_header": "Wert eingeben:",
-      "numberpad_new_value_header": "Neuen Wert eingeben:"
+      "numberpad_input_header": "Wert eingeben",
+      "numberpad_new_value_header": "Neuen Wert eingeben"
     },
     "move": {
       "home_all": "Alle referenzieren",

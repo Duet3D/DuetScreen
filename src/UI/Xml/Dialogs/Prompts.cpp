@@ -46,7 +46,7 @@ namespace UI::Xml::Prompts
 		lv_obj_t* asker = request.asker;
 		return open<NumberPrompt>("dialog_number",
 								  title,
-								  {.width = "50%", .height = "80%"},
+								  {.width = "460", .height = "content"},
 								  asker,
 								  nullptr,
 								  [&request](NumberPrompt& prompt, PromptStep& step)
@@ -59,7 +59,7 @@ namespace UI::Xml::Prompts
 		lv_obj_t* asker = request.asker;
 		return open<NumberPrompt>("dialog_number",
 								  title,
-								  {.width = "50%", .height = "80%"},
+								  {.width = "460", .height = "content"},
 								  asker,
 								  nullptr,
 								  [&request](NumberPrompt& prompt, PromptStep& step)

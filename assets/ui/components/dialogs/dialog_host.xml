@@ -32,7 +32,7 @@
 				</ds_button>
 				<!-- As tall as the buttons beside it, so a header without them (a blocking step) keeps its height -->
 				<lv_obj name="titles" height="content" flex_grow="1" flex_flow="column" scrollable="false"
-						clickable="false" style_min_height="48" style_flex_main_place="center">
+						clickable="false" style_min_height="40" style_flex_main_place="center">
 					<style name="pad_zero"/>
 					<lv_label name="title" bind_text="presenter.title" width="100%" long_mode="wrap">
 						<style name="dialog_title"/>

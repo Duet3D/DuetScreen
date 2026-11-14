@@ -87,4 +87,10 @@ namespace UI::Xml
 		step->m_asker = nullptr;
 		step->m_host.finish(*step);
 	}
+
+	void PromptStep::cancel()
+	{
+		const std::function<void()> onDismissed = m_onDismissed;
+		finish(onDismissed);
+	}
 } // namespace UI::Xml

@@ -10,8 +10,8 @@
 		<ds_dialog name="babystep_dialog" bind_open="presenter.open" title_tag="tr.babystep.header" width="40%"
 				   height="85%">
 			<action trigger="dismissed" name="presenter.babystep.close"/>
-			<ds_view name="dialog_babystep" view="babystep" shown="true" width="100%" height="100%"
-					 style_pad_all="0"/>
+			<ds_view name="dialog_babystep" view="babystep" shown="true" prop_hide_title="true" width="100%"
+					 height="100%" style_pad_all="0"/>
 		</ds_dialog>
 	</view>
 </component>

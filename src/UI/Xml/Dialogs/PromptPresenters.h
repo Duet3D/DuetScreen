@@ -26,7 +26,10 @@ namespace UI::Xml
 {
 	class PromptStep;
 
-	/** Behind dialog_number.xml: what has been typed, and whether it can be confirmed */
+	/**
+	 * Behind dialog_number.xml: a number pad's keys type into what it shows, the first key replacing the value it
+	 * starts with, as a calculator's do; OK hands it back once it can be
+	 */
 	class NumberPrompt : public XmlPresenter
 	{
 	  public:
@@ -43,10 +46,13 @@ namespace UI::Xml
 		void ask(Prompts::TextRequest request, PromptStep& step);
 
 	  private:
+		/** Type `key`: a digit or a dot */
+		void type(char key);
+
 		/** Show `text` as typed, and whether it can be confirmed */
 		void setText(std::string_view text);
 
-		/** Whether what is typed can be confirmed: a number within the limits, or any text */
+		/** Whether what is typed can be confirmed: a number within the limits (nothing typed is 0), or any text */
 		bool confirmable() const;
 
 		/** Confirm what is typed, if it can be */
@@ -55,9 +61,9 @@ namespace UI::Xml
 		PromptStep* m_step = nullptr;				   // Where the answer goes
 		std::optional<Prompts::NumberRequest> m_number; // The number asked for, if it is one
 		std::optional<Prompts::TextRequest> m_text;	   // The text asked for, if it is text
+		bool m_fresh = false;						   // Showing the value it started with: a key replaces it
 
 		StringSubject<32> m_typed;	  // `text`
-		StringSubject<16> m_accepted; // `accepted`: the characters the box takes
 		StringSubject<64> m_range;	  // `range`
 		IntSubject m_confirmable;	  // `confirmable`
 		IntSubject m_signed;		  // `signed`: 1 if the number may be negative
