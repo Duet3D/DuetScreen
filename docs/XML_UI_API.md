@@ -3076,7 +3076,9 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `console_btn_anim` |  | recolor=#secondary |
 | `estop` | ![estop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/estop.png) | bg_color=0xf44336 text_color=0xffffff radius=circle |
 | `file` | ![file](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file.png) | merge=btn merge=bg_light merge=border |
-| `folder` | ![folder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder.png) | copy=btn |
+| `folder` | ![folder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder.png) | copy=btn border_color=#primary border_width=#border_width border_opa=100% border_side=full |
+| `folder_icon` | ![folder_icon](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder_icon.png) | recolor=#primary recolor_opa=100% |
+| `file_crumb` | ![file_crumb](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file_crumb.png) | bg_color=#bg bg_opa=100% border_color=#primary border_width=#border_width border_opa=100% border_side=full |
 | `unhomed` |  | bg_color=#secondary border_color=#secondary |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |

@@ -283,8 +283,10 @@ namespace UI::Themes
 		Style estop;				 // Emergency stop button style
 
 		/* Files */
-		Style file; // File items
-		Style folder; // Folder items
+		Style file;		   // File items
+		Style folder;	   // Folder items: set apart from files
+		Style folder_icon; // A folder item's icon
+		Style file_crumb;  // A folder in the path above the files, tapped to go back to it
 
 		/* Move */
 		Style unhomed; // Unhomed axes in the move view

@@ -19,6 +19,7 @@
 			</lv_image>
 		</lv_obj>
 		<ds_icon name="folder_icon" icon="folder.png" width="100%" height="72" flex_grow="1">
+			<style name="folder_icon"/>
 			<bind_flag_if_eq subject="row.is_folder" flag="hidden" ref_value="0"/>
 		</ds_icon>
 		<lv_label name="label" bind_text="row.name" width="100%" height="content" long_mode="dots" flex_grow="1"

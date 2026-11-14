@@ -282,8 +282,14 @@
 		<!-- E-stop: LVGL's palette red -->
 		<style name="estop" bg_color="0xf44336" text_color="0xffffff" radius="circle"/>
 
-		<style name="folder" copy="btn"/>
+		<!-- Files are neutral items; a folder is edged in the accent, with its icon in the accent too, and so is each
+			 folder in the path above them (file_crumb), which is tapped to go back to it -->
 		<style name="file" merge="btn bg_light border"/>
+		<style name="folder" copy="btn" border_color="#primary" border_width="#border_width" border_opa="100%"
+			   border_side="full"/>
+		<style name="folder_icon" recolor="#primary" recolor_opa="100%"/>
+		<style name="file_crumb" bg_color="#bg" bg_opa="100%" border_color="#primary" border_width="#border_width"
+			   border_opa="100%" border_side="full"/>
 
 		<!-- An axis that isn't homed: in the secondary accent, which no action uses, so it stands out among the move
 			 buttons -->

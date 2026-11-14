@@ -53,7 +53,8 @@
 		<style name="gauge_bar_indic" radius="circle"/>
 
 		<!-- Files and folders follow the restyled buttons -->
-		<style name="folder" copy="btn"/>
+		<style name="folder" copy="btn" border_color="#primary" border_width="#border_width" border_opa="100%"
+			   border_side="full"/>
 		<style name="file" merge="btn bg_light"/>
 	</styles>
 </theme>

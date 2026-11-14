@@ -305,6 +305,8 @@ namespace UI::Themes
 		{"estop", &ComponentStyles::estop},
 		{"file", &ComponentStyles::file},
 		{"folder", &ComponentStyles::folder},
+		{"folder_icon", &ComponentStyles::folder_icon},
+		{"file_crumb", &ComponentStyles::file_crumb},
 		{"unhomed", &ComponentStyles::unhomed},
 		{"temperature_bar", &ComponentStyles::temperature_bar},
 		{"temperature_bar_indic", &ComponentStyles::temperature_bar_indic},

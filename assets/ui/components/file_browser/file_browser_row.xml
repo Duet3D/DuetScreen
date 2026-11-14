@@ -24,6 +24,7 @@
 		<ds_icon name="folder_icon" icon="folder.png" width="72" height="72"
 				 style_grid_cell_column_pos="1" style_grid_cell_column_span="1" style_grid_cell_x_align="end"
 				 style_grid_cell_row_pos="0" style_grid_cell_row_span="4" style_grid_cell_y_align="start">
+			<style name="folder_icon"/>
 			<bind_flag_if_eq subject="row.is_folder" flag="hidden" ref_value="0"/>
 		</ds_icon>
 		<lv_label name="label" bind_text="row.name" width="100%" height="content" long_mode="dots"

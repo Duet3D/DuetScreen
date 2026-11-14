@@ -1176,7 +1176,9 @@
 			<xs:enumeration value="dropdown_list"/>
 			<xs:enumeration value="estop"/>
 			<xs:enumeration value="file"/>
+			<xs:enumeration value="file_crumb"/>
 			<xs:enumeration value="folder"/>
+			<xs:enumeration value="folder_icon"/>
 			<xs:enumeration value="gauge_arc"/>
 			<xs:enumeration value="gauge_arc_indic"/>
 			<xs:enumeration value="gauge_arc_target"/>

@@ -13,6 +13,7 @@
 			<bind_flag_if_eq subject="row.index" flag="hidden" ref_value="0"/>
 		</lv_label>
 		<ds_button name="folder" bind_text="row.name">
+			<style name="file_crumb"/>
 			<bind_flag_if_eq subject="row.last" flag="hidden" ref_value="1"/>
 			<action trigger="clicked" name="presenter.files.crumb"/>
 		</ds_button>

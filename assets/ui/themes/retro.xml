@@ -65,7 +65,8 @@
 			   shadow_offset_y="3" shadow_color="#shadow" shadow_opa="100%"/>
 
 		<!-- Files and folders follow the restyled buttons -->
-		<style name="folder" copy="btn"/>
+		<style name="folder" copy="btn" border_color="#primary" border_width="#border_width" border_opa="100%"
+			   border_side="full"/>
 		<style name="file" merge="btn bg_light"/>
 	</styles>
 </theme>

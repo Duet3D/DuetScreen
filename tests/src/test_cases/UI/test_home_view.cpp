@@ -373,6 +373,25 @@ TEST_F(TestHomeView, JobModalShowsDeleteButton)
 	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
+TEST_F(TestHomeView, FoldersStandApartFromFiles)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_tiles.png");
+
+	lv_obj_send_event(lv_obj_find_by_name(browser, "display_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_rows.png");
+
+	// In the folder, the path above shows the folders to go back to
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folder_path.png");
+}
+
 TEST_F(TestHomeView, TappingAFileAnywhereOnItOpensIt)
 {
 	openFilesTab(1);
