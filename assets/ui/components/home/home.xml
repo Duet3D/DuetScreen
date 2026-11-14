@@ -3,8 +3,8 @@
   page at a time (the dashboard when nothing else is open).
 
   Pages are <ds_view>s showing XML components. Each is registered with Navigation under its name, which the sidebar
-  and <action name="actions.navigation.open" arg="…"/> use. Modals open over the view called main_window (see getModalHost() in
-  src/UI/Core/Navigation.h).
+  and <action name="actions.navigation.open" arg="…"/> use. Dialogs open on the dialog surface over the main window
+  (<ds_dialog_host>), so the sidebar and the E-stop stay usable.
 
   The console can sit beside the main window instead of being a page: give the grid a third column (fr(5)) and move
   the console's <ds_view> out of main_window with style_grid_cell_column_pos="2".
@@ -38,11 +38,14 @@
 		<!-- While the user customises the screen: its toolbar, over the pages, sidebar and status bar -->
 		<ds_view name="customise" view="customise" shown="true"/>
 
-		<!-- The shared dialogs, which open over the main window -->
-		<ds_view name="numberpad" view="numberpad" shown="true"/>
+		<!-- Every dialog, one step at a time, over the main window (and the customise toolbar) -->
+		<ds_dialog_host name="dialogs"
+						style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
+						style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1"/>
+
+		<!-- The shared dialogs, which open on the dialog surface -->
 		<ds_view name="factors" view="factors" shown="true"/>
 		<ds_view name="babystep_dialog" view="babystep_dialog" shown="true"/>
-		<ds_view name="job_cancel" view="job_cancel" shown="true"/>
 
 		<!-- Over everything: responses, alerts and update prompts, then the keyboard -->
 		<ds_view name="notifications" view="notifications" shown="true"/>

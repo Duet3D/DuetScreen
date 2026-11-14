@@ -8,6 +8,7 @@
 #include "UiTestSuite.h"
 #include "Configuration.h"
 #include "Debug.h"
+#include "UI/Core/Model.h"
 #include "UI/Presenters/Presenters.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/Runtime/XmlUi.h"
@@ -87,4 +88,20 @@ UiTestSuite::UiTestSuite()
 	screen.setSize(LV_PCT(100), LV_PCT(100));
 	screen.setStylePad(0);
 	screen.setFlexFlow(LV_FLEX_FLOW_COLUMN_WRAP);
+}
+
+void UiTestSuite::deliverModelEvents()
+{
+	Model::get().startEventLoop();
+	Model::get().stopEventLoop();
+}
+
+void UiTestSuite::runTimers()
+{
+	for (int i = 0; i < 30; i++)
+	{
+		lv_tick_inc(20);
+		lv_timer_handler();
+	}
+	lv_obj_update_layout(lv_screen_active());
 }

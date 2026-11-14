@@ -11,6 +11,14 @@ namespace UI::Xml
 	void SeriesRow::fields(FieldVisitor& f)
 	{
 		f.field("name", name, "Name of the series, e.g. for a legend");
+		f.field("key",
+				key,
+				"What its source knows the series by, so a `<ds_graph_key>` can find it: for "
+				"source.temperature.temperatures, its heaters' sensor number");
+		f.field("shown",
+				shown,
+				"1 while graphs draw the series, 0 while it is hidden; tapping its legend entry or a `<ds_graph_key>` "
+				"for it toggles it, in every graph of the history");
 	}
 
 	History::History(uint32_t samplesPerSecond, size_t capacity)

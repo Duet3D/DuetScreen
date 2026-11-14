@@ -55,6 +55,13 @@ namespace UI::Xml
 	 */
 	void reload();
 
+	/**
+	 * Delete the layouts made or saved on the screen: the user bundle folder's local bundle (Layouts::LOCAL_BUNDLE)
+	 * and saved layouts, as erasing every setting does. Bundles copied there by hand stay. Works whether or not the UI
+	 * has started (then the default folder is used); the layouts in use stay until DuetScreen restarts.
+	 */
+	void eraseUserLayouts();
+
 	/** Problems found by the last load */
 	const std::vector<LoadIssue>& getIssues();
 

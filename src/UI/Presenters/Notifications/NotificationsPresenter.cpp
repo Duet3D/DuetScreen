@@ -12,8 +12,8 @@
 #include "utils/StorageHelper.h"
 #include "version.h"
 #include <algorithm>
-#include <cfloat>
 #include <climits>
+#include <cmath>
 #include <cstdlib>
 #include <regex>
 
@@ -62,7 +62,10 @@ namespace UI
 
 	NotificationsPresenter::NotificationsPresenter()
 		: XmlPresenter("notifications")
+		, m_alertPad(*this, "alert.pad")
 	{
+		// OK only for a number within the alert's limits
+		m_alertPad.setOnChange([this] { m_alertOk.set(m_alertPad.confirmable() ? Usable : Disabled); });
 		m_timer = lv_timer_create(tickCb, TICK_MS, this);
 		lv_timer_pause(m_timer);
 
@@ -93,18 +96,23 @@ namespace UI
 			   [this](const Xml::ActionArgs&) { m_updateOpen.set(0); });
 
 		action("alert.ok",
-			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it",
+			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it; nothing "
+			   "while OK can't be used (what is typed isn't valid), e.g. from the keyboard's OK key",
 			   [this](const Xml::ActionArgs&)
 			   {
+				   if (m_alertOk.get() != Usable)
+				   {
+					   return;
+				   }
 				   const uint32_t seq = m_alert.seq;
 				   switch (m_alert.mode)
 				   {
 				   case OM::Alert::Mode::NumberInt:
-					   Xml::Services::sendGcode(fmt::format("M292 R{{{:d}}} S{:d}", std::atoi(m_input.c_str()), seq));
+					   Xml::Services::sendGcode(fmt::format(
+						   "M292 R{{{:d}}} S{:d}", static_cast<int32_t>(std::lround(m_alertPad.value())), seq));
 					   break;
 				   case OM::Alert::Mode::NumberFloat:
-					   Xml::Services::sendGcode(
-						   fmt::format("M292 R{{{:g}}} S{:d}", static_cast<float>(std::atof(m_input.c_str())), seq));
+					   Xml::Services::sendGcode(fmt::format("M292 R{{{:g}}} S{:d}", m_alertPad.value(), seq));
 					   break;
 				   case OM::Alert::Mode::Text:
 				   {
@@ -152,15 +160,16 @@ namespace UI
 				   }
 				   Xml::Services::sendGcode(fmt::format("M120\nG91\nG1 {:c}{:g} F300\nM121", row->letter, *distance));
 			   });
-		action(
-			"alert.input",
-			"Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok`",
-			[this](const Xml::ActionArgs& args) { validateInput(args.text()); });
-		action("alert.keyboard",
-			   "Set `alert.keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away",
-			   [this](const Xml::ActionArgs& args) { m_alertKeyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
+		action("alert.input",
+			   "The text edited (`value_changed` on its text box): keep it, and set `alert.warning` and `alert.ok`",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   // Kept in the subject too, so the next alert's text replaces it
+				   m_alertInput.set(args.text());
+				   validateInput(args.text());
+			   });
 		action("alert.dismissed",
-			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_modal>`",
+			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>`",
 			   [this](const Xml::ActionArgs&) { closeAlert(); });
 	}
 
@@ -197,14 +206,11 @@ namespace UI
 		f.field("alert.choices_shown", m_alertChoicesShown, "1 if choices are offered");
 		f.list("alert.axes", m_alertAxes, "The axes the user may jog, each with `label` and `homed`");
 		f.field("alert.axes_shown", m_alertAxesShown, "1 if there are axes to jog");
-		f.field("alert.input_shown", m_alertInputShown, "1 if a value is asked for");
-		f.field("alert.input", m_alertInput, "The value to start with");
-		f.field("alert.accepted_chars", m_alertAccepted, "Characters the value may contain; empty for any");
-		f.field("alert.keyboard_mode", m_alertKeyboardMode, "\"number\" or \"text\"");
-		f.field("alert.min", m_alertMin, "Lower limit shown beside the value; empty if none");
-		f.field("alert.max", m_alertMax, "Upper limit shown beside the value; empty if none");
-		f.field("alert.warning", m_alertWarning, "Why the value isn't valid; empty if it is");
-		f.field("alert.keyboard", m_alertKeyboard, "1 while the keyboard is up, so the alert moves out of its way");
+		f.field("alert.text_shown", m_alertTextShown, "1 if text is asked for, typed on the keyboard");
+		f.field("alert.input", m_alertInput, "The text to start with");
+		f.field("alert.pad_shown", m_alertPadShown, "1 if a number is asked for, typed on the pad (`alert.pad`)");
+		m_alertPad.fields(f);
+		f.field("alert.warning", m_alertWarning, "The length the text must be, while it isn't; empty once it is");
 		f.field("alert.progress", m_alertProgress, "Time left before the alert closes itself, 0-100");
 		f.field("alert.progress_shown", m_alertProgressShown, "1 if the alert closes itself");
 	}
@@ -329,53 +335,36 @@ namespace UI
 							[&](AlertChoiceRow& row, size_t i) { row.text.set(alert.choices[i].c_str()); });
 		m_alertChoicesShown.set(alert.mode == Mode::Choices ? 1 : 0);
 
-		// A value to type
-		m_alertInputShown.set(input ? 1 : 0);
+		// A number to type on the pad, or text on the keyboard
 		m_alertWarning.set("");
-		m_alertKeyboard.set(0);
-		m_alertMin.set("");
-		m_alertMax.set("");
-		std::string value;
+		m_alertPadShown.set(alert.mode == Mode::NumberInt || alert.mode == Mode::NumberFloat ? 1 : 0);
+		m_alertTextShown.set(alert.mode == Mode::Text ? 1 : 0);
 		switch (alert.mode)
 		{
 		case Mode::NumberInt:
-			m_alertAccepted.set("+-0123456789");
-			m_alertKeyboardMode.set("number");
-			if (alert.limits.numberInt.min > INT32_MIN)
-			{
-				m_alertMin.set(fmt::format("{:d}", alert.limits.numberInt.min));
-			}
-			if (alert.limits.numberInt.max < INT32_MAX)
-			{
-				m_alertMax.set(fmt::format("{:d}", alert.limits.numberInt.max));
-			}
-			value = fmt::format("{:d}", alert.limits.numberInt.valueDefault);
-			break;
-		case Mode::NumberFloat:
-			m_alertAccepted.set("+-0123456789.");
-			m_alertKeyboardMode.set("number");
-			if (alert.limits.numberFloat.min > -FLT_MAX)
-			{
-				m_alertMin.set(fmt::format("{:g}", alert.limits.numberFloat.min));
-			}
-			if (alert.limits.numberFloat.max < FLT_MAX)
-			{
-				m_alertMax.set(fmt::format("{:g}", alert.limits.numberFloat.max));
-			}
-			value = fmt::format("{:.1f}", alert.limits.numberFloat.valueDefault);
-			break;
-		case Mode::Text:
-			m_alertAccepted.set("");
-			m_alertKeyboardMode.set("text");
-			value = alert.limits.text.valueDefault.c_str();
-			break;
-		default:
+		{
+			const auto& limits = alert.limits.numberInt;
+			m_alertPad.askNumber(static_cast<float>(limits.min),
+								 static_cast<float>(limits.max),
+								 static_cast<float>(limits.valueDefault),
+								 true);
 			break;
 		}
-		m_alertInput.set(value);
-		if (input)
+		case Mode::NumberFloat:
 		{
+			const auto& limits = alert.limits.numberFloat;
+			m_alertPad.askNumber(limits.min, limits.max, limits.valueDefault);
+			break;
+		}
+		case Mode::Text:
+		{
+			const std::string value = alert.limits.text.valueDefault.c_str();
+			m_alertInput.set(value);
 			validateInput(value);
+			break;
+		}
+		default:
+			break;
 		}
 
 		// Axes to jog
@@ -414,7 +403,6 @@ namespace UI
 	void NotificationsPresenter::closeAlert()
 	{
 		m_alertCountdown = {};
-		m_alertKeyboard.set(0);
 		m_alertOpen.set(0);
 		showFirstResponse();
 	}
@@ -422,39 +410,20 @@ namespace UI
 	void NotificationsPresenter::validateInput(std::string_view text)
 	{
 		m_input = text;
-		using Mode = OM::Alert::Mode;
-		bool valid = true;
-		std::string warning;
-		switch (m_alert.mode)
+		const auto& limits = m_alert.limits.text;
+		const auto length = static_cast<int32_t>(m_input.length());
+		const bool valid = length >= limits.min && length <= limits.max;
+		// What it takes, while it isn't met: a limit of 0 or INT32_MAX is none
+		const bool hasMin = limits.min > 0;
+		const bool hasMax = limits.max < INT32_MAX;
+		std::string needed;
+		if (!valid)
 		{
-		case Mode::NumberInt:
-		{
-			const auto& limits = m_alert.limits.numberInt;
-			const int value = std::atoi(m_input.c_str());
-			valid = value >= limits.min && value <= limits.max;
-			warning = _("msgbox.warning_int_range", limits.min, limits.max);
-			break;
+			needed = hasMin && hasMax ? _("msgbox.text_length_range", limits.min, limits.max)
+					 : hasMin		  ? _("msgbox.text_length_min", limits.min)
+									  : _("msgbox.text_length_max", limits.max);
 		}
-		case Mode::NumberFloat:
-		{
-			const auto& limits = m_alert.limits.numberFloat;
-			const auto value = static_cast<float>(std::atof(m_input.c_str()));
-			valid = value >= limits.min && value <= limits.max;
-			warning = _("msgbox.warning_float_range", limits.min, limits.max);
-			break;
-		}
-		case Mode::Text:
-		{
-			const auto& limits = m_alert.limits.text;
-			const auto length = static_cast<int32_t>(m_input.length());
-			valid = length >= limits.min && length <= limits.max;
-			warning = _("msgbox.warning_text_length", limits.min, limits.max);
-			break;
-		}
-		default:
-			break;
-		}
-		m_alertWarning.set(valid ? std::string() : warning);
+		m_alertWarning.set(needed);
 		m_alertOk.set(valid ? Usable : Disabled);
 	}
 

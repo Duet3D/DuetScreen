@@ -1,144 +1,97 @@
 <!--
   Messages over every screen: responses from the Duet, M291 alerts, and firmware update prompts. An invisible layer
-  covering the screen that only takes touches where a message is showing; the alert and update prompt dim the whole
-  screen behind them.
+  covering the screen that only takes touches where a response is showing. The alert and the update prompt are
+  alerts on the dialog surface: shown before any dialog the user has open, which waits until they are answered.
 
   Fields and actions: src/UI/Presenters/Notifications/NotificationsPresenter.h
 -->
 <component presenter="notifications">
-	<styles>
-		<!-- Out of the on-screen keyboard's way -->
-		<style name="above_keyboard" translate_y="5" max_height="45%"/>
-	</styles>
-
 	<view extends="lv_obj" width="100%" height="100%" floating="true" clickable="false" scrollable="false">
 		<style name="pad_zero"/>
 
-		<!-- M291 alert -->
-		<ds_modal name="alert" in_place="true" blocking="true" bind_open="presenter.alert.open" width="70%" height="content"
-				  align="top_mid" style_max_height="70%" flex_flow="column">
-			<bind_style name="above_keyboard" subject="presenter.alert.keyboard" ref_value="1"/>
+		<!-- M291 alert: it must be answered (or closes itself), so it is blocking -->
+		<ds_dialog name="alert" alert="true" blocking="true" bind_open="presenter.alert.open"
+				   bind_title="presenter.alert.title" flex_flow="column" style_pad_row="#pad"
+				   style_flex_cross_place="center">
 			<action trigger="dismissed" name="presenter.alert.dismissed"/>
 
-			<lv_obj name="header" width="100%" height="content" flex_flow="row">
-				<style name="bg_color_header"/>
-				<style name="text_header"/>
-				<lv_label name="title" bind_text="presenter.alert.title"/>
+			<lv_label name="text" bind_text="presenter.alert.text" width="100%" style_text_align="center">
+				<bind_flag_if_eq subject="presenter.alert.text" flag="hidden" ref_value=""/>
+			</lv_label>
+
+			<!-- A number to type, on the pad -->
+			<numpad name="pad" pad="alert.pad">
+				<bind_flag_if_eq subject="presenter.alert.pad_shown" flag="hidden" ref_value="0"/>
+			</numpad>
+
+			<!-- Text to type, on the keyboard -->
+			<lv_obj name="text_input" width="100%" height="content" flex_flow="column" scrollable="false">
+				<style name="pad_zero"/>
+				<bind_flag_if_eq subject="presenter.alert.text_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" width="100%">
+					<action trigger="value_changed" name="presenter.alert.input"/>
+					<!-- The keyboard's OK key answers, as OK does -->
+					<action trigger="ready" name="presenter.alert.ok"/>
+				</ds_textarea>
+				<!-- The length it must be, while it isn't -->
+				<lv_label name="warning_text" bind_text="presenter.alert.warning" width="100%">
+					<style name="text_muted"/>
+					<bind_flag_if_eq subject="presenter.alert.warning" flag="hidden" ref_value=""/>
+				</lv_label>
 			</lv_obj>
 
-			<lv_obj name="body" width="100%" height="content" flex_flow="column">
-				<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
-					<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
-							style_flex_main_place="start" style_flex_cross_place="center"
-							style_flex_track_place="center">
-						<lv_label name="text" bind_text="presenter.alert.text" width="100%">
-							<bind_flag_if_eq subject="presenter.alert.text" flag="hidden" ref_value=""/>
-						</lv_label>
-					</lv_obj>
-				</lv_obj>
+			<ds_list name="axes" list="presenter.alert.axes" item="notifications_alert_axis" width="100%" height="content"
+					 flex_flow="column">
+				<style name="pad_zero"/>
+				<bind_flag_if_eq subject="presenter.alert.axes_shown" flag="hidden" ref_value="0"/>
+			</ds_list>
 
-				<!-- A value to type, with its limits and what is wrong with it -->
-				<lv_obj name="input_cont" width="100%" height="content" style_layout="grid"
-						style_grid_column_dsc_array="fr(1) fr(3) fr(1)" style_grid_row_dsc_array="content content">
-					<bind_flag_if_eq subject="presenter.alert.input_shown" flag="hidden" ref_value="0"/>
-					<lv_label name="warning_text" bind_text="presenter.alert.warning" style_text_align="center"
-							  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-							  style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
-						<bind_flag_if_eq subject="presenter.alert.warning" flag="hidden" ref_value=""/>
-					</lv_label>
-					<lv_label name="min_text" bind_text="presenter.alert.min" style_text_align="center"
-							  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-							  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-						<bind_flag_if_eq subject="presenter.alert.min" flag="hidden" ref_value=""/>
-					</lv_label>
-					<lv_label name="max_text" bind_text="presenter.alert.max" style_text_align="center"
-							  style_grid_cell_column_pos="2" style_grid_cell_x_align="stretch"
-							  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-						<bind_flag_if_eq subject="presenter.alert.max" flag="hidden" ref_value=""/>
-					</lv_label>
-					<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input"
-								 bind_accepted_chars="presenter.alert.accepted_chars" bind_keyboard_mode="presenter.alert.keyboard_mode"
-								 style_text_align="center"
-								 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-								 style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-						<style name="pad_zero"/>
-						<action trigger="value_changed" name="presenter.alert.input"/>
-						<action trigger="focused" name="presenter.alert.keyboard" arg="1"/>
-						<action trigger="defocused" name="presenter.alert.keyboard" arg="0"/>
-						<action trigger="ready" name="presenter.alert.keyboard" arg="0"/>
-					</ds_textarea>
-				</lv_obj>
+			<ds_list name="choices" list="presenter.alert.choices" item="notifications_alert_choice" width="100%"
+					 height="content" flex_flow="row_wrap">
+				<style name="pad_zero"/>
+				<bind_flag_if_eq subject="presenter.alert.choices_shown" flag="hidden" ref_value="0"/>
+			</ds_list>
 
-				<lv_obj name="axis_jog_list" width="100%" height="content" flex_flow="column">
-					<bind_flag_if_eq subject="presenter.alert.axes_shown" flag="hidden" ref_value="0"/>
-					<ds_list name="list" list="presenter.alert.axes" item="notifications_alert_axis" width="100%" height="content"
-							 flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start"
-							 style_flex_track_place="start"/>
-				</lv_obj>
+			<!-- Time left before it closes itself -->
+			<lv_bar name="progress" bind_value="presenter.alert.progress" width="100%" height="5">
+				<bind_flag_if_eq subject="presenter.alert.progress_shown" flag="hidden" ref_value="0"/>
+			</lv_bar>
 
-				<lv_obj name="choices_list" width="100%" height="content" flex_flow="column">
-					<bind_flag_if_eq subject="presenter.alert.choices_shown" flag="hidden" ref_value="0"/>
-					<ds_list name="list" list="presenter.alert.choices" item="notifications_alert_choice" width="100%" height="content"
-							 flex_flow="row" style_flex_main_place="start" style_flex_cross_place="start"
-							 style_flex_track_place="start"/>
-				</lv_obj>
-			</lv_obj>
-
-			<lv_obj name="pad" width="100%" flex_grow="1"/>
-
-			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
+			<ds_dialog_footer name="footer">
 				<bind_flag_if_eq subject="presenter.alert.footer_shown" flag="hidden" ref_value="0"/>
-				<ds_button name="cancel" translation_tag="tr.common.cancel" height="content" flex_grow="1">
-					<style name="action_btn"/>
+				<ds_button name="cancel" translation_tag="tr.common.cancel">
+					<style name="dialog_button"/>
 					<bind_flag_if_eq subject="presenter.alert.cancel" flag="hidden" ref_value="0"/>
 					<action trigger="clicked" name="presenter.alert.cancel"/>
 				</ds_button>
-				<ds_button name="ok" bind_text="presenter.alert.ok_text" height="content" flex_grow="1">
+				<ds_button name="ok" bind_text="presenter.alert.ok_text">
+					<style name="dialog_button"/>
 					<style name="action_btn"/>
 					<bind_flag_if_eq subject="presenter.alert.ok" flag="hidden" ref_value="0"/>
 					<bind_state_if_eq subject="presenter.alert.ok" state="disabled" ref_value="1"/>
 					<action trigger="clicked" name="presenter.alert.ok"/>
 				</ds_button>
-			</lv_obj>
-
-			<lv_bar name="progress" bind_value="presenter.alert.progress" width="100%" height="5">
-				<bind_flag_if_eq subject="presenter.alert.progress_shown" flag="hidden" ref_value="0"/>
-			</lv_bar>
-		</ds_modal>
+			</ds_dialog_footer>
+		</ds_dialog>
 
 		<!-- An update to install, or how one went -->
-		<ds_modal name="update_prompt" in_place="true" bind_open="presenter.update.open" width="70%" height="content"
-				  style_max_height="70%" flex_flow="column">
+		<ds_dialog name="update_prompt" alert="true" bind_open="presenter.update.open" bind_title="presenter.update.title"
+				   flex_flow="column" style_pad_row="#pad">
 			<action trigger="dismissed" name="presenter.update.close"/>
-
-			<lv_obj name="header" width="100%" height="content" flex_flow="row">
-				<style name="bg_color_header"/>
-				<style name="text_header"/>
-				<lv_label name="title" bind_text="presenter.update.title"/>
-			</lv_obj>
-
-			<lv_obj name="body" width="100%" height="content" flex_flow="column">
-				<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
-					<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
-							style_flex_main_place="start" style_flex_cross_place="center"
-							style_flex_track_place="center">
-						<lv_label name="text" bind_text="presenter.update.text" width="100%"/>
-					</lv_obj>
-				</lv_obj>
-			</lv_obj>
-
-			<lv_obj name="pad" width="100%" flex_grow="1"/>
-
-			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
-				<ds_button name="cancel" translation_tag="tr.message.update_cancel" height="content" flex_grow="1">
+			<lv_label name="text" bind_text="presenter.update.text" width="100%" style_text_align="center"/>
+			<ds_dialog_footer name="footer">
+				<ds_button name="cancel" translation_tag="tr.message.update_cancel">
+					<style name="dialog_button"/>
 					<bind_flag_if_eq subject="presenter.update.can_cancel" flag="hidden" ref_value="0"/>
 					<action trigger="clicked" name="presenter.update.close"/>
 				</ds_button>
-				<ds_button name="ok" bind_text="presenter.update.ok_text" height="content" flex_grow="1">
+				<ds_button name="ok" bind_text="presenter.update.ok_text">
+					<style name="dialog_button"/>
+					<style name="action_btn"/>
 					<action trigger="clicked" name="presenter.update.confirm"/>
 				</ds_button>
-			</lv_obj>
-		</ds_modal>
+			</ds_dialog_footer>
+		</ds_dialog>
 
 		<!-- The response showing: it closes itself as its bar runs down -->
 		<lv_obj name="response" width="70%" height="content" floating="true" align="top_mid" y="2"

@@ -31,8 +31,10 @@ namespace UI::Xml
 			 .description =
 				 "A line graph of a history, with a legend whose entries show each series' colour, name and latest "
 				 "value, and show and hide it when tapped. Series are coloured by position from the theme's series "
-				 "colours (#series_1, #series_2, …), which follow the theme. The graph starts with what was recorded "
-				 "before it was built, and follows series being added, removed and renamed.",
+				 "colours (#series_1, #series_2, …), which follow the theme. Whether a series is drawn is its history "
+				 "row's `shown`, so every graph of a history, and every `<ds_graph_key>` for it, agree. The graph "
+				 "starts with what was recorded before it was built, and follows series being added, removed and "
+				 "renamed.",
 			 .example =
 				 R"(<ds_graph history="source.temperature.temperatures" seconds="60" y_min="0" y_max="300"
 		  bind_y_max="source.temperature.limit" width="400" height="250"/>)",
@@ -178,15 +180,32 @@ namespace UI::Xml
 		}
 	}
 
+	std::optional<size_t> DsGraph::seriesOf(const lv_observer_t* observer) const
+	{
+		const auto it =
+			std::find_if(m_rows.begin(),
+						 m_rows.end(),
+						 [observer](const RowObservers& row) { return row.name == observer || row.shown == observer; });
+		return it == m_rows.end() ? std::nullopt : std::optional(static_cast<size_t>(it - m_rows.begin()));
+	}
+
 	void DsGraph::nameObserverCb(lv_observer_t* observer, lv_subject_t* subject)
 	{
 		auto* graph = static_cast<DsGraph*>(lv_observer_get_user_data(observer));
-		const auto& observers = graph->m_nameObservers;
-		const auto it = std::find(observers.begin(), observers.end(), observer);
 		// Not yet in the list while it is being added; addSeries sets the name itself
-		if (it != observers.end())
+		if (const auto index = graph->seriesOf(observer))
 		{
-			graph->updateSeriesName(static_cast<size_t>(it - observers.begin()), lv_subject_get_string(subject));
+			graph->updateSeriesName(*index, lv_subject_get_string(subject));
+		}
+	}
+
+	void DsGraph::shownObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* graph = static_cast<DsGraph*>(lv_observer_get_user_data(observer));
+		// Not yet in the list while it is being added; addSeries shows or hides it itself
+		if (const auto index = graph->seriesOf(observer))
+		{
+			graph->showSeries(*index, lv_subject_get_int(subject) != 0);
 		}
 	}
 
@@ -244,18 +263,31 @@ namespace UI::Xml
 			std::for_each(values.begin() + static_cast<std::ptrdiff_t>(skip),
 						  values.end(),
 						  [&](int32_t value) { addData(i, value); });
-			m_nameObservers.push_back(lv_subject_add_observer(row.name.raw(), nameObserverCb, this));
+			showSeries(i, row.shown.get() != 0);
+			m_rows.push_back({.name = lv_subject_add_observer(row.name.raw(), nameObserverCb, this),
+							  .shown = lv_subject_add_observer(row.shown.raw(), shownObserverCb, this)});
 		}
 	}
 
 	void DsGraph::removeSeries(size_t count)
 	{
-		while (m_nameObservers.size() > count)
+		while (m_rows.size() > count)
 		{
-			lv_observer_remove(m_nameObservers.back());
-			m_nameObservers.pop_back();
+			lv_observer_remove(m_rows.back().name);
+			lv_observer_remove(m_rows.back().shown);
+			m_rows.pop_back();
 		}
 		setSeriesCount(count);
+	}
+
+	void DsGraph::onLegendClicked(size_t index)
+	{
+		if (m_history == nullptr || index >= m_history->size())
+		{
+			return;
+		}
+		IntSubject& shown = m_history->row(index).shown;
+		shown.set(shown.get() != 0 ? 0 : 1);
 	}
 
 	void DsGraph::forgetHistory()

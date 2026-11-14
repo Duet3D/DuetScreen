@@ -1,63 +1,114 @@
 <!--
-  The Display settings tab: the theme, font and icons, a preview of the theme (settings_theme_preview.xml), animations and the
-  screen's rotation. Each is applied as soon as it is changed. First, a button to customise the home screen (the global
-  action customise.start, src/UI/Presenters/Customise/CustomisePresenter.h).
+  The Display settings page: the screen (brightness, screensaver, rotation, animations), its appearance (the theme,
+  dark mode, the way to the theme's colours, the font and icons) and customising the home screen (the global action
+  customise.start, src/UI/Presenters/Customise/CustomisePresenter.h). The colours are a page of their own
+  (settings_theme_preview.xml), opened in place. Each setting is a row (ds_setting) in a group, applied as soon as it is
+  changed.
 
-  Fields and actions: src/UI/Presenters/Settings/DisplaySettingsPresenter.h
+  Fields and actions: src/UI/Presenters/Settings/DisplaySettingsPresenter.h. Numbers are typed on the shared number pad.
 -->
 <component presenter="settings_display">
-	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"
-		  style_grid_column_dsc_array="content fr(1)"
-		  style_grid_row_dsc_array="content content content content content content content">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
+		<style name="setting_page"/>
 
-		<lv_label name="row_label_0" translation_tag="tr.settings.customise"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<ds_button name="customise" translation_tag="tr.settings.customise_start"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-				   style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
-			<action trigger="clicked" name="actions.customise.start"/>
-		</ds_button>
+		<ds_setting_group name="screen" title_tag="tr.settings.groups.screen">
+			<ds_setting name="brightness" title_tag="tr.settings.brightness">
+				<ds_slider name="slider" label_tag="tr.settings.brightness" label_shown="false" numberpad="true" min="0"
+						   max="100" decimals="0" unit="%" bind_value="presenter.brightness" send="change" width="55%"
+						   height="content">
+					<action trigger="value_confirmed" name="presenter.settings.brightness"/>
+				</ds_slider>
+			</ds_setting>
+			<ds_setting name="screensaver_timeout" title_tag="tr.settings.screensaver_timeout"
+						hint_tag="tr.settings.hints.screensaver">
+				<ds_slider name="slider" label_tag="tr.settings.screensaver_timeout" label_shown="false" numberpad="true"
+						   min="0" max="300" increment="10" decimals="0" unit="s" out_of_range="upper"
+						   bind_value="presenter.screensaver_timeout" width="55%" height="content">
+					<action trigger="value_confirmed" name="presenter.settings.screensaver_timeout"/>
+				</ds_slider>
+			</ds_setting>
+			<!-- One of a few: the chosen one is checked -->
+			<ds_setting name="screen_rotation" title_tag="tr.settings.screen_rotation">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<ds_button name="rotation_0" translation_tag="tr.settings.screen_rotation_options.rotation_0">
+						<style name="setting_option"/>
+						<bind_state_if_eq subject="presenter.rotation" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="presenter.settings.rotation" arg="0"/>
+					</ds_button>
+					<ds_button name="rotation_180" translation_tag="tr.settings.screen_rotation_options.rotation_180">
+						<style name="setting_option"/>
+						<bind_state_if_eq subject="presenter.rotation" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="presenter.settings.rotation" arg="1"/>
+					</ds_button>
+				</lv_obj>
+			</ds_setting>
+			<ds_setting name="enable_animations" title_tag="tr.settings.enable_animations">
+				<ds_toggle name="switch">
+					<bind_state_if_eq subject="presenter.animations" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="presenter.settings.animations"/>
+				</ds_toggle>
+			</ds_setting>
+		</ds_setting_group>
 
-		<lv_label name="row_label_1" translation_tag="tr.settings.theme"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="theme" options="presenter.themes" selected="presenter.theme" action="presenter.settings.theme"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_2" translation_tag="tr.settings.font"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="font" options="presenter.fonts" selected="presenter.font" action="presenter.settings.font"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_3" translation_tag="tr.settings.icons"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="icons" options="presenter.icon_sets" selected="presenter.icon_set" action="presenter.settings.icon_set"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
+		<ds_setting_group name="appearance" title_tag="tr.settings.groups.appearance">
+			<ds_setting name="theme" title_tag="tr.settings.theme">
+				<ds_choice name="choice" title_tag="tr.settings.theme" bind_options="presenter.themes"
+						   bind_selected="presenter.theme">
+					<style name="setting_value"/>
+					<action trigger="value_confirmed" name="presenter.settings.theme"/>
+				</ds_choice>
+			</ds_setting>
+			<!-- For a theme whose palette can be changed -->
+			<ds_setting name="dark_mode" title_tag="tr.theme.dark_mode">
+				<bind_flag_if_eq subject="presenter.dark_shown" flag="hidden" ref_value="0"/>
+				<ds_toggle name="switch">
+					<bind_state_if_eq subject="presenter.dark" state="checked" ref_value="1"/>
+					<action trigger="value_changed" name="presenter.settings.dark"/>
+				</ds_toggle>
+			</ds_setting>
+			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
+				<!-- The theme's accents -->
+				<lv_obj name="swatches" width="content" height="content" flex_flow="row" clickable="false"
+						style_pad_all="0" style_pad_column="6" style_bg_opa="0" style_border_width="0">
+					<lv_obj name="primary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
+						<style name="border"/>
+						<bind_style_prop prop="bg_color" subject="presenter.primary_color"/>
+					</lv_obj>
+					<lv_obj name="secondary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
+						<style name="border"/>
+						<bind_style_prop prop="bg_color" subject="presenter.secondary_color"/>
+					</lv_obj>
+				</lv_obj>
+				<ds_button name="open" text="&#xF054;">
+					<style name="setting_value"/>
+					<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
+				</ds_button>
+			</ds_setting>
+			<ds_setting name="font" title_tag="tr.settings.font">
+				<ds_choice name="choice" title_tag="tr.settings.font" bind_options="presenter.fonts"
+						   bind_selected="presenter.font">
+					<style name="setting_value"/>
+					<action trigger="value_confirmed" name="presenter.settings.font"/>
+				</ds_choice>
+			</ds_setting>
+			<ds_setting name="icons" title_tag="tr.settings.icons">
+				<ds_choice name="choice" title_tag="tr.settings.icons" bind_options="presenter.icon_sets"
+						   bind_selected="presenter.icon_set">
+					<style name="setting_value"/>
+					<action trigger="value_confirmed" name="presenter.settings.icon_set"/>
+				</ds_choice>
+			</ds_setting>
+		</ds_setting_group>
 
-		<ds_view name="theme_preview" view="settings_theme_preview" shown="true" height="content"
-				 style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-				 style_grid_cell_row_pos="4" style_grid_cell_y_align="center"/>
-
-		<lv_label name="row_label_5" translation_tag="tr.settings.enable_animations"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
-		<ds_toggle name="enable_animations"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-				   style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
-			<bind_state_if_eq subject="presenter.animations" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="presenter.settings.animations"/>
-		</ds_toggle>
-		<lv_label name="row_label_6" translation_tag="tr.settings.screen_rotation"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="screen_rotation" options="presenter.rotations" selected="presenter.rotation" action="presenter.settings.rotation"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
-
+		<ds_setting_group name="home" title_tag="tr.settings.groups.home">
+			<ds_setting name="customise" title_tag="tr.settings.customise" hint_tag="tr.settings.hints.customise">
+				<ds_button name="start" translation_tag="tr.settings.customise_start">
+					<style name="setting_control"/>
+					<action trigger="clicked" name="actions.customise.start"/>
+				</ds_button>
+			</ds_setting>
+		</ds_setting_group>
 	</view>
 </component>

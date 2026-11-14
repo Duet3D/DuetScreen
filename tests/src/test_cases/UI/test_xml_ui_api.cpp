@@ -167,11 +167,9 @@ TEST_F(XmlUiApi, ReferenceIsUpToDate)
 	// when its scan, instant in simulation, finishes), so every picture is drawn with everything there
 	const auto settle = []
 	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 	};
 	// The pictures show the release firmware, as the Test preset builds it. A developer build shows more (developer
 	// settings, the console's shell), so its pictures differ and aren't compared; its Markdown is the same.
@@ -336,7 +334,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	// A component with a prop: the value given where it is used is checked there
 	std::ofstream(userDir / "test" / "components" / "lint_dialog.xml") << R"(<component>
 	<api><prop name="open" type="string"/></api>
-	<view extends="ds_modal" bind_open="$open">
+	<view extends="ds_dialog" bind_open="$open">
 		<lv_label bind_text="$missing_prop"/>
 	</view>
 </component>)";

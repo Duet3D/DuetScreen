@@ -7,13 +7,15 @@
 #include "Configuration.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
-#include "UI/Xml/Runtime/Services.h"
+#include "Storage.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "i18n/i18n.h"
+#include "utils/StorageHelper.h"
 
 namespace UI
 {
 	ConnectionSettingsPresenter::ConnectionSettingsPresenter()
-		: XmlPresenter("settings_connection")
+		: SettingsPresenter("settings_connection")
 	{
 		std::string methods;
 		for (const auto& method : Comm::duetCommunicationTypeNames)
@@ -54,37 +56,31 @@ namespace UI
 				   }
 				   showMethod();
 			   });
-		action("settings.usb_mode",
-			   "Use the USB-C port in the mode at the edited index of `usb_modes`",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   if (const auto value = args.value())
-				   {
-					   Comm::setUsbMode(Comm::UsbMode(static_cast<int>(*value)));
-					   m_usbMode.set(static_cast<int32_t>(*value));
-				   }
-			   });
-		action("settings.poll_interval",
-			   "Poll the Duet every edited value ms",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   if (const auto value = args.value())
-				   {
-					   m_pollInterval.set(static_cast<int32_t>(*value));
-					   Comm::DUET.SetPollInterval(std::chrono::milliseconds(static_cast<int32_t>(*value)));
-				   }
-			   });
+		setting("settings.usb_mode",
+				"Use the USB-C port in the mode at the edited index of `usb_modes`",
+				[this](float value)
+				{
+					Comm::setUsbMode(Comm::UsbMode(static_cast<int>(value)));
+					m_usbMode.set(static_cast<int32_t>(value));
+				});
+		setting("settings.poll_interval",
+				"Poll the Duet every edited value ms",
+				[this](float value)
+				{
+					m_pollInterval.set(static_cast<int32_t>(value));
+					Comm::DUET.SetPollInterval(std::chrono::milliseconds(static_cast<int32_t>(value)));
+				});
 		action("settings.duet_ip",
 			   "Ask for the Duet's IP address with the number pad, and use it",
 			   [this](const Xml::ActionArgs&)
 			   {
-				   Xml::Services::askText({.header = _("settings.duet_ip_address_prompt"),
-										   .text = std::string(m_ip.get()),
-										   .onConfirm = [this](std::string_view ip)
-										   {
-											   m_ip.set(ip);
-											   Comm::DUET.SetIPAddress(std::string(ip));
-										   }});
+				   Xml::Prompts::askText({.header = _("settings.duet_ip_address_prompt"),
+										  .text = std::string(m_ip.get()),
+										  .onConfirm = [this](std::string_view ip)
+										  {
+											  m_ip.set(ip);
+											  Comm::DUET.SetIPAddress(std::string(ip));
+										  }});
 			   });
 		action("settings.duet_password",
 			   "Use the text edited (e.g. a `<ds_textarea>`'s) as the Duet's password",
@@ -106,6 +102,9 @@ namespace UI
 		f.field("network_shown",
 				m_networkShown,
 				"1 if the Duet is reached over the network, so its IP address and password are shown");
+		f.field("advanced_shown",
+				m_advancedShown,
+				"1 if advanced settings are shown (the USB-C port's mode and the poll interval)");
 		f.field("duet_ip", m_ip, "The Duet's IP address");
 		f.field("duet_password", m_password, "The Duet's password");
 	}
@@ -114,6 +113,7 @@ namespace UI
 	{
 		showMethod();
 		m_pollInterval.set(static_cast<int32_t>(Comm::DUET.GetPollInterval().count()));
+		m_advancedShown.set(StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS) ? 1 : 0);
 		m_ip.set(Comm::DUET.GetIPAddress());
 		m_password.set(Comm::DUET.GetPassword());
 	}

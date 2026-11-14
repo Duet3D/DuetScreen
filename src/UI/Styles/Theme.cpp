@@ -749,6 +749,16 @@ namespace UI::Themes
 		return s_current.empty() ? nullptr : getThemeByName(s_current);
 	}
 
+	lv_color_t seriesColor(size_t index)
+	{
+		const Theme* theme = getCurrentTheme();
+		if (theme == nullptr)
+		{
+			return lv_color_white();
+		}
+		return theme->getColors().series[index % SERIES_COLOR_COUNT];
+	}
+
 	Theme* getTheme(size_t index)
 	{
 		if (index >= s_index.size())
@@ -793,6 +803,23 @@ namespace UI::Themes
 		}
 		LOG_ERROR("No current theme set");
 		return false;
+	}
+
+	bool changeCurrentPalette(const std::function<void(PaletteInputs&)>& change)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		Theme* theme = getCurrentTheme();
+		if (theme == nullptr || !theme->isCustomisable())
+		{
+			LOG_ERROR("The theme in use has a fixed palette");
+			return false;
+		}
+		PaletteInputs palette = theme->getPalette();
+		change(palette);
+		theme->setPalette(palette);
+		theme->setThemeActive();
+		return true;
 	}
 
 	std::vector<std::string_view> getThemeNames()

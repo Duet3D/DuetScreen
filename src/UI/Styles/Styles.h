@@ -101,7 +101,6 @@ namespace UI::Themes
 		Style bg_color_error; // Error background
 		Style bg_color_header; // Translucent header strip
 		Style bg_color_list_item; // List item background
-		Style bg_modal; // Translucent backdrop behind modals
 
 		/* Text */
 		Style text; // Body text
@@ -123,7 +122,6 @@ namespace UI::Themes
 		Style scrollbar_scrolled; // Scrollbars while scrolling
 		Style card; // Cards and panels
 		Style tab_card; // Tab page panels
-		Style modal; // Modal dialogs
 		Style btn; // Buttons
 		Style btn_checked; // Checked buttons
 
@@ -157,6 +155,7 @@ namespace UI::Themes
 		Style anim_fast; // Fast animation time
 
 		Style action_btn; // UI elements that perform actions on the Duet
+		Style danger_btn; // A button whose action can't be undone, such as erasing every setting
 		Style input; // Text inputs
 		Style long_press; // Long-press feedback
 		Style draggable; // Draggable widgets
@@ -285,8 +284,12 @@ namespace UI::Themes
 		Style estop;				 // Emergency stop button style
 
 		/* Files */
-		Style file; // File items
-		Style folder; // Folder items
+		Style file;		   // File items
+		Style folder;	   // Folder items: set apart from files
+		Style folder_icon; // A folder item's icon
+		Style file_crumb;		  // A folder in the path above the files, tapped to go back to it
+		Style file_crumb_current; // The open folder, last in the path: as tall as a file_crumb, so the path's height
+								  // doesn't change
 
 		/* Move */
 		Style unhomed; // Unhomed axes in the move view
@@ -307,6 +310,8 @@ namespace UI::Themes
 
 		/* Tabview */
 		Style tab_button;			 // Used in tabview tabs
+		Style tab_bar_side;			 // The panel of tabs down a side
+		Style tab_button_side;		 // A tab down a side, flat until it is the one selected
 
 		/* Slider */
 		Style slider_buttons;		 // Slider increment/decrement buttons
@@ -336,6 +341,43 @@ namespace UI::Themes
 		Style widget_value_large; // A widget's main value, in a regular-sized widget
 		Style widget_value_huge;  // A widget's main value, in an expanded widget
 		Style widget_detail;	  // Anything else a widget shows beside its value, e.g. a target
+
+		/* Dialogs (assets/ui/components/dialogs/dialog_host.xml) */
+		Style dialog;			  // The card, on top of the theme's card style
+		Style dialog_backdrop;	  // The dimmed backdrop; its padding is the room the card keeps from the edges
+		Style dialog_header;	  // The header: back button, titles, close button
+		Style dialog_title;		  // The step's title
+		Style dialog_from;		  // The title of the step it came from, under it
+		Style dialog_icon_button; // The back and close buttons
+		Style dialog_body;		  // Around the step's content
+		Style dialog_footer;	  // A row of a step's buttons, its main one last
+		Style dialog_button;	  // A button in that row
+		Style dialog_row;		  // A row of a list in a dialog (settings, choices): a rule under it
+		Style dialog_row_chosen;  // The value chosen in a list of choices
+
+		/* Settings: a page (setting_page) of groups (ds_setting_group) of rows (ds_setting) */
+		Style setting_page;		   // A page of settings, on top of the card: the room around and between its groups
+		Style setting_section;	   // A group: its title over its box
+		Style setting_group;	   // A group's box of rows: its background shows in the gaps between them, as rules
+		Style setting_group_title; // The title over a group's box
+		Style setting_group_danger; // A group whose actions can't be undone, on top of setting_group
+		Style setting_list;		   // Rows listed in a group's box (a ds_list), ruled as the box's own rows are
+		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
+		Style setting_title;	   // A row's title
+		Style setting_hint;		   // The line under a row's title that says more about it
+		Style setting_badge;	   // A word after a row's title saying what sort of setting it is, e.g. "Advanced"
+		Style setting_control;	   // A row's button: big enough to tap
+		Style setting_value;	   // A row's choice, or its way into more: the value and a chevron, plain on the row
+		Style setting_options;	   // One of a few options: the box the buttons are joined in
+		Style setting_option;	   // One of those buttons
+
+		/* The number pad (assets/ui/components/dialogs/dialog_number.xml) */
+		Style numpad;		   // The pad, and its grid of keys: the gaps between them
+		Style numpad_readout;  // The box showing what is typed, with the numbers that can be
+		Style numpad_value;	   // What is typed
+		Style numpad_unit;	   // The unit after it
+		Style numpad_key;	   // A key
+		Style numpad_key_side; // A key that edits rather than types: backspace, clear, the sign
 
 		/* Gauges */
 		Style gauge_arc;		// An arc gauge's track
@@ -382,6 +424,7 @@ namespace UI::Themes
 	struct Fonts
 	{
 		lv_font_t header;	// Headings
+		lv_font_t title;	// A name to read first, a step under a heading, e.g. a setting's or a category's
 		lv_font_t normal;	// Body text
 		lv_font_t emphasis; // Emphasised text
 		lv_font_t subdued;	// Secondary text
@@ -400,8 +443,9 @@ namespace UI::Themes
 	};
 
 	/** Every theme font, in the order themes list them */
-	inline constexpr std::array<FontRole, 8> FONT_ROLES = {{
+	inline constexpr std::array<FontRole, 9> FONT_ROLES = {{
 		{"header", "font_header", &Fonts::header},
+		{"title", "font_title", &Fonts::title},
 		{"normal", "font_normal", &Fonts::normal},
 		{"emphasis", "font_emphasis", &Fonts::emphasis},
 		{"subdued", "font_subdued", &Fonts::subdued},

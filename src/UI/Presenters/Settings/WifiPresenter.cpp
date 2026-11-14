@@ -9,88 +9,94 @@
 
 namespace UI
 {
+	namespace
+	{
+		/** How strong a signal is, from its level in dBm: 4 bars from -55, 3 from -65, 2 from -75, else 1 */
+		int bars(int32_t dbm)
+		{
+			return dbm >= -55 ? 4 : dbm >= -65 ? 3 : dbm >= -75 ? 2 : 1;
+		}
+
+		/** The translation keys of the signal's strength, by bars, from 1 */
+		constexpr const char* SIGNAL_WORDS[] = {"settings.network.signal_weak",
+												"settings.network.signal_fair",
+												"settings.network.signal_good",
+												"settings.network.signal_excellent"};
+	} // namespace
+
 	void WifiNetworkRow::fields(Xml::FieldVisitor& f)
 	{
 		f.field("ssid", ssid, "Network name");
-		f.field("signal", signal, "Signal level, e.g. \"75 dBm\"");
+		f.field("signal", signal, "How strong its signal is, e.g. \"Good (-61 dBm)\"");
+		f.field("signal_icon", signalIcon, "Its signal as bars: wifi_signal_1.png to wifi_signal_4.png");
+		f.field("state", state, "\"Connected\", \"Saved\" (joined before), or empty");
 		f.field("known", known, "1 if the screen has joined it before, so it can be forgotten");
 		f.field("connected", connected, "1 if the screen is on it");
-		f.field("connect_text", connectText, "\"Disconnect\" (connected), \"Connect\" (known) or \"Join\"");
+		f.field("secured", secured, "1 if joining it takes a password");
 	}
 
 	WifiPresenter::WifiPresenter()
 		: XmlPresenter("settings_wifi")
 	{
 		action("wifi.refresh", "Scan for networks now", [this](const Xml::ActionArgs&) { m_scanner.scanNow(); });
-		action("wifi.connect",
-			   "Disconnect from the network if on it, connect to it if known, else ask for its password to join it. "
-			   "From a row of `networks`.",
+		action("wifi.open",
+			   "Open the network in the dialog. From a row of `networks`.",
 			   [this](const Xml::ActionArgs& args)
 			   {
-				   const auto* row = networkOf(args);
-				   if (row == nullptr)
+				   if (const auto* row = args.row<WifiNetworkRow>())
 				   {
-					   return;
-				   }
-				   const std::string ssid(row->ssid.get());
-				   if (row->connected.get() != 0)
-				   {
-					   NetworkHelper::disconnect();
-					   m_status.set(_("settings.network.status_disconnected"));
-					   m_scanner.scanNow();
-				   }
-				   else if (row->known.get() != 0)
-				   {
-					   m_status.set(_("settings.network.status_connecting", ssid));
-					   m_scanner.connect(ssid);
+					   open(*row);
 				   }
 				   else
 				   {
-					   m_joining = ssid;
-					   m_password.set("");
-					   m_passwordTitle.set(_("settings.network.password_for", ssid));
-					   m_passwordOpen.set(1);
+					   LOG_WARN("{:s} must come from a networks row", args.name);
 				   }
 			   });
-		action("wifi.forget",
-			   "Forget the network. From a row of `networks`.",
-			   [this](const Xml::ActionArgs& args)
+		action("wifi.connect",
+			   "Connect to the network open, which the screen has joined before",
+			   [this](const Xml::ActionArgs&) { connect(std::string(m_ssid.get()), std::nullopt); });
+		action(
+			"wifi.join",
+			"Join the network open, with the password typed if it is secured",
+			[this](const Xml::ActionArgs&)
+			{ connect(std::string(m_ssid.get()), m_passwordShown.get() != 0 ? std::string(m_password.get()) : ""); });
+		action("wifi.disconnect",
+			   "Leave the network open",
+			   [this](const Xml::ActionArgs&)
 			   {
-				   if (const auto* row = networkOf(args))
-				   {
-					   NetworkHelper::forgetNetwork(row->ssid.get());
-					   m_scanner.scanNow();
-				   }
+				   m_open.set(0);
+				   NetworkHelper::disconnect();
+				   m_status.set(_("settings.network.status_disconnected"));
+				   m_scanner.scanNow();
+			   });
+		action("wifi.forget",
+			   "Forget the network open",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_open.set(0);
+				   NetworkHelper::forgetNetwork(m_ssid.get());
+				   m_scanner.scanNow();
 			   });
 		action("wifi.password",
 			   "Store the text edited (`value_changed` on the password's text box) as the password",
 			   [this](const Xml::ActionArgs& args) { m_password.set(args.text()); });
-		action("wifi.join",
-			   "Join the network asked about with the password typed",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_passwordOpen.set(0);
-				   m_status.set(_("settings.network.status_connecting", m_joining));
-				   m_scanner.connect(m_joining, std::string(m_password.get()));
-			   });
-		action("wifi.close_password",
-			   "Stop asking for a password",
-			   [this](const Xml::ActionArgs&) { m_passwordOpen.set(0); });
-		action("wifi.keyboard",
-			   "Set `keyboard` to `arg`, 1 when the keyboard comes up and 0 when it goes away",
-			   [this](const Xml::ActionArgs& args) { m_keyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
-		m_ip.set(_("settings.network.ip_address", "-"));
+		action("wifi.close", "Close the network's dialog", [this](const Xml::ActionArgs&) { m_open.set(0); });
+		m_ip.set("-");
 	}
 
 	void WifiPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("ip", m_ip, "E.g. \"IP Address: 192.168.1.100\"");
+		f.field("ip", m_ip, "The screen's IP address, or \"-\"");
 		f.field("status", m_status, "How the last connection attempt went, or empty");
 		f.list("networks", m_networks, "The networks found");
-		f.field("password_open", m_passwordOpen, "1 while asking for a network's password");
-		f.field("password_title", m_passwordTitle, "The password question");
-		f.field("password", m_password, "The password typed");
-		f.field("keyboard", m_keyboard, "1 while the keyboard is up, so the question moves out of its way");
+		f.field("network.open", m_open, "1 while a network is open in the dialog");
+		f.field("network.ssid", m_ssid, "The network open");
+		f.field("network.signal", m_signal, "Its signal, e.g. \"Good (-61 dBm)\"");
+		f.field("network.security", m_security, "\"Secured\" or \"Open\"");
+		f.field("network.known", m_known, "1 if the screen has joined it before: it can be connected to or forgotten");
+		f.field("network.connected", m_connected, "1 if the screen is on it: it can be left");
+		f.field("network.password_shown", m_passwordShown, "1 if joining it asks for a password");
+		f.field("network.password", m_password, "The password typed");
 	}
 
 	void WifiPresenter::onInit()
@@ -115,19 +121,23 @@ namespace UI
 		ZoneScoped;
 		const std::vector<WiFiNetwork> networks = m_scanner.networks();
 		UI_LOCK();
-		m_networks.sync(networks.size(),
-						[&networks](WifiNetworkRow& row, size_t i)
-						{
-							const WiFiNetwork& network = networks[i];
-							row.ssid.set(network.ssid);
-							row.signal.set(fmt::format("{:d} dBm", network.signal_level));
-							row.known.set(network.isKnown() ? 1 : 0);
-							row.connected.set(network.connected ? 1 : 0);
-							row.connectText.set(network.connected	? _("settings.network.disconnect")
-												: network.isKnown() ? _("settings.network.connect")
-																	: _("settings.network.join"));
-						});
-		m_ip.set(_("settings.network.ip_address", NetworkHelper::getIpAddress()));
+		m_networks.sync(
+			networks.size(),
+			[&networks](WifiNetworkRow& row, size_t i)
+			{
+				const WiFiNetwork& network = networks[i];
+				const int strength = bars(network.signal_level);
+				row.ssid.set(network.ssid);
+				row.signal.set(_("settings.network.signal_value", _(SIGNAL_WORDS[strength - 1]), network.signal_level));
+				row.signalIcon.set(fmt::format("wifi_signal_{:d}.png", strength));
+				row.state.set(network.connected	  ? _("settings.network.connected")
+							  : network.isKnown() ? _("settings.network.saved")
+												  : std::string());
+				row.known.set(network.isKnown() ? 1 : 0);
+				row.connected.set(network.connected ? 1 : 0);
+				row.secured.set(network.secured ? 1 : 0);
+			});
+		m_ip.set(NetworkHelper::getIpAddress());
 	}
 
 	void WifiPresenter::showResult(const std::string& ssid, NetworkHelper::ConnectResult result)
@@ -153,13 +163,22 @@ namespace UI
 		}
 	}
 
-	const WifiNetworkRow* WifiPresenter::networkOf(const Xml::ActionArgs& args)
+	void WifiPresenter::open(const WifiNetworkRow& row)
 	{
-		const auto* row = args.row<WifiNetworkRow>();
-		if (row == nullptr)
-		{
-			LOG_WARN("{:s} must come from a networks row", args.name);
-		}
-		return row;
+		m_ssid.set(row.ssid.get());
+		m_signal.set(row.signal.get());
+		m_security.set(row.secured.get() != 0 ? _("settings.network.secured") : _("settings.network.open"));
+		m_known.set(row.known.get());
+		m_connected.set(row.connected.get());
+		m_passwordShown.set(row.known.get() == 0 && row.secured.get() != 0 ? 1 : 0);
+		m_password.set("");
+		m_open.set(1);
+	}
+
+	void WifiPresenter::connect(const std::string& ssid, std::optional<std::string> password)
+	{
+		m_open.set(0);
+		m_status.set(_("settings.network.status_connecting", ssid));
+		m_scanner.connect(ssid, std::move(password));
 	}
 } // namespace UI

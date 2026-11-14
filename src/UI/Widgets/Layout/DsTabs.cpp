@@ -7,6 +7,7 @@
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
+#include "src/xml/lv_xml_base_types.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
 namespace UI::Xml
@@ -45,8 +46,9 @@ namespace UI::Xml
 	{
 		Widgets::add({.name = "ds_tabs",
 					  .extends = "lv_obj",
-					  .description = "A row of tab buttons over the selected tab's content. Each tab is a "
-									 "`<ds_tabs-tab>` inside it; the first starts selected.",
+					  .description = "Tab buttons beside the selected tab's content: a row over it, or a column down "
+									 "its side (`side`). Each tab is a `<ds_tabs-tab>` inside it; the first starts "
+									 "selected.",
 					  .example = R"(<ds_tabs width="100%" height="200">
 	<ds_tabs-tab name="macros" title_tag="tr.file.macros">
 		<lv_label text="The first tab's content"/>
@@ -54,7 +56,10 @@ namespace UI::Xml
 	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="source.machine.job_active">
 		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
-</ds_tabs>)"},
+</ds_tabs>)",
+					  .attributes = {{"side",
+									  "Where the tab buttons are: top (the default), bottom, left or right. Down a "
+									  "side, each tab is a row as wide as the column, its icon before its title"}}},
 					 xmlCreate,
 					 xmlApply);
 		Widgets::add(
@@ -63,6 +68,11 @@ namespace UI::Xml
 			 .description = "One tab of a `<ds_tabs>`, written inside it. Its content is the tab's page; the "
 							"lv_obj attributes apply to that page.",
 			 .attributes = {{"title", "The tab button's text, if there is no `title_tag`"},
+							{"icon",
+							 "Icon file from the icon set shown on the tab button, e.g. \"settings_display.png\""},
+							{"end",
+							 "\"true\" to put the tab, and those after it, at the far end of the tab bar, e.g. the "
+							 "bottom of a bar down a side"},
 							{"title_tag", "Translation key for the tab button's text", AttributeKind::Translation},
 							{"bind_disabled",
 							 "Disable the tab's button while this int subject is non-zero",
@@ -85,6 +95,32 @@ namespace UI::Xml
 	void DsTabs::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
 	{
 		lv_xml_obj_apply(state, attrs);
+
+		// Before the tabs are added, so each tab's button is styled for the side as it is added
+		if (const char* side = lv_xml_get_value_of(attrs, "side"))
+		{
+			auto* tabs = static_cast<DsTabs*>(LvObj::fromPtr(itemOf(state)));
+			if (lv_streq(side, "top"))
+			{
+				tabs->setTabBarPosition(LV_DIR_TOP);
+			}
+			else if (lv_streq(side, "bottom"))
+			{
+				tabs->setTabBarPosition(LV_DIR_BOTTOM);
+			}
+			else if (lv_streq(side, "left"))
+			{
+				tabs->setTabBarPosition(LV_DIR_LEFT);
+			}
+			else if (lv_streq(side, "right"))
+			{
+				tabs->setTabBarPosition(LV_DIR_RIGHT);
+			}
+			else
+			{
+				LOG_WARN("<ds_tabs side=\"{:s}\">: not top, bottom, left or right", side);
+			}
+		}
 	}
 
 	void* DsTabs::xmlCreateTab(lv_xml_parser_state_t* state, const char** attrs)
@@ -117,6 +153,14 @@ namespace UI::Xml
 		if (tabs == nullptr)
 		{
 			return;
+		}
+		if (const char* icon = lv_xml_get_value_of(attrs, "icon"))
+		{
+			tabs->getTabButton(index)->setIcon(icon);
+		}
+		if (const char* end = lv_xml_get_value_of(attrs, "end"); end != nullptr && lv_xml_to_bool(end))
+		{
+			tabs->pinToEnd(index);
 		}
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_disabled"))
 		{

@@ -1,6 +1,6 @@
 <!--
-  The file browser's dialog: start a job (with its details and thumbnail, and an offer to delete it instead), run a
-  macro, or delete a file. Open while `dialog` is set.
+  The file browser's dialog: start a job (with its details and thumbnail, and an offer to delete it instead: a
+  question, the next step), or run a macro. Open while `dialog` is set.
 
   Fields and actions: dialog, dialog_*, info_*; files.confirm, files.ask_delete, files.close_dialog
   (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
@@ -11,15 +11,9 @@
 		<style name="beside_image" text_align="left"/>
 	</styles>
 
-	<view extends="ds_modal" name="file_browser_dialog" bind_open="presenter.dialog" width="70%" height="content" align="center"
-		  style_max_height="70%" flex_flow="column">
+	<view extends="ds_dialog" name="file_browser_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title"
+		  flex_flow="column">
 		<action trigger="dismissed" name="presenter.files.close_dialog"/>
-
-		<lv_obj name="header" width="100%" height="content" flex_flow="row">
-			<style name="bg_color_header"/>
-			<style name="text_header"/>
-			<lv_label name="title" bind_text="presenter.dialog_title"/>
-		</lv_obj>
 
 		<lv_obj name="body" width="100%" height="content" flex_flow="column">
 			<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
@@ -88,20 +82,25 @@
 			</lv_obj>
 		</lv_obj>
 
-		<lv_obj name="pad" width="100%" flex_grow="1"/>
-
-		<lv_obj name="footer" width="100%" height="content" flex_flow="row">
-			<ds_button name="delete" text="&#xF2ED;" width="content" height="content">
+		<ds_dialog_footer name="footer">
+			<!-- Deleting, apart from what the dialog is for, on the left -->
+			<ds_button name="delete" text="&#xF2ED;" width="content">
 				<bind_flag_if_eq subject="presenter.dialog_can_delete" flag="hidden" ref_value="0"/>
 				<action trigger="clicked" name="presenter.files.ask_delete"/>
 			</ds_button>
-			<ds_button name="cancel" translation_tag="tr.common.cancel" height="content" flex_grow="1">
+			<!-- Pushes the delete button left; it goes with it, so the buttons on the right keep to the edge -->
+			<lv_obj name="spacer" height="1" flex_grow="1" clickable="false" style_bg_opa="0" style_border_width="0">
+				<bind_flag_if_eq subject="presenter.dialog_can_delete" flag="hidden" ref_value="0"/>
+			</lv_obj>
+			<ds_button name="cancel" translation_tag="tr.common.cancel">
+				<style name="dialog_button"/>
 				<action trigger="clicked" name="presenter.files.close_dialog"/>
 			</ds_button>
-			<ds_button name="ok" translation_tag="tr.common.ok" height="content" flex_grow="1">
+			<ds_button name="ok" translation_tag="tr.common.ok">
+				<style name="dialog_button"/>
 				<style name="action_btn"/>
 				<action trigger="clicked" name="presenter.files.confirm"/>
 			</ds_button>
-		</lv_obj>
+		</ds_dialog_footer>
 	</view>
 </component>

@@ -5,6 +5,7 @@
  *      Author: Andy Everitt
  */
 
+#include "UI/Core/Model.h"
 #include "UI/Styles/Theme.h"
 #include "UI/Styles/ThemeFile.h"
 #include "UI/Widgets/Inputs/Slider.h"
@@ -79,24 +80,25 @@ TEST_F(TestTheme, DefaultTheme)
 	themePreview.show();
 	EXPECT_TRUE(Themes::getCurrentTheme() == theme);
 
-	// Changed as the user would: the sliders keep the values within their ranges
-	auto set = [&](const char* name, float value)
+	// Changed as the user would: the sliders keep the values within their ranges. Dark mode is on the Display page,
+	// which changes the palette and says the theme changed, as here
+	auto set = [&](const char* row, float value)
 	{
-		auto& slider = static_cast<Slider&>(*LvObj::fromPtr(lv_obj_find_by_name(themePreview.getRootPtr(), name)));
-		slider.setValue(value);
+		lv_obj_t* slider = lv_obj_find_by_name(lv_obj_find_by_name(themePreview.getRootPtr(), row), "slider");
+		static_cast<Slider&>(*LvObj::fromPtr(slider)).setValue(value);
 	};
 	auto setDark = [&](bool dark)
 	{
-		lv_obj_t* toggle = lv_obj_find_by_name(themePreview.getRootPtr(), "dark_mode");
-		lv_obj_set_state(toggle, LV_STATE_CHECKED, dark);
-		lv_obj_send_event(toggle, LV_EVENT_VALUE_CHANGED, nullptr);
+		ASSERT_TRUE(Themes::changeCurrentPalette([dark](Themes::PaletteInputs& palette) { palette.dark = dark; }));
+		Model::get().post<EventType::ThemeChanged>();
+		deliverModelEvents();
 	};
 	auto change = [&](bool dark, uint16_t primary, uint16_t secondary, float chromaValue)
 	{
 		setDark(dark);
-		set("primary_hue_slider", primary);
-		set("secondary_hue_slider", secondary);
-		set("chroma_slider", chromaValue);
+		set("primary_hue", primary);
+		set("secondary_hue", secondary);
+		set("chroma", chromaValue);
 	};
 
 	change(darkMode, primaryHue, secondaryHue, chroma);

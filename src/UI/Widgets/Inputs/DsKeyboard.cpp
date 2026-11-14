@@ -14,18 +14,12 @@ namespace UI::Xml
 
 	namespace
 	{
-		constexpr const char* SIGN_KEY = "+/-"; // The number pad's sign key
-
 		/** The key layout called `mode` */
 		lv_keyboard_mode_t keyboardMode(std::string_view mode)
 		{
 			if (mode == "number")
 			{
 				return LV_KEYBOARD_MODE_NUMBER;
-			}
-			if (mode == "numberpad")
-			{
-				return LvKeyboard::NUMBER_PAD_MODE;
 			}
 			return mode == "text_upper" ? LV_KEYBOARD_MODE_TEXT_UPPER : LV_KEYBOARD_MODE_TEXT_LOWER;
 		}
@@ -62,18 +56,12 @@ namespace UI::Xml
 			 .extends = "lv_obj",
 			 .description = "An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and "
 							"types into it, so it is usually written `hidden=\"true\"`; or, with `textarea`, it always "
-							"types into one box, as the number pad's keys do. Its OK key raises `ready`.",
+							"types into one box. Its OK key raises `ready`.",
 			 .example = R"(<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="200"/>)",
-			 .attributes = {{"mode", "Key layout: `text` (default), `text_upper`, `number` or `numberpad`"},
+			 .attributes = {{"mode", "Key layout: `text` (default), `text_upper` or `number`"},
 							{"textarea",
 							 "Always type into the text box of this name: the nearest one around the keyboard, written "
-							 "before it"},
-							{"bind_ok_enabled",
-							 "Follow an int subject: the OK key works only while it is non-zero",
-							 AttributeKind::Subject},
-							{"bind_sign_enabled",
-							 "Follow an int subject: the `numberpad` layout's +/- key works only while it is non-zero",
-							 AttributeKind::Subject}}},
+							 "before it"}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -90,7 +78,6 @@ namespace UI::Xml
 		lv_xml_obj_apply(state, attrs);
 
 		lv_obj_t* root = itemOf(state);
-		auto& keyboard = static_cast<DsKeyboard&>(*LvObj::fromPtr(root));
 		lv_keyboard_set_mode(root, keyboardMode(attrOr(attrs, "mode", "text")));
 
 		if (const char* name = lv_xml_get_value_of(attrs, "textarea"))
@@ -103,54 +90,6 @@ namespace UI::Xml
 			{
 				LOG_WARN("<ds_keyboard textarea=\"{:s}\">: no text box of that name before it", name);
 			}
-		}
-		if (lv_subject_t* subject = findSubject(state, attrs, "bind_ok_enabled"))
-		{
-			lv_subject_add_observer_obj(subject, okObserverCb, root, &keyboard);
-		}
-		if (lv_subject_t* subject = findSubject(state, attrs, "bind_sign_enabled"))
-		{
-			lv_subject_add_observer_obj(subject, signObserverCb, root, &keyboard);
-		}
-	}
-
-	void DsKeyboard::okObserverCb(lv_observer_t* observer, lv_subject_t* subject)
-	{
-		static_cast<DsKeyboard*>(lv_observer_get_user_data(observer))
-			->enableKey(LV_SYMBOL_OK, lv_subject_get_int(subject) != 0);
-	}
-
-	void DsKeyboard::signObserverCb(lv_observer_t* observer, lv_subject_t* subject)
-	{
-		static_cast<DsKeyboard*>(lv_observer_get_user_data(observer))
-			->enableKey(SIGN_KEY, lv_subject_get_int(subject) != 0);
-	}
-
-	void DsKeyboard::enableKey(const char* text, bool enabled)
-	{
-		lv_obj_t* root = getRootPtr();
-		const char* const* map = lv_buttonmatrix_get_map(root);
-		// Buttons are numbered without the "\n" row breaks
-		uint32_t button = 0;
-		for (size_t i = 0; map[i][0] != '\0'; i++)
-		{
-			if (lv_streq(map[i], "\n"))
-			{
-				continue;
-			}
-			if (lv_streq(map[i], text))
-			{
-				if (enabled)
-				{
-					lv_buttonmatrix_clear_button_ctrl(root, button, LV_BUTTONMATRIX_CTRL_DISABLED);
-				}
-				else
-				{
-					lv_buttonmatrix_set_button_ctrl(root, button, LV_BUTTONMATRIX_CTRL_DISABLED);
-				}
-				return;
-			}
-			button++;
 		}
 	}
 } // namespace UI::Xml

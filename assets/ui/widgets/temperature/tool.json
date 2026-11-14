@@ -26,6 +26,12 @@
       "label": "row.name|default:tr.temperature.default_tool_name",
       "default": 0,
       "title_tag": "tr.widget.setting_tool"
+    },
+    {
+      "name": "graph_key",
+      "kind": "bool",
+      "title_tag": "tr.widget.setting_graph_key",
+      "default": true
     }
   ]
 }

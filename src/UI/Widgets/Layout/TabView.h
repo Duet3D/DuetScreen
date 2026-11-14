@@ -38,9 +38,14 @@ namespace UI
 		 * anything it is inside), the tab is only marked shown: it comes alive with the tab view.
 		 */
 		void setActiveTab(size_t index, bool animate = true);
+
+		/** Put the tab bar on side `dir` (LV_DIR_TOP, _BOTTOM, _LEFT or _RIGHT) of the content, styling its buttons to suit */
 		void setTabBarPosition(lv_dir_t dir);
 
 		bool disableTab(size_t index, bool disable);
+
+		/** Put tab `index`, and those after it, at the far end of the tab bar, e.g. the bottom of a bar down a side */
+		void pinToEnd(size_t index);
 
 		/** Whether tab `index`'s button is disabled; false if there is no such tab */
 		bool isTabDisabled(size_t index);
@@ -49,10 +54,19 @@ namespace UI
 		/** Lay out the tab bar and content area */
 		void init();
 
+		/**
+		 * Style `button` for the side the tab bar is on. Across the top or bottom, the tabs share the bar's width, the
+		 * icon over the text, and the selected one is edged on one side (tab_btn). Down a side, each is a row as wide
+		 * as the bar, the icon before the text, and the selected one looks like any chosen option (btn_checked).
+		 */
+		void styleTabButton(TabButton& button);
+
 		List<TabButton> m_tabButtons{"tab_buttons", getRoot()};
 		LvContainer m_tabContent{"tab_content", getRoot()};
 
 		std::vector<std::unique_ptr<LvContainer>> m_tabs;
 		size_t m_currentTabIndex = -1;
+		lv_dir_t m_barSide = LV_DIR_TOP;			 // The side of the content the tab bar is on
+		std::unique_ptr<LvContainer> m_endSpacer; // Before the first tab pinned to the end (pinToEnd()), if any
 	};
 } // namespace UI

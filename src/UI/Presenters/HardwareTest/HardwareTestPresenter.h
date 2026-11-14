@@ -5,7 +5,7 @@
  * number, it runs each test in turn (touch, dead pixels, memory, WiFi, USB, buzzer and speaker), logs every result to
  * a file, and shows a summary. One stage of the screen is shown at a time, named by `stage`.
  *
- * A HARDWARE_TEST build shows it over the home screen from start-up (main.cpp); the Developer settings tab opens it
+ * A HARDWARE_TEST build shows it over the home screen from start-up (main.cpp); Settings > Developer > Hardware test opens it
  * too, skipping the serial number.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference

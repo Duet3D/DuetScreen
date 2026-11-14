@@ -1,20 +1,34 @@
 <!--
-  The Settings page: general, connection, display and developer settings, in tabs.
+  The Settings page: the categories down the left (general, display, notifications, connection, system, developer),
+  each a page of settings in groups of rows. Display's colours are a page of their own, opened from it in place.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
 		<style name="bg_dark"/>
-		<ds_tabs name="tabs" width="100%" height="100%">
-			<ds_tabs-tab name="general" title_tag="tr.settings.tabs.general">
+		<ds_tabs name="tabs" side="left" width="100%" height="100%">
+			<ds_tabs-tab name="general" icon="settings_general.png" title_tag="tr.settings.tabs.general">
 				<ds_view name="settings_general" view="settings_general" shown="true"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="connection" title_tag="tr.settings.tabs.connection">
+			<ds_tabs-tab name="display" icon="settings_display.png" title_tag="tr.settings.tabs.display">
+				<ds_pages name="display_pages" width="100%" height="100%">
+					<ds_pages-page name="display" title_tag="tr.settings.tabs.display">
+						<ds_view name="settings_display" view="settings_display" shown="true"/>
+					</ds_pages-page>
+					<ds_pages-page name="colours" title_tag="tr.settings.colours">
+						<ds_view name="settings_colours" view="settings_theme_preview" shown="true"/>
+					</ds_pages-page>
+				</ds_pages>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="notifications" icon="settings_notifications.png" title_tag="tr.settings.tabs.notifications">
+				<ds_view name="settings_notifications" view="settings_notifications" shown="true"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="connection" icon="settings_connection.png" title_tag="tr.settings.tabs.connection">
 				<ds_view name="settings_connection" view="settings_connection" shown="true"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="display" title_tag="tr.settings.tabs.display">
-				<ds_view name="settings_display" view="settings_display" shown="true"/>
+			<ds_tabs-tab name="system" icon="settings_system.png" title_tag="tr.settings.tabs.system">
+				<ds_view name="settings_system" view="settings_system" shown="true"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="developer" title_tag="tr.settings.tabs.developer">
+			<ds_tabs-tab name="developer" icon="settings_developer.png" title_tag="tr.settings.tabs.developer" end="true">
 				<ds_view name="settings_developer" view="settings_developer" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>

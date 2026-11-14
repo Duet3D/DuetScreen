@@ -4,11 +4,13 @@
 
   Props:    label_tag  the translation of its name when its sensor has none, with the number in it
                        (dashboard_bed.xml, dashboard_chamber.xml)
+            graph_key  whether its colour key shows (dashboard_heater.xml)
   Fields:   a row of om.heat.bedHeaters or om.heat.chamberHeaters: row.index (its number), row.value (its heater)
 -->
 <component>
 	<api>
 		<prop name="label_tag" type="string"/>
+		<prop name="graph_key" type="bool" default="true"/>
 	</api>
 
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
@@ -22,7 +24,7 @@
 				<dashboard_heater name="0"
 								  label="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:${label_tag}:{row.index}"
 								  active="om.heat.heaters[{row.value}].active|int"
-								  standby="om.heat.heaters[{row.value}].standby|int"/>
+								  standby="om.heat.heaters[{row.value}].standby|int" graph_key="$graph_key"/>
 			</lv_obj>
 		</lv_obj>
 	</view>

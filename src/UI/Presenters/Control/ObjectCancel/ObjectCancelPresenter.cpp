@@ -7,6 +7,7 @@
 #include "Storage.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -39,7 +40,7 @@ namespace UI
 	{
 		action("object_cancel.select",
 			   "Cancel the object, or resume it if cancelled, asking first. From a row of `objects`.",
-			   [this](const Xml::ActionArgs& args)
+			   [](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<JobObjectRow>();
 				   if (row == nullptr)
@@ -64,20 +65,22 @@ namespace UI
 				   const std::string gcode = fmt::format("M486 {:c}{:d}\n", resume ? 'U' : 'P', index);
 				   if (resume)
 				   {
-					   ask(_("object_cancel.confirm_uncancel_title"),
+					   ask(args.target,
+						   _("object_cancel.confirm_uncancel_title"),
 						   _("object_cancel.confirm_uncancel_text", name),
 						   [gcode]() { Xml::Services::sendGcode(gcode); });
 				   }
 				   else
 				   {
-					   ask(_("object_cancel.confirm_cancel_title"),
+					   ask(args.target,
+						   _("object_cancel.confirm_cancel_title"),
 						   _("object_cancel.confirm_cancel_text", name),
 						   [gcode]() { Xml::Services::sendGcode(gcode); });
 				   }
 			   });
 		action("object_cancel.cancel_current",
 			   "Cancel the object being printed, asking first if confirmations are on",
-			   [this](const Xml::ActionArgs&)
+			   [](const Xml::ActionArgs& args)
 			   {
 				   const auto cancelCurrent = []() { Xml::Services::sendGcode("M486 C\n"); };
 				   if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
@@ -85,26 +88,10 @@ namespace UI
 					   cancelCurrent();
 					   return;
 				   }
-				   ask(_("object_cancel.confirm_cancel_current_title"),
+				   ask(args.target,
+					   _("object_cancel.confirm_cancel_current_title"),
 					   _("object_cancel.confirm_cancel_current_text", currentObjectName()),
 					   cancelCurrent);
-			   });
-		action("object_cancel.confirm",
-			   "Answer yes to the question (`confirm`): close it and do what it asked",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_confirm.set(0);
-				   if (auto action = std::move(m_confirmed))
-				   {
-					   action();
-				   }
-			   });
-		action("object_cancel.close_dialog",
-			   "Answer no to the question (`confirm`): close it without doing anything",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_confirm.set(0);
-				   m_confirmed = nullptr;
 			   });
 		m_currentObject.set(_("object_cancel.current_object_none"));
 	}
@@ -121,9 +108,6 @@ namespace UI
 		f.field("y_max", m_yMax, "Highest Y of the bed, whole mm; as `x_min`");
 		f.list("objects", m_objects, "The job's objects");
 		f.field("confirmations", m_confirmations, "1 if actions are confirmed first (the setting)");
-		f.field("confirm", m_confirm, "1 while asking; `confirm_title` and `confirm_text` are the question");
-		f.field("confirm_title", m_confirmTitle, "Question title");
-		f.field("confirm_text", m_confirmText, "Question");
 	}
 
 	void ObjectCancelPresenter::onInit()
@@ -137,12 +121,10 @@ namespace UI
 		showObjects();
 	}
 
-	void ObjectCancelPresenter::ask(std::string title, std::string text, std::function<void()> action)
+	void ObjectCancelPresenter::ask(lv_obj_t* asker, std::string title, std::string text, std::function<void()> action)
 	{
-		m_confirmTitle.set(title);
-		m_confirmText.set(text);
-		m_confirmed = std::move(action);
-		m_confirm.set(1);
+		Xml::Prompts::askQuestion(
+			{.title = std::move(title), .text = std::move(text), .onYes = std::move(action), .asker = asker});
 	}
 
 	const OM::Node& ObjectCancelPresenter::objects()

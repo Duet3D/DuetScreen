@@ -3,28 +3,21 @@
  */
 
 #include "DeveloperSettingsPresenter.h"
-#include "Comm/FileInfo.h"
 #include "Configuration.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
-#include "Hardware/Reset.h"
-#include "ObjectModel/Directories.h"
 #include "Storage.h"
-#include "UI/Core/Model.h"
 #include "UI/Presenters/HardwareTest/HardwareTestPresenter.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/SystemHelper.h"
-#include "utils/UnitSystem.h"
-#include "utils/UpgradeHelper.h"
-#include <filesystem>
 
 namespace UI
 {
 	DeveloperSettingsPresenter::DeveloperSettingsPresenter()
-		: XmlPresenter("settings_developer")
+		: SettingsPresenter("settings_developer")
 	{
 		std::string levels;
 		for (const auto& level : Log::DebugLevelStrings)
@@ -36,17 +29,18 @@ namespace UI
 		m_debugBordersShown.set(DEBUG_BORDERS ? 1 : 0);
 		m_developerMode.set(DEVELOPER_MODE ? 1 : 0);
 		m_systemMonitorShown.set(LV_USE_SYSMON ? 1 : 0);
+		m_buildToolsShown.set(DEBUG_BORDERS || DEVELOPER_MODE || LV_USE_SYSMON ? 1 : 0);
+		action("settings.hardware_test",
+			   "Open the hardware test",
+			   [this](const Xml::ActionArgs&) { startHardwareTest(); });
 
-		action("settings.debug_level",
-			   "Log at the level at the edited index of `debug_levels`",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   if (const auto value = args.value())
-				   {
-					   m_debugLevel.set(static_cast<int32_t>(*value));
-					   Log::SetDebugLevel(static_cast<Log::DebugLevel>(static_cast<int>(*value)));
-				   }
-			   });
+		setting("settings.debug_level",
+				"Log at the level at the edited index of `debug_levels`",
+				[this](float value)
+				{
+					m_debugLevel.set(static_cast<int32_t>(value));
+					Log::SetDebugLevel(static_cast<Log::DebugLevel>(static_cast<int>(value)));
+				});
 		toggle("settings.advanced_settings",
 			   "Show advanced settings if the edited value is 1, else hide them",
 			   m_advancedSettings,
@@ -132,45 +126,6 @@ namespace UI
 				   on ? lv_sysmon_show_memory(NULL) : lv_sysmon_hide_memory(NULL);
 #endif
 			   });
-
-		action("settings.restart", "Restart the DuetScreen program", [](const Xml::ActionArgs&) { Restart(); });
-		action("settings.erase_and_restart",
-			   "Erase every setting, then restart",
-			   [](const Xml::ActionArgs&) { EraseAndRestart(); });
-		action("settings.reboot", "Reboot the screen", [](const Xml::ActionArgs&) { Reboot(); });
-		action("settings.hardware_test",
-			   "Open the hardware test",
-			   [this](const Xml::ActionArgs&) { startHardwareTest(); });
-		action("settings.clear_cache",
-			   "Delete the cached settings and file information, then show the storage used again",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   if (std::filesystem::exists(NVS_FOLDER))
-				   {
-					   std::filesystem::remove_all(NVS_FOLDER);
-				   }
-				   FILEINFO_CACHE->ClearCache();
-				   showStorage();
-			   });
-		action("settings.upgrade_from_github",
-			   "Upgrade to the latest release on GitHub, reporting an error if it fails to start",
-			   [](const Xml::ActionArgs&)
-			   {
-				   LOG_INFO("User requested upgrade from GitHub latest release");
-				   if (!UpgradeHelper::upgradeFromGithubLatest())
-				   {
-					   LOG_ERROR("Upgrade from GitHub latest failed to start");
-					   Model::get().post<EventType::Response>(ResponseType::ERROR,
-															  _("settings.upgrade_from_github_failed"));
-				   }
-			   });
-		action("settings.send_config",
-			   "Upload the screen's settings to the Duet as duetscreen.json in its system directory",
-			   [](const Xml::ActionArgs&)
-			   {
-				   Comm::DUET.UploadFile(fmt::format("{:s}/duetscreen.json", OM::Directories::GetSystemDirectory()),
-										 StorageHelper::dump());
-			   });
 	}
 
 	DeveloperSettingsPresenter::~DeveloperSettingsPresenter() = default;
@@ -189,8 +144,9 @@ namespace UI
 		f.field("adb", m_adb, "1 if ADB is on (developer mode builds)");
 		f.field("system_monitor_shown", m_systemMonitorShown, "1 if the build has the system monitor");
 		f.field("system_monitor", m_systemMonitor, "1 if the system monitor is on");
-		f.field("storage_info", m_storageInfo, "Storage used, e.g. \"256.00 MB / 16.00 GB (1%)\"");
-		f.field("cache_size", m_cacheSize, "Size of the cache, e.g. \"10.00 KB (100 files)\"");
+		f.field("build_tools_shown",
+				m_buildToolsShown,
+				"1 if the build has any of debug borders, developer mode or the system monitor");
 	}
 
 	void DeveloperSettingsPresenter::onActivate()
@@ -207,57 +163,6 @@ namespace UI
 		m_adb.set(SystemHelper::isServiceEnabled(SystemHelper::Services::ADB) ? 1 : 0);
 #endif
 		m_systemMonitor.set(StorageHelper::getData(ID_SYSTEM_MONITOR_ENABLED) ? 1 : 0);
-		showStorage();
-	}
-
-	void DeveloperSettingsPresenter::toggle(std::string name,
-											std::string description,
-											Xml::IntSubject& shown,
-											std::function<void(bool on)> apply)
-	{
-		action(std::move(name),
-			   std::move(description),
-			   [&shown, apply = std::move(apply)](const Xml::ActionArgs& args)
-			   {
-				   const bool on = args.value().value_or(0.0f) != 0.0f;
-				   shown.set(on ? 1 : 0);
-				   apply(on);
-			   });
-	}
-
-	void DeveloperSettingsPresenter::showStorage()
-	{
-		ZoneScoped;
-		std::uintmax_t total = 0;
-		std::uintmax_t used = 0;
-		std::uintmax_t cacheSize = 0;
-		size_t cacheFiles = 0;
-#if USE_FIXED_TEST_STRINGS
-		total = 16uz * 1024uz * 1024uz * 1024uz; // 16 GB
-		used = 256uz * 1024uz * 1024uz;			 // 256 MB
-		cacheSize = 10uz * 1024uz;				 // 10 KB
-		cacheFiles = 100u;
-#else
-		const auto space = std::filesystem::space("/");
-		total = space.capacity;
-		used = space.capacity - space.available;
-		if (std::filesystem::exists(NVS_FOLDER))
-		{
-			for (const auto& entry : std::filesystem::recursive_directory_iterator(NVS_FOLDER))
-			{
-				if (entry.is_regular_file())
-				{
-					cacheSize += entry.file_size();
-					cacheFiles++;
-				}
-			}
-		}
-#endif
-		m_storageInfo.set(_("settings.storage_info_format",
-							Units::formatBytes(used),
-							Units::formatBytes(total),
-							total == 0 ? 0 : used * 100 / total));
-		m_cacheSize.set(_("settings.duetscreen_cache_size_format", Units::formatBytes(cacheSize), cacheFiles));
 	}
 
 	void DeveloperSettingsPresenter::startHardwareTest()

@@ -5,13 +5,15 @@
 #include "DsSlider.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
-#include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Runtime/Translations.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
 #include <cstdlib>
+#include <limits>
+#include <optional>
 
 namespace UI::Xml
 {
@@ -47,38 +49,43 @@ namespace UI::Xml
 		   numberpad="true" send="change" width="100%">
 	<action trigger="value_confirmed" name="presenter.settings.brightness"/>
 </ds_slider>)",
-			 .attributes = {{"min", "Bottom of the range, may have a fraction (default 0)"},
-							{"max", "Top of the range, may have a fraction (default 100)"},
-							{"increment", "Step of the -/+ buttons, may have a fraction, e.g. \"0.01\" (default 1)"},
-							{"decimals", "Decimal places the value is shown with (default 2)"},
-							{"label", "The label, if there is no `label_tag`"},
-							{"label_tag", "Translation key for the label", AttributeKind::Translation},
-							{"bind_label", "Follow a text subject for the label", AttributeKind::Subject},
-							{"label_shown",
-							 "\"false\" to hide the label, which still heads the number pad (default true)"},
-							{"bind_value", "Follow an int subject for the value", AttributeKind::Subject},
-							{"value_scale",
-							 "How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 "
-							 "held as 2 with value_scale=\"100\" (default 1)"},
-							{"send",
-							 "`confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` "
-							 "on every movement, for a setting seen as it changes such as brightness"},
-							{"out_of_range",
-							 "Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a "
-							 "timeout longer than the slider reaches"},
-							{"numberpad",
-							 "What tapping the value does: `true` types it on the shared number pad, `own` raises "
-							 "`value_tapped` with the value for the view to show its own, `false` types it in place "
-							 "(default)"},
-							{"default",
-							 "A value to go back to: a Reset button shows while the value is anything else, and "
-							 "raises `value_confirmed` with it"},
-							{"bind_min",
-							 "Follow an int subject for the bottom of the range (scaled by `value_scale`)",
-							 AttributeKind::Subject},
-							{"bind_max",
-							 "Follow an int subject for the top of the range (scaled by `value_scale`)",
-							 AttributeKind::Subject}},
+			 .attributes =
+				 {{"min", "Bottom of the range, may have a fraction (default 0)"},
+				  {"max", "Top of the range, may have a fraction (default 100)"},
+				  {"increment", "Step of the -/+ buttons, may have a fraction, e.g. \"0.01\" (default 1)"},
+				  {"decimals", "Decimal places the value is shown with (default 2)"},
+				  {"unit", "Shown after the value, e.g. \"%\" or \"s\""},
+				  {"label", "The label, if there is no `label_tag`"},
+				  {"label_tag", "Translation key for the label", AttributeKind::Translation},
+				  {"bind_label", "Follow a text subject for the label", AttributeKind::Subject},
+				  {"label_shown", "\"false\" to hide the label, which still heads the number pad (default true)"},
+				  {"bind_value", "Follow an int subject for the value", AttributeKind::Subject},
+				  {"value_scale",
+				   "How much `bind_value` is scaled by, for a value with a fraction, e.g. a chroma of 0.02 "
+				   "held as 2 with value_scale=\"100\" (default 1)"},
+				  {"send",
+				   "`confirmed` to raise `value_confirmed` when an edit is finished (default), or `change` "
+				   "on every movement, for a setting seen as it changes such as brightness"},
+				  {"out_of_range",
+				   "Let a typed value go past the slider's `upper` end, `lower` end or `both`, e.g. a "
+				   "timeout longer than the slider reaches"},
+				  {"lowest",
+				   "The least the value may be, dragged, typed or reset, if not the bottom of the range: for a range "
+				   "that moves with the value (`bind_min`), its true limit"},
+				  {"highest",
+				   "The most the value may be, if not the top of the range (or none past it, with `out_of_range`)"},
+				  {"numberpad",
+				   "What tapping the value does: `true` types it on a number pad, the next step of the dialog "
+				   "the slider is in or a dialog of its own; `false` types it in place (default)"},
+				  {"default",
+				   "A value to go back to: a Reset button shows while the value is anything else, and "
+				   "raises `value_confirmed` with it"},
+				  {"bind_min",
+				   "Follow an int subject for the bottom of the range (scaled by `value_scale`)",
+				   AttributeKind::Subject},
+				  {"bind_max",
+				   "Follow an int subject for the top of the range (scaled by `value_scale`)",
+				   AttributeKind::Subject}},
 			 .exampleSubjects = {{"presenter.brightness", "int", "60"}}},
 			xmlCreate,
 			xmlApply);
@@ -104,22 +111,17 @@ namespace UI::Xml
 		{
 		case NumberPad::NONE:
 			return false;
-		case NumberPad::OWN:
-		{
-			float value = getValue();
-			lv_obj_send_event(getRootPtr(), Actions::valueTappedEvent(), &value);
-			return true;
-		}
 		case NumberPad::SHARED:
 			break;
 		}
 		// The request goes with the slider: a fan going while its number pad is open takes the slider with it
-		return Services::askNumber({.header = std::string(getLabelText()),
-									.min = lowestTypable(),
-									.max = highestTypable(),
-									.value = getValue(),
-									.onConfirm = [this](float value) { setValue(value); },
-									.asker = getRootPtr()});
+		return Prompts::askNumber({.header = std::string(getLabelText()),
+								   .min = lowest(),
+								   .max = highest(),
+								   .value = getValue(),
+								   .unit = std::string(getUnit()),
+								   .onConfirm = [this](float value) { setValue(value); },
+								   .asker = getRootPtr()});
 	}
 
 	void* DsSlider::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
@@ -151,6 +153,10 @@ namespace UI::Xml
 		{
 			slider.setDisplayDecimals(lv_xml_atoi(decimals));
 		}
+		if (const char* unit = lv_xml_get_value_of(attrs, "unit"))
+		{
+			slider.setUnit(unit);
+		}
 		if (const char* tag = lv_xml_get_value_of(attrs, "label_tag"))
 		{
 			slider.setLabel(Xml::Translations::translate(tag));
@@ -171,27 +177,38 @@ namespace UI::Xml
 		{
 			slider.setSendMode(SendMode::VALUE_CHANGED);
 		}
-		if (const char* outOfRange = lv_xml_get_value_of(attrs, "out_of_range"))
+		// The limits: as written, else none past an end the value may go out of range at
+		const char* outOfRange = lv_xml_get_value_of(attrs, "out_of_range");
+		const char* lowest = lv_xml_get_value_of(attrs, "lowest");
+		const char* highest = lv_xml_get_value_of(attrs, "highest");
+		if (outOfRange != nullptr || lowest != nullptr || highest != nullptr)
 		{
-			if (lv_streq(outOfRange, "upper"))
+			constexpr float NONE = std::numeric_limits<float>::infinity();
+			const std::string_view open = outOfRange != nullptr ? outOfRange : "";
+			std::optional<float> least;
+			std::optional<float> most;
+			if (lowest != nullptr)
 			{
-				slider.setOutOfRangeMode(OutOfRange::UPPER);
+				least = std::strtof(lowest, nullptr);
 			}
-			else if (lv_streq(outOfRange, "lower"))
+			else if (open == "lower" || open == "both")
 			{
-				slider.setOutOfRangeMode(OutOfRange::LOWER);
+				least = -NONE;
 			}
-			else if (lv_streq(outOfRange, "both"))
+			if (highest != nullptr)
 			{
-				slider.setOutOfRangeMode(OutOfRange::BOTH);
+				most = std::strtof(highest, nullptr);
 			}
+			else if (open == "upper" || open == "both")
+			{
+				most = NONE;
+			}
+			slider.setLimits(least, most);
 		}
 		// Applied again for each placement of a component extending it, so only what is written changes anything
 		if (const char* numberPad = lv_xml_get_value_of(attrs, "numberpad"))
 		{
-			slider.m_numberPad = lv_streq(numberPad, "own")	 ? NumberPad::OWN
-								 : lv_xml_to_bool(numberPad) ? NumberPad::SHARED
-															 : NumberPad::NONE;
+			slider.m_numberPad = lv_xml_to_bool(numberPad) ? NumberPad::SHARED : NumberPad::NONE;
 		}
 		if (const char* value = lv_xml_get_value_of(attrs, "default"))
 		{

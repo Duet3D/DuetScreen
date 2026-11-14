@@ -7,8 +7,8 @@
 #include "FanPresenter.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Om/OmList.h"
-#include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
 #include <cmath>
@@ -59,12 +59,13 @@ namespace UI::FanActions
 			return;
 		}
 		const int32_t fan = *number;
-		Xml::Services::askNumber({.header = name,
-								  .min = 0,
-								  .max = 100,
-								  .value = current,
-								  .onConfirm = [fan](float value) { setFanSpeed(fan, value); },
-								  .asker = nullptr});
+		Xml::Prompts::askNumber({.header = name,
+								 .min = 0,
+								 .max = 100,
+								 .value = current,
+								 .unit = "%",
+								 .onConfirm = [fan](float value) { setFanSpeed(fan, value); },
+								 .asker = nullptr});
 	}
 
 	void registerAll()

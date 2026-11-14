@@ -134,8 +134,8 @@ namespace UI
 		/** Ask to run the macro `item` */
 		void askRunMacro(const OM::FileSystem::FileSystemItem& item);
 
-		/** Ask to delete the file the dialog is about */
-		void askDelete();
+		/** Ask whether to delete the file the dialog is about, as its next step; the question goes with `asker` */
+		void askDelete(lv_obj_t* asker);
 
 		/** Do what the dialog asks */
 		void confirm();

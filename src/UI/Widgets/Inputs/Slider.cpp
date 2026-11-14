@@ -15,6 +15,12 @@
 
 namespace UI
 {
+	namespace
+	{
+		/** The gap between the value and its unit */
+		constexpr lv_coord_t UNIT_GAP = 4;
+	} // namespace
+
 	Slider::Slider(const std::string& name, LvObj& parent)
 		: LvContainer(name, parent)
 	{
@@ -56,8 +62,19 @@ namespace UI
 		m_decrement.setIcon("decrement.png");
 		m_increment.setIcon("increment.png");
 
+		m_valueCont.setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+		m_valueCont.setStylePad(0);
+		m_valueCont.setStylePad(UNIT_GAP, 0, Padding::COLUMN);
+		m_valueCont.setFlexFlow(LV_FLEX_FLOW_ROW);
+		m_valueCont.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+		m_valueCont.setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
+
 		m_input.setSize(LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 		m_input.setMinWidth(50);
+
+		m_unit.addStyle(Themes::getLvglStyles().text_muted);
+		m_unit.setText(""); // A label starts as "Text"
+		m_unit.hide();
 
 		m_slider.setMinHeight(LV_SIZE_CONTENT);
 		m_slider.setFlexGrow(1);
@@ -109,7 +126,7 @@ namespace UI
 			this);
 
 		setRange(0, 100);
-		setOutOfRangeMode(OutOfRange::NONE);
+		setLimits(std::nullopt, std::nullopt);
 
 		m_input.setOneLine(true);
 		m_input.setCursorClickPos(false);
@@ -122,19 +139,14 @@ namespace UI
 
 	void Slider::onShow() {}
 
-	void Slider::setOutOfRangeMode(OutOfRange mode)
+	void Slider::setLimits(std::optional<float> lowest, std::optional<float> highest)
 	{
 		ZoneScoped;
 		UI_LOCK();
-		if (mode & OutOfRange::LOWER || getMin() < 0)
-		{
-			m_input.setAcceptedChars("-0123456789.");
-		}
-		else
-		{
-			m_input.setAcceptedChars("0123456789.");
-		}
-		m_outOfRangeMode = mode;
+		m_lowest = lowest;
+		m_highest = highest;
+		m_input.setAcceptedChars(this->lowest() < 0 ? "-0123456789." : "0123456789.");
+		setValue(m_value);
 	}
 
 	void Slider::setLabel(std::string_view text)
@@ -255,16 +267,6 @@ namespace UI
 		}
 	}
 
-	float Slider::lowestTypable() const
-	{
-		return m_outOfRangeMode & OutOfRange::LOWER ? std::numeric_limits<float>::lowest() : m_min;
-	}
-
-	float Slider::highestTypable() const
-	{
-		return m_outOfRangeMode & OutOfRange::UPPER ? std::numeric_limits<float>::max() : m_max;
-	}
-
 	void Slider::onInputEvent(lv_event_t* e)
 	{
 		ZoneScoped;
@@ -320,9 +322,9 @@ namespace UI
 				break;
 			}
 			float value = static_cast<float>(atof(slider->m_input.getText().data()));
-			if (value > slider->getMax() && slider->m_outOfRangeMode & ~OutOfRange::UPPER)
+			if (value > slider->highest())
 			{
-				slider->m_input.setText(fmt::format("{:g}", slider->getMax()));
+				slider->m_input.setText(fmt::format("{:g}", slider->highest()));
 			}
 			slider->boundValue(value);
 			slider->m_value = value;
@@ -338,29 +340,10 @@ namespace UI
 	{
 		ZoneScoped;
 		UI_LOCK();
-		float original = value;
-		switch (m_outOfRangeMode)
-		{
-		case OutOfRange::NONE:
-			value = std::clamp(value, getMin(), getMax());
-			m_decrement.setDisabled(value == getMin());
-			m_increment.setDisabled(value == getMax());
-			break;
-		case OutOfRange::BOTH:
-			m_decrement.setDisabled(false);
-			m_increment.setDisabled(false);
-			break;
-		case OutOfRange::UPPER:
-			value = std::max(value, getMin());
-			m_decrement.setDisabled(value == getMin());
-			m_increment.setDisabled(false);
-			break;
-		case OutOfRange::LOWER:
-			value = std::min(value, getMax());
-			m_decrement.setDisabled(false);
-			m_increment.setDisabled(value == getMax());
-			break;
-		}
+		const float original = value;
+		value = std::clamp(value, lowest(), highest());
+		m_decrement.setDisabled(value <= lowest());
+		m_increment.setDisabled(value >= highest());
 		return original != value;
 	}
 
@@ -384,6 +367,14 @@ namespace UI
 										(getMax() - getMin())) +
 				   slider_min;
 		}
+	}
+
+	void Slider::setUnit(std::string_view unit)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		m_unit.setText(unit);
+		m_unit.setVisible(!unit.empty());
 	}
 
 	void Slider::updateText()

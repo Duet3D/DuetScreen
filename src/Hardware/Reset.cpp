@@ -8,6 +8,8 @@
 
 #include "Reset.h"
 #include "Debug.h"
+#include "UI/Xml/Runtime/XmlUi.h"
+#include "utils/NetworkHelper.h"
 #include "utils/SystemHelper.h"
 
 #include <cstdlib>
@@ -43,7 +45,8 @@ extern "C"
 	}
 
 	/**
-	 * @brief Reset any user customizations and reset the hardware
+	 * @brief Erase every setting, the WiFi networks the screen has joined and the layouts made or saved on it, then
+	 * restart
 	 */
 	void EraseAndRestart() noexcept
 	{
@@ -58,6 +61,8 @@ extern "C"
 		LOG_ERROR("Failed to remove /etc/duetscreen.json file");
 	}
 #endif
+		NetworkHelper::forgetAllNetworks();
+		UI::Xml::eraseUserLayouts();
 
 		Restart();
 	}

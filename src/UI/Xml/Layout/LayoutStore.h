@@ -100,5 +100,11 @@ namespace UI::Xml
 		 * @param error Set to what went wrong if false is returned
 		 */
 		bool writeSafely(const std::filesystem::path& file, std::string_view text, std::string& error);
+
+		/**
+		 * Delete `dir` and everything in it, if it is there, and flush its removal to the card
+		 * @param error Set to what went wrong if false is returned
+		 */
+		bool removeSafely(const std::filesystem::path& dir, std::string& error);
 	} // namespace Layouts
 } // namespace UI::Xml

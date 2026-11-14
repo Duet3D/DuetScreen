@@ -15,6 +15,7 @@
 #include "UI/Lvgl/LvTextarea.h"
 #include "UI/Core/View.h"
 #include <functional>
+#include <optional>
 
 namespace UI
 {
@@ -31,14 +32,6 @@ namespace UI
 			DISABLED		 // Do not run the callback
 		};
 
-		enum OutOfRange
-		{
-			NONE = (1 << 0),  // Do not allow the value to go out of range
-			UPPER = (1 << 1), // Allow the value to go out of range in the +ve direction
-			LOWER = (1 << 2), // Allow the value to go out of range in the -ve direction
-			BOTH = UPPER | LOWER
-		};
-
 		Slider(const std::string& name, LvObj& parent);
 		/** For widgets built by the XML engine, whose parent has no C++ wrapper */
 		Slider(const std::string& name, lv_obj_t* parent);
@@ -53,13 +46,25 @@ namespace UI
 
 		bool isFocused() const { return m_focused; }
 
-		void setOutOfRangeMode(OutOfRange mode);
+		/**
+		 * The least and the most the value may be, dragged, typed or reset, where they differ from the ends of the
+		 * slider's range (setRange()): a value past an end shows the slider at that end. Unset, a limit is that end;
+		 * an infinite one is none, e.g. a timeout typed longer than the slider reaches. A range that follows the value
+		 * (a window either side of it) keeps the value's true limits here.
+		 */
+		void setLimits(std::optional<float> lowest, std::optional<float> highest);
 		void setLabel(std::string_view text);
 		void setIncrementValue(float value);
 		void setRange(float min, float max);
 		void setValue(float value);
 		void setDefaultValue(float value);
 		void setDisplayDecimals(int decimals);
+
+		/** Show `unit` after the value, e.g. "%" or "s"; empty for none */
+		void setUnit(std::string_view unit);
+
+		/** The value's unit, e.g. "%"; empty if it has none */
+		std::string_view getUnit() const { return m_unit.getText(); }
 		void setSendMode(SendMode mode) { m_sendMode = mode; }
 		void setLongPressedEnabled(bool enabled) { m_longPressEnabled = enabled; }
 		void setValueChangedCallback(value_changed_callback_t callback) { m_valueChangedCallback = callback; }
@@ -84,11 +89,11 @@ namespace UI
 		 */
 		virtual bool askForValue() { return false; }
 
-		/** The lowest value that can be typed: the bottom of the range, or none if it may go below */
-		float lowestTypable() const;
+		/** The least the value may be: its lower limit, else the bottom of the range */
+		float lowest() const { return m_lowest.value_or(m_min); }
 
-		/** The highest value that can be typed: the top of the range, or none if it may go above */
-		float highestTypable() const;
+		/** The most the value may be: its upper limit, else the top of the range */
+		float highest() const { return m_highest.value_or(m_max); }
 
 	  private:
 		void init();
@@ -103,7 +108,9 @@ namespace UI
 		Button m_decrement{"decrement", m_sliderCont};
 		LvSlider m_slider{"slider", m_sliderCont};
 		Button m_increment{"increment", m_sliderCont};
-		LvTextarea m_input{"input", m_sliderCont};
+		LvContainer m_valueCont{"value_cont", m_sliderCont}; // The value, and its unit after it if it has one
+		LvTextarea m_input{"input", m_valueCont};
+		LvLabel m_unit{"unit", m_valueCont}; // The value's unit, e.g. "%"; hidden if it has none
 
 		float m_incrementValue = 1;
 
@@ -115,7 +122,8 @@ namespace UI
 		bool m_focused = false;
 		bool m_longPressEnabled = true;
 		SendMode m_sendMode = SendMode::VALUE_CONFIRMED;
-		OutOfRange m_outOfRangeMode = OutOfRange::NONE;
+		std::optional<float> m_lowest;	// The least the value may be, if not the bottom of the range
+		std::optional<float> m_highest; // The most the value may be, if not the top of the range
 		value_changed_callback_t m_valueChangedCallback;
 		focused_callback_t m_focusedCallback;
 	};

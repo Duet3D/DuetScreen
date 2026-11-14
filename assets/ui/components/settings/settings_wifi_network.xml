@@ -1,22 +1,18 @@
 <!--
-  One WiFi network in the WiFi selector: its name and signal, a button to connect (or disconnect, or join), and one to
-  forget it once it is known.
+  One network found, a row of the screen's WiFi (ds_setting): its name, whether the screen is on it or has joined it,
+  a lock if it is secured, its signal as bars, and the way into it. Tapping the row opens it in the dialog.
 
-  Fields and actions: a networks row (src/UI/Presenters/Settings/WifiPresenter.h)
+  Fields:   a networks row (src/UI/Presenters/Settings/WifiPresenter.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="content" flex_flow="row"
-		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="start">
-		<lv_label name="ssid" bind_text="row.ssid" long_mode="scroll_circular" flex_grow="2"/>
-		<lv_label name="signal" bind_text="row.signal" flex_grow="1"/>
-		<ds_button name="connect" bind_text="row.connect_text" width="content" height="content"
-				   style_min_width="content" flex_grow="1">
-			<action trigger="clicked" name="presenter.wifi.connect"/>
-		</ds_button>
-		<ds_button name="forget" translation_tag="tr.settings.network.forget" width="content" height="content"
-				   style_min_width="content" flex_grow="1">
-			<bind_flag_if_eq subject="row.known" flag="hidden" ref_value="0"/>
-			<action trigger="clicked" name="presenter.wifi.forget"/>
+	<view extends="ds_setting" bind_title="row.ssid" bind_hint="row.state">
+		<ds_icon name="lock" icon="lock.png" width="24" height="24">
+			<bind_flag_if_eq subject="row.secured" flag="hidden" ref_value="0"/>
+		</ds_icon>
+		<ds_icon name="signal" bind_icon="row.signal_icon" width="28" height="28"/>
+		<ds_button name="open" text="&#xF054;">
+			<style name="setting_value"/>
+			<action trigger="clicked" name="presenter.wifi.open"/>
 		</ds_button>
 	</view>
 </component>

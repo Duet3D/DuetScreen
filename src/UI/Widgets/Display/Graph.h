@@ -22,10 +22,10 @@ namespace UI
 	 * A line chart with axes and a legend. Values are added at the right and scroll left.
 	 *
 	 * Each series is drawn in the theme's series colours in turn (#series_1, #series_2, …; see Palette.h), and
-	 * recoloured when the theme changes. Its legend entry shows its colour, its name and its latest value, and shows
-	 * or hides it when tapped. The legend is styled by the theme: graph_legend, graph_legend_item (an entry, as it looks
-	 * while its series is hidden), graph_legend_item_shown, graph_legend_swatch, graph_legend_swatch_shown and
-	 * graph_legend_value.
+	 * recoloured when the theme changes (Themes::seriesColor()). Its legend entry shows its colour, its name and its
+	 * latest value, and shows or hides it when tapped (onLegendClicked()). The legend is styled by the theme:
+	 * graph_legend, graph_legend_item (an entry, as it looks while its series is hidden), graph_legend_item_shown,
+	 * graph_legend_swatch, graph_legend_swatch_shown and graph_legend_value.
 	 */
 	class Graph : public LvContainer
 	{
@@ -64,7 +64,7 @@ namespace UI
 		/** One line of the chart */
 		struct series_t
 		{
-			lv_chart_series_t* series;				 // The chart's series
+			lv_chart_series_t* series;				// The chart's series
 			std::unique_ptr<LegendItem> legendItem; // Its entry in the legend
 		};
 
@@ -117,9 +117,6 @@ namespace UI
 		/** The series at `index`, or nullptr */
 		const series_t* getSeries(const size_t index) const;
 
-		/** The colour series `index` is drawn in: the theme's series colours in turn */
-		static lv_color_t seriesColor(size_t index);
-
 		/**
 		 * Add a series, shown, at the end, in the next of the theme's series colours
 		 * @param displayName Legend text
@@ -142,8 +139,12 @@ namespace UI
 		/** Add `value` at the right of a series, scrolling it left, and show it in the legend */
 		void addData(const size_t index, int32_t value);
 
+	  protected:
+		/** A series' legend entry was tapped: show it if hidden, hide it if shown */
+		virtual void onLegendClicked(size_t index);
+
 	  private:
-		/** A legend entry was clicked: show or hide its series */
+		/** A legend entry was clicked: tell onLegendClicked() */
 		static void legendEvent(lv_event_t* e);
 
 		/** Lay out and style the parts */

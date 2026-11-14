@@ -6,9 +6,10 @@
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
-#include "UI/Presenters/Modals/JobCancelPresenter.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
+#include "i18n/i18n.h"
 #include <fmt/format.h>
 #include <string>
 
@@ -42,12 +43,13 @@ namespace UI::JobActions
 								"Ask whether to cancel the job; it is cancelled, which also turns the heaters off, "
 								"only if the user says so",
 								"tr.actions.job_ask_cancel",
-								[](const Xml::ActionArgs&)
+								[](const Xml::ActionArgs& args)
 								{
-									if (auto* question = JobCancelPresenter::shared())
-									{
-										question->ask();
-									}
+									Xml::Prompts::askQuestion(
+										{.title = _("status.print_cancel_title"),
+										 .text = _("status.print_cancel_message"),
+										 .onYes = [] { OM::FileSystem::StopPrint(); }, // Also turns the heaters off
+										 .asker = args.target});
 								});
 	}
 } // namespace UI::JobActions

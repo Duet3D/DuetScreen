@@ -1,0 +1,26 @@
+<!--
+  A number pad prompt: a number pad (numpad.xml) whose footer cancels or hands the number back. Code asks it with
+  Prompts::askNumber() or askText() (src/UI/Xml/Dialogs/Prompts.h); a slider with numberpad="true" asks it when its
+  value is tapped. What is asked for is the step's title.
+
+  Fields and actions: src/UI/Xml/Dialogs/PromptPresenters.h (NumberPrompt), its pad's under `number`
+-->
+<component presenter="dialog_number">
+	<view extends="lv_obj" width="420" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<numpad name="pad" pad="number" width="100%"/>
+
+		<ds_dialog_footer name="footer">
+			<ds_button name="cancel" translation_tag="tr.common.cancel">
+				<style name="dialog_button"/>
+				<action trigger="clicked" name="presenter.number.cancel"/>
+			</ds_button>
+			<ds_button name="ok" translation_tag="tr.common.ok">
+				<style name="dialog_button"/>
+				<style name="action_btn"/>
+				<bind_state_if_eq subject="presenter.number.confirmable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="presenter.number.confirm"/>
+			</ds_button>
+		</ds_dialog_footer>
+	</view>
+</component>

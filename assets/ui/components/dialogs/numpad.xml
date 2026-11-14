@@ -1,0 +1,83 @@
+<!--
+  A number pad: what has been typed, large, in its unit if it has one, with the numbers that can be, over the keys:
+  the digits, the sign and the dot, and beside them backspace and clear. It shows and types into the NumberPad
+  (src/UI/Xml/Dialogs/NumberPad.h) of the presenter around it called `pad`, e.g. the number prompt's (dialog_number.xml)
+  or an alert's (notifications.xml).
+
+  Fields and actions: a NumberPad's, under `pad`: ${pad}.text, ${pad}.unit, ${pad}.range, ${pad}.signed,
+  ${pad}.decimal; ${pad}.key, ${pad}.backspace, ${pad}.sign, ${pad}.clear
+-->
+<component>
+	<api>
+		<prop name="pad" type="string" default="pad"/>
+	</api>
+	<view extends="lv_obj" width="420" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<style name="numpad"/>
+
+		<!-- What has been typed, large, in its unit, and the numbers that can be -->
+		<lv_obj name="readout" width="100%" height="content" flex_flow="row" scrollable="false"
+				style_flex_main_place="space_between" style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="numpad_readout"/>
+			<lv_label name="text" bind_text="presenter.${pad}.text" long_mode="dots">
+				<style name="numpad_value"/>
+				<bind_flag_if_eq subject="presenter.${pad}.text" flag="hidden" ref_value=""/>
+			</lv_label>
+			<!-- Nothing typed is 0 -->
+			<lv_label name="zero" text="0" style_text_opa="50%">
+				<style name="numpad_value"/>
+				<bind_flag_if_not_eq subject="presenter.${pad}.text" flag="hidden" ref_value=""/>
+			</lv_label>
+			<lv_label name="unit" bind_text="presenter.${pad}.unit" flex_grow="1">
+				<style name="numpad_unit"/>
+			</lv_label>
+			<lv_label name="range" bind_text="presenter.${pad}.range">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.${pad}.range" flag="hidden" ref_value=""/>
+			</lv_label>
+		</lv_obj>
+
+		<!-- The digits, with the sign and the dot under them; backspace and clear beside them -->
+		<lv_obj name="keys" width="100%" height="content" scrollable="false" style_layout="grid"
+				style_grid_column_dsc_array="fr(1) fr(1) fr(1) fr(1)" style_grid_row_dsc_array="56 56 56 56">
+			<style name="pad_zero"/>
+			<style name="numpad"/>
+			<numpad_key name="key_7" pad="$pad" key="7" column="0" row="0"/>
+			<numpad_key name="key_8" pad="$pad" key="8" column="1" row="0"/>
+			<numpad_key name="key_9" pad="$pad" key="9" column="2" row="0"/>
+			<numpad_key name="key_4" pad="$pad" key="4" column="0" row="1"/>
+			<numpad_key name="key_5" pad="$pad" key="5" column="1" row="1"/>
+			<numpad_key name="key_6" pad="$pad" key="6" column="2" row="1"/>
+			<numpad_key name="key_1" pad="$pad" key="1" column="0" row="2"/>
+			<numpad_key name="key_2" pad="$pad" key="2" column="1" row="2"/>
+			<numpad_key name="key_3" pad="$pad" key="3" column="2" row="2"/>
+			<ds_button name="sign" text="&#177;" style_grid_cell_column_pos="0" style_grid_cell_row_pos="3"
+					   style_grid_cell_x_align="stretch" style_grid_cell_y_align="stretch">
+				<style name="numpad_key"/>
+				<style name="numpad_key_side"/>
+				<bind_state_if_eq subject="presenter.${pad}.signed" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="presenter.${pad}.sign"/>
+			</ds_button>
+			<numpad_key name="key_0" pad="$pad" key="0" column="1" row="3"/>
+			<!-- No dot for a whole number -->
+			<ds_button name="key_dot" text="." style_grid_cell_column_pos="2" style_grid_cell_row_pos="3"
+					   style_grid_cell_x_align="stretch" style_grid_cell_y_align="stretch">
+				<style name="numpad_key"/>
+				<bind_state_if_eq subject="presenter.${pad}.decimal" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="presenter.${pad}.key" arg="."/>
+			</ds_button>
+			<ds_button name="backspace" text="&#xF55A;" style_grid_cell_column_pos="3" style_grid_cell_row_pos="0"
+					   style_grid_cell_row_span="2" style_grid_cell_x_align="stretch" style_grid_cell_y_align="stretch">
+				<style name="numpad_key"/>
+				<style name="numpad_key_side"/>
+				<action trigger="clicked" name="presenter.${pad}.backspace"/>
+			</ds_button>
+			<ds_button name="clear" text="C" style_grid_cell_column_pos="3" style_grid_cell_row_pos="2"
+					   style_grid_cell_row_span="2" style_grid_cell_x_align="stretch" style_grid_cell_y_align="stretch">
+				<style name="numpad_key"/>
+				<style name="numpad_key_side"/>
+				<action trigger="clicked" name="presenter.${pad}.clear"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

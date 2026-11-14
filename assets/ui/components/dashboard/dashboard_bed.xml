@@ -1,8 +1,13 @@
 <!--
   A bed in the tool list (dashboard_heater_card.xml), named for its sensor, else "Bed <number>".
 
+  Props:    graph_key: whether its colour key shows (dashboard_heater.xml)
   Fields:   a row of om.heat.bedHeaters
 -->
 <component>
-	<view extends="dashboard_heater_card" label_tag="tr.temperature.bed_number"/>
+	<api>
+		<prop name="graph_key" type="bool" default="true"/>
+	</api>
+
+	<view extends="dashboard_heater_card" label_tag="tr.temperature.bed_number" graph_key="$graph_key"/>
 </component>

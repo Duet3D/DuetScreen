@@ -6,6 +6,7 @@
 #include "Debug.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Om/OmList.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
@@ -227,10 +228,16 @@ namespace UI::HeaterActions
 		}
 	}
 
+	/** The lowest target a heater can be given: its minimum, but not below 0 (a heater's minimum is its sensor's) */
+	static float settableMin(const OM::Node& heater)
+	{
+		return std::max(0.0f, static_cast<float>(heater["min"].number()));
+	}
+
 	void setTemperature(Heated what, size_t number, size_t slot, bool active, std::optional<float> value)
 	{
 		ZoneScoped;
-		Xml::NumberRequest request;
+		Xml::Prompts::NumberRequest request;
 		{
 			MODEL_LOCK();
 			switch (what)
@@ -243,7 +250,7 @@ namespace UI::HeaterActions
 					return;
 				}
 				request.header = _("temperature.numpad_header_tool_heater", number, slot, modeText(active));
-				request.min = static_cast<float>(Xml::PrinterModel::heater(*heater)["min"].number());
+				request.min = settableMin(Xml::PrinterModel::heater(*heater));
 				request.max = static_cast<float>(Xml::PrinterModel::heater(*heater)["max"].number());
 				request.onConfirm = [number, slot, active](float v)
 				{
@@ -285,7 +292,7 @@ namespace UI::HeaterActions
 								   bed ? _("temperature.bed") : _("temperature.chamber"),
 								   slot,
 								   modeText(active));
-				request.min = static_cast<float>(Xml::PrinterModel::heater(place->heater)["min"].number());
+				request.min = settableMin(Xml::PrinterModel::heater(place->heater));
 				request.max = static_cast<float>(Xml::PrinterModel::heater(place->heater)["max"].number());
 				request.onConfirm = [bed, number, active](float v)
 				{
@@ -305,7 +312,8 @@ namespace UI::HeaterActions
 			request.onConfirm(*value);
 			return;
 		}
-		Xml::Services::askNumber(std::move(request));
+		request.unit = "°C";
+		Xml::Prompts::askNumber(std::move(request));
 	}
 
 	/**

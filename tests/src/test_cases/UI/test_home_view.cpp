@@ -12,21 +12,25 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Lvgl/LvTextarea.h"
 #include "UI/Presenters/Notifications/NotificationsPresenter.h"
+#include "UI/Styles/Theme.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Inputs/Slider.h"
 #include "UI/Widgets/Layout/TabView.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Data/TemperatureSource.h"
+#include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "helix_xml.h"
 #include "i18n/i18n.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
+#include <algorithm>
 #include <fmt/format.h>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -188,22 +192,8 @@ class TestHomeView : public UiTestSuite
 		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
 	}
 
-	/** The open file dialog (each file browser has one, in the modal host), or nullptr */
-	static lv_obj_t* openFileDialog()
-	{
-		lv_obj_t* host = UI::getModalHost()->getRootPtr();
-		for (uint32_t i = 0; i < lv_obj_get_child_count(host); i++)
-		{
-			lv_obj_t* backdrop = lv_obj_get_child(host, static_cast<int32_t>(i));
-			lv_obj_t* dialog = lv_obj_find_by_name(backdrop, "file_browser_dialog");
-			if (dialog != nullptr && !lv_obj_has_flag(backdrop, LV_OBJ_FLAG_HIDDEN) &&
-				!lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN))
-			{
-				return dialog;
-			}
-		}
-		return nullptr;
-	}
+	/** The file dialog, if it is the step shown (each file browser has one), or nullptr */
+	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_browser_dialog"); }
 
 	static std::string_view labelText(lv_obj_t* parent, const char* name)
 	{
@@ -214,8 +204,15 @@ class TestHomeView : public UiTestSuite
 	{
 		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
 	}
-	/** The Settings page's tabs (0 general, 1 connection, 2 display, 3 developer), as settings.xml builds them
-	 */
+	/** The Settings page's categories, in the order settings.xml lists them */
+	static constexpr size_t SETTINGS_GENERAL = 0;
+	static constexpr size_t SETTINGS_DISPLAY = 1;
+	static constexpr size_t SETTINGS_NOTIFICATIONS = 2;
+	static constexpr size_t SETTINGS_CONNECTION = 3;
+	static constexpr size_t SETTINGS_SYSTEM = 4;
+	static constexpr size_t SETTINGS_DEVELOPER = 5;
+
+	/** The Settings page's categories (SETTINGS_*), as settings.xml builds them */
 	static UI::TabView& settingsPage()
 	{
 		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "tabs");
@@ -231,25 +228,27 @@ class TestHomeView : public UiTestSuite
 		return static_cast<UI::NotificationsPresenter&>(*page<UI::Xml::XmlView>("notifications").getPresenter());
 	}
 
-	/** The widget called `name` in the notifications */
+	/** The widget called `name` in the notifications, or in the alert or update prompt the dialog surface shows */
 	static lv_obj_t* notificationPart(const char* name)
 	{
-		return lv_obj_find_by_name(page<UI::LvObj>("notifications").getRootPtr(), name);
+		lv_obj_t* found = lv_obj_find_by_name(page<UI::LvObj>("notifications").getRootPtr(), name);
+		return found != nullptr ? found : TestDialogs::find(name);
 	}
+
+	/** Whether the dialog surface shows the notifications' dialog called `name` (the alert, the update prompt) */
+	static bool notificationShown(const char* name) { return TestDialogs::shownNamed(name) != nullptr; }
 
 	/** The update prompt's checks shared by the update result tests */
 	static void expectUpdateResult()
 	{
-		lv_obj_t* prompt = notificationPart("update_prompt");
-		ASSERT_NE(prompt, nullptr);
-		EXPECT_FALSE(lv_obj_has_flag(prompt, LV_OBJ_FLAG_HIDDEN));
-		EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(prompt, "ok"), LV_OBJ_FLAG_HIDDEN));
-		EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(prompt, "cancel"), LV_OBJ_FLAG_HIDDEN));
-		EXPECT_STRNE(lv_label_get_text(lv_obj_find_by_name(prompt, "title")), "");
-		EXPECT_STRNE(lv_label_get_text(lv_obj_find_by_name(prompt, "text")), "");
+		ASSERT_TRUE(notificationShown("update_prompt"));
+		EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("ok"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_NE(TestDialogs::title(), "");
+		EXPECT_NE(TestDialogs::text("text"), "");
 	}
 
-	/** The M291 alert's text box */
+	/** The M291 alert's text box, for text (S7) */
 	static UI::LvTextarea& alertInput()
 	{
 		lv_obj_t* input = notificationPart("input");
@@ -304,14 +303,12 @@ TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
 					R"json({"cancelled":false,"name":"gear (Instance 5)","x":[100,150],"y":[100,150]}]}}})json"
 					"\n");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/set_object_name.png");
 
 	load_model_data(R"({"key":"","flags":"d99f","result":{"job":{"build":{"currentObject":-1}}}})"
 					"\n");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/clear_object_name.png");
 }
 
@@ -324,32 +321,27 @@ TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 	openControlTab(3);
 	lv_obj_t* page = UI::findView("object_cancel")->getRootPtr();
-	lv_obj_t* dialog = lv_obj_find_by_name(page, "confirm_object_cancel");
-	ASSERT_NE(dialog, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "title"))),
-			  _("object_cancel.confirm_cancel_current_title"));
-	EXPECT_NE(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "text"))).find("gear (Instance 1)"),
-			  std::string::npos);
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_current_title"));
+	EXPECT_NE(TestDialogs::text("text").find("gear (Instance 1)"), std::string::npos);
+	TestDialogs::tap("no");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	// Pressing the object on the bed asks to cancel it
 	lv_obj_t* rects = lv_obj_find_by_name(page, "objects");
 	ASSERT_NE(rects, nullptr);
 	ASSERT_EQ(lv_obj_get_child_count(rects), 1u);
 	lv_obj_send_event(lv_obj_get_child(rects, 0), LV_EVENT_PRESSED, nullptr);
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(dialog, "title"))),
-			  _("object_cancel.confirm_cancel_title"));
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_title"));
+	TestDialogs::tap("no");
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, false);
 	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "cancelled without asking";
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "cancelled without asking";
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 }
@@ -380,13 +372,57 @@ TEST_F(TestHomeView, JobModalShowsDeleteButton)
 
 	lv_obj_t* dialog = openFileDialog();
 	ASSERT_NE(dialog, nullptr);
-	EXPECT_EQ(labelText(dialog, "title"), "Start Print");
+	EXPECT_EQ(TestDialogs::title(), "Start Print");
 	EXPECT_EQ(labelText(dialog, "text"), "File: test.gcode");
-	EXPECT_FALSE(isHidden(dialog, "delete"));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("delete"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/start_print_modal.png");
 
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(openFileDialog(), nullptr);
+}
+
+TEST_F(TestHomeView, FoldersStandApartFromFiles)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_tiles.png");
+
+	lv_obj_send_event(lv_obj_find_by_name(browser, "display_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_rows.png");
+
+	// In the folder, the path above shows the folders to go back to
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folder_path.png");
+}
+
+TEST_F(TestHomeView, TappingAFileAnywhereOnItOpensIt)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	const auto tapMiddle = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
+
+	// As a tile and as a row: the middle of a tile is its thumbnail's box
+	for (int layout = 0; layout < 2; layout++)
+	{
+		tapMiddle(fileItem(browser, "test.gcode"));
+		EXPECT_NE(openFileDialog(), nullptr) << (layout == 0 ? "a tile" : "a row");
+		UI::closeDialogs();
+		lv_obj_send_event(lv_obj_find_by_name(browser, "display_mode"), LV_EVENT_CLICKED, nullptr);
+		lv_obj_update_layout(lv_screen_active());
+		lv_timer_handler();
+	}
+	lv_test_mouse_release();
 }
 
 TEST_F(TestHomeView, MacroModalHidesDeleteButton)
@@ -397,11 +433,11 @@ TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 
 	lv_obj_t* dialog = openFileDialog();
 	ASSERT_NE(dialog, nullptr);
-	EXPECT_EQ(labelText(dialog, "title"), "Run Macro");
-	EXPECT_TRUE(isHidden(dialog, "delete"));
+	EXPECT_EQ(TestDialogs::title(), "Run Macro");
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("delete"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/run_macro_modal.png");
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
@@ -413,15 +449,18 @@ TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 
 	lv_obj_t* dialog = openFileDialog();
 	ASSERT_NE(dialog, nullptr);
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "delete"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(TestDialogs::find("delete"), LV_EVENT_CLICKED, nullptr);
 
-	ASSERT_EQ(openFileDialog(), dialog) << "the same dialog asks again";
-	EXPECT_EQ(labelText(dialog, "title"), "Delete File");
-	EXPECT_EQ(labelText(dialog, "text"), "Are you sure you want to delete test.gcode?");
-	EXPECT_TRUE(isHidden(dialog, "delete"));
+	// The question is the dialog's next step; going back returns to the job
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Delete File");
+	EXPECT_EQ(TestDialogs::text("text"), "Are you sure you want to delete test.gcode?");
+	EXPECT_EQ(TestDialogs::host().shownSteps(), 2u);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/confirm_delete_modal.png");
+	TestDialogs::tapHeader("back");
+	EXPECT_EQ(openFileDialog(), dialog);
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
@@ -457,24 +496,19 @@ TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 	// Each page's button, in the widget placed for the page
 	auto button = [sidebar](const char* name)
 	{ return lv_obj_find_by_name(lv_obj_find_by_name(sidebar, name), "button"); };
-	auto pump = []
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	};
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
 	// Each button raises nav.open with its page's name
 	lv_obj_send_event(button("control"), LV_EVENT_CLICKED, nullptr);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(UI::findView("control")->isVisible());
 	EXPECT_FALSE(UI::findView("dashboard")->isVisible());
 	EXPECT_TRUE(lv_obj_has_state(button("control"), LV_STATE_CHECKED));
 	EXPECT_FALSE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
 	lv_obj_send_event(button("settings"), LV_EVENT_CLICKED, nullptr);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(UI::findView("settings")->isVisible());
 	EXPECT_FALSE(UI::findView("control")->isVisible());
 	EXPECT_TRUE(lv_obj_has_state(button("settings"), LV_STATE_CHECKED));
@@ -482,7 +516,7 @@ TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 
 	// nav.home closes them all
 	lv_obj_send_event(button("home"), LV_EVENT_CLICKED, nullptr);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(UI::findView("dashboard")->isVisible());
 	EXPECT_FALSE(UI::findView("settings")->isVisible());
 	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
@@ -524,7 +558,7 @@ TEST_F(TestHomeView, HandleUpdateResultSuccess)
 	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_success.png");
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
@@ -539,7 +573,7 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
 	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_failed.png");
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
@@ -554,7 +588,7 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
 	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_warning.png");
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
@@ -563,13 +597,11 @@ TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 	ASSERT_NE(files.getTabButton(1), nullptr);
 
 	Model::get().post<EventType::Status>(OM::PrinterStatus::paused);
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED)) << "a paused job can't be replaced either";
 
 	Model::get().post<EventType::Status>(OM::PrinterStatus::idle);
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_FALSE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
@@ -632,21 +664,18 @@ TEST_F(TestHomeView, AlertS5)
 	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits.png");
 
-	auto& input = alertInput();
-	input.sendEvent(LV_EVENT_FOCUSED);
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_input.png");
-
-	input.setText("-1");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_min.png");
-
-	input.setText("11");
+	// A whole number from 0 to 10, typed on the alert's own pad: no sign, no dot
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("sign"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("key_dot"), LV_STATE_DISABLED));
+	TestDialogs::typeOnPad("11");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_max.png");
 
-	input.setText("10");
+	TestDialogs::tap("backspace");
+	TestDialogs::typeOnPad("0");
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_ok.png");
-
-	input.setText("5.5");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_float.png");
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, AlertS6)
@@ -663,21 +692,16 @@ TEST_F(TestHomeView, AlertS6)
 	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits.png");
 
-	auto& input = alertInput();
-	input.sendEvent(LV_EVENT_FOCUSED);
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_input.png");
-
-	input.setText("-0.1");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_min.png");
-
-	input.setText("10.1");
+	// A number from 0 to 10, with a fraction, typed on the alert's own pad
+	TestDialogs::typeOnPad("10.1");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_max.png");
 
-	input.setText("10");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_ok.png");
-
-	input.setText("5.5");
+	TestDialogs::tap("clear");
+	TestDialogs::typeOnPad("5.5");
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_float.png");
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, AlertS7)
@@ -702,6 +726,25 @@ TEST_F(TestHomeView, AlertS7)
 
 	input.setText("this is ok");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_ok.png");
+
+	// The next alert starts with its own text, not what was typed into the last
+	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
+	notifications().newAlertData(alertInObjectModel());
+	EXPECT_STREQ(alertInput().getText().data(), "default....");
+
+	// The keyboard's OK key answers, once the text can be sent
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	input.setText("short");
+	input.sendEvent(LV_EVENT_READY);
+	EXPECT_TRUE(sent.empty()) << "too short to send";
+	EXPECT_TRUE(notificationShown("alert"));
+	input.setText("this is ok");
+	input.sendEvent(LV_EVENT_READY);
+	EXPECT_EQ(sent,
+			  (std::vector<std::string>{fmt::format("M292 R{{\"this is ok\"}} S{:d}\n", alertInObjectModel().seq)}));
+	EXPECT_FALSE(notificationShown("alert"));
+	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
 class TestHomeViewWithData : public TestHomeView
@@ -758,7 +801,9 @@ TEST_F(TestHomeViewWithData, Dashboard)
 		reading = (reading + 1) % 300;
 	}
 
-	temperatureGraph().showSeries(1, false);
+	// Hidden from the legend, the Revo's line is hidden for its key in the tool list too, which shows it hollow
+	lv_obj_send_event(temperatureGraph().getSeries(1)->legendItem->getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(temperatureGraph().isSeriesShown(1));
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/temperature_graph.png");
 
@@ -769,14 +814,80 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
-	UI::closeAllModals();
+	UI::closeDialogs();
+}
+
+TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
+{
+	// Build the tool list's rows
+	deliverModelEvents();
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
+	temperatures->sample();
+	ASSERT_EQ(temperatureGraph().getSeriesCount(), 3u);
+
+	// The first tool's heater is the Revo: the graph's second series, so its key has the second series colour
+	lv_obj_t* key = lv_obj_find_by_name(lv_obj_find_by_name(dashboardToolList(), "tools"), "graph_key");
+	ASSERT_NE(key, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(key, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_color_eq(lv_obj_get_style_bg_color(key, LV_PART_MAIN), UI::Themes::seriesColor(1)));
+	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
+
+	// Tapping the key hides the line, and the legend shows it hidden
+	lv_obj_send_event(key, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(temperatureGraph().isSeriesShown(1));
+	EXPECT_FALSE(lv_obj_has_state(key, LV_STATE_CHECKED));
+	EXPECT_TRUE(temperatureGraph().isSeriesShown(0));
+
+	// Tapping the legend shows it again, and the key follows
+	lv_obj_send_event(temperatureGraph().getSeries(1)->legendItem->getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(temperatureGraph().isSeriesShown(1));
+	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
+}
+
+TEST_F(TestHomeViewWithData, GraphKeysAreTheToolListsSetting)
+{
+	deliverModelEvents();
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
+	temperatures->sample();
+
+	// Every heater's key follows the setting; the widget is rebuilt with it at once
+	auto keysShown = []
+	{
+		std::vector<bool> shown;
+		lv_obj_tree_walk(
+			dashboardToolList(),
+			[](lv_obj_t* obj, void* user) -> lv_obj_tree_walk_res_t
+			{
+				const char* name = lv_obj_get_name(obj);
+				if (name != nullptr && std::string_view(name) == "graph_key")
+				{
+					static_cast<std::vector<bool>*>(user)->push_back(!lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN));
+				}
+				return LV_OBJ_TREE_WALK_NEXT;
+			},
+			&shown);
+		return shown;
+	};
+	const auto before = keysShown();
+	ASSERT_GE(before.size(), 3u); // At least the first tool's, the dual drive's two
+	EXPECT_TRUE(std::ranges::all_of(before, [](bool shown) { return shown; }));
+
+	auto& editor = UI::Xml::LayoutEditor::get();
+	editor.begin();
+	editor.select("dashboard", "tools");
+	ASSERT_TRUE(editor.setSetting("graph_key", false));
+	const auto after = keysShown();
+	EXPECT_EQ(after.size(), before.size());
+	EXPECT_TRUE(std::ranges::none_of(after, [](bool shown) { return shown; }));
+	editor.cancel();
 }
 
 TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 {
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	lv_obj_t* toolList = dashboardToolList();
 	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
 	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
@@ -791,8 +902,7 @@ TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "active"), LV_STATE_DISABLED));
 
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
 }
@@ -825,8 +935,7 @@ TEST_F(TestHomeViewWithData, ConsoleView)
 	Model::get().post<EventType::Response>(ResponseType::ERROR, std::string("Error response"));
 	Model::get().post<EventType::LogMessage>(
 		Log::DebugLevel::Info, Log::log_time_t{}, std::string("Testing log message"));
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/duet_responses.png")
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list.png");
@@ -879,8 +988,7 @@ TEST_F(TestHomeViewWithData, ConsoleFollowsNewLines)
 		Model::get().post<EventType::Response>(
 			ResponseType::INFO,
 			fmt::format("response {:d}{:s}", i, i % 3 == 0 ? std::string(150, 'x') : std::string("\nsecond line")));
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 		lv_refr_now(nullptr);
 
 		lv_obj_t* last = lv_obj_get_child(output, -1);
@@ -951,50 +1059,88 @@ TEST_F(TestHomeViewWithData, MacroView)
 
 TEST_F(TestHomeViewWithData, SettingsView)
 {
+	// Scroll the settings page shown by the view registered as `view` to its end, so its last rows show too
+	auto scrollToEnd = [](const char* view)
+	{
+		lv_obj_t* root = UI::findView(view)->getRootPtr();
+		lv_obj_update_layout(root);
+		lv_obj_scroll_to_y(root, LV_COORD_MAX, LV_ANIM_OFF);
+	};
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So Connection shows every row
+
 	UI::openScreen(std::string_view("settings"));
 	auto& settings = settingsPage();
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/initial.png")
 
-	settings.setActiveTab(0);
+	settings.setActiveTab(SETTINGS_GENERAL);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/general.png")
 
-	settings.setActiveTab(1);
-	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
-	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
-
-	settings.setActiveTab(2);
+	settings.setActiveTab(SETTINGS_DISPLAY);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display.png")
+	scrollToEnd("settings_display");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display_end.png")
 
-	settings.setActiveTab(3);
+	// The colours are a page of their own, opened from Display; the back key goes back to Display
+	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(display, "colours"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/colours.png")
+	UI::back();
+	runTimers();
+	EXPECT_TRUE(UI::findView("settings_display")->isShownOnScreen());
+
+	settings.setActiveTab(SETTINGS_NOTIFICATIONS);
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/notifications.png")
+
+	settings.setActiveTab(SETTINGS_CONNECTION);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
+	deliverModelEvents();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
+	scrollToEnd("settings_connection");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection_end.png")
+
+	settings.setActiveTab(SETTINGS_SYSTEM);
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/system.png")
+	scrollToEnd("settings_system");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/system_end.png")
+
+	settings.setActiveTab(SETTINGS_DEVELOPER);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
+
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
 }
 
 TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 {
 	UI::openScreen(std::string_view("settings"));
-	settingsPage().setActiveTab(1);
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
 	lv_obj_t* wifi = UI::findView("settings_wifi")->getRootPtr();
 	lv_obj_t* networks = lv_obj_find_by_name(wifi, "list");
 	ASSERT_NE(networks, nullptr);
 	for (int i = 0; i < 50 && lv_obj_get_child_count(networks) == 0; i++) // Scanned on a thread of its own
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 	}
 	ASSERT_GT(lv_obj_get_child_count(networks), 0u);
 
-	// The last network found isn't known, so connecting to it asks for its password
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_networks.png")
+
+	// The last network found is secured and isn't known: tapping it opens it, to join with its password
 	lv_obj_t* unknown = lv_obj_get_child(networks, -1);
-	ASSERT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(unknown, "forget"), LV_OBJ_FLAG_HIDDEN));
-	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "wifi_password_modal");
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(unknown, "lock"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "network_dialog");
 	ASSERT_NE(dialog, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-	lv_obj_send_event(lv_obj_find_by_name(unknown, "connect"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(unknown, LV_EVENT_CLICKED, nullptr);
 	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("forget"), LV_OBJ_FLAG_HIDDEN)) << "it can't be forgotten";
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("join"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("password"), LV_OBJ_FLAG_HIDDEN));
 
 	// Typing the password brings up the keyboard, and the dialog moves out of its way
-	lv_obj_t* input = lv_obj_find_by_name(dialog, "wifi_password_input");
+	lv_obj_t* input = lv_obj_find_by_name(dialog, "password_input");
 	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
 	lv_obj_t* keyboard = lv_obj_find_by_name(home.getRootPtr(), "keyboard");
 	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
@@ -1026,8 +1172,27 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	lv_area_t centred;
 	lv_obj_get_coords(dialog, &centred);
 	EXPECT_GT(centred.y1, dialogArea.y1) << "the dialog is back in the middle";
-	lv_obj_send_event(lv_obj_find_by_name(dialog, "cancel"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::tapHeader("close");
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// The keyboard's OK key joins, as Join does
+	lv_obj_send_event(unknown, LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
+	lv_obj_send_event(input, LV_EVENT_READY, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// The first network is the one the screen is on: it can be left or forgotten, not joined
+	lv_obj_send_event(lv_obj_get_child(networks, 0), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("disconnect"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("forget"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("connect"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("join"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("password"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_network.png")
+	TestDialogs::tapHeader("close");
 }
 
 TEST_F(TestHomeViewWithData, StatusView)
@@ -1044,16 +1209,16 @@ TEST_F(TestHomeViewWithData, StatusView)
 	};
 
 	click("speed_multiplier");
-	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_numberpad.png")
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_dialog.png")
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 
 	click("flow_multiplier");
 	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"extruders":[{"factor":1.2},{}]}}})"
 					"\n");
-	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_dialog.png")
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 
 	click("babystep_button");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
@@ -1081,8 +1246,7 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 
 		UI::home();
 		dashboardTabs().setActiveTab(STATUS_TAB);
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
+		deliverModelEvents();
 		UI::Xml::reload();
 		lv_refr_now(nullptr);
 	}
@@ -1147,8 +1311,7 @@ TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
 {
 	// Built while a job runs, the dashboard's Jobs tab is disabled from the start
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
-	Model::get().startEventLoop();
-	Model::get().stopEventLoop();
+	deliverModelEvents();
 	UI::Xml::reload();
 
 	auto& tabs = dashboardTabs();
@@ -1178,33 +1341,27 @@ TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
 
 TEST_F(TestHomeView, AlertFollowsTheMessageBox)
 {
-	const auto deliver = []
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	};
-	lv_obj_t* alert = notificationPart("alert");
-
+	const auto deliver = [] { deliverModelEvents(); };
 	// A new message box opens the alert
 	load_model_data_from_file("tests/object_model/m291/s3.json");
 	deliver();
-	EXPECT_FALSE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(notificationShown("alert"));
 
 	// Once answered, the same box sent again (the same sequence number) doesn't open it again
-	lv_obj_send_event(lv_obj_find_by_name(alert, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(notificationShown("alert"));
 	load_model_data_from_file("tests/object_model/m291/s3.json");
 	deliver();
-	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(notificationShown("alert"));
 
 	// Another box opens it, and the box going away closes it
 	load_model_data_from_file("tests/object_model/m291/s0.json");
 	deliver();
-	EXPECT_FALSE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(notificationShown("alert"));
 	load_model_data(R"({"key":"state","flags":"vn","result":{"messageBox":null}})"
 					"\n");
 	deliver();
-	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(notificationShown("alert"));
 }
 
 TEST_F(TestHomeView, TappingOutsideATextBoxPutsTheKeyboardAway)
@@ -1217,7 +1374,7 @@ TEST_F(TestHomeView, TappingOutsideATextBoxPutsTheKeyboardAway)
 	lv_indev_set_group(pointer, group);
 	UI::Xml::reload();
 
-	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
+	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
 	notifications().newAlertData(alertInObjectModel());
 	lv_obj_t* input = notificationPart("input");
 	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
@@ -1252,7 +1409,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	lv_obj_t* response = notificationPart("response");
-	auto alertPart = [](const char* name) { return lv_obj_find_by_name(notificationPart("alert"), name); };
+	auto alertPart = [](const char* name) { return TestDialogs::find(name); };
 	auto click = [&](const char* name) { lv_obj_send_event(alertPart(name), LV_EVENT_CLICKED, nullptr); };
 
 	// A response waits while an alert is open
@@ -1265,7 +1422,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	const uint32_t seq3 = alertInObjectModel().seq;
 	click("cancel");
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 P1 S{:d}\n", seq3)}));
-	EXPECT_TRUE(lv_obj_has_flag(notificationPart("alert"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(notificationShown("alert"));
 	EXPECT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN)) << "then the response shows";
 	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
 
@@ -1273,7 +1430,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	sent.clear();
 	load_model_data_from_file("tests/object_model/m291/s4.json");
 	notifications().newAlertData(alertInObjectModel());
-	lv_obj_t* choices = lv_obj_find_by_name(notificationPart("choices_list"), "list");
+	lv_obj_t* choices = notificationPart("choices");
 	ASSERT_EQ(lv_obj_get_child_count(choices), 3u);
 	lv_obj_send_event(lv_obj_get_child(choices, 1), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{1}} S{:d}\n", alertInObjectModel().seq)}));
@@ -1282,9 +1439,10 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	sent.clear();
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
 	notifications().newAlertData(alertInObjectModel());
-	alertInput().setText("11");
+	TestDialogs::typeOnPad("11");
 	EXPECT_TRUE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
-	alertInput().setText("7");
+	TestDialogs::tap("clear");
+	TestDialogs::typeOnPad("7");
 	EXPECT_FALSE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
 	click("ok");
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", alertInObjectModel().seq)}));
@@ -1293,13 +1451,6 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 
 namespace
 {
-	/** Run the Model's queued events, as the main loop would */
-	void runEvents()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	}
-
 	/** Whether `obj` and every widget it is in are shown */
 	bool shownOnScreen(lv_obj_t* obj)
 	{
@@ -1313,11 +1464,10 @@ namespace
 		return true;
 	}
 
-	/** The shared number pad's dialog if it is open, else nullptr */
+	/** The number pad prompt if it is the step shown, else nullptr */
 	lv_obj_t* openNumberPad()
 	{
-		lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "numberpad_dialog");
-		return dialog != nullptr && shownOnScreen(dialog) ? dialog : nullptr;
+		return TestDialogs::shownNamed("dialog_number");
 	}
 
 	/**
@@ -1326,7 +1476,7 @@ namespace
 	 */
 	bool tapShowsNumberPad(const char* view, const char* within, const char* name, bool sliderValue = false)
 	{
-		UI::closeAllModals();
+		UI::closeDialogs();
 		lv_obj_t* obj = UI::findView(view)->getRootPtr();
 		if (within != nullptr)
 		{
@@ -1349,7 +1499,9 @@ namespace
 
 TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
-	runEvents(); // Fill the lists from the object model
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So the poll interval shows
+	deliverModelEvents();									   // Fill the lists from the object model
 	{
 		lv_obj_t* toolList = dashboardToolList();
 		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
@@ -1366,19 +1518,30 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	EXPECT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true)) << "fan slider";
 
 	UI::openScreen(std::string_view("settings"), false);
-	settingsPage().setActiveTab(0);
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "brightness", true)) << "brightness";
-	settingsPage().setActiveTab(1);
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true)) << "poll interval";
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "duet_ip_address")) << "IP address";
-	settingsPage().setActiveTab(2);
-	EXPECT_TRUE(tapShowsNumberPad("settings", nullptr, "chroma_slider", true)) << "chroma";
-	UI::closeAllModals();
+	settingsPage().setActiveTab(SETTINGS_DISPLAY);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "brightness", "slider", true)) << "brightness";
+	EXPECT_TRUE(tapShowsNumberPad("settings", "screensaver_timeout", "slider", true)) << "screensaver";
+	settingsPage().setActiveTab(SETTINGS_NOTIFICATIONS);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "notification_timeout", "slider", true)) << "notification timeout";
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true)) << "poll interval";
+	EXPECT_TRUE(tapShowsNumberPad("settings", "duet_ip_address", "field")) << "IP address";
+
+	// The colours, a page opened from Display
+	settingsPage().setActiveTab(SETTINGS_DISPLAY);
+	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(display, "colours"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_TRUE(tapShowsNumberPad("settings", "chroma", "slider", true)) << "chroma";
+	UI::closeDialogs();
+	UI::back();
+	runTimers();
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
 }
 
 TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
 {
-	runEvents();
+	deliverModelEvents();
 	openControlTab(1);
 	lv_obj_t* factors = lv_obj_find_by_name(UI::findView("temperature")->getRootPtr(), "extrusion_factors");
 	ASSERT_NE(factors, nullptr);
@@ -1387,7 +1550,7 @@ TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
 	ASSERT_NE(firstFactor, nullptr);
 	lv_obj_send_event(firstFactor, LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
-	UI::closeAllModals();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
@@ -1407,70 +1570,73 @@ TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
 
 TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
 {
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, true); // So the poll interval shows
 	UI::openScreen(std::string_view("settings"), false);
-	settingsPage().setActiveTab(1);
-	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
 	lv_obj_t* dialog = openNumberPad();
 
 	// Typed on the keys, then OK
-	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "1234");
-	lv_obj_t* keys = lv_obj_find_by_name(dialog, "keys");
-	lv_obj_send_event(keys, LV_EVENT_READY, nullptr);
+	EXPECT_EQ(TestDialogs::text("range"), "100 ms or more") << "in the slider's unit";
+	TestDialogs::enterOnPad("1234");
 	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
-	auto& slider = static_cast<UI::Slider&>(
-		*UI::LvObj::fromPtr(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval")));
+	auto& slider = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(
+		lv_obj_find_by_name(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval"), "slider")));
 	EXPECT_EQ(slider.getValue(), 1234.0f);
 
 	// Out of range: OK does nothing
-	ASSERT_TRUE(tapShowsNumberPad("settings", nullptr, "poll_interval", true));
-	lv_textarea_set_text(lv_obj_find_by_name(dialog, "text"), "5");
-	lv_obj_send_event(keys, LV_EVENT_READY, nullptr);
+	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
+	dialog = openNumberPad();
+	TestDialogs::enterOnPad("5");
 	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
 	EXPECT_EQ(slider.getValue(), 1234.0f);
-	UI::closeAllModals();
+	UI::closeDialogs();
+	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, advanced);
 }
 
 TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
 {
 	// The fans go while one's question is open, taking its slider: the question goes, and nothing answers the slider
-	runEvents();
+	deliverModelEvents();
 	openControlTab(4);
 	ASSERT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true));
 	load_model_data(R"({"key":"fans","flags":"v","result":[]})"
 					"\n");
-	runEvents();
+	deliverModelEvents();
 	EXPECT_EQ(openNumberPad(), nullptr);
 }
 
-TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactor)
+TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 {
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
-	runEvents();
+	deliverModelEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "flow_multiplier"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
-	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "extrusion_dialog");
+	lv_obj_t* dialog = TestDialogs::shownNamed("extrusion_dialog");
 	ASSERT_NE(dialog, nullptr);
-	ASSERT_TRUE(shownOnScreen(dialog));
-	lv_obj_t* pad = lv_obj_find_by_name(dialog, "numberpad");
-	EXPECT_TRUE(shownOnScreen(pad)) << "the number pad starts on the first extruder";
-	EXPECT_EQ(labelText(pad, "header"), "Extruder 0");
+	EXPECT_EQ(TestDialogs::title(), _("fine_tune.extruder_header"));
 
-	// Tap the second extruder's value: the pad is for it now
+	// Tap the second extruder's value: a number pad for it, the dialog's next step
 	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
 	ASSERT_EQ(lv_obj_get_child_count(rows), 2u);
 	auto& second = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(rows, 1)));
 	lv_obj_send_event(second.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(labelText(pad, "header"), "Extruder 1");
+	lv_obj_t* pad = TestDialogs::shownNamed("dialog_number");
+	ASSERT_NE(pad, nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Extruder 1");
+	EXPECT_EQ(TestDialogs::text("range"), "1 or more");
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
 
-	// Type 95 and confirm: sent, and the dialog closes
-	lv_textarea_set_text(lv_obj_find_by_name(pad, "text"), "95");
-	lv_obj_send_event(lv_obj_find_by_name(pad, "keys"), LV_EVENT_READY, nullptr);
+	// Type 95 and confirm: sent, and back to the factors
+	TestDialogs::enterOnPad("95");
 	ASSERT_EQ(sent.size(), 1u);
 	EXPECT_EQ(sent[0], "M221 D1 S95\n");
-	EXPECT_FALSE(shownOnScreen(dialog));
+	EXPECT_EQ(TestDialogs::shown(), dialog);
+	UI::closeDialogs();
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
@@ -1483,7 +1649,7 @@ TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 	auto letGo = [estop](float fraction)
 	{
 		lv_obj_send_event(estop, UI::Xml::Actions::valueConfirmedEvent(), &fraction);
-		runEvents();
+		deliverModelEvents();
 	};
 
 	letGo(0.7f); // Dragged most of the way, then let go: nothing
@@ -1502,56 +1668,60 @@ TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 {
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
-	runEvents();
+	deliverModelEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
-	// A dialog opens over the main window, not in the view it belongs to
-	lv_obj_t* question = lv_obj_find_by_name(lv_screen_active(), "confirm_cancel");
-	ASSERT_NE(question, nullptr);
-	EXPECT_FALSE(shownOnScreen(question));
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
-	// The job panel's Cancel button asks the shared question
+	// The job panel's Cancel button asks the question
 	lv_obj_t* cancel = lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "cancel");
 	ASSERT_NE(cancel, nullptr);
 	EXPECT_FALSE(lv_obj_has_state(cancel, LV_STATE_DISABLED)) << "a paused job can be cancelled";
 	lv_obj_send_event(cancel, LV_EVENT_CLICKED, nullptr);
-	ASSERT_TRUE(shownOnScreen(question));
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("status.print_cancel_title"));
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/cancel_question.png")
 
 	// Answering no closes it
-	lv_obj_send_event(lv_obj_find_by_name(question, "cancel"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_FALSE(shownOnScreen(question));
+	TestDialogs::tap("no");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	// Any view can ask it, e.g. a button placed in the sidebar
 	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "actions.job.ask_cancel", "");
-	EXPECT_TRUE(shownOnScreen(question));
-	UI::closeAllModals();
+	EXPECT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	UI::closeDialogs();
 }
 
-TEST_F(TestHomeViewWithData, FactorDialogNumberPadTextStartsUnscrolled)
+TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
 {
-	// The pad's text is written while the pad is hidden and has no size; once shown, it must not scroll out of view
-	runEvents();
+	// At 200% the speed slider shows 150% to 250%, but the speed may be anything from 1% up
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
+	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"speedFactor":2}}})"
+					"\n");
+	deliverModelEvents();
 	dashboardTabs().setActiveTab(STATUS_TAB);
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
-	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "speed_dialog");
+	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");
 	ASSERT_NE(dialog, nullptr);
-	lv_obj_t* pad = lv_obj_find_by_name(dialog, "numberpad");
-	ASSERT_FALSE(shownOnScreen(pad)) << "the pad starts hidden";
-
 	auto& speed =
 		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0)));
-	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
-	ASSERT_TRUE(shownOnScreen(pad));
-	for (int i = 0; i < 10; i++) // Let any scroll animation finish
-	{
-		lv_tick_inc(100);
-		lv_timer_handler();
-	}
+	ASSERT_EQ(speed.getValue(), 200.0f);
+	EXPECT_EQ(speed.getMin(), 150.0f);
 
-	lv_obj_t* text = lv_obj_find_by_name(pad, "text");
-	EXPECT_EQ(lv_obj_get_scroll_x(text), 0);
-	EXPECT_EQ(lv_obj_get_scroll_y(text), 0);
-	UI::closeAllModals();
+	// The number pad takes anything from 1%
+	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
+	EXPECT_EQ(TestDialogs::text("range"), "1 or more");
+	TestDialogs::tapHeader("back");
+
+	// Reset goes back to 100%, below the window
+	lv_obj_send_event(lv_obj_find_by_name(speed.getRootPtr(), "reset"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(sent.size(), 1u);
+	EXPECT_EQ(sent[0], "M220 S100\n");
+	EXPECT_EQ(speed.getValue(), 100.0f);
+	EXPECT_EQ(speed.getMin(), 50.0f) << "the window follows";
+	UI::closeDialogs();
+	UI::Xml::Services::setGcodeSender(nullptr);
 }

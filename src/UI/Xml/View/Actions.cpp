@@ -40,7 +40,6 @@ namespace UI::Xml
 		ActionHandlerSet s_globals;						  // Actions no presenter handles
 		lv_event_code_t s_valueConfirmed = LV_EVENT_LAST; // Registered at init()
 		lv_event_code_t s_dismissed = LV_EVENT_LAST;	  // Registered at init()
-		lv_event_code_t s_valueTapped = LV_EVENT_LAST;	  // Registered at init()
 
 		/** Forget a deleted widget */
 		void targetDeletedCb(lv_event_t* e)
@@ -160,10 +159,6 @@ namespace UI::Xml
 			{
 				return s_dismissed;
 			}
-			if (lv_streq(trigger, "value_tapped"))
-			{
-				return s_valueTapped;
-			}
 			return lv_xml_trigger_text_to_enum_value(trigger);
 		}
 
@@ -229,7 +224,7 @@ namespace UI::Xml
 		if (event != nullptr)
 		{
 			const lv_event_code_t code = lv_event_get_code(event);
-			if ((code == s_valueConfirmed || code == s_valueTapped) && lv_event_get_param(event) != nullptr)
+			if (code == s_valueConfirmed && lv_event_get_param(event) != nullptr)
 			{
 				return *static_cast<const float*>(lv_event_get_param(event));
 			}
@@ -345,7 +340,6 @@ namespace UI::Xml
 		{
 			s_valueConfirmed = static_cast<lv_event_code_t>(lv_event_register_id());
 			s_dismissed = static_cast<lv_event_code_t>(lv_event_register_id());
-			s_valueTapped = static_cast<lv_event_code_t>(lv_event_register_id());
 			Widgets::add(
 				{.name = "lv_obj-action",
 				 .description = "Written `<action>` inside any widget: run the named action when the widget raises the "
@@ -361,8 +355,7 @@ namespace UI::Xml
 					  {"trigger",
 					   "The event that runs it (default `clicked`): an LVGL event name such as "
 					   "`value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is "
-					   "finished), `value_tapped` (a `<ds_slider numberpad=\"own\">`'s value was tapped to "
-					   "type one) or `dismissed` (a `<ds_modal>` was closed by the user)",
+					   "finished) or `dismissed` (a `<ds_dialog>` was closed by the user without answering it)",
 					   AttributeKind::Trigger},
 					  {"arg",
 					   "Passed to the handler. `{event.value}` is replaced by the edited value, and `{name}` by "
@@ -379,7 +372,6 @@ namespace UI::Xml
 			s_targets.clear();
 			s_valueConfirmed = LV_EVENT_LAST;
 			s_dismissed = LV_EVENT_LAST;
-			s_valueTapped = LV_EVENT_LAST;
 		}
 
 		lv_event_code_t valueConfirmedEvent()
@@ -390,11 +382,6 @@ namespace UI::Xml
 		lv_event_code_t dismissedEvent()
 		{
 			return s_dismissed;
-		}
-
-		lv_event_code_t valueTappedEvent()
-		{
-			return s_valueTapped;
 		}
 
 		void setHandlers(lv_obj_t* obj, const ActionHandlerSet* handlers)
@@ -477,7 +464,6 @@ namespace UI::Xml
 			}
 			names.emplace_back("value_confirmed");
 			names.emplace_back("dismissed");
-			names.emplace_back("value_tapped");
 			return names;
 		}
 

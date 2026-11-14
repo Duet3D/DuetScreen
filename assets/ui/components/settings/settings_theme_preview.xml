@@ -1,72 +1,47 @@
 <!--
-  The theme preview: a swatch of each colour of the theme in use and, for a theme whose palette can be changed, its
-  hues (on sliders showing every hue), chroma and dark mode, which change it as they are moved.
+  The theme's colours (Settings > Display > Colours, a page of its own): for a theme whose palette can be changed, its
+  hues (on sliders showing every hue) and chroma, which change it as they are moved; then a swatch of each colour the
+  theme gives the screen. Dark mode is on the Display page.
 
   Fields and actions: src/UI/Presenters/Settings/ThemePreviewPresenter.h. Values are typed on the shared number pad.
 -->
 <component presenter="settings_theme_preview">
-	<view extends="lv_obj" width="100%" height="content" style_layout="grid"
-		  style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content content content content">
-		<lv_obj name="swatches" width="100%" height="content" flex_flow="column"
-				style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-				style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
-			<ds_list name="list" list="presenter.swatches" item="settings_theme_swatch" width="100%" height="content" flex_flow="row_wrap"
-					 style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start"/>
-		</lv_obj>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<style name="setting_page"/>
 
 		<!-- The palette, if it can be changed -->
-		<lv_label name="primary_hue_label" translation_tag="tr.theme.primary_hue"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+		<ds_setting_group name="palette" title_tag="tr.settings.groups.palette">
 			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<ds_hue_slider name="primary_hue_slider" label_tag="tr.theme.primary_hue" label_shown="false" numberpad="true"
-					   bind_value="presenter.primary_hue" bind_lightness="presenter.primary.lightness" bind_chroma="presenter.primary.chroma"
-					   height="content"
-					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-					   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-			<action trigger="value_confirmed" name="presenter.preview.primary_hue"/>
-		</ds_hue_slider>
+			<ds_setting name="primary_hue" title_tag="tr.theme.primary_hue">
+				<ds_hue_slider name="slider" label_tag="tr.theme.primary_hue" label_shown="false" numberpad="true"
+							   bind_value="presenter.primary_hue" bind_lightness="presenter.primary.lightness"
+							   bind_chroma="presenter.primary.chroma" width="60%" height="content">
+					<action trigger="value_confirmed" name="presenter.preview.primary_hue"/>
+				</ds_hue_slider>
+			</ds_setting>
+			<ds_setting name="secondary_hue" title_tag="tr.theme.secondary_hue">
+				<ds_hue_slider name="slider" label_tag="tr.theme.secondary_hue" label_shown="false" numberpad="true"
+							   bind_value="presenter.secondary_hue" bind_lightness="presenter.secondary.lightness"
+							   bind_chroma="presenter.secondary.chroma" width="60%" height="content">
+					<action trigger="value_confirmed" name="presenter.preview.secondary_hue"/>
+				</ds_hue_slider>
+			</ds_setting>
+			<ds_setting name="chroma" title_tag="tr.theme.chroma">
+				<ds_slider name="slider" label_tag="tr.theme.chroma" label_shown="false" numberpad="true" min="0"
+						   max="0.4" increment="0.01" bind_value="presenter.chroma" value_scale="100" width="60%"
+						   height="content">
+					<action trigger="value_confirmed" name="presenter.preview.chroma"/>
+				</ds_slider>
+			</ds_setting>
+		</ds_setting_group>
 
-		<lv_label name="secondary_hue_label" translation_tag="tr.theme.secondary_hue"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<ds_hue_slider name="secondary_hue_slider" label_tag="tr.theme.secondary_hue" label_shown="false" numberpad="true"
-					   bind_value="presenter.secondary_hue" bind_lightness="presenter.secondary.lightness"
-					   bind_chroma="presenter.secondary.chroma" height="content"
-					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-					   style_grid_cell_row_pos="2" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-			<action trigger="value_confirmed" name="presenter.preview.secondary_hue"/>
-		</ds_hue_slider>
-
-		<lv_label name="chroma_label" translation_tag="tr.theme.chroma"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<ds_slider name="chroma_slider" label_tag="tr.theme.chroma" label_shown="false" numberpad="true" min="0" max="0.4"
-				   increment="0.01" bind_value="presenter.chroma" value_scale="100" height="content"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-				   style_grid_cell_row_pos="3" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-			<action trigger="value_confirmed" name="presenter.preview.chroma"/>
-		</ds_slider>
-
-		<lv_label name="dark_mode_label" translation_tag="tr.theme.dark_mode"
-				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
-				  style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-		</lv_label>
-		<ds_toggle name="dark_mode"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="start"
-				   style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
-			<bind_flag_if_eq subject="presenter.controls_shown" flag="hidden" ref_value="0"/>
-			<bind_state_if_eq subject="presenter.dark" state="checked" ref_value="1"/>
-			<action trigger="value_changed" name="presenter.preview.dark"/>
-		</ds_toggle>
+		<ds_setting_group name="roles" title_tag="tr.settings.groups.colour_roles">
+			<ds_list name="list" list="presenter.swatches" item="settings_theme_swatch" width="100%" height="content"
+					 flex_flow="row_wrap" style_flex_main_place="center" style_flex_cross_place="center"
+					 style_flex_track_place="start" style_pad_all="12">
+				<style name="setting_row"/>
+			</ds_list>
+		</ds_setting_group>
 	</view>
 </component>

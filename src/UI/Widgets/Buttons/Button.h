@@ -23,6 +23,11 @@ namespace UI
 		void setIcon(std::string_view icon_path);
 		void setFixedIcon(const std::string& icon_path);
 		void clearIcon();
+		/**
+		 * Put the icon before the text, `iconSize` square, both in a row from the start (true); or over the text, as
+		 * wide as the button, both centred (false, as a button starts)
+		 */
+		void setIconBeforeText(bool before, lv_coord_t iconSize = 0);
 		void setCheckable(bool checkable);
 		void setChecked(const bool checked);
 		bool getChecked() const;

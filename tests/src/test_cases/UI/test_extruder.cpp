@@ -34,13 +34,6 @@ class TestExtruder : public UiTestSuite
 		return lv_obj_has_state(lv_obj_find_by_name(panel.getRootPtr(), name), LV_STATE_DISABLED);
 	}
 
-	/** Run the Model's queued events, as the main loop would */
-	static void runEvents()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	}
-
 	/** The value the selector called `selector` shows */
 	std::string_view valueOf(const char* selector) { return lv_textarea_get_text(part(selector, "value")); }
 
@@ -68,7 +61,7 @@ TEST_F(TestExtruder, ColdExtrusionAllowedNeedsNoHeat)
 	// A live response: heater 2 reads nothing (the other heaters, sent empty, keep what they have)
 	load_model_data(R"({"key":"","flags":"d99f","result":{"heat":{"heaters":[{},null,{"current":-273.15},{},{}]}}})"
 					"\n");
-	runEvents();
+	deliverModelEvents();
 	{
 		MODEL_LOCK();
 		ASSERT_EQ(OM::Tree::get().root().at("heat.coldExtrudeTemperature").number(-1), 0.0);
@@ -80,7 +73,7 @@ TEST_F(TestExtruder, ColdExtrusionAllowedNeedsNoHeat)
 	load_model_data(
 		R"({"key":"","flags":"d99f","result":{"heat":{"coldExtrudeTemperature":160,"coldRetractTemperature":90}}})"
 		"\n");
-	runEvents();
+	deliverModelEvents();
 	EXPECT_TRUE(disabled("extrude"));
 	EXPECT_TRUE(disabled("retract"));
 }

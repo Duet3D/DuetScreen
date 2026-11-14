@@ -19,8 +19,6 @@ namespace UI
 {
 	namespace
 	{
-		constexpr float MAX_PERCENT = 10000.0f; // The most that can be typed for either factor
-
 		/** `percent` rounded to a whole number */
 		uint32_t whole(float percent)
 		{
@@ -44,8 +42,6 @@ namespace UI
 		: XmlPresenter("factors")
 		, m_speed({.id = "speed_dialog",
 				   .title = _("fine_tune.speed_factor"),
-				   .min = 1.0f,
-				   .max = MAX_PERCENT,
 				   .sliderMin = 1,
 				   .sliderMax = 150,
 				   .rangeFollowsValue = true,
@@ -60,11 +56,8 @@ namespace UI
 		, m_extrusion(
 			  {.id = "extrusion_dialog",
 			   .title = _("fine_tune.extruder_header"),
-			   .min = 0.0f,
-			   .max = MAX_PERCENT,
-			   .sliderMin = 0,
+			   .sliderMin = 1,
 			   .sliderMax = 200,
-			   .padOnOpen = true,
 			   .onSet = [this](size_t index, float percent)
 			   {
 				   std::optional<size_t> extruder;

@@ -16,7 +16,7 @@
  *
  * Triggers are LVGL's event names (`clicked`, `value_changed`, `long_pressed`, ...) plus `value_confirmed`, which
  * DuetScreen widgets raise once an edit is finished (a slider is released, or a value is typed in), and `dismissed`,
- * which a `<ds_modal>` raises when the user closes it (see Widgets/DsModal.h).
+ * which a `<ds_dialog>` raises when the user leaves it without answering (see Xml/Dialogs/DsDialog.h).
  *
  * `arg` may contain `{name}` placeholders. `{event.value}` is the edited value; any other name is replaced by the
  * current value of the subject of that name, looked up from where the `<action>` was written. E.g. in a fan row:
@@ -47,7 +47,7 @@ namespace UI::Xml
 		lv_obj_t* target = nullptr;	 // The widget the `<action>` belongs to
 
 		/** The value an edit produced (`value_confirmed`; `value_changed` on a ds_slider, slider, arc, dropdown (the
-		 * option's index) or checkable), or the value tapped (`value_tapped`), else `arg` as a number */
+		 * option's index) or checkable), else `arg` as a number */
 		std::optional<float> value() const;
 
 		/** As value(), but only an edit's or a tap's value, never `arg` */
@@ -154,11 +154,8 @@ namespace UI::Xml
 		/** The event DuetScreen widgets send, with a `float*` parameter, when an edit is confirmed */
 		lv_event_code_t valueConfirmedEvent();
 
-		/** The event a `<ds_modal>` sends when it is closed other than by its subject (tapped outside, back, …) */
+		/** The event a `<ds_dialog>` sends when the user leaves it without answering (close, back, tapped outside) */
 		lv_event_code_t dismissedEvent();
-
-		/** The event a `<ds_slider numberpad="own">` sends when its value is tapped, for the view to ask for one */
-		lv_event_code_t valueTappedEvent();
 
 		/** Actions from `obj` and the widgets inside it try `handlers` before outer ones. Until `obj` is deleted. */
 		void setHandlers(lv_obj_t* obj, const ActionHandlerSet* handlers);

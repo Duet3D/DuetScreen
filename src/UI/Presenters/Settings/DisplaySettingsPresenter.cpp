@@ -41,7 +41,7 @@ namespace UI
 	} // namespace
 
 	DisplaySettingsPresenter::DisplaySettingsPresenter()
-		: XmlPresenter("settings_display")
+		: SettingsPresenter("settings_display")
 	{
 		std::string themes;
 		for (const auto& [name, theme] : Themes::getThemes())
@@ -86,6 +86,7 @@ namespace UI
 				   m_theme.set(static_cast<int32_t>(args.value().value_or(0)));
 				   theme->setThemeActive();
 				   StorageHelper::setData(ID_THEME, theme->getName());
+				   showTheme();
 				   Model::get().post<EventType::ThemeChanged>();
 			   });
 		action("settings.font",
@@ -111,14 +112,35 @@ namespace UI
 					   Themes::setIconFolder(m_iconSets[index]);
 				   }
 			   });
-		action("settings.animations",
+		toggle("settings.animations",
 			   "Turn UI animations on (edited value 1) or off (0)",
-			   [this](const Xml::ActionArgs& args)
+			   m_animations,
+			   [](bool on) { StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, on); });
+		toggle("settings.dark",
+			   "Put the theme in use in dark mode (edited value 1) or light mode (0), if its palette can be changed",
+			   m_dark,
+			   [this](bool on)
 			   {
-				   const bool enabled = args.value().value_or(0.0f) != 0.0f;
-				   m_animations.set(enabled ? 1 : 0);
-				   StorageHelper::setData(ID_UI_ANIMATIONS_ENABLED, enabled);
+				   if (Themes::changeCurrentPalette([on](Themes::PaletteInputs& palette) { palette.dark = on; }))
+				   {
+					   Model::get().post<EventType::ThemeChanged>();
+				   }
+				   showTheme();
 			   });
+		setting("settings.brightness",
+				"Set the screen brightness to the edited value, 0-100",
+				[this](float value)
+				{
+					m_brightness.set(static_cast<int32_t>(value));
+					DisplayHelper::setBrightness(static_cast<unsigned int>(value));
+				});
+		setting("settings.screensaver_timeout",
+				"Dim the screen after the edited value, in seconds, without a touch; 0 for never",
+				[this](float value)
+				{
+					m_screensaverTimeout.set(static_cast<int32_t>(value));
+					StorageHelper::setData(ID_SCREENSAVER_TIMEOUT, std::chrono::seconds(static_cast<int32_t>(value)));
+				});
 		action("settings.rotation",
 			   "Rotate the screen as the edited index of `rotations` says",
 			   [this](const Xml::ActionArgs& args)
@@ -145,6 +167,13 @@ namespace UI
 		f.field("rotations", m_rotations, "Screen rotations offered, one per line");
 		f.field("rotation", m_rotation, "Index of the rotation in use");
 		f.field("animations", m_animations, "1 if the UI animates");
+		f.field("brightness", m_brightness, "Brightness, 0-100");
+		f.field(
+			"screensaver_timeout", m_screensaverTimeout, "Seconds without a touch before the screen dims; 0 for never");
+		f.field("dark", m_dark, "1 if the theme in use is in dark mode");
+		f.field("dark_shown", m_darkShown, "1 if the theme in use can change between dark and light mode");
+		f.field("primary_color", m_primary, "The theme's primary colour");
+		f.field("secondary_color", m_secondary, "The theme's secondary colour");
 	}
 
 	void DisplaySettingsPresenter::onActivate()
@@ -175,12 +204,39 @@ namespace UI
 			}
 		}
 		m_animations.set(StorageHelper::getData(ID_UI_ANIMATIONS_ENABLED) ? 1 : 0);
+		m_brightness.set(static_cast<int32_t>(DisplayHelper::getBrightness()));
+		m_screensaverTimeout.set(static_cast<int32_t>(StorageHelper::getData(ID_SCREENSAVER_TIMEOUT).count()));
+		showTheme();
 		for (size_t i = 0; i < ROTATIONS.size(); i++)
 		{
 			if (ROTATIONS[i].rotation == DisplayHelper::getRotation())
 			{
 				m_rotation.set(static_cast<int32_t>(i));
 			}
+		}
+	}
+
+	void DisplaySettingsPresenter::onInit()
+	{
+		registerEventListener<EventType::ThemeChanged>(
+			[this]()
+			{
+				UI_LOCK();
+				showTheme();
+			});
+	}
+
+	void DisplaySettingsPresenter::showTheme()
+	{
+		const Themes::Theme* theme = Themes::getCurrentTheme();
+		const bool changeable = theme != nullptr && theme->isCustomisable();
+		m_darkShown.set(changeable ? 1 : 0);
+		m_dark.set(theme != nullptr && theme->getPalette().dark ? 1 : 0);
+		if (theme != nullptr)
+		{
+			const auto colors = theme->getColors();
+			m_primary.set(colors.primary);
+			m_secondary.set(colors.secondary);
 		}
 	}
 } // namespace UI

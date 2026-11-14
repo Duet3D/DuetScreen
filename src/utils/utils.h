@@ -43,6 +43,13 @@ namespace utils
 	/** `value` with at most `maxDecimals` decimals and no trailing zeros in them, e.g. 2.50 is "2.5" and 100 "100" */
 	std::string formatFloat(double value, int maxDecimals = 6);
 
+	/**
+	 * `text` (UTF-8) in capitals, e.g. a heading drawn in capitals whatever its translation. Letters of the scripts
+	 * the screen's languages use (ASCII, Latin-1 and Latin Extended-A) are changed; any other character, and one
+	 * with no capital of its own such as ß, is left as it is.
+	 */
+	std::string toUpper(std::string_view text);
+
 	std::string readFileToString(std::filesystem::path file);
 } // namespace utils
 

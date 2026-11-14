@@ -17,7 +17,7 @@ namespace UI::Xml
 	}
 
 	DsToggle::DsToggle(const std::string& name, LvObjRef&& parent)
-		: UI_SETTINGS_TOGGLE_WIDGET(name, parent)
+		: LvSwitch(name, parent)
 	{
 	}
 
@@ -25,9 +25,8 @@ namespace UI::Xml
 	{
 		Widgets::add({.name = "ds_toggle",
 					  .extends = "lv_obj",
-					  .description = "An on/off setting, drawn as the build's toggle (a check box or a switch), so "
-									 "every setting looks the same. Raises `value_changed` when it is changed; the "
-									 "action's value is 1 when turned on and 0 when off.",
+					  .description = "An on/off setting, drawn as a switch. Raises `value_changed` when it is changed; "
+									 "the action's value is 1 when turned on and 0 when off.",
 					  .example = R"(<ds_toggle>
 	<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
 	<action trigger="value_changed" name="presenter.settings.confirmations"/>

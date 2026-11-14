@@ -113,6 +113,31 @@ namespace UI
 		}
 	}
 
+	void LvObj::setVisible(lv_obj_t* obj, bool visible)
+	{
+		if (LvObj* own = fromPtr(obj))
+		{
+			own->setVisible(visible);
+			return;
+		}
+		if (visible == !lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+		{
+			return;
+		}
+		lv_obj_set_flag(obj, LV_OBJ_FLAG_HIDDEN, !visible);
+#if LV_NESTED_SHOW_HIDE
+		forEachNested(obj,
+					  !visible,
+					  [visible](LvObj& child)
+					  {
+						  if (child.isVisible())
+						  {
+							  visible ? child.showInner() : child.hideInner();
+						  }
+					  });
+#endif
+	}
+
 	LvObj* LvObj::fromPtr(lv_obj_t* obj)
 	{
 		ZoneScoped;

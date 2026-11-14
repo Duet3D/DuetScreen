@@ -1,8 +1,8 @@
 /*
  * DsTabs.h
  *
- * <ds_tabs>: DuetScreen's TabView (a row of tab buttons over the selected tab's content) in XML, with its
- * <ds_tabs-tab> elements. Its attributes are in registerXml().
+ * <ds_tabs>: DuetScreen's TabView (tab buttons over, or down a side of, the selected tab's content) in XML, with
+ * its <ds_tabs-tab> elements. Its attributes are in registerXml().
  */
 
 #pragma once
@@ -34,14 +34,14 @@ namespace UI::Xml
 		/** `<ds_tabs>` create callback: create the C++ tab view, deleted with its widget */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_tabs>` apply callback: lv_obj attributes */
+		/** `<ds_tabs>` apply callback: lv_obj attributes, then `side` */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** `<ds_tabs-tab>` create callback: add a tab, whose content area its children are built in */
 		static void* xmlCreateTab(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_tabs-tab>` apply callback: lv_obj attributes on the content area, then `bind_disabled` and `select_on`
-		 */
+		/** `<ds_tabs-tab>` apply callback: lv_obj attributes on the content area, then `icon`, `end`, `bind_disabled` and
+		 * `select_on` */
 		static void xmlApplyTab(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** `bind_disabled` observer */

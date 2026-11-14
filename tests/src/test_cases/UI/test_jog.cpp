@@ -16,13 +16,6 @@
 class TestJog : public UiTestSuite
 {
   protected:
-	/** Deliver queued model events, as the event loop would */
-	static void pump()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	}
-
 	/** The `index`th distance choice in `view` */
 	static lv_obj_t* distance(UI::Xml::XmlView& view, uint32_t index)
 	{
@@ -36,13 +29,13 @@ TEST_F(TestJog, EveryViewSharesTheChosenDistance)
 	UI::Xml::XmlView b("b", screen, "move_jog_choices");
 	a.show();
 	b.show();
-	pump();
+	deliverModelEvents();
 	const auto distances = StorageHelper::getData(ID_MOVE_DISTANCES);
 	ASSERT_GE(distances.size(), 2u);
 
 	// Chosen in one view…
 	UI::Xml::Actions::dispatch(distance(a, 1), "actions.jog.distance", "");
-	pump();
+	deliverModelEvents();
 
 	// …it is chosen in the other, and every jog goes that far
 	EXPECT_TRUE(lv_obj_has_state(distance(b, 1), LV_STATE_CHECKED));

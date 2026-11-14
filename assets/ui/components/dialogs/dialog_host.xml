@@ -1,0 +1,63 @@
+<!--
+  The dialog surface's chrome: a dimmed backdrop and one card on it, with a header (the back button from a dialog's
+  second step, the step's title and the one it came from, the close button) and the body the step's content goes in.
+  Each <ds_dialog_host> (the home screen's, over its main window) builds one; it places and sizes the card itself, and
+  moves each step's content in and out of the body (src/UI/Xml/Dialogs/DialogHost.h). The parts it uses are found by
+  name: `backdrop`, `card` and `body`.
+
+  Fields and actions: src/UI/Xml/Dialogs/DialogHostPresenter.h
+-->
+<component presenter="dialog_host">
+	<view extends="lv_obj" width="100%" height="100%" clickable="false" scrollable="false">
+		<style name="pad_zero"/>
+
+		<!-- Tapping outside the card closes the dialog, unless a step of it is blocking -->
+		<lv_obj name="backdrop" width="100%" height="100%" scrollable="false">
+			<style name="dialog_backdrop"/>
+			<action trigger="clicked" name="presenter.dialog.outside"/>
+		</lv_obj>
+
+		<!-- Sized and placed by the surface for each step; centred until then -->
+		<lv_obj name="card" width="60%" height="content" align="center" flex_flow="column" scrollable="false">
+			<style name="card"/>
+			<style name="dialog"/>
+
+			<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="dialog_header"/>
+				<bind_flag_if_eq subject="presenter.header_shown" flag="hidden" ref_value="0"/>
+				<ds_button name="back" icon="back.png">
+					<style name="dialog_icon_button"/>
+					<bind_flag_if_eq subject="presenter.can_go_back" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="presenter.dialog.back"/>
+				</ds_button>
+				<!-- As tall as the buttons beside it, so a header without them (a blocking step) keeps its height -->
+				<lv_obj name="titles" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+						clickable="false" style_min_height="40" style_flex_main_place="center">
+					<style name="pad_zero"/>
+					<lv_label name="title" bind_text="presenter.title" width="100%" long_mode="wrap">
+						<style name="dialog_title"/>
+					</lv_label>
+					<lv_label name="from" bind_text="presenter.from" width="100%" long_mode="dots">
+						<style name="dialog_from"/>
+						<bind_flag_if_eq subject="presenter.from" flag="hidden" ref_value=""/>
+					</lv_label>
+				</lv_obj>
+				<ds_button name="close" icon="close.png">
+					<style name="dialog_icon_button"/>
+					<bind_flag_if_eq subject="presenter.can_close" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="presenter.dialog.close"/>
+				</ds_button>
+			</lv_obj>
+
+			<lv_obj name="body" width="100%" scrollable="false">
+				<style name="dialog_body"/>
+			</lv_obj>
+
+			<!-- The step's own buttons (its <ds_dialog_footer>), under its content wherever that is scrolled -->
+			<lv_obj name="footer" width="100%" height="content" scrollable="false" hidden="true">
+				<style name="pad_zero"/>
+			</lv_obj>
+		</lv_obj>
+	</view>
+</component>

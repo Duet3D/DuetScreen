@@ -12,7 +12,6 @@
 #include "UI/Widgets/Buttons/Button.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Inputs/Slider.h"
-#include "UI/Widgets/Layout/DsModal.h"
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/History.h"
@@ -26,6 +25,7 @@
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include "src/widgets/chart/lv_chart_private.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include <algorithm>
 #include <filesystem>
@@ -218,12 +218,12 @@ namespace
 	constexpr std::string_view DIALOG_SCREEN = R"(
 		<component presenter="test_dialog">
 			<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
-				<ds_modal name="dialog" bind_open="presenter.dialog" open_value="ask" width="50%" height="content">
+				<ds_dialog name="dialog" bind_open="presenter.dialog" open_value="ask" title="Ask" width="50%">
 					<action trigger="dismissed" name="presenter.test.dismissed"/>
 					<ds_button name="ok" text="OK">
 						<action trigger="clicked" name="presenter.test.ok"/>
 					</ds_button>
-				</ds_modal>
+				</ds_dialog>
 				<ds_tabs name="tabs" width="300" height="100">
 					<ds_tabs-tab name="first" title="First"/>
 					<ds_tabs-tab name="second" title="Second" bind_disabled="presenter.busy"/>
@@ -326,13 +326,6 @@ class TestXmlUi : public UiTestSuite
 		return *m_views.back();
 	}
 
-	/** Deliver queued model events, as the event loop would */
-	static void pump()
-	{
-		Model::get().startEventLoop();
-		Model::get().stopEventLoop();
-	}
-
 	static lv_obj_t* find(UI::LvObj& root, const char* name) { return lv_obj_find_by_name(root.getRootPtr(), name); }
 	static lv_obj_t* find(lv_obj_t* root, const char* name) { return lv_obj_find_by_name(root, name); }
 
@@ -353,7 +346,7 @@ class TestXmlUi : public UiTestSuite
 		load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
 		load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
 		auto& view = makeView("tools_screen");
-		pump();
+		deliverModelEvents();
 		return view;
 	}
 
@@ -485,7 +478,7 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
 
@@ -508,7 +501,7 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 
 	// Updating the model updates only that card
 	load_model_data(FAN_1_AT_80);
-	pump();
+	deliverModelEvents();
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 2)).getValue(), 0.0f);
 }
@@ -518,7 +511,7 @@ TEST_F(TestXmlUi, TwoViewsShareOneModel)
 	auto& a = makeView();
 	auto& b = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(fanList(a)), 3u);
 	ASSERT_EQ(lv_obj_get_child_count(fanList(b)), 3u);
@@ -530,24 +523,24 @@ TEST_F(TestXmlUi, ListGrowsAndShrinksAtTheEnd)
 {
 	auto& view = makeView();
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
 	lv_obj_t* first = fanCard(view, 0);
 
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
 	EXPECT_EQ(fanCard(view, 0), first) << "existing cards are kept when the list grows";
 
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
 	EXPECT_EQ(fanCard(view, 0), first);
 
 	// Disconnecting empties the list: the connection forgets the object model
 	OM::RemoveAll();
 	Model::get().post<EventType::Disconnected>();
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(lv_obj_get_child_count(fanList(view)), 0u);
 }
 
@@ -555,7 +548,7 @@ TEST_F(TestXmlUi, ButtonsReachThePresenterWithTheirFan)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	lv_obj_send_event(find(fanCard(view, 1), "max"), LV_EVENT_CLICKED, nullptr);
 	lv_obj_send_event(find(fanCard(view, 2), "max"), LV_EVENT_CLICKED, nullptr);
@@ -570,7 +563,7 @@ TEST_F(TestXmlUi, SliderEditsSendButBindingUpdatesDont)
 {
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	EXPECT_TRUE(m_sent.empty()) << "showing the model's values is not an edit";
 
 	slider(fanCard(view, 2)).setValue(40.0f);
@@ -578,7 +571,7 @@ TEST_F(TestXmlUi, SliderEditsSendButBindingUpdatesDont)
 
 	m_sent.clear();
 	load_model_data(FAN_1_AT_80);
-	pump();
+	deliverModelEvents();
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
 	EXPECT_TRUE(m_sent.empty());
 }
@@ -602,7 +595,7 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	// The built-in screen now uses the user's card, and thermostatic fans are no longer hidden
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 3u);
@@ -629,7 +622,7 @@ TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	EXPECT_NE(find(fanCard(view, 1), "slider"), nullptr);
 }
 
@@ -696,7 +689,7 @@ TEST_F(TestXmlUi, ReloadRebuildsLiveViewsAndKeepsThePresenter)
 
 	auto& view = makeView();
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	ASSERT_NE(find(fanCard(view, 0), "v1"), nullptr);
 	auto* presenter = view.getPresenter();
 	const int32_t index = lv_obj_get_index(view.getRootPtr());
@@ -781,7 +774,7 @@ TEST_F(TestXmlUi, BedsAndChambersAreNamedAndTheirActionsKnowWhichTheyAre)
 	load_model_data(
 		R"({"key":"sensors","flags":"v","result":{"analog":[{"name":"Bed plate"},null,null,{"name":""}]}})");
 	auto& view = makeView("dashboard_tools");
-	pump();
+	deliverModelEvents();
 
 	lv_obj_t* beds = find(find(view, "beds"), "list");
 	ASSERT_EQ(lv_obj_get_child_count(beds), 2u);
@@ -822,7 +815,7 @@ TEST_F(TestXmlUi, NestedListFollowsItsRowsLength)
 	lv_obj_t* firstCard = toolCard(view, 0);
 
 	load_model_data(ONE_TOOL);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(find(view, "tools")), 1u);
 	EXPECT_EQ(toolCard(view, 0), firstCard) << "the remaining card is kept";
@@ -1121,55 +1114,50 @@ TEST_F(TestXmlUi, TabDisabledWhileItsSubjectIsSet)
 	EXPECT_FALSE(tabs.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
-TEST_F(TestXmlUi, ModalFollowsItsSubjectFromTheModalHost)
+TEST_F(TestXmlUi, DialogFollowsItsSubject)
 {
 	installDialogScreens();
-	UI::LvContainer mainWindow("main_window", screen);
-	UI::registerView("main_window", &mainWindow);
-
 	auto& view = makeView("dialog_screen");
 	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
-	lv_obj_t* dialog = find(mainWindow, "dialog");
-	ASSERT_NE(dialog, nullptr) << "the dialog is in the modal host";
-	EXPECT_EQ(find(view, "dialog"), nullptr);
+	lv_obj_t* dialog = find(view, "dialog");
+	ASSERT_NE(dialog, nullptr) << "its content stays in its view while closed";
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 
 	// Its subject opens and closes it, raising nothing
 	presenter.dialog.set("ask");
-	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(TestDialogs::shown(), dialog);
 	presenter.dialog.set("other");
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "open_value must match";
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "open_value must match";
 	EXPECT_TRUE(presenter.calls.empty());
 
-	// Actions in it reach the view it was written in
+	// Actions in it reach the view it was written in, wherever it shows
 	presenter.dialog.set("ask");
 	lv_obj_send_event(find(dialog, "ok"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok"}));
 
-	// Closed by navigation, it says so, and the presenter's answer doesn't reopen it
-	UI::closeAllModals();
+	// Closed by the user, it says so, and the presenter's answer doesn't reopen it
+	TestDialogs::tapHeader("close");
 	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok", "dismissed"}));
 	EXPECT_EQ(presenter.dialog.get(), "");
-	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-
-	// It goes with the view it was written in
-	m_views.clear();
-	EXPECT_EQ(find(mainWindow, "dialog"), nullptr);
-	UI::forgetView(&mainWindow);
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	EXPECT_EQ(lv_obj_get_parent(dialog), view.getRootPtr()) << "back where it is written";
 }
 
-TEST_F(TestXmlUi, ModalGoesWithItsHost)
+TEST_F(TestXmlUi, DialogOutlivesItsSurface)
 {
 	installDialogScreens();
-	auto mainWindow = std::make_unique<UI::LvContainer>("main_window", screen);
-	UI::registerView("main_window", mainWindow.get());
 	auto& view = makeView("dialog_screen");
-	ASSERT_NE(find(*mainWindow, "dialog"), nullptr);
+	auto& presenter = static_cast<DialogPresenter&>(*view.getPresenter());
+	presenter.dialog.set("ask");
+	lv_obj_t* dialog = TestDialogs::shown();
+	ASSERT_NE(dialog, nullptr);
 
-	UI::forgetView(mainWindow.get());
-	mainWindow.reset(); // Deletes the dialog
-	m_views.clear();	// Mustn't touch it again
-	(void)view;
+	// The surface goes: the dialog goes home, and opens on a new surface next time
+	lv_obj_delete(TestDialogs::host().root());
+	EXPECT_EQ(lv_obj_get_parent(dialog), view.getRootPtr());
+	presenter.dialog.set("");
+	presenter.dialog.set("ask");
+	EXPECT_EQ(TestDialogs::shown(), dialog);
 }
 
 TEST_F(TestXmlUi, WindowedListBuildsOnlyRowsOnScreen)
@@ -1342,7 +1330,7 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 	auto& view = makeView("one_fan_screen");
 	lv_obj_t* list = find(find(view, "pick"), "list");
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	ASSERT_EQ(lv_obj_get_child_count(list), 1u);
 	EXPECT_EQ(slider(lv_obj_get_child(list, 0)).getLabelText(), _("fine_tune.fan", 2));
@@ -1351,10 +1339,10 @@ TEST_F(TestXmlUi, KeyedListShowsOneFanWithItsActions)
 
 	// The fan's card goes with the fan, and comes back with it
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(lv_obj_get_child_count(list), 0u);
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	EXPECT_EQ(lv_obj_get_child_count(list), 1u);
 }
 
@@ -1474,7 +1462,7 @@ TEST_F(TestXmlUi, ItemAttributesReachEveryItemAsPropsOrRootAttributes)
 
 	auto& view = makeView("items_screen");
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 
 	// An empty key shows every row; each item has the props, named in its own row, and the root attribute
 	lv_obj_t* fans = find(view, "fans");
@@ -1513,7 +1501,7 @@ TEST_F(TestXmlUi, ListFlowPlacesItemsInARowOrAPageAtATime)
 
 	auto& view = makeView("flow_screen");
 	load_model_data(THREE_FANS);
-	pump();
+	deliverModelEvents();
 	lv_obj_update_layout(view.getRootPtr());
 
 	EXPECT_EQ(lv_obj_get_style_flex_flow(find(view, "row"), LV_PART_MAIN), LV_FLEX_FLOW_ROW);
@@ -1544,7 +1532,7 @@ TEST_F(TestXmlUi, ListFlowPlacesItemsInARowOrAPageAtATime)
 
 	// One item has the whole list, and no dots
 	load_model_data(ONE_FAN);
-	pump();
+	deliverModelEvents();
 	lv_obj_update_layout(view.getRootPtr());
 	ASSERT_EQ(lv_obj_get_child_count(pages), 2u);
 	EXPECT_TRUE(lv_obj_has_flag(dots, LV_OBJ_FLAG_HIDDEN));
@@ -1610,7 +1598,7 @@ TEST_F(TestXmlUi, HeaterAndFanActionsWorkFromAnyHeaterOrFanTheyAreGiven)
 	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
 	load_model_data(THREE_FANS);
 	auto& view = makeView("heater_actions_screen");
-	pump();
+	deliverModelEvents();
 
 	// A row of the heaters acts on what the heater heats: heater 0 is bed 0, 2 tool 0's, 3 chamber 1
 	const auto confirm = [](lv_obj_t* obj, float value)

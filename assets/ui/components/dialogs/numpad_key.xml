@@ -1,0 +1,19 @@
+<!--
+  A key of a number pad (numpad.xml) that types `key` into the pad called `pad`, in the pad's grid at `column` and
+  `row`.
+
+  Actions: the pad's ${pad}.key (src/UI/Xml/Dialogs/NumberPad.h)
+-->
+<component>
+	<api>
+		<prop name="key" type="string" default="0"/>
+		<prop name="column" type="int" default="0"/>
+		<prop name="row" type="int" default="0"/>
+		<prop name="pad" type="string" default="pad"/>
+	</api>
+	<view extends="ds_button" text="$key" style_grid_cell_column_pos="$column" style_grid_cell_row_pos="$row"
+		  style_grid_cell_x_align="stretch" style_grid_cell_y_align="stretch">
+		<style name="numpad_key"/>
+		<action trigger="clicked" name="presenter.${pad}.key" arg="$key"/>
+	</view>
+</component>

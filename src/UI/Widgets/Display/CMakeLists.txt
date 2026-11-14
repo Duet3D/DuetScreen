@@ -7,6 +7,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/DsBar.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsBarMarker.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsGraph.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsGraphKey.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsHeatmap.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsIcon.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsPlot.cpp

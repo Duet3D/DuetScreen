@@ -1,5 +1,6 @@
 <!--
-  One tool, chosen by its number (`tool`), with its heaters: the `tool` widget (widgets/temperature/tool.json). It shows nothing
+  One tool, chosen by its number (`tool`), with its heaters (and, with `graph_key`, their colour keys on the
+  temperature graph): the `tool` widget (widgets/temperature/tool.json). It shows nothing
   while the printer has no such tool.
 
   Data:     the object model's om.tools
@@ -9,12 +10,13 @@
 <component>
 	<api>
 		<prop name="tool" type="int" default="0"/>
+		<prop name="graph_key" type="bool" default="true"/>
 	</api>
 
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="pad_zero"/>
 		<style name="card"/>
-		<ds_list name="list" list="om.tools" key="row.index" value="$tool" item="dashboard_tool" width="100%"
+		<ds_list name="list" list="om.tools" key="row.index" value="$tool" item="dashboard_tool" item.graph_key="$graph_key" width="100%"
 				 height="content"/>
 	</view>
 </component>

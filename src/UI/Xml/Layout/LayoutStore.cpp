@@ -354,4 +354,21 @@ namespace UI::Xml::Layouts
 		}
 		return replace(file, text, error);
 	}
+
+	bool removeSafely(const std::filesystem::path& dir, std::string& error)
+	{
+		std::error_code ec;
+		if (!std::filesystem::exists(dir, ec))
+		{
+			return true;
+		}
+		std::filesystem::remove_all(dir, ec);
+		if (ec)
+		{
+			error = fmt::format("can't delete {:s}: {:s}", dir.string(), ec.message());
+			return false;
+		}
+		syncDirectory(dir.parent_path().empty() ? std::filesystem::path(".") : dir.parent_path());
+		return true;
+	}
 } // namespace UI::Xml::Layouts

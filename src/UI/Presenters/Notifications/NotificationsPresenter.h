@@ -17,6 +17,7 @@
 #include "Subscribers/ResponseSubscribers.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Dialogs/NumberPad.h"
 #include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include "utils/UpgradeHelper.h"
@@ -111,7 +112,7 @@ namespace UI
 		/** Close the alert and show any waiting responses */
 		void closeAlert();
 
-		/** Check the value typed into the alert, enabling OK and showing why it isn't valid */
+		/** Check the text typed into the alert (its text mode), enabling OK and showing the length it must be */
 		void validateInput(std::string_view text);
 
 		/** Show the alert's axes' positions and whether they can move */
@@ -135,7 +136,7 @@ namespace UI
 		lv_timer_t* m_timer = nullptr;	  // Drives the countdowns
 
 		OM::Alert m_alert;				  // The alert showing
-		std::string m_input;			  // The value typed into the alert
+		std::string m_input;			  // The text typed into the alert
 		bool m_cancelSends = false;		  // Cancel answers the printer (the alert offers it)
 		std::string m_updateFile;		  // Update file offered from USB
 		std::function<void()> m_install;  // What update.confirm does
@@ -163,14 +164,11 @@ namespace UI
 		Xml::IntSubject m_alertChoicesShown;		// 1 if choices are offered
 		Xml::List<AlertAxisRow> m_alertAxes;		// Axes to jog
 		Xml::IntSubject m_alertAxesShown;			// 1 if there are axes to jog
-		Xml::IntSubject m_alertInputShown;			// 1 if a value is asked for
-		Xml::StringSubject<256> m_alertInput;		// The value to start with
-		Xml::StringSubject<16> m_alertAccepted;		// Characters the value may contain
-		Xml::StringSubject<8> m_alertKeyboardMode;	// "number" or "text"
-		Xml::StringSubject<24> m_alertMin;			// Lower limit text, or empty
-		Xml::StringSubject<24> m_alertMax;			// Upper limit text, or empty
-		Xml::StringSubject<96> m_alertWarning;		// Why the value isn't valid, or empty
-		Xml::IntSubject m_alertKeyboard;			// 1 while the keyboard is up
+		Xml::IntSubject m_alertTextShown;			// 1 if text is asked for, typed on the keyboard
+		Xml::StringSubject<256> m_alertInput;		// The text to start with
+		Xml::StringSubject<96> m_alertWarning;		// The length the text must be, while it isn't, or empty
+		Xml::IntSubject m_alertPadShown;			// 1 if a number is asked for, typed on the pad
+		Xml::NumberPad m_alertPad;					// `alert.pad`: the number typed
 		Xml::IntSubject m_alertProgress;			// Time left, 0-100
 		Xml::IntSubject m_alertProgressShown;		// 1 if the alert closes itself
 		std::optional<uint32_t> m_lastAlertSeq;		// Sequence number of the alert shown, or none

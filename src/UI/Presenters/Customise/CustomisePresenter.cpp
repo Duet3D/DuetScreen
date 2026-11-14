@@ -7,10 +7,10 @@
 #include "Subscribers/ResponseSubscribers.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
-#include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/XmlView.h"
 #include "i18n/i18n.h"
 #include <algorithm>
@@ -122,13 +122,6 @@ namespace UI
 		f.field("on", on, "For a bool, 1 when on, else 0");
 	}
 
-	void OptionRow::fields(Xml::FieldVisitor& f)
-	{
-		f.field("value", value, "The value");
-		f.field("title", title, "The value as shown, translated");
-		f.field("chosen", chosen, "1 for the setting's current value, else 0");
-	}
-
 	CustomisePresenter::CustomisePresenter()
 		: XmlPresenter("customise")
 	{
@@ -152,22 +145,19 @@ namespace UI
 			   [this](const Xml::ActionArgs&)
 			   {
 				   showSettings();
+				   m_openedFor = editor().selection();
 				   setOpen(m_settingsOpen, editor().canConfigure() ? 1 : 0);
 			   });
 		action("customise.close_settings",
 			   "Close the settings",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_keyboard.set(0);
-				   setOpen(m_settingsOpen, 0);
-			   });
+			   [this](const Xml::ActionArgs&) { setOpen(m_settingsOpen, 0); });
 		action("customise.edit_setting",
-			   "Change the setting of the row: on the number pad, a choice of its values, or typed",
+			   "Change the setting of the row: on a number pad or a choice of its values, the settings' next step",
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<SettingRow>())
 				   {
-					   editSetting(*row);
+					   editSetting(*row, args.target);
 				   }
 			   });
 		action("customise.toggle_setting",
@@ -179,19 +169,6 @@ namespace UI
 					   setSetting(std::string(row->name.get()), row->on.get() == 0);
 				   }
 			   });
-		action("customise.choose",
-			   "Set the setting being changed to the value of the row, and close the values",
-			   [this](const Xml::ActionArgs& args)
-			   {
-				   setOpen(m_optionsOpen, 0);
-				   if (const auto* row = args.row<OptionRow>())
-				   {
-					   setSetting(m_choosing, std::string(row->value.get()));
-				   }
-			   });
-		action("customise.close_options",
-			   "Close the values without changing the setting",
-			   [this](const Xml::ActionArgs&) { setOpen(m_optionsOpen, 0); });
 		action("customise.set_text",
 			   "Set the text setting of the row to the text typed (the text area's), e.g. when the keyboard's OK is "
 			   "pressed",
@@ -202,9 +179,6 @@ namespace UI
 					   setSetting(std::string(row->name.get()), args.text());
 				   }
 			   });
-		action("customise.keyboard",
-			   "Set `keyboard` to `arg`: 1 when the keyboard comes up for a text setting, 0 when it goes away",
-			   [this](const Xml::ActionArgs& args) { m_keyboard.set(args.argInt().value_or(0) != 0 ? 1 : 0); });
 		action("customise.save",
 			   "Ask for a name, to save every slot's layout as it is now under it",
 			   [this](const Xml::ActionArgs&) { askSaveName(); });
@@ -218,11 +192,7 @@ namespace UI
 		action("customise.save_ok", "Save under the name typed", [this](const Xml::ActionArgs&) { saveAs(); });
 		action("customise.close_save",
 			   "Close the question without saving",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_keyboard.set(0);
-				   setOpen(m_saveOpen, 0);
-			   });
+			   [this](const Xml::ActionArgs&) { setOpen(m_saveOpen, 0); });
 		action("customise.load",
 			   "List the saved layouts, to load one",
 			   [this](const Xml::ActionArgs&)
@@ -248,23 +218,19 @@ namespace UI
 			   {
 				   if (const auto* row = args.row<SavedRow>())
 				   {
-					   m_deleting = row->name.get();
-					   m_deleteTitle.set(_("customise.delete_title"));
-					   m_deleteText.set(_("customise.delete_text", m_deleting));
-					   m_confirmDelete.set(1);
+					   const std::string name(row->name.get());
+					   // The question goes with the list's row, and so with this
+					   Xml::Prompts::askQuestion({.title = _("customise.delete_title"),
+												  .text = _("customise.delete_text", name),
+												  .onYes =
+													  [this, name]
+												  {
+													  Xml::LayoutLibrary::remove(name);
+													  showSaved();
+												  },
+												  .asker = args.target});
 				   }
 			   });
-		action("customise.delete_saved",
-			   "Delete the saved layout the question is about",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   m_confirmDelete.set(0);
-				   Xml::LayoutLibrary::remove(m_deleting);
-				   showSaved();
-			   });
-		action("customise.close_delete",
-			   "Close the question without deleting",
-			   [this](const Xml::ActionArgs&) { m_confirmDelete.set(0); });
 		action("customise.remove",
 			   "Remove the selected widget",
 			   [](const Xml::ActionArgs&) { editor().removeSelected(); });
@@ -300,10 +266,6 @@ namespace UI
 		f.field("catalogue_open", m_catalogueOpen, "1 while the widget pool is open");
 		f.list("settings", m_settings, "The selected widget's settings");
 		f.field("settings_open", m_settingsOpen, "1 while the selected widget's settings are open");
-		f.list("options", m_options, "The values the setting being changed can take");
-		f.field("options_open", m_optionsOpen, "1 while they are shown");
-		f.field("options_title", m_optionsTitle, "The name of the setting they are for");
-		f.field("keyboard", m_keyboard, "1 while the keyboard is up for typed text, so the dialog moves above it");
 		f.field("can_save", m_canSave, "1 if layouts can be saved (not in safe mode), else 0");
 		f.field("save_open", m_saveOpen, "1 while asking for a name to save the layouts as");
 		f.field("save_name", m_saveName, "The name typed so far");
@@ -311,9 +273,6 @@ namespace UI
 		f.field("load_open", m_loadOpen, "1 while the saved layouts are listed");
 		f.list("saved", m_saved, "The saved layouts, by name");
 		f.field("has_saved", m_hasSaved, "1 if there are any saved layouts, else 0");
-		f.field("confirm_delete", m_confirmDelete, "1 while asking whether to delete a saved layout");
-		f.field("delete_title", m_deleteTitle, "That question's title");
-		f.field("delete_text", m_deleteText, "That question, naming the layout");
 	}
 
 	void CustomisePresenter::onEditorChanged()
@@ -321,6 +280,13 @@ namespace UI
 		if (!editor().isEditing())
 		{
 			closeDialogs();
+		}
+		// The pool and the settings are for what was selected: selecting something else (a widget tapped beside the
+		// dialog, in the sidebar or status bar) closes them, as tapping outside a dialog does
+		else if ((m_settingsOpen.get() != 0 || m_catalogueOpen.get() != 0) && editor().selection() != m_openedFor)
+		{
+			setOpen(m_settingsOpen, 0);
+			setOpen(m_catalogueOpen, 0);
 		}
 		m_canSave.set(Xml::LayoutLibrary::canSave() ? 1 : 0);
 	}
@@ -364,6 +330,7 @@ namespace UI
 												  item.icon.set(widget.icon);
 											  });
 						 });
+		m_openedFor = editor().selection();
 		setOpen(m_catalogueOpen, 1);
 	}
 
@@ -387,7 +354,7 @@ namespace UI
 						});
 	}
 
-	void CustomisePresenter::editSetting(const SettingRow& row)
+	void CustomisePresenter::editSetting(const SettingRow& row, lv_obj_t* asker)
 	{
 		const Xml::WidgetDef* widget = selectedWidget();
 		const Xml::SettingDef* setting = widget ? widget->setting(row.name.get()) : nullptr;
@@ -395,22 +362,21 @@ namespace UI
 		{
 			return;
 		}
-		m_choosing = setting->name;
+		const std::string name = setting->name;
 		const std::string title = shown(setting->titleTag, setting->title);
 		const nlohmann::json value = currentValue(*setting);
 		switch (setting->kind)
 		{
 		case Xml::SettingKind::Int:
-		{
-			const std::string name = setting->name;
-			Xml::Services::askNumber({.header = title,
-									  .min = static_cast<float>(setting->min),
-									  .max = static_cast<float>(setting->max),
-									  .value = static_cast<float>(value.get<int32_t>()),
-									  .onConfirm = [this, name](float typed)
-									  { setSetting(name, static_cast<int32_t>(std::lround(typed))); }});
+			// The prompts go with the setting's row, and so with this
+			Xml::Prompts::askNumber(
+				{.header = title,
+				 .min = static_cast<float>(setting->min),
+				 .max = static_cast<float>(setting->max),
+				 .value = static_cast<float>(value.get<int32_t>()),
+				 .onConfirm = [this, name](float typed) { setSetting(name, static_cast<int32_t>(std::lround(typed))); },
+				 .asker = asker});
 			break;
-		}
 		case Xml::SettingKind::Bool:
 			setSetting(setting->name, !(value.is_boolean() && value.get<bool>()));
 			break;
@@ -420,17 +386,16 @@ namespace UI
 		case Xml::SettingKind::Row:
 		case Xml::SettingKind::Action:
 		{
-			const std::string current = Xml::SettingDef::toProp(value);
-			const auto choices = setting->choices();
-			m_options.sync(choices.size(),
-						   [&](OptionRow& option, size_t index)
-						   {
-							   option.value.set(choices[index].value);
-							   option.title.set(shown(choices[index].titleTag, choices[index].title));
-							   option.chosen.set(choices[index].value == current ? 1 : 0);
-						   });
-			m_optionsTitle.set(title);
-			setOpen(m_optionsOpen, 1);
+			std::vector<Xml::Prompts::Choice> choices;
+			for (const auto& option : setting->choices())
+			{
+				choices.push_back({.value = option.value, .title = shown(option.titleTag, option.title)});
+			}
+			Xml::Prompts::askChoice({.title = title,
+									 .choices = std::move(choices),
+									 .chosen = Xml::SettingDef::toProp(value),
+									 .onChoose = [this, name](const std::string& chosen) { setSetting(name, chosen); },
+									 .asker = asker});
 			break;
 		}
 		}
@@ -444,13 +409,10 @@ namespace UI
 
 	void CustomisePresenter::closeDialogs()
 	{
-		m_keyboard.set(0);
-		m_confirmDelete.set(0);
 		setOpen(m_saveOpen, 0);
 		setOpen(m_loadOpen, 0);
 		setOpen(m_catalogueOpen, 0);
 		setOpen(m_settingsOpen, 0);
-		setOpen(m_optionsOpen, 0);
 	}
 
 	void CustomisePresenter::askSaveName()
@@ -473,7 +435,6 @@ namespace UI
 		{
 			warn(fmt::format("{:s}: {:s}", _("customise.not_saved"), error));
 		}
-		m_keyboard.set(0);
 		setOpen(m_saveOpen, 0);
 	}
 
@@ -507,8 +468,7 @@ namespace UI
 	void CustomisePresenter::setOpen(Xml::IntSubject& dialog, bool open)
 	{
 		dialog.set(open ? 1 : 0);
-		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_optionsOpen.get() || m_saveOpen.get() ||
-						 m_loadOpen.get();
+		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_saveOpen.get() || m_loadOpen.get();
 		m_dialogOpen.set(any ? 1 : 0);
 	}
 

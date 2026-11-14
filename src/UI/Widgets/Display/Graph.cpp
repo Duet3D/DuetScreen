@@ -227,22 +227,12 @@ namespace UI
 		return &m_series[index];
 	}
 
-	lv_color_t Graph::seriesColor(size_t index)
-	{
-		const Themes::Theme* theme = Themes::getCurrentTheme();
-		if (theme == nullptr)
-		{
-			return lv_color_white();
-		}
-		return theme->getColors().series[index % Themes::SERIES_COLOR_COUNT];
-	}
-
 	bool Graph::createSeries(const std::string& displayName)
 	{
 		ZoneScoped;
 		UI_LOCK();
 		const size_t index = getSeriesCount();
-		const lv_color_t color = seriesColor(index);
+		const lv_color_t color = Themes::seriesColor(index);
 		lv_chart_series_t* series = m_chart.addSeries(color, LV_CHART_AXIS_PRIMARY_Y);
 		if (series == nullptr)
 		{
@@ -324,8 +314,12 @@ namespace UI
 		UI_LOCK();
 		auto* graph = static_cast<Graph*>(lv_event_get_user_data(e));
 		const LvObj* item = LvObj::fromPtr(lv_event_get_current_target_obj(e));
-		const auto index = static_cast<size_t>(reinterpret_cast<uintptr_t>(item->getUserData()));
-		graph->showSeries(index, !graph->isSeriesShown(index));
+		graph->onLegendClicked(static_cast<size_t>(reinterpret_cast<uintptr_t>(item->getUserData())));
+	}
+
+	void Graph::onLegendClicked(size_t index)
+	{
+		showSeries(index, !isSeriesShown(index));
 	}
 
 	void Graph::applyThemeColors()
@@ -334,7 +328,7 @@ namespace UI
 		UI_LOCK();
 		for (size_t i = 0; i < m_series.size(); i++)
 		{
-			const lv_color_t color = seriesColor(i);
+			const lv_color_t color = Themes::seriesColor(i);
 			m_chart.setSeriesColor(m_series[i].series, color);
 			m_series[i].legendItem->setColor(color);
 		}
