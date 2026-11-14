@@ -1517,3 +1517,32 @@ TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 	EXPECT_TRUE(shownOnScreen(question));
 	UI::closeAllModals();
 }
+
+TEST_F(TestHomeViewWithData, FactorDialogNumberPadTextStartsUnscrolled)
+{
+	// The pad's text is written while the pad is hidden and has no size; once shown, it must not scroll out of view
+	runEvents();
+	dashboardTabs().setActiveTab(STATUS_TAB);
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
+					  LV_EVENT_CLICKED,
+					  nullptr);
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "speed_dialog");
+	ASSERT_NE(dialog, nullptr);
+	lv_obj_t* pad = lv_obj_find_by_name(dialog, "numberpad");
+	ASSERT_FALSE(shownOnScreen(pad)) << "the pad starts hidden";
+
+	auto& speed =
+		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0)));
+	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	ASSERT_TRUE(shownOnScreen(pad));
+	for (int i = 0; i < 10; i++) // Let any scroll animation finish
+	{
+		lv_tick_inc(100);
+		lv_timer_handler();
+	}
+
+	lv_obj_t* text = lv_obj_find_by_name(pad, "text");
+	EXPECT_EQ(lv_obj_get_scroll_x(text), 0);
+	EXPECT_EQ(lv_obj_get_scroll_y(text), 0);
+	UI::closeAllModals();
+}
