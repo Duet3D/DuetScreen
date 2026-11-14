@@ -1,0 +1,30 @@
+<!--
+  A line to type G-code into, with buttons to empty it and to send it. Inside console.xml it shares the console's
+  presenter, so the G-code list follows what is typed there; placed on its own (the `console_input` widget) it has a
+  console presenter of its own and sends with that.
+
+  Props:    keyboard  the keyboard to type with (default `keyboard`, the home screen's)
+  Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
+-->
+<component presenter="console">
+	<api>
+		<prop name="keyboard" type="string" default="keyboard"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="no_border"/>
+		<ds_textarea name="input" one_line="true" placeholder_tag="tr.console.input_placeholder" height="content"
+					 flex_grow="1" style_text_align="left" bind_text="presenter.input" keyboard="$keyboard"
+					 keyboard_mode="text_upper" hide_keyboard_on_ready="false" hide_keyboard_on_defocus="false">
+			<action trigger="value_changed" name="presenter.console.input"/>
+			<action trigger="ready" name="presenter.console.send"/>
+		</ds_textarea>
+		<ds_button name="clear" icon="clear.png" width="50" height="50">
+			<action trigger="clicked" name="presenter.console.clear"/>
+		</ds_button>
+		<ds_button name="enter" icon="send.png" width="50" height="50">
+			<action trigger="clicked" name="presenter.console.send"/>
+		</ds_button>
+	</view>
+</component>

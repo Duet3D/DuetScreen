@@ -53,7 +53,7 @@ namespace UI::Xml
 
 	void ConsoleSource::fields(FieldVisitor& f)
 	{
-		f.list("console.lines", m_rows, "What the console shows, oldest first, at most MAX_RESPONSE_LINES");
+		f.list("lines", m_rows, "What the console shows, oldest first, at most MAX_RESPONSE_LINES");
 	}
 
 	void ConsoleSource::onInit()

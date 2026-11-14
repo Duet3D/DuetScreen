@@ -4,7 +4,6 @@
 
 #include "OmBindings.h"
 #include "Debug.h"
-#include "ObjectModel/Tree/Schema.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "OmForward.h"
 #include "OmName.h"
@@ -59,16 +58,6 @@ namespace UI::Xml
 			list->refresh(OM::Tree::get().root());
 		}
 		return m_lists.emplace(std::move(key), std::move(list)).first->second.get();
-	}
-
-	bool OmBindings::isField(const OM::Path& path) const
-	{
-		if (OM::Schema::get().typeAt(path))
-		{
-			return true;
-		}
-		MODEL_LOCK();
-		return OM::Tree::get().root().at(path).kind() != OM::Node::Kind::missing;
 	}
 
 	void OmBindings::flush()
@@ -247,7 +236,9 @@ namespace UI::Xml
 		return bound;
 	}
 
-	Subject* OmBindings::findSubject(const lv_xml_subject_ctx_t* origin, std::string_view name, bool /* last */)
+	Subject* OmBindings::findSubject(const lv_xml_subject_ctx_t* origin,
+									 std::string_view name,
+									 std::string_view written)
 	{
 		const auto parsed = OmName::parse(name);
 		if (!parsed || !parsed->absolute)
@@ -255,10 +246,10 @@ namespace UI::Xml
 			return nullptr;
 		}
 		const auto path = bindAbsolute(origin, name, parsed->path);
-		return path ? subjectFor(*path, parsed->converter, parsed->argument, origin, name) : nullptr;
+		return path ? subjectFor(*path, parsed->converter, parsed->argument, origin, written) : nullptr;
 	}
 
-	ListBase* OmBindings::findList(const lv_xml_subject_ctx_t* origin, std::string_view name, bool /* last */)
+	ListBase* OmBindings::findList(const lv_xml_subject_ctx_t* origin, std::string_view name, std::string_view written)
 	{
 		const auto parsed = OmName::parse(name);
 		if (!parsed || !parsed->absolute || !parsed->converter.empty())
@@ -266,6 +257,6 @@ namespace UI::Xml
 			return nullptr;
 		}
 		const auto path = bindAbsolute(origin, name, parsed->path);
-		return path ? listFor(*path, origin, name) : nullptr;
+		return path ? listFor(*path, origin, written) : nullptr;
 	}
 } // namespace UI::Xml

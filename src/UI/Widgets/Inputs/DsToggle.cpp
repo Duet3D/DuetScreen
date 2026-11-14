@@ -29,10 +29,10 @@ namespace UI::Xml
 									 "every setting looks the same. Raises `value_changed` when it is changed; the "
 									 "action's value is 1 when turned on and 0 when off.",
 					  .example = R"(<ds_toggle>
-	<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
+	<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
 	<action trigger="value_changed" name="presenter.settings.confirmations"/>
 </ds_toggle>)",
-					  .exampleSubjects = {{"confirmations", "int", "1"}}},
+					  .exampleSubjects = {{"presenter.confirmations", "int", "1"}}},
 					 xmlCreate,
 					 xmlApply);
 	}

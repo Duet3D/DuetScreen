@@ -15,7 +15,9 @@ namespace UI::Xml
 		m_item = std::move(item);
 	}
 
-	Subject* OmItemNames::findSubject(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last)
+	Subject* OmItemNames::findSubject(const lv_xml_subject_ctx_t* origin,
+									  std::string_view name,
+									  std::string_view written)
 	{
 		const auto parsed = OmName::parse(name);
 		if (!parsed || parsed->absolute || m_bindings == nullptr)
@@ -34,38 +36,28 @@ namespace UI::Xml
 		}
 		else
 		{
-			path = resolve(origin, parsed->path, last);
+			path = resolve(origin, parsed->path);
 		}
-		return path ? m_bindings->subjectFor(*path, parsed->converter, parsed->argument, origin, name) : nullptr;
+		return path ? m_bindings->subjectFor(*path, parsed->converter, parsed->argument, origin, written) : nullptr;
 	}
 
-	ListBase* OmItemNames::findList(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last)
+	ListBase* OmItemNames::findList(const lv_xml_subject_ctx_t* origin, std::string_view name, std::string_view written)
 	{
 		const auto parsed = OmName::parse(name);
 		if (!parsed || parsed->absolute || !parsed->converter.empty() || m_bindings == nullptr)
 		{
 			return nullptr;
 		}
-		const auto path = resolve(origin, parsed->path, last);
-		return path ? m_bindings->listFor(*path, origin, name) : nullptr;
+		const auto path = resolve(origin, parsed->path);
+		return path ? m_bindings->listFor(*path, origin, written) : nullptr;
 	}
 
-	std::optional<OmBoundPath> OmItemNames::resolve(const lv_xml_subject_ctx_t* origin,
-													std::string_view relative,
-													bool last) const
+	std::optional<OmBoundPath> OmItemNames::resolve(const lv_xml_subject_ctx_t* origin, std::string_view relative) const
 	{
 		const auto relativePath = OmTemplate::parse(relative);
 		if (!relativePath)
 		{
 			return std::nullopt;
-		}
-		if (!last)
-		{
-			const auto item = m_item.resolve();
-			if (!item || !m_bindings->isField(item->field(relativePath->firstField())))
-			{
-				return std::nullopt;
-			}
 		}
 		std::string missing;
 		const auto bound = OmBoundPath::bind(

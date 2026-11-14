@@ -8,7 +8,7 @@
 		<style name="card"/>
 
 		<!-- Temperature-controlled fans can't be set by hand, and a gap in the fan numbers has no fan -->
-		<bind_flag_if cond="thermostatic.lowTemperature|exists eq 1 or exists eq 0" flag="hidden"/>
+		<bind_flag_if cond="row.thermostatic.lowTemperature|exists eq 1 or row.exists eq 0" flag="hidden"/>
 
 		<ds_button name="off" translation_tag="tr.fan.off" width="60" height="100%" style_min_width="content">
 			<!-- The slider needs the room more, in all but a wide widget -->
@@ -16,7 +16,7 @@
 			<action trigger="clicked" name="presenter.fans.set_speed" arg="0"/>
 		</ds_button>
 
-		<ds_slider name="slider" bind_label="name|default:tr.fine_tune.fan" bind_value="requestedValue|percent" min="0"
+		<ds_slider name="slider" bind_label="row.name|default:tr.fine_tune.fan" bind_value="row.requestedValue|percent" min="0"
 				   max="100" numberpad="true"
 				   flex_grow="1" width="100%" height="content" style_pad_all="5">
 			<style name="no_border"/>

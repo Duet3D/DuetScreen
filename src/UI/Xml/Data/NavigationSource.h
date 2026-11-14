@@ -2,7 +2,7 @@
  * NavigationSource.h
  *
  * Publishes which screen is open, so navigation controls can show it, e.g.
- * `<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>`
+ * `<bind_state_if_eq subject="source.navigation.screen" state="checked" ref_value="control"/>`
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -25,7 +25,7 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		NavigationSource();
 
-		/** Declare `nav.screen` */
+		/** Declare `source.navigation.screen` */
 		void fields(FieldVisitor& f) override;
 
 		/** Read the open screen from Navigation */

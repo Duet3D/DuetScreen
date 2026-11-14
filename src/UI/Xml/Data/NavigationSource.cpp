@@ -14,7 +14,7 @@ namespace UI::Xml
 
 	void NavigationSource::fields(FieldVisitor& f)
 	{
-		f.field("nav.screen", m_screen, "Name of the open screen, or empty when the home screens are showing");
+		f.field("screen", m_screen, "Name of the open screen, or empty when the home screens are showing");
 	}
 
 	void NavigationSource::onInit()

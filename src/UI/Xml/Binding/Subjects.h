@@ -1,7 +1,7 @@
 /*
  * Subjects.h
  *
- * Subjects are the only way data reaches an XML view: a widget binds to a subject by name (`bind_text="name"`) and
+ * Subjects are the only way data reaches an XML view: a widget binds to a subject by name (`bind_text="presenter.name"`) and
  * redraws when the subject changes. These wrappers own their storage, including string buffers, and only notify
  * observers when the value really changes, so code that writes every poll doesn't cause redraws.
  */

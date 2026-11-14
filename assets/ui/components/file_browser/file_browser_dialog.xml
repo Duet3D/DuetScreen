@@ -11,48 +11,48 @@
 		<style name="beside_image" text_align="left"/>
 	</styles>
 
-	<view extends="ds_modal" name="file_browser_dialog" bind_open="dialog" width="70%" height="content" align="center"
+	<view extends="ds_modal" name="file_browser_dialog" bind_open="presenter.dialog" width="70%" height="content" align="center"
 		  style_max_height="70%" flex_flow="column">
 		<action trigger="dismissed" name="presenter.files.close_dialog"/>
 
 		<lv_obj name="header" width="100%" height="content" flex_flow="row">
 			<style name="bg_color_header"/>
 			<style name="text_header"/>
-			<lv_label name="title" bind_text="dialog_title"/>
+			<lv_label name="title" bind_text="presenter.dialog_title"/>
 		</lv_obj>
 
 		<lv_obj name="body" width="100%" height="content" flex_flow="column">
 			<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
 				<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
 						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-					<bind_style name="beside_image" subject="dialog_has_image" ref_value="1"/>
-					<lv_label name="text" bind_text="dialog_text" width="100%"/>
+					<bind_style name="beside_image" subject="presenter.dialog_has_image" ref_value="1"/>
+					<lv_label name="text" bind_text="presenter.dialog_text" width="100%"/>
 
 					<!-- The job's details -->
 					<lv_obj name="file_info_cont" width="100%" height="content" style_layout="grid"
 							style_grid_column_dsc_array="content fr(1)"
 							style_grid_row_dsc_array="content content content content content content">
-						<bind_flag_if_eq subject="info_shown" flag="hidden" ref_value="0"/>
+						<bind_flag_if_eq subject="presenter.info_shown" flag="hidden" ref_value="0"/>
 
 						<lv_label translation_tag="tr.file.start_print.date" style_grid_cell_column_pos="0"
 								  style_grid_cell_x_align="start" style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 							<style name="text_muted"/>
 						</lv_label>
-						<lv_label bind_text="info_date" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						<lv_label bind_text="presenter.info_date" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 								  style_grid_cell_row_pos="0" style_grid_cell_y_align="start"/>
 
 						<lv_label translation_tag="tr.file.start_print.size" style_grid_cell_column_pos="0"
 								  style_grid_cell_x_align="start" style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
 							<style name="text_muted"/>
 						</lv_label>
-						<lv_label bind_text="info_size" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						<lv_label bind_text="presenter.info_size" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 								  style_grid_cell_row_pos="1" style_grid_cell_y_align="start"/>
 
 						<lv_label translation_tag="tr.file.start_print.generated_by" style_grid_cell_column_pos="0"
 								  style_grid_cell_x_align="start" style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
 							<style name="text_muted"/>
 						</lv_label>
-						<lv_label bind_text="info_generated_by" style_grid_cell_column_pos="1"
+						<lv_label bind_text="presenter.info_generated_by" style_grid_cell_column_pos="1"
 								  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="2"
 								  style_grid_cell_y_align="start"/>
 
@@ -60,7 +60,7 @@
 								  style_grid_cell_x_align="start" style_grid_cell_row_pos="3" style_grid_cell_y_align="start">
 							<style name="text_muted"/>
 						</lv_label>
-						<lv_label bind_text="info_print_time" style_grid_cell_column_pos="1"
+						<lv_label bind_text="presenter.info_print_time" style_grid_cell_column_pos="1"
 								  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="3"
 								  style_grid_cell_y_align="start"/>
 
@@ -68,22 +68,22 @@
 								  style_grid_cell_x_align="start" style_grid_cell_row_pos="4" style_grid_cell_y_align="start">
 							<style name="text_muted"/>
 						</lv_label>
-						<lv_label bind_text="info_height" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						<lv_label bind_text="presenter.info_height" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 								  style_grid_cell_row_pos="4" style_grid_cell_y_align="start"/>
 
 						<lv_label translation_tag="tr.file.start_print.layer_height" style_grid_cell_column_pos="0"
 								  style_grid_cell_x_align="start" style_grid_cell_row_pos="5" style_grid_cell_y_align="start">
 							<style name="text_muted"/>
 						</lv_label>
-						<lv_label bind_text="info_layer_height" style_grid_cell_column_pos="1"
+						<lv_label bind_text="presenter.info_layer_height" style_grid_cell_column_pos="1"
 								  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="5"
 								  style_grid_cell_y_align="start"/>
 					</lv_obj>
 				</lv_obj>
 
-				<lv_image name="image" bind_src="dialog_image" inner_align="contain" width="50%" height="200"
+				<lv_image name="image" bind_src="presenter.dialog_image" inner_align="contain" width="50%" height="200"
 						  style_min_width="50" style_max_width="300" style_min_height="50" style_max_height="300">
-					<bind_flag_if_eq subject="dialog_has_image" flag="hidden" ref_value="0"/>
+					<bind_flag_if_eq subject="presenter.dialog_has_image" flag="hidden" ref_value="0"/>
 				</lv_image>
 			</lv_obj>
 		</lv_obj>
@@ -92,7 +92,7 @@
 
 		<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 			<ds_button name="delete" text="&#xF2ED;" width="content" height="content">
-				<bind_flag_if_eq subject="dialog_can_delete" flag="hidden" ref_value="0"/>
+				<bind_flag_if_eq subject="presenter.dialog_can_delete" flag="hidden" ref_value="0"/>
 				<action trigger="clicked" name="presenter.files.ask_delete"/>
 			</ds_button>
 			<ds_button name="cancel" translation_tag="tr.common.cancel" height="content" flex_grow="1">

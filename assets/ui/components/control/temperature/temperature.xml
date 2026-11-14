@@ -21,7 +21,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="tools" item="temperature_tool" width="100%" height="content"
+				<ds_list name="list" list="presenter.tools" item="temperature_tool" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>
@@ -35,7 +35,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="beds" item="temperature_heater_card" width="100%" height="content"
+				<ds_list name="list" list="source.heat.beds" item="temperature_heater_card" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>
@@ -49,14 +49,14 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="chambers" item="temperature_heater_card" width="100%" height="content"
+				<ds_list name="list" list="source.heat.chambers" item="temperature_heater_card" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>
 		</lv_obj>
 
 		<lv_obj name="control_cont" height="100%" flex_grow="1" flex_flow="column" style_pad_all="0">
-			<lv_label name="selected_tool_label" bind_text="selected_tool" width="100%" height="content"
+			<lv_label name="selected_tool_label" bind_text="presenter.selected_tool" width="100%" height="content"
 					  style_text_align="center"/>
 			<ds_view name="extruder_control" view="temperature_extrusion" shown="true" width="100%" flex_grow="1">
 				<style name="card"/>

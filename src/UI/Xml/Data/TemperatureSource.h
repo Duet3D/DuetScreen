@@ -2,7 +2,7 @@
  * TemperatureSource.h
  *
  * Records recent temperatures, for graphs: a history (see Binding/History.h) and the highest temperature a graph's
- * axis needs to reach, e.g. `<ds_graph bind_y_max="temperatures.limit"/>`.
+ * axis needs to reach, e.g. `<ds_graph bind_y_max="source.temperature.limit"/>`.
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -22,7 +22,7 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		TemperatureSource();
 
-		/** Declare `temperatures` and `temperatures.limit` */
+		/** Declare `source.temperature.temperatures` and `source.temperature.limit` */
 		void fields(FieldVisitor& f) override;
 
 		/** Re-read which heaters there are, their names and limits */

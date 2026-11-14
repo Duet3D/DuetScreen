@@ -1,6 +1,6 @@
 <!--
   X and Y on a pad, in a card: the `jog_xy` widget (widgets/motion/jog_xy.json). It jogs by the distance and speed
-  chosen in any view (the global jog.*), and asks before homing as the Move tab does.
+  chosen in any view (the global source.jog.*), and asks before homing as the Move tab does.
 
   Fields and actions: src/UI/Presenters/Control/Move/MovePresenter.h
 -->
@@ -8,9 +8,9 @@
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
 		<style name="card"/>
 		<style name="pad_zero"/>
-		<bind_state_if_eq subject="connected" state="disabled" ref_value="0"/>
+		<bind_state_if_eq subject="presenter.connected" state="disabled" ref_value="0"/>
 		<move_xy name="xy_control" width="100%" height="100%"/>
-		<question_dialog name="confirm_msgbox" open="confirm" title="confirm_title" text="confirm_text"
+		<question_dialog name="confirm_msgbox" open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
 						 confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 	</view>
 </component>

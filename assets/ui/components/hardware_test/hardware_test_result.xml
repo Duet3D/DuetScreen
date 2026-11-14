@@ -1,7 +1,7 @@
 <!--
   One finished test in the hardware test's results: its name and what it found, green if it passed, red if not.
 
-  Fields:   a passed or failed row: name, output, passed (src/UI/Presenters/HardwareTest/HardwareTestPresenter.h)
+  Fields:   a passed or failed row: row.name, row.output, row.passed (src/UI/Presenters/HardwareTest/HardwareTestPresenter.h)
 -->
 <component>
 	<styles>
@@ -11,10 +11,10 @@
 
 	<view extends="lv_obj" height="100%" flex_grow="1" style_min_width="20%" flex_flow="column"
 		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
-		<bind_style name="hardware_test_passed" subject="passed" ref_value="1"/>
-		<bind_style name="hardware_test_failed" subject="passed" ref_value="0"/>
-		<lv_label name="name" bind_text="name"/>
-		<ds_textarea name="output" bind_text="output" keyboard="none" width="100%" flex_grow="1"
+		<bind_style name="hardware_test_passed" subject="row.passed" ref_value="1"/>
+		<bind_style name="hardware_test_failed" subject="row.passed" ref_value="0"/>
+		<lv_label name="name" bind_text="row.name"/>
+		<ds_textarea name="output" bind_text="row.output" keyboard="none" width="100%" flex_grow="1"
 					 style_text_align="left"/>
 	</view>
 </component>

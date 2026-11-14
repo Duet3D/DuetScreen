@@ -95,7 +95,7 @@ namespace UI::Xml
 		f.field("id",
 				id,
 				"What it shows: bed.N, chamber.N, tool.T.H (tool T's Hth heater, from 0), fan.N, sensor.N, "
-				"job.progress, speed_factor or extrusion_factor");
+				"job.progress, speed_factor or extrusion_factor (as `row.id`)");
 		f.field("name", name, "Display name, e.g. \"Bed\" or \"Tool 0\"");
 		f.field("kind", kind, "heater, fan, sensor or percent");
 		f.field("value", value, "The value, whole units, e.g. °C or percent");
@@ -129,7 +129,7 @@ namespace UI::Xml
 	}
 
 	GaugeSource::GaugeSource()
-		: DataSource("gauges")
+		: DataSource("gauge")
 	{
 	}
 

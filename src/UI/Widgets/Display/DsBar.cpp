@@ -26,7 +26,7 @@ namespace UI::Xml
 		Widgets::add({.name = "ds_bar",
 					  .extends = "lv_obj",
 					  .description = "A progress bar that draws its value as text, inside the filled part when it fits",
-					  .example = R"(<ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>)",
+					  .example = R"(<ds_bar min="0" max="100" label_format="{}%" bind_value="presenter.progress"/>)",
 					  .attributes = {{"min", "Bottom of the range (default 0)"},
 									 {"max", "Top of the range (default 100)"},
 									 {"bind_min",
@@ -39,7 +39,7 @@ namespace UI::Xml
 									 {"label_format",
 									  "fmt format for the value's text (default \"{}\"); empty for no text, e.g. under "
 									  "a value shown beside it"}},
-					  .exampleSubjects = {{"progress", "int", "42"}}},
+					  .exampleSubjects = {{"presenter.progress", "int", "42"}}},
 					 xmlCreate,
 					 xmlApply);
 	}

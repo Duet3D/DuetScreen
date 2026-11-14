@@ -2,7 +2,7 @@
   A value with - and + beside it, under a title, and a row of presets below. Tap the value to type one in; tap a
   preset to use it; hold a preset to change it.
 
-      <value_selector selector="distance" title="distance.title" value="distance.value" choices="distance.choices"/>
+      <value_selector selector="distance" title="presenter.distance.title" value="presenter.distance.value" choices="presenter.distance.choices"/>
 
   `selector` is the selector's id, the arg of its actions; `title`, `value` and `choices` name its fields. The
   presenter showing it owns a ValueSelector, which declares those fields and handles the actions

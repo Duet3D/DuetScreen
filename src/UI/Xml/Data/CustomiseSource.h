@@ -25,7 +25,7 @@ namespace UI::Xml
 		/** Stop following the editor */
 		~CustomiseSource() override;
 
-		/** Declare `customise.*` */
+		/** Declare `source.customise.*` */
 		void fields(FieldVisitor& f) override;
 
 		/** Read the editor */
@@ -37,7 +37,7 @@ namespace UI::Xml
 		/** The editor changed: show it */
 		void onEditorChanged() override { update(); }
 
-		/** The value `customise.selected` has while item `id` of `slot` is selected */
+		/** The value `source.customise.selected` has while item `id` of `slot` is selected */
 		static std::string selectedKey(std::string_view slot, std::string_view id);
 
 	  private:

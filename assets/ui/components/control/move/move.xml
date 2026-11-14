@@ -3,7 +3,7 @@
   distance and speed along the bottom. Tap a position to move to one; hold a distance or speed to change it.
 
   Fields and actions: src/UI/Presenters/Control/Move/MovePresenter.h. Its question covers only this tab. The jog
-  distance and speed are the global jog.* (src/UI/Xml/Data/JogSource.h), shared with any jog widgets.
+  distance and speed are the global source.jog.* (src/UI/Xml/Data/JogSource.h), shared with any jog widgets.
 -->
 <component presenter="move">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
@@ -13,7 +13,7 @@
 			<lv_obj name="axis_control" height="100%" flex_grow="1" scrollable="false" flex_flow="row"
 					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="card"/>
-				<bind_state_if_eq subject="connected" state="disabled" ref_value="0"/>
+				<bind_state_if_eq subject="presenter.connected" state="disabled" ref_value="0"/>
 
 				<!-- X and Y -->
 				<move_xy name="xy_control" width="38%" height="100%"/>
@@ -22,10 +22,10 @@
 				<move_z name="z_control" width="13%" height="100%" style_min_width="content"/>
 
 				<!-- Any other axes -->
-				<ds_list name="generic_axis_controls" list="axes" item="move_axis" height="100%" flex_grow="1"
+				<ds_list name="generic_axis_controls" list="presenter.axes" item="move_axis" height="100%" flex_grow="1"
 						 flex_flow="row" style_pad_all="0" style_pad_column="0">
 					<style name="no_border"/>
-					<bind_flag_if_eq subject="axes_shown" flag="hidden" ref_value="0"/>
+					<bind_flag_if_eq subject="presenter.axes_shown" flag="hidden" ref_value="0"/>
 				</ds_list>
 			</lv_obj>
 
@@ -39,7 +39,7 @@
 		<!-- Jog distance and speed -->
 		<move_jog_choices name="bottombar" width="100%" height="content"/>
 
-		<question_dialog name="confirm_msgbox" open="confirm" title="confirm_title" text="confirm_text"
+		<question_dialog name="confirm_msgbox" open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
 						 confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 	</view>
 </component>

@@ -50,7 +50,7 @@ class TestGauges : public UiTestSuite
 	/** The row of `gauges` whose id is `id`, or nullptr */
 	static GaugeRow* gauge(std::string_view id)
 	{
-		UI::Xml::ListBase* list = UI::Xml::Scope::findList(nullptr, "gauges");
+		UI::Xml::ListBase* list = UI::Xml::Scope::findList(nullptr, "source.gauge.gauges");
 		if (list == nullptr)
 		{
 			return nullptr;

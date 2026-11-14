@@ -7,6 +7,7 @@
 #include "UI/Styles/Theme.h"
 #include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/Binding/List.h"
+#include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/PlacementScope.h"
@@ -30,20 +31,24 @@ namespace UI::Xml::Api
 {
 	namespace
 	{
-		/** Collects the fields it visits, and the fields of each list's rows */
+		/**
+		 * Collects the fields it visits, each name as XML writes it (after the prefix that says where it comes from,
+		 * see Binding/Names.h), and the fields of each list's rows (`row.*`)
+		 */
 		class FieldCollector : public FieldVisitor
 		{
 		  public:
-			/** Collect into `fields` */
-			explicit FieldCollector(std::vector<Field>& fields)
+			/** Collect into `fields`, each name after `prefix` */
+			FieldCollector(std::vector<Field>& fields, std::string_view prefix)
 				: m_fields(fields)
+				, m_prefix(prefix)
 			{
 			}
 
 			/** Add the subject */
 			void field(std::string_view name, Subject& subject, std::string_view description) override
 			{
-				m_fields.push_back({.name = std::string(name),
+				m_fields.push_back({.name = m_prefix + std::string(name),
 									.type = std::string(subject.typeName()),
 									.description = std::string(description)});
 			}
@@ -51,16 +56,17 @@ namespace UI::Xml::Api
 			/** Add the list, with its row fields */
 			void list(std::string_view name, ListBase& list, std::string_view description) override
 			{
-				Field field{.name = std::string(name),
+				Field field{.name = m_prefix + std::string(name),
 							.type = std::string(list.typeName()),
 							.description = std::string(description)};
-				FieldCollector rows(field.rowFields);
+				FieldCollector rows(field.rowFields, Names::ROW);
 				list.rowFields(rows);
 				m_fields.push_back(std::move(field));
 			}
 
 		  private:
 			std::vector<Field>& m_fields; // Where fields are collected
+			std::string m_prefix;		  // What each name is written after
 		};
 
 		/** The actions in `set`, each name after `prefix` as XML writes it */
@@ -83,8 +89,9 @@ namespace UI::Xml::Api
 			std::vector<Source> result;
 			for (const auto& source : DataSources::all())
 			{
-				Source& entry = result.emplace_back(Source{.name = std::string(source->getName()), .fields = {}});
-				FieldCollector collector(entry.fields);
+				Source& entry = result.emplace_back(
+					Source{.name = std::string(source->getName()), .fields = {}, .file = source->file()});
+				FieldCollector collector(entry.fields, source->prefix());
 				source->fields(collector);
 			}
 			return result;
@@ -106,7 +113,7 @@ namespace UI::Xml::Api
 							  .fields = {},
 							  .actions = actionsOf(presenter->getActions(), Actions::PRESENTER_PREFIX),
 							  .components = {}});
-				FieldCollector collector(entry.fields);
+				FieldCollector collector(entry.fields, Names::PRESENTER);
 				presenter->fields(collector);
 				for (const auto& [componentName, info] : getComponents())
 				{
@@ -412,7 +419,7 @@ namespace UI::Xml::Api
 		}
 		{
 			OmRow row;
-			FieldCollector collector(reference.omRowFields);
+			FieldCollector collector(reference.omRowFields, Names::ROW);
 			row.allFields(collector);
 		}
 		reference.sources = sources();
@@ -431,7 +438,7 @@ namespace UI::Xml::Api
 		}
 		{
 			PlacementScope placed;
-			FieldCollector collector(reference.placedFields);
+			FieldCollector collector(reference.placedFields, Names::WIDGET);
 			placed.fields(collector);
 		}
 		for (const auto& slot : Layouts::slots())

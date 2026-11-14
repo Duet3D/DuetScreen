@@ -10,7 +10,7 @@
   screen's user folder (src/UI/Xml/Layout/LayoutLibrary.h). Widgets are selected, moved and resized on the screen
   itself (see src/UI/Widgets/Layout/DsLayout.h).
 
-  Data:     customise.* (src/UI/Xml/Data/CustomiseSource.h)
+  Data:     source.customise.* (src/UI/Xml/Data/CustomiseSource.h)
   Fields and actions: src/UI/Presenters/Customise/CustomisePresenter.h
 -->
 <component presenter="customise">
@@ -25,12 +25,12 @@
 		<lv_obj name="toolbar" width="100%" height="100%" clickable="false" scrollable="false" flex_flow="column"
 				style_flex_main_place="end" style_flex_cross_place="center" style_flex_track_place="center">
 		<style name="pad_small"/>
-		<bind_flag_if_eq subject="customise.editing" flag="hidden" ref_value="0"/>
+		<bind_flag_if_eq subject="source.customise.editing" flag="hidden" ref_value="0"/>
 
 		<lv_obj name="bar" width="content" height="content" scrollable="false" flex_flow="row"
 				style_flex_cross_place="center" style_pad_column="#pad_small">
 			<style name="card"/>
-			<bind_flag_if_eq subject="dialog_open" flag="hidden" ref_value="1"/>
+			<bind_flag_if_eq subject="presenter.dialog_open" flag="hidden" ref_value="1"/>
 			<!-- The grip: dragging it moves the bar -->
 			<ds_move_handle name="grip" width="content" height="content" style_pad_all="0">
 				<ds_icon name="grip_icon" icon="drag.png" width="32" height="48" clickable="false"/>
@@ -39,28 +39,28 @@
 				<action trigger="clicked" name="actions.customise.open_catalogue"/>
 			</ds_button>
 			<ds_button name="configure" translation_tag="tr.customise.configure" icon="settings.png">
-				<bind_state_if_eq subject="customise.can_configure" state="disabled" ref_value="0"/>
+				<bind_state_if_eq subject="source.customise.can_configure" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.configure"/>
 			</ds_button>
 			<ds_button name="remove" translation_tag="tr.customise.remove" icon="clear.png">
-				<bind_state_if_eq subject="customise.can_remove" state="disabled" ref_value="0"/>
+				<bind_state_if_eq subject="source.customise.can_remove" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.remove"/>
 			</ds_button>
 			<!-- Checked while dragged widgets snap to the edges near them -->
 			<ds_button name="snap" translation_tag="tr.customise.snap" icon="apps.png">
-				<bind_flag_if_eq subject="customise.is_free" flag="hidden" ref_value="0"/>
-				<bind_state_if_eq subject="customise.snap" state="checked" ref_value="1"/>
+				<bind_flag_if_eq subject="source.customise.is_free" flag="hidden" ref_value="0"/>
+				<bind_state_if_eq subject="source.customise.snap" state="checked" ref_value="1"/>
 				<action trigger="clicked" name="presenter.customise.snap"/>
 			</ds_button>
 			<ds_button name="undo" translation_tag="tr.customise.undo" icon="back.png">
-				<bind_state_if_eq subject="customise.can_undo" state="disabled" ref_value="0"/>
+				<bind_state_if_eq subject="source.customise.can_undo" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.undo"/>
 			</ds_button>
 			<ds_button name="reset" translation_tag="tr.customise.reset" icon="print_again.png">
 				<action trigger="clicked" name="presenter.customise.reset"/>
 			</ds_button>
 			<ds_button name="save" translation_tag="tr.customise.save" icon="save.png">
-				<bind_state_if_eq subject="can_save" state="disabled" ref_value="0"/>
+				<bind_state_if_eq subject="presenter.can_save" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.save"/>
 			</ds_button>
 			<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
@@ -77,27 +77,27 @@
 		</lv_obj>
 
 		<!-- The widget pool: the widgets that can go where the user chose, by category -->
-		<ds_modal name="catalogue_dialog" bind_open="catalogue_open" width="70%" height="80%" flex_flow="column">
+		<ds_modal name="catalogue_dialog" bind_open="presenter.catalogue_open" width="70%" height="80%" flex_flow="column">
 			<action trigger="dismissed" name="presenter.customise.close_catalogue"/>
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
 				<lv_label name="title" translation_tag="tr.customise.add_title"/>
 			</lv_obj>
-			<ds_list name="list" list="catalogue" item="customise_catalogue_category" width="100%" flex_grow="1"
+			<ds_list name="list" list="presenter.catalogue" item="customise_catalogue_category" width="100%" flex_grow="1"
 					 flex_flow="column"/>
 		</ds_modal>
 
 		<!-- The selected widget's settings; above the keyboard while a text setting is typed -->
-		<ds_modal name="settings_dialog" bind_open="settings_open" width="70%" height="content" flex_flow="column">
-			<bind_style name="above_keyboard" subject="keyboard" ref_value="1"/>
+		<ds_modal name="settings_dialog" bind_open="presenter.settings_open" width="70%" height="content" flex_flow="column">
+			<bind_style name="above_keyboard" subject="presenter.keyboard" ref_value="1"/>
 			<action trigger="dismissed" name="presenter.customise.close_settings"/>
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
-				<lv_label name="title" bind_text="customise.title"/>
+				<lv_label name="title" bind_text="source.customise.title"/>
 			</lv_obj>
-			<ds_list name="list" list="settings" item="customise_setting" width="100%" height="content"
+			<ds_list name="list" list="presenter.settings" item="customise_setting" width="100%" height="content"
 					 flex_flow="column"/>
 			<ds_button name="close" translation_tag="tr.common.close" width="100%">
 				<action trigger="clicked" name="presenter.customise.close_settings"/>
@@ -105,26 +105,26 @@
 		</ds_modal>
 
 		<!-- The values a choice (or a row of a list) can take -->
-		<ds_modal name="options_dialog" bind_open="options_open" width="50%" height="80%" flex_flow="column">
+		<ds_modal name="options_dialog" bind_open="presenter.options_open" width="50%" height="80%" flex_flow="column">
 			<action trigger="dismissed" name="presenter.customise.close_options"/>
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
-				<lv_label name="title" bind_text="options_title"/>
+				<lv_label name="title" bind_text="presenter.options_title"/>
 			</lv_obj>
-			<ds_list name="list" list="options" item="customise_option" width="100%" flex_grow="1" flex_flow="column"/>
+			<ds_list name="list" list="presenter.options" item="customise_option" width="100%" flex_grow="1" flex_flow="column"/>
 		</ds_modal>
 
 		<!-- Saving: the name to save the layouts as, typed on the shared keyboard (the dialog moves above it) -->
-		<ds_modal name="save_dialog" bind_open="save_open" width="70%" height="content" flex_flow="column">
-			<bind_style name="above_keyboard" subject="keyboard" ref_value="1"/>
+		<ds_modal name="save_dialog" bind_open="presenter.save_open" width="70%" height="content" flex_flow="column">
+			<bind_style name="above_keyboard" subject="presenter.keyboard" ref_value="1"/>
 			<action trigger="dismissed" name="presenter.customise.close_save"/>
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
 				<lv_label name="title" translation_tag="tr.customise.save_title"/>
 			</lv_obj>
-			<ds_textarea name="name" bind_text="save_name" one_line="true" width="100%"
+			<ds_textarea name="name" bind_text="presenter.save_name" one_line="true" width="100%"
 						 placeholder_tag="tr.customise.name_hint">
 				<action trigger="value_changed" name="presenter.customise.save_name"/>
 				<action trigger="focused" name="presenter.customise.keyboard" arg="1"/>
@@ -132,9 +132,9 @@
 				<action trigger="ready" name="presenter.customise.keyboard" arg="0"/>
 				<action trigger="ready" name="presenter.customise.save_ok"/>
 			</ds_textarea>
-			<lv_label name="problem" bind_text="save_problem" width="100%" long_mode="wrap">
+			<lv_label name="problem" bind_text="presenter.save_problem" width="100%" long_mode="wrap">
 				<style name="text_warning"/>
-				<bind_flag_if_eq subject="save_problem" flag="hidden" ref_value=""/>
+				<bind_flag_if_eq subject="presenter.save_problem" flag="hidden" ref_value=""/>
 			</lv_label>
 			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 				<style name="pad_zero"/>
@@ -149,7 +149,7 @@
 		</ds_modal>
 
 		<!-- Loading: the saved layouts -->
-		<ds_modal name="load_dialog" bind_open="load_open" width="70%" height="70%" flex_flow="column">
+		<ds_modal name="load_dialog" bind_open="presenter.load_open" width="70%" height="70%" flex_flow="column">
 			<action trigger="dismissed" name="presenter.customise.close_load"/>
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
@@ -157,12 +157,12 @@
 				<lv_label name="title" translation_tag="tr.customise.saved_title"/>
 			</lv_obj>
 			<lv_label name="none" translation_tag="tr.customise.none_saved" width="100%" long_mode="wrap">
-				<bind_flag_if_eq subject="has_saved" flag="hidden" ref_value="1"/>
+				<bind_flag_if_eq subject="presenter.has_saved" flag="hidden" ref_value="1"/>
 			</lv_label>
-			<ds_list name="list" list="saved" item="customise_saved_layout" width="100%" flex_grow="1"
+			<ds_list name="list" list="presenter.saved" item="customise_saved_layout" width="100%" flex_grow="1"
 					 flex_flow="column"/>
 		</ds_modal>
-		<question_dialog name="delete_question" open="confirm_delete" title="delete_title" text="delete_text"
+		<question_dialog name="delete_question" open="presenter.confirm_delete" title="presenter.delete_title" text="presenter.delete_text"
 						 confirm="presenter.customise.delete_saved" close="presenter.customise.close_delete"/>
 	</view>
 </component>

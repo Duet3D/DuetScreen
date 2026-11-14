@@ -14,16 +14,16 @@
 
 	<!-- Its width comes from the styles above: a flex_grow attribute where it is used would override them -->
 	<view extends="lv_obj" height="100%" flex_flow="column">
-		<bind_style name="commands_open" subject="commands_shown" ref_value="1"/>
-		<bind_style name="commands_folded" subject="commands_shown" ref_value="0"/>
-		<ds_list name="list" list="gcodes" item="console_gcode" windowed="true" item_height="30"
+		<bind_style name="commands_open" subject="presenter.commands_shown" ref_value="1"/>
+		<bind_style name="commands_folded" subject="presenter.commands_shown" ref_value="0"/>
+		<ds_list name="list" list="presenter.gcodes" item="console_gcode" windowed="true" item_height="30"
 				 item_width="content" width="100%" height="100%" flex_grow="1" scroll_dir="all">
-			<bind_flag_if_eq subject="commands_shown" flag="hidden" ref_value="0"/>
+			<bind_flag_if_eq subject="presenter.commands_shown" flag="hidden" ref_value="0"/>
 		</ds_list>
 		<!-- Over the list's corner while it shows; on its own while it is folded away -->
 		<ds_button name="command_visibility" text="&#xF00B;" align="top_right">
-			<bind_state_if_eq subject="commands_shown" state="checked" ref_value="1"/>
-			<bind_flag_if_eq subject="commands_shown" flag="floating" ref_value="1"/>
+			<bind_state_if_eq subject="presenter.commands_shown" state="checked" ref_value="1"/>
+			<bind_flag_if_eq subject="presenter.commands_shown" flag="floating" ref_value="1"/>
 			<action trigger="clicked" name="presenter.console.toggle_commands"/>
 		</ds_button>
 	</view>

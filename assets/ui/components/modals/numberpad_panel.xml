@@ -3,8 +3,8 @@
   Shown in a dialog by the shared number pad (numberpad.xml), and beside the sliders of the speed and extrusion factor
   dialogs.
 
-      <numberpad_panel entry="pad" header="pad.header" text="pad.text" accepted="pad.accepted"
-                       confirmable="pad.confirmable" signed="pad.signed"/>
+      <numberpad_panel entry="pad" header="presenter.pad.header" text="presenter.pad.text" accepted="presenter.pad.accepted"
+                       confirmable="presenter.pad.confirmable" signed="presenter.pad.signed"/>
 
   `entry` is the entry's id, the arg of its actions; the others name its fields. The presenter showing it owns a
   NumberEntry, which declares those fields and handles the actions (src/UI/Xml/View/NumberEntry.h).

@@ -29,7 +29,8 @@ namespace UI::Xml
 			 .description = "An arc that shows a value, such as a gauge's: a read-only lv_arc, without a knob, whose "
 							"value and range follow subjects. The track is the main part's arc, the value the "
 							"indicator's. Takes every lv_arc attribute but `bind_value`, which this replaces.",
-			 .example = R"(<ds_arc bind_value="temperature" bind_max="limit" bg_start_angle="135" bg_end_angle="45"
+			 .example =
+				 R"(<ds_arc bind_value="presenter.temperature" bind_max="presenter.limit" bg_start_angle="135" bg_end_angle="45"
 		width="120" height="120">
 	<style name="gauge_arc"/>
 	<style name="gauge_arc_indic" selector="indicator"/>
@@ -41,7 +42,7 @@ namespace UI::Xml
 							{"bind_max",
 							 "Follow an int subject for the top of the range, e.g. a heater's maximum",
 							 AttributeKind::Subject}},
-			 .exampleSubjects = {{"temperature", "int", "210"}, {"limit", "int", "300"}}},
+			 .exampleSubjects = {{"presenter.temperature", "int", "210"}, {"presenter.limit", "int", "300"}}},
 			xmlCreate,
 			xmlApply);
 	}

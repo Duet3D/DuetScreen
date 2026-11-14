@@ -33,11 +33,10 @@ namespace UI::Xml
 				 "position from LVGL's palette (red, pink, purple, …). The graph starts with what was recorded before "
 				 "it was built, and follows series being added, removed and renamed.",
 			 .example =
-				 R"(<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"
-		  width="400" height="250"/>)",
+				 R"(<ds_graph history="source.temperature.temperatures" seconds="60" y_min="0" y_max="300"
+		  bind_y_max="source.temperature.limit" width="400" height="250"/>)",
 			 .attributes = {{"history",
-							 "The history shown (required), looked up like a list: the enclosing rows, the view's "
-							 "presenter, then the globals",
+							 "The history shown (required), named like a list, e.g. `source.temperature.temperatures`",
 							 AttributeKind::List},
 							{"seconds",
 							 "The X axis shows the last this-many seconds, labelled -seconds to 0 (default 60)"},

@@ -17,14 +17,14 @@
 
 namespace UI::Xml
 {
-	/** Publishes `move.*` */
+	/** Publishes `source.move.*` */
 	class MoveSource : public DataSource
 	{
 	  public:
 		/** Create the source. Nothing is published until DataSources::start(). */
 		MoveSource();
 
-		/** Declare `move.*` */
+		/** Declare `source.move.*` */
 		void fields(FieldVisitor& f) override;
 
 		/** Re-read everything */

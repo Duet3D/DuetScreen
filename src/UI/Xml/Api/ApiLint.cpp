@@ -4,6 +4,7 @@
 
 #include "ApiLint.h"
 #include "ObjectModel/Tree/Schema.h"
+#include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Om/Converters.h"
 #include "UI/Xml/Om/OmName.h"
 #include "UI/Xml/Om/OmPath.h"
@@ -42,15 +43,20 @@ namespace UI::Xml::Api
 			NameSet consts{};							// Consts it defines in `<consts>`
 		};
 
-		/** Where names are looked up */
+		/** A row a component is built in: of a C++ list, of an object model list, or a <ds_scope>'s item */
+		struct Row
+		{
+			const std::vector<Field>* fields = nullptr; // Its fields (`row.*`), or nullptr for none
+			std::optional<OM::Path> item{};				// For an object model row, its item, any index as 0
+		};
+
+		/** Where names are looked up (see Binding/Names.h: each prefix says where) */
 		struct Scope
 		{
-			std::vector<const std::vector<Field>*> fields{}; // Innermost first: list rows, then the view's presenter
-			std::vector<const Presenter*> handlers{};		 // Presenters actions go to, innermost view first
-			std::string where{};							 // Path of components to here, for messages
-			std::vector<OM::Path> omItems{}; // The object model items (rows of `om.` lists, <ds_scope>s) this is in,
-											 // innermost first, any index as 0. Their fields have names relative to
-											 // them, looked up innermost first.
+			std::vector<Row> rows{};								  // `row.*`, then `parent.*`, …: innermost first
+			std::vector<const std::vector<Field>*> presenterFields{}; // `presenter.*`: the view's presenter's
+			std::vector<const Presenter*> handlers{};				  // Presenters actions go to, innermost view first
+			std::string where{};									  // Path of components to here, for messages
 		};
 
 		/** One use of a component: where it is, and its props */
@@ -127,7 +133,7 @@ namespace UI::Xml::Api
 					Scope scope;
 					if (const Presenter* presenter = presenterNamed(def.presenter))
 					{
-						scope.fields.push_back(&presenter->fields);
+						scope.presenterFields.push_back(&presenter->fields);
 						scope.handlers.push_back(presenter);
 					}
 					if (component.uses.empty())
@@ -146,7 +152,6 @@ namespace UI::Xml::Api
 						if (const WidgetDef* widget = placeable(use.by))
 						{
 							Scope placed = scope;
-							placed.fields.push_back(&m_reference.placedFields);
 							placed.where = "widget " + widget->id;
 							for (const auto& settings : settingsToCheck(*widget))
 							{
@@ -258,24 +263,41 @@ namespace UI::Xml::Api
 			 */
 			void rowSetting(const SettingDef& setting, const std::function<void(std::string)>& report) const
 			{
+				// The widget file's key and label are row fields, kept without their `row.`
+				const std::string key = std::string(Names::ROW) + setting.key;
+				const std::string label = std::string(Names::ROW) + setting.label;
 				const Context global{.def = nullptr, .props = nullptr, .scope = {}};
 				if (const auto omList = omPath(setting.list, global, true))
 				{
 					Context item = global;
-					item.scope.omItems.push_back(omList->index(0));
-					if (!isRowField(m_reference.omRowFields, setting.key))
+					item.scope.rows.push_back({.fields = &m_reference.omRowFields, .item = omList->index(0)});
+					if (!isRowField(m_reference.omRowFields, key))
 					{
 						report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
 										   setting.name,
 										   setting.list,
-										   setting.key));
+										   key));
 					}
-					if (!isRowField(m_reference.omRowFields, setting.label) && !omPath(setting.label, item, false))
+					if (!isRowField(m_reference.omRowFields, label) && !omPath(label, item, false))
 					{
 						report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
 										   setting.name,
 										   setting.list,
-										   setting.label));
+										   label));
+					}
+					// A label's converter may take a translation key, as `row.name|default:tr.fine_tune.fan` does
+					const auto parsed = OmName::parse(setting.label);
+					const Converter* converter = parsed ? findConverter(parsed->converter) : nullptr;
+					if (converter != nullptr && converter->argumentKind == Converter::Argument::translationKey)
+					{
+						const auto key = Translations::key(parsed->argument);
+						if (!key || !m_translations.contains(*key))
+						{
+							report(fmt::format("setting `{:s}`: no translation `{:s}`, written `{:s}<key>`",
+											   setting.name,
+											   parsed->argument,
+											   Translations::PREFIX));
+						}
 					}
 					return;
 				}
@@ -286,7 +308,7 @@ namespace UI::Xml::Api
 					report(fmt::format("setting `{:s}`: no global list `{:s}`", setting.name, setting.list));
 					return;
 				}
-				for (const std::string* field : {&setting.key, &setting.label})
+				for (const std::string* field : {&key, &label})
 				{
 					const bool found = std::any_of(list->rowFields.begin(),
 												   list->rowFields.end(),
@@ -355,7 +377,7 @@ namespace UI::Xml::Api
 				Scope scope;
 				for (const auto& presenter : m_reference.presenters)
 				{
-					scope.fields.push_back(&presenter.fields);
+					scope.presenterFields.push_back(&presenter.fields);
 					scope.handlers.push_back(&presenter);
 				}
 				for (const auto& widget : m_reference.widgets)
@@ -567,11 +589,9 @@ namespace UI::Xml::Api
 					{
 						// An object model list's rows have names relative to their item besides their fields
 						Scope scope = context.scope;
-						scope.fields.insert(scope.fields.begin(), field ? &field->rowFields : &m_reference.omRowFields);
-						if (omList)
-						{
-							scope.omItems.insert(scope.omItems.begin(), omList->index(0));
-						}
+						scope.rows.insert(scope.rows.begin(),
+										  Row{.fields = field ? &field->rowFields : &m_reference.omRowFields,
+											  .item = omList ? std::optional(omList->index(0)) : std::nullopt});
 						const std::map<std::string, std::string> noProps;
 						instance(component->second, scope, noProps);
 					}
@@ -585,7 +605,7 @@ namespace UI::Xml::Api
 					if (component != m_components.end() && element_)
 					{
 						Scope scope = context.scope;
-						scope.omItems.insert(scope.omItems.begin(), *element_);
+						scope.rows.insert(scope.rows.begin(), Row{.fields = nullptr, .item = *element_});
 						const std::map<std::string, std::string> noProps;
 						instance(component->second, scope, noProps);
 					}
@@ -600,10 +620,13 @@ namespace UI::Xml::Api
 						const Presenter* presenter =
 							presenterNamed(presenterName.value_or(component->second.presenter));
 						// A view's names are its presenter's and the globals; its actions also go to outer views
-						Scope scope{.fields = {}, .handlers = context.scope.handlers, .where = context.scope.where};
+						Scope scope{.rows = {},
+									.presenterFields = {},
+									.handlers = context.scope.handlers,
+									.where = context.scope.where};
 						if (presenter)
 						{
-							scope.fields.push_back(&presenter->fields);
+							scope.presenterFields.push_back(&presenter->fields);
 							scope.handlers.insert(scope.handlers.begin(), presenter);
 						}
 						const std::map<std::string, std::string> noProps;
@@ -625,9 +648,17 @@ namespace UI::Xml::Api
 				case AttributeKind::List:
 					if (const Field* field = findField(value, context); !field || field->rowFields.empty())
 					{
-						if (!isLocalSubject(value, context) && !omPath(value, context, true))
+						if (!isLocalSubject(value, context) && !hasPrefix(value))
+						{
+							unprefixed(value, element, context);
+						}
+						else if (!isLocalSubject(value, context) && !omPath(value, context, true))
 						{
 							issue(context, element, fmt::format("no list `{:s}`", value));
+						}
+						else if (const auto parsed = OmName::parse(value))
+						{
+							checkIndices(parsed->path, element, context);
 						}
 					}
 					return;
@@ -702,6 +733,11 @@ namespace UI::Xml::Api
 				{
 					return;
 				}
+				if (!hasPrefix(name))
+				{
+					unprefixed(name, element, context);
+					return;
+				}
 				if (!omPath(name, context, false))
 				{
 					issue(context, element, fmt::format("no subject `{:s}`", name));
@@ -722,7 +758,18 @@ namespace UI::Xml::Api
 				{
 					checkTranslationGroup(parsed->argument, element, context);
 				}
-				for (const auto& segment : OmTemplate::parse(parsed->path)->segments())
+				checkIndices(parsed->path, element, context);
+			}
+
+			/** Check the names of the `{…}` indices of object model path `path` */
+			void checkIndices(std::string_view path, const Element& element, const Context& context)
+			{
+				const auto parsed = OmTemplate::parse(path);
+				if (!parsed)
+				{
+					return;
+				}
+				for (const auto& segment : parsed->segments())
 				{
 					if (const auto* ref = std::get_if<OmTemplate::Ref>(&segment))
 					{
@@ -754,14 +801,25 @@ namespace UI::Xml::Api
 			}
 
 			/**
-			 * The object model path `name` stands for (see Om/OmName.h): an `om.` path, or inside object model items, a
-			 * path relative to the innermost that has it (`value|…` is the innermost item itself). With a schema, only
-			 * a path it lists, and for a `list`, only an array.
+			 * The object model path `name` stands for (see Om/OmName.h): an `om.` path, or a path relative to the
+			 * object model item of the row it names (`row.current`, `parent.active[0]`; `row.value|…` is the item
+			 * itself). With a schema, only a path it lists, and for a `list`, only an array.
 			 * @return the path, any `{…}` index as 0, or nothing if `name` isn't an object model name here
 			 */
 			static std::optional<OM::Path> omPath(const std::string& name, const Context& context, bool list)
 			{
-				const auto parsed = OmName::parse(name);
+				std::optional<OM::Path> item;
+				std::string_view inItem = name;
+				if (const auto row = rowNamed(name))
+				{
+					if (row->level >= context.scope.rows.size() || !context.scope.rows[row->level].item)
+					{
+						return std::nullopt;
+					}
+					item = context.scope.rows[row->level].item;
+					inItem = row->field;
+				}
+				const auto parsed = OmName::parse(inItem);
 				if (!parsed || (list && !parsed->converter.empty()))
 				{
 					return std::nullopt;
@@ -777,7 +835,7 @@ namespace UI::Xml::Api
 					const auto type = schema.typeAt(path);
 					return type && (!list || *type == "any" || type->ends_with("[]"));
 				};
-				if (parsed->absolute)
+				if (parsed->absolute && !item)
 				{
 					const auto parsedPath = OmTemplate::parse(parsed->path);
 					if (parsedPath && fits(anyItem(*parsedPath)))
@@ -786,18 +844,18 @@ namespace UI::Xml::Api
 					}
 					return std::nullopt;
 				}
-				if (parsed->path == "value" && !parsed->converter.empty() && !list && !context.scope.omItems.empty())
+				if (!item || parsed->absolute)
 				{
-					return context.scope.omItems.front();
+					return std::nullopt;
 				}
-				// Relative: the innermost item that has the field, as the UI looks it up
-				const auto parsedPath = OmTemplate::parse(parsed->path);
-				for (const auto& item : context.scope.omItems)
+				if (parsed->path == "value" && !parsed->converter.empty() && !list)
 				{
-					if (parsedPath && fits(item / anyItem(*parsedPath)))
-					{
-						return item / anyItem(*parsedPath);
-					}
+					return item;
+				}
+				const auto parsedPath = OmTemplate::parse(parsed->path);
+				if (parsedPath && fits(*item / anyItem(*parsedPath)))
+				{
+					return *item / anyItem(*parsedPath);
 				}
 				return std::nullopt;
 			}
@@ -1100,24 +1158,135 @@ namespace UI::Xml::Api
 			/** The field called `name` in the scope, the innermost first, then the globals; nullptr if none */
 			const Field* findField(const std::string& name, const Context& context) const
 			{
-				for (const auto* fields : context.scope.fields)
+				const auto in = [](const std::vector<Field>* fields, std::string_view wanted) -> const Field*
 				{
-					for (const auto& field : *fields)
+					if (fields == nullptr)
 					{
-						if (field.name == name)
+						return nullptr;
+					}
+					const auto it = std::find_if(
+						fields->begin(), fields->end(), [wanted](const Field& field) { return field.name == wanted; });
+					return it == fields->end() ? nullptr : &*it;
+				};
+				if (const auto row = rowNamed(name))
+				{
+					return row->level < context.scope.rows.size()
+							   ? in(context.scope.rows[row->level].fields, std::string(Names::ROW) + row->field)
+							   : nullptr;
+				}
+				if (name.starts_with(Names::PRESENTER))
+				{
+					for (const auto* fields : context.scope.presenterFields)
+					{
+						if (const Field* field = in(fields, name))
 						{
-							return &field;
+							return field;
 						}
+					}
+					return nullptr;
+				}
+				if (name.starts_with(Names::WIDGET))
+				{
+					return in(&m_reference.placedFields, name);
+				}
+				if (name.starts_with(Names::SOURCE))
+				{
+					return in(&m_globals, name);
+				}
+				return nullptr;
+			}
+
+			/** A row's field, as a name says it: how many rows out (`row.` 0, `parent.` 1, …), and the field */
+			struct RowName
+			{
+				size_t level;			// 0 for the innermost row
+				std::string_view field; // The field, e.g. `current|fixed:1`
+			};
+
+			/** The row field `name` is (`row.x`, `parent.x`, `parent.parent.x`, …), or nothing if it isn't one */
+			static std::optional<RowName> rowNamed(std::string_view name)
+			{
+				if (const auto field = Names::after(name, Names::ROW))
+				{
+					return RowName{.level = 0, .field = *field};
+				}
+				size_t level = 0;
+				while (const auto rest = Names::after(name, Names::PARENT))
+				{
+					name = *rest;
+					level++;
+				}
+				return level > 0 ? std::optional(RowName{.level = level, .field = name}) : std::nullopt;
+			}
+
+			/** Whether `name` starts with a prefix that says where it comes from (see Binding/Names.h) */
+			static bool hasPrefix(std::string_view name)
+			{
+				for (const auto prefix :
+					 {Names::ROW, Names::PARENT, Names::PRESENTER, Names::WIDGET, Names::SOURCE, Names::OM})
+				{
+					if (name.starts_with(prefix))
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+
+			/**
+			 * What `name`, written without saying where it comes from, is likely to be here: the innermost row's
+			 * field, an outer row's, the presenter's, the place's, or a data source's (by the end of its name)
+			 * @return the name written with its prefix, or nothing if nothing here has it
+			 */
+			std::optional<std::string> suggestion(const std::string& name, const Context& context) const
+			{
+				std::string parents;
+				for (size_t level = 0; level < context.scope.rows.size(); level++)
+				{
+					const std::string written =
+						level == 0 ? std::string(Names::ROW) + name : parents + std::string(Names::PARENT) + name;
+					if (level > 0)
+					{
+						parents += Names::PARENT;
+					}
+					if (findField(written, context) || omPath(written, context, false) ||
+						omPath(written, context, true))
+					{
+						return written;
+					}
+				}
+				for (const auto prefix : {Names::PRESENTER, Names::WIDGET})
+				{
+					if (findField(std::string(prefix) + name, context))
+					{
+						return std::string(prefix) + name;
 					}
 				}
 				for (const auto& field : m_globals)
 				{
-					if (field.name == name)
+					// A source's old names started with a group of their own, e.g. `machine.printing`
+					const std::string_view inSource = std::string_view(field.name).substr(Names::SOURCE.size());
+					const size_t dot = inSource.find('.');
+					const std::string_view own = dot == std::string_view::npos ? inSource : inSource.substr(dot + 1);
+					if (own == name || inSource == name ||
+						(name.ends_with(own) && name.ends_with("." + std::string(own))))
 					{
-						return &field;
+						return field.name;
 					}
 				}
-				return nullptr;
+				return std::nullopt;
+			}
+
+			/** Report `name` (a subject or list) that isn't written with where it comes from, with a suggestion */
+			void unprefixed(const std::string& name, const Element& element, const Context& context)
+			{
+				const auto suggested = suggestion(name, context);
+				issue(context,
+					  element,
+					  fmt::format("`{:s}`: names are written with where they come from (row., parent., presenter., "
+								  "widget., source., om.){:s}",
+								  name,
+								  suggested ? fmt::format("; here, `{:s}`", *suggested) : std::string()));
 			}
 
 			/** Whether `value` is a colour written in hex, e.g. "#ff0000", rather than a `#const` */

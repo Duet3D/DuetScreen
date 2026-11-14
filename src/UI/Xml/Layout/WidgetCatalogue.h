@@ -6,16 +6,16 @@
  *
  *     {
  *       "component": "dashboard_fan",              // The XML component shown; default "widget_<id>"
- *       "title_tag": "widget.fan.title",           // Its name in the widget pool (or "title": "Fan")
- *       "description_tag": "widget.fan.description",
- *       "category_tag": "widget.category_fans",    // Its group in the widget pool (or "category": "Fans")
+ *       "title_tag": "tr.widget.fan.title",        // Its name in the widget pool (or "title": "Fan")
+ *       "description_tag": "tr.widget.fan.description",
+ *       "category_tag": "tr.widget.category_fans", // Its group in the widget pool (or "category": "Fans")
  *       "icon": "fan.png",
  *       "slots": ["dashboard"],                    // The layout slots it can be placed in
  *       "size": {"default": [456, 90], "min": [364, 90], "max": [920, 190]},  // In pixels: [width, height]
  *       "props": {"style": "card"},                // Props always given to the component
  *       "settings": [                              // Props the user chooses; see SettingDef
- *         {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
- *          "title_tag": "widget.fan.which"}
+ *         {"name": "fan", "kind": "row", "list": "om.fans", "key": "row.index",
+ *          "label": "row.name|default:tr.fine_tune.fan", "default": 0, "title_tag": "tr.widget.fan.which"}
  *       ]
  *     }
  *
@@ -71,9 +71,9 @@ namespace UI::Xml
 		int32_t max = std::numeric_limits<int32_t>::max(); // Int: largest value
 		std::string unit{};							// Int: shown after the value, e.g. "s"
 		std::vector<SettingOption> options{};			// Choice: the values to choose from
-		std::string list{};							// Row: the global list whose rows are chosen from, e.g. "fans"
-		std::string key{};							// Row: the rows' field whose value is stored, e.g. "number"
-		std::string label{};							// Row: the rows' field shown, e.g. "name"
+		std::string list{};	 // Row: the global list whose rows are chosen from, e.g. "om.fans"
+		std::string key{};	 // Row: the rows' field whose value is stored, without `row.`, e.g. "index"
+		std::string label{}; // Row: the rows' field shown, without `row.`, e.g. "name|default:tr.fine_tune.fan"
 		size_t maxLength = 64;						// Text: longest value, in bytes
 
 		/**

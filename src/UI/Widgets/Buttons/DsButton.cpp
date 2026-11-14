@@ -43,7 +43,7 @@ namespace UI::Xml
 				   "What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip"},
 				  {"flash_on",
 				   "Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. "
-				   "`responses.count`; style the flash with `<style … selector=\"user_1\"/>`",
+				   "`source.response.count`; style the flash with `<style … selector=\"user_1\"/>`",
 				   AttributeKind::Subject}}},
 			xmlCreate,
 			xmlApply);

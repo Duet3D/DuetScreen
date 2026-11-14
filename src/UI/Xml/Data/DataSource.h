@@ -7,6 +7,9 @@
  * navigation, customising). What it publishes, and the names, are declared in `fields()`; those names are the public
  * UI API (see UI_API_VERSION in Runtime/XmlUi.h) and renaming one breaks user bundles.
  *
+ * XML writes a source's names `source.<name>.<field>`: `<name>Source.cpp`, `source.machine.printing` is in
+ * MachineSource.cpp, so a name says where to look (a test keeps the rule).
+ *
  * A data source is a presenter for the whole UI rather than for one view: it is created when the XML UI starts, stays
  * active, and listens to Model events (registered in `onInit()`) for as long as it lives. Connecting re-reads
  * everything (`update()`); disconnecting empties everything (`clear()`).
@@ -16,8 +19,8 @@
  *     class SensorSource : public DataSource
  *     {
  *       public:
- *         SensorSource() : DataSource("sensors") {}
- *         void fields(FieldVisitor& f) override { f.list("sensor_summary", m_rows, "…"); }
+ *         SensorSource() : DataSource("sensor") {}  // in SensorSource.cpp
+ *         void fields(FieldVisitor& f) override { f.list("summary", m_rows, "…"); }  // source.sensor.summary
  *         void update() override;  // MODEL_LOCK(), read OM::Tree::get().root()["sensors"], m_rows.sync(...)
  *         void clear() override { m_rows.clear(); }
  *       protected:
@@ -33,7 +36,9 @@
 
 #include "UI/Core/Presenter.h"
 #include "UI/Xml/Binding/Fields.h"
+#include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Om/OmWatch.h"
+#include <source_location>
 #include <string>
 #include <vector>
 
@@ -42,14 +47,24 @@ namespace UI::Xml
 	class DataSource : public BasePresenter, public FieldProvider
 	{
 	  public:
-		/** @param name Name used in logs */
-		explicit DataSource(std::string name)
+		/**
+		 * @param name Its names are `source.<name>.<field>`; it is defined in `<Name>Source.cpp`
+		 * @param where Where it is defined, recorded for the UI API reference
+		 */
+		explicit DataSource(std::string name, std::source_location where = std::source_location::current())
 			: m_name(std::move(name))
+			, m_file(where.file_name())
 		{
 		}
 
-		/** Name used in logs */
+		/** Its name: its names are `source.<name>.<field>` */
 		std::string_view getName() const override { return m_name; }
+
+		/** What its names are written after: `source.<name>.` */
+		std::string prefix() const { return std::string(Names::SOURCE) + m_name + "."; }
+
+		/** The source file that defines it, e.g. "src/UI/Xml/Data/MachineSource.cpp" */
+		const std::string& file() const { return m_file; }
 
 		/** Re-read everything this source publishes */
 		virtual void update() = 0;
@@ -71,7 +86,8 @@ namespace UI::Xml
 		void watchObjectModel(std::vector<std::string> paths);
 
 	  private:
-		std::string m_name; // Name used in logs
+		std::string m_name; // Its names are `source.<name>.<field>`
+		std::string m_file; // The source file that defines it
 		OmWatch m_watch;	// Calls update() as the object model changes, once watchObjectModel() has
 	};
 } // namespace UI::Xml

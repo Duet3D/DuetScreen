@@ -63,29 +63,29 @@ namespace
 	constexpr std::string_view TOOLS_SCREEN = R"(
 		<component presenter="test_tools">
 			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
-				<ds_list name="tools" list="tools" item="dashboard_tool" width="100%" height="content" flex_flow="column"/>
+				<ds_list name="tools" list="source.tool.tools" item="dashboard_tool" width="100%" height="content" flex_flow="column"/>
 			</view>
 		</component>)";
 
 	constexpr std::string_view TOOL_CARD = R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-				<lv_label name="tool_name" bind_text="om.tools[{number}].name|default:tr.temperature.default_tool_name"/>
-				<ds_list name="heaters" list="heaters" item="tool_heater_row" width="100%" height="content"/>
+				<lv_label name="tool_name" bind_text="om.tools[{row.number}].name|default:tr.temperature.default_tool_name"/>
+				<ds_list name="heaters" list="row.heaters" item="tool_heater_row" width="100%" height="content"/>
 			</view>
 		</component>)";
 
-	/* `name` and `index` are the heater's; `number` is only on the tool row, `title` only on the presenter */
+	/* `row.name` and `row.index` are the heater's, `parent.number` the tool row's, `presenter.title` the presenter's */
 	constexpr std::string_view TOOL_HEATER_ROW = R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="row">
-				<lv_label name="heater_name" bind_text="name"/>
-				<lv_label name="title" bind_text="title"/>
+				<lv_label name="heater_name" bind_text="row.name"/>
+				<lv_label name="title" bind_text="presenter.title"/>
 				<ds_button name="edit" text="Edit">
 					<action trigger="clicked" name="presenter.test.heater"/>
 				</ds_button>
 				<ds_button name="send" text="Send">
-					<action trigger="clicked" name="actions.gcode.send" arg="T{number} H{index} {title}"/>
+					<action trigger="clicked" name="actions.gcode.send" arg="T{parent.number} H{row.index} {presenter.title}"/>
 				</ds_button>
 			</view>
 		</component>)";
@@ -135,7 +135,7 @@ namespace
 	constexpr std::string_view HISTORY_SCREEN = R"(
 		<component presenter="test_history">
 			<view extends="lv_obj" width="100%" height="100%">
-				<ds_graph name="graph" history="samples" seconds="2" y_min="0" y_max="100" bind_y_max="limit"
+				<ds_graph name="graph" history="presenter.samples" seconds="2" y_min="0" y_max="100" bind_y_max="presenter.limit"
 						  width="100%" height="100%"/>
 			</view>
 		</component>)";
@@ -222,7 +222,7 @@ namespace
 	constexpr std::string_view DIALOG_SCREEN = R"(
 		<component presenter="test_dialog">
 			<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
-				<ds_modal name="dialog" bind_open="dialog" open_value="ask" width="50%" height="content">
+				<ds_modal name="dialog" bind_open="presenter.dialog" open_value="ask" width="50%" height="content">
 					<action trigger="dismissed" name="presenter.test.dismissed"/>
 					<ds_button name="ok" text="OK">
 						<action trigger="clicked" name="presenter.test.ok"/>
@@ -230,12 +230,12 @@ namespace
 				</ds_modal>
 				<ds_tabs name="tabs" width="300" height="100">
 					<ds_tabs-tab name="first" title="First"/>
-					<ds_tabs-tab name="second" title="Second" bind_disabled="busy"/>
-					<ds_tabs-tab name="third" title="Third" select_on="job"/>
+					<ds_tabs-tab name="second" title="Second" bind_disabled="presenter.busy"/>
+					<ds_tabs-tab name="third" title="Third" select_on="presenter.job"/>
 				</ds_tabs>
-				<ds_list name="rows" list="numbers" item="number_item" windowed="true" item_height="50"
+				<ds_list name="rows" list="presenter.numbers" item="number_item" windowed="true" item_height="50"
 						 width="300" height="200" y="100" style_pad_all="0" style_pad_row="0"/>
-				<ds_list name="tiles" list="numbers" item="number_item" windowed="true" item_width="100"
+				<ds_list name="tiles" list="presenter.numbers" item="number_item" windowed="true" item_width="100"
 						 item_height="50" flow="row_wrap" width="300" height="100" y="300" style_pad_all="0"
 						 style_pad_row="0" style_pad_column="0"/>
 			</view>
@@ -244,7 +244,7 @@ namespace
 	constexpr std::string_view NUMBER_ITEM = R"(
 		<component>
 			<view extends="lv_obj">
-				<lv_label name="value" bind_text="value"/>
+				<lv_label name="value" bind_text="row.value"/>
 			</view>
 		</component>)";
 
@@ -252,10 +252,10 @@ namespace
 	constexpr std::string_view KEYED_SCREEN = R"(
 		<component presenter="test_dialog">
 			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
-				<ds_list name="threes" list="numbers" key="value" value="3" item="number_item" height="content"
+				<ds_list name="threes" list="presenter.numbers" key="row.value" value="3" item="number_item" height="content"
 						 flex_flow="column"/>
-				<ds_list name="no_field" list="numbers" key="nothing" value="3" item="number_item" height="content"/>
-				<ds_list name="windowed" list="numbers" key="value" value="3" item="number_item" windowed="true"
+				<ds_list name="no_field" list="presenter.numbers" key="row.nothing" value="3" item="number_item" height="content"/>
+				<ds_list name="windowed" list="presenter.numbers" key="row.value" value="3" item="number_item" windowed="true"
 						 item_height="50" height="100"/>
 			</view>
 		</component>)";
@@ -272,7 +272,7 @@ namespace
 		<component>
 			<api><prop name="fan" type="int"/></api>
 			<view extends="lv_obj" width="100%" height="content">
-				<ds_list name="list" list="om.fans" key="index" value="$fan" item="fan_card" width="100%"
+				<ds_list name="list" list="om.fans" key="row.index" value="$fan" item="fan_card" width="100%"
 						 height="content"/>
 			</view>
 		</component>)";
@@ -288,7 +288,7 @@ namespace
 	constexpr std::string_view HOSTED_LIMIT = R"(
 		<component>
 			<view extends="lv_obj">
-				<lv_label name="limit" bind_text="limit"/>
+				<lv_label name="limit" bind_text="presenter.limit"/>
 			</view>
 		</component>)";
 } // namespace
@@ -593,9 +593,9 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 	writeFile(bundleFile("components/fan_card.xml"), R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="custom" bind_text="name|default:tr.fine_tune.fan"/>
+				<lv_label name="custom" bind_text="row.name|default:tr.fine_tune.fan"/>
 				<ds_button name="home" text="Home">
-					<action trigger="clicked" name="actions.gcode.send" arg="G28 ; from {name|default:tr.fine_tune.fan} at {index}"/>
+					<action trigger="clicked" name="actions.gcode.send" arg="G28 ; from {row.name|default:tr.fine_tune.fan} at {row.index}"/>
 				</ds_button>
 			</view>
 		</component>)");
@@ -974,18 +974,18 @@ TEST_F(TestXmlUi, GraphOutlivesItsHistory)
 	writeFile(bundleFile("components/global_history.xml"), R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="100%">
-				<ds_graph name="graph" history="test_samples"/>
+				<ds_graph name="graph" history="source.test.samples"/>
 			</view>
 		</component>)");
 	restartWithUserBundles();
 	auto history = std::make_unique<UI::Xml::History>(10, 50);
 	history->sync(1, [](UI::Xml::SeriesRow& row, size_t) { row.name.set("A"); });
-	UI::Xml::Globals::add("test_samples", *history);
+	UI::Xml::Globals::add("source.test.samples", *history);
 
 	auto& view = makeView("global_history");
 	ASSERT_EQ(graph(view).getSeriesCount(), 1u);
 
-	UI::Xml::Globals::remove("test_samples");
+	UI::Xml::Globals::remove("source.test.samples");
 	history.reset();
 	EXPECT_EQ(graph(view).getSeriesCount(), 0u) << "the graph lets go of a destroyed history";
 	m_views.clear(); // Deleting the graph afterwards must not touch the history
@@ -1194,7 +1194,7 @@ TEST_F(TestXmlUi, UnknownStylePropertyIsOnlyWarnedAbout)
 		<component presenter="test_dialog">
 			<view extends="lv_obj" width="100%" height="100%">
 				<lv_obj name="moved">
-					<bind_style_prop prop="no_such_property" subject="busy"/>
+					<bind_style_prop prop="no_such_property" subject="presenter.busy"/>
 				</lv_obj>
 				<lv_label name="after" text="Built"/>
 			</view>

@@ -17,6 +17,6 @@
 		<style name="frame"/>
 		<style name="border_highlight"/>
 		<style name="chosen" selector="checked"/>
-		<bind_state_if_eq subject="customise.selected" state="checked" ref_value="$key"/>
+		<bind_state_if_eq subject="source.customise.selected" state="checked" ref_value="$key"/>
 	</view>
 </component>

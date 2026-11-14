@@ -20,6 +20,7 @@
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/PlacementScope.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
@@ -139,6 +140,7 @@ namespace UI::Xml
 		Layouts::clear();
 		LayoutLibrary::setFolder({});
 		WidgetCatalogue::set({});
+		PlacementScope::releasePage();
 		Themes::clearThemes();
 		Globals::clear();
 		Actions::deinit();

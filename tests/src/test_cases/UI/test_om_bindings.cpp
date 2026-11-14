@@ -173,10 +173,10 @@ TEST_F(TestOmBindings, AListHasARowPerItemWithNamesRelativeToIt)
 	lv_xml_register_component_from_data("om_heater_row", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<bind_flag_if_eq subject="exists" ref_value="0" flag="hidden"/>
-				<lv_label name="number" bind_text="index" bind_text-fmt="%d"/>
-				<lv_label name="current" bind_text="current|fixed:1"/>
-				<lv_label name="state" bind_text="state"/>
+				<bind_flag_if_eq subject="row.exists" ref_value="0" flag="hidden"/>
+				<lv_label name="number" bind_text="row.index" bind_text-fmt="%d"/>
+				<lv_label name="current" bind_text="row.current|fixed:1"/>
+				<lv_label name="state" bind_text="row.state"/>
 			</view>
 		</component>)");
 	receive(HEAT);
@@ -208,15 +208,15 @@ TEST_F(TestOmBindings, NestedListsAndItemsThatAreValues)
 	lv_xml_register_component_from_data("om_tool_heater", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="heater" bind_text="value"/>
-				<lv_label name="heater_int" bind_text="value|int" bind_text-fmt="H%d"/>
+				<lv_label name="heater" bind_text="row.value"/>
+				<lv_label name="heater_int" bind_text="row.value|int" bind_text-fmt="H%d"/>
 			</view>
 		</component>)");
 	lv_xml_register_component_from_data("om_tool", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-				<lv_label name="name" bind_text="name"/>
-				<ds_list name="heaters" list="heaters" item="om_tool_heater" width="100%" height="content"/>
+				<lv_label name="name" bind_text="row.name"/>
+				<ds_list name="heaters" list="row.heaters" item="om_tool_heater" width="100%" height="content"/>
 			</view>
 		</component>)");
 	receive(TOOLS);
@@ -237,34 +237,43 @@ TEST_F(TestOmBindings, NestedListsAndItemsThatAreValues)
 	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "heater_int"), "H2");
 }
 
-TEST_F(TestOmBindings, AnItemsFieldWinsOverAnOuterNameAndOtherNamesPassThrough)
+TEST_F(TestOmBindings, ANameIsOnlyFoundWhereItsPrefixSays)
 {
-	UI::Xml::StringSubject<16> outer("outer");
-	UI::Xml::StringSubject<16> title("title");
-	UI::Xml::Globals::add("state", outer);
-	UI::Xml::Globals::add("test.title", title);
-	lv_xml_register_component_from_data("om_shadow_row", R"(
+	UI::Xml::StringSubject<16> global("global");
+	UI::Xml::Globals::add("source.test.state", global);
+	lv_xml_register_component_from_data("om_strict_heater", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="state" bind_text="state"/>
-				<lv_label name="title" bind_text="test.title"/>
+				<lv_label name="own" bind_text="row.value"/>
+				<lv_label name="tool" bind_text="parent.name"/>
+				<lv_label name="global" bind_text="source.test.state"/>
+				<lv_label name="unprefixed" text="unchanged" bind_text="name"/>
+				<lv_label name="outer_as_own" text="unchanged" bind_text="row.name"/>
 			</view>
 		</component>)");
-	receive(HEAT);
-	auto& view = show("om_shadow", R"(
+	lv_xml_register_component_from_data("om_strict_tool", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<ds_list name="heaters" list="row.heaters" item="om_strict_heater" width="100%" height="content"/>
+			</view>
+		</component>)");
+	receive(TOOLS);
+	auto& view = show("om_strict", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="100%">
-				<ds_list name="heaters" list="om.heat.heaters" item="om_shadow_row" width="100%" height="content"/>
+				<ds_list name="tools" list="om.tools" item="om_strict_tool" width="100%" height="content"/>
 			</view>
 		</component>)");
 
-	lv_obj_t* row = lv_obj_get_child(list(view, "heaters"), 1);
-	EXPECT_EQ(text(row, "state"), "off") << "the item's field wins over the global";
-	EXPECT_EQ(text(row, "title"), "title") << "a name the item doesn't have is found outside";
+	lv_obj_t* heater = lv_obj_get_child(lv_obj_find_by_name(lv_obj_get_child(list(view, "tools"), 0), "heaters"), 1);
+	EXPECT_EQ(text(heater, "own"), "2") << "row.* is the innermost row's";
+	EXPECT_EQ(text(heater, "tool"), "Hot end") << "parent.* is the row around it";
+	EXPECT_EQ(text(heater, "global"), "global");
+	EXPECT_EQ(text(heater, "unprefixed"), "unchanged") << "a name without a prefix is found nowhere";
+	EXPECT_EQ(text(heater, "outer_as_own"), "") << "row.name is the heater number's (it has none), never the tool's";
 
 	m_views.clear();
-	UI::Xml::Globals::remove("state");
-	UI::Xml::Globals::remove("test.title");
+	UI::Xml::Globals::remove("source.test.state");
 }
 
 TEST_F(TestOmBindings, AFieldTheItemHasntSentYetIsStillItsOwn)
@@ -272,7 +281,7 @@ TEST_F(TestOmBindings, AFieldTheItemHasntSentYetIsStillItsOwn)
 	lv_xml_register_component_from_data("om_late_row", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="max" bind_text="max" />
+				<lv_label name="max" bind_text="row.max" />
 			</view>
 		</component>)");
 	// Only the live fields so far: no heater has a `max`
@@ -320,17 +329,17 @@ class TestOmJoins : public TestOmBindings
 		lv_xml_register_component_from_data("join_heater", R"(
 			<component>
 				<view extends="lv_obj" width="100%" height="content" flex_flow="row">
-					<lv_label name="number" bind_text="value"/>
-					<lv_label name="current" bind_text="om.heat.heaters[{value}].current"/>
-					<lv_label name="active" bind_text="om.heat.heaters[{value}].active"/>
-					<lv_label name="standby" bind_text="om.heat.heaters[{value}].standby"/>
+					<lv_label name="number" bind_text="row.value"/>
+					<lv_label name="current" bind_text="om.heat.heaters[{row.value}].current"/>
+					<lv_label name="active" bind_text="om.heat.heaters[{row.value}].active"/>
+					<lv_label name="standby" bind_text="om.heat.heaters[{row.value}].standby"/>
 				</view>
 			</component>)");
 		lv_xml_register_component_from_data("join_tool", R"(
 			<component>
 				<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-					<lv_label name="title" bind_text="index" bind_text-fmt="T%d"/>
-					<ds_list name="heaters" list="heaters" item="join_heater" width="100%" height="content"/>
+					<lv_label name="title" bind_text="row.index" bind_text-fmt="T%d"/>
+					<ds_list name="heaters" list="row.heaters" item="join_heater" width="100%" height="content"/>
 				</view>
 			</component>)");
 	}
@@ -386,17 +395,18 @@ TEST_F(TestOmJoins, ToolsShowTheirHeatersThroughTheirNumbers)
 
 TEST_F(TestOmJoins, ARowsIndexReadsAParallelArrayOfItsParent)
 {
-	// In RepRapFirmware a tool's own temperatures run parallel to its heaters
+	// In RepRapFirmware a tool's own temperatures run parallel to its heaters: the tool's (the row around the heater's)
+	// `active` at the heater row's index
 	lv_xml_register_component_from_data("parallel_heater", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="active" bind_text="active[{index}]"/>
+				<lv_label name="active" bind_text="parent.active[{row.index}]"/>
 			</view>
 		</component>)");
 	lv_xml_register_component_from_data("parallel_tool", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<ds_list name="heaters" list="heaters" item="parallel_heater" width="100%" height="content"/>
+				<ds_list name="heaters" list="row.heaters" item="parallel_heater" width="100%" height="content"/>
 			</view>
 		</component>)");
 	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[1,2],"active":[205,60]}]})");
@@ -417,7 +427,7 @@ TEST_F(TestOmJoins, TheCurrentTool)
 	lv_xml_register_component_from_data("current_heater", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="heater" bind_text="value"/>
+				<lv_label name="heater" bind_text="row.value"/>
 			</view>
 		</component>)");
 	receive(R"({"key":"tools","flags":"v","result":[{"name":"Left","heaters":[1]},{"name":"Right","heaters":[2,3]}]})");
@@ -450,20 +460,20 @@ TEST_F(TestOmJoins, AScopeNamesOneElement)
 	lv_xml_register_component_from_data("scope_detail", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="current" bind_text="current"/>
-				<lv_label name="active" bind_text="active|int" bind_text-fmt="%d°C"/>
+				<lv_label name="current" bind_text="row.current"/>
+				<lv_label name="active" bind_text="row.active|int" bind_text-fmt="%d°C"/>
 			</view>
 		</component>)");
 	lv_xml_register_component_from_data("scope_heater", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<ds_scope name="detail" path="om.heat.heaters[{value}]" item="scope_detail" width="100%" height="content"/>
+				<ds_scope name="detail" path="om.heat.heaters[{row.value}]" item="scope_detail" width="100%" height="content"/>
 			</view>
 		</component>)");
 	lv_xml_register_component_from_data("scope_tool", R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<ds_list name="heaters" list="heaters" item="scope_heater" width="100%" height="content"/>
+				<ds_list name="heaters" list="row.heaters" item="scope_heater" width="100%" height="content"/>
 			</view>
 		</component>)");
 	receive(JOIN_HEAT);
@@ -482,30 +492,4 @@ TEST_F(TestOmJoins, AScopeNamesOneElement)
 	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[0,3]},{"heaters":[3]}]})");
 	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "current"), "50");
 	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "active"), "220°C");
-}
-
-TEST_F(TestOmBindings, AnItemClaimsItsSchemaFieldsBeforeThePrinterSendsThem)
-{
-	// Without the schema an item couldn't tell its `state` from the global one until the printer sent it
-	UI::Xml::StringSubject<16> outer("outer");
-	UI::Xml::Globals::add("state", outer);
-	lv_xml_register_component_from_data("schema_heater", R"(
-		<component>
-			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="state" bind_text="state"/>
-			</view>
-		</component>)");
-	auto& view = show("schema_scope", R"(
-		<component>
-			<view extends="lv_obj" width="100%" height="100%">
-				<ds_scope name="heater" path="om.heat.heaters[1]" item="schema_heater" width="100%" height="content"/>
-			</view>
-		</component>)");
-	EXPECT_EQ(text(view, "state"), "") << "the heater's state, not sent yet";
-
-	receive(HEAT);
-	EXPECT_EQ(text(view, "state"), "off");
-
-	m_views.clear();
-	UI::Xml::Globals::remove("state");
 }

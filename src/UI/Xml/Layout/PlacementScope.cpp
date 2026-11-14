@@ -4,8 +4,10 @@
 
 #include "PlacementScope.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Xml/Binding/Names.h"
 #include <algorithm>
 #include <charconv>
+#include <memory>
 #include <optional>
 #include <string_view>
 
@@ -39,7 +41,7 @@ namespace UI::Xml
 		, m_heightClass(static_cast<int32_t>(unmeasured))
 		, m_sizeClass(static_cast<int32_t>(unmeasured))
 	{
-		ScopeBinder binder(m_scope);
+		ScopeBinder binder(m_scope, Names::WIDGET);
 		fields(binder);
 	}
 
@@ -51,17 +53,35 @@ namespace UI::Xml
 
 	void PlacementScope::fields(FieldVisitor& f)
 	{
-		f.field("widget.width_class",
+		f.field("width_class",
 				m_widthClass,
 				"How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints "
 				"(widget_regular_min, widget_expanded_min); always 1 in a strip, and 2 outside a placed widget");
-		f.field("widget.height_class", m_heightClass, "How tall the widget's place is, as `widget.width_class`");
-		f.field(
-			"widget.size_class",
-			m_sizeClass,
-			"The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, such "
-			"as an arc, can be");
-		f.field("widget.portrait", m_portrait, "1 if the widget's place is taller than it is wide, else 0");
+		f.field("height_class", m_heightClass, "How tall the widget's place is, as `widget.width_class`");
+		f.field("size_class",
+				m_sizeClass,
+				"The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, "
+				"such as an arc, can be");
+		f.field("portrait", m_portrait, "1 if the widget's place is taller than it is wide, else 0");
+	}
+
+	namespace
+	{
+		std::unique_ptr<PlacementScope> s_page; // The room a view that isn't a placed widget has
+	} // namespace
+
+	PlacementScope& PlacementScope::page()
+	{
+		if (!s_page)
+		{
+			s_page = std::make_unique<PlacementScope>(SizeClass::Expanded);
+		}
+		return *s_page;
+	}
+
+	void PlacementScope::releasePage()
+	{
+		s_page.reset();
 	}
 
 	void PlacementScope::follow(lv_obj_t* place)

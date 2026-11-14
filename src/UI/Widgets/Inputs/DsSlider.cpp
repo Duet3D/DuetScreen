@@ -43,7 +43,7 @@ namespace UI::Xml
 				 "changes without echoing the data back to the printer. Also raises `value_changed` as it is "
 				 "dragged.",
 			 .example =
-				 R"(<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
+				 R"(<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="presenter.brightness"
 		   numberpad="true" send="change" width="100%">
 	<action trigger="value_confirmed" name="presenter.settings.brightness"/>
 </ds_slider>)",
@@ -79,7 +79,7 @@ namespace UI::Xml
 							{"bind_max",
 							 "Follow an int subject for the top of the range (scaled by `value_scale`)",
 							 AttributeKind::Subject}},
-			 .exampleSubjects = {{"brightness", "int", "60"}}},
+			 .exampleSubjects = {{"presenter.brightness", "int", "60"}}},
 			xmlCreate,
 			xmlApply);
 	}

@@ -51,7 +51,7 @@ namespace UI::Xml
 	<ds_tabs-tab name="macros" title_tag="tr.file.macros">
 		<lv_label text="The first tab's content"/>
 	</ds_tabs-tab>
-	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="machine.job_active">
+	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="source.machine.job_active">
 		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
 </ds_tabs>)"},
@@ -69,7 +69,7 @@ namespace UI::Xml
 							 AttributeKind::Subject},
 							{"select_on",
 							 "Select the tab whenever this subject changes to a non-empty text or non-zero "
-							 "int, e.g. the status tab when a job starts: `select_on=\"job.file\"`",
+							 "int, e.g. the status tab when a job starts: `select_on=\"om.job.file.fileName\"`",
 							 AttributeKind::Subject}}},
 			xmlCreateTab,
 			xmlApplyTab);

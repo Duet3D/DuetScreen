@@ -26,7 +26,7 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		MachineSource();
 
-		/** Declare `machine.*` */
+		/** Declare `source.machine.*` */
 		void fields(FieldVisitor& f) override;
 
 		/** Read the printer's state */

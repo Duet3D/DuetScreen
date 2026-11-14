@@ -1,7 +1,7 @@
 <!--
   A bed or chamber in the tool list: one heater row in a card.
 
-  Fields:   a row of the beds or chambers list (src/UI/Xml/Data/HeatSource.h)
+  Fields:   a row of source.heat.beds or source.heat.chambers (src/UI/Xml/Data/HeatSource.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">

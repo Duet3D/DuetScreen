@@ -11,13 +11,16 @@
  *     }
  *
  * The same declaration is used to add the names to a scope (ScopeBinder), to publish them globally (Data sources)
- * and to describe the UI API (names and descriptions), so a name is only ever written once in C++.
+ * and to describe the UI API (names and descriptions), so a name is only ever written once in C++. It is declared
+ * without where it comes from; whoever adds it to a scope or the globals adds that (see Names.h): the row above is
+ * `row.number` in XML.
  */
 
 #pragma once
 
 #include "Resolver.h"
 #include "Scope.h"
+#include <string>
 #include <string_view>
 
 namespace UI::Xml
@@ -53,33 +56,35 @@ namespace UI::Xml
 		virtual void fields(FieldVisitor& f) = 0;
 	};
 
-	/** Adds the fields it visits to a scope */
+	/** Adds the fields it visits to a scope, each name after a prefix that says where it comes from (Names.h) */
 	class ScopeBinder : public FieldVisitor
 	{
 	  public:
-		/** Bind into `scope` */
-		explicit ScopeBinder(Scope& scope)
+		/** Bind into `scope`, each name after `prefix`, e.g. `row.` */
+		ScopeBinder(Scope& scope, std::string_view prefix)
 			: m_scope(scope)
+			, m_prefix(prefix)
 		{
 		}
 
 		/** Add the subject to the scope */
 		void field(std::string_view name, Subject& subject, std::string_view) override
 		{
-			m_scope.add(std::string(name), subject);
+			m_scope.add(m_prefix + std::string(name), subject);
 		}
 
 		/** Add the list to the scope */
 		void list(std::string_view name, ListBase& list, std::string_view) override
 		{
-			m_scope.add(std::string(name), list);
+			m_scope.add(m_prefix + std::string(name), list);
 		}
 
-		/** Ask the resolver for the scope's other names */
-		void resolver(Resolver& resolver) override { m_scope.setResolver(&resolver); }
+		/** Ask the resolver for the scope's other names after the prefix */
+		void resolver(Resolver& resolver) override { m_scope.setResolver(&resolver, m_prefix); }
 
 	  private:
-		Scope& m_scope; // Scope the fields are added to
+		Scope& m_scope;		  // Scope the fields are added to
+		std::string m_prefix; // What each name is written after
 	};
 
 	/** Finds the field called `name` among those it visits, or failing that, asks their resolver for it */
@@ -129,6 +134,6 @@ namespace UI::Xml
 		{
 			return foundSubject;
 		}
-		return m_resolver->findSubject(nullptr, m_name, true);
+		return m_resolver->findSubject(nullptr, m_name, m_name);
 	}
 } // namespace UI::Xml

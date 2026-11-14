@@ -577,6 +577,8 @@
       "console_log_desc": "Le ultime risposte della stampante; tocca per aprire la console",
       "console_command_list": "Riferimento G-code",
       "console_command_list_desc": "Ogni G-code con la sua funzione; toccane uno per metterlo nell'input della console",
+      "console_input": "Input della console",
+      "console_input_desc": "Una riga per scrivere G-code e inviarlo alla stampante",
       "category_console": "Console",
       "category_commands": "Comandi",
       "om_value": "Valore del modello a oggetti",

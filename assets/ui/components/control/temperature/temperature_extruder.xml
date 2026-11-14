@@ -1,11 +1,11 @@
 <!--
   One extruder of a tool on the Temperature tab: its extrusion factor. Tap to change the tool's factors.
 
-  Fields:   a row of the tool's om.tools[…].extruders: value (the extruder number); its factor is
-            om.move.extruders[{value}].factor
+  Fields:   a row of the tool's om.tools[…].extruders: row.value (the extruder number); its factor is
+            om.move.extruders[{row.value}].factor
 -->
 <component>
-	<view extends="ds_button" bind_text="om.move.extruders[{value}].factor|percent" bind_text-fmt="%d%%"
+	<view extends="ds_button" bind_text="om.move.extruders[{row.value}].factor|percent" bind_text-fmt="%d%%"
 		  width="content" height="content">
 		<action trigger="clicked" name="actions.factors.extrusion"/>
 	</view>

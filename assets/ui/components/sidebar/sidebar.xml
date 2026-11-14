@@ -4,7 +4,7 @@
   locked: they can be moved but not removed.
 
   Each page button (sidebar_page_button.xml) opens a page by the name home.xml registers it under, and is checked
-  while that page is open (nav.screen is empty on the home screen). A page of a user bundle gets a button by giving it
+  while that page is open (source.navigation.screen is empty on the home screen). A page of a user bundle gets a button by giving it
   a widget file the same way (widgets/navigation/page_*.json).
 
   The sidebar and its buttons draw beyond their own area so the E-stop stays visible while it is dragged (and

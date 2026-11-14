@@ -2,7 +2,22 @@
 
 <!-- Generated from the code by tests/src/test_cases/UI/test_xml_ui_api.cpp. Don't edit it: change the code, run the tests (which rewrite this file when it is out of date) and commit the result. -->
 
-Every name the firmware provides to XML, for UI API version 1.0. How to write XML with them is in [XML_UI.md](XML_UI.md). Translation keys, for `translation_tag`, are those in [en-GB.json](../assets/i18n/en-GB.json).
+Every name the firmware provides to XML, for UI API version 1.0. How to write XML with them is in [XML_UI.md](XML_UI.md).
+
+Every name starts with where it comes from, so a reader knows where to look ([Names.h](../src/UI/Xml/Binding/Names.h)), and is only looked for there:
+
+| Written | Is | Where |
+| --- | --- | --- |
+| `om.<path>` | the printer's object model | [Object model](#object-model) |
+| `source.<source>.<field>` | a data source's | [Global data](#global-data), `<Source>Source.cpp` |
+| `presenter.<field>` | the presenter of the view the widget is in | [Presenters](#presenters) |
+| `row.<field>` | the list row (or `<ds_scope>` item) the widget is in | its list |
+| `parent.<field>` | the row around that one (`parent.parent.…` further out) | its list |
+| `widget.<field>` | the room the widget's place gives it | [Placed widgets' names](#placed-widgets-names) |
+| `tr.<key>` | a translation, in `translation_tag`, the `*_tag` attributes and converter arguments | [en-GB.json](../assets/i18n/en-GB.json) |
+| `presenter.<action>` | an action of the presenter of an enclosing view | [Presenters](#presenters) |
+| `actions.<group>.<action>` | a global action, added in `<Group>Actions.cpp` | [Global actions](#global-actions) |
+| `{event.value}` | in an action's `arg`, the edited value | |
 
 - [Object model](#object-model)
 - [Global data](#global-data)
@@ -18,19 +33,19 @@ Every name the firmware provides to XML, for UI API version 1.0. How to write XM
 Every field of the printer's object model has a name, written as RepRapFirmware writes its path after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The names need no code: a field a newer firmware adds can be used as soon as the printer sends it. Every field is listed in [XML_UI_OBJECT_MODEL.md](XML_UI_OBJECT_MODEL.md); see also [ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).
 
 - A name binds before the printer has sent the field, and follows it: while the field isn't there (or is null) its subject holds empty text, or 0.
-- An array is a list: `<ds_list list="om.heat.heaters" item="…">` makes a row per item, nulls included, so a row's `index` is the item's index (the heater number). Inside a row, the item's fields have names relative to it, `current` or `model.pid.p`, found before any other name, and its arrays are lists: `<ds_list list="heaters">` in a row of `om.tools`. A name the item doesn't have is looked up outside it, so in a row of a tool's `heaters`, `active[{index}]` is the tool's.
-- An index can be another subject's value, written `{name}`, which joins one part of the object model to another: `om.heat.heaters[{value}].current` in a row of a tool's heaters, or `om.tools[{om.state.currentTool}].name`. The name follows when the index changes; nothing is rebuilt.
-- `<ds_scope path="om.…" item="…">` builds a component whose names are relative to one element, as in a list row.
+- An array is a list: `<ds_list list="om.heat.heaters" item="…">` makes a row per item, nulls included, so a row's `row.index` is the item's index (the heater number). Inside a row, the item's fields are `row.*`, `row.current` or `row.model.pid.p`, and its arrays are lists: `<ds_list list="row.heaters">` in a row of `om.tools`. The row around it is `parent.*`, so in a row of a tool's `heaters`, `parent.active[{row.index}]` is the tool's target for that heater.
+- An index can be another subject's value, written `{name}`, which joins one part of the object model to another: `om.heat.heaters[{row.value}].current` in a row of a tool's heaters, or `om.tools[{om.state.currentTool}].name`. The name follows when the index changes; nothing is rebuilt.
+- `<ds_scope path="om.…" item="…">` builds a component in a row of one item: its fields are `row.*`, as in a list row.
 - The name sets what the subject holds: the value as text, or after `|` what a converter makes of it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.
 
 Each row of an object model list:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `value` | text | The item as text, if it isn't an object (e.g. a heater number); `value\|int` etc. convert it (see Converters) |
-| `exists` | int | 1 unless the item is null, so `<bind_flag_if_eq subject="exists" ref_value="0" flag="hidden"/>` hides the gaps |
-| *a field of the item* | text | e.g. `current`; converters apply, as in `current\|fixed:1` |
+| `row.index` | int | Position in the list, from 0 |
+| `row.value` | text | The item as text, if it isn't an object (e.g. a heater number); `value\|int` etc. convert it (see Converters) |
+| `row.exists` | int | 1 unless the item is null, so `<bind_flag_if_eq subject="exists" ref_value="0" flag="hidden"/>` hides the gaps |
+| `row.`*a field of the item* | text | e.g. `row.current`; converters apply, as in `row.current\|fixed:1` |
 
 ### Converters
 
@@ -51,224 +66,239 @@ Each row of an object model list:
 
 ## Global data
 
-Printer data published by the data sources in [src/UI/Xml/Data](../src/UI/Xml/Data). Any view can bind to these. A list is shown with `<ds_list list="…">`; inside each row, the row's own names are found first.
+Printer data published by the data sources in [src/UI/Xml/Data](../src/UI/Xml/Data), each source's as `source.<source>.<field>`, from `<Source>Source.cpp`. Any view can bind to these. A list is shown with `<ds_list list="…">`; inside each row, the row's fields are `row.*`.
 
 ### console
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `console.lines` | list | What the console shows, oldest first, at most MAX_RESPONSE_LINES |
-
-Each row of `console.lines`:
+From [ConsoleSource.cpp](../src/UI/Xml/Data/ConsoleSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `time` | text | When it arrived, e.g. "[12:34:56]   " |
-| `command` | text | A command sent, e.g. "> M115"; empty for a response |
-| `text` | text | A response or log message; empty for a command |
+| `source.console.lines` | list | What the console shows, oldest first, at most MAX_RESPONSE_LINES |
+
+Each row of `source.console.lines`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.time` | text | When it arrived, e.g. "[12:34:56]   " |
+| `row.command` | text | A command sent, e.g. "> M115"; empty for a response |
+| `row.text` | text | A response or log message; empty for a command |
 
 ### customise
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `customise.editing` | int | 1 while the user is customising the screen, else 0 |
-| `customise.selected` | text | The selected widget, as "slot/id" (e.g. "dashboard/tools"), or empty if none is |
-| `customise.has_item` | int | 1 if a widget is selected, else 0 |
-| `customise.can_remove` | int | 1 if the selected widget can be removed (it isn't locked) |
-| `customise.can_configure` | int | 1 if the selected widget has settings the user can change |
-| `customise.can_undo` | int | 1 if there is a change to undo |
-| `customise.is_free` | int | 1 if new widgets go into a free layout, whose widgets can snap |
-| `customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
-| `customise.title` | text | The selected widget's name, translated; empty if none is selected |
-
-### gauges
+From [CustomiseSource.cpp](../src/UI/Xml/Data/CustomiseSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `gauges` | list | Every value a gauge can show, one row each, all with the same fields: the heaters, fans, analog sensors that no heater uses, the job's progress and the speed and extrusion factors |
+| `source.customise.editing` | int | 1 while the user is customising the screen, else 0 |
+| `source.customise.selected` | text | The selected widget, as "slot/id" (e.g. "dashboard/tools"), or empty if none is |
+| `source.customise.has_item` | int | 1 if a widget is selected, else 0 |
+| `source.customise.can_remove` | int | 1 if the selected widget can be removed (it isn't locked) |
+| `source.customise.can_configure` | int | 1 if the selected widget has settings the user can change |
+| `source.customise.can_undo` | int | 1 if there is a change to undo |
+| `source.customise.is_free` | int | 1 if new widgets go into a free layout, whose widgets can snap |
+| `source.customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
+| `source.customise.title` | text | The selected widget's name, translated; empty if none is selected |
 
-Each row of `gauges`:
+### gauge
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `id` | text | What it shows: bed.N, chamber.N, tool.T.H (tool T's Hth heater, from 0), fan.N, sensor.N, job.progress, speed_factor or extrusion_factor |
-| `name` | text | Display name, e.g. "Bed" or "Tool 0" |
-| `kind` | text | heater, fan, sensor or percent |
-| `value` | int | The value, whole units, e.g. °C or percent |
-| `min` | int | Bottom of its scale, e.g. 0 |
-| `max` | int | Top of its scale: a heater's maximum, 100 for a fan or the job, 200 for a factor |
-| `text` | text | The value as shown, without its unit, e.g. "61.2" |
-| `unit` | text | The value's unit, e.g. "°C" or "%" |
-| `target` | int | What it is heading for, e.g. a heater's target; `min` if nothing |
-| `detail` | text | A line about the value, e.g. "Target 215°C", "Off" or "1200 RPM"; empty if there is none |
-| `state` | text | A heater's status key: active, standby, off, fault, tuning, offline; else empty |
-| `editable` | int | 1 if actions.gauge.edit changes it: a heater's target, a fan's speed, a factor |
-
-### tools
+From [GaugeSource.cpp](../src/UI/Xml/Data/GaugeSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `tools` | list | One row per tool, in slot order |
-| `current_tool.shown` | int | 1 if there is a current tool with heaters, else 0 |
-| `current_tool.label` | text | The current tool, e.g. "T0:", or empty if it has no heaters |
-| `current_tool.heaters` | text | The current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C" |
-| `current_tool.fault` | int | 1 if any of the current tool's heaters has a fault, else 0 |
+| `source.gauge.gauges` | list | Every value a gauge can show, one row each, all with the same fields: the heaters, fans, analog sensors that no heater uses, the job's progress and the speed and extrusion factors |
 
-Each row of `tools`:
+Each row of `source.gauge.gauges`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
-| `heaters` | list | One row per heater of the tool |
+| `row.index` | int | Position in the list, from 0 |
+| `row.id` | text | What it shows: bed.N, chamber.N, tool.T.H (tool T's Hth heater, from 0), fan.N, sensor.N, job.progress, speed_factor or extrusion_factor (as `row.id`) |
+| `row.name` | text | Display name, e.g. "Bed" or "Tool 0" |
+| `row.kind` | text | heater, fan, sensor or percent |
+| `row.value` | int | The value, whole units, e.g. °C or percent |
+| `row.min` | int | Bottom of its scale, e.g. 0 |
+| `row.max` | int | Top of its scale: a heater's maximum, 100 for a fan or the job, 200 for a factor |
+| `row.text` | text | The value as shown, without its unit, e.g. "61.2" |
+| `row.unit` | text | The value's unit, e.g. "°C" or "%" |
+| `row.target` | int | What it is heading for, e.g. a heater's target; `min` if nothing |
+| `row.detail` | text | A line about the value, e.g. "Target 215°C", "Off" or "1200 RPM"; empty if there is none |
+| `row.state` | text | A heater's status key: active, standby, off, fault, tuning, offline; else empty |
+| `row.editable` | int | 1 if actions.gauge.edit changes it: a heater's target, a fan's speed, a factor |
 
-Each row of `tools` › `heaters`:
+### tool
+
+From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `heater` | int | Heater number |
-| `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `active` | int | Active target temperature, °C |
-| `standby` | int | Standby target temperature, °C |
+| `source.tool.tools` | list | One row per tool, in slot order |
+| `source.tool.current.shown` | int | 1 if there is a current tool with heaters, else 0 |
+| `source.tool.current.label` | text | The current tool, e.g. "T0:", or empty if it has no heaters |
+| `source.tool.current.heaters` | text | The current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C" |
+| `source.tool.current.fault` | int | 1 if any of the current tool's heaters has a fault, else 0 |
+
+Each row of `source.tool.tools`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
+| `row.heaters` | list | One row per heater of the tool |
+
+Each row of `source.tool.tools` › `row.heaters`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.heater` | int | Heater number |
+| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
+| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
+| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
+| `row.active` | int | Active target temperature, °C |
+| `row.standby` | int | Standby target temperature, °C |
 
 ### heat
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `beds` | list | One row per bed, in slot order |
-| `chambers` | list | One row per chamber, in slot order |
-
-Each row of `beds`:
+From [HeatSource.cpp](../src/UI/Xml/Data/HeatSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `number` | int | Bed or chamber number, as used by M140/M141 P |
-| `heater` | int | Heater number |
-| `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `active` | int | Active target temperature, °C |
-| `standby` | int | Standby target temperature, °C |
+| `source.heat.beds` | list | One row per bed, in slot order |
+| `source.heat.chambers` | list | One row per chamber, in slot order |
 
-Each row of `chambers`:
+Each row of `source.heat.beds`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `number` | int | Bed or chamber number, as used by M140/M141 P |
-| `heater` | int | Heater number |
-| `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `active` | int | Active target temperature, °C |
-| `standby` | int | Standby target temperature, °C |
+| `row.index` | int | Position in the list, from 0 |
+| `row.number` | int | Bed or chamber number, as used by M140/M141 P |
+| `row.heater` | int | Heater number |
+| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
+| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
+| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
+| `row.active` | int | Active target temperature, °C |
+| `row.standby` | int | Standby target temperature, °C |
+
+Each row of `source.heat.chambers`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.number` | int | Bed or chamber number, as used by M140/M141 P |
+| `row.heater` | int | Heater number |
+| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
+| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
+| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
+| `row.active` | int | Active target temperature, °C |
+| `row.standby` | int | Standby target temperature, °C |
 
 ### job
 
+From [JobSource.cpp](../src/UI/Xml/Data/JobSource.cpp).
+
 | Name | Type | Description |
 | --- | --- | --- |
-| `job.latest_file` | text | The latest job's file: the current job's, or the last job's when it has finished |
-| `job.finished` | int | 1 when the latest job is the last one, finished, else 0 |
-| `job.thumbnail` | text | The latest job's thumbnail path, or empty until it arrives |
-| `job.progress` | int | The current job's progress, percent 0-100, through the file or the expected time as set in the settings |
-| `job.elapsed` | text | How long the current job has been running, e.g. "00:03:43" |
-| `job.remaining` | text | The current job's expected time left, e.g. "00:45:03" |
-| `job.elapsed_text` | text | `job.elapsed` in a sentence, translated, e.g. "Elapsed: 00:03:43" |
-| `job.remaining_text` | text | `job.remaining` in a sentence, translated, e.g. "Remaining: 00:45:03" |
-| `job.pause_control` | int | Pausing the job (job.pause): 0 hidden, 1 disabled, 2 usable |
-| `job.resume_control` | int | Resuming the job (job.resume): 0 hidden, 1 disabled, 2 usable |
-| `job.print_again_control` | int | Printing the last job again (job.print_again): 0 hidden, 1 disabled, 2 usable |
-| `job.cancel_control` | int | Cancelling the job: 0 hidden, 1 disabled, 2 usable |
+| `source.job.latest_file` | text | The latest job's file: the current job's, or the last job's when it has finished |
+| `source.job.finished` | int | 1 when the latest job is the last one, finished, else 0 |
+| `source.job.thumbnail` | text | The latest job's thumbnail path, or empty until it arrives |
+| `source.job.progress` | int | The current job's progress, percent 0-100, through the file or the expected time as set in the settings |
+| `source.job.elapsed` | text | How long the current job has been running, e.g. "00:03:43" |
+| `source.job.remaining` | text | The current job's expected time left, e.g. "00:45:03" |
+| `source.job.elapsed_text` | text | `source.job.elapsed` in a sentence, translated, e.g. "Elapsed: 00:03:43" |
+| `source.job.remaining_text` | text | `source.job.remaining` in a sentence, translated, e.g. "Remaining: 00:45:03" |
+| `source.job.pause_control` | int | Pausing the job (actions.job.pause): 0 hidden, 1 disabled, 2 usable |
+| `source.job.resume_control` | int | Resuming the job (actions.job.resume): 0 hidden, 1 disabled, 2 usable |
+| `source.job.print_again_control` | int | Printing the last job again (actions.job.print_again): 0 hidden, 1 disabled, 2 usable |
+| `source.job.cancel_control` | int | Cancelling the job: 0 hidden, 1 disabled, 2 usable |
 
 ### jog
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `jog.distance_title` | text | The distances' title, with the unit, e.g. "Move Distance (mm)" |
-| `jog.feedrate_title` | text | The speeds' title, with the unit |
-| `jog.distances` | list | The jog distances to choose from (move.distance, move.edit_distance) |
-| `jog.feedrates` | list | The jog speeds to choose from (move.feedrate, move.edit_feedrate) |
-
-Each row of `jog.distances`:
+From [JogSource.cpp](../src/UI/Xml/Data/JogSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The value, e.g. "0.1" |
-| `selected` | int | 1 for the one in use |
+| `source.jog.distance_title` | text | The distances' title, with the unit, e.g. "Move Distance (mm)" |
+| `source.jog.feedrate_title` | text | The speeds' title, with the unit |
+| `source.jog.distances` | list | The jog distances to choose from (actions.jog.distance, actions.jog.edit_distance) |
+| `source.jog.feedrates` | list | The jog speeds to choose from (actions.jog.feedrate, actions.jog.edit_feedrate) |
 
-Each row of `jog.feedrates`:
+Each row of `source.jog.distances`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The value, e.g. "0.1" |
-| `selected` | int | 1 for the one in use |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The value, e.g. "0.1" |
+| `row.selected` | int | 1 for the one in use |
+
+Each row of `source.jog.feedrates`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The value, e.g. "0.1" |
+| `row.selected` | int | 1 for the one in use |
 
 ### machine
 
+From [MachineSource.cpp](../src/UI/Xml/Data/MachineSource.cpp).
+
 | Name | Type | Description |
 | --- | --- | --- |
-| `machine.status` | text | State key, e.g. idle, processing, paused; translated under state.* |
-| `machine.printing` | int | 1 while a job is running and not paused, else 0: controls that would change the job are disabled |
-| `machine.job_active` | int | 1 while there is a job (running, pausing, paused, resuming or simulating), else 0 |
-| `machine.connection` | text | How the screen is connected to the printer, e.g. "USB" |
-| `machine.state` | text | The printer's state, translated, e.g. "Idle" |
-| `machine.summary` | text | The connection and the state, e.g. "USB - Idle" |
+| `source.machine.status` | text | State key, e.g. idle, processing, paused; translated under state.* |
+| `source.machine.printing` | int | 1 while a job is running and not paused, else 0: controls that would change the job are disabled |
+| `source.machine.job_active` | int | 1 while there is a job (running, pausing, paused, resuming or simulating), else 0 |
+| `source.machine.connection` | text | How the screen is connected to the printer, e.g. "USB" |
+| `source.machine.state` | text | The printer's state, translated, e.g. "Idle" |
+| `source.machine.summary` | text | The connection and the state, e.g. "USB - Idle" |
 
 ### move
 
+From [MoveSource.cpp](../src/UI/Xml/Data/MoveSource.cpp).
+
 | Name | Type | Description |
 | --- | --- | --- |
-| `move.speed_factor` | text | The speed override, e.g. "100%" |
-| `move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
-| `move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
-| `move.speed_text` | text | The current move's top and requested speeds, e.g. "0/0 mm/s" |
-| `move.speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000), for a gauge |
-| `move.speed_requested` | int | The current move's requested speed, in thousandths of the fastest axis' maximum (0-1000) |
-| `move.flow_text` | text | The volumetric flow, e.g. "0.0 mm³/s" |
-| `move.flow` | int | The volumetric flow, in thousandths of the current tool's fastest extruder's maximum (0-1000) |
+| `source.move.speed_factor` | text | The speed override, e.g. "100%" |
+| `source.move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
+| `source.move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
+| `source.move.speed_text` | text | The current move's top and requested speeds, e.g. "0/0 mm/s" |
+| `source.move.speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000), for a gauge |
+| `source.move.speed_requested` | int | The current move's requested speed, in thousandths of the fastest axis' maximum (0-1000) |
+| `source.move.flow_text` | text | The volumetric flow, e.g. "0.0 mm³/s" |
+| `source.move.flow` | int | The volumetric flow, in thousandths of the current tool's fastest extruder's maximum (0-1000) |
 
 ### navigation
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `nav.screen` | text | Name of the open screen, or empty when the home screens are showing |
-
-### responses
+From [NavigationSource.cpp](../src/UI/Xml/Data/NavigationSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `responses.count` | int | Number of responses received; changes with every response |
+| `source.navigation.screen` | text | Name of the open screen, or empty when the home screens are showing |
 
-### temperatures
+### response
 
-| Name | Type | Description |
-| --- | --- | --- |
-| `temperatures` | history | One series per heater, in slot order, sampled every model tick, whole °C. Heaters sharing a sensor are shown once. |
-| `temperatures.limit` | int | Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis |
-
-Each row of `temperatures`:
+From [ResponseSource.cpp](../src/UI/Xml/Data/ResponseSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | Name of the series, e.g. for a legend |
+| `source.response.count` | int | Number of responses received; changes with every response |
 
-### widget
+### temperature
+
+From [TemperatureSource.cpp](../src/UI/Xml/Data/TemperatureSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `widget.width_class` | int | How wide the widget's place is: 0 compact, 1 regular, 2 expanded, by the theme's breakpoints (widget_regular_min, widget_expanded_min); always 1 in a strip, and 2 outside a placed widget |
-| `widget.height_class` | int | How tall the widget's place is, as `widget.width_class` |
-| `widget.size_class` | int | The smaller of `widget.width_class` and `widget.height_class`: how big something that needs both, such as an arc, can be |
-| `widget.portrait` | int | 1 if the widget's place is taller than it is wide, else 0 |
+| `source.temperature.temperatures` | history | One series per heater, in slot order, sampled every model tick, whole °C. Heaters sharing a sensor are shown once. |
+| `source.temperature.limit` | int | Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis |
+
+Each row of `source.temperature.temperatures`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | Name of the series, e.g. for a legend |
 
 ## Global actions
 
@@ -312,17 +342,17 @@ Used by `babystep`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `usable` | int | 1 if there is a Z axis and the printer is connected |
-| `reset_text` | text | The reset button's text, with the current offset, e.g. "Reset 0.02 mm" |
-| `steps` | list | Step sizes |
+| `presenter.usable` | int | 1 if there is a Z axis and the printer is connected |
+| `presenter.reset_text` | text | The reset button's text, with the current offset, e.g. "Reset 0.02 mm" |
+| `presenter.steps` | list | Step sizes |
 
-Each row of `steps`:
+Each row of `presenter.steps`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | E.g. "0.01 mm" |
-| `selected` | int | 1 for the step in use |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | E.g. "0.01 mm" |
+| `row.selected` | int | 1 for the step in use |
 
 | Action | Description |
 | --- | --- |
@@ -338,7 +368,7 @@ Used by `babystep_dialog`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `open` | int | 1 while the dialog is open |
+| `presenter.open` | int | 1 while the dialog is open |
 
 | Action | Description |
 | --- | --- |
@@ -346,23 +376,23 @@ Used by `babystep_dialog`.
 
 ### console
 
-Used by `console`, `console_command_list`.
+Used by `console`, `console_command_list`, `console_input`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `input` | text | What is typed, kept equal to the text box so picking a G-code can replace it |
-| `commands_shown` | int | 1 when the G-code list is showing, 0 when it is folded away; remembered |
-| `shell_available` | int | 1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds) |
-| `shell` | int | 1 while what is sent goes to the shell instead of the Duet |
-| `gcodes` | list | The G-codes starting with the first word typed |
+| `presenter.input` | text | What is typed, kept equal to the text box so picking a G-code can replace it |
+| `presenter.commands_shown` | int | 1 when the G-code list is showing, 0 when it is folded away; remembered |
+| `presenter.shell_available` | int | 1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds) |
+| `presenter.shell` | int | 1 while what is sent goes to the shell instead of the Duet |
+| `presenter.gcodes` | list | The G-codes starting with the first word typed |
 
-Each row of `gcodes`:
+Each row of `presenter.gcodes`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `gcode` | text | The G-code, e.g. "G28" |
-| `description` | text | What it does, e.g. "Home" |
+| `row.index` | int | Position in the list, from 0 |
+| `row.gcode` | text | The G-code, e.g. "G28" |
+| `row.description` | text | What it does, e.g. "Home" |
 
 | Action | Description |
 | --- | --- |
@@ -379,71 +409,71 @@ Used by `customise`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `dialog_open` | int | 1 while any of the dialogs below is open, else 0 |
-| `catalogue` | list | The widgets that can be added where the user chose, by category |
-| `catalogue_open` | int | 1 while the widget pool is open |
-| `settings` | list | The selected widget's settings |
-| `settings_open` | int | 1 while the selected widget's settings are open |
-| `options` | list | The values the setting being changed can take |
-| `options_open` | int | 1 while they are shown |
-| `options_title` | text | The name of the setting they are for |
-| `keyboard` | int | 1 while the keyboard is up for typed text, so the dialog moves above it |
-| `can_save` | int | 1 if layouts can be saved (not in safe mode), else 0 |
-| `save_open` | int | 1 while asking for a name to save the layouts as |
-| `save_name` | text | The name typed so far |
-| `save_problem` | text | Why the name typed can't be used, translated; empty if it can |
-| `load_open` | int | 1 while the saved layouts are listed |
-| `saved` | list | The saved layouts, by name |
-| `has_saved` | int | 1 if there are any saved layouts, else 0 |
-| `confirm_delete` | int | 1 while asking whether to delete a saved layout |
-| `delete_title` | text | That question's title |
-| `delete_text` | text | That question, naming the layout |
+| `presenter.dialog_open` | int | 1 while any of the dialogs below is open, else 0 |
+| `presenter.catalogue` | list | The widgets that can be added where the user chose, by category |
+| `presenter.catalogue_open` | int | 1 while the widget pool is open |
+| `presenter.settings` | list | The selected widget's settings |
+| `presenter.settings_open` | int | 1 while the selected widget's settings are open |
+| `presenter.options` | list | The values the setting being changed can take |
+| `presenter.options_open` | int | 1 while they are shown |
+| `presenter.options_title` | text | The name of the setting they are for |
+| `presenter.keyboard` | int | 1 while the keyboard is up for typed text, so the dialog moves above it |
+| `presenter.can_save` | int | 1 if layouts can be saved (not in safe mode), else 0 |
+| `presenter.save_open` | int | 1 while asking for a name to save the layouts as |
+| `presenter.save_name` | text | The name typed so far |
+| `presenter.save_problem` | text | Why the name typed can't be used, translated; empty if it can |
+| `presenter.load_open` | int | 1 while the saved layouts are listed |
+| `presenter.saved` | list | The saved layouts, by name |
+| `presenter.has_saved` | int | 1 if there are any saved layouts, else 0 |
+| `presenter.confirm_delete` | int | 1 while asking whether to delete a saved layout |
+| `presenter.delete_title` | text | That question's title |
+| `presenter.delete_text` | text | That question, naming the layout |
 
-Each row of `catalogue`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `title` | text | The category's name, translated |
-| `widgets` | list | Its widgets that fit where one is being added, by name |
-
-Each row of `catalogue` › `widgets`:
+Each row of `presenter.catalogue`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `id` | text | The widget's id |
-| `title` | text | Its name, translated |
-| `description` | text | What it shows, translated |
-| `icon` | text | Its icon, e.g. "fan.png"; empty for none |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | The category's name, translated |
+| `row.widgets` | list | Its widgets that fit where one is being added, by name |
 
-Each row of `settings`:
+Each row of `presenter.catalogue` › `row.widgets`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | The setting's name |
-| `title` | text | Its name as shown, translated |
-| `kind` | text | How it is chosen: int, bool, text, choice or row |
-| `control` | text | What changes it: `button` (showing the value; it opens the number pad or the values), `switch` or `text` (typed in place) |
-| `value` | text | Its value as shown, e.g. "Fan 1" |
-| `on` | int | For a bool, 1 when on, else 0 |
+| `row.index` | int | Position in the list, from 0 |
+| `row.id` | text | The widget's id |
+| `row.title` | text | Its name, translated |
+| `row.description` | text | What it shows, translated |
+| `row.icon` | text | Its icon, e.g. "fan.png"; empty for none |
 
-Each row of `options`:
+Each row of `presenter.settings`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `value` | text | The value |
-| `title` | text | The value as shown, translated |
-| `chosen` | int | 1 for the setting's current value, else 0 |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The setting's name |
+| `row.title` | text | Its name as shown, translated |
+| `row.kind` | text | How it is chosen: int, bool, text, choice or row |
+| `row.control` | text | What changes it: `button` (showing the value; it opens the number pad or the values), `switch` or `text` (typed in place) |
+| `row.value` | text | Its value as shown, e.g. "Fan 1" |
+| `row.on` | int | For a bool, 1 when on, else 0 |
 
-Each row of `saved`:
+Each row of `presenter.options`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | The saved layout's name |
+| `row.index` | int | Position in the list, from 0 |
+| `row.value` | text | The value |
+| `row.title` | text | The value as shown, translated |
+| `row.chosen` | int | 1 for the setting's current value, else 0 |
+
+Each row of `presenter.saved`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The saved layout's name |
 
 | Action | Description |
 | --- | --- |
@@ -478,45 +508,45 @@ Each row of `saved`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `files` | list | One row per file and folder in the open folder, in the chosen order |
-| `crumbs` | list | The open folder's path from the base folder down, e.g. "0:/gcodes", "parts" |
-| `sort` | int | Order: 0 by name, 1 by date, 2 by size |
-| `sort_name` | text | The name-order button's text, with an arrow showing the direction when it is in use |
-| `sort_date` | text | As `sort_name`, for the date order |
-| `sort_size` | text | As `sort_name`, for the size order |
-| `tiles` | int | 1 when files are shown as tiles, 0 as a list |
-| `mode_icon` | text | Symbol for the other way of showing files |
-| `dialog` | text | What the dialog asks: "start_print", "run_macro" or "delete"; empty when it is closed |
-| `dialog_title` | text | Dialog title |
-| `dialog_text` | text | Dialog message |
-| `dialog_image` | text | Thumbnail shown in the dialog, or empty |
-| `dialog_has_image` | int | 1 if there is a thumbnail, else 0 |
-| `dialog_can_delete` | int | 1 if the dialog offers to delete the file (starting a job does), else 0 |
-| `info_shown` | int | 1 if the job's details (the info_* fields) are known, else 0 |
-| `info_date` | text | Job modification date |
-| `info_size` | text | Job size |
-| `info_generated_by` | text | Slicer |
-| `info_print_time` | text | Estimated print time |
-| `info_height` | text | Object height |
-| `info_layer_height` | text | Layer height |
+| `presenter.files` | list | One row per file and folder in the open folder, in the chosen order |
+| `presenter.crumbs` | list | The open folder's path from the base folder down, e.g. "0:/gcodes", "parts" |
+| `presenter.sort` | int | Order: 0 by name, 1 by date, 2 by size |
+| `presenter.sort_name` | text | The name-order button's text, with an arrow showing the direction when it is in use |
+| `presenter.sort_date` | text | As `sort_name`, for the date order |
+| `presenter.sort_size` | text | As `sort_name`, for the size order |
+| `presenter.tiles` | int | 1 when files are shown as tiles, 0 as a list |
+| `presenter.mode_icon` | text | Symbol for the other way of showing files |
+| `presenter.dialog` | text | What the dialog asks: "start_print", "run_macro" or "delete"; empty when it is closed |
+| `presenter.dialog_title` | text | Dialog title |
+| `presenter.dialog_text` | text | Dialog message |
+| `presenter.dialog_image` | text | Thumbnail shown in the dialog, or empty |
+| `presenter.dialog_has_image` | int | 1 if there is a thumbnail, else 0 |
+| `presenter.dialog_can_delete` | int | 1 if the dialog offers to delete the file (starting a job does), else 0 |
+| `presenter.info_shown` | int | 1 if the job's details (the info_* fields) are known, else 0 |
+| `presenter.info_date` | text | Job modification date |
+| `presenter.info_size` | text | Job size |
+| `presenter.info_generated_by` | text | Slicer |
+| `presenter.info_print_time` | text | Estimated print time |
+| `presenter.info_height` | text | Object height |
+| `presenter.info_layer_height` | text | Layer height |
 
-Each row of `files`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | Shown name; a macro's "12_" ordering prefix is left out |
-| `date` | text | Modification date, e.g. "2025-03-18 18:21:58" |
-| `thumbnail` | text | Thumbnail image path, or empty if there is none (yet) |
-| `is_folder` | int | 1 for a folder, else 0 |
-
-Each row of `crumbs`:
+Each row of `presenter.files`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | The folder's name |
-| `last` | int | 1 for the open folder, else 0 (the others can be tapped to go back up) |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | Shown name; a macro's "12_" ordering prefix is left out |
+| `row.date` | text | Modification date, e.g. "2025-03-18 18:21:58" |
+| `row.thumbnail` | text | Thumbnail image path, or empty if there is none (yet) |
+| `row.is_folder` | int | 1 for a folder, else 0 |
+
+Each row of `presenter.crumbs`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The folder's name |
+| `row.last` | int | 1 for the open folder, else 0 (the others can be tapped to go back up) |
 
 | Action | Description |
 | --- | --- |
@@ -535,44 +565,44 @@ Used by `factors`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `speed_dialog.open` | int | 1 while the dialog is open |
-| `speed_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
-| `speed_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
-| `speed_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
-| `speed_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
-| `speed_dialog.pad.text` | text | What has been typed |
-| `speed_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
-| `speed_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `speed_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
-| `extrusion_dialog.open` | int | 1 while the dialog is open |
-| `extrusion_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
-| `extrusion_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
-| `extrusion_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
-| `extrusion_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
-| `extrusion_dialog.pad.text` | text | What has been typed |
-| `extrusion_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
-| `extrusion_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `extrusion_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
+| `presenter.speed_dialog.open` | int | 1 while the dialog is open |
+| `presenter.speed_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
+| `presenter.speed_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
+| `presenter.speed_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
+| `presenter.speed_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
+| `presenter.speed_dialog.pad.text` | text | What has been typed |
+| `presenter.speed_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `presenter.speed_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `presenter.speed_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
+| `presenter.extrusion_dialog.open` | int | 1 while the dialog is open |
+| `presenter.extrusion_dialog.title` | text | Above the sliders, e.g. "Speed Factor" |
+| `presenter.extrusion_dialog.factors` | list | The percentages, each with `label`, `value`, `min` and `max` |
+| `presenter.extrusion_dialog.pad_shown` | int | 1 while the number pad is shown, for the factor being typed |
+| `presenter.extrusion_dialog.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
+| `presenter.extrusion_dialog.pad.text` | text | What has been typed |
+| `presenter.extrusion_dialog.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `presenter.extrusion_dialog.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `presenter.extrusion_dialog.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
 
-Each row of `speed_dialog.factors`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `label` | text | What it is, e.g. "Extruder 0" |
-| `value` | int | The percentage, e.g. 100 |
-| `min` | int | The bottom of its slider |
-| `max` | int | The top of its slider |
-
-Each row of `extrusion_dialog.factors`:
+Each row of `presenter.speed_dialog.factors`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `label` | text | What it is, e.g. "Extruder 0" |
-| `value` | int | The percentage, e.g. 100 |
-| `min` | int | The bottom of its slider |
-| `max` | int | The top of its slider |
+| `row.index` | int | Position in the list, from 0 |
+| `row.label` | text | What it is, e.g. "Extruder 0" |
+| `row.value` | int | The percentage, e.g. 100 |
+| `row.min` | int | The bottom of its slider |
+| `row.max` | int | The top of its slider |
+
+Each row of `presenter.extrusion_dialog.factors`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.label` | text | What it is, e.g. "Extruder 0" |
+| `row.value` | int | The percentage, e.g. 100 |
+| `row.min` | int | The bottom of its slider |
+| `row.max` | int | The top of its slider |
 
 | Action | Description |
 | --- | --- |
@@ -598,41 +628,41 @@ Used by `hardware_test`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `stage` | text | The stage shown: `serial`, `touch`, `colours`, `command`, `usb`, `buzzer`, `speaker` or `results` |
-| `version` | text | The firmware version and build date |
-| `serial` | text | The serial number to start with |
-| `serial_invalid` | int | 1 if the serial number typed isn't valid |
-| `target_x` | int | Left of the touch target, to be centred on the point to tap |
-| `target_y` | int | Top of the touch target |
-| `colour_shown` | int | 1 while the screen is filled with a test colour |
-| `colour` | colour | The test colour |
-| `message` | text | What the memory, WiFi, USB or speaker test is doing or asks for |
-| `output` | text | What the memory, WiFi or speaker test's commands wrote |
-| `usb_drives` | text | The mounted USB drives and the one in use |
-| `usb_button_shown` | int | 1 while the USB test waits for the user |
-| `usb_button` | text | What the USB test's button says |
-| `speaker_answerable` | int | 1 once the speaker has played, so it can be answered |
-| `passed` | list | The tests that passed, each with `name` and `output` |
-| `failed` | list | The tests that failed, each with `name` and `output` |
-| `exit_shown` | int | 1 if the results can be left with Exit |
+| `presenter.stage` | text | The stage shown: `serial`, `touch`, `colours`, `command`, `usb`, `buzzer`, `speaker` or `results` |
+| `presenter.version` | text | The firmware version and build date |
+| `presenter.serial` | text | The serial number to start with |
+| `presenter.serial_invalid` | int | 1 if the serial number typed isn't valid |
+| `presenter.target_x` | int | Left of the touch target, to be centred on the point to tap |
+| `presenter.target_y` | int | Top of the touch target |
+| `presenter.colour_shown` | int | 1 while the screen is filled with a test colour |
+| `presenter.colour` | colour | The test colour |
+| `presenter.message` | text | What the memory, WiFi, USB or speaker test is doing or asks for |
+| `presenter.output` | text | What the memory, WiFi or speaker test's commands wrote |
+| `presenter.usb_drives` | text | The mounted USB drives and the one in use |
+| `presenter.usb_button_shown` | int | 1 while the USB test waits for the user |
+| `presenter.usb_button` | text | What the USB test's button says |
+| `presenter.speaker_answerable` | int | 1 once the speaker has played, so it can be answered |
+| `presenter.passed` | list | The tests that passed, each with `name` and `output` |
+| `presenter.failed` | list | The tests that failed, each with `name` and `output` |
+| `presenter.exit_shown` | int | 1 if the results can be left with Exit |
 
-Each row of `passed`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | The test, e.g. "UsbTest" |
-| `output` | text | What it found, as JSON |
-| `passed` | int | 1 if it passed |
-
-Each row of `failed`:
+Each row of `presenter.passed`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | The test, e.g. "UsbTest" |
-| `output` | text | What it found, as JSON |
-| `passed` | int | 1 if it passed |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The test, e.g. "UsbTest" |
+| `row.output` | text | What it found, as JSON |
+| `row.passed` | int | 1 if it passed |
+
+Each row of `presenter.failed`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The test, e.g. "UsbTest" |
+| `row.output` | text | What it found, as JSON |
+| `row.passed` | int | 1 if it passed |
 
 | Action | Description |
 | --- | --- |
@@ -654,26 +684,26 @@ Used by `heightmap`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `surface` | surface | The height map shown, sampled for <ds_heatmap> |
-| `title` | text | E.g. "Heightmap: heightmap.csv" |
-| `maps` | list | The height map files |
-| `stats.points` | text | Number of points, as text, e.g. "Number of points: 0;" |
-| `stats.area` | text | Probed area, as text |
-| `stats.min` | text | Lowest deviation, as text |
-| `stats.max` | text | Highest deviation, as text |
-| `stats.mean` | text | Mean error, as text |
-| `stats.rms` | text | RMS error, as text |
-| `mode` | int | How values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range) |
-| `levelling_usable` | int | 1 if the bed can be levelled or probed: connected and no job running |
+| `presenter.surface` | surface | The height map shown, sampled for <ds_heatmap> |
+| `presenter.title` | text | E.g. "Heightmap: heightmap.csv" |
+| `presenter.maps` | list | The height map files |
+| `presenter.stats.points` | text | Number of points, as text, e.g. "Number of points: 0;" |
+| `presenter.stats.area` | text | Probed area, as text |
+| `presenter.stats.min` | text | Lowest deviation, as text |
+| `presenter.stats.max` | text | Highest deviation, as text |
+| `presenter.stats.mean` | text | Mean error, as text |
+| `presenter.stats.rms` | text | RMS error, as text |
+| `presenter.mode` | int | How values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range) |
+| `presenter.levelling_usable` | int | 1 if the bed can be levelled or probed: connected and no job running |
 
-Each row of `maps`:
+Each row of `presenter.maps`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `name` | text | File name |
-| `loaded` | int | 1 for the one the printer is using |
-| `load_text` | text | "Load", or "Unload" for the one in use |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | File name |
+| `row.loaded` | int | 1 for the one the printer is using |
+| `row.load_text` | text | "Load", or "Unload" for the one in use |
 
 | Action | Description |
 | --- | --- |
@@ -687,7 +717,7 @@ Used by `job_cancel`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `confirm` | int | 1 while asking whether to cancel the job |
+| `presenter.confirm` | int | 1 while asking whether to cancel the job |
 
 | Action | Description |
 | --- | --- |
@@ -700,39 +730,39 @@ Used by `move`, `move_xy_card`, `move_z_card`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `connected` | int | 1 while connected |
-| `x.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `x.homed` | int | 1 when homed |
-| `x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `x.home_usable` | int | 1 if it can be homed |
-| `y.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `y.homed` | int | 1 when homed |
-| `y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `y.home_usable` | int | 1 if it can be homed |
-| `z.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `z.homed` | int | 1 when homed |
-| `z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `z.home_usable` | int | 1 if it can be homed |
-| `xy.homed` | int | 1 when X and Y are homed |
-| `xy.home_usable` | int | 1 if X and Y can be homed |
-| `home_all_usable` | int | 1 if all axes can be homed |
-| `disable_motors_usable` | int | 1 if the motors can be disabled |
-| `axes` | list | The axes other than X, Y and Z |
-| `axes_shown` | int | 1 if there are other axes |
-| `confirm` | int | 1 while asking before homing or disabling the motors |
-| `confirm_title` | text | The question's title |
-| `confirm_text` | text | The question |
+| `presenter.connected` | int | 1 while connected |
+| `presenter.x.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
+| `presenter.x.homed` | int | 1 when homed |
+| `presenter.x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `presenter.x.home_usable` | int | 1 if it can be homed |
+| `presenter.y.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
+| `presenter.y.homed` | int | 1 when homed |
+| `presenter.y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `presenter.y.home_usable` | int | 1 if it can be homed |
+| `presenter.z.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
+| `presenter.z.homed` | int | 1 when homed |
+| `presenter.z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `presenter.z.home_usable` | int | 1 if it can be homed |
+| `presenter.xy.homed` | int | 1 when X and Y are homed |
+| `presenter.xy.home_usable` | int | 1 if X and Y can be homed |
+| `presenter.home_all_usable` | int | 1 if all axes can be homed |
+| `presenter.disable_motors_usable` | int | 1 if the motors can be disabled |
+| `presenter.axes` | list | The axes other than X, Y and Z |
+| `presenter.axes_shown` | int | 1 if there are other axes |
+| `presenter.confirm` | int | 1 while asking before homing or disabling the motors |
+| `presenter.confirm_title` | text | The question's title |
+| `presenter.confirm_text` | text | The question |
 
-Each row of `axes`:
+Each row of `presenter.axes`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `letter` | text | Axis letter |
-| `label` | text | Position in the displayed unit, e.g. "U: 0.00" |
-| `homed` | int | 1 when homed |
-| `jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `home_usable` | int | 1 if it can be homed |
+| `row.index` | int | Position in the list, from 0 |
+| `row.letter` | text | Axis letter |
+| `row.label` | text | Position in the displayed unit, e.g. "U: 0.00" |
+| `row.homed` | int | 1 when homed |
+| `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `row.home_usable` | int | 1 if it can be homed |
 
 | Action | Description |
 | --- | --- |
@@ -749,52 +779,52 @@ Used by `notifications`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `response.open` | int | 1 while a response is showing |
-| `response.title` | text | "Info", "Success", "Warning" or "Error" |
-| `response.text` | text | The response |
-| `response.type` | int | 0 info, 1 success, 2 warning, 3 error |
-| `response.progress` | int | Time left before it closes itself, 0-100 |
-| `update.open` | int | 1 while an update is offered or its result shown |
-| `update.title` | text | Title |
-| `update.text` | text | Text |
-| `update.ok_text` | text | OK button text |
-| `update.can_cancel` | int | 1 if the update can be declined |
-| `alert.open` | int | 1 while an M291 alert is showing |
-| `alert.title` | text | Title |
-| `alert.text` | text | Text |
-| `alert.ok` | int | The OK button: 0 hidden, 1 disabled (the input isn't valid), 2 usable |
-| `alert.ok_text` | text | "Ok", or "Close" for a message that only needs closing |
-| `alert.cancel` | int | The Cancel button: 0 hidden, 2 usable |
-| `alert.footer_shown` | int | 1 if there is an OK or Cancel button |
-| `alert.choices` | list | The choices offered, each with `text` |
-| `alert.choices_shown` | int | 1 if choices are offered |
-| `alert.axes` | list | The axes the user may jog, each with `label` and `homed` |
-| `alert.axes_shown` | int | 1 if there are axes to jog |
-| `alert.input_shown` | int | 1 if a value is asked for |
-| `alert.input` | text | The value to start with |
-| `alert.accepted_chars` | text | Characters the value may contain; empty for any |
-| `alert.keyboard_mode` | text | "number" or "text" |
-| `alert.min` | text | Lower limit shown beside the value; empty if none |
-| `alert.max` | text | Upper limit shown beside the value; empty if none |
-| `alert.warning` | text | Why the value isn't valid; empty if it is |
-| `alert.keyboard` | int | 1 while the keyboard is up, so the alert moves out of its way |
-| `alert.progress` | int | Time left before the alert closes itself, 0-100 |
-| `alert.progress_shown` | int | 1 if the alert closes itself |
+| `presenter.response.open` | int | 1 while a response is showing |
+| `presenter.response.title` | text | "Info", "Success", "Warning" or "Error" |
+| `presenter.response.text` | text | The response |
+| `presenter.response.type` | int | 0 info, 1 success, 2 warning, 3 error |
+| `presenter.response.progress` | int | Time left before it closes itself, 0-100 |
+| `presenter.update.open` | int | 1 while an update is offered or its result shown |
+| `presenter.update.title` | text | Title |
+| `presenter.update.text` | text | Text |
+| `presenter.update.ok_text` | text | OK button text |
+| `presenter.update.can_cancel` | int | 1 if the update can be declined |
+| `presenter.alert.open` | int | 1 while an M291 alert is showing |
+| `presenter.alert.title` | text | Title |
+| `presenter.alert.text` | text | Text |
+| `presenter.alert.ok` | int | The OK button: 0 hidden, 1 disabled (the input isn't valid), 2 usable |
+| `presenter.alert.ok_text` | text | "Ok", or "Close" for a message that only needs closing |
+| `presenter.alert.cancel` | int | The Cancel button: 0 hidden, 2 usable |
+| `presenter.alert.footer_shown` | int | 1 if there is an OK or Cancel button |
+| `presenter.alert.choices` | list | The choices offered, each with `text` |
+| `presenter.alert.choices_shown` | int | 1 if choices are offered |
+| `presenter.alert.axes` | list | The axes the user may jog, each with `label` and `homed` |
+| `presenter.alert.axes_shown` | int | 1 if there are axes to jog |
+| `presenter.alert.input_shown` | int | 1 if a value is asked for |
+| `presenter.alert.input` | text | The value to start with |
+| `presenter.alert.accepted_chars` | text | Characters the value may contain; empty for any |
+| `presenter.alert.keyboard_mode` | text | "number" or "text" |
+| `presenter.alert.min` | text | Lower limit shown beside the value; empty if none |
+| `presenter.alert.max` | text | Upper limit shown beside the value; empty if none |
+| `presenter.alert.warning` | text | Why the value isn't valid; empty if it is |
+| `presenter.alert.keyboard` | int | 1 while the keyboard is up, so the alert moves out of its way |
+| `presenter.alert.progress` | int | Time left before the alert closes itself, 0-100 |
+| `presenter.alert.progress_shown` | int | 1 if the alert closes itself |
 
-Each row of `alert.choices`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The choice |
-
-Each row of `alert.axes`:
+Each row of `presenter.alert.choices`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `label` | text | Axis and position, e.g. "X = 0.00" |
-| `homed` | int | 1 if the axis can be jogged |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The choice |
+
+Each row of `presenter.alert.axes`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.label` | text | Axis and position, e.g. "X = 0.00" |
+| `row.homed` | int | 1 if the axis can be jogged |
 
 | Action | Description |
 | --- | --- |
@@ -816,12 +846,12 @@ Used by `numberpad`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `open` | int | 1 while the dialog is open |
-| `pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
-| `pad.text` | text | What has been typed |
-| `pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
-| `pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `pad.signed` | int | 1 if the number may be negative, so the +/- key works |
+| `presenter.open` | int | 1 while the dialog is open |
+| `presenter.pad.header` | text | What is asked for, e.g. "T0 heater 1 active"; empty for nothing |
+| `presenter.pad.text` | text | What has been typed |
+| `presenter.pad.accepted` | text | The characters the box takes, for `bind_accepted_chars` |
+| `presenter.pad.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
+| `presenter.pad.signed` | int | 1 if the number may be negative, so the +/- key works |
 
 | Action | Description |
 | --- | --- |
@@ -836,30 +866,30 @@ Used by `object_cancel`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `current_object` | text | Name of the object being printed, or "None" |
-| `x_min` | int | Lowest X of the bed, whole mm: the X axis' travel allowing for the tool's offset, or the objects' bounds with a margin if the axes aren't known |
-| `x_max` | int | Highest X of the bed, whole mm; as `x_min` |
-| `y_min` | int | Lowest Y of the bed, whole mm; as `x_min` |
-| `y_max` | int | Highest Y of the bed, whole mm; as `x_min` |
-| `objects` | list | The job's objects |
-| `confirmations` | int | 1 if actions are confirmed first (the setting) |
-| `confirm` | int | 1 while asking; `confirm_title` and `confirm_text` are the question |
-| `confirm_title` | text | Question title |
-| `confirm_text` | text | Question |
+| `presenter.current_object` | text | Name of the object being printed, or "None" |
+| `presenter.x_min` | int | Lowest X of the bed, whole mm: the X axis' travel allowing for the tool's offset, or the objects' bounds with a margin if the axes aren't known |
+| `presenter.x_max` | int | Highest X of the bed, whole mm; as `x_min` |
+| `presenter.y_min` | int | Lowest Y of the bed, whole mm; as `x_min` |
+| `presenter.y_max` | int | Highest Y of the bed, whole mm; as `x_min` |
+| `presenter.objects` | list | The job's objects |
+| `presenter.confirmations` | int | 1 if actions are confirmed first (the setting) |
+| `presenter.confirm` | int | 1 while asking; `confirm_title` and `confirm_text` are the question |
+| `presenter.confirm_title` | text | Question title |
+| `presenter.confirm_text` | text | Question |
 
-Each row of `objects`:
+Each row of `presenter.objects`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `number` | int | Object number |
-| `label` | text | E.g. "[2]: gear (Instance 37)" |
-| `x1` | int | Lowest X of its bounds, whole mm |
-| `y1` | int | Lowest Y of its bounds, whole mm |
-| `x2` | int | Highest X of its bounds, whole mm |
-| `y2` | int | Highest Y of its bounds, whole mm |
-| `current` | int | 1 if it is being printed |
-| `cancelled` | int | 1 if it has been cancelled |
+| `row.index` | int | Position in the list, from 0 |
+| `row.number` | int | Object number |
+| `row.label` | text | E.g. "[2]: gear (Instance 37)" |
+| `row.x1` | int | Lowest X of its bounds, whole mm |
+| `row.y1` | int | Lowest Y of its bounds, whole mm |
+| `row.x2` | int | Highest X of its bounds, whole mm |
+| `row.y2` | int | Highest Y of its bounds, whole mm |
+| `row.current` | int | 1 if it is being printed |
+| `row.cancelled` | int | 1 if it has been cancelled |
 
 | Action | Description |
 | --- | --- |
@@ -874,14 +904,14 @@ Used by `settings_connection`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `connection_methods` | text | Connection methods offered (USB, UART or network), one per line |
-| `connection_method` | int | Index of the one in use, in `connection_methods` |
-| `usb_modes` | text | Modes of the USB-C port offered, one per line |
-| `usb_mode` | int | Index of the one in use, in `usb_modes` |
-| `poll_interval` | int | ms between polls of the Duet |
-| `network_shown` | int | 1 if the Duet is reached over the network, so its IP address and password are shown |
-| `duet_ip` | text | The Duet's IP address |
-| `duet_password` | text | The Duet's password |
+| `presenter.connection_methods` | text | Connection methods offered (USB, UART or network), one per line |
+| `presenter.connection_method` | int | Index of the one in use, in `connection_methods` |
+| `presenter.usb_modes` | text | Modes of the USB-C port offered, one per line |
+| `presenter.usb_mode` | int | Index of the one in use, in `usb_modes` |
+| `presenter.poll_interval` | int | ms between polls of the Duet |
+| `presenter.network_shown` | int | 1 if the Duet is reached over the network, so its IP address and password are shown |
+| `presenter.duet_ip` | text | The Duet's IP address |
+| `presenter.duet_password` | text | The Duet's password |
 
 | Action | Description |
 | --- | --- |
@@ -897,20 +927,20 @@ Used by `settings_developer`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `debug_levels` | text | Log levels offered, one per line |
-| `debug_level` | int | Index of the one in use, in `debug_levels` |
-| `advanced_settings` | int | 1 if advanced settings are shown |
-| `second_usb_channel` | int | 1 if the second USB channel is used |
-| `system_logging` | int | 1 if system messages are logged to the console |
-| `debug_borders_shown` | int | 1 if the build has debug borders |
-| `debug_borders` | int | 1 if debug borders are on (builds with debug borders) |
-| `developer_mode` | int | 1 in developer mode (SSH, ADB, setup) |
-| `ssh` | int | 1 if SSH is on (developer mode builds) |
-| `adb` | int | 1 if ADB is on (developer mode builds) |
-| `system_monitor_shown` | int | 1 if the build has the system monitor |
-| `system_monitor` | int | 1 if the system monitor is on |
-| `storage_info` | text | Storage used, e.g. "256.00 MB / 16.00 GB (1%)" |
-| `cache_size` | text | Size of the cache, e.g. "10.00 KB (100 files)" |
+| `presenter.debug_levels` | text | Log levels offered, one per line |
+| `presenter.debug_level` | int | Index of the one in use, in `debug_levels` |
+| `presenter.advanced_settings` | int | 1 if advanced settings are shown |
+| `presenter.second_usb_channel` | int | 1 if the second USB channel is used |
+| `presenter.system_logging` | int | 1 if system messages are logged to the console |
+| `presenter.debug_borders_shown` | int | 1 if the build has debug borders |
+| `presenter.debug_borders` | int | 1 if debug borders are on (builds with debug borders) |
+| `presenter.developer_mode` | int | 1 in developer mode (SSH, ADB, setup) |
+| `presenter.ssh` | int | 1 if SSH is on (developer mode builds) |
+| `presenter.adb` | int | 1 if ADB is on (developer mode builds) |
+| `presenter.system_monitor_shown` | int | 1 if the build has the system monitor |
+| `presenter.system_monitor` | int | 1 if the system monitor is on |
+| `presenter.storage_info` | text | Storage used, e.g. "256.00 MB / 16.00 GB (1%)" |
+| `presenter.cache_size` | text | Size of the cache, e.g. "10.00 KB (100 files)" |
 
 | Action | Description |
 | --- | --- |
@@ -937,15 +967,15 @@ Used by `settings_display`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `themes` | text | Themes offered, one per line |
-| `theme` | int | Index of the theme in use |
-| `fonts` | text | Typefaces offered, one per line |
-| `font` | int | Index of the typeface in use |
-| `icon_sets` | text | Icon sets offered, one per line |
-| `icon_set` | int | Index of the icon set in use |
-| `rotations` | text | Screen rotations offered, one per line |
-| `rotation` | int | Index of the rotation in use |
-| `animations` | int | 1 if the UI animates |
+| `presenter.themes` | text | Themes offered, one per line |
+| `presenter.theme` | int | Index of the theme in use |
+| `presenter.fonts` | text | Typefaces offered, one per line |
+| `presenter.font` | int | Index of the typeface in use |
+| `presenter.icon_sets` | text | Icon sets offered, one per line |
+| `presenter.icon_set` | int | Index of the icon set in use |
+| `presenter.rotations` | text | Screen rotations offered, one per line |
+| `presenter.rotation` | int | Index of the rotation in use |
+| `presenter.animations` | int | 1 if the UI animates |
 
 | Action | Description |
 | --- | --- |
@@ -961,26 +991,26 @@ Used by `settings_general`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `firmware` | text | Firmware version and build time |
-| `buildroot` | text | Buildroot version |
-| `languages` | text | Languages offered, one per line |
-| `language` | int | Index of the language in use, in `languages` |
-| `keyboard_layouts` | text | USB keyboard layouts, one per line |
-| `keyboard_layout` | int | Index of the layout in use, in `keyboard_layouts` |
-| `brightness` | int | Brightness, 0-100 |
-| `screensaver_timeout` | int | Screensaver timeout, s |
-| `confirmations` | int | 1 if actions are confirmed first |
-| `machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) |
-| `progress_sources` | text | How a job's progress can be worked out, one per line |
-| `progress_source` | int | Index of the one used, in `progress_sources` |
-| `connected_message` | int | 1 if a message is shown on connecting |
-| `notification_levels` | text | Notification levels, one per line |
-| `notification_level` | int | Index of the lowest level shown, in `notification_levels` |
-| `notification_timeout` | int | ms before a notification closes itself |
-| `error_notifications_stay` | int | 1 if error notifications stay until closed |
-| `language_confirm` | int | 1 while asking to restart in another language |
-| `language_confirm_title` | text | The language question's title |
-| `language_confirm_text` | text | The language question |
+| `presenter.firmware` | text | Firmware version and build time |
+| `presenter.buildroot` | text | Buildroot version |
+| `presenter.languages` | text | Languages offered, one per line |
+| `presenter.language` | int | Index of the language in use, in `languages` |
+| `presenter.keyboard_layouts` | text | USB keyboard layouts, one per line |
+| `presenter.keyboard_layout` | int | Index of the layout in use, in `keyboard_layouts` |
+| `presenter.brightness` | int | Brightness, 0-100 |
+| `presenter.screensaver_timeout` | int | Screensaver timeout, s |
+| `presenter.confirmations` | int | 1 if actions are confirmed first |
+| `presenter.machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) |
+| `presenter.progress_sources` | text | How a job's progress can be worked out, one per line |
+| `presenter.progress_source` | int | Index of the one used, in `progress_sources` |
+| `presenter.connected_message` | int | 1 if a message is shown on connecting |
+| `presenter.notification_levels` | text | Notification levels, one per line |
+| `presenter.notification_level` | int | Index of the lowest level shown, in `notification_levels` |
+| `presenter.notification_timeout` | int | ms before a notification closes itself |
+| `presenter.error_notifications_stay` | int | 1 if error notifications stay until closed |
+| `presenter.language_confirm` | int | 1 while asking to restart in another language |
+| `presenter.language_confirm_title` | text | The language question's title |
+| `presenter.language_confirm_text` | text | The language question |
 
 | Action | Description |
 | --- | --- |
@@ -1004,25 +1034,25 @@ Used by `settings_theme_preview`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `swatches` | list | A swatch of each colour of the theme |
-| `controls_shown` | int | 1 if the palette can be changed here |
-| `primary_hue` | int | Primary hue, 0-360 |
-| `secondary_hue` | int | Secondary hue, 0-360 |
-| `chroma` | int | Chroma, 0-0.4, in hundredths (0.02 is 2) |
-| `dark` | int | 1 in dark mode |
-| `primary.lightness` | int | The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`) |
-| `primary.chroma` | int | The primary colour's OKLCH chroma, in thousandths, to show hues at |
-| `secondary.lightness` | int | The secondary colour's OKLCH lightness, in thousandths, to show hues at |
-| `secondary.chroma` | int | The secondary colour's OKLCH chroma, in thousandths, to show hues at |
+| `presenter.swatches` | list | A swatch of each colour of the theme |
+| `presenter.controls_shown` | int | 1 if the palette can be changed here |
+| `presenter.primary_hue` | int | Primary hue, 0-360 |
+| `presenter.secondary_hue` | int | Secondary hue, 0-360 |
+| `presenter.chroma` | int | Chroma, 0-0.4, in hundredths (0.02 is 2) |
+| `presenter.dark` | int | 1 in dark mode |
+| `presenter.primary.lightness` | int | The primary colour's OKLCH lightness, in thousandths, to show hues at (`<ds_hue_slider>`) |
+| `presenter.primary.chroma` | int | The primary colour's OKLCH chroma, in thousandths, to show hues at |
+| `presenter.secondary.lightness` | int | The secondary colour's OKLCH lightness, in thousandths, to show hues at |
+| `presenter.secondary.chroma` | int | The secondary colour's OKLCH chroma, in thousandths, to show hues at |
 
-Each row of `swatches`:
+Each row of `presenter.swatches`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `label` | text | The style's name, e.g. "Primary" |
-| `color` | colour | Its colour, e.g. for `<bind_style_prop>` |
-| `text_style` | int | For the text styles, so their names show them: 1 muted, 2 emphasis, 3 header; else 0 |
+| `row.index` | int | Position in the list, from 0 |
+| `row.label` | text | The style's name, e.g. "Primary" |
+| `row.color` | colour | Its colour, e.g. for `<bind_style_prop>` |
+| `row.text_style` | int | For the text styles, so their names show them: 1 muted, 2 emphasis, 3 header; else 0 |
 
 | Action | Description |
 | --- | --- |
@@ -1037,24 +1067,24 @@ Used by `settings_wifi`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `ip` | text | E.g. "IP Address: 192.168.1.100" |
-| `status` | text | How the last connection attempt went, or empty |
-| `networks` | list | The networks found |
-| `password_open` | int | 1 while asking for a network's password |
-| `password_title` | text | The password question |
-| `password` | text | The password typed |
-| `keyboard` | int | 1 while the keyboard is up, so the question moves out of its way |
+| `presenter.ip` | text | E.g. "IP Address: 192.168.1.100" |
+| `presenter.status` | text | How the last connection attempt went, or empty |
+| `presenter.networks` | list | The networks found |
+| `presenter.password_open` | int | 1 while asking for a network's password |
+| `presenter.password_title` | text | The password question |
+| `presenter.password` | text | The password typed |
+| `presenter.keyboard` | int | 1 while the keyboard is up, so the question moves out of its way |
 
-Each row of `networks`:
+Each row of `presenter.networks`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `ssid` | text | Network name |
-| `signal` | text | Signal level, e.g. "75 dBm" |
-| `known` | int | 1 if the screen has joined it before, so it can be forgotten |
-| `connected` | int | 1 if the screen is on it |
-| `connect_text` | text | "Disconnect" (connected), "Connect" (known) or "Join" |
+| `row.index` | int | Position in the list, from 0 |
+| `row.ssid` | text | Network name |
+| `row.signal` | text | Signal level, e.g. "75 dBm" |
+| `row.known` | int | 1 if the screen has joined it before, so it can be forgotten |
+| `row.connected` | int | 1 if the screen is on it |
+| `row.connect_text` | text | "Disconnect" (connected), "Connect" (known) or "Join" |
 
 | Action | Description |
 | --- | --- |
@@ -1072,34 +1102,34 @@ Used by `temperature`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `tools` | list | The tools with heaters; each row also has the fields of a global `tools` row |
-| `filaments` | text | The filaments the printer knows, one per line |
-| `selected_tool` | text | E.g. "Selected Tool: Tool 0" |
+| `presenter.tools` | list | The tools with heaters; each row also has the fields of a global `tools` row |
+| `presenter.filaments` | text | The filaments the printer knows, one per line |
+| `presenter.selected_tool` | text | E.g. "Selected Tool: Tool 0" |
 
-Each row of `tools`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
-| `heaters` | list | One row per heater of the tool |
-| `filament_shown` | int | 1 if the tool takes filament |
-| `filament_text` | text | The filament picked or loaded, or "No Filament Loaded" |
-| `filament_loaded` | int | 1 if filament is loaded, so it can be unloaded |
-| `change_shown` | int | 1 if a filament other than the loaded one has been picked |
-| `change_text` | text | "Load", or "Change" when filament is loaded |
-
-Each row of `tools` › `heaters`:
+Each row of `presenter.tools`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `heater` | int | Heater number |
-| `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `active` | int | Active target temperature, °C |
-| `standby` | int | Standby target temperature, °C |
+| `row.index` | int | Position in the list, from 0 |
+| `row.number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
+| `row.heaters` | list | One row per heater of the tool |
+| `row.filament_shown` | int | 1 if the tool takes filament |
+| `row.filament_text` | text | The filament picked or loaded, or "No Filament Loaded" |
+| `row.filament_loaded` | int | 1 if filament is loaded, so it can be unloaded |
+| `row.change_shown` | int | 1 if a filament other than the loaded one has been picked |
+| `row.change_text` | text | "Load", or "Change" when filament is loaded |
+
+Each row of `presenter.tools` › `row.heaters`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.heater` | int | Heater number |
+| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
+| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
+| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
+| `row.active` | int | Active target temperature, °C |
+| `row.standby` | int | Standby target temperature, °C |
 
 | Action | Description |
 | --- | --- |
@@ -1113,28 +1143,28 @@ Used by `temperature_extrusion`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
-| `retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
-| `distance.title` | text | The title, e.g. "Feed Distance (mm)" |
-| `distance.value` | text | The value, e.g. "0.1" |
-| `distance.choices` | list | The presets, each with `text` |
-| `feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
-| `feedrate.value` | text | The value, e.g. "0.1" |
-| `feedrate.choices` | list | The presets, each with `text` |
+| `presenter.extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `presenter.retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `presenter.distance.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `presenter.distance.value` | text | The value, e.g. "0.1" |
+| `presenter.distance.choices` | list | The presets, each with `text` |
+| `presenter.feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `presenter.feedrate.value` | text | The value, e.g. "0.1" |
+| `presenter.feedrate.choices` | list | The presets, each with `text` |
 
-Each row of `distance.choices`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The preset, e.g. "10" |
-
-Each row of `feedrate.choices`:
+Each row of `presenter.distance.choices`:
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `text` | text | The preset, e.g. "10" |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The preset, e.g. "10" |
+
+Each row of `presenter.feedrate.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The preset, e.g. "10" |
 
 | Action | Description |
 | --- | --- |
@@ -1157,7 +1187,7 @@ An arc that shows a value, such as a gauge's: a read-only lv_arc, without a knob
 Also takes every `lv_arc` attribute.
 
 ```xml
-<ds_arc bind_value="temperature" bind_max="limit" bg_start_angle="135" bg_end_angle="45"
+<ds_arc bind_value="presenter.temperature" bind_max="presenter.limit" bg_start_angle="135" bg_end_angle="45"
 		width="120" height="120">
 	<style name="gauge_arc"/>
 	<style name="gauge_arc_indic" selector="indicator"/>
@@ -1179,7 +1209,7 @@ A progress bar that draws its value as text, inside the filled part when it fits
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_bar min="0" max="100" label_format="{}%" bind_value="progress"/>
+<ds_bar min="0" max="100" label_format="{}%" bind_value="presenter.progress"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_bar.png)
@@ -1201,9 +1231,9 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <lv_obj width="400" height="100" scrollable="false">
-	<ds_bar name="current" bind_value="current_value" bind_min="scale_min" bind_max="scale_max"
+	<ds_bar name="current" bind_value="presenter.current_value" bind_min="presenter.scale_min" bind_max="presenter.scale_max"
 			width="100%" height="15" align="center"/>
-	<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
+	<ds_bar_marker name="target" bar="current" bind_value="presenter.active" bind_min="presenter.scale_min" bind_max="presenter.scale_max"
 				   label_format="{} °C" align="left_mid" y="-30">
 		<style name="input"/>
 		<action trigger="clicked" name="actions.heater.set_active"/>
@@ -1247,7 +1277,7 @@ Also takes every `lv_obj` attribute.
 | `icon` | Icon file from the icon set, e.g. "fan.png" |
 | `checkable` | "true" to make the button toggle its `checked` state when clicked |
 | `long_mode` | What the label does with text too long for it: wrap, dots, scroll, scroll_circular or clip |
-| `flash_on` | Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `responses.count`; style the flash with `<style … selector="user_1"/>` |
+| `flash_on` | Flash the button briefly, in its `user_1` state, whenever this subject changes, e.g. `source.response.count`; style the flash with `<style … selector="user_1"/>` |
 
 ### ds_drag_button
 
@@ -1280,7 +1310,7 @@ A drop-down list whose options and text follow subjects. The option chosen reach
 Also takes every `lv_dropdown` attribute.
 
 ```xml
-<ds_dropdown bind_options="filaments" bind_text="filament_text">
+<ds_dropdown bind_options="presenter.filaments" bind_text="presenter.filament_text">
 	<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
 </ds_dropdown>
 ```
@@ -1300,15 +1330,15 @@ A line graph of a history, with a legend whose buttons show and hide series. Ser
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"
-		  width="400" height="250"/>
+<ds_graph history="source.temperature.temperatures" seconds="60" y_min="0" y_max="300"
+		  bind_y_max="source.temperature.limit" width="400" height="250"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_graph.png)
 
 | Attribute | Description |
 | --- | --- |
-| `history` | The history shown (required), looked up like a list: the enclosing rows, the view's presenter, then the globals |
+| `history` | The history shown (required), named like a list, e.g. `source.temperature.temperatures` |
 | `seconds` | The X axis shows the last this-many seconds, labelled -seconds to 0 (default 60) |
 | `y_min` | Bottom of the Y axis (default 0) |
 | `y_max` | Top of the Y axis (default 100) |
@@ -1322,7 +1352,7 @@ A colour map of a surface, such as a bed's height map, with X and Y scales, a gr
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_heatmap bind_surface="surface" bind_title="title" resolution="200" width="400" height="300"/>
+<ds_heatmap bind_surface="presenter.surface" bind_title="presenter.title" resolution="200" width="400" height="300"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_heatmap.png)
@@ -1340,7 +1370,7 @@ A `<ds_slider>` for a hue, 0 to 360, whose track shows every hue at a lightness 
 Also takes every `ds_slider` attribute.
 
 ```xml
-<ds_hue_slider bind_value="primary_hue" bind_lightness="primary.lightness" bind_chroma="primary.chroma"
+<ds_hue_slider bind_value="presenter.primary_hue" bind_lightness="presenter.primary.lightness" bind_chroma="presenter.primary.chroma"
 			   width="100%"/>
 ```
 
@@ -1410,20 +1440,20 @@ A container with one component per row of a list. Each item is built in a scope 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_list list="files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>
+<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>
 ```
 
 | Attribute | Description |
 | --- | --- |
-| `list` | The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can show `list="heaters"`), then the view's presenter, then the globals |
+| `list` | The list shown (required), named like a subject: e.g. `presenter.files`, `source.gauge.gauges`, `om.fans`, or in a tool's row, its `row.heaters` |
 | `item` | The component built for each row (required) |
 | `windowed` | "true" to build only the rows on screen, building and deleting rows as the list scrolls (default false) |
 | `item_height` | Windowed: each item's height in pixels (required when windowed) |
 | `item_width` | Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; the list scrolls sideways); the list's full width if not given |
 | `flow` | Windowed: `column` for one item per line (default), `row_wrap` for as many per line as fit |
 | `follow_end` | "true" to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false) |
-| `key` | A field of the rows: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. |
-| `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="fans" key="number" value="2" item="…"/>` shows fan 2 |
+| `key` | A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. |
+| `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="om.fans" key="row.index" value="2" item="…"/>` shows fan 2 |
 
 ### ds_modal
 
@@ -1432,7 +1462,7 @@ A dialog over the main window with a dimmed backdrop. Its subject alone decides 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_modal name="file_dialog" bind_open="dialog" width="70%" height="content">
+<ds_modal name="file_dialog" bind_open="presenter.dialog" width="70%" height="content">
 	<action trigger="dismissed" name="presenter.files.close_dialog"/>
 	…the dialog's content…
 </ds_modal>
@@ -1488,10 +1518,10 @@ An X/Y area with scales and a grid, such as the bed with its objects, whose cont
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_plot title_tag="tr.object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
-		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
+<ds_plot title_tag="tr.object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="presenter.current"
+		 bind_x_min="presenter.x_min" bind_x_max="presenter.x_max" bind_y_min="presenter.y_min" bind_y_max="presenter.y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
-		<ds_list list="objects" item="object_cancel_outline" width="100%" height="100%"/>
+		<ds_list list="presenter.objects" item="object_cancel_outline" width="100%" height="100%"/>
 	</ds_plot_layer>
 </ds_plot>
 ```
@@ -1528,7 +1558,7 @@ A rectangle kept at its X/Y bounds over a `<ds_plot>`, e.g. an object on the bed
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_plot_rect bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2"/>
+<ds_plot_rect bind_x1="row.x1" bind_y1="row.y1" bind_x2="row.x2" bind_y2="row.y2"/>
 ```
 
 | Attribute | Description |
@@ -1566,7 +1596,7 @@ A slider with a label, its value and -/+ buttons, and optionally a number pad. R
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
+<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="presenter.brightness"
 		   numberpad="true" send="change" width="100%">
 	<action trigger="value_confirmed" name="presenter.settings.brightness"/>
 </ds_slider>
@@ -1604,7 +1634,7 @@ Also takes every `lv_obj` attribute.
 	<ds_tabs-tab name="macros" title_tag="tr.file.macros">
 		<lv_label text="The first tab's content"/>
 	</ds_tabs-tab>
-	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="machine.job_active">
+	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="source.machine.job_active">
 		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
 </ds_tabs>
@@ -1623,7 +1653,7 @@ Also takes every `lv_obj` attribute.
 | `title` | The tab button's text, if there is no `title_tag` |
 | `title_tag` | Translation key for the tab button's text |
 | `bind_disabled` | Disable the tab's button while this int subject is non-zero |
-| `select_on` | Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on="job.file"` |
+| `select_on` | Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on="om.job.file.fileName"` |
 
 ### ds_textarea
 
@@ -1632,7 +1662,7 @@ A text box that brings up an on-screen keyboard while it is being edited. The ke
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
+<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" bind_keyboard_mode="presenter.alert.keyboard_mode"
 			 width="300">
 	<action trigger="value_changed" name="presenter.alert.input"/>
 </ds_textarea>
@@ -1661,7 +1691,7 @@ An image as tall as its parent's content and as wide as its aspect ratio needs, 
 Also takes every `lv_image` attribute.
 
 ```xml
-<ds_thumbnail bind_src="job.thumbnail" height="100%"/>
+<ds_thumbnail bind_src="source.job.thumbnail" height="100%"/>
 ```
 
 | Attribute | Description |
@@ -1676,7 +1706,7 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_toggle>
-	<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
+	<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
 	<action trigger="value_changed" name="presenter.settings.confirmations"/>
 </ds_toggle>
 ```
@@ -1705,7 +1735,7 @@ Also takes every `lv_obj` attribute.
 Written `<action>` inside any widget: run the named action when the widget raises the trigger event. `presenter.<action>` is looked for in the presenters of the views the widget is in, innermost first; `actions.<group>.<action>` is a global action.
 
 ```xml
-<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{number} S{event.value}"/>
+<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{row.number} S{event.value}"/>
 ```
 
 | Attribute | Description |
@@ -1730,7 +1760,7 @@ The built-in slots and the layout each shows until the user changes it.
 
 ### Placed widgets' names
 
-A placed widget's component can use these as well as its presenter's names and the globals (they are found after its presenter's), to fit what it shows to the room it has, e.g. `<bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>` hides a part when the widget is narrow. The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h) for when to use them.
+A placed widget's component can use these, as well as its presenter's names and the globals, to fit what it shows to the room it has; any other view has a page's room, every class expanded. E.g. `<bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>` hides a part when the widget is narrow. The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h) for when to use them.
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -1757,7 +1787,7 @@ At its smallest, 134×136 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `tool.0.0` |
+| `source` | Shows | a row of `source.gauge.gauges`, by its `id`, shown by its `name` | `tool.0.0` |
 
 #### axes
 
@@ -1797,7 +1827,7 @@ At its smallest, 180×89 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `bed.0` |
+| `source` | Shows | a row of `source.gauge.gauges`, by its `id`, shown by its `name` | `bed.0` |
 
 #### console
 
@@ -1822,6 +1852,18 @@ In Console; placed in `dashboard`; component `console_command_list` ([console_co
 At its smallest, 272×136 px:
 
 ![console_command_list at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_command_list_smallest.png)
+
+#### console_input
+
+**Console input**: A line to type G-code into and send to the printer
+
+In Console; placed in `dashboard`; component `console_input` ([console_input.json](../assets/ui/widgets/console/console_input.json)). In a free layout it is 300×100 px, and at least 200×60 px.
+
+![console_input](../tests/ref_imgs/xml_ui_api/widgets/console_input.png)
+
+At its smallest, 200×60 px:
+
+![console_input at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_input_smallest.png)
 
 #### console_log
 
@@ -1881,7 +1923,7 @@ At its smallest, 365×89 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `fan` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:fine_tune.fan` | `0` |
+| `fan` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:tr.fine_tune.fan` | `0` |
 
 #### fans
 
@@ -2203,7 +2245,7 @@ At its smallest, 458×100 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:temperature.default_tool_name` | `0` |
+| `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
 
 #### tools
 
@@ -2231,7 +2273,7 @@ At its smallest, 134×89 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `source` | Shows | a row of `gauges`, by its `id`, shown by its `name` | `job.progress` |
+| `source` | Shows | a row of `source.gauge.gauges`, by its `id`, shown by its `name` | `job.progress` |
 
 ## Components
 
@@ -2246,6 +2288,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `console` |  | `console`, `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
 | `console_gcode` |  |  | `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
+| `console_input` | `console` | `keyboard` | `console`, `console_input` | [console_input.xml](../assets/ui/components/console/console_input.xml) |
 | `console_line` |  |  | `console`, `console_log` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | `console_log` |  |  | `console_log` | [console_log.xml](../assets/ui/components/console/console_log.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |

@@ -99,13 +99,14 @@ TEST_F(XmlUiApi, DescribesEveryKindOfName)
 	const auto reference = UI::Xml::Api::build();
 
 	// Global data, with list rows, nested lists and the `index` every row has
-	auto tools = std::find_if(
-		reference.sources.begin(), reference.sources.end(), [](const auto& s) { return findField(s.fields, "tools"); });
+	auto tools = std::find_if(reference.sources.begin(),
+							  reference.sources.end(),
+							  [](const auto& s) { return findField(s.fields, "source.tool.tools"); });
 	ASSERT_NE(tools, reference.sources.end());
-	const auto* toolList = findField(tools->fields, "tools");
+	const auto* toolList = findField(tools->fields, "source.tool.tools");
 	EXPECT_EQ(toolList->type, "list");
-	EXPECT_NE(findField(toolList->rowFields, "index"), nullptr);
-	const auto* heaters = findField(toolList->rowFields, "heaters");
+	EXPECT_NE(findField(toolList->rowFields, "row.index"), nullptr);
+	const auto* heaters = findField(toolList->rowFields, "row.heaters");
 	ASSERT_NE(heaters, nullptr);
 	EXPECT_FALSE(heaters->rowFields.empty());
 
@@ -244,6 +245,23 @@ TEST_F(XmlUiApi, GlobalActionsAreAddedInTheirGroupsFile)
 	}
 }
 
+/* A data source's names say where to look: `source.<name>.<field>` is published by `<Name>Source.cpp` */
+TEST_F(XmlUiApi, DataSourcesAreDefinedInTheirNamesFile)
+{
+	const auto reference = UI::Xml::Api::build();
+	ASSERT_FALSE(reference.sources.empty());
+	for (const auto& source : reference.sources)
+	{
+		std::string stem = std::filesystem::path(source.file).stem().string();
+		std::transform(stem.begin(), stem.end(), stem.begin(), [](unsigned char c) { return std::tolower(c); });
+		EXPECT_EQ(stem, source.name + "source") << source.name << " is defined in " << source.file;
+		for (const auto& field : source.fields)
+		{
+			EXPECT_TRUE(field.name.starts_with("source." + source.name + ".")) << field.name;
+		}
+	}
+}
+
 /* A user bundle's mistakes are found, each where it is made */
 TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 {
@@ -258,20 +276,20 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	// A screen, nothing uses it, so it is a view of its own, with the fans presenter
 	std::ofstream(userDir / "test" / "components" / "lint_screen.xml") << R"(<component presenter="fans">
 	<view extends="lv_obj">
-		<lv_label bind_text="no_such_subject"/>
+		<lv_label bind_text="presenter.no_such_subject"/>
 		<style name="no_such_style"/>
 		<ds_button translation_tag="tr.no.such.key">
 			<action name="presenter.no.such_action"/>
 			<action name="presenter.fans.set_speed" trigger="clickd"/>
 		</ds_button>
 		<ds_list list="om.fans" item="lint_fan"/>
-		<lint_dialog open="no_such_open"/>
+		<lint_dialog open="presenter.no_such_open"/>
 		<no_such_widget/>
 		<lv_obj style_radius="#no_such_const" style_pad_all="#pad"/>
-		<bind_flag_if cond="machine.printing and no_such_operand" flag="hidden"/>
-		<ds_list list="om.fans" key="numbr" value="2" item="lint_plain"/>
-		<ds_list list="tools" key="heaters" value="2" item="lint_plain"/>
-		<ds_list list="om.fans" key="index" value="2" item="lint_plain"/>
+		<bind_flag_if cond="source.machine.printing and no_such_operand" flag="hidden"/>
+		<ds_list list="om.fans" key="row.numbr" value="2" item="lint_plain"/>
+		<ds_list list="source.tool.tools" key="row.heaters" value="2" item="lint_plain"/>
+		<ds_list list="om.fans" key="row.index" value="2" item="lint_plain"/>
 		<lv_label translation_tag="fan.max"/>
 		<lv_label bind_text="om.fans[0].name|default:fine_tune.fan"/>
 		<ds_button><action name="fans.set_speed"/></ds_button>
@@ -283,12 +301,13 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	<view extends="lv_obj"/>
 </component>)";
 
-	// A list item: its row's fields come first
+	// A list item: its row's names are `row.*`; a name without a prefix is wrong, with a suggestion if it can be found
 	std::ofstream(userDir / "test" / "components" / "lint_fan.xml") << R"(<component>
 	<view extends="lv_obj">
+		<lv_label bind_text="row.rpm"/>
+		<lv_label bind_text="row.rpmx"/>
+		<ds_button><action name="actions.gcode.send" arg="M106 P{row.index} S{event.value} X{nothing}"/></ds_button>
 		<lv_label bind_text="rpm"/>
-		<lv_label bind_text="rpmx"/>
-		<ds_button><action name="actions.gcode.send" arg="M106 P{index} S{event.value} X{nothing}"/></ds_button>
 	</view>
 </component>)";
 
@@ -328,20 +347,24 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		}
 	}
 	const std::vector<std::string> expected = {
-		"lint_dialog.xml:3: no subject `no_such_open` (in lint_screen › lint_dialog)",
+		"lint_dialog.xml:3: no subject `presenter.no_such_open` (in lint_screen › lint_dialog)",
 		"lint_dialog.xml:4: no prop `missing_prop` (in lint_screen › lint_dialog)",
-		"lint_fan.xml:4: no subject `rpmx` (in lint_screen › lint_fan)",
-		"lint_fan.xml:5: no subject `nothing` (in lint_screen › lint_fan)",
-		"lint_screen.xml:3: no subject `no_such_subject` (in lint_screen)",
+		"lint_fan.xml:4: no subject `row.rpmx` (in lint_screen › lint_fan)",
+		"lint_fan.xml:5: `nothing`: names are written with where they come from (row., parent., presenter., widget., "
+		"source., om.) (in lint_screen › lint_fan)",
+		"lint_fan.xml:6: `rpm`: names are written with where they come from (row., parent., presenter., widget., "
+		"source., om.); here, `row.rpm` (in lint_screen › lint_fan)",
+		"lint_screen.xml:3: no subject `presenter.no_such_subject` (in lint_screen)",
 		"lint_screen.xml:4: no style `no_such_style` (in lint_screen)",
 		"lint_screen.xml:5: no translation `tr.no.such.key` (in lint_screen)",
 		"lint_screen.xml:6: no action `presenter.no.such_action` (in lint_screen)",
 		"lint_screen.xml:7: no trigger `clickd` (in lint_screen)",
 		"lint_screen.xml:11: <no_such_widget> is no widget, component or binding (in lint_screen)",
 		"lint_screen.xml:12: no const or colour `#no_such_const` (in lint_screen)",
-		"lint_screen.xml:13: no subject `no_such_operand` (in lint_screen)",
-		"lint_screen.xml:14: rows of `om.fans` have no field `numbr` (in lint_screen)",
-		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
+		"lint_screen.xml:13: `no_such_operand`: names are written with where they come from (row., parent., "
+		"presenter., widget., source., om.) (in lint_screen)",
+		"lint_screen.xml:14: rows of `om.fans` have no field `row.numbr` (in lint_screen)",
+		"lint_screen.xml:15: `row.heaters` is a list, so it can't be a key (in lint_screen)",
 		"lint_screen.xml:17: `fan.max`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:18: `fine_tune.fan`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:19: `fans.set_speed`: actions are written `presenter.<action>` or `actions.<group>.<action>` "
@@ -375,25 +398,27 @@ TEST_F(XmlUiApi, LintChecksObjectModelNames)
 	</view>
 </component>)";
 
-	// A tool: its fields, its heaters as a list, and in a heater row, the tool's `active` by the row's index
+	// A tool: its fields, its heaters as a list, and in a heater row, the tool's `active` by the row's index; the
+	// heater row's own `row.active` is the heater number's, which has none
 	std::ofstream(userDir / "test" / "components" / "lint_om_tool.xml") << R"(<component>
 	<view extends="lv_obj">
-		<lv_label bind_text="name"/>
-		<lv_label bind_text="nme"/>
-		<ds_list list="heaters" item="lint_om_tool_heater"/>
+		<lv_label bind_text="row.name"/>
+		<lv_label bind_text="row.nme"/>
+		<ds_list list="row.heaters" item="lint_om_tool_heater"/>
 	</view>
 </component>)";
 	std::ofstream(userDir / "test" / "components" / "lint_om_tool_heater.xml") << R"(<component>
 	<view extends="lv_obj">
-		<lv_label bind_text="value|int"/>
-		<lv_label bind_text="active[{index}]"/>
-		<lv_label bind_text="om.heat.heaters[{value}].state|translate:tr.temperature.status"/>
+		<lv_label bind_text="row.value|int"/>
+		<lv_label bind_text="parent.active[{row.index}]"/>
+		<lv_label bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status"/>
+		<lv_label bind_text="row.active[{row.index}]"/>
 	</view>
 </component>)";
 	std::ofstream(userDir / "test" / "components" / "lint_om_heater.xml") << R"(<component>
 	<view extends="lv_obj">
-		<lv_label bind_text="current"/>
-		<lv_label bind_text="currnt"/>
+		<lv_label bind_text="row.current"/>
+		<lv_label bind_text="row.currnt"/>
 	</view>
 </component>)";
 
@@ -412,13 +437,16 @@ TEST_F(XmlUiApi, LintChecksObjectModelNames)
 		}
 	}
 	const std::vector<std::string> expected = {
-		"lint_om_heater.xml:4: no subject `currnt` (in lint_om_screen › lint_om_heater)",
+		"lint_om_heater.xml:4: no subject `row.currnt` (in lint_om_screen › lint_om_heater)",
 		"lint_om_screen.xml:4: no subject `om.heat.heaters[1].curent` (in lint_om_screen)",
 		"lint_om_screen.xml:5: `om.heat.heaters[1].current|nonsense`: no converter `nonsense` (in lint_om_screen)",
-		"lint_om_screen.xml:6: no subject `no_such_index` (in lint_om_screen)",
+		"lint_om_screen.xml:6: `no_such_index`: names are written with where they come from (row., parent., "
+		"presenter., widget., source., om.) (in lint_om_screen)",
 		"lint_om_screen.xml:7: no subject `om.state.curentTool|int` (in lint_om_screen)",
 		"lint_om_screen.xml:8: no list `om.heat.heaters[1].current` (in lint_om_screen)",
-		"lint_om_tool.xml:4: no subject `nme` (in lint_om_screen › lint_om_tool)",
+		"lint_om_tool.xml:4: no subject `row.nme` (in lint_om_screen › lint_om_tool)",
+		"lint_om_tool_heater.xml:6: no subject `row.active[{row.index}]` (in lint_om_screen › lint_om_tool › "
+		"lint_om_tool_heater)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
 }

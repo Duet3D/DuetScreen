@@ -6,6 +6,7 @@
 #include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/List.h"
+#include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Runtime/Translations.h"
 #include <algorithm>
 #include <array>
@@ -75,6 +76,26 @@ namespace UI::Xml
 				return {};
 			}
 			return std::string(*found);
+		}
+
+		/**
+		 * The row field `json[key]` names (written `row.<field>`, see Binding/Names.h), without its `row.`; `fallback`
+		 * if it isn't there. Sets `error` if it is there but isn't written so.
+		 */
+		std::string rowFieldOf(const nlohmann::json& json, const char* key, std::string& error, std::string fallback)
+		{
+			const std::string name = stringOf(json, key, error);
+			if (name.empty())
+			{
+				return fallback;
+			}
+			const auto field = Names::after(name, Names::ROW);
+			if (!field)
+			{
+				error = fmt::format("\"{:s}\" is a field of the rows, written {:s}<field>", key, Names::ROW);
+				return {};
+			}
+			return std::string(*field);
 		}
 
 		/** Read a [width, height] size in pixels; sets `error` if it is there but isn't one */
@@ -168,9 +189,9 @@ namespace UI::Xml
 				break;
 			case SettingKind::Row:
 				setting.list = stringOf(json, "list", error);
-				setting.key = stringOf(json, "key", error);
-				setting.label = stringOf(json, "label", error, setting.key);
-				if (setting.list.empty() || setting.key.empty())
+				setting.key = rowFieldOf(json, "key", error, "");
+				setting.label = rowFieldOf(json, "label", error, setting.key);
+				if (error.empty() && (setting.list.empty() || setting.key.empty()))
 				{
 					error = fmt::format("setting \"{:s}\": a row setting needs \"list\" and \"key\"", setting.name);
 				}

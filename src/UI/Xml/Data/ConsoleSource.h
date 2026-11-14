@@ -38,7 +38,7 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		ConsoleSource();
 
-		/** Declare `console.lines` */
+		/** Declare `source.console.lines` */
 		void fields(FieldVisitor& f) override;
 
 		/** Nothing to re-read: lines are events */

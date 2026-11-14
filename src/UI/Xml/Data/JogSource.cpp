@@ -44,11 +44,14 @@ namespace UI::Xml
 
 	void JogSource::fields(FieldVisitor& f)
 	{
-		f.field(
-			"jog.distance_title", m_distanceTitle, "The distances' title, with the unit, e.g. \"Move Distance (mm)\"");
-		f.field("jog.feedrate_title", m_feedrateTitle, "The speeds' title, with the unit");
-		f.list("jog.distances", m_distances, "The jog distances to choose from (move.distance, move.edit_distance)");
-		f.list("jog.feedrates", m_feedrates, "The jog speeds to choose from (move.feedrate, move.edit_feedrate)");
+		f.field("distance_title", m_distanceTitle, "The distances' title, with the unit, e.g. \"Move Distance (mm)\"");
+		f.field("feedrate_title", m_feedrateTitle, "The speeds' title, with the unit");
+		f.list("distances",
+			   m_distances,
+			   "The jog distances to choose from (actions.jog.distance, actions.jog.edit_distance)");
+		f.list("feedrates",
+			   m_feedrates,
+			   "The jog speeds to choose from (actions.jog.feedrate, actions.jog.edit_feedrate)");
 	}
 
 	void JogSource::onInit()

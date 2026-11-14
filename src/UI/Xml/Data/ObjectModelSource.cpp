@@ -12,7 +12,7 @@
 namespace UI::Xml
 {
 	ObjectModelSource::ObjectModelSource()
-		: DataSource("om")
+		: DataSource("objectmodel")
 	{
 		if (OM::Schema::get().empty())
 		{

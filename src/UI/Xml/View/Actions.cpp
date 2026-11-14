@@ -342,7 +342,7 @@ namespace UI::Xml
 								"trigger event. `presenter.<action>` is looked for in the presenters of the views the "
 								"widget is in, innermost first; `actions.<group>.<action>` is a global action.",
 				 .example =
-					 R"(<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{number} S{event.value}"/>)",
+					 R"(<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{row.number} S{event.value}"/>)",
 				 .attributes =
 					 {{"name",
 					   "The action to run (required): `presenter.<action>` or `actions.<group>.<action>`",
@@ -358,7 +358,7 @@ namespace UI::Xml
 					   "the current value of the subject `name`, looked up from where the `<action>` is "
 					   "written",
 					   AttributeKind::ActionArg}},
-				 .exampleSubjects = {{"number", "int", "1"}}},
+				 .exampleSubjects = {{"row.number", "int", "1"}}},
 				actionCreate,
 				actionApply);
 		}

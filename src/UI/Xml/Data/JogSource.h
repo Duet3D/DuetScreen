@@ -31,7 +31,7 @@ namespace UI::Xml
 		IntSubject selected;	// 1 for the one in use
 	};
 
-	/** Publishes `jog.*` */
+	/** Publishes `source.jog.*` */
 	class JogSource : public DataSource
 	{
 	  public:

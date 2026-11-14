@@ -28,21 +28,21 @@ namespace UI::Xml
 
 	void MoveSource::fields(FieldVisitor& f)
 	{
-		f.field("move.speed_factor", m_speedFactor, "The speed override, e.g. \"100%\"");
-		f.field("move.extrusion_factor",
+		f.field("speed_factor", m_speedFactor, "The speed override, e.g. \"100%\"");
+		f.field("extrusion_factor",
 				m_extrusionFactor,
 				"The extrusion override of the current tool's extruders (every extruder's, if there is no current "
 				"tool), e.g. \"100%\"");
-		f.field("move.babystep", m_babystep, "The Z babystep, e.g. \"0.05 mm\"");
-		f.field("move.speed_text", m_speedText, "The current move's top and requested speeds, e.g. \"0/0 mm/s\"");
-		f.field("move.speed_top",
+		f.field("babystep", m_babystep, "The Z babystep, e.g. \"0.05 mm\"");
+		f.field("speed_text", m_speedText, "The current move's top and requested speeds, e.g. \"0/0 mm/s\"");
+		f.field("speed_top",
 				m_speedTop,
 				"The current move's top speed, in thousandths of the fastest axis' maximum (0-1000), for a gauge");
-		f.field("move.speed_requested",
+		f.field("speed_requested",
 				m_speedRequested,
 				"The current move's requested speed, in thousandths of the fastest axis' maximum (0-1000)");
-		f.field("move.flow_text", m_flowText, "The volumetric flow, e.g. \"0.0 mm³/s\"");
-		f.field("move.flow",
+		f.field("flow_text", m_flowText, "The volumetric flow, e.g. \"0.0 mm³/s\"");
+		f.field("flow",
 				m_flow,
 				"The volumetric flow, in thousandths of the current tool's fastest extruder's maximum (0-1000)");
 	}

@@ -15,7 +15,7 @@ The engine is [helix-xml](https://github.com/AndyEveritt/helix-xml) (`libraries/
 | View | Shows a component in C++: `Xml::XmlView` | [View/XmlView.h](../src/UI/Xml/View/XmlView.h) |
 | Presenter | C++ behaviour for one component: declares subjects and lists, handles actions | [View/XmlPresenter.h](../src/UI/Xml/View/XmlPresenter.h), `src/UI/Presenters/<Name>/` |
 | Data source | Publishes printer data (fans, tools, …) as global subjects and lists | [Data/](../src/UI/Xml/Data) |
-| Subject | A named value a widget binds to (`bind_text="name"`) | [Binding/Subjects.h](../src/UI/Xml/Binding/Subjects.h) |
+| Subject | A named value a widget binds to (`bind_text="presenter.name"`) | [Binding/Subjects.h](../src/UI/Xml/Binding/Subjects.h) |
 | List | A dynamic-length list of rows; each row has its own subjects, and may have lists of its own | [Binding/List.h](../src/UI/Xml/Binding/List.h) |
 | History | A list of named series and their recent values, recorded at a fixed rate, for graphs | [Binding/History.h](../src/UI/Xml/Binding/History.h) |
 | Scope | The names a view can use while it is built: subjects and lists | [Binding/Scope.h](../src/UI/Xml/Binding/Scope.h) |
@@ -107,7 +107,7 @@ Xml::XmlView m_fanView{"fans", parent, "fans"};
 
 An `XmlView` behaves like any other `LvObj`: it works in tabs and navigation, and its presenter is active, and receives Model events, only while it is shown.
 
-A view can also be given a presenter, which then replaces the one the component names. Its fields shadow the globals, so a component can show other data: the theme gallery test shows `dashboard_tools.xml` with made-up `tools`.
+A view can also be given a presenter, which then replaces the one the component names, so a component can show other data.
 
 ```cpp
 Xml::XmlView toolList{"dashboard_tools", parent, "dashboard_tools", std::make_shared<MyTools>()};
@@ -170,10 +170,10 @@ Then add `/boot/ui/my-fans/fan_card.xml`, which here shows the speed as text and
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row">
 		<style name="card"/>
-		<lv_label bind_text="name" flex_grow="1"/>
-		<lv_label bind_text="actual" bind_text-fmt="%d%%"/>
+		<lv_label bind_text="row.name|default:tr.fine_tune.fan" flex_grow="1"/>
+		<lv_label bind_text="row.actualValue|percent" bind_text-fmt="%d%%"/>
 		<ds_button text="50%">
-			<action trigger="clicked" name="actions.gcode.send" arg="M106 P{number} S128"/>
+			<action trigger="clicked" name="actions.gcode.send" arg="M106 P{row.index} S128"/>
 		</ds_button>
 	</view>
 </component>
@@ -187,28 +187,33 @@ Style properties set on a widget use the `style_` prefix, e.g. `style_pad_all="5
 
 ### Names a view can use
 
-A name is looked up from the inside out:
+Every name starts with where it comes from, so a reader knows where to look, and it is only looked for there ([Names.h](../src/UI/Xml/Binding/Names.h)):
 
-1. the row the widget is in (inside a `<ds_list>`), then the row that row is in, and so on
-2. the view's presenter
-3. the globals: data published by the data sources
+| Written | Is |
+| --- | --- |
+| `row.<field>` | the row the widget is in, inside a `<ds_list>` (or a `<ds_scope>`'s item) |
+| `parent.<field>` | the row that row is in (`parent.parent.<field>` the one around that, ...) |
+| `presenter.<field>` | the view's presenter's |
+| `widget.<field>` | the room the widget's place gives it (see [Widgets](#widgets)) |
+| `source.<source>.<field>` | a data source's, published by `src/UI/Xml/Data/<Source>Source.cpp` |
+| `om.<path>` | the printer's object model |
 
-So in a heater row inside a tool card, `name` is the heater's name, `number` is the tool's number (heater rows have no `number`), and `fans` is the global fan list.
+So in a heater row inside a tool card, `row.index` is the heater's position, `parent.number` the tool's number, `presenter.title` the presenter's, and `source.machine.printing` whether the printer is printing. A name without a prefix is found nowhere, and `row.x` is never an outer row's, so nothing is shadowed or picked up by accident; the lint says which prefix a name needs.
 
 The [UI API reference](XML_UI_API.md) lists the names of each kind: the globals by data source, each presenter's, and the fields of every list's rows. Theme styles (`<style name="card"/>`), palette colours and consts (`style_bg_color="#primary"`, `style_radius="#radius"`) and fonts (`font_header`) are listed there too; they all follow theme changes. Translation keys are those in `assets/i18n/*.json`, written `tr.<key>` wherever XML or a widget file names one, so a key can't be mistaken for a subject: `translation_tag="tr.fan.title"` on labels and `ds_button`, the `*_tag` attributes and props, and converter arguments (`name|default:tr.fine_tune.fan`). Literal text (`text="XY"`) is shown as written, never looked up.
 
-A string subject can be compared with `bind_*_if_eq`: the sidebar checks the button of the open page with `<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>`.
+A string subject can be compared with `bind_*_if_eq`: the sidebar checks the button of the open page with `<bind_state_if_eq subject="source.navigation.screen" state="checked" ref_value="control"/>`.
 
 ### Lists
 
 ```xml
-<ds_list list="tools" item="dashboard_tool" flex_flow="column"/>
+<ds_list list="source.tool.tools" item="dashboard_tool" flex_flow="column"/>
 ```
 
-builds one `dashboard_tool` per row of `tools` (see [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml)). Inside `dashboard_tool`, a list belonging to the row is shown the same way:
+builds one `dashboard_tool` per row of `source.tool.tools` (see [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml)). Inside `dashboard_tool`, a list belonging to the row is shown the same way:
 
 ```xml
-<ds_list list="heaters" item="tool_heater_row"/>
+<ds_list list="row.heaters" item="tool_heater_row"/>
 ```
 
 Lists add and remove rows at the end, so existing rows keep their scroll position and in-progress edits when the list changes length.
@@ -216,28 +221,29 @@ Lists add and remove rows at the end, so existing rows keep their scroll positio
 A long list should be windowed: only the rows on screen are built, and rows are built and deleted as it scrolls. Every item then has the same size, set by the list:
 
 ```xml
-<ds_list list="files" item="file_browser_row" windowed="true" item_height="90"/>
-<ds_list list="files" item="file_browser_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
+<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90"/>
+<ds_list list="presenter.files" item="file_browser_tile" windowed="true" item_width="150" item_height="170" flow="row_wrap"/>
 ```
 
-A keyed list shows only the rows whose `key` field is `value`, for a widget about one fan, bed or tool:
+A keyed list shows only the rows whose `key` field (written `row.<field>`) is `value`, for a widget about one fan, bed or tool:
 
 ```xml
-<ds_list list="fans" key="number" value="2" item="fan_card"/>
-<ds_list list="beds" key="number" value="$bed" item="dashboard_heater_card"/>
+<ds_list list="om.fans" key="row.index" value="2" item="fan_card"/>
+<ds_list list="source.heat.beds" key="row.number" value="$bed" item="dashboard_heater_card"/>
 ```
 
-Each item is still a row of the list, so its names and actions work as in the full list. The list watches every row's key, so it follows the data: an item appears when its fan does and goes when it goes, and stays right when the rows are refilled (removing fan 1 moves fan 2 into fan 1's row). Key on the item's number rather than `index`, which is only its position. Any field of the rows can be a key, and every row that matches is shown, so `key="state" value="active"` shows every active heater. A keyed list can't be windowed.
+Each item is still a row of the list, so its names and actions work as in the full list. The list watches every row's key, so it follows the data: an item appears when its fan does and goes when it goes, and stays right when the rows are refilled (removing fan 1 moves fan 2 into fan 1's row). Key on the item's number rather than its position (for an object model list, `row.index` is both). Any field of the rows can be a key, and every row that matches is shown, so `key="row.state" value="active"` shows every active heater. A keyed list can't be windowed.
 
 ### Graphs
 
 A subject holds only the current value. A graph needs the past, so data sources record into a *history*: a list whose rows are series (each with a `name`), and which adds one value to every series at a fixed rate. Sources record whether or not anything shows the history, so a graph built later starts with what came before it.
 
 ```xml
-<ds_graph history="temperatures" seconds="60" y_min="0" y_max="300" bind_y_max="temperatures.limit"/>
+<ds_graph history="source.temperature.temperatures" seconds="60" y_min="0" y_max="300"
+          bind_y_max="source.temperature.limit"/>
 ```
 
-shows the last 60 seconds of every heater (see [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml)). The Y axis runs from `y_min` to `y_max`, or to `bind_y_max`'s value if that is higher. Because a history is a list, `<ds_list list="temperatures" …>` can show its series too.
+shows the last 60 seconds of every heater (see [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml)). The Y axis runs from `y_min` to `y_max`, or to `bind_y_max`'s value if that is higher. Because a history is a list, `<ds_list list="source.temperature.temperatures" …>` can show its series too.
 
 ### DuetScreen widgets
 
@@ -248,7 +254,7 @@ These are in addition to the standard `lv_*` widgets: `ds_button`, `ds_slider`, 
 A dialog is a `<ds_modal>` whose subject says whether it is open, so the presenter opens and closes it by setting a subject and never touches a widget:
 
 ```xml
-<ds_modal name="file_dialog" bind_open="dialog" open_value="start_print" width="70%" height="content">
+<ds_modal name="file_dialog" bind_open="presenter.dialog" open_value="start_print" width="70%" height="content">
     <action trigger="dismissed" name="presenter.files.close_dialog"/>
     …
 </ds_modal>
@@ -257,14 +263,16 @@ A dialog is a `<ds_modal>` whose subject says whether it is open, so the present
 For a plain question, `confirm_dialog.xml` is ready-made, as in the shared question before cancelling the job (`modals/job_cancel.xml`):
 
 ```xml
-<confirm_dialog open="confirm" title_tag="tr.status.print_cancel_title" text_tag="tr.status.print_cancel_message"
-                confirm="job.cancel" close="job.close_cancel"/>
+<confirm_dialog open="presenter.confirm" title_tag="tr.status.print_cancel_title"
+                text_tag="tr.status.print_cancel_message" confirm="presenter.job.cancel"
+                close="presenter.job.close_cancel"/>
 ```
 
 `question_dialog.xml` asks yes or no with a title and text from subjects, over the view it is in:
 
 ```xml
-<question_dialog open="confirm" title="confirm_title" text="confirm_text" confirm="move.confirm" close="move.close_dialog"/>
+<question_dialog open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
+                 confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 ```
 
 A value with - and + and a row of presets, such as the extruder's feed distance, is `value_selector.xml`, backed by a `ValueSelector` the presenter owns ([ValueSelector.h](../src/UI/Xml/View/ValueSelector.h)), which also stores the presets and the value.
@@ -287,7 +295,7 @@ An action's name says where it is: `presenter.<action>` is the presenter of the 
 
 `trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...), `value_confirmed` (an edit finished) or `dismissed` (a `<ds_modal>` was closed by the user).
 
-`arg` may contain placeholders: `{event.value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{number} S{event.value}"`.
+`arg` may contain placeholders: `{event.value}` is the edited value, and any other `{name}` is the current value of that subject, looked up from where the `<action>` is written. In a fan row, `arg="M106 P{row.index} S{event.value}"`.
 
 The global actions, and each presenter's, are listed with what they take in the [reference](XML_UI_API.md#global-actions). Global actions are registered with `Actions::addGlobal()` and, like presenters, last for the life of the program. A group's actions are added in `<Group>Actions.cpp`, so the name says where to look: `actions.heater.toggle` is in [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp), `actions.factors.speed` in [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp), `actions.gcode.send` in [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp); the reference lists each with its file, and a test keeps the rule.
 
@@ -341,7 +349,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
   "size": {"default": [458, 89], "min": [365, 89]},
   "props": {},
   "settings": [
-    {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
+    {"name": "fan", "kind": "row", "list": "om.fans", "key": "row.index", "label": "row.name|default:tr.fine_tune.fan", "default": 0,
      "title_tag": "tr.widget.setting_fan"}
   ]
 }
@@ -358,7 +366,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
 | `bool` | on or off, with a switch | |
 | `text` | text, typed in the settings on the keyboard | `max_length` (default 64) |
 | `choice` | one of `options` (`[{"value": 30, "title": "30 s"}]`, or `title_tag`) | |
-| `row` | a row of a global list, as the printer has them now: which fan, which tool | `list`, `key` (the field stored), `label` (the field shown) |
+| `row` | a row of a global list, as the printer has them now: which fan, which tool | `list`, `key` (the field stored), `label` (the field shown), both `row.<field>` |
 
 The component takes them as props, and uses them as `$name`, or `${name}` inside a longer value:
 
@@ -369,7 +377,7 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 	</api>
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
 		<style name="pad_zero"/>
-		<ds_list list="fans" key="number" value="$fan" item="fan_card" width="100%" height="content"/>
+		<ds_list list="om.fans" key="row.index" value="$fan" item="fan_card" width="100%" height="content"/>
 	</view>
 </component>
 ```
@@ -379,12 +387,12 @@ The component takes them as props, and uses them as `$name`, or `${name}` inside
 
   ```xml
   <!-- The standby target goes when the row is too narrow for it -->
-  <ds_button name="standby" bind_text="standby">
+  <ds_button name="standby" bind_text="row.standby">
       <bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>
   </ds_button>
   ```
 
-  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A free layout measures each widget's rectangle, which only the layout sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. A view that isn't a placed widget, such as a page, has a page's room: the names are globals there, always expanded, so a piece shown both on a page and in a widget (a fan's card, a heater's row) can use them. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
+  The breakpoints are the theme's consts `widget_regular_min` and `widget_expanded_min`, in pixels like its fonts, so XML never compares pixels and a theme with larger fonts moves them all. A free layout measures each widget's rectangle, which only the layout sizes, so nothing a widget does for its size can change it; a strip's widgets size themselves, so they are always regular. A view that isn't a placed widget, such as a page, has a page's room: the same names, always expanded, so a piece shown both on a page and in a widget (a fan's card, a heater's row) can use them. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h).
 - A widget about one of something (a fan, a tool) shows it with a keyed list, so it follows the printer's rows; it shows nothing while the printer has no such one.
 - Printer data is global, so a widget shows it wherever it is placed. A widget may name a presenter, and each placed widget then has one of its own.
 - The lint checks each widget file (its component takes every prop and setting, a `row` setting's list and fields exist, every translation key exists) and each widget's component with its default settings.

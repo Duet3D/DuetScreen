@@ -23,7 +23,7 @@ namespace UI::Xml
 	class JobSource : public DataSource
 	{
 	  public:
-		/** Whether a job control is offered, as `job.*_control` publishes it */
+		/** Whether a job control is offered, as `source.job.*_control` publishes it */
 		enum class Control : int32_t
 		{
 			Hidden = 0,	  // Not shown
@@ -34,7 +34,7 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		JobSource();
 
-		/** Declare `job.*` */
+		/** Declare `source.job.*` */
 		void fields(FieldVisitor& f) override;
 
 		/** Read the current and last jobs */

@@ -5,11 +5,11 @@
  * gives it, as size classes, so a component can fit what it shows to its size.
  *
  *     <!-- The standby target goes when the row is too narrow for it -->
- *     <ds_button name="standby" bind_text="standby">
+ *     <ds_button name="standby" bind_text="row.standby">
  *         <bind_flag_if cond="widget.width_class eq 0" flag="hidden"/>
  *     </ds_button>
  *     <!-- A bigger gauge shows its value in a larger font -->
- *     <lv_label name="value" bind_text="text">
+ *     <lv_label name="value" bind_text="row.text">
  *         <style name="widget_value"/>
  *         <bind_style_if name="widget_value_large" cond="widget.size_class eq 1"/>
  *         <bind_style_if name="widget_value_huge" cond="widget.size_class eq 2"/>
@@ -24,8 +24,8 @@
  * Only a free layout measures its widgets, and it measures the box it gives each, which the layout alone sizes, never
  * the widget's content: so what a widget hides or restyles for its size can't change that size, and the layout can't
  * loop. A strip sizes its widgets by their content, so its widgets are always regular, regular, regular, landscape.
- * A view that isn't a placed widget, such as a page, has a page's room: the same names are globals (WidgetSource.h),
- * always expanded, so a piece shared by a page and a widget can use them.
+ * A view that isn't a placed widget, such as a page, has a page's room: its scope is in page(), whose classes are
+ * always expanded, so a piece shared by a page and a widget can use the same names.
  *
  * Lay a widget out with `%`, `fr` and `flex_grow` first: it must look right at its default and smallest sizes without
  * these. Use them to hide secondary parts, to step a value's font, and for orientation, with `bind_flag_if` and
@@ -79,6 +79,12 @@ namespace UI::Xml
 
 		/** The scope, to be the parent of the placed view's own (see XmlView) */
 		const Scope& getScope() const { return m_scope; }
+
+		/** The room a view that isn't a placed widget has, a page's: every class expanded, landscape */
+		static PlacementScope& page();
+
+		/** Let page() go (at Xml::deinit()); the next call makes it again */
+		static void releasePage();
 
 		/** The class of a length in pixels, by the active theme's breakpoints */
 		static SizeClass classify(int32_t length);

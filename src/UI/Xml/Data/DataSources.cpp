@@ -20,7 +20,6 @@
 #include "ToolSource.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Globals.h"
-#include "WidgetSource.h"
 #include <memory>
 #include <vector>
 
@@ -30,38 +29,56 @@ namespace UI::Xml::DataSources
 	{
 		std::vector<std::shared_ptr<DataSource>> s_sources; // Live sources, between start() and stop()
 
-		/** Publishes the fields it visits as global names */
+		/** Publishes the fields it visits as global names, each after a source's prefix (`source.<name>.`) */
 		class Publisher : public FieldVisitor
 		{
 		  public:
+			/** Publish after `prefix` */
+			explicit Publisher(std::string prefix)
+				: m_prefix(std::move(prefix))
+			{
+			}
+
 			/** Add the subject to the globals */
 			void field(std::string_view name, Subject& subject, std::string_view) override
 			{
-				Globals::add(std::string(name), subject);
+				Globals::add(m_prefix + std::string(name), subject);
 			}
 
 			/** Add the list to the globals */
 			void list(std::string_view name, ListBase& list, std::string_view) override
 			{
-				Globals::add(std::string(name), list);
+				Globals::add(m_prefix + std::string(name), list);
 			}
+
+		  private:
+			std::string m_prefix; // What each name is written after
 		};
 
-		/** Removes the fields it visits from the global names */
+		/** Removes the fields it visits from the global names, each after a source's prefix */
 		class Unpublisher : public FieldVisitor
 		{
 		  public:
+			/** Remove names after `prefix` */
+			explicit Unpublisher(std::string prefix)
+				: m_prefix(std::move(prefix))
+			{
+			}
+
 			/** Remove the subject from the globals */
 			void field(std::string_view name, Subject&, std::string_view) override
 			{
-				Globals::remove(std::string(name));
+				Globals::remove(m_prefix + std::string(name));
 			}
 
 			/** Remove the list from the globals */
 			void list(std::string_view name, ListBase&, std::string_view) override
 			{
-				Globals::remove(std::string(name));
+				Globals::remove(m_prefix + std::string(name));
 			}
+
+		  private:
+			std::string m_prefix; // What each name is written after
 		};
 	} // namespace
 
@@ -89,12 +106,11 @@ namespace UI::Xml::DataSources
 			std::make_shared<ObjectModelSource>(),
 			std::make_shared<ResponseSource>(),
 			std::make_shared<TemperatureSource>(),
-			std::make_shared<WidgetSource>(),
 		};
 
-		Publisher publisher;
 		for (auto& source : s_sources)
 		{
+			Publisher publisher(source->prefix());
 			source->fields(publisher);
 			source->activate();
 			Model::get().bind(source);
@@ -105,11 +121,11 @@ namespace UI::Xml::DataSources
 	void stop()
 	{
 		ZoneScoped;
-		Unpublisher unpublisher;
 		for (auto& source : s_sources)
 		{
 			Model::get().unbind(source);
 			source->deactivate();
+			Unpublisher unpublisher(source->prefix());
 			source->fields(unpublisher);
 		}
 		s_sources.clear();

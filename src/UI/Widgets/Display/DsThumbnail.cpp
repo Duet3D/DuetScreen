@@ -37,7 +37,7 @@ namespace UI::Xml
 						  "An image as tall as its parent's content and as wide as its aspect ratio needs, so a "
 						  "thumbnail beside some text is as large as it can be without making the row taller. With "
 						  "no image it takes no width.",
-					  .example = R"(<ds_thumbnail bind_src="job.thumbnail" height="100%"/>)",
+					  .example = R"(<ds_thumbnail bind_src="source.job.thumbnail" height="100%"/>)",
 					  .attributes = {{"bind_src",
 									  "Follow a text subject holding an image path; empty shows no image",
 									  AttributeKind::Subject}}},

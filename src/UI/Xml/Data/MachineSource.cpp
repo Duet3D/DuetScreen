@@ -18,16 +18,16 @@ namespace UI::Xml
 
 	void MachineSource::fields(FieldVisitor& f)
 	{
-		f.field("machine.status", m_status, "State key, e.g. idle, processing, paused; translated under state.*");
-		f.field("machine.printing",
+		f.field("status", m_status, "State key, e.g. idle, processing, paused; translated under state.*");
+		f.field("printing",
 				m_printing,
 				"1 while a job is running and not paused, else 0: controls that would change the job are disabled");
-		f.field("machine.job_active",
+		f.field("job_active",
 				m_jobActive,
 				"1 while there is a job (running, pausing, paused, resuming or simulating), else 0");
-		f.field("machine.connection", m_connection, "How the screen is connected to the printer, e.g. \"USB\"");
-		f.field("machine.state", m_state, "The printer's state, translated, e.g. \"Idle\"");
-		f.field("machine.summary", m_summary, "The connection and the state, e.g. \"USB - Idle\"");
+		f.field("connection", m_connection, "How the screen is connected to the printer, e.g. \"USB\"");
+		f.field("state", m_state, "The printer's state, translated, e.g. \"Idle\"");
+		f.field("summary", m_summary, "The connection and the state, e.g. \"USB - Idle\"");
 	}
 
 	void MachineSource::onInit()

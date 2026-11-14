@@ -577,6 +577,8 @@
       "console_log_desc": "Die neuesten Antworten des Druckers; tippen öffnet die Konsole",
       "console_command_list": "G-Code-Referenz",
       "console_command_list_desc": "Jeder G-Code mit seiner Wirkung; antippen setzt ihn in die Eingabe der Konsole",
+      "console_input": "Konsoleneingabe",
+      "console_input_desc": "Eine Zeile, um G-Code einzugeben und an den Drucker zu senden",
       "category_console": "Konsole",
       "category_commands": "Befehle",
       "om_value": "Objektmodell-Wert",

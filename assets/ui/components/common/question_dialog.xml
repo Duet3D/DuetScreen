@@ -2,7 +2,7 @@
   A yes-or-no question with a title and text from subjects, over the widget it is written in, open while the
   subject named by `open` is non-zero.
 
-      <question_dialog open="confirm" title="confirm_title" text="confirm_text"
+      <question_dialog open="presenter.confirm" title="presenter.confirm_title" text="presenter.confirm_text"
                        confirm="presenter.move.confirm" close="presenter.move.close_dialog"/>
 
   `confirm` is raised by Yes; `close` by No, or when the question is closed any other way.

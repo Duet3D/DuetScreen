@@ -2,11 +2,10 @@
  * Globals.h
  *
  * Names every view can use, whatever scope it is built in: the printer data published by the data sources (see
- * Data/DataSource.h), e.g. the `jog.distance` subject. They are searched after every scope.
+ * Data/DataSource.h), e.g. the `source.jog.distances` list. They are searched after every scope.
  *
  * The globals can also have a resolver (see Resolver.h), asked after the global names, which gives names on demand:
- * the object model's `om.*` names. After that comes the last chance for a name nobody has: the scopes' resolvers are
- * asked again, innermost first.
+ * the object model's `om.*` names.
  */
 
 #pragma once

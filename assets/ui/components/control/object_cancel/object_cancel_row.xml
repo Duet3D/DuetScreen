@@ -6,10 +6,10 @@
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content">
-		<bind_style name="object_cancel_cancelled" subject="cancelled" ref_value="1"/>
-		<bind_style name="object_cancel_current" subject="current" ref_value="1"/>
+		<bind_style name="object_cancel_cancelled" subject="row.cancelled" ref_value="1"/>
+		<bind_style name="object_cancel_current" subject="row.current" ref_value="1"/>
 		<action trigger="clicked" name="presenter.object_cancel.select"/>
 
-		<lv_label name="label" bind_text="label" width="100%" height="content"/>
+		<lv_label name="label" bind_text="row.label" width="100%" height="content"/>
 	</view>
 </component>

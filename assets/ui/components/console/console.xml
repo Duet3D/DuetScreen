@@ -1,8 +1,8 @@
 <!--
   The console: what was sent and what came back, a G-code reference that narrows as you type
-  (console_command_list.xml), and a line to type G-code into, with the console's own keyboard.
+  (console_command_list.xml), and a line to type G-code into (console_input.xml), with the console's own keyboard.
 
-  The lines are the global console.lines (src/UI/Xml/Data/ConsoleSource.h), recorded even while the console isn't
+  The lines are the global source.console.lines (src/UI/Xml/Data/ConsoleSource.h), recorded even while the console isn't
   showing. Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
 -->
 <component presenter="console">
@@ -14,33 +14,18 @@
 
 			<console_command_list name="command_list"/>
 
-			<ds_list name="output" list="console.lines" item="console_line" follow_end="true" height="100%"
+			<ds_list name="output" list="source.console.lines" item="console_line" follow_end="true" height="100%"
 					 flex_grow="30" flex_flow="column" style_pad_row="0">
 				<style name="card"/>
 			</ds_list>
 		</lv_obj>
 
-		<lv_obj name="input_cont" width="100%" height="content" flex_flow="row"
-				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
-			<style name="no_border"/>
-			<ds_textarea name="input" one_line="true" placeholder_tag="tr.console.input_placeholder" height="content"
-						 flex_grow="1" style_text_align="left" bind_text="input" keyboard="console_keyboard"
-						 keyboard_mode="text_upper" hide_keyboard_on_ready="false" hide_keyboard_on_defocus="false">
-				<action trigger="value_changed" name="presenter.console.input"/>
-				<action trigger="ready" name="presenter.console.send"/>
-			</ds_textarea>
-			<ds_button name="clear" icon="clear.png" width="50" height="50">
-				<action trigger="clicked" name="presenter.console.clear"/>
-			</ds_button>
-			<ds_button name="enter" icon="send.png" width="50" height="50">
-				<action trigger="clicked" name="presenter.console.send"/>
-			</ds_button>
-		</lv_obj>
+		<console_input name="input_cont" keyboard="console_keyboard"/>
 
 		<!-- Developer builds can send to the shell instead -->
 		<lv_checkbox name="shell_toggle" translation_tag="tr.console.shell" ignore_layout="true" align="top_right"
 					 x="-30" y="20">
-			<bind_flag_if_eq subject="shell_available" flag="hidden" ref_value="0"/>
+			<bind_flag_if_eq subject="presenter.shell_available" flag="hidden" ref_value="0"/>
 			<action trigger="value_changed" name="presenter.console.shell"/>
 		</lv_checkbox>
 

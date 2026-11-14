@@ -70,10 +70,6 @@ namespace UI::Xml
 		/** Make `bindings` the running UI's (nullptr: none) */
 		static void setCurrent(OmBindings* bindings);
 
-		/** Whether `path` is a field of the object model: the printer has sent it, or the schema says it can (see
-		 * ObjectModel/Tree/Schema.h) */
-		bool isField(const OM::Path& path) const;
-
 		/** Update everything at, below or above the paths the object model changed since the last flush, then tell
 		 * the watchers of those paths */
 		void flush();
@@ -92,10 +88,14 @@ namespace UI::Xml
 		void unwatch(size_t id);
 
 		/** An `om.` name's subject (see the file comment) */
-		Subject* findSubject(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last) override;
+		Subject* findSubject(const lv_xml_subject_ctx_t* origin,
+							 std::string_view name,
+							 std::string_view written) override;
 
 		/** An `om.` name's list (see the file comment) */
-		ListBase* findList(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last) override;
+		ListBase* findList(const lv_xml_subject_ctx_t* origin,
+						   std::string_view name,
+						   std::string_view written) override;
 
 	  private:
 		/**

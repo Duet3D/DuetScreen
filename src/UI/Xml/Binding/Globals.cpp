@@ -58,17 +58,10 @@ namespace UI::Xml::Globals
 		return s_resolver;
 	}
 
-	/** The engine's global resolver callback: the global resolver, then the last chance (see Globals.h) */
+	/** The engine's global resolver callback: the global resolver (see Globals.h) */
 	static lv_subject_t* resolveCb(const lv_xml_subject_ctx_t* origin, const char* name, void* /* userData */)
 	{
-		if (resolver() != nullptr)
-		{
-			if (Subject* subject = resolver()->findSubject(origin, name, false))
-			{
-				return subject->raw();
-			}
-		}
-		Subject* subject = Scope::lastChanceSubject(origin, name);
+		Subject* subject = resolver() != nullptr ? resolver()->findSubject(origin, name, name) : nullptr;
 		return subject ? subject->raw() : nullptr;
 	}
 
@@ -79,7 +72,7 @@ namespace UI::Xml::Globals
 		{
 			return it->second;
 		}
-		return resolver() ? resolver()->findList(from, name, false) : nullptr;
+		return resolver() ? resolver()->findList(from, name, name) : nullptr;
 	}
 
 	void setResolver(Resolver* newResolver)

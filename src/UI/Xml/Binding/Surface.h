@@ -3,7 +3,7 @@
  *
  * A value over an X/Y area, such as a bed's height map, for <ds_heatmap> to show as a colour map:
  *
- *     <ds_heatmap bind_surface="surface"/>
+ *     <ds_heatmap bind_surface="presenter.surface"/>
  *
  * The values are a grid of samples, so the work of finding them (e.g. interpolating a height map) is done by the
  * presenter, off the UI thread, and the widget only colours them. Sample (i, j), for i < columns and j < rows, is the

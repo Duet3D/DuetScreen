@@ -153,28 +153,27 @@ namespace UI::Xml::Api
 		/** The object model section */
 		void writeObjectModel(std::string& out, const Reference& reference)
 		{
-			out +=
-				"## Object model\n\n"
-				"Every field of the printer's object model has a name, written as RepRapFirmware writes its path "
-				"after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The "
-				"names need no code: a field a newer firmware adds can be used as soon as the printer sends it. "
-				"Every field is listed in [XML_UI_OBJECT_MODEL.md](XML_UI_OBJECT_MODEL.md); see also "
-				"[ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).\n\n"
-				"- A name binds before the printer has sent the field, and follows it: while the field isn't there "
-				"(or is null) its subject holds empty text, or 0.\n"
-				"- An array is a list: `<ds_list list=\"om.heat.heaters\" item=\"…\">` makes a row per item, nulls "
-				"included, so a row's `index` is the item's index (the heater number). Inside a row, the item's "
-				"fields have names relative to it, `current` or `model.pid.p`, found before any other name, and its "
-				"arrays are lists: `<ds_list list=\"heaters\">` in a row of `om.tools`. A name the item doesn't have "
-				"is looked up outside it, so in a row of a tool's `heaters`, `active[{index}]` is the tool's.\n"
-				"- An index can be another subject's value, written `{name}`, which joins one part of the object "
-				"model to another: `om.heat.heaters[{value}].current` in a row of a tool's heaters, or "
-				"`om.tools[{om.state.currentTool}].name`. The name follows when the index changes; nothing is "
-				"rebuilt.\n"
-				"- `<ds_scope path=\"om.…\" item=\"…\">` builds a component whose names are relative to one "
-				"element, as in a list row.\n"
-				"- The name sets what the subject holds: the value as text, or after `|` what a converter makes of "
-				"it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.\n\n";
+			out += "## Object model\n\n"
+				   "Every field of the printer's object model has a name, written as RepRapFirmware writes its path "
+				   "after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The "
+				   "names need no code: a field a newer firmware adds can be used as soon as the printer sends it. "
+				   "Every field is listed in [XML_UI_OBJECT_MODEL.md](XML_UI_OBJECT_MODEL.md); see also "
+				   "[ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).\n\n"
+				   "- A name binds before the printer has sent the field, and follows it: while the field isn't there "
+				   "(or is null) its subject holds empty text, or 0.\n"
+				   "- An array is a list: `<ds_list list=\"om.heat.heaters\" item=\"…\">` makes a row per item, nulls "
+				   "included, so a row's `row.index` is the item's index (the heater number). Inside a row, the item's "
+				   "fields are `row.*`, `row.current` or `row.model.pid.p`, and its arrays are lists: "
+				   "`<ds_list list=\"row.heaters\">` in a row of `om.tools`. The row around it is `parent.*`, so in a "
+				   "row of a tool's `heaters`, `parent.active[{row.index}]` is the tool's target for that heater.\n"
+				   "- An index can be another subject's value, written `{name}`, which joins one part of the object "
+				   "model to another: `om.heat.heaters[{row.value}].current` in a row of a tool's heaters, or "
+				   "`om.tools[{om.state.currentTool}].name`. The name follows when the index changes; nothing is "
+				   "rebuilt.\n"
+				   "- `<ds_scope path=\"om.…\" item=\"…\">` builds a component in a row of one item: its fields are "
+				   "`row.*`, as in a list row.\n"
+				   "- The name sets what the subject holds: the value as text, or after `|` what a converter makes of "
+				   "it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.\n\n";
 			out += "Each row of an object model list:\n\n| Name | Type | Description |\n| --- | --- | --- |\n";
 			for (const auto& field : reference.omRowFields)
 			{
@@ -184,7 +183,8 @@ namespace UI::Xml::Api
 							   field.type,
 							   cell(field.description));
 			}
-			out += "| *a field of the item* | text | e.g. `current`; converters apply, as in `current\\|fixed:1` |\n\n";
+			out += "| `row.`*a field of the item* | text | e.g. `row.current`; converters apply, as in "
+				   "`row.current\\|fixed:1` |\n\n";
 			out += "### Converters\n\n| Converter | Gives | Argument | Description |\n| --- | --- | --- | --- |\n";
 			for (const auto& converter : reference.omConverters)
 			{
@@ -202,16 +202,20 @@ namespace UI::Xml::Api
 		void writeSources(std::string& out, const Reference& reference)
 		{
 			out += "## Global data\n\n"
-				   "Printer data published by the data sources in [src/UI/Xml/Data](../src/UI/Xml/Data). Any view can "
-				   "bind to these. A list is shown with `<ds_list list=\"…\">`; inside each row, the row's own names "
-				   "are found first.\n\n";
+				   "Printer data published by the data sources in [src/UI/Xml/Data](../src/UI/Xml/Data), each source's "
+				   "as `source.<source>.<field>`, from `<Source>Source.cpp`. Any view can bind to these. A list is "
+				   "shown with `<ds_list list=\"…\">`; inside each row, the row's fields are `row.*`.\n\n";
 			for (const auto& source : reference.sources)
 			{
 				if (source.fields.empty())
 				{
 					continue; // e.g. the object model's, whose names are given on demand
 				}
-				fmt::format_to(std::back_inserter(out), "### {:s}\n\n", source.name);
+				fmt::format_to(std::back_inserter(out),
+							   "### {:s}\n\nFrom [{:s}](../{:s}).\n\n",
+							   source.name,
+							   std::filesystem::path(source.file).filename().string(),
+							   source.file);
 				writeFields(out, source.fields);
 			}
 		}
@@ -395,13 +399,14 @@ namespace UI::Xml::Api
 							   items.empty() ? std::string("none") : fmt::format("{:s}", fmt::join(items, "; ")));
 			}
 
-			out += "\n### Placed widgets' names\n\n"
-				   "A placed widget's component can use these as well as its presenter's names and the globals (they "
-				   "are found after its presenter's), to fit what it shows to the room it has, e.g. "
-				   "`<bind_flag_if cond=\"widget.width_class eq 0\" flag=\"hidden\"/>` hides a part when the "
-				   "widget is narrow. The breakpoints are the theme's consts `widget_regular_min` and "
-				   "`widget_expanded_min`. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h) for when to "
-				   "use them.\n\n";
+			out +=
+				"\n### Placed widgets' names\n\n"
+				"A placed widget's component can use these, as well as its presenter's names and the globals, to fit "
+				"what it shows to the room it has; any other view has a page's room, every class expanded. E.g. "
+				"`<bind_flag_if cond=\"widget.width_class eq 0\" flag=\"hidden\"/>` hides a part when the "
+				"widget is narrow. The breakpoints are the theme's consts `widget_regular_min` and "
+				"`widget_expanded_min`. See [PlacementScope.h](../src/UI/Xml/Layout/PlacementScope.h) for when to "
+				"use them.\n\n";
 			writeFields(out, reference.placedFields);
 
 			out +=
@@ -622,8 +627,24 @@ namespace UI::Xml::Api
 			"change the code, run the tests (which rewrite this file when it is out of date) and commit the "
 			"result. -->\n\n"
 			"Every name the firmware provides to XML, for UI API version {:s}. How to write XML with them is "
-			"in [XML_UI.md](XML_UI.md). Translation keys, for `translation_tag`, are those in "
-			"[en-GB.json](../assets/i18n/en-GB.json).\n\n"
+			"in [XML_UI.md](XML_UI.md).\n\n"
+			"Every name starts with where it comes from, so a reader knows where to look "
+			"([Names.h](../src/UI/Xml/Binding/Names.h)), and is only looked for there:\n\n"
+			"| Written | Is | Where |\n| --- | --- | --- |\n"
+			"| `om.<path>` | the printer's object model | [Object model](#object-model) |\n"
+			"| `source.<source>.<field>` | a data source's | [Global data](#global-data), `<Source>Source.cpp` |\n"
+			"| `presenter.<field>` | the presenter of the view the widget is in | [Presenters](#presenters) |\n"
+			"| `row.<field>` | the list row (or `<ds_scope>` item) the widget is in | its list |\n"
+			"| `parent.<field>` | the row around that one (`parent.parent.…` further out) | its list |\n"
+			"| `widget.<field>` | the room the widget's place gives it | [Placed widgets' names]"
+			"(#placed-widgets-names) |\n"
+			"| `tr.<key>` | a translation, in `translation_tag`, the `*_tag` attributes and converter arguments | "
+			"[en-GB.json](../assets/i18n/en-GB.json) |\n"
+			"| `presenter.<action>` | an action of the presenter of an enclosing view | [Presenters](#presenters) "
+			"|\n"
+			"| `actions.<group>.<action>` | a global action, added in `<Group>Actions.cpp` | "
+			"[Global actions](#global-actions) |\n"
+			"| `{{event.value}}` | in an action's `arg`, the edited value | |\n\n"
 			"- [Object model](#object-model)\n"
 			"- [Global data](#global-data)\n"
 			"- [Global actions](#global-actions)\n"

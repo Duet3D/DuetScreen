@@ -6,8 +6,8 @@
  *     <component presenter="fans"> ... </component>
  *
  * When an XmlView builds that component it first creates the presenter, then binds the names the presenter declares
- * in `fields()` into the view's scope, so the view's widgets can bind to them. `<action>`s in the view reach the
- * handlers the presenter registers with `action()`.
+ * in `fields()` into the view's scope as `presenter.<name>`, so the view's widgets can bind to them. `<action>`s in the
+ * view reach the handlers the presenter registers with `action()` as `presenter.<action>`.
  *
  * A presenter writes subjects and handles actions. It never sees a widget, which keeps logic out of the XML and lets
  * users restyle or restructure a view freely. Model events are subscribed in `onInit()` as for every other presenter

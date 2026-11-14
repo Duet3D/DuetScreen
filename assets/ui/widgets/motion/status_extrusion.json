@@ -8,7 +8,7 @@
     "status_bar"
   ],
   "props": {
-    "value": "move.extrusion_factor",
+    "value": "source.move.extrusion_factor",
     "action": "actions.factors.extrusion"
   }
 }

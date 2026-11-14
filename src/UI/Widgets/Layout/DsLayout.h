@@ -5,8 +5,9 @@
  * attributes are in registerXml().
  *
  * Each placed widget is an XmlView of the widget's component, with the widget's props and settings as the component's
- * props, so a widget with a presenter has one of its own. Its names are its presenter's, then its PlacementScope's (the
- * size classes of its place in a free layout, see UI/Xml/Layout/PlacementScope.h), then the globals. A free layout
+ * props, so a widget with a presenter has one of its own. Its names are its presenter's (`presenter.*`), its
+ * PlacementScope's (`widget.*`: the size classes of its place in a free layout, see UI/Xml/Layout/PlacementScope.h),
+ * and the globals. A free layout
  * puts each widget at its rectangle, scaled if the ds_layout's content area isn't the size the layout was made for; a
  * strip leaves the ds_layout's own layout (e.g. `flex_flow="column"`) to place them in order.
  *

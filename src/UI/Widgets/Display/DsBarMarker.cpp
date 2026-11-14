@@ -53,9 +53,9 @@ namespace UI::Xml
 				 "`clicked`; a drag doesn't raise `clicked`.",
 			 .example =
 				 R"(<lv_obj width="400" height="100" scrollable="false">
-	<ds_bar name="current" bind_value="current_value" bind_min="scale_min" bind_max="scale_max"
+	<ds_bar name="current" bind_value="presenter.current_value" bind_min="presenter.scale_min" bind_max="presenter.scale_max"
 			width="100%" height="15" align="center"/>
-	<ds_bar_marker name="target" bar="current" bind_value="active" bind_min="scale_min" bind_max="scale_max"
+	<ds_bar_marker name="target" bar="current" bind_value="presenter.active" bind_min="presenter.scale_min" bind_max="presenter.scale_max"
 				   label_format="{} °C" align="left_mid" y="-30">
 		<style name="input"/>
 		<action trigger="clicked" name="actions.heater.set_active"/>
@@ -71,10 +71,10 @@ namespace UI::Xml
 							{"bind_max", "Follow an int subject for the top of the scale", AttributeKind::Subject},
 							{"bind_value", "Follow an int subject for the value marked", AttributeKind::Subject},
 							{"label_format", "fmt format for the value's text (default \"{}\")"}},
-			 .exampleSubjects = {{"current_value", "int", "180"},
-								 {"active", "int", "210"},
-								 {"scale_min", "int", "0"},
-								 {"scale_max", "int", "300"}}},
+			 .exampleSubjects = {{"presenter.current_value", "int", "180"},
+								 {"presenter.active", "int", "210"},
+								 {"presenter.scale_min", "int", "0"},
+								 {"presenter.scale_max", "int", "300"}}},
 			xmlCreate,
 			xmlApply);
 	}

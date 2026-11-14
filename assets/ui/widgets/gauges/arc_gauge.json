@@ -21,9 +21,9 @@
     {
       "name": "source",
       "kind": "row",
-      "list": "gauges",
-      "key": "id",
-      "label": "name",
+      "list": "source.gauge.gauges",
+      "key": "row.id",
+      "label": "row.name",
       "default": "tool.0.0",
       "title_tag": "tr.widget.setting_source"
     }

@@ -3,8 +3,8 @@
   coloured by its heater's state, and a detail (the target, or the heater's state) below. In a tall, narrow place the
   name goes above the value, and the bar stands up (LVGL draws a bar taller than it is wide upright).
 
-  Fields:   a gauges row: name, value, min, max, target, state, detail (src/UI/Xml/Data/GaugeSource.h)
-  Actions:  gauges.edit
+  Fields:   a source.gauge.gauges row: row.name, row.value, row.min, row.max, row.target, row.state, row.detail (src/UI/Xml/Data/GaugeSource.h)
+  Actions:  actions.gauge.edit
 -->
 <component>
 	<styles>
@@ -28,7 +28,7 @@
 			<!-- Too narrow for the name beside the value: one above the other -->
 			<bind_style_if name="gauge_bar_beside" cond="not widget.portrait"/>
 			<bind_style_if name="gauge_bar_stacked" cond="widget.portrait"/>
-			<lv_label name="title" bind_text="name" long_mode="scroll_circular" clickable="false">
+			<lv_label name="title" bind_text="row.name" long_mode="scroll_circular" clickable="false">
 				<style name="widget_title"/>
 				<bind_style_if name="gauge_bar_title_beside" cond="not widget.portrait"/>
 				<bind_style_if name="gauge_bar_title_stacked" cond="widget.portrait"/>
@@ -38,24 +38,24 @@
 
 		<lv_obj name="track" width="100%" flex_grow="1" style_min_height="12" scrollable="false" clickable="false">
 			<style name="pad_zero"/>
-			<ds_bar name="target" bind_value="target" bind_min="min" bind_max="max" label_format="" width="100%"
+			<ds_bar name="target" bind_value="row.target" bind_min="row.min" bind_max="row.max" label_format="" width="100%"
 					height="100%">
 				<style name="gauge_bar"/>
 				<style name="gauge_bar_indic" selector="indicator"/>
 				<style name="gauge_bar_target" selector="indicator"/>
-				<bind_style_if_eq name="gauge_standby_target" subject="state" ref_value="standby" selector="indicator"/>
+				<bind_style_if_eq name="gauge_standby_target" subject="row.state" ref_value="standby" selector="indicator"/>
 			</ds_bar>
 			<!-- Over the target, with no track of its own -->
-			<ds_bar name="value" bind_value="value" bind_min="min" bind_max="max" label_format="" width="100%"
+			<ds_bar name="value" bind_value="row.value" bind_min="row.min" bind_max="row.max" label_format="" width="100%"
 					height="100%" style_bg_opa="0">
 				<style name="gauge_bar_indic" selector="indicator"/>
-				<bind_style_if_eq name="gauge_standby" subject="state" ref_value="standby" selector="indicator"/>
-				<bind_style_if_eq name="gauge_off" subject="state" ref_value="off" selector="indicator"/>
-				<bind_style_if_eq name="gauge_fault" subject="state" ref_value="fault" selector="indicator"/>
+				<bind_style_if_eq name="gauge_standby" subject="row.state" ref_value="standby" selector="indicator"/>
+				<bind_style_if_eq name="gauge_off" subject="row.state" ref_value="off" selector="indicator"/>
+				<bind_style_if_eq name="gauge_fault" subject="row.state" ref_value="fault" selector="indicator"/>
 			</ds_bar>
 		</lv_obj>
 
-		<lv_label name="detail" bind_text="detail" width="100%" long_mode="scroll_circular" clickable="false">
+		<lv_label name="detail" bind_text="row.detail" width="100%" long_mode="scroll_circular" clickable="false">
 			<style name="widget_detail"/>
 		</lv_label>
 	</view>

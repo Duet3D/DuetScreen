@@ -8,7 +8,7 @@
     "status_bar"
   ],
   "props": {
-    "value": "move.speed_factor",
+    "value": "source.move.speed_factor",
     "action": "actions.factors.speed"
   }
 }

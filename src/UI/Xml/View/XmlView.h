@@ -5,8 +5,8 @@
  * drawer). The component's root widget *is* this LvObj's root, so the widget tree has the same shape as a C++ view's.
  *
  * The view owns the component's presenter (if it names one, or the one it is given) and a top-level scope holding the
- * presenter's fields. Giving a view a presenter lets C++ show a component with data of its own: the presenter's
- * fields shadow the globals, so e.g. dashboard_tools.xml can show a presenter's `tools` list instead of the printer's.
+ * presenter's fields, as `presenter.*` (see Binding/Names.h). Giving a view a presenter by name lets C++ show one
+ * component with different data in different places, e.g. the file browser's jobs and macros.
  * Like a C++ View, it activates the presenter and connects it to the Model while shown, and disconnects it while
  * hidden.
  *
@@ -15,8 +15,8 @@
  * as a placeholder saying so; wrap it in an `lv_obj`.
  *
  * A view can be given props, the values of the component's `<api><prop>`s, e.g. the settings of a widget placed by
- * `<ds_layout>`, and an outer scope, whose names are found after the presenter's and before the globals, e.g. a placed
- * widget's size (see UI/Xml/Layout/PlacementScope.h).
+ * `<ds_layout>`, and an outer scope, whose names are found after the presenter's and before the globals: a placed
+ * widget's size (see UI/Xml/Layout/PlacementScope.h). Without one, a view has a page's room (PlacementScope::page()).
  */
 
 #pragma once
@@ -59,7 +59,7 @@ namespace UI::Xml
 			bool presenterGiven = false;			 // The presenter was given, not named by the component
 			std::unique_ptr<Scope> scope;			 // Names the component's widgets bind to
 			std::map<std::string, std::string> props; // Values of the component's props
-			const Scope* outer = nullptr;			  // Searched after the presenter's names; nullptr for none
+			const Scope* outer = nullptr;			  // Searched after the presenter's names; nullptr for a page's room
 		};
 	} // namespace detail
 

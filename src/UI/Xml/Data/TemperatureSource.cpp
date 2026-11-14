@@ -19,7 +19,7 @@ namespace UI::Xml
 	} // namespace
 
 	TemperatureSource::TemperatureSource()
-		: DataSource("temperatures")
+		: DataSource("temperature")
 		, m_history(MODEL_TICK_HZ, HISTORY_SECONDS * MODEL_TICK_HZ)
 	{
 	}
@@ -30,7 +30,7 @@ namespace UI::Xml
 			   m_history,
 			   "One series per heater, in slot order, sampled every model tick, whole °C. Heaters sharing a sensor are "
 			   "shown once.");
-		f.field("temperatures.limit",
+		f.field("limit",
 				m_limit,
 				"Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis");
 	}

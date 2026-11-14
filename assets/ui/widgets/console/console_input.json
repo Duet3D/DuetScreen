@@ -1,0 +1,20 @@
+{
+  "component": "console_input",
+  "title_tag": "tr.widget.console_input",
+  "description_tag": "tr.widget.console_input_desc",
+  "category_tag": "tr.widget.category_console",
+  "icon": "console.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      300,
+      100
+    ],
+    "min": [
+      200,
+      60
+    ]
+  }
+}

@@ -24,7 +24,7 @@
 				   style_min_width="content" long_mode="clip" flash_on="$flash">
 			<style name="sidebar_btn"/>
 			<style name="console_btn_anim" selector="user_1"/>
-			<bind_state_if_eq subject="nav.screen" state="checked" ref_value="$page"/>
+			<bind_state_if_eq subject="source.navigation.screen" state="checked" ref_value="$page"/>
 			<action trigger="clicked" name="$action" arg="$page"/>
 		</ds_button>
 	</view>

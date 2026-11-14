@@ -58,7 +58,7 @@ namespace UI::Xml
 							"so the presenter can update the subject; closing it by its subject raises nothing. The "
 							"content is laid out in the dialog's card, which the lv_obj attributes apply to. Unless "
 							"`in_place`, it is deleted with the widget it was written in.",
-			 .example = R"(<ds_modal name="file_dialog" bind_open="dialog" width="70%" height="content">
+			 .example = R"(<ds_modal name="file_dialog" bind_open="presenter.dialog" width="70%" height="content">
 	<action trigger="dismissed" name="presenter.files.close_dialog"/>
 	…the dialog's content…
 </ds_modal>)",

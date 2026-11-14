@@ -41,8 +41,8 @@ class TestValueSelector : public UiTestSuite
 		lv_xml_register_component_from_data("test_value_selector", R"(
 			<component>
 				<view extends="lv_obj" style_pad_all="0">
-					<value_selector name="selector" selector="test" title="test.title" value="test.value"
-									choices="test.choices" width="100%" height="100%"/>
+					<value_selector name="selector" selector="test" title="presenter.test.title" value="presenter.test.value"
+									choices="presenter.test.choices" width="100%" height="100%"/>
 				</view>
 			</component>)");
 	}

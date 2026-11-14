@@ -63,7 +63,7 @@ namespace UI::Xml
 				 "written by `bind_text` is not an edit and raises nothing, so a handler can store each edit in the "
 				 "subject the box shows.",
 			 .example =
-				 R"(<ds_textarea name="input" one_line="true" bind_text="alert.input" bind_keyboard_mode="alert.keyboard_mode"
+				 R"(<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" bind_keyboard_mode="presenter.alert.keyboard_mode"
 			 width="300">
 	<action trigger="value_changed" name="presenter.alert.input"/>
 </ds_textarea>)",
@@ -92,7 +92,8 @@ namespace UI::Xml
 				  {"placeholder_tag",
 				   "Translation key for the placeholder, instead of `placeholder`",
 				   AttributeKind::Translation}},
-			 .exampleSubjects = {{"alert.input", "string", "M115"}, {"alert.keyboard_mode", "string", "text"}}},
+			 .exampleSubjects = {{"presenter.alert.input", "string", "M115"},
+								 {"presenter.alert.keyboard_mode", "string", "text"}}},
 			xmlCreate,
 			xmlApply);
 	}

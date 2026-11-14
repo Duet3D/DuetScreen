@@ -1,12 +1,12 @@
 <!--
   One saved layout in the list: its name, a button to load it and one to delete it (which asks first).
 
-  Fields:   a saved row: name (src/UI/Presenters/Customise/CustomisePresenter.h)
+  Fields:   a saved row: row.name (src/UI/Presenters/Customise/CustomisePresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
 		<style name="card"/>
-		<lv_label name="name" bind_text="name" flex_grow="1" long_mode="dots"/>
+		<lv_label name="name" bind_text="row.name" flex_grow="1" long_mode="dots"/>
 		<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
 			<style name="action_btn"/>
 			<action trigger="clicked" name="presenter.customise.load_saved"/>

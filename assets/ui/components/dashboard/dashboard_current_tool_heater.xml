@@ -1,20 +1,21 @@
 <!--
   One heater of a tool from the object model: its sensor's name, its temperature, the tool's target for it and its
   state. The row is one of the tool's heater numbers, so the heater's fields are read through it
-  (`om.heat.heaters[{value}]`), its sensor's through the heater's `sensor`, and the tool's target is the tool's
-  `active` entry at the row's index. Labels move to the next line, whole, when the widget is narrow.
+  (`om.heat.heaters[{row.value}]`), its sensor's through the heater's `sensor`, and the tool's target is the tool's
+  `active` entry at the row's index (`parent.active[{row.index}]`). Labels move to the next line, whole, when the
+  widget is narrow.
 
-  Fields:   a row of an object model array: value (the heater number), index; the tool's `active` (outer scope)
+  Fields:   a row of an object model array: row.value (the heater number), row.index; the tool's parent.active
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row_wrap" style_flex_main_place="space_between"
 		  style_flex_cross_place="center" style_flex_track_place="start">
 		<style name="tool_list_heater"/>
-		<lv_label name="heater" bind_text="om.sensors.analog[{om.heat.heaters[{value}].sensor}].name" width="content"
+		<lv_label name="heater" bind_text="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name" width="content"
 				  style_max_width="100%" long_mode="dots"/>
-		<lv_label name="current" bind_text="om.heat.heaters[{value}].current|fixed:1" bind_text-fmt="%s°C"
+		<lv_label name="current" bind_text="om.heat.heaters[{row.value}].current|fixed:1" bind_text-fmt="%s°C"
 				  width="content"/>
-		<lv_label name="active" bind_text="active[{index}]|int" bind_text-fmt="%d°C" width="content"/>
-		<lv_label name="state" bind_text="om.heat.heaters[{value}].state|translate:tr.temperature.status" width="content"/>
+		<lv_label name="active" bind_text="parent.active[{row.index}]|int" bind_text-fmt="%d°C" width="content"/>
+		<lv_label name="state" bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status" width="content"/>
 	</view>
 </component>

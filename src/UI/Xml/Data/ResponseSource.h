@@ -2,7 +2,7 @@
  * ResponseSource.h
  *
  * Publishes that the printer replied, so a control can draw attention to the console, e.g.
- * `<ds_button flash_on="responses.count"/>`
+ * `<ds_button flash_on="source.response.count"/>`
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -23,7 +23,7 @@ namespace UI::Xml
 		/** Create the source. Nothing is published until DataSources::start(). */
 		ResponseSource();
 
-		/** Declare `responses.count` */
+		/** Declare `responses` and `count` (`source.response.*`) */
 		void fields(FieldVisitor& f) override;
 
 		/** Nothing to re-read: responses are events */

@@ -6,6 +6,7 @@
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Binding/Fields.h"
+#include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/View/Actions.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 #include <algorithm>
@@ -106,11 +107,11 @@ namespace UI::Xml
 				 "ignored), with its style_pad_row and style_pad_column as the gaps. With `key` and `value`, only the "
 				 "rows whose `key` field is `value` are shown, e.g. one fan.",
 			 .example =
-				 R"(<ds_list list="files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
+				 R"(<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
 			 .attributes =
 				 {{"list",
-				   "The list shown (required), looked up like a subject: the enclosing rows first (so a tool card can "
-				   "show `list=\"heaters\"`), then the view's presenter, then the globals",
+				   "The list shown (required), named like a subject: e.g. `presenter.files`, `source.gauge.gauges`, "
+				   "`om.fans`, or in a tool's row, its `row.heaters`",
 				   AttributeKind::List},
 				  {"item", "The component built for each row (required)", AttributeKind::Component},
 				  {"windowed",
@@ -126,11 +127,11 @@ namespace UI::Xml
 				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
 				   "unless the user has scrolled back (default false)"},
 				  {"key",
-				   "A field of the rows: only the rows whose `key` is `value` are shown, as the data changes. Not "
-				   "with `windowed`."},
+				   "A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the "
+				   "data changes. Not with `windowed`."},
 				  {"value",
 				   "With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, "
-				   "e.g. `<ds_list list=\"fans\" key=\"number\" value=\"2\" item=\"…\"/>` shows fan 2"}}},
+				   "e.g. `<ds_list list=\"om.fans\" key=\"row.index\" value=\"2\" item=\"…\"/>` shows fan 2"}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -234,16 +235,26 @@ namespace UI::Xml
 				LOG_WARN("<ds_list list=\"{:s}\">: a keyed list can't be windowed", listName);
 				return;
 			}
+			// A field of the rows, written `row.<field>`
+			const auto field = Names::after(keyField, Names::ROW);
+			if (!field)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\" key=\"{:s}\">: a key is a field of the rows, written {:s}<field>",
+						 listName,
+						 keyField,
+						 Names::ROW);
+				return;
+			}
 			// Checked on the list's example row, so even an empty list reports a bad key. Only whether the field
 			// was found is used: the example row is gone once rowFields() returns.
-			FieldFinder finder(keyField);
+			FieldFinder finder(*field);
 			list->rowFields(finder);
 			if (finder.foundSubject == nullptr)
 			{
 				LOG_WARN("<ds_list list=\"{:s}\" key=\"{:s}\">: the rows have no such field", listName, keyField);
 				return;
 			}
-			key = Key{.field = keyField, .value = keyValue};
+			key = Key{.field = std::string(*field), .value = keyValue};
 		}
 
 		lv_obj_t* container = itemOf(state);
@@ -292,8 +303,8 @@ namespace UI::Xml
 	{
 		ZoneScoped;
 		Row& row = m_list->row(index);
-		auto scope = std::make_unique<Scope>(m_parentContext);
-		ScopeBinder binder(*scope);
+		auto scope = std::make_unique<Scope>(m_parentContext, Scope::Kind::row);
+		ScopeBinder binder(*scope, Names::ROW);
 		row.allFields(binder);
 
 		const std::string name = std::to_string(index);

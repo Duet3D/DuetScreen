@@ -5,15 +5,27 @@
 #include "Scope.h"
 #include "Globals.h"
 #include "List.h"
+#include "Names.h"
 #include "Resolver.h"
 #include "Subjects.h"
 
 namespace UI::Xml
 {
-	Scope::Scope(lv_xml_subject_ctx_t* parent)
-		: m_ctx(lv_xml_subject_ctx_create(parent))
+	Scope::Scope(lv_xml_subject_ctx_t* parent, Kind kind)
+		: m_ctx(lv_xml_subject_ctx_create(kind == Kind::row ? pastRows(parent) : parent))
+		, m_kind(kind)
 	{
 		lv_xml_subject_ctx_set_user_data(m_ctx, this);
+		if (m_kind == Kind::row)
+		{
+			m_parentRow = rowOf(parent);
+			if (m_parentRow != nullptr)
+			{
+				lv_xml_subject_ctx_ref(m_parentRow);
+			}
+			// A row answers `parent.*` names, with or without a resolver of its own
+			lv_xml_subject_ctx_set_resolver(m_ctx, resolveCb, this);
+		}
 	}
 
 	Scope::~Scope()
@@ -22,11 +34,16 @@ namespace UI::Xml
 		lv_xml_subject_ctx_set_user_data(m_ctx, nullptr);
 		lv_xml_subject_ctx_set_resolver(m_ctx, nullptr, nullptr);
 		lv_xml_subject_ctx_delete(m_ctx);
+		if (m_parentRow != nullptr)
+		{
+			lv_xml_subject_ctx_unref(m_parentRow);
+		}
 	}
 
 	void Scope::add(const std::string& name, Subject& subject)
 	{
 		lv_xml_subject_ctx_add(m_ctx, name.c_str(), subject.raw());
+		m_subjects[name] = &subject;
 	}
 
 	void Scope::add(const std::string& name, ListBase& list)
@@ -34,10 +51,14 @@ namespace UI::Xml
 		m_lists[name] = &list;
 	}
 
-	void Scope::setResolver(Resolver* resolver)
+	void Scope::setResolver(Resolver* resolver, std::string prefix)
 	{
 		m_resolver = resolver;
-		lv_xml_subject_ctx_set_resolver(m_ctx, resolver ? resolveCb : nullptr, this);
+		m_resolverPrefix = std::move(prefix);
+		if (m_kind != Kind::row)
+		{
+			lv_xml_subject_ctx_set_resolver(m_ctx, resolver ? resolveCb : nullptr, this);
+		}
 	}
 
 	Subject& Scope::keep(std::string key, std::unique_ptr<Subject> subject)
@@ -82,53 +103,101 @@ namespace UI::Xml
 	{
 		for (const lv_xml_subject_ctx_t* ctx = from; ctx != nullptr; ctx = lv_xml_subject_ctx_get_parent(ctx))
 		{
-			const Scope* scope = fromContext(ctx);
-			if (scope == nullptr)
+			if (const Scope* scope = fromContext(ctx))
 			{
-				continue;
-			}
-			auto it = scope->m_lists.find(name);
-			if (it != scope->m_lists.end())
-			{
-				return it->second;
-			}
-			if (scope->m_resolver != nullptr)
-			{
-				if (ListBase* list = scope->m_resolver->findList(from, name, false))
+				if (ListBase* list = scope->findListHere(from, name, name))
 				{
 					return list;
 				}
 			}
 		}
-		if (ListBase* list = Globals::findList(from, name))
+		return Globals::findList(from, name);
+	}
+
+	Subject* Scope::findHere(const lv_xml_subject_ctx_t* origin, std::string_view name, std::string_view written) const
+	{
+		if (m_kind == Kind::row)
 		{
-			return list;
-		}
-		for (const lv_xml_subject_ctx_t* ctx = from; ctx != nullptr; ctx = lv_xml_subject_ctx_get_parent(ctx))
-		{
-			const Scope* scope = fromContext(ctx);
-			if (scope != nullptr && scope->m_resolver != nullptr)
+			if (const auto outer = Names::after(name, Names::PARENT))
 			{
-				if (ListBase* list = scope->m_resolver->findList(from, name, true))
-				{
-					return list;
-				}
+				// `parent.x` is the row around this one's `row.x`; `parent.parent.x` its `parent.x`
+				const Scope* row = parentRow();
+				const std::string there = outer->starts_with(Names::PARENT)
+											  ? std::string(*outer)
+											  : std::string(Names::ROW) + std::string(*outer);
+				return row ? row->findHere(origin, there, written) : nullptr;
+			}
+		}
+		if (const auto it = m_subjects.find(name); it != m_subjects.end())
+		{
+			return it->second;
+		}
+		if (m_resolver != nullptr)
+		{
+			if (const auto rest = Names::after(name, m_resolverPrefix))
+			{
+				return m_resolver->findSubject(origin, *rest, written);
 			}
 		}
 		return nullptr;
 	}
 
-	Subject* Scope::lastChanceSubject(const lv_xml_subject_ctx_t* from, std::string_view name)
+	ListBase* Scope::findListHere(const lv_xml_subject_ctx_t* origin,
+								  std::string_view name,
+								  std::string_view written) const
 	{
-		for (const lv_xml_subject_ctx_t* ctx = from; ctx != nullptr; ctx = lv_xml_subject_ctx_get_parent(ctx))
+		if (m_kind == Kind::row)
+		{
+			if (const auto outer = Names::after(name, Names::PARENT))
+			{
+				const Scope* row = parentRow();
+				const std::string there = outer->starts_with(Names::PARENT)
+											  ? std::string(*outer)
+											  : std::string(Names::ROW) + std::string(*outer);
+				return row ? row->findListHere(origin, there, written) : nullptr;
+			}
+		}
+		if (const auto it = m_lists.find(name); it != m_lists.end())
+		{
+			return it->second;
+		}
+		if (m_resolver != nullptr)
+		{
+			if (const auto rest = Names::after(name, m_resolverPrefix))
+			{
+				return m_resolver->findList(origin, *rest, written);
+			}
+		}
+		return nullptr;
+	}
+
+	const Scope* Scope::parentRow() const
+	{
+		return m_parentRow != nullptr ? fromContext(m_parentRow) : nullptr;
+	}
+
+	lv_xml_subject_ctx_t* Scope::pastRows(lv_xml_subject_ctx_t* ctx)
+	{
+		while (ctx != nullptr)
 		{
 			const Scope* scope = fromContext(ctx);
-			if (scope != nullptr && scope->m_resolver != nullptr)
+			if (scope == nullptr || scope->m_kind != Kind::row)
 			{
-				if (Subject* subject = scope->m_resolver->findSubject(from, name, true))
-				{
-					return subject;
-				}
+				break;
+			}
+			ctx = lv_xml_subject_ctx_get_parent(ctx);
+		}
+		return ctx;
+	}
+
+	lv_xml_subject_ctx_t* Scope::rowOf(lv_xml_subject_ctx_t* ctx)
+	{
+		for (; ctx != nullptr; ctx = lv_xml_subject_ctx_get_parent(ctx))
+		{
+			const Scope* scope = fromContext(ctx);
+			if (scope != nullptr && scope->m_kind == Kind::row)
+			{
+				return ctx;
 			}
 		}
 		return nullptr;
@@ -137,11 +206,7 @@ namespace UI::Xml
 	lv_subject_t* Scope::resolveCb(const lv_xml_subject_ctx_t* origin, const char* name, void* userData)
 	{
 		const auto* scope = static_cast<const Scope*>(userData);
-		if (scope->m_resolver == nullptr)
-		{
-			return nullptr;
-		}
-		Subject* subject = scope->m_resolver->findSubject(origin, name, false);
+		Subject* subject = scope->findHere(origin, name, name);
 		return subject ? subject->raw() : nullptr;
 	}
 

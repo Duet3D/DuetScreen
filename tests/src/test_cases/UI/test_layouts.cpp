@@ -136,7 +136,7 @@ TEST_F(TestLayouts, WidgetFileGivesTheWidgetAndItsSettings)
 		"size": {"default": [300, 200], "min": [200, 100], "max": [500, 300]},
 		"props": {"style": "card", "big": true},
 		"settings": [
-			{"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0},
+			{"name": "fan", "kind": "row", "list": "om.fans", "key": "row.index", "label": "row.name", "default": 0},
 			{"name": "seconds", "kind": "choice", "default": 60,
 			 "options": [{"value": 30, "title": "30 s"}, {"value": 60, "title_tag": "tr.time.minute"}]}
 		]})");
@@ -150,7 +150,8 @@ TEST_F(TestLayouts, WidgetFileGivesTheWidgetAndItsSettings)
 	EXPECT_EQ(def.maxSize, (Size{500, 300}));
 	ASSERT_EQ(def.settings.size(), 2u);
 	EXPECT_EQ(def.settings[0].kind, SettingKind::Row);
-	EXPECT_EQ(def.settings[0].list, "fans");
+	EXPECT_EQ(def.settings[0].list, "om.fans");
+	EXPECT_EQ(def.settings[0].key, "index") << "kept without its row.";
 	EXPECT_EQ(def.settings[1].options[1].value, "60");
 	EXPECT_EQ(def.settings[1].fallback, "60");
 
@@ -177,6 +178,12 @@ TEST_F(TestLayouts, InvalidWidgetFilesSayWhatIsWrong)
 			  "setting \"x\": the default isn't one of its values");
 	EXPECT_EQ(widgetError(R"({"slots": ["d"], "settings": [{"name": "x", "kind": "row", "default": 0}]})"),
 			  "setting \"x\": a row setting needs \"list\" and \"key\"");
+	EXPECT_EQ(
+		widgetError(R"({"slots": ["d"], "settings": [{"name": "x", "kind": "row", "list": "om.fans", "key": "index",
+		"default": 0}]})"),
+		"\"key\" is a field of the rows, written row.<field>");
+	EXPECT_EQ(widgetError(R"({"slots": ["d"], "title_tag": "widget.fan"})"),
+			  "\"title_tag\" is a translation key, written tr.<key>");
 	EXPECT_EQ(
 		widgetError(
 			R"({"slots": ["d"], "props": {"x": 1}, "settings": [{"name": "x", "kind": "bool", "default": false}]})"),

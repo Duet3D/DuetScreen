@@ -3,7 +3,7 @@
  *
  * Behaviour for the Move tab (assets/ui/components/control/move/move.xml) and its pieces placed as widgets: jog and
  * home each axis, set an axis' position and disable the motors. A jog goes as far and as fast as chosen in the global
- * jog.* (src/UI/Xml/Data/JogSource.h), which every view shares.
+ * source.jog.* (src/UI/Xml/Data/JogSource.h), which every view shares.
  *
  * Every control's `*_usable` field already allows for the printer being disconnected or busy, so the view only binds.
  *

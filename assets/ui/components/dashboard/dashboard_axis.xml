@@ -1,15 +1,15 @@
 <!--
   One axis' position in the job status panel: its letter above its position.
 
-  Fields:   a row of om.move.axes: letter, userPosition, exists
+  Fields:   a row of om.move.axes: row.letter, row.userPosition, row.exists
 -->
 <component>
 	<view extends="lv_obj" width="content" height="content" flex_grow="1" style_min_width="content" scrollable="false"
 		  flex_flow="column">
 		<style name="bg_light"/>
 		<style name="pad_zero"/>
-		<bind_flag_if_eq subject="exists" ref_value="0" flag="hidden"/>
-		<lv_label bind_text="letter" width="100%" style_text_align="center"/>
-		<lv_label bind_text="userPosition|fixed:2" width="100%" style_text_align="center"/>
+		<bind_flag_if_eq subject="row.exists" ref_value="0" flag="hidden"/>
+		<lv_label bind_text="row.letter" width="100%" style_text_align="center"/>
+		<lv_label bind_text="row.userPosition|fixed:2" width="100%" style_text_align="center"/>
 	</view>
 </component>

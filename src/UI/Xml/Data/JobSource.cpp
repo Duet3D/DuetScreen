@@ -23,28 +23,29 @@ namespace UI::Xml
 
 	void JobSource::fields(FieldVisitor& f)
 	{
-		f.field("job.latest_file",
+		f.field("latest_file",
 				m_latest,
 				"The latest job's file: the current job's, or the last job's when it has finished");
-		f.field("job.finished", m_finished, "1 when the latest job is the last one, finished, else 0");
-		f.field("job.thumbnail", m_thumbnail, "The latest job's thumbnail path, or empty until it arrives");
-		f.field("job.progress",
+		f.field("finished", m_finished, "1 when the latest job is the last one, finished, else 0");
+		f.field("thumbnail", m_thumbnail, "The latest job's thumbnail path, or empty until it arrives");
+		f.field("progress",
 				m_progress,
 				"The current job's progress, percent 0-100, through the file or the expected time as set in the "
 				"settings");
-		f.field("job.elapsed", m_elapsed, "How long the current job has been running, e.g. \"00:03:43\"");
-		f.field("job.remaining", m_remaining, "The current job's expected time left, e.g. \"00:45:03\"");
-		f.field(
-			"job.elapsed_text", m_elapsedText, "`job.elapsed` in a sentence, translated, e.g. \"Elapsed: 00:03:43\"");
-		f.field("job.remaining_text",
+		f.field("elapsed", m_elapsed, "How long the current job has been running, e.g. \"00:03:43\"");
+		f.field("remaining", m_remaining, "The current job's expected time left, e.g. \"00:45:03\"");
+		f.field("elapsed_text",
+				m_elapsedText,
+				"`source.job.elapsed` in a sentence, translated, e.g. \"Elapsed: 00:03:43\"");
+		f.field("remaining_text",
 				m_remainingText,
-				"`job.remaining` in a sentence, translated, e.g. \"Remaining: 00:45:03\"");
-		f.field("job.pause_control", m_pause, "Pausing the job (job.pause): 0 hidden, 1 disabled, 2 usable");
-		f.field("job.resume_control", m_resume, "Resuming the job (job.resume): 0 hidden, 1 disabled, 2 usable");
-		f.field("job.print_again_control",
+				"`source.job.remaining` in a sentence, translated, e.g. \"Remaining: 00:45:03\"");
+		f.field("pause_control", m_pause, "Pausing the job (actions.job.pause): 0 hidden, 1 disabled, 2 usable");
+		f.field("resume_control", m_resume, "Resuming the job (actions.job.resume): 0 hidden, 1 disabled, 2 usable");
+		f.field("print_again_control",
 				m_printAgain,
-				"Printing the last job again (job.print_again): 0 hidden, 1 disabled, 2 usable");
-		f.field("job.cancel_control", m_cancel, "Cancelling the job: 0 hidden, 1 disabled, 2 usable");
+				"Printing the last job again (actions.job.print_again): 0 hidden, 1 disabled, 2 usable");
+		f.field("cancel_control", m_cancel, "Cancelling the job: 0 hidden, 1 disabled, 2 usable");
 	}
 
 	void JobSource::onInit()

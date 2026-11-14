@@ -30,7 +30,7 @@ namespace UI::Xml
 			 .description =
 				 "A drop-down list whose options and text follow subjects. The option chosen reaches a `value_changed` "
 				 "action as its text (ActionArgs::text()) and its index (ActionArgs::value()).",
-			 .example = R"(<ds_dropdown bind_options="filaments" bind_text="filament_text">
+			 .example = R"(<ds_dropdown bind_options="presenter.filaments" bind_text="presenter.filament_text">
 	<action trigger="value_changed" name="presenter.temperature.pick_filament"/>
 </ds_dropdown>)",
 			 .attributes =
@@ -41,7 +41,8 @@ namespace UI::Xml
 				  {"bind_selected",
 				   "Follow an int subject for the index of the option shown chosen, kept when the options change",
 				   AttributeKind::Subject}},
-			 .exampleSubjects = {{"filaments", "string", "PLA\nPETG\nABS"}, {"filament_text", "string", "PLA"}}},
+			 .exampleSubjects = {{"presenter.filaments", "string", "PLA\nPETG\nABS"},
+								 {"presenter.filament_text", "string", "PLA"}}},
 			xmlCreate,
 			xmlApply);
 	}

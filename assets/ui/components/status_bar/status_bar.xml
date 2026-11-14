@@ -7,7 +7,7 @@
   never overlap. The temperatures are spans so the tool and the temperatures share a baseline whatever the theme's
   fonts.
 
-  Data:     machine.summary (src/UI/Xml/Data/MachineSource.h); the printer's name, om.network.name; current_tool.*
+  Data:     source.machine.summary (src/UI/Xml/Data/MachineSource.h); the printer's name, om.network.name; source.tool.current.*
             (src/UI/Xml/Data/ToolSource.h)
 -->
 <component>
@@ -20,7 +20,7 @@
 	</styles>
 
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">
-		<lv_label name="status" bind_text="machine.summary" align="left_mid"/>
+		<lv_label name="status" bind_text="source.machine.summary" align="left_mid"/>
 
 		<!-- Long names scroll -->
 		<lv_label name="name" bind_text="om.network.name" align="center" long_mode="scroll_circular"
@@ -35,15 +35,15 @@
 					   style_flex_track_place="center" style_pad_column="#pad_small">
 				<style name="pad_zero"/>
 				<!-- The outline tight, to stay on the screen at its right edge -->
-				<bind_style_if_eq name="outline_primary" subject="customise.editing" ref_value="1"/>
-				<bind_style_if_eq name="slot_editing" subject="customise.editing" ref_value="1"/>
+				<bind_style_if_eq name="outline_primary" subject="source.customise.editing" ref_value="1"/>
+				<bind_style_if_eq name="slot_editing" subject="source.customise.editing" ref_value="1"/>
 			</ds_layout>
 
 			<lv_spangroup name="temperatures" width="content" height="content" style_text_align="right">
-				<bind_flag_if_eq subject="current_tool.shown" flag="hidden" ref_value="0"/>
-				<bind_style_if_eq name="text_warning" subject="current_tool.fault" ref_value="1"/>
-				<lv_spangroup-span bind_text="current_tool.label" style="text_emphasis"/>
-				<lv_spangroup-span bind_text="current_tool.heaters"/>
+				<bind_flag_if_eq subject="source.tool.current.shown" flag="hidden" ref_value="0"/>
+				<bind_style_if_eq name="text_warning" subject="source.tool.current.fault" ref_value="1"/>
+				<lv_spangroup-span bind_text="source.tool.current.label" style="text_emphasis"/>
+				<lv_spangroup-span bind_text="source.tool.current.heaters"/>
 			</lv_spangroup>
 		</lv_obj>
 	</view>

@@ -6,6 +6,7 @@
 #include "Debug.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Om/OmBindings.h"
 #include "UI/Xml/Om/OmName.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -19,10 +20,10 @@ namespace UI::Xml
 					 OmBoundPath element,
 					 const std::string& item,
 					 lv_xml_subject_ctx_t* parentContext)
-		: m_scope(std::make_unique<Scope>(parentContext))
+		: m_scope(std::make_unique<Scope>(parentContext, Scope::Kind::row))
 	{
 		m_names.setItem(bindings, std::move(element));
-		m_scope->setResolver(&m_names);
+		m_scope->setResolver(&m_names, std::string(Names::ROW));
 		const char* attrs[] = {"name", "item", nullptr, nullptr};
 		m_obj = static_cast<lv_obj_t*>(lv_xml_create_with_ctx(container, item.c_str(), attrs, m_scope->context()));
 		if (m_obj == nullptr)

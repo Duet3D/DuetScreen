@@ -2,8 +2,8 @@
   One tool, chosen by its number (`tool`), with its heaters: the `tool` widget (widgets/temperature/tool.json). It shows nothing
   while the printer has no such tool.
 
-  Data:     the global tools list (src/UI/Xml/Data/ToolSource.h)
-  Actions:  tools.toggle, heaters.toggle, heaters.set_active, heaters.set_standby
+  Data:     the global source.tool.tools list (src/UI/Xml/Data/ToolSource.h)
+  Actions:  actions.tool.toggle, actions.heater.toggle, heaters.set_active, heaters.set_standby
             (src/UI/Presenters/Control/Temperature/HeaterActions.h)
 -->
 <component>
@@ -14,7 +14,7 @@
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="pad_zero"/>
 		<style name="card"/>
-		<ds_list name="list" list="tools" key="number" value="$tool" item="dashboard_tool" width="100%"
+		<ds_list name="list" list="source.tool.tools" key="row.number" value="$tool" item="dashboard_tool" width="100%"
 				 height="content"/>
 	</view>
 </component>

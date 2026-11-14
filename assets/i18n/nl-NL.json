@@ -577,6 +577,8 @@
       "console_log_desc": "De laatste antwoorden van de printer; tik om de console te openen",
       "console_command_list": "G-code-overzicht",
       "console_command_list_desc": "Elke G-code met wat hij doet; tik erop om hem in de invoer van de console te zetten",
+      "console_input": "Console-invoer",
+      "console_input_desc": "Een regel om G-code in te typen en naar de printer te sturen",
       "category_console": "Console",
       "category_commands": "Opdrachten sturen",
       "om_value": "Objectmodelwaarde",

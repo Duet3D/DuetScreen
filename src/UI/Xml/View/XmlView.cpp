@@ -5,6 +5,8 @@
 #include "XmlView.h"
 #include "Debug.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Binding/Names.h"
+#include "UI/Xml/Layout/PlacementScope.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "helix_xml.h"
 #include <vector>
@@ -64,11 +66,12 @@ namespace UI::Xml
 			}
 		}
 
-		// A screen is self-contained: its names are its presenter's, then the outer scope's (if any), then the globals
-		scope = std::make_unique<Scope>(outer ? outer->context() : nullptr);
+		// A screen is self-contained: its names are its presenter's, then its place's (a placed widget's, else a
+		// page's), then the globals
+		scope = std::make_unique<Scope>(outer ? outer->context() : PlacementScope::page().getScope().context());
 		if (presenter)
 		{
-			ScopeBinder binder(*scope);
+			ScopeBinder binder(*scope, Names::PRESENTER);
 			presenter->fields(binder);
 		}
 	}

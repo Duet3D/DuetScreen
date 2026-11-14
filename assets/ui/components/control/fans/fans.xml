@@ -2,7 +2,7 @@
   Fan screen: one card per fan in the object model.
 
   Data:     the object model's fans (om.fans). Each fan_card binds to its own fan's fields.
-  Actions:  fans.set_speed, from the `fans` presenter (src/UI/Presenters/Control/Fans/FanPresenter.h).
+  Actions:  presenter.fans.set_speed, from the `fans` presenter (src/UI/Presenters/Control/Fans/FanPresenter.h).
 -->
 <component presenter="fans">
 	<view extends="lv_obj" width="100%" height="100%"

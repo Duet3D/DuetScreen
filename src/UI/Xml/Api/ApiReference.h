@@ -21,7 +21,7 @@ namespace UI::Xml::Api
 	/** A subject or list a view can bind to */
 	struct Field
 	{
-		std::string name;				   // As written in XML, e.g. "machine.status"
+		std::string name;				   // As written in XML, e.g. "source.machine.status" or "row.index"
 		std::string type;				   // "int", "text", "colour", "surface", "list" or "history"
 		std::string description;		   // What it holds
 		std::vector<Field> rowFields = {}; // For a list, the fields every row has (including `index`); else empty
@@ -38,8 +38,9 @@ namespace UI::Xml::Api
 	/** A data source: printer data published as global names */
 	struct Source
 	{
-		std::string name;		   // The source's name, e.g. "fans"
+		std::string name;		   // The source's name, e.g. "machine"; its names are `source.<name>.<field>`
 		std::vector<Field> fields; // What it publishes
+		std::string file = {};	   // The source file that defines it, e.g. "src/UI/Xml/Data/MachineSource.cpp"
 	};
 
 	/** A converter for object model names, written after '|' (see Om/Converters.h) */

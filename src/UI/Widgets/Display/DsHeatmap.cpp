@@ -35,12 +35,12 @@ namespace UI::Xml
 			 .description = "A colour map of a surface, such as a bed's height map, with X and Y scales, a "
 							"grid, a title, and the colour scale beside it",
 			 .example =
-				 R"(<ds_heatmap bind_surface="surface" bind_title="title" resolution="200" width="400" height="300"/>)",
+				 R"(<ds_heatmap bind_surface="presenter.surface" bind_title="presenter.title" resolution="200" width="400" height="300"/>)",
 			 .attributes =
 				 {{"bind_surface", "The surface subject to show; redrawn whenever it changes", AttributeKind::Subject},
 				  {"bind_title", "Follow a text subject for the title shown above the map", AttributeKind::Subject},
 				  {"resolution", "Pixels the map is drawn with along each side, scaled to fit (default 200)"}},
-			 .exampleSubjects = {{"title", "string", "Heightmap: heightmap.csv"}}},
+			 .exampleSubjects = {{"presenter.title", "string", "Heightmap: heightmap.csv"}}},
 			xmlCreate,
 			xmlApply);
 	}

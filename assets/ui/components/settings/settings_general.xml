@@ -13,26 +13,26 @@
 		<lv_label name="row_label_0" translation_tag="tr.settings.firmware_version"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<lv_label name="build_time" bind_text="firmware"
+		<lv_label name="build_time" bind_text="presenter.firmware"
 				  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_1" translation_tag="tr.settings.buildroot_version"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
-		<lv_label name="buildroot_version" bind_text="buildroot"
+		<lv_label name="buildroot_version" bind_text="presenter.buildroot"
 				  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 
 		<lv_label name="row_label_2" translation_tag="tr.settings.language"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="language" options="languages" selected="language" action="presenter.settings.language"
+		<settings_dropdown name="language" options="presenter.languages" selected="presenter.language" action="presenter.settings.language"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<lv_label name="row_label_3" translation_tag="tr.settings.keyboard_layout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="keyboard_layout" options="keyboard_layouts" selected="keyboard_layout"
+		<settings_dropdown name="keyboard_layout" options="presenter.keyboard_layouts" selected="presenter.keyboard_layout"
 						  action="presenter.settings.keyboard_layout"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
@@ -41,7 +41,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="4" style_grid_cell_y_align="center"/>
 		<ds_slider name="brightness" label_tag="tr.settings.brightness" label_shown="false" numberpad="true" min="0" max="100"
-				   bind_value="brightness" height="content" send="change"
+				   bind_value="presenter.brightness" height="content" send="change"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
 			<action trigger="value_confirmed" name="presenter.settings.brightness"/>
@@ -50,7 +50,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
 		<ds_slider name="screensaver_timeout" label_tag="tr.settings.screensaver_timeout" label_shown="false"
-				   numberpad="true" min="0" max="300" bind_value="screensaver_timeout" height="content" out_of_range="upper"
+				   numberpad="true" min="0" max="300" bind_value="presenter.screensaver_timeout" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
 			<action trigger="value_confirmed" name="presenter.settings.screensaver_timeout"/>
@@ -62,7 +62,7 @@
 		<ds_toggle name="show_confirmation_dialogs"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="6" style_grid_cell_y_align="center">
-			<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
+			<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.confirmations"/>
 		</ds_toggle>
 		<lv_label name="row_label_7" translation_tag="tr.settings.move_machine_position_mode"
@@ -71,13 +71,13 @@
 		<ds_toggle name="move_machine_position_mode"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="7" style_grid_cell_y_align="center">
-			<bind_state_if_eq subject="machine_position_mode" state="checked" ref_value="1"/>
+			<bind_state_if_eq subject="presenter.machine_position_mode" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.machine_position_mode"/>
 		</ds_toggle>
 		<lv_label name="row_label_8" translation_tag="tr.settings.job_progress_source"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="job_progress_source" options="progress_sources" selected="progress_source"
+		<settings_dropdown name="job_progress_source" options="presenter.progress_sources" selected="presenter.progress_source"
 						  action="presenter.settings.progress_source"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
@@ -94,13 +94,13 @@
 		<ds_toggle name="display_connected_message"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="10" style_grid_cell_y_align="center">
-			<bind_state_if_eq subject="connected_message" state="checked" ref_value="1"/>
+			<bind_state_if_eq subject="presenter.connected_message" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.connected_message"/>
 		</ds_toggle>
 		<lv_label name="row_label_11" translation_tag="tr.settings.notification_level"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
-		<settings_dropdown name="notification_level" options="notification_levels" selected="notification_level"
+		<settings_dropdown name="notification_level" options="presenter.notification_levels" selected="presenter.notification_level"
 						  action="presenter.settings.notification_level"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
@@ -108,7 +108,7 @@
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="12" style_grid_cell_y_align="center"/>
 		<ds_slider name="info_timeout" label_tag="tr.settings.notification_timeout" label_shown="false"
-				   numberpad="true" min="0" max="5000" bind_value="notification_timeout" height="content" out_of_range="upper"
+				   numberpad="true" min="0" max="5000" bind_value="presenter.notification_timeout" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="12" style_grid_cell_y_align="center">
 			<action trigger="value_confirmed" name="presenter.settings.notification_timeout"/>
@@ -119,12 +119,12 @@
 		<ds_toggle name="notification_auto_close_error"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="13" style_grid_cell_y_align="center">
-			<bind_state_if_eq subject="error_notifications_stay" state="checked" ref_value="1"/>
+			<bind_state_if_eq subject="presenter.error_notifications_stay" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.settings.error_notifications_stay"/>
 		</ds_toggle>
 
-		<question_dialog name="language_confirm" open="language_confirm" title="language_confirm_title"
-						 text="language_confirm_text" confirm="presenter.settings.restart_in_language"
+		<question_dialog name="language_confirm" open="presenter.language_confirm" title="presenter.language_confirm_title"
+						 text="presenter.language_confirm_text" confirm="presenter.settings.restart_in_language"
 						 close="presenter.settings.keep_language"/>
 	</view>
 </component>

@@ -23,17 +23,17 @@ namespace UI::Xml
 
 	void CustomiseSource::fields(FieldVisitor& f)
 	{
-		f.field("customise.editing", m_editing, "1 while the user is customising the screen, else 0");
-		f.field("customise.selected",
+		f.field("editing", m_editing, "1 while the user is customising the screen, else 0");
+		f.field("selected",
 				m_selected,
 				"The selected widget, as \"slot/id\" (e.g. \"dashboard/tools\"), or empty if none is");
-		f.field("customise.has_item", m_hasItem, "1 if a widget is selected, else 0");
-		f.field("customise.can_remove", m_canRemove, "1 if the selected widget can be removed (it isn't locked)");
-		f.field("customise.can_configure", m_canConfigure, "1 if the selected widget has settings the user can change");
-		f.field("customise.can_undo", m_canUndo, "1 if there is a change to undo");
-		f.field("customise.is_free", m_isFree, "1 if new widgets go into a free layout, whose widgets can snap");
-		f.field("customise.snap", m_snap, "1 if dragged widgets snap to the edges near them, in that free layout");
-		f.field("customise.title", m_title, "The selected widget's name, translated; empty if none is selected");
+		f.field("has_item", m_hasItem, "1 if a widget is selected, else 0");
+		f.field("can_remove", m_canRemove, "1 if the selected widget can be removed (it isn't locked)");
+		f.field("can_configure", m_canConfigure, "1 if the selected widget has settings the user can change");
+		f.field("can_undo", m_canUndo, "1 if there is a change to undo");
+		f.field("is_free", m_isFree, "1 if new widgets go into a free layout, whose widgets can snap");
+		f.field("snap", m_snap, "1 if dragged widgets snap to the edges near them, in that free layout");
+		f.field("title", m_title, "The selected widget's name, translated; empty if none is selected");
 	}
 
 	void CustomiseSource::update()

@@ -21,9 +21,9 @@
     {
       "name": "source",
       "kind": "row",
-      "list": "gauges",
-      "key": "id",
-      "label": "name",
+      "list": "source.gauge.gauges",
+      "key": "row.id",
+      "label": "row.name",
       "default": "job.progress",
       "title_tag": "tr.widget.setting_source"
     }

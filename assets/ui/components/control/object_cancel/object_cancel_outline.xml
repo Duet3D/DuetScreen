@@ -5,11 +5,11 @@
   Fields and actions: an objects row (src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h)
 -->
 <component>
-	<view extends="ds_plot_rect" bind_x1="x1" bind_y1="y1" bind_x2="x2" bind_y2="y2" style_pad_all="0"
+	<view extends="ds_plot_rect" bind_x1="row.x1" bind_y1="row.y1" bind_x2="row.x2" bind_y2="row.y2" style_pad_all="0"
 		  style_radius="2" style_border_width="1" style_border_color="0x9E9E9E">
 		<style name="object_cancel_base"/>
-		<bind_style name="object_cancel_cancelled" subject="cancelled" ref_value="1"/>
-		<bind_style name="object_cancel_current" subject="current" ref_value="1"/>
+		<bind_style name="object_cancel_cancelled" subject="row.cancelled" ref_value="1"/>
+		<bind_style name="object_cancel_current" subject="row.current" ref_value="1"/>
 		<action trigger="pressed" name="presenter.object_cancel.select"/>
 	</view>
 </component>

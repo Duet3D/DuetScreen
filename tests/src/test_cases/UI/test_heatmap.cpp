@@ -42,7 +42,7 @@ class TestHeatmap : public UiTestSuite
 		lv_xml_register_component_from_data("test_heatmap", R"(
 			<component>
 				<view extends="lv_obj" style_pad_all="0">
-					<ds_heatmap name="heatmap" bind_surface="surface" bind_title="title" resolution="100"
+					<ds_heatmap name="heatmap" bind_surface="presenter.surface" bind_title="presenter.title" resolution="100"
 								width="100%" height="100%"/>
 				</view>
 			</component>)");

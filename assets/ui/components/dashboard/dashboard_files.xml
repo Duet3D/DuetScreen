@@ -7,7 +7,7 @@
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
 		<style name="pad_zero"/>
 		<ds_tabs name="tabs" width="100%" height="100%">
-			<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="machine.job_active">
+			<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="source.machine.job_active">
 				<ds_view name="dashboard_jobs" view="file_browser" presenter="dashboard_jobs" shown="true"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="macros" title_tag="tr.file.macros">

@@ -3,18 +3,18 @@
   dialog moves above it); on or off settings are a switch; tapping the value of any other opens what changes it (the
   number pad, or a choice of values).
 
-  Fields:   a settings row: name, title, kind, control, value, on (src/UI/Presenters/Customise/CustomisePresenter.h)
+  Fields:   a settings row: row.name, row.title, row.kind, row.control, row.value, row.on (src/UI/Presenters/Customise/CustomisePresenter.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
 		<style name="pad_zero"/>
-		<lv_label name="title" bind_text="title" flex_grow="1"/>
-		<ds_button name="value" bind_text="value" width="50%" long_mode="dots">
-			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="button"/>
+		<lv_label name="title" bind_text="row.title" flex_grow="1"/>
+		<ds_button name="value" bind_text="row.value" width="50%" long_mode="dots">
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="button"/>
 			<action trigger="clicked" name="presenter.customise.edit_setting"/>
 		</ds_button>
-		<ds_textarea name="text" bind_text="value" one_line="true" width="50%">
-			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="text"/>
+		<ds_textarea name="text" bind_text="row.value" one_line="true" width="50%">
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="text"/>
 			<action trigger="ready" name="presenter.customise.set_text"/>
 			<action trigger="defocused" name="presenter.customise.set_text"/>
 			<action trigger="focused" name="presenter.customise.keyboard" arg="1"/>
@@ -22,8 +22,8 @@
 			<action trigger="ready" name="presenter.customise.keyboard" arg="0"/>
 		</ds_textarea>
 		<ds_toggle name="toggle">
-			<bind_flag_if_not_eq subject="control" flag="hidden" ref_value="switch"/>
-			<bind_state_if_eq subject="on" state="checked" ref_value="1"/>
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="switch"/>
+			<bind_state_if_eq subject="row.on" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="presenter.customise.toggle_setting"/>
 		</ds_toggle>
 	</view>

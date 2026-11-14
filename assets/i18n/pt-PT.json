@@ -577,6 +577,8 @@
       "console_log_desc": "As últimas respostas da impressora; toque para abrir a consola",
       "console_command_list": "Referência de G-code",
       "console_command_list_desc": "Cada G-code e o que faz; toque num para o pôr na entrada da consola",
+      "console_input": "Entrada da consola",
+      "console_input_desc": "Uma linha para escrever G-code e enviá-lo para a impressora",
       "category_console": "Consola",
       "category_commands": "Comandos",
       "om_value": "Valor do modelo de objetos",
