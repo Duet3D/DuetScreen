@@ -113,26 +113,26 @@ namespace UI
 		}
 	}
 
-	void LvObj::setShown(lv_obj_t* obj, bool shown)
+	void LvObj::setVisible(lv_obj_t* obj, bool visible)
 	{
 		if (LvObj* own = fromPtr(obj))
 		{
-			shown ? own->show() : own->hide();
+			own->setVisible(visible);
 			return;
 		}
-		if (shown == !lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+		if (visible == !lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
 		{
 			return;
 		}
-		lv_obj_set_flag(obj, LV_OBJ_FLAG_HIDDEN, !shown);
+		lv_obj_set_flag(obj, LV_OBJ_FLAG_HIDDEN, !visible);
 #if LV_NESTED_SHOW_HIDE
 		forEachNested(obj,
-					  !shown,
-					  [shown](LvObj& child)
+					  !visible,
+					  [visible](LvObj& child)
 					  {
 						  if (child.isVisible())
 						  {
-							  shown ? child.showInner() : child.hideInner();
+							  visible ? child.showInner() : child.hideInner();
 						  }
 					  });
 #endif

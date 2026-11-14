@@ -86,10 +86,11 @@ namespace UI
 		static LvObj* fromPtr(lv_obj_t* obj);
 
 		/**
-		 * Show or hide `obj`, telling the views inside it, as show() and hide() do: for a widget with no LvObj of its
-		 * own (an XML <lv_obj>, say) as for one with, e.g. a dialog's content moved in and out of the dialog surface
+		 * Show or hide `obj`, telling the views inside it, as setVisible() does for a view: for a widget with no LvObj
+		 * of its own (an XML <lv_obj>, say) as for one with, e.g. a dialog's content moved in and out of the dialog
+		 * surface
 		 */
-		static void setShown(lv_obj_t* obj, bool shown);
+		static void setVisible(lv_obj_t* obj, bool visible);
 
 		virtual ~LvObj();
 
@@ -266,6 +267,7 @@ namespace UI
 		void moveToIndex(int32_t index);
 		void clearChildren();
 
+		/** Show or hide the view (see show() and hide()); for any widget, see the static setVisible() */
 		void setVisible(bool display, bool move_to_front = false);
 		void show(bool move_to_front = false);
 		void hide(bool move_to_back = false);

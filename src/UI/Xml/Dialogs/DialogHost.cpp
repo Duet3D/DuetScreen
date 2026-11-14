@@ -537,7 +537,7 @@ namespace UI::Xml
 				lv_obj_set_parent(content, m_body);
 				showFooter(content);
 				// Views in it come alive, as they would on a page shown
-				LvObj::setShown(content, true);
+				LvObj::setVisible(content, true);
 				lv_obj_set_pos(content, 0, 0);
 				layout(*next);
 				if (!wasHidden && motion != Motion::none)
@@ -592,7 +592,7 @@ namespace UI::Xml
 		{
 			lv_obj_set_parent(content, home);
 		}
-		LvObj::setShown(content, false);
+		LvObj::setVisible(content, false);
 	}
 
 	void DialogHost::showFooter(lv_obj_t* content)
