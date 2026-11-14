@@ -1039,8 +1039,8 @@ TEST_F(TestHomeViewWithData, StatusView)
 	UI::closeAllModals();
 
 	click("flow_multiplier");
-	OM::Move::SetExtruderFactor(0, 1.2f);
-	Model::get().post<EventType::ExtruderData>();
+	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"extruders":[{"factor":1.2},{}]}}})"
+					"\n");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
 
 	UI::closeAllModals();

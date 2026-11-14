@@ -11,6 +11,7 @@
 #pragma once
 
 #include "UI/Xml/Binding/List.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <vector>
@@ -60,5 +61,6 @@ namespace UI
 		Xml::IntSubject m_usable;			  // 1 if babystepping is possible
 		Xml::StringSubject<32> m_resetText;	  // Reset button text
 		Xml::List<BabyStepRow> m_stepRows;	  // Step sizes
+		Xml::OmWatch m_watch;				  // Shows the Z offset again as the axes change
 	};
 } // namespace UI

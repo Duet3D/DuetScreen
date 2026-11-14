@@ -4,9 +4,9 @@
 
 #include "BabyStepPresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -78,7 +78,7 @@ namespace UI
 
 	void BabyStepPresenter::onInit()
 	{
-		registerEventListener<EventType::AxesData>([this]() { showOffset(); });
+		m_watch = Xml::OmWatch({"move.axes"}, [this] { showOffset(); });
 	}
 
 	void BabyStepPresenter::onActivate()
@@ -96,9 +96,9 @@ namespace UI
 	void BabyStepPresenter::showOffset()
 	{
 		MODEL_LOCK();
-		auto z = OM::Move::GetAxisByLetter('Z');
-		m_usable.set(z && OM::IsConnected() ? 1 : 0);
-		m_resetText.set(_("babystep.reset", z ? z->babystep : 0.0f));
+		const OM::Node& z = Xml::PrinterModel::axis('Z');
+		m_usable.set(z.exists() && OM::IsConnected() ? 1 : 0);
+		m_resetText.set(_("babystep.reset", static_cast<float>(z["babystep"].number())));
 	}
 
 	void BabyStepPresenter::showSteps()

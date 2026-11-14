@@ -11,9 +11,10 @@
 #pragma once
 
 #include "FactorDialog.h"
-#include "ObjectModel/Tool.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <optional>
+#include <vector>
 
 namespace UI
 {
@@ -46,14 +47,12 @@ namespace UI
 		/** Show the extrusion factors of the extruders the dialog is for */
 		void showExtrusion();
 
-		/** The extruder in row `index` of the extrusion dialog, or nullptr */
-		OM::Move::ExtruderAxisPtr extruderAt(size_t index) const;
-
-		/** The extruders the extrusion dialog is for */
-		size_t extruderCount() const;
+		/** The extruders the extrusion dialog is for, by number: the tool's, or every extruder (the model lock held) */
+		std::vector<size_t> extruders() const;
 
 		std::optional<size_t> m_tool; // Number of the tool the extrusion dialog is for; none for every extruder
 		FactorDialog m_speed;		  // `speed_dialog.*`
 		FactorDialog m_extrusion;	  // `extrusion_dialog.*`
+		Xml::OmWatch m_watch;		  // Shows the factors again as they change
 	};
 } // namespace UI

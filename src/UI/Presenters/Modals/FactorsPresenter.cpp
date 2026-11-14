@@ -7,6 +7,8 @@
 #include "ObjectModel/Axis.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
+#include "UI/Xml/Data/MoveSource.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
@@ -52,28 +54,38 @@ namespace UI
 				   .onSet =
 					   [](size_t, float percent)
 				   {
-					   if (whole(percent) != whole(100 * OM::Move::GetSpeedFactor()))
+					   if (whole(percent) != whole(100 * Xml::MoveSource::speedFactor()))
 					   {
 						   Xml::Services::sendGcode(fmt::format("M220 S{:d}", whole(percent)));
 					   }
 				   }})
-		, m_extrusion({.id = "extrusion_dialog",
-					   .title = _("fine_tune.extruder_header"),
-					   .min = 0.0f,
-					   .max = MAX_PERCENT,
-					   .sliderMin = 0,
-					   .sliderMax = 200,
-					   .padOnOpen = true,
-					   .onSet = [this](size_t index, float percent)
+		, m_extrusion(
+			  {.id = "extrusion_dialog",
+			   .title = _("fine_tune.extruder_header"),
+			   .min = 0.0f,
+			   .max = MAX_PERCENT,
+			   .sliderMin = 0,
+			   .sliderMax = 200,
+			   .padOnOpen = true,
+			   .onSet = [this](size_t index, float percent)
+			   {
+				   std::optional<size_t> extruder;
+				   float factor = 0;
+				   {
+					   MODEL_LOCK();
+					   const auto numbers = extruders();
+					   if (index < numbers.size())
 					   {
-						   MODEL_LOCK();
-						   auto extruder = extruderAt(index);
-						   if (extruder != nullptr && whole(percent) != whole(100 * extruder->factor))
-						   {
-							   Xml::Services::sendGcode(
-								   fmt::format("M221 D{:d} S{:d}", extruder->index, whole(percent)));
-						   }
-					   }})
+						   extruder = numbers[index];
+						   factor = static_cast<float>(
+							   Xml::PrinterModel::root()["move"]["extruders"][numbers[index]]["factor"].number());
+					   }
+				   }
+				   if (extruder && whole(percent) != whole(100 * factor))
+				   {
+					   Xml::Services::sendGcode(fmt::format("M221 D{:d} S{:d}", *extruder, whole(percent)));
+				   }
+			   }})
 	{
 		for (auto& [name, description, handler] : FactorDialog::actions({&m_speed, &m_extrusion}))
 		{
@@ -130,51 +142,55 @@ namespace UI
 
 	void FactorsPresenter::onInit()
 	{
-		registerEventListener<EventType::SpeedFactor>([this]() { showSpeed(); });
-		registerEventListener<EventType::ExtruderData>([this]() { showExtrusion(); });
-		registerEventListener<EventType::ToolData>([this]() { showExtrusion(); });
+		m_watch = Xml::OmWatch({"move.speedFactor", "move.extruders", "tools"},
+							   [this]
+							   {
+								   showSpeed();
+								   showExtrusion();
+							   });
 	}
 
 	void FactorsPresenter::showSpeed()
 	{
-		const float percent = 100 * OM::Move::GetSpeedFactor();
+		const float percent = 100 * Xml::MoveSource::speedFactor();
 		m_speed.show(1, [](size_t) { return std::string(); }, [percent](size_t) { return percent; });
 	}
 
 	void FactorsPresenter::showExtrusion()
 	{
 		MODEL_LOCK();
+		const auto numbers = extruders();
+		const OM::Node& all = Xml::PrinterModel::root()["move"]["extruders"];
 		m_extrusion.show(
-			extruderCount(),
-			[this](size_t i)
-			{
-				auto extruder = extruderAt(i);
-				return extruder ? _("fine_tune.extruder", extruder->index) : std::string();
-			},
-			[this](size_t i)
-			{
-				auto extruder = extruderAt(i);
-				return extruder ? 100.0f * extruder->factor : 100.0f;
-			});
+			numbers.size(),
+			[&numbers](size_t i) { return _("fine_tune.extruder", numbers[i]); },
+			[&](size_t i) { return 100.0f * static_cast<float>(all[numbers[i]]["factor"].number()); });
 	}
 
-	OM::Move::ExtruderAxisPtr FactorsPresenter::extruderAt(size_t index) const
+	std::vector<size_t> FactorsPresenter::extruders() const
 	{
+		std::vector<size_t> numbers;
+		const OM::Node& all = Xml::PrinterModel::root()["move"]["extruders"];
 		if (!m_tool)
 		{
-			return OM::Move::GetExtruderAxisBySlot(index);
+			for (size_t number = 0; number < all.size(); ++number)
+			{
+				if (all[number].exists())
+				{
+					numbers.push_back(number);
+				}
+			}
+			return numbers;
 		}
-		auto tool = OM::GetTool(*m_tool);
-		return tool ? tool->GetExtruder(index) : nullptr;
-	}
-
-	size_t FactorsPresenter::extruderCount() const
-	{
-		if (!m_tool)
+		const OM::Node& toolExtruders = Xml::PrinterModel::tool(*m_tool)["extruders"];
+		for (size_t i = 0; i < toolExtruders.size(); ++i)
 		{
-			return OM::Move::GetExtruderAxisCount();
+			if (const int64_t number = toolExtruders[i].integer(-1);
+				number >= 0 && all[static_cast<size_t>(number)].exists())
+			{
+				numbers.push_back(static_cast<size_t>(number));
+			}
 		}
-		auto tool = OM::GetTool(*m_tool);
-		return tool ? tool->GetExtruderCount() : 0;
+		return numbers;
 	}
 } // namespace UI
