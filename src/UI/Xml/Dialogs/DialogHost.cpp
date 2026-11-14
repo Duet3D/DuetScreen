@@ -378,6 +378,14 @@ namespace UI::Xml
 		}
 	}
 
+	void DialogHost::headerChanged()
+	{
+		if (m_top != nullptr)
+		{
+			layout(*m_top);
+		}
+	}
+
 	bool DialogHost::back()
 	{
 		if (!isOpen())
@@ -524,6 +532,9 @@ namespace UI::Xml
 			lv_obj_move_foreground(root);
 		}
 
+		// The header first: whether it shows is part of the room the step has
+		updateHeader();
+
 		if (next != m_top)
 		{
 			if (m_top != nullptr)
@@ -571,7 +582,6 @@ namespace UI::Xml
 				lv_anim_start(&anim);
 			}
 		}
-		updateHeader();
 		notifyNavigation();
 	}
 

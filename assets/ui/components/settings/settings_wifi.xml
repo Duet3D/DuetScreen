@@ -37,6 +37,8 @@
 				<ds_textarea name="wifi_password_input" bind_text="presenter.password" one_line="true" password_mode="true"
 							 placeholder_tag="tr.settings.network.enter_password_hint" height="content" flex_grow="1">
 					<action trigger="value_changed" name="presenter.wifi.password"/>
+					<!-- The keyboard's OK key joins, as OK does -->
+					<action trigger="ready" name="presenter.wifi.join"/>
 				</ds_textarea>
 				<ds_password_toggle name="show_password" textarea="wifi_password_input" height="content"/>
 			</lv_obj>

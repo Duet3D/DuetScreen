@@ -706,6 +706,25 @@ TEST_F(TestHomeView, AlertS7)
 
 	input.setText("this is ok");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_ok.png");
+
+	// The next alert starts with its own text, not what was typed into the last
+	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
+	notifications().newAlertData(alertInObjectModel());
+	EXPECT_STREQ(alertInput().getText().data(), "default....");
+
+	// The keyboard's OK key answers, once the text can be sent
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	input.setText("short");
+	input.sendEvent(LV_EVENT_READY);
+	EXPECT_TRUE(sent.empty()) << "too short to send";
+	EXPECT_TRUE(notificationShown("alert"));
+	input.setText("this is ok");
+	input.sendEvent(LV_EVENT_READY);
+	EXPECT_EQ(sent,
+			  (std::vector<std::string>{fmt::format("M292 R{{\"this is ok\"}} S{:d}\n", alertInObjectModel().seq)}));
+	EXPECT_FALSE(notificationShown("alert"));
+	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
 class TestHomeViewWithData : public TestHomeView
@@ -1032,6 +1051,14 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	EXPECT_GT(centred.y1, dialogArea.y1) << "the dialog is back in the middle";
 	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// The keyboard's OK key joins, as OK does
+	lv_obj_send_event(lv_obj_find_by_name(unknown, "connect"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
+	lv_obj_send_event(input, LV_EVENT_READY, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
 }
 
 TEST_F(TestHomeViewWithData, StatusView)

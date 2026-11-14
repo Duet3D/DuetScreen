@@ -112,7 +112,7 @@ namespace UI
 		/** Close the alert and show any waiting responses */
 		void closeAlert();
 
-		/** Check the text typed into the alert (its text mode), enabling OK and showing why it can't be sent */
+		/** Check the text typed into the alert (its text mode), enabling OK and showing the length it must be */
 		void validateInput(std::string_view text);
 
 		/** Show the alert's axes' positions and whether they can move */
@@ -166,7 +166,7 @@ namespace UI
 		Xml::IntSubject m_alertAxesShown;			// 1 if there are axes to jog
 		Xml::IntSubject m_alertTextShown;			// 1 if text is asked for, typed on the keyboard
 		Xml::StringSubject<256> m_alertInput;		// The text to start with
-		Xml::StringSubject<96> m_alertWarning;		// Why the text can't be sent, or empty
+		Xml::StringSubject<96> m_alertWarning;		// The length the text must be, while it isn't, or empty
 		Xml::IntSubject m_alertPadShown;			// 1 if a number is asked for, typed on the pad
 		Xml::NumberPad m_alertPad;					// `alert.pad`: the number typed
 		Xml::IntSubject m_alertProgress;			// Time left, 0-100

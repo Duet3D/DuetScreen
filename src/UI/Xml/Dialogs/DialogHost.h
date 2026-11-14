@@ -117,6 +117,9 @@ namespace UI::Xml
 		/** The keyboard has gone: the card may use the whole surface again */
 		void giveRoomBack();
 
+		/** The header came or went (its step's title was set or emptied): lay the step out again in the room left */
+		void headerChanged();
+
 		/* Navigation (see DialogLayer in Navigation.h) */
 
 		/** The back key: go back a step, or close the dialog on its first; false if nothing is open */

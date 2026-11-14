@@ -41,6 +41,12 @@ namespace UI::Xml
 		void show(lv_subject_t* title, lv_subject_t* from, bool canGoBack, bool canClose);
 
 	  private:
+		/** Show the header if it has anything to show: a title, or a button */
+		void updateHeaderShown();
+
+		/** `title` changed: the header may have something to show now, or nothing */
+		static void titleChangedCb(lv_observer_t* observer, lv_subject_t* subject);
+
 		/** Keeps a text subject a copy of another subject, as text */
 		class Mirror
 		{
@@ -76,5 +82,7 @@ namespace UI::Xml
 		IntSubject m_canClose;		  // `can_close`
 		Mirror m_titleMirror{m_title}; // Keeps `title` the step's title
 		Mirror m_fromMirror{m_from};   // Keeps `from` the previous step's title
+		IntSubject m_headerShown;	   // `header_shown`
+		lv_observer_t* m_titleObserver = nullptr; // Watches `title`, for `header_shown`
 	};
 } // namespace UI::Xml

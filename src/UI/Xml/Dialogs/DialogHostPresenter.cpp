@@ -5,6 +5,7 @@
 #include "DialogHostPresenter.h"
 #include "DialogHost.h"
 #include <string>
+#include <string_view>
 
 namespace UI::Xml
 {
@@ -38,9 +39,13 @@ namespace UI::Xml
 					   m_host->tappedOutside();
 				   }
 			   });
+		m_titleObserver = lv_subject_add_observer(m_title.raw(), titleChangedCb, this);
 	}
 
-	DialogHostPresenter::~DialogHostPresenter() = default;
+	DialogHostPresenter::~DialogHostPresenter()
+	{
+		lv_observer_remove(m_titleObserver);
+	}
 
 	void DialogHostPresenter::fields(FieldVisitor& f)
 	{
@@ -48,6 +53,10 @@ namespace UI::Xml
 		f.field("from", m_from, "The title of the step it came from; empty on a dialog's first step");
 		f.field("can_go_back", m_canGoBack, "1 if the back button shows: a later step that isn't blocking");
 		f.field("can_close", m_canClose, "1 if the close button shows: no step of the dialog is blocking");
+		f.field("header_shown",
+				m_headerShown,
+				"1 if the header has anything to show: a title, or a button (a blocking step without a title has "
+				"none)");
 	}
 
 	void DialogHostPresenter::show(lv_subject_t* title, lv_subject_t* from, bool canGoBack, bool canClose)
@@ -56,6 +65,24 @@ namespace UI::Xml
 		m_fromMirror.follow(from);
 		m_canGoBack.set(canGoBack ? 1 : 0);
 		m_canClose.set(canClose ? 1 : 0);
+		updateHeaderShown();
+	}
+
+	void DialogHostPresenter::updateHeaderShown()
+	{
+		const bool shown = !std::string_view(m_title.get()).empty() || m_canGoBack.get() != 0 || m_canClose.get() != 0;
+		m_headerShown.set(shown ? 1 : 0);
+	}
+
+	void DialogHostPresenter::titleChangedCb(lv_observer_t* observer, lv_subject_t* /* subject */)
+	{
+		auto* self = static_cast<DialogHostPresenter*>(lv_observer_get_user_data(observer));
+		const int32_t was = self->m_headerShown.get();
+		self->updateHeaderShown();
+		if (self->m_headerShown.get() != was && self->m_host != nullptr)
+		{
+			self->m_host->headerChanged();
+		}
 	}
 
 	void DialogHostPresenter::Mirror::follow(lv_subject_t* source)

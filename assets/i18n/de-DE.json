@@ -186,9 +186,9 @@
       "response_warning": "Warnung",
       "response_error": "Fehler",
       "open_console": "Konsole öffnen",
-      "warning_float_range": "Wert muss zwischen {:g} und {:g} liegen",
-      "warning_int_range": "Wert muss zwischen {:d} und {:d} liegen",
-      "warning_text_length": "Eingabe muss zwischen {:d} und {:d} Zeichen lang sein"
+      "text_length_range": "{:d} bis {:d} Zeichen",
+      "text_length_min": "{:d} oder mehr Zeichen",
+      "text_length_max": "Höchstens {:d} Zeichen"
     },
     "multi_value_selector": {
       "numberpad_input_header": "Wert eingeben",

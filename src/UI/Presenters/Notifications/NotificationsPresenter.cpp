@@ -12,7 +12,6 @@
 #include "utils/StorageHelper.h"
 #include "version.h"
 #include <algorithm>
-#include <cfloat>
 #include <climits>
 #include <cmath>
 #include <cstdlib>
@@ -97,9 +96,14 @@ namespace UI
 			   [this](const Xml::ActionArgs&) { m_updateOpen.set(0); });
 
 		action("alert.ok",
-			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it",
+			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it; nothing "
+			   "while OK can't be used (what is typed isn't valid), e.g. from the keyboard's OK key",
 			   [this](const Xml::ActionArgs&)
 			   {
+				   if (m_alertOk.get() != Usable)
+				   {
+					   return;
+				   }
 				   const uint32_t seq = m_alert.seq;
 				   switch (m_alert.mode)
 				   {
@@ -157,8 +161,13 @@ namespace UI
 				   Xml::Services::sendGcode(fmt::format("M120\nG91\nG1 {:c}{:g} F300\nM121", row->letter, *distance));
 			   });
 		action("alert.input",
-			   "Check the text edited (`value_changed` on its text box), setting `alert.warning` and `alert.ok`",
-			   [this](const Xml::ActionArgs& args) { validateInput(args.text()); });
+			   "The text edited (`value_changed` on its text box): keep it, and set `alert.warning` and `alert.ok`",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   // Kept in the subject too, so the next alert's text replaces it
+				   m_alertInput.set(args.text());
+				   validateInput(args.text());
+			   });
 		action("alert.dismissed",
 			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>`",
 			   [this](const Xml::ActionArgs&) { closeAlert(); });
@@ -201,7 +210,7 @@ namespace UI
 		f.field("alert.input", m_alertInput, "The text to start with");
 		f.field("alert.pad_shown", m_alertPadShown, "1 if a number is asked for, typed on the pad (`alert.pad`)");
 		m_alertPad.fields(f);
-		f.field("alert.warning", m_alertWarning, "Why the text can't be sent; empty if it can");
+		f.field("alert.warning", m_alertWarning, "The length the text must be, while it isn't; empty once it is");
 		f.field("alert.progress", m_alertProgress, "Time left before the alert closes itself, 0-100");
 		f.field("alert.progress_shown", m_alertProgressShown, "1 if the alert closes itself");
 	}
@@ -404,7 +413,17 @@ namespace UI
 		const auto& limits = m_alert.limits.text;
 		const auto length = static_cast<int32_t>(m_input.length());
 		const bool valid = length >= limits.min && length <= limits.max;
-		m_alertWarning.set(valid ? std::string() : _("msgbox.warning_text_length", limits.min, limits.max));
+		// What it takes, while it isn't met: a limit of 0 or INT32_MAX is none
+		const bool hasMin = limits.min > 0;
+		const bool hasMax = limits.max < INT32_MAX;
+		std::string needed;
+		if (!valid)
+		{
+			needed = hasMin && hasMax ? _("msgbox.text_length_range", limits.min, limits.max)
+					 : hasMin		  ? _("msgbox.text_length_min", limits.min)
+									  : _("msgbox.text_length_max", limits.max);
+		}
+		m_alertWarning.set(needed);
 		m_alertOk.set(valid ? Usable : Disabled);
 	}
 

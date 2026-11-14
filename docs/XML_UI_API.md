@@ -498,6 +498,7 @@ Used by `dialog_host`.
 | `presenter.from` | text | The title of the step it came from; empty on a dialog's first step |
 | `presenter.can_go_back` | int | 1 if the back button shows: a later step that isn't blocking |
 | `presenter.can_close` | int | 1 if the close button shows: no step of the dialog is blocking |
+| `presenter.header_shown` | int | 1 if the header has anything to show: a title, or a button (a blocking step without a title has none) |
 
 | Action | Description |
 | --- | --- |
@@ -755,7 +756,7 @@ Used by `notifications`.
 | `presenter.alert.pad.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
 | `presenter.alert.pad.signed` | int | 1 if the number may be negative, so the sign key works |
 | `presenter.alert.pad.decimal` | int | 1 if the number may have a fraction, so the dot key works |
-| `presenter.alert.warning` | text | Why the text can't be sent; empty if it can |
+| `presenter.alert.warning` | text | The length the text must be, while it isn't; empty once it is |
 | `presenter.alert.progress` | int | Time left before the alert closes itself, 0-100 |
 | `presenter.alert.progress_shown` | int | 1 if the alert closes itself |
 
@@ -779,9 +780,9 @@ Each row of `presenter.alert.axes`:
 | `presenter.alert.cancel` | Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it |
 | `presenter.alert.choose` | Answer the alert with the choice, and close it. From a row of `alert.choices`. |
 | `presenter.alert.dismissed` | Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>` |
-| `presenter.alert.input` | Check the text edited (`value_changed` on its text box), setting `alert.warning` and `alert.ok` |
+| `presenter.alert.input` | The text edited (`value_changed` on its text box): keep it, and set `alert.warning` and `alert.ok` |
 | `presenter.alert.jog` | Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`. |
-| `presenter.alert.ok` | Answer the alert with OK (M292), with the value typed if one was asked for, and close it |
+| `presenter.alert.ok` | Answer the alert with OK (M292), with the value typed if one was asked for, and close it; nothing while OK can't be used (what is typed isn't valid), e.g. from the keyboard's OK key |
 | `presenter.alert.pad.backspace` | Remove the last character shown, whether typed or the value the pad starts with |
 | `presenter.alert.pad.clear` | Empty what is typed |
 | `presenter.alert.pad.key` | Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with. |

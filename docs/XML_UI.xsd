@@ -88,6 +88,7 @@
 			<xs:enumeration value="presenter.from"/>
 			<xs:enumeration value="presenter.gcodes"/>
 			<xs:enumeration value="presenter.has_saved"/>
+			<xs:enumeration value="presenter.header_shown"/>
 			<xs:enumeration value="presenter.home_all_usable"/>
 			<xs:enumeration value="presenter.icon_set"/>
 			<xs:enumeration value="presenter.icon_sets"/>
@@ -1740,9 +1741,9 @@
 			<xs:enumeration value="tr.msgbox.response_info"/>
 			<xs:enumeration value="tr.msgbox.response_success"/>
 			<xs:enumeration value="tr.msgbox.response_warning"/>
-			<xs:enumeration value="tr.msgbox.warning_float_range"/>
-			<xs:enumeration value="tr.msgbox.warning_int_range"/>
-			<xs:enumeration value="tr.msgbox.warning_text_length"/>
+			<xs:enumeration value="tr.msgbox.text_length_max"/>
+			<xs:enumeration value="tr.msgbox.text_length_min"/>
+			<xs:enumeration value="tr.msgbox.text_length_range"/>
 			<xs:enumeration value="tr.multi_value_selector.numberpad_input_header"/>
 			<xs:enumeration value="tr.multi_value_selector.numberpad_new_value_header"/>
 			<xs:enumeration value="tr.object_cancel.cancel_current"/>

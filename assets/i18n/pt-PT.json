@@ -186,9 +186,9 @@
       "response_warning": "Aviso",
       "response_error": "Erro",
       "open_console": "Abrir consola",
-      "warning_float_range": "O valor deve estar entre {:g} e {:g}",
-      "warning_int_range": "O valor deve estar entre {:d} e {:d}",
-      "warning_text_length": "A entrada deve ter entre {:d} e {:d} caracteres"
+      "text_length_range": "De {:d} a {:d} caracteres",
+      "text_length_min": "{:d} caracteres ou mais",
+      "text_length_max": "{:d} caracteres no máximo"
     },
     "multi_value_selector": {
       "numberpad_input_header": "Introduzir valor",

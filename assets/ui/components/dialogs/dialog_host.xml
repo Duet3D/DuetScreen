@@ -25,6 +25,7 @@
 			<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
 					style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="dialog_header"/>
+				<bind_flag_if_eq subject="presenter.header_shown" flag="hidden" ref_value="0"/>
 				<ds_button name="back" icon="back.png">
 					<style name="dialog_icon_button"/>
 					<bind_flag_if_eq subject="presenter.can_go_back" flag="hidden" ref_value="0"/>

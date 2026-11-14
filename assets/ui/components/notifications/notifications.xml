@@ -24,17 +24,18 @@
 				<bind_flag_if_eq subject="presenter.alert.pad_shown" flag="hidden" ref_value="0"/>
 			</numpad>
 
-			<!-- Text to type, on the keyboard, with why it can't be sent -->
-			<lv_obj name="text_input" width="100%" height="content" flex_flow="column" scrollable="false"
-					style_flex_cross_place="center">
+			<!-- Text to type, on the keyboard -->
+			<lv_obj name="text_input" width="100%" height="content" flex_flow="column" scrollable="false">
 				<style name="pad_zero"/>
 				<bind_flag_if_eq subject="presenter.alert.text_shown" flag="hidden" ref_value="0"/>
-				<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" width="75%"
-							 style_text_align="center">
+				<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" width="100%">
 					<action trigger="value_changed" name="presenter.alert.input"/>
+					<!-- The keyboard's OK key answers, as OK does -->
+					<action trigger="ready" name="presenter.alert.ok"/>
 				</ds_textarea>
-				<lv_label name="warning_text" bind_text="presenter.alert.warning" style_text_align="center">
-					<style name="text_warning"/>
+				<!-- The length it must be, while it isn't -->
+				<lv_label name="warning_text" bind_text="presenter.alert.warning" width="100%">
+					<style name="text_muted"/>
 					<bind_flag_if_eq subject="presenter.alert.warning" flag="hidden" ref_value=""/>
 				</lv_label>
 			</lv_obj>

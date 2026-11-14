@@ -49,6 +49,7 @@ namespace
 			f.field("b", b, "Opens dialog B");
 			f.field("alert", alert, "Opens the alert");
 			f.field("b_blocking", bBlocking, "Opens the blocking dialog");
+			f.field("untitled", untitled, "Opens the blocking dialog without a title");
 			f.field("form", form, "Opens the form; open from the start");
 		}
 
@@ -59,6 +60,7 @@ namespace
 		UI::Xml::IntSubject b;
 		UI::Xml::IntSubject alert;
 		UI::Xml::IntSubject bBlocking;
+		UI::Xml::IntSubject untitled;
 		UI::Xml::IntSubject form{1};
 		std::vector<std::string> calls;
 	};
@@ -78,6 +80,9 @@ namespace
 				</ds_dialog>
 				<ds_dialog name="blocking" bind_open="presenter.b_blocking" title="Must answer" blocking="true">
 					<lv_label name="text" text="Blocking"/>
+				</ds_dialog>
+				<ds_dialog name="untitled" bind_open="presenter.untitled" blocking="true">
+					<lv_label name="text" text="Untitled"/>
 				</ds_dialog>
 				<ds_dialog name="alert" bind_open="presenter.alert" title="Alert" alert="true">
 					<action trigger="dismissed" name="presenter.test.dismissed_alert"/>
@@ -266,6 +271,12 @@ TEST_F(DialogSurface, TappingOutsideClosesTheDialogUnlessAStepIsBlocking)
 	EXPECT_TRUE(presenter().calls.empty());
 	presenter().bBlocking.set(0);
 	presenter().a.set(0);
+
+	// A blocking dialog without a title has nothing for its header to show: no header
+	presenter().untitled.set(1);
+	ASSERT_NE(TestDialogs::shownNamed("untitled"), nullptr);
+	EXPECT_FALSE(chromeShows("header"));
+	presenter().untitled.set(0);
 }
 
 TEST_F(DialogSurface, AnAlertSetsTheDialogAsideUntilItIsAnswered)
