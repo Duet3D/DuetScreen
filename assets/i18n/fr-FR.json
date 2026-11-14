@@ -536,7 +536,8 @@
       "reverse": "Arrière",
       "stop": "Arrêt",
       "active": "Actif",
-      "standby": "En attente"
+      "standby": "En attente",
+      "deselect": "Désélectionner"
     },
     "spindle": {
       "speed": "Vitesse de broche"

@@ -536,7 +536,8 @@
       "reverse": "Para trás",
       "stop": "Parar",
       "active": "Ativo",
-      "standby": "Em espera"
+      "standby": "Em espera",
+      "deselect": "Desselecionar"
     },
     "spindle": {
       "speed": "Velocidade do fuso"

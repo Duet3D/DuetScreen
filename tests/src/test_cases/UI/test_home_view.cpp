@@ -1785,6 +1785,14 @@ TEST_F(TestHomeViewWithData, ToolsTabSelectsToolsAndTurnsAPrintersSpindle)
 	ASSERT_FALSE(sent.empty());
 	EXPECT_EQ(sent.back(), "T2\n");
 
+	// The tool in use is deselected from its card
+	lv_obj_t* deselect = lv_obj_find_by_name(card(0), "deselect");
+	ASSERT_NE(deselect, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(deselect, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(card(2), "deselect"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(deselect, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "T-1\n");
+
 	// The extrusion factor opens its shared dialog
 	lv_obj_t* factor = lv_obj_find_by_name(lv_obj_find_by_name(tools, "extrusion_factor"), "value");
 	ASSERT_NE(factor, nullptr);

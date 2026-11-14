@@ -536,7 +536,8 @@
       "reverse": "Achteruit",
       "stop": "Stop",
       "active": "Actief",
-      "standby": "Stand-by"
+      "standby": "Stand-by",
+      "deselect": "Deselecteren"
     },
     "spindle": {
       "speed": "Spindeltoerental"

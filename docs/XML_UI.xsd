@@ -2156,6 +2156,7 @@
 			<xs:enumeration value="tr.tools.active"/>
 			<xs:enumeration value="tr.tools.amount"/>
 			<xs:enumeration value="tr.tools.bed_and_chamber"/>
+			<xs:enumeration value="tr.tools.deselect"/>
 			<xs:enumeration value="tr.tools.extrude"/>
 			<xs:enumeration value="tr.tools.extrusion_factor"/>
 			<xs:enumeration value="tr.tools.filament"/>

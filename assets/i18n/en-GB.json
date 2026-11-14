@@ -537,7 +537,8 @@
       "reverse": "Reverse",
       "stop": "Stop",
       "active": "Active",
-      "standby": "Standby"
+      "standby": "Standby",
+      "deselect": "Deselect"
     },
     "spindle": {
       "speed": "Spindle speed"

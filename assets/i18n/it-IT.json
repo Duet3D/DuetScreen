@@ -537,7 +537,8 @@
       "reverse": "Indietro",
       "stop": "Ferma",
       "active": "Attivo",
-      "standby": "Standby"
+      "standby": "Standby",
+      "deselect": "Deseleziona"
     },
     "spindle": {
       "speed": "Velocità del mandrino"

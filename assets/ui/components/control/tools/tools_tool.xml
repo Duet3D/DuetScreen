@@ -1,5 +1,5 @@
 <!--
-  One tool, as a card: its name, then "In use" or Select; a row per heater (tools_tool_heater.xml); its filament, if it
+  One tool, as a card: its name, then "In use" and Deselect, or Select; a row per heater (tools_tool_heater.xml); its filament, if it
   takes any (tap to choose one to load); and its spindle's speed, if it has one (tap to set it), on a printer's tool
   too. Outlined while it is the tool in use. A gap in the tools (a null item) isn't shown. Nothing that would change
   the job can be pressed while printing.
@@ -27,6 +27,11 @@
 				<style name="chip_accent"/>
 				<bind_flag_if_eq subject="row.state|eq:active" flag="hidden" ref_value="0"/>
 			</lv_label>
+			<ds_button name="deselect" translation_tag="tr.tools.deselect" height="content" style_min_height="36">
+				<bind_flag_if_eq subject="row.state|eq:active" flag="hidden" ref_value="0"/>
+				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="actions.tool.toggle" arg="{row.index}"/>
+			</ds_button>
 			<ds_button name="select" translation_tag="tr.tools.select" height="content" style_min_height="36">
 				<bind_flag_if_eq subject="row.state|eq:active" flag="hidden" ref_value="1"/>
 				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>

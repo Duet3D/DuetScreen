@@ -536,7 +536,8 @@
       "reverse": "Rückwärts",
       "stop": "Stopp",
       "active": "Aktiv",
-      "standby": "Standby"
+      "standby": "Standby",
+      "deselect": "Abwählen"
     },
     "spindle": {
       "speed": "Spindeldrehzahl"

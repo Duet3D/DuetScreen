@@ -536,7 +536,8 @@
       "reverse": "Atrás",
       "stop": "Parar",
       "active": "Activo",
-      "standby": "En espera"
+      "standby": "En espera",
+      "deselect": "Deseleccionar"
     },
     "spindle": {
       "speed": "Velocidad del husillo"
