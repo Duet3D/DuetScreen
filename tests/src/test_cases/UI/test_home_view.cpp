@@ -1002,6 +1002,63 @@ TEST_F(TestHomeViewWithData, ConsoleReferenceSearchesAndPicks)
 	EXPECT_EQ(TestDialogs::shownNamed("reference_dialog"), nullptr);
 }
 
+TEST_F(TestHomeViewWithData, ConsoleListsScrollWhenDragged)
+{
+	UI::openScreen(std::string_view("console"));
+	lv_indev_t* mouse = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	const auto drag = [mouse](lv_obj_t* obj, int32_t dx, int32_t dy)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		const lv_point_t from{(area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2};
+		lv_test_mouse_move_to(from.x, from.y);
+		lv_test_mouse_press();
+		lv_indev_read(mouse);
+		for (int step = 1; step <= 10; step++)
+		{
+			lv_test_mouse_move_to(from.x + dx * step / 10, from.y + dy * step / 10);
+			lv_indev_read(mouse);
+		}
+		lv_test_mouse_release();
+		lv_indev_read(mouse);
+		lv_timer_handler();
+	};
+	const auto dragBy = [&](lv_obj_t* obj, int32_t dy) { drag(obj, 0, dy); };
+	const auto dragByX = [&](lv_obj_t* obj, int32_t dx) { drag(obj, dx, 0); };
+
+	// The reference: dragged up, it shows later G-codes
+	lv_obj_send_event(consolePart("reference"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("reference_dialog"), nullptr);
+	lv_obj_t* list = TestDialogs::find("list");
+	ASSERT_NE(list, nullptr);
+	dragBy(list, -150);
+	EXPECT_GT(lv_obj_get_scroll_y(list), 0) << "the reference";
+	UI::closeDialogs();
+
+	// The log: more than a screenful, dragged down, it shows earlier lines
+	for (int i = 0; i < 40; i++)
+	{
+		Model::get().post<EventType::Response>(ResponseType::INFO, fmt::format("response {:d}", i));
+	}
+	deliverModelEvents();
+	lv_obj_t* output = consolePart("output");
+	lv_obj_update_layout(lv_screen_active());
+	const int32_t before = lv_obj_get_scroll_y(output);
+	dragBy(output, 150);
+	EXPECT_LT(lv_obj_get_scroll_y(output), before) << "the log";
+
+	// The recent commands: more than fit, dragged left, they show the oldest
+	for (int i = 0; i < 6; i++)
+	{
+		Model::get().post<EventType::ConsoleCommand>(fmt::format("M98 P\"macros/a long macro name {:d}.g\"", i));
+	}
+	deliverModelEvents();
+	lv_obj_t* recent = consolePart("recent");
+	dragByX(recent, -300);
+	EXPECT_GT(lv_obj_get_scroll_x(recent), 0) << "the recent commands";
+}
+
 TEST_F(TestHomeViewWithData, ConsoleSendsAndRecallsRecentCommands)
 {
 	std::vector<std::string> sent;
