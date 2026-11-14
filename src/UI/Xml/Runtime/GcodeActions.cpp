@@ -22,7 +22,9 @@ namespace UI::Xml::GcodeActions
 
 	void registerAll()
 	{
-		Actions::addGlobal(
-			"gcode.send", "Send `arg` to the printer as G-code, e.g. `arg=\"M106 P{number} S{event.value}\"`", send);
+		Actions::addGlobal("gcode.send",
+						   "Send `arg` to the printer as G-code, e.g. `arg=\"M106 P{number} S{event.value}\"`",
+						   "tr.actions.gcode_send",
+						   send);
 	}
 } // namespace UI::Xml::GcodeActions

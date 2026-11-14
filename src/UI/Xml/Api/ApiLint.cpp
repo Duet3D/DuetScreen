@@ -98,6 +98,10 @@ namespace UI::Xml::Api
 				for (const auto& action : reference.globalActions)
 				{
 					m_globalActions.insert(action.name);
+					if (!action.titleTag.empty())
+					{
+						m_offeredTitles.emplace_back(action.name, action.titleTag);
+					}
 				}
 				for (const auto& style : reference.styles)
 				{
@@ -164,6 +168,7 @@ namespace UI::Xml::Api
 				}
 				examples();
 				widgetFiles();
+				offeredActions();
 
 				std::sort(m_issues.begin(),
 						  m_issues.end(),
@@ -192,6 +197,21 @@ namespace UI::Xml::Api
 					}
 				}
 				return all;
+			}
+
+			/** Check that the title of each action offered to users is a translation key that exists */
+			void offeredActions()
+			{
+				for (const auto& [name, tag] : m_offeredTitles)
+				{
+					const auto key = Translations::key(tag);
+					if (!key || !m_translations.contains(*key))
+					{
+						m_issues.push_back({.file = name,
+											.line = 0,
+											.message = fmt::format("no translation `{:s}` for its title", tag)});
+					}
+				}
 			}
 
 			/** The placeable widget `id`, or nullptr */
@@ -1402,17 +1422,18 @@ namespace UI::Xml::Api
 									.message = fmt::format("{:s} (in {:s})", message, context.scope.where)});
 			}
 
-			const Reference& m_reference;									 // What the UI provides
-			std::vector<Field> m_globals;									 // Every data source's fields
-			std::map<std::string, const Presenter*> m_presenters;			 // Presenters by name
-			std::map<std::string, const WidgetSpec*, std::less<>> m_widgets; // Widget specs by name
-			NameSet m_globalActions;										 // Global action names
-			NameSet m_styles;												 // Theme style names
-			NameSet m_consts;												 // Theme const and colour names
-			NameSet m_fonts;												 // Font names
-			NameSet m_translations;											 // Translation keys
-			NameSet m_triggers;												 // Action trigger names
-			std::map<std::string, ComponentDef, std::less<>> m_components;	 // Components by name
+			const Reference& m_reference;									  // What the UI provides
+			std::vector<Field> m_globals;									  // Every data source's fields
+			std::map<std::string, const Presenter*> m_presenters;			  // Presenters by name
+			std::map<std::string, const WidgetSpec*, std::less<>> m_widgets;  // Widget specs by name
+			NameSet m_globalActions;										  // Global action names
+			std::vector<std::pair<std::string, std::string>> m_offeredTitles; // Offered actions' names and titles' keys
+			NameSet m_styles;												  // Theme style names
+			NameSet m_consts;												  // Theme const and colour names
+			NameSet m_fonts;												  // Font names
+			NameSet m_translations;											  // Translation keys
+			NameSet m_triggers;												  // Action trigger names
+			std::map<std::string, ComponentDef, std::less<>> m_components;	  // Components by name
 			std::deque<ComponentDef> m_examples; // The widgets' examples, as components; a deque keeps them in place
 			std::vector<std::string> m_stack;	 // Components being checked, outermost first
 			std::vector<LintIssue> m_issues;	 // Problems found

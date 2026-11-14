@@ -38,6 +38,7 @@ namespace UI::ToolActions
 			"tool.toggle",
 			"Select the tool numbered `arg`, or deselect it if selected, e.g. `arg=\"{row.index}\"` in a row of "
 			"`om.tools`",
+			"tr.actions.tool_toggle",
 			toggleTool);
 	}
 } // namespace UI::ToolActions

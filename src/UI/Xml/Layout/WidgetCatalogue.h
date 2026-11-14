@@ -48,7 +48,8 @@ namespace UI::Xml
 		Bool,	// On or off, with a switch
 		Text,	// Text, typed on the keyboard
 		Choice, // One of a fixed list of options
-		Row		// One row of a list the UI publishes (a fan, a tool, …), by the value of one of its fields
+		Row,	// One row of a list the UI publishes (a fan, a tool, …), by the value of one of its fields
+		Action	// An action offered to users (Actions::offered()), by its name, or none (empty)
 	};
 
 	/** One of a Choice setting's options */
@@ -75,6 +76,7 @@ namespace UI::Xml
 		std::string key{};	 // Row: the rows' field whose value is stored, without `row.`, e.g. "index"
 		std::string label{}; // Row: the rows' field shown, without `row.`, e.g. "name|default:tr.fine_tune.fan"
 		size_t maxLength = 64;						// Text: longest value, in bytes
+		bool constant = false; // Text: given to the component as a constant, `'<text>'` (see Binding/Constants.h)
 
 		/**
 		 * `value` as a value of this setting, or nullopt if it isn't one. Numbers and text are accepted for each
@@ -86,10 +88,14 @@ namespace UI::Xml
 		/** `value` (an accepted one) as XML writes a prop value: "5", "true", "Bed" */
 		static std::string toProp(const nlohmann::json& value);
 
+		/** `value` (an accepted one) as given to the component: as toProp(), as a constant for a `constant` setting */
+		std::string propOf(const nlohmann::json& value) const;
+
 		/**
-		 * What the user chooses from: a Choice's options, or a Row's list as it is now, one option per row (its key
-		 * as the value, its label as the title) but the gaps of an object model list (rows whose `exists` is 0);
-		 * empty for the other kinds, or a list that isn't published
+		 * What the user chooses from: a Choice's options; a Row's list as it is now, one option per row (its key
+		 * as the value, its label as the title) but the gaps of an object model list (rows whose `exists` is 0); or
+		 * for an Action, none, the actions offered to users, and the default if it isn't one of them. Empty for the
+		 * other kinds, or a list that isn't published.
 		 */
 		std::vector<SettingOption> choices() const;
 	};

@@ -595,6 +595,18 @@
       "current_tool_desc": "La herramienta en uso, con las temperaturas de sus calentadores",
       "no_tool": "Ninguna herramienta seleccionada"
     },
+    "actions": { /* Actions a user may choose for a widget */
+      "none": "Nada",
+      "gcode_send": "Enviar G-code",
+      "navigation_open": "Abrir una página",
+      "babystep_open": "Babystepping",
+      "factors_speed": "Cambiar el factor de velocidad",
+      "factors_extrusion": "Cambiar el factor de extrusión",
+      "job_pause": "Pausar el trabajo",
+      "job_resume": "Reanudar el trabajo",
+      "job_ask_cancel": "Cancelar el trabajo",
+      "tool_toggle": "Seleccionar o deseleccionar una herramienta"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

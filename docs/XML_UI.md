@@ -383,9 +383,12 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
 | --- | --- | --- |
 | `int` | a number, on the number pad | `min`, `max`, `unit` |
 | `bool` | on or off, with a switch | |
-| `text` | text, typed in the settings on the keyboard | `max_length` (default 64) |
+| `text` | text, typed in the settings on the keyboard | `max_length` (default 64); `constant`: given as a constant, `'<text>'`, for a prop that takes a name |
 | `choice` | one of `options` (`[{"value": 30, "title": "30 s"}]`, or `title_tag`) | |
 | `row` | a row of a global list, as the printer has them now: which fan, which tool | `list`, `key` (the field stored), `label` (the field shown), both `row.<field>` |
+| `action` | an action, or none (`""`): those offered to users (`Actions::addGlobal()` with a title), and the default | |
+
+An `action` setting goes with a `text` setting for the action's `arg`; the component runs them with `<action name="$tap_action" arg="$tap_arg"/>`, which does nothing while the name is empty.
 
 The component takes them as props, and uses them as `$name`, or `${name}` inside a longer value:
 

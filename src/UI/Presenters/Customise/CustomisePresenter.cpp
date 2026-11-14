@@ -64,6 +64,7 @@ namespace UI
 				return setting.unit.empty() ? text : text + " " + setting.unit;
 			case Xml::SettingKind::Choice:
 			case Xml::SettingKind::Row:
+			case Xml::SettingKind::Action:
 				for (const auto& option : setting.choices())
 				{
 					if (option.value == text)
@@ -417,6 +418,7 @@ namespace UI
 			break; // Typed in its row
 		case Xml::SettingKind::Choice:
 		case Xml::SettingKind::Row:
+		case Xml::SettingKind::Action:
 		{
 			const std::string current = Xml::SettingDef::toProp(value);
 			const auto choices = setting->choices();

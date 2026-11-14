@@ -1288,6 +1288,16 @@
 	</xs:simpleType>
 	<xs:simpleType name="translation.names">
 		<xs:restriction base="xs:string">
+			<xs:enumeration value="tr.actions.babystep_open"/>
+			<xs:enumeration value="tr.actions.factors_extrusion"/>
+			<xs:enumeration value="tr.actions.factors_speed"/>
+			<xs:enumeration value="tr.actions.gcode_send"/>
+			<xs:enumeration value="tr.actions.job_ask_cancel"/>
+			<xs:enumeration value="tr.actions.job_pause"/>
+			<xs:enumeration value="tr.actions.job_resume"/>
+			<xs:enumeration value="tr.actions.navigation_open"/>
+			<xs:enumeration value="tr.actions.none"/>
+			<xs:enumeration value="tr.actions.tool_toggle"/>
 			<xs:enumeration value="tr.app_drawer.console"/>
 			<xs:enumeration value="tr.app_drawer.fan"/>
 			<xs:enumeration value="tr.app_drawer.files"/>
@@ -4103,7 +4113,7 @@
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_obj-action.attributes">
 		<xs:attribute name="name" type="action">
-			<xs:annotation><xs:documentation>The action to run (required): `presenter.&lt;action&gt;` or `actions.&lt;group&gt;.&lt;action&gt;`</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>The action to run (required): `presenter.&lt;action&gt;` or `actions.&lt;group&gt;.&lt;action&gt;`; empty for none, so a component can leave it to a prop (`name=&quot;$tap_action&quot;`)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="trigger" type="trigger">
 			<xs:annotation><xs:documentation>The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `&lt;ds_slider numberpad=&quot;own&quot;&gt;`'s value was tapped to type one) or `dismissed` (a `&lt;ds_modal&gt;` was closed by the user)</xs:documentation></xs:annotation>

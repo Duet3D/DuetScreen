@@ -8,6 +8,7 @@
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Runtime/Translations.h"
+#include "UI/Xml/View/Actions.h"
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -19,13 +20,17 @@ namespace UI::Xml
 	namespace
 	{
 		/** Each kind with its name in a widget file */
-		constexpr std::array<std::pair<SettingKind, std::string_view>, 5> KIND_NAMES = {{
+		constexpr std::array<std::pair<SettingKind, std::string_view>, 6> KIND_NAMES = {{
 			{SettingKind::Int, "int"},
 			{SettingKind::Bool, "bool"},
 			{SettingKind::Text, "text"},
 			{SettingKind::Choice, "choice"},
 			{SettingKind::Row, "row"},
+			{SettingKind::Action, "action"},
 		}};
+
+		/** The translation key (as `_()` takes it) of the title of an Action setting's "no action" */
+		constexpr std::string_view NO_ACTION_TAG = "actions.none";
 
 		std::map<std::string, WidgetDef, std::less<>> s_widgets; // The pool, by id
 
@@ -169,6 +174,7 @@ namespace UI::Xml
 				break;
 			case SettingKind::Text:
 				setting.maxLength = json.value("max_length", setting.maxLength);
+				setting.constant = json.value("constant", false);
 				break;
 			case SettingKind::Choice:
 				for (const auto& option : json.value("options", nlohmann::json::array()))
@@ -197,6 +203,7 @@ namespace UI::Xml
 				}
 				break;
 			case SettingKind::Bool:
+			case SettingKind::Action:
 				break;
 			}
 
@@ -270,8 +277,22 @@ namespace UI::Xml
 				return value;
 			}
 			return std::nullopt;
+		case SettingKind::Action:
+			// None, or any global action: a widget's default may be one users aren't offered
+			if (value.is_string() &&
+				(value.get<std::string>().empty() || Actions::globals().has(value.get<std::string>())))
+			{
+				return value;
+			}
+			return std::nullopt;
 		}
 		return std::nullopt;
+	}
+
+	std::string SettingDef::propOf(const nlohmann::json& value) const
+	{
+		const std::string prop = toProp(value);
+		return constant ? "'" + prop + "'" : prop;
 	}
 
 	std::string SettingDef::toProp(const nlohmann::json& value)
@@ -292,6 +313,26 @@ namespace UI::Xml
 		if (kind == SettingKind::Choice)
 		{
 			return options;
+		}
+		if (kind == SettingKind::Action)
+		{
+			std::vector<SettingOption> actions{{.value = "", .title = "", .titleTag = std::string(NO_ACTION_TAG)}};
+			for (const auto& action : Actions::offered())
+			{
+				const auto tag = Translations::key(action.titleTag);
+				actions.push_back(
+					{.value = action.name, .title = action.name, .titleTag = std::string(tag.value_or(""))});
+			}
+			const std::string defaultAction = toProp(fallback);
+			const bool offered =
+				std::any_of(actions.begin(),
+							actions.end(),
+							[&defaultAction](const SettingOption& option) { return option.value == defaultAction; });
+			if (!offered)
+			{
+				actions.push_back({.value = defaultAction, .title = defaultAction, .titleTag = ""});
+			}
+			return actions;
 		}
 		std::vector<SettingOption> rows;
 		ListBase* rowList = kind == SettingKind::Row ? Globals::findList(nullptr, list) : nullptr;
@@ -341,7 +382,7 @@ namespace UI::Xml
 			{
 				value = setting.accept(values[setting.name]);
 			}
-			result[setting.name] = SettingDef::toProp(value.value_or(setting.fallback));
+			result[setting.name] = setting.propOf(value.value_or(setting.fallback));
 		}
 		return result;
 	}

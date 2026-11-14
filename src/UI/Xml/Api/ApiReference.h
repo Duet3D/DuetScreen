@@ -33,6 +33,7 @@ namespace UI::Xml::Api
 		std::string name;		 // As XML writes it, e.g. "presenter.fans.set_speed" or "actions.heater.toggle"
 		std::string description; // What it does and what it takes
 		std::string file = {};	 // For a global action, the source file that adds it, e.g. "src/…/HeaterActions.cpp"
+		std::string titleTag = {}; // For a global action offered to users, its title's key (`tr.<key>`); else empty
 	};
 
 	/** A data source: printer data published as global names */

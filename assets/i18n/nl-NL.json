@@ -595,6 +595,18 @@
       "current_tool_desc": "Het gereedschap in gebruik, met de temperaturen van zijn verwarmers",
       "no_tool": "Geen gereedschap gekozen"
     },
+    "actions": { /* Actions a user may choose for a widget */
+      "none": "Niets",
+      "gcode_send": "G-code verzenden",
+      "navigation_open": "Pagina openen",
+      "babystep_open": "Babystepping",
+      "factors_speed": "Snelheidsfactor wijzigen",
+      "factors_extrusion": "Extrusiefactor wijzigen",
+      "job_pause": "Taak pauzeren",
+      "job_resume": "Taak hervatten",
+      "job_ask_cancel": "Taak annuleren",
+      "tool_toggle": "Gereedschap kiezen of vrijgeven"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

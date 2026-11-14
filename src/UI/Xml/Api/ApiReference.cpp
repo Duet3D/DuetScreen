@@ -425,6 +425,16 @@ namespace UI::Xml::Api
 		reference.sources = sources();
 		reference.triggers = Actions::triggers();
 		reference.globalActions = actionsOf(Actions::globals(), "");
+		for (auto& action : reference.globalActions)
+		{
+			for (const auto& offered : Actions::offered())
+			{
+				if (offered.name == action.name)
+				{
+					action.titleTag = offered.titleTag;
+				}
+			}
+		}
 		reference.presenters = presenters();
 		for (const WidgetSpec* spec : Widgets::specs())
 		{

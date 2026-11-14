@@ -139,7 +139,15 @@ namespace UI::Xml::Api
 						 : "| Action | Description |\n| --- | --- |\n";
 			for (const auto& action : actions)
 			{
-				fmt::format_to(std::back_inserter(out), "| {:s} | {:s} |", code(action.name), cell(action.description));
+				// An action offered to users says so, by the name they see it by
+				const std::string offered =
+					action.titleTag.empty()
+						? std::string()
+						: fmt::format("{:s} Offered to users for their widgets' action settings, as {:s}.",
+									  action.description.ends_with('.') ? "" : ".",
+									  code(action.titleTag));
+				fmt::format_to(
+					std::back_inserter(out), "| {:s} | {:s} |", code(action.name), cell(action.description + offered));
 				if (files)
 				{
 					const std::string name = std::filesystem::path(action.file).filename().string();
@@ -338,7 +346,10 @@ namespace UI::Xml::Api
 			case SettingKind::Bool:
 				return "on or off";
 			case SettingKind::Text:
-				return fmt::format("text, up to {:d} bytes", setting.maxLength);
+				return fmt::format(
+					"text, up to {:d} bytes{:s}", setting.maxLength, setting.constant ? ", given as a constant" : "");
+			case SettingKind::Action:
+				return "an action offered to users, or none";
 			case SettingKind::Choice:
 			{
 				std::vector<std::string> values;

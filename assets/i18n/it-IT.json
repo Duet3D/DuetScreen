@@ -595,6 +595,18 @@
       "current_tool_desc": "L'utensile in uso, con le temperature dei suoi riscaldatori",
       "no_tool": "Nessun utensile selezionato"
     },
+    "actions": { /* Actions a user may choose for a widget */
+      "none": "Niente",
+      "gcode_send": "Invia G-code",
+      "navigation_open": "Apri una pagina",
+      "babystep_open": "Babystepping",
+      "factors_speed": "Cambia il fattore di velocità",
+      "factors_extrusion": "Cambia il fattore di estrusione",
+      "job_pause": "Metti in pausa il lavoro",
+      "job_resume": "Riprendi il lavoro",
+      "job_ask_cancel": "Annulla il lavoro",
+      "tool_toggle": "Seleziona o deseleziona un utensile"
+    },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
       "gcode_G10_temperature_desc": "Tool Temperature Setting",

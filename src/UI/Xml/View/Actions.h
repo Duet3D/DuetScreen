@@ -183,6 +183,27 @@ namespace UI::Xml
 					   ActionHandler handler,
 					   std::source_location where = std::source_location::current());
 
+		/** A global action users may choose for a widget they place, in a setting of kind `action` */
+		struct Offered
+		{
+			std::string name;	  // As XML writes it: `actions.<group>.<action>`
+			std::string titleTag; // Translation key of what it is called on the screen, `tr.<key>`
+		};
+
+		/**
+		 * As addGlobal(), and offer the action to users, called what `titleTag` (`tr.<key>`) translates to, for the
+		 * settings of the widgets they place (see Layout/WidgetCatalogue.h). Offer only an action that needs nothing
+		 * but its `arg`: not one that must be raised from a list's row.
+		 */
+		void addGlobal(std::string name,
+					   std::string description,
+					   std::string titleTag,
+					   ActionHandler handler,
+					   std::source_location where = std::source_location::current());
+
+		/** The actions offered to users (see addGlobal()), in the order added */
+		const std::vector<Offered>& offered();
+
 		/** The global actions (see addGlobal()), by their full names (`actions.<group>.<action>`) */
 		const ActionHandlerSet& globals();
 

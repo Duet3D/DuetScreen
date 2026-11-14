@@ -177,9 +177,14 @@ namespace UI::Xml
 		void actionApply(lv_xml_parser_state_t* state, const char** attrs)
 		{
 			const char* name = lv_xml_get_value_of(attrs, "name");
-			if (name == nullptr || name[0] == '\0')
+			if (name == nullptr)
 			{
 				LOG_WARN("<action> without a name is ignored");
+				return;
+			}
+			// An empty name is no action, so a component can leave its actions to props, e.g. `name="$tap_action"`
+			if (name[0] == '\0')
+			{
 				return;
 			}
 
@@ -345,7 +350,8 @@ namespace UI::Xml
 					 R"(<action trigger="value_confirmed" name="actions.gcode.send" arg="M106 P{row.number} S{event.value}"/>)",
 				 .attributes =
 					 {{"name",
-					   "The action to run (required): `presenter.<action>` or `actions.<group>.<action>`",
+					   "The action to run (required): `presenter.<action>` or `actions.<group>.<action>`; empty for "
+					   "none, so a component can leave it to a prop (`name=\"$tap_action\"`)",
 					   AttributeKind::Action},
 					  {"trigger",
 					   "The event that runs it (default `clicked`): an LVGL event name such as "
@@ -414,6 +420,31 @@ namespace UI::Xml
 		{
 			s_globals.add(
 				std::string(GLOBAL_PREFIX) + name, std::move(description), std::move(handler), where.file_name());
+		}
+
+		/** The actions offered to users, in the order added */
+		static std::vector<Offered>& offeredActions()
+		{
+			static std::vector<Offered> s_offered;
+			return s_offered;
+		}
+
+		void addGlobal(std::string name,
+					   std::string description,
+					   std::string titleTag,
+					   ActionHandler handler,
+					   std::source_location where)
+		{
+			std::string fullName = std::string(GLOBAL_PREFIX) + name;
+			auto& offered = offeredActions();
+			std::erase_if(offered, [&fullName](const Offered& action) { return action.name == fullName; });
+			offered.push_back({.name = fullName, .titleTag = std::move(titleTag)});
+			s_globals.add(std::move(fullName), std::move(description), std::move(handler), where.file_name());
+		}
+
+		const std::vector<Offered>& offered()
+		{
+			return offeredActions();
 		}
 
 		const ActionHandlerSet& globals()

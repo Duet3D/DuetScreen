@@ -13,6 +13,7 @@ namespace UI::FactorsActions
 	{
 		Xml::Actions::addGlobal("factors.speed",
 								"Open the dialog to change the speed factor",
+								"tr.actions.factors_speed",
 								[](const Xml::ActionArgs&)
 								{
 									if (auto* factors = FactorsPresenter::shared())
@@ -24,6 +25,7 @@ namespace UI::FactorsActions
 			"factors.extrusion",
 			"Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every "
 			"extruder's",
+			"tr.actions.factors_extrusion",
 			[](const Xml::ActionArgs& args)
 			{
 				auto* factors = FactorsPresenter::shared();

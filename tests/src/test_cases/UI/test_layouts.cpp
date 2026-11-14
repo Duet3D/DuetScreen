@@ -11,6 +11,7 @@
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/Snap.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
+#include "UI/Xml/View/Actions.h"
 #include <array>
 #include <filesystem>
 #include <fmt/format.h>
@@ -208,6 +209,40 @@ TEST_F(TestLayouts, SettingsAcceptOnlyTheirValues)
 	EXPECT_FALSE(def.setting("t")->accept("abcde"));
 	EXPECT_EQ(def.setting("c")->accept("b"), json(R"("b")"));
 	EXPECT_FALSE(def.setting("c")->accept("z"));
+}
+
+TEST_F(TestLayouts, ActionSettingsChooseAnOfferedActionOrNone)
+{
+	UI::Xml::Actions::addGlobal(
+		"test.offered", "An action users may choose", "tr.actions.gcode_send", [](const auto&) {});
+	UI::Xml::Actions::addGlobal("test.hidden", "An action users aren't offered", [](const auto&) {});
+	const WidgetDef def = widget("w", R"({"slots": ["d"], "settings": [
+		{"name": "tap", "kind": "action", "default": "actions.test.hidden"},
+		{"name": "hold", "kind": "action", "default": ""},
+		{"name": "title", "kind": "text", "constant": true, "default": "Hotend"}]})");
+
+	// None, any global action (a widget's own default needn't be offered), but nothing else
+	EXPECT_EQ(def.setting("tap")->accept(""), json(R"("")"));
+	EXPECT_EQ(def.setting("tap")->accept("actions.test.offered"), json(R"("actions.test.offered")"));
+	EXPECT_FALSE(def.setting("tap")->accept("actions.test.nothing"));
+	EXPECT_FALSE(def.setting("tap")->accept(1));
+
+	// The choices are none, the offered actions, and the default if it isn't offered
+	std::vector<std::string> values;
+	for (const auto& option : def.setting("tap")->choices())
+	{
+		values.push_back(option.value);
+	}
+	EXPECT_NE(std::find(values.begin(), values.end(), ""), values.end());
+	EXPECT_NE(std::find(values.begin(), values.end(), "actions.test.offered"), values.end());
+	EXPECT_NE(std::find(values.begin(), values.end(), "actions.test.hidden"), values.end());
+	EXPECT_EQ(def.setting("hold")->choices().size(), def.setting("tap")->choices().size() - 1);
+
+	// A constant text setting is given to the component as a constant
+	const auto props = def.propsFor(json(R"({"title": "Bed's", "tap": "actions.test.offered"})"));
+	EXPECT_EQ(props.at("title"), "'Bed's'");
+	EXPECT_EQ(props.at("tap"), "actions.test.offered");
+	EXPECT_EQ(props.at("hold"), "");
 }
 
 TEST_F(TestLayouts, LayoutFileRoundTrips)

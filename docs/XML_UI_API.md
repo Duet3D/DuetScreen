@@ -255,29 +255,29 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 
 | Action | Description | Added in |
 | --- | --- | --- |
-| `actions.babystep.open` | Open the shared babystepping dialog | [BabystepActions.cpp](../src/UI/Presenters/Modals/BabystepActions.cpp) |
+| `actions.babystep.open` | Open the shared babystepping dialog. Offered to users for their widgets' action settings, as `tr.actions.babystep_open`. | [BabystepActions.cpp](../src/UI/Presenters/Modals/BabystepActions.cpp) |
 | `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
-| `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
-| `actions.factors.speed` | Open the dialog to change the speed factor | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.gauge.edit` | Change the value a row of `gauges` shows: a heater's target (its standby one while on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else asking for it on the number pad; or open the speed or extrusion factor dialog. Does nothing for a row that isn't `editable`. | [GaugeActions.cpp](../src/UI/Presenters/Gauge/GaugeActions.cpp) |
-| `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"` | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
+| `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.toggle` | Cycle the heater through active, standby and off. From a row of a tool's heaters (`om.tools[…].heaters`), or of `om.heat.bedHeaters` or `om.heat.chamberHeaters`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
-| `actions.job.ask_cancel` | Ask whether to cancel the job; it is cancelled, which also turns the heaters off, only if the user says so | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
-| `actions.job.pause` | Pause the job | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.job.ask_cancel` | Ask whether to cancel the job; it is cancelled, which also turns the heaters off, only if the user says so. Offered to users for their widgets' action settings, as `tr.actions.job_ask_cancel`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.job.pause` | Pause the job. Offered to users for their widgets' action settings, as `tr.actions.job_pause`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
-| `actions.job.resume` | Resume the paused job | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.job.resume` | Resume the paused job. Offered to users for their widgets' action settings, as `tr.actions.job_resume`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.jog.distance` | Use that jog distance. From a row of `jog.distances`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
 | `actions.jog.edit_distance` | Ask for a new value for that jog distance with a number pad, and use it. From a row of `jog.distances`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
 | `actions.jog.edit_feedrate` | Ask for a new value for that jog speed with a number pad, and use it. From a row of `jog.feedrates`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
 | `actions.jog.feedrate` | Use that jog speed. From a row of `jog.feedrates`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
-| `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"` | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
-| `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools` | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
+| `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
+| `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`, `value_tapped`
 
@@ -1680,7 +1680,7 @@ Written `<action>` inside any widget: run the named action when the widget raise
 
 | Attribute | Description |
 | --- | --- |
-| `name` | The action to run (required): `presenter.<action>` or `actions.<group>.<action>` |
+| `name` | The action to run (required): `presenter.<action>` or `actions.<group>.<action>`; empty for none, so a component can leave it to a prop (`name="$tap_action"`) |
 | `trigger` | The event that runs it (default `clicked`): an LVGL event name such as `value_changed` or `long_pressed`, `value_confirmed` (a DuetScreen widget's edit is finished), `value_tapped` (a `<ds_slider numberpad="own">`'s value was tapped to type one) or `dismissed` (a `<ds_modal>` was closed by the user) |
 | `arg` | Passed to the handler. `{event.value}` is replaced by the edited value, and `{name}` by the current value of the subject `name`, looked up from where the `<action>` is written |
 

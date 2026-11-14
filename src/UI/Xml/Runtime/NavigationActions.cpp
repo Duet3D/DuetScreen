@@ -16,7 +16,10 @@ namespace UI::Xml::NavigationActions
 
 	void registerAll()
 	{
-		Actions::addGlobal("navigation.open", "Open the screen registered as `arg`, e.g. `arg=\"control\"`", open);
+		Actions::addGlobal("navigation.open",
+						   "Open the screen registered as `arg`, e.g. `arg=\"control\"`",
+						   "tr.actions.navigation_open",
+						   open);
 		Actions::addGlobal(
 			"navigation.home", "Close every screen and show the home screens", [](const ActionArgs&) { home(); });
 		Actions::addGlobal(

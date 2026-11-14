@@ -12,6 +12,7 @@ namespace UI::BabystepActions
 	{
 		Xml::Actions::addGlobal("babystep.open",
 								"Open the shared babystepping dialog",
+								"tr.actions.babystep_open",
 								[](const Xml::ActionArgs&)
 								{
 									if (auto* dialog = BabystepDialogPresenter::shared())

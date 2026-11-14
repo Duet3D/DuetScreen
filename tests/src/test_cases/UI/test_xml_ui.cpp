@@ -1549,3 +1549,33 @@ TEST_F(TestXmlUi, ListFlowPlacesItemsInARowOrAPageAtATime)
 	EXPECT_TRUE(lv_obj_has_flag(dots, LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQ(lv_obj_get_height(lv_obj_get_child(pages, 0)), 200);
 }
+
+TEST_F(TestXmlUi, ActionsCanComeFromPropsAndAnEmptyOneIsNone)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	writeFile(bundleFile("components/prop_actions_screen.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<prop_action_button name="sends" tap_action="actions.gcode.send" tap_arg="G28"/>
+				<prop_action_button name="nothing"/>
+			</view>
+		</component>)");
+	writeFile(bundleFile("components/prop_action_button.xml"), R"(
+		<component>
+			<api>
+				<prop name="tap_action" type="string" default=""/>
+				<prop name="tap_arg" type="string" default=""/>
+			</api>
+			<view extends="ds_button" text="Go">
+				<action trigger="clicked" name="$tap_action" arg="$tap_arg"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	EXPECT_TRUE(UI::Xml::getIssues().empty());
+
+	auto& view = makeView("prop_actions_screen");
+	lv_obj_send_event(find(view, "nothing"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(m_sent.empty());
+	lv_obj_send_event(find(view, "sends"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(m_sent, std::vector<std::string>{"G28\n"});
+}
