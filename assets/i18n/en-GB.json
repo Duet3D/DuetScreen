@@ -61,6 +61,8 @@
     },
     "console": { /* Console screen */
       "input_placeholder": "Enter G-code command",
+      "reference": "G-code reference",
+      "search_placeholder": "Search by code, or by what it does",
       "shell": "Shell Mode"
     },
     "control": {
@@ -641,7 +643,7 @@
       "console_desc": "The console: send G-code and read the replies",
       "console_log": "Console log",
       "console_log_desc": "The printer's latest replies; tap to open the console",
-      "console_command_list": "GCode command list",
+      "console_command_list": "G-code reference",
       "console_command_list_desc": "Every G-code with what it does; tap one to put it in the console's input",
       "console_input": "Console input",
       "console_input_desc": "A line to type G-code into and send to the printer",

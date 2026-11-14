@@ -327,6 +327,21 @@
 		<!-- DuetScreen components -->
 		<style name="console_btn_anim" recolor="#secondary"/>
 
+		<!-- Console: a line is its time, then its text. Every line has an edge on the left, so their text lines up;
+			 it shows on a line that reports an outcome, in its colour (#success, #warning, #error), and warnings and
+			 errors are tinted too, so they stand out in a long log -->
+		<style name="console_line" bg_opa="0" radius="0" border_side="left" border_width="3" border_opa="0"
+			   shadow_width="0" outline_width="0" pad_left="5" pad_right="#pad" pad_ver="#pad_small"
+			   pad_column="#pad_large"/>
+		<style name="console_line_command" text_font="font_emphasis"/>
+		<style name="console_line_success" border_side="left" border_width="3" border_color="#success"
+			   border_opa="100%"/>
+		<style name="console_line_warning" border_side="left" border_width="3" border_color="#warning"
+			   border_opa="100%" bg_color="#warning" bg_opa="12%"/>
+		<style name="console_line_error" border_side="left" border_width="3" border_color="#error" border_opa="100%"
+			   bg_color="#error" bg_opa="15%"/>
+		<style name="console_time" text_color="#text_muted" text_font="font_subdued" pad_top="1"/>
+
 		<!-- E-stop: LVGL's palette red -->
 		<style name="estop" bg_color="0xf44336" text_color="0xffffff" radius="circle"/>
 

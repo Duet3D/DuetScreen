@@ -13,6 +13,7 @@
 #include "UI/Lvgl/LvTextarea.h"
 #include "UI/Presenters/Notifications/NotificationsPresenter.h"
 #include "UI/Styles/Theme.h"
+#include "UI/Widgets/Buttons/Button.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Inputs/Slider.h"
 #include "UI/Widgets/Layout/TabView.h"
@@ -926,7 +927,7 @@ TEST_F(TestHomeViewWithData, ConsoleView)
 	ZoneScoped;
 	UI::openScreen(std::string_view("console"));
 
-	// As the Duet and the logger would report them
+	// As the Duet and the logger would report them: each kind of line is marked its own way
 	Model::get().post<EventType::ConsoleCommand>(std::string("M115"));
 	Model::get().post<EventType::Response>(ResponseType::INFO, std::string("Testing response"));
 	Model::get().post<EventType::Response>(ResponseType::INFO, std::string("new multi-line response\nline 2"));
@@ -935,44 +936,106 @@ TEST_F(TestHomeViewWithData, ConsoleView)
 	Model::get().post<EventType::Response>(ResponseType::ERROR, std::string("Error response"));
 	Model::get().post<EventType::LogMessage>(
 		Log::DebugLevel::Info, Log::log_time_t{}, std::string("Testing log message"));
+	Model::get().post<EventType::LogMessage>(
+		Log::DebugLevel::Error, Log::log_time_t{}, std::string("Testing log error"));
 	deliverModelEvents();
-
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/duet_responses.png")
-	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list.png");
 
-	lv_obj_send_event(consolePart("command_visibility"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list_hidden.png");
+	// The reference opens as a dialog
+	lv_obj_send_event(consolePart("reference"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("reference_dialog"), nullptr);
+	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/reference.png");
+	UI::closeDialogs();
 
 	lv_obj_send_event(consolePart("input"), LV_EVENT_FOCUSED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/keyboard.png");
-
-	// Put back as it was, for the next test
-	lv_obj_send_event(consolePart("command_visibility"), LV_EVENT_CLICKED, nullptr);
 }
 
-TEST_F(TestHomeViewWithData, ConsoleNarrowsTheGcodesAndSends)
+TEST_F(TestHomeViewWithData, ConsoleReferenceSearchesAndPicks)
 {
-	std::vector<std::string> sent;
-	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	UI::openScreen(std::string_view("console"));
 	lv_obj_t* list = consolePart("list");
 	auto& input = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("input")));
+	auto& search = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("search")));
+	const auto codes = [&]
+	{
+		std::vector<std::string> found;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+		{
+			if (lv_obj_t* code = lv_obj_find_by_name(lv_obj_get_child(list, static_cast<int32_t>(i)), "gcode"))
+			{
+				found.emplace_back(lv_label_get_text(code));
+			}
+		}
+		return found;
+	};
 
-	input.setText("m11");
+	// Opened, it searches for the first word typed
+	input.setText("m11 S1");
+	lv_obj_send_event(consolePart("reference"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("reference_dialog"), nullptr);
+	EXPECT_EQ(search.getText(), "m11");
+	lv_obj_update_layout(lv_screen_active());
+	auto found = codes();
+	ASSERT_FALSE(found.empty());
+	for (const auto& code : found)
+	{
+		EXPECT_TRUE(code.starts_with("M11")) << code << " for lower case m11";
+	}
+
+	// It finds a G-code by what it does, too
+	search.setText("home");
+	lv_obj_update_layout(lv_screen_active());
+	found = codes();
+	EXPECT_NE(std::find(found.begin(), found.end(), "G28"), found.end()) << "G28 homes";
+
+	// Picking one types it and closes the reference
 	lv_obj_t* first = nullptr;
 	for (uint32_t i = 0; i < lv_obj_get_child_count(list) && first == nullptr; i++)
 	{
 		first = lv_obj_find_by_name(lv_obj_get_child(list, static_cast<int32_t>(i)), "gcode");
 	}
 	ASSERT_NE(first, nullptr);
-	EXPECT_TRUE(std::string_view(lv_label_get_text(first)).starts_with("M11")) << "typed lower case";
-
-	// Picking one types it; sending sends what is typed
+	const std::string picked = lv_label_get_text(first);
 	lv_obj_send_event(lv_obj_get_parent(first), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(input.getText(), lv_label_get_text(first));
-	input.setText("M115 P1");
-	lv_obj_send_event(consolePart("enter"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(sent, (std::vector<std::string>{"M115 P1\n"}));
+	EXPECT_EQ(input.getText(), picked);
+	EXPECT_EQ(TestDialogs::shownNamed("reference_dialog"), nullptr);
+}
+
+TEST_F(TestHomeViewWithData, ConsoleSendsAndRecallsRecentCommands)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	UI::openScreen(std::string_view("console"));
+	lv_obj_t* recent = consolePart("recent");
+	auto& input = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("input")));
+	const auto send = [&](const char* command)
+	{
+		input.setText(command);
+		lv_obj_send_event(consolePart("enter"), LV_EVENT_CLICKED, nullptr);
+		deliverModelEvents();
+	};
+	const auto recentCommands = [&]
+	{
+		std::vector<std::string> commands;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(recent); i++)
+		{
+			lv_obj_t* button = lv_obj_find_by_name(lv_obj_get_child(recent, static_cast<int32_t>(i)), "command");
+			commands.emplace_back(static_cast<UI::Button&>(*UI::LvObj::fromPtr(button)).getText());
+		}
+		return commands;
+	};
+
+	send("G28");
+	send("M114");
+	send("G28");
+	EXPECT_EQ(sent, (std::vector<std::string>{"G28\n", "M114\n", "G28\n"}));
+	EXPECT_EQ(recentCommands(), (std::vector<std::string>{"G28", "M114"})) << "newest first, each once";
+
+	// A recent command goes back in the text box, to send again
+	input.setText("");
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_get_child(recent, 1), "command"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(input.getText(), "M114");
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 

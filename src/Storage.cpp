@@ -63,8 +63,6 @@ constexpr StorageKey<std::chrono::milliseconds> ID_NOTIFICATION_TIMEOUT = {"ui:i
 constexpr StorageKey<ResponseType> ID_NOTIFICATION_LEVEL = {"ui:notification_level", ResponseType::INFO};
 constexpr StorageKey<bool> ID_NOTIFICATION_AUTO_CLOSE_ERROR = {"ui:notification_auto_close_error", false};
 
-constexpr StorageKey<bool> ID_UI_CONSOLE_COMMAND_LIST_COLLAPSED = {"ui:console_command_list_collapsed", false};
-
 constexpr StorageKey<std::vector<float>, std::vector<float> (*)()> ID_BABYSTEP_AMOUNT = {
 	"ui:baby_step_amount", +[]() -> std::vector<float> { return {0.01f, 0.05f}; }};
 constexpr StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTANCES = {
