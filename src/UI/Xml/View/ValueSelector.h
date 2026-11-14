@@ -1,35 +1,33 @@
 /*
  * ValueSelector.h
  *
- * The fields and actions behind value_selector.xml: a value with - and + beside it, tapped to type one in, and a row
- * of preset values below, tapped to use one and held to change it. A presenter owns one ValueSelector per value,
- * declares its fields, and handles its actions:
+ * A value chosen from a row of presets, which the user can change: the jog distance and speed, the extruder's feed
+ * distance and rate, the babystep size. A data source owns one ValueSelector per value and declares its fields, so
+ * every view that shows the value shares it:
  *
- *     MyPresenter::MyPresenter() : XmlPresenter("my")
- *     {
- *         for (auto& [name, description, handler] : Xml::ValueSelector::actions({&m_distance}))
- *             action(name, description, handler);
- *     }
- *     void MyPresenter::fields(Xml::FieldVisitor& f) { m_distance.fields(f); }
+ *     JogSource::JogSource() : DataSource("jog"), m_distance({.id = "jog.distance", ...}) {}
+ *     void JogSource::fields(FieldVisitor& f) { m_distance.fields(f); }  // source.jog.distance.*
  *
- *     <value_selector selector="distance" title="distance.title" value="distance.value" choices="distance.choices"/>
+ *     <value_selector selector="jog.distance" title="source.jog.distance.title"
+ *                     value="source.jog.distance.value" choices="source.jog.distance.choices"/>
  *
- * Its fields are named under the selector's id (e.g. "distance.title"). They are declared in fields(), and its
- * actions in actions(); both are listed in the UI API reference (docs/XML_UI_API.md).
+ * A selector's id is `<source>.<name>`: its fields are `source.<source>.<name>.title`, `.value` and `.choices`, and the
+ * id is the `arg` of the global actions that change it, `actions.selector.*` (SelectorActions.h). Actions raised from a
+ * row of its `choices` find it through the row.
  *
- * The presets and the value are kept in storage under the selector's storage key, so they survive a restart.
+ * The presets are kept in storage under the selector's storage key, so they survive a restart; so is the value, if
+ * the selector keeps it.
  */
 
 #pragma once
 
-#include "Actions.h"
 #include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
-#include <initializer_list>
+#include <cstddef>
 #include <limits>
 #include <string>
-#include <utility>
+#include <string_view>
 #include <vector>
 
 namespace UI::Xml
@@ -43,8 +41,9 @@ namespace UI::Xml
 		/** Declare the row's fields */
 		void fields(FieldVisitor& f) override;
 
-		StringSubject<16> text;			  // The preset, e.g. "10"
-		ValueSelector* owner = nullptr;	  // The selector it belongs to; not shown
+		StringSubject<16> text;			// The preset, e.g. "10"
+		IntSubject selected;			// 1 if it is the value chosen
+		ValueSelector* owner = nullptr; // The selector it belongs to; not shown
 	};
 
 	class ValueSelector : public FieldProvider
@@ -53,56 +52,72 @@ namespace UI::Xml
 		/** How a selector is set up */
 		struct Settings
 		{
-			std::string id;								   // Prefix of its fields, and its actions' arg
-			std::string storageKey;						   // Where its presets and value are kept; empty for nowhere
+			std::string id;								   // `<source>.<name>`, e.g. "jog.distance"
+			std::string storageKey;						   // Where its presets (and value) are kept
 			std::vector<float> presets;					   // The presets until others are stored
+			size_t initial = 0;							   // The preset chosen at first
+			bool keepValue = false;						   // Store the value chosen, so it survives a restart
 			float min = 0.0f;							   // Lowest value
 			float max = std::numeric_limits<float>::max(); // Highest value
 			float step = 1.0f;							   // What - and + take off or add
 		};
 
-		/** Create the selector, with the presets and value last stored, else the defaults and `min` */
+		/** Create the selector, with the presets (and value) last stored, else the defaults */
 		explicit ValueSelector(Settings settings);
 
-		/** Declare `<id>.title`, `<id>.value` and `<id>.choices` */
+		/** Forget the selector */
+		~ValueSelector() override;
+
+		ValueSelector(const ValueSelector&) = delete;
+		ValueSelector& operator=(const ValueSelector&) = delete;
+
+		/** The live selector with id `id`, or nullptr */
+		static ValueSelector* find(std::string_view id);
+
+		/** Its id, `<source>.<name>` */
+		const std::string& id() const { return m_settings.id; }
+
+		/** Declare `<name>.title`, `<name>.value` and `<name>.choices`, for its source to publish */
 		void fields(FieldVisitor& f) override;
 
 		/** Show `title` above the value */
 		void setTitle(std::string_view title);
 
+		/** Show `unit` beside the value on the number pad, e.g. "mm" */
+		void setUnit(std::string_view unit);
+
 		/** The value chosen */
 		float value() const { return m_value; }
 
-		/** Use `value`, kept within the limits, and store it */
+		/** Use `value`, kept within the limits */
 		void setValue(float value);
 
-		/** One selector action, to register with XmlPresenter::action() */
-		struct Action
-		{
-			std::string name;		 // Action name, e.g. "selector.edit"
-			std::string description; // What it does, for the UI API reference
-			ActionHandler handler;	 // Runs it
-		};
+		/** Use preset `index` */
+		void pick(size_t index);
 
-		/** The selector actions (see the file comment) of any of `selectors`, to register */
-		static std::vector<Action> actions(std::initializer_list<ValueSelector*> selectors);
+		/** Step the value up (`direction` 1) or down (-1) */
+		void step(int direction);
+
+		/** Ask for a value with the number pad, and use it */
+		void edit();
+
+		/** Ask for a new value for preset `index` with the number pad, and use it */
+		void editPreset(size_t index);
 
 	  private:
 		/** Change preset `index` to `value`, and store the presets */
 		void setPreset(size_t index, float value);
 
-		/** Show the presets */
+		/** Show the presets, and which is chosen */
 		void showPresets();
 
-		/** Ask for a value with `header`, then call `onConfirm` with it */
-		void ask(std::string header, float start, std::function<void(float)> onConfirm);
+		Settings m_settings;		  // How it is set up
+		std::vector<float> m_presets; // The presets
+		float m_value = 0.0f;		  // The value chosen
+		std::string m_unit;			  // Shown on the number pad
 
-		Settings m_settings;		   // How it is set up
-		std::vector<float> m_presets;  // The presets
-		float m_value = 0.0f;		   // The value chosen
-
-		StringSubject<64> m_title;		  // `<id>.title`
-		StringSubject<16> m_valueText;	  // `<id>.value`
-		List<ValueChoiceRow> m_choices;	  // `<id>.choices`
+		StringSubject<64> m_title;		// `<name>.title`
+		StringSubject<16> m_valueText;	// `<name>.value`
+		List<ValueChoiceRow> m_choices; // `<name>.choices`
 	};
 } // namespace UI::Xml

@@ -25,6 +25,7 @@
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
+#include "UI/Xml/View/SelectorActions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "helix_xml.h"
 #include "i18n/i18n.h"
@@ -131,6 +132,7 @@ namespace UI::Xml
 		Widgets::registerAll();
 		GcodeActions::registerAll();
 		NavigationActions::registerAll();
+		SelectorActions::registerAll();
 		DataSources::start();
 		i18n::setLanguageChangedCallback(onLanguageChanged);
 

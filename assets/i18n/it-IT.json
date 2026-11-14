@@ -220,9 +220,7 @@
       "disable_motors_confirm": {
         "title": "Conferma disattivazione motori",
         "text": "Sei sicuro di voler disattivare tutti i motori?"
-      },
-      "distance_adjust_header": "Aggiorna distanza di movimento ({:s})",
-      "feedrate_adjust_header": "Aggiorna velocità di avanzamento ({:s})"
+      }
     },
     "settings": {
       "severity": {
@@ -730,8 +728,12 @@
       "gcode_send": "Invia G-code",
       "navigation_open": "Apri una pagina",
       "babystep_open": "Babystepping",
+      "babystep_up": "Babystep su",
+      "babystep_down": "Babystep giù",
       "factors_speed": "Cambia il fattore di velocità",
       "factors_extrusion": "Cambia il fattore di estrusione",
+      "extruder_extrude": "Estrudi",
+      "extruder_retract": "Ritrai",
       "job_pause": "Metti in pausa il lavoro",
       "job_resume": "Riprendi il lavoro",
       "job_ask_cancel": "Annulla il lavoro",

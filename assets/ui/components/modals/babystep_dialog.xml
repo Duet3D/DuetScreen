@@ -2,14 +2,14 @@
   The shared babystepping dialog, hosted once by the home screen. Any view opens it with the global action
   `actions.babystep.open`, e.g. a button showing source.move.babystep.
 
-  Fields and actions: src/UI/Presenters/Modals/BabystepDialogPresenter.h
+  Data:     source.babystep.dialog_open (src/UI/Xml/Data/BabystepSource.h)
 -->
-<component presenter="babystep_dialog">
+<component>
 	<!-- Takes no room: its dialog opens on the dialog surface -->
 	<view extends="lv_obj" width="0" height="0" floating="true">
-		<ds_dialog name="babystep_dialog" bind_open="presenter.open" title_tag="tr.babystep.header" width="40%"
+		<ds_dialog name="babystep_dialog" bind_open="source.babystep.dialog_open" title_tag="tr.babystep.header" width="40%"
 				   height="85%">
-			<action trigger="dismissed" name="presenter.babystep.close"/>
+			<action trigger="dismissed" name="actions.babystep.close"/>
 			<ds_view name="dialog_babystep" view="babystep" shown="true" prop_hide_title="true" width="100%"
 					 height="100%" style_pad_all="0"/>
 		</ds_dialog>

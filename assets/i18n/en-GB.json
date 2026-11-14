@@ -221,9 +221,7 @@
       "disable_motors_confirm": {
         "title": "Confirm Disable Motors",
         "text": "Are you sure you want to disable all motors?"
-      },
-      "distance_adjust_header": "Update jog distance value ({:s})",
-      "feedrate_adjust_header": "Update jog feedrate value ({:s})"
+      }
     },
     "settings": { /* Settings screen */
       "severity": {
@@ -730,8 +728,12 @@
       "gcode_send": "Send G-code",
       "navigation_open": "Open a page",
       "babystep_open": "Babystepping",
+      "babystep_up": "Babystep up",
+      "babystep_down": "Babystep down",
       "factors_speed": "Change the speed factor",
       "factors_extrusion": "Change the extrusion factor",
+      "extruder_extrude": "Extrude",
+      "extruder_retract": "Retract",
       "job_pause": "Pause the job",
       "job_resume": "Resume the job",
       "job_ask_cancel": "Cancel the job",

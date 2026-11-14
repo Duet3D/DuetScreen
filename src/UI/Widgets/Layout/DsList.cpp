@@ -118,7 +118,8 @@ namespace UI::Xml
 				 R"(<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
 			 .attributes =
 				 {{"list",
-				   "The list shown (required), named like a subject: e.g. `presenter.files`, `source.jog.distances`, "
+				   "The list shown (required), named like a subject: e.g. `presenter.files`, "
+				   "`source.jog.distance.choices`, "
 				   "`om.fans`, or in a tool's row, its `row.heaters`",
 				   AttributeKind::List},
 				  {"item", "The component built for each row (required)", AttributeKind::Component},

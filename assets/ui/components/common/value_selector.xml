@@ -2,10 +2,11 @@
   A value with - and + beside it, under a title, and a row of presets below. Tap the value to type one in; tap a
   preset to use it; hold a preset to change it.
 
-      <value_selector selector="distance" title="presenter.distance.title" value="presenter.distance.value" choices="presenter.distance.choices"/>
+      <value_selector selector="extruder.distance" title="source.extruder.distance.title"
+                      value="source.extruder.distance.value" choices="source.extruder.distance.choices"/>
 
-  `selector` is the selector's id, the arg of its actions; `title`, `value` and `choices` name its fields. The
-  presenter showing it owns a ValueSelector, which declares those fields and handles the actions
+  `selector` is the selector's id, the arg of its actions (actions.selector.*, src/UI/Xml/View/SelectorActions.h);
+  `title`, `value` and `choices` name its fields, which the data source owning it publishes
   (src/UI/Xml/View/ValueSelector.h). Values are typed on the shared number pad.
 -->
 <component>
@@ -26,14 +27,14 @@
 		<lv_obj name="top_row" width="100%" height="content" style_min_height="content" flex_flow="row"
 				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
 			<ds_button name="decrement" icon="decrement.png" height="100%" style_min_height="content">
-				<action trigger="clicked" name="presenter.selector.decrement" arg="$selector"/>
+				<action trigger="clicked" name="actions.selector.decrement" arg="$selector"/>
 			</ds_button>
 			<ds_textarea name="value" bind_text="$value" one_line="true" keyboard="none" height="content"
 						 flex_grow="1" style_text_align="center">
-				<action trigger="clicked" name="presenter.selector.edit" arg="$selector"/>
+				<action trigger="clicked" name="actions.selector.edit" arg="$selector"/>
 			</ds_textarea>
 			<ds_button name="increment" icon="increment.png" height="100%" style_min_height="content">
-				<action trigger="clicked" name="presenter.selector.increment" arg="$selector"/>
+				<action trigger="clicked" name="actions.selector.increment" arg="$selector"/>
 			</ds_button>
 		</lv_obj>
 

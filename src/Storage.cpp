@@ -63,22 +63,18 @@ constexpr StorageKey<std::chrono::milliseconds> ID_NOTIFICATION_TIMEOUT = {"ui:i
 constexpr StorageKey<ResponseType> ID_NOTIFICATION_LEVEL = {"ui:notification_level", ResponseType::INFO};
 constexpr StorageKey<bool> ID_NOTIFICATION_AUTO_CLOSE_ERROR = {"ui:notification_auto_close_error", false};
 
-constexpr StorageKey<std::vector<float>, std::vector<float> (*)()> ID_BABYSTEP_AMOUNT = {
-	"ui:baby_step_amount", +[]() -> std::vector<float> { return {0.01f, 0.05f}; }};
-constexpr StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTANCES = {
-	"ui:move:distances", +[]() -> std::vector<float> { return {0.1f, 0.5f, 1, 5, 10, 25, 50}; }};
-constexpr StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES = {
-	"ui:move:feedrates", +[]() -> std::vector<uint32_t> { return {5, 10, 25, 50, 100, 200, 300}; }};
 constexpr StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE = {"ui:move:machine_position_mode", false};
 
 constexpr StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS = {"ui:show_confirmation_dialogs", true};
 constexpr StorageKey<OM::JobProgressSource> ID_JOB_PROGRESS_SOURCE = {"ui:job_progress_source",
 																	  OM::JobProgressSource::DURATION};
 
-/* Multi value selectors */
-// these will have the following sub keys {"values", "selected"}
+/* Value selectors (UI/Xml/View/ValueSelector.h): each has the sub keys "values" (its presets) and "selected" */
 constexpr std::string_view ID_MVS_EXTRUSION_FEEDRATES = "ui:extrusion:feedrates";
 constexpr std::string_view ID_MVS_EXTRUSION_DISTANCES = "ui:extrusion:distances";
+constexpr std::string_view ID_MVS_JOG_DISTANCES = "ui:jog:distances";
+constexpr std::string_view ID_MVS_JOG_FEEDRATES = "ui:jog:feedrates";
+constexpr std::string_view ID_MVS_BABYSTEPS = "ui:babystep:steps";
 
 constexpr StorageKey<Units::UnitSystem> ID_UNIT_SYSTEM = {"ui:units", Units::UnitSystem::Metric};
 

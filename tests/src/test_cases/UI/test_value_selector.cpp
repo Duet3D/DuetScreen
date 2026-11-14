@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-/** Shows one selector, kept nowhere */
+/** Shows one selector; its actions are the global actions.selector.* */
 class SelectorPresenter : public UI::Xml::XmlPresenter
 {
   public:
@@ -20,16 +20,13 @@ class SelectorPresenter : public UI::Xml::XmlPresenter
 		: XmlPresenter("test_selector")
 	{
 		m_selector.setTitle("Selector");
-		for (auto& [name, description, handler] : UI::Xml::ValueSelector::actions({&m_selector}))
-		{
-			action(name, description, handler);
-		}
 	}
 
 	void fields(UI::Xml::FieldVisitor& f) override { m_selector.fields(f); }
 
   private:
-	UI::Xml::ValueSelector m_selector{{.id = "test", .presets = {0.1f, 0.5f, 1.0f, 5.0f, 10.0f}}}; // The selector
+	UI::Xml::ValueSelector m_selector{
+		{.id = "test", .storageKey = "test:selector", .presets = {0.1f, 0.5f, 1.0f, 5.0f, 10.0f}}}; // The selector
 };
 
 class TestValueSelector : public UiTestSuite

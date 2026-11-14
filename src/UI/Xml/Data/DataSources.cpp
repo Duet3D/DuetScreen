@@ -3,10 +3,12 @@
  */
 
 #include "DataSources.h"
+#include "BabystepSource.h"
 #include "ConsoleSource.h"
 #include "CustomiseSource.h"
 #include "DataSource.h"
 #include "Debug.h"
+#include "ExtruderSource.h"
 #include "FactorsSource.h"
 #include "JobSource.h"
 #include "JogSource.h"
@@ -92,8 +94,10 @@ namespace UI::Xml::DataSources
 
 		// The printer data available to XML
 		s_sources = {
+			std::make_shared<BabystepSource>(),
 			std::make_shared<ConsoleSource>(),
 			std::make_shared<CustomiseSource>(),
+			std::make_shared<ExtruderSource>(),
 			std::make_shared<FactorsSource>(),
 			std::make_shared<ToolSource>(),
 			std::make_shared<JobSource>(),

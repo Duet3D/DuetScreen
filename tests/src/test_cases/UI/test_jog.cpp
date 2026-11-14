@@ -1,8 +1,8 @@
 /*
  * test_jog.cpp
  *
- * The jog distance and speed every view shares: the global jog.* (src/UI/Xml/Data/JogSource.h) and the actions that
- * choose them (src/UI/Presenters/Control/Move/JogActions.h).
+ * The jog distance and speed every view shares: the global source.jog.* (src/UI/Xml/Data/JogSource.h), chosen with
+ * the selector actions (src/UI/Xml/View/SelectorActions.h).
  */
 
 #include "UI/Core/Model.h"
@@ -10,7 +10,6 @@
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
-#include "utils/StorageHelper.h"
 #include <gtest/gtest.h>
 
 class TestJog : public UiTestSuite
@@ -30,16 +29,14 @@ TEST_F(TestJog, EveryViewSharesTheChosenDistance)
 	a.show();
 	b.show();
 	deliverModelEvents();
-	const auto distances = StorageHelper::getData(ID_MOVE_DISTANCES);
-	ASSERT_GE(distances.size(), 2u);
+	ASSERT_GE(lv_obj_get_child_count(lv_obj_find_by_name(b.getRootPtr(), "distances")), 2u);
 
 	// Chosen in one view…
-	UI::Xml::Actions::dispatch(distance(a, 1), "actions.jog.distance", "");
-	deliverModelEvents();
+	UI::Xml::Actions::dispatch(distance(a, 1), "actions.selector.pick", "");
 
 	// …it is chosen in the other, and every jog goes that far
 	EXPECT_TRUE(lv_obj_has_state(distance(b, 1), LV_STATE_CHECKED));
 	EXPECT_FALSE(lv_obj_has_state(distance(b, 0), LV_STATE_CHECKED));
 	ASSERT_TRUE(UI::Xml::JogSource::distance().has_value());
-	EXPECT_FLOAT_EQ(*UI::Xml::JogSource::distance(), distances[1]);
+	EXPECT_FLOAT_EQ(*UI::Xml::JogSource::distance(), 0.5f);
 }

@@ -77,6 +77,27 @@ Each row of an object model list:
 
 Printer data published by the data sources in [src/UI/Xml/Data](../src/UI/Xml/Data), each source's as `source.<source>.<field>`, from `<Source>Source.cpp`. Any view can bind to these. A list is shown with `<ds_list list="…">`; inside each row, the row's fields are `row.*`.
 
+### babystep
+
+From [BabystepSource.cpp](../src/UI/Xml/Data/BabystepSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.babystep.usable` | int | 1 if Z can be babystepped: there is a Z axis, it is homed, and connected |
+| `source.babystep.reset_text` | text | The reset button's text, with the current offset, e.g. "Reset 0.02 mm" |
+| `source.babystep.dialog_open` | int | 1 while the shared babystepping dialog is open |
+| `source.babystep.step.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `source.babystep.step.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `babystep.step`) |
+| `source.babystep.step.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
+
+Each row of `source.babystep.step.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The preset, e.g. "10" |
+| `row.selected` | int | 1 if it is the value chosen, else 0 |
+
 ### console
 
 From [ConsoleSource.cpp](../src/UI/Xml/Data/ConsoleSource.cpp).
@@ -117,6 +138,37 @@ From [CustomiseSource.cpp](../src/UI/Xml/Data/CustomiseSource.cpp).
 | `source.customise.is_free` | int | 1 if new widgets go into a free layout, whose widgets can snap |
 | `source.customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
 | `source.customise.title` | text | The selected widget's name, translated; empty if none is selected |
+
+### extruder
+
+From [ExtruderSource.cpp](../src/UI/Xml/Data/ExtruderSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.extruder.extrude_usable` | int | 1 if the current tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `source.extruder.retract_usable` | int | 1 if the current tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
+| `source.extruder.distance.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `source.extruder.distance.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `extruder.distance`) |
+| `source.extruder.distance.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
+| `source.extruder.feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `source.extruder.feedrate.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `extruder.feedrate`) |
+| `source.extruder.feedrate.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
+
+Each row of `source.extruder.distance.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The preset, e.g. "10" |
+| `row.selected` | int | 1 if it is the value chosen, else 0 |
+
+Each row of `source.extruder.feedrate.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The preset, e.g. "10" |
+| `row.selected` | int | 1 if it is the value chosen, else 0 |
 
 ### factors
 
@@ -187,26 +239,28 @@ From [JogSource.cpp](../src/UI/Xml/Data/JogSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.jog.distance_title` | text | The distances' title, with the unit, e.g. "Move Distance (mm)" |
-| `source.jog.feedrate_title` | text | The speeds' title, with the unit |
-| `source.jog.distances` | list | The jog distances to choose from (actions.jog.distance, actions.jog.edit_distance) |
-| `source.jog.feedrates` | list | The jog speeds to choose from (actions.jog.feedrate, actions.jog.edit_feedrate) |
+| `source.jog.distance.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `source.jog.distance.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `jog.distance`) |
+| `source.jog.distance.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
+| `source.jog.feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
+| `source.jog.feedrate.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `jog.feedrate`) |
+| `source.jog.feedrate.choices` | list | The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice) |
 
-Each row of `source.jog.distances`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.text` | text | The value, e.g. "0.1" |
-| `row.selected` | int | 1 for the one in use |
-
-Each row of `source.jog.feedrates`:
+Each row of `source.jog.distance.choices`:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
-| `row.text` | text | The value, e.g. "0.1" |
-| `row.selected` | int | 1 for the one in use |
+| `row.text` | text | The preset, e.g. "10" |
+| `row.selected` | int | 1 if it is the value chosen, else 0 |
+
+Each row of `source.jog.feedrate.choices`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The preset, e.g. "10" |
+| `row.selected` | int | 1 if it is the value chosen, else 0 |
 
 ### machine
 
@@ -277,10 +331,16 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 
 | Action | Description | Added in |
 | --- | --- | --- |
-| `actions.babystep.open` | Open the shared babystepping dialog. Offered to users for their widgets' action settings, as `tr.actions.babystep_open`. | [BabystepActions.cpp](../src/UI/Presenters/Modals/BabystepActions.cpp) |
+| `actions.babystep.close` | Close the shared babystepping dialog | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
+| `actions.babystep.down` | Move Z down by the chosen step (M290). Offered to users for their widgets' action settings, as `tr.actions.babystep_down`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
+| `actions.babystep.open` | Open the shared babystepping dialog. Offered to users for their widgets' action settings, as `tr.actions.babystep_open`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
+| `actions.babystep.reset` | Undo all babystepping | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
+| `actions.babystep.up` | Move Z up by the chosen step (M290). Offered to users for their widgets' action settings, as `tr.actions.babystep_up`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
+| `actions.extruder.extrude` | Extrude the chosen distance (`source.extruder.distance`) at the chosen feed rate with the current tool. Offered to users for their widgets' action settings, as `tr.actions.extruder_extrude`. | [ExtruderActions.cpp](../src/UI/Presenters/Control/Temperature/ExtruderActions.cpp) |
+| `actions.extruder.retract` | Retract the chosen distance at the chosen feed rate with the current tool. Offered to users for their widgets' action settings, as `tr.actions.extruder_retract`. | [ExtruderActions.cpp](../src/UI/Presenters/Control/Temperature/ExtruderActions.cpp) |
 | `actions.factors.close` | Close the dialog named by `arg`, `speed` or `extrusion`, e.g. when it is dismissed | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of a dialog's `factors`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
@@ -295,14 +355,15 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.job.pause` | Pause the job. Offered to users for their widgets' action settings, as `tr.actions.job_pause`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.resume` | Resume the paused job. Offered to users for their widgets' action settings, as `tr.actions.job_resume`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
-| `actions.jog.distance` | Use that jog distance. From a row of `jog.distances`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
-| `actions.jog.edit_distance` | Ask for a new value for that jog distance with a number pad, and use it. From a row of `jog.distances`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
-| `actions.jog.edit_feedrate` | Ask for a new value for that jog speed with a number pad, and use it. From a row of `jog.feedrates`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
-| `actions.jog.feedrate` | Use that jog speed. From a row of `jog.feedrates`. | [JogActions.cpp](../src/UI/Presenters/Control/Move/JogActions.cpp) |
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open_page` | Open the page called `arg` in the <ds_pages> around the widget, e.g. `arg="colours"` | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
+| `actions.selector.decrement` | Step the selector named by `arg` (its id, e.g. `jog.distance`) down | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
+| `actions.selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
+| `actions.selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
+| `actions.selector.increment` | Step the selector named by `arg` (its id) up | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
+| `actions.selector.pick` | Use the preset. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
@@ -310,44 +371,6 @@ An action runs when its widget raises its `trigger` (default `clicked`): `all`, 
 ## Presenters
 
 A component names its presenter with `<component presenter="…">`. Its view can then bind to the presenter's names and raise its actions, as well as the global ones.
-
-### babystep
-
-Used by `babystep`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.usable` | int | 1 if there is a Z axis and the printer is connected |
-| `presenter.reset_text` | text | The reset button's text, with the current offset, e.g. "Reset 0.02 mm" |
-| `presenter.steps` | list | Step sizes |
-
-Each row of `presenter.steps`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.text` | text | E.g. "0.01 mm" |
-| `row.selected` | int | 1 for the step in use |
-
-| Action | Description |
-| --- | --- |
-| `presenter.babystep.down` | Move Z down by the chosen step (M290) |
-| `presenter.babystep.edit` | Ask for a new size for that step with a number pad, and remember it. From a row of `steps`. |
-| `presenter.babystep.reset` | Undo all babystepping |
-| `presenter.babystep.select` | Use that step. From a row of `steps`. |
-| `presenter.babystep.up` | Move Z up by the chosen step (M290) |
-
-### babystep_dialog
-
-Used by `babystep_dialog`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.open` | int | 1 while the dialog is open |
-
-| Action | Description |
-| --- | --- |
-| `presenter.babystep.close` | Close the babystepping dialog |
 
 ### console
 
@@ -1084,45 +1107,6 @@ Each row of `presenter.tools`:
 | `presenter.temperature.pick_filament` | Pick the filament at the confirmed index of `filaments` (`value_confirmed`) to load next. From a row of `presenter.tools`. |
 | `presenter.temperature.unload_filament` | Unload the tool's filament. From a row of `presenter.tools`. |
 
-### temperature_extrusion
-
-Used by `temperature_extrusion`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.extrude_usable` | int | 1 if the selected tool can extrude: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
-| `presenter.retract_usable` | int | 1 if the selected tool can retract: there is one, it is hot enough (or cold extrusion is allowed), and no job is running |
-| `presenter.distance.title` | text | The title, e.g. "Feed Distance (mm)" |
-| `presenter.distance.value` | text | The value, e.g. "0.1" |
-| `presenter.distance.choices` | list | The presets, each with `text` |
-| `presenter.feedrate.title` | text | The title, e.g. "Feed Distance (mm)" |
-| `presenter.feedrate.value` | text | The value, e.g. "0.1" |
-| `presenter.feedrate.choices` | list | The presets, each with `text` |
-
-Each row of `presenter.distance.choices`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.text` | text | The preset, e.g. "10" |
-
-Each row of `presenter.feedrate.choices`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.text` | text | The preset, e.g. "10" |
-
-| Action | Description |
-| --- | --- |
-| `presenter.extruder.extrude` | Extrude the chosen distance at the chosen feed rate with the selected tool |
-| `presenter.extruder.retract` | Retract the chosen distance at the chosen feed rate with the selected tool |
-| `presenter.selector.decrement` | Step the selector named by `arg` (its id) down |
-| `presenter.selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad |
-| `presenter.selector.edit_choice` | Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`. |
-| `presenter.selector.increment` | Step the selector named by `arg` (its id) up |
-| `presenter.selector.pick` | Use the preset. From a row of a selector's `choices`. |
-
 ## Widgets
 
 DuetScreen's own elements, in addition to LVGL's `lv_*` widgets and the helix-xml elements (see [helix-xml's README](../libraries/helix-xml/README.md)). An element registered as `parent-child` is written inside a `parent`; `lv_obj-child` is written `<child>` inside any widget.
@@ -1468,7 +1452,7 @@ Also takes every `lv_obj` attribute.
 
 | Attribute | Description |
 | --- | --- |
-| `list` | The list shown (required), named like a subject: e.g. `presenter.files`, `source.jog.distances`, `om.fans`, or in a tool's row, its `row.heaters` |
+| `list` | The list shown (required), named like a subject: e.g. `presenter.files`, `source.jog.distance.choices`, `om.fans`, or in a tool's row, its `row.heaters` |
 | `item` | The component built for each row (required) |
 | `windowed` | "true" to build only the rows on screen, building and deleting rows as the list scrolls (default false) |
 | `item_height` | Windowed: each item's height in pixels (required when windowed) |
@@ -2888,9 +2872,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| [`babystep`](#control) | `babystep` | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
-| `babystep_dialog` | `babystep_dialog` |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
-| `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
+| [`babystep`](#control) |  | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `console` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
 | `console_gcode` |  |  | `console`, `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
@@ -2970,8 +2953,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | [`move`](#control) | `move` |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
-| `move_distance` |  |  | `move_jog_choices` | [move_distance.xml](../assets/ui/components/control/move/move_distance.xml) |
-| `move_feedrate` |  |  | `move_jog_choices` | [move_feedrate.xml](../assets/ui/components/control/move/move_feedrate.xml) |
 | `move_jog_choices` |  |  | `move`, `jog_choices` | [move_jog_choices.xml](../assets/ui/components/control/move/move_jog_choices.xml) |
 | `move_xy` |  |  | `move`, `move_xy_card` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
 | `move_xy_card` | `move` |  | `jog_xy` | [move_xy_card.xml](../assets/ui/components/control/move/move_xy_card.xml) |
@@ -3007,14 +2988,14 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `temperature_bed` |  |  | `temperature` | [temperature_bed.xml](../assets/ui/components/control/temperature/temperature_bed.xml) |
 | `temperature_chamber` |  |  | `temperature` | [temperature_chamber.xml](../assets/ui/components/control/temperature/temperature_chamber.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
-| [`temperature_extrusion`](#temperature) | `temperature_extrusion` |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
+| [`temperature_extrusion`](#temperature) |  |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
 | `temperature_extrusion_card` |  |  | `extrude` | [temperature_extrusion_card.xml](../assets/ui/components/control/temperature/temperature_extrusion_card.xml) |
 | `temperature_heater` |  | `label`, `active`, `standby` | `temperature_heater_card`, `temperature_tool_heater` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
 | `temperature_heater_card` |  | `label_tag` | `temperature_bed`, `temperature_chamber` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
 | `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
-| `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
+| `value_selector_choice` |  | `format` | `babystep`, `move_jog_choices`, `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
 ### Views
 

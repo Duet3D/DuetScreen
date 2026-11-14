@@ -3,14 +3,13 @@
  */
 
 #include "Presenters.h"
-#include "Common/BabyStepPresenter.h"
+#include "Common/BabystepActions.h"
 #include "Console/ConsolePresenter.h"
 #include "Control/Fans/FanActions.h"
 #include "Control/Heightmap/HeightmapPresenter.h"
-#include "Control/Move/JogActions.h"
 #include "Control/Move/MovePresenter.h"
 #include "Control/ObjectCancel/ObjectCancelPresenter.h"
-#include "Control/Temperature/ExtruderPresenter.h"
+#include "Control/Temperature/ExtruderActions.h"
 #include "Control/Temperature/HeaterActions.h"
 #include "Control/Temperature/TemperaturePresenter.h"
 #include "Control/Temperature/ToolActions.h"
@@ -19,8 +18,6 @@
 #include "Dashboard/JobActions.h"
 #include "FileBrowser/FileBrowserPresenter.h"
 #include "HardwareTest/HardwareTestPresenter.h"
-#include "Modals/BabystepActions.h"
-#include "Modals/BabystepDialogPresenter.h"
 #include "Modals/FactorsActions.h"
 #include "Notifications/NotificationsPresenter.h"
 #include "Settings/ConnectionSettingsPresenter.h"
@@ -48,7 +45,7 @@ namespace UI
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
 		FanActions::registerAll();
-		JogActions::registerAll();
+		ExtruderActions::registerAll();
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
 		EStopActions::registerAll();
@@ -59,13 +56,10 @@ namespace UI
 		/* Presenters */
 		Xml::Presenters::add<HardwareTestPresenter>("hardware_test");
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
-		Xml::Presenters::add<BabystepDialogPresenter>("babystep_dialog");
 		Xml::Presenters::add<CustomisePresenter>("customise");
 		Xml::Presenters::add<ConsolePresenter>("console");
 		Xml::Presenters::add<MovePresenter>("move");
-		Xml::Presenters::add<BabyStepPresenter>("babystep");
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
-		Xml::Presenters::add<ExtruderPresenter>("temperature_extrusion");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");
 		Xml::Presenters::add<GeneralSettingsPresenter>("settings_general");

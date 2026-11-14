@@ -16,6 +16,8 @@ namespace UI::Xml
 {
 	namespace
 	{
+		std::vector<ValueSelector*> s_live; // Every selector, to be found by id
+
 		/** Where the presets are kept, under the selector's storage key */
 		StorageKeyRunTime<std::vector<float>> presetsKey(const std::string& storageKey)
 		{
@@ -38,34 +40,53 @@ namespace UI::Xml
 	void ValueChoiceRow::fields(FieldVisitor& f)
 	{
 		f.field("text", text, "The preset, e.g. \"10\"");
+		f.field("selected", selected, "1 if it is the value chosen, else 0");
 	}
 
 	ValueSelector::ValueSelector(Settings settings)
 		: m_settings(std::move(settings))
 		, m_presets(m_settings.presets)
-		, m_value(m_settings.min)
 	{
-		if (!m_settings.storageKey.empty())
+		if (auto stored = StorageHelper::getData(presetsKey(m_settings.storageKey)); !stored.empty())
 		{
-			if (auto stored = StorageHelper::getData(presetsKey(m_settings.storageKey)); !stored.empty())
-			{
-				m_presets = std::move(stored);
-			}
+			m_presets = std::move(stored);
+		}
+		float value =
+			m_presets.empty() ? m_settings.min : m_presets[std::min(m_settings.initial, m_presets.size() - 1)];
+		if (m_settings.keepValue)
+		{
 			if (const float stored = StorageHelper::getData(valueKey(m_settings.storageKey)); !std::isnan(stored))
 			{
-				m_value = std::clamp(stored, m_settings.min, m_settings.max);
+				value = stored;
 			}
 		}
+		m_value = std::clamp(value, m_settings.min, m_settings.max);
 		m_valueText.set(format(m_value));
 		showPresets();
+		s_live.push_back(this);
+	}
+
+	ValueSelector::~ValueSelector()
+	{
+		std::erase(s_live, this);
+	}
+
+	ValueSelector* ValueSelector::find(std::string_view id)
+	{
+		const auto it =
+			std::find_if(s_live.begin(), s_live.end(), [id](const ValueSelector* s) { return s->id() == id; });
+		return it == s_live.end() ? nullptr : *it;
 	}
 
 	void ValueSelector::fields(FieldVisitor& f)
 	{
 		const std::string& id = m_settings.id;
-		f.field(id + ".title", m_title, "The title, e.g. \"Feed Distance (mm)\"");
-		f.field(id + ".value", m_valueText, "The value, e.g. \"0.1\"");
-		f.list(id + ".choices", m_choices, "The presets, each with `text`");
+		const std::string name = id.substr(id.find('.') + 1);
+		f.field(name + ".title", m_title, "The title, e.g. \"Feed Distance (mm)\"");
+		f.field(name + ".value", m_valueText, "The value, e.g. \"0.1\" (actions.selector.* with arg `" + id + "`)");
+		f.list(name + ".choices",
+			   m_choices,
+			   "The presets, each with `text` and `selected` (actions.selector.pick, actions.selector.edit_choice)");
 	}
 
 	void ValueSelector::setTitle(std::string_view title)
@@ -73,14 +94,61 @@ namespace UI::Xml
 		m_title.set(title);
 	}
 
+	void ValueSelector::setUnit(std::string_view unit)
+	{
+		m_unit = unit;
+	}
+
 	void ValueSelector::setValue(float value)
 	{
 		m_value = std::clamp(value, m_settings.min, m_settings.max);
 		m_valueText.set(format(m_value));
-		if (!m_settings.storageKey.empty())
+		showPresets();
+		if (m_settings.keepValue)
 		{
 			StorageHelper::setData(valueKey(m_settings.storageKey), m_value);
 		}
+	}
+
+	void ValueSelector::pick(size_t index)
+	{
+		if (index < m_presets.size())
+		{
+			setValue(m_presets[index]);
+		}
+	}
+
+	void ValueSelector::step(int direction)
+	{
+		setValue(m_value + static_cast<float>(direction) * m_settings.step);
+	}
+
+	void ValueSelector::edit()
+	{
+		Prompts::askNumber({.header = _("multi_value_selector.numberpad_input_header"),
+							.min = m_settings.min,
+							.max = m_settings.max,
+							.value = m_value,
+							.unit = m_unit,
+							.onConfirm = [this](float value) { setValue(value); }});
+	}
+
+	void ValueSelector::editPreset(size_t index)
+	{
+		if (index >= m_presets.size())
+		{
+			return;
+		}
+		Prompts::askNumber({.header = _("multi_value_selector.numberpad_new_value_header"),
+							.min = m_settings.min,
+							.max = m_settings.max,
+							.value = m_presets[index],
+							.unit = m_unit,
+							.onConfirm = [this, index](float value)
+							{
+								setPreset(index, value);
+								setValue(value);
+							}});
 	}
 
 	void ValueSelector::setPreset(size_t index, float value)
@@ -90,12 +158,9 @@ namespace UI::Xml
 			LOG_ERROR("{:s} has no preset {:d}", m_settings.id, index);
 			return;
 		}
-		m_presets[index] = value;
+		m_presets[index] = std::clamp(value, m_settings.min, m_settings.max);
 		showPresets();
-		if (!m_settings.storageKey.empty())
-		{
-			StorageHelper::setData(presetsKey(m_settings.storageKey), m_presets);
-		}
+		StorageHelper::setData(presetsKey(m_settings.storageKey), m_presets);
 	}
 
 	void ValueSelector::showPresets()
@@ -105,110 +170,7 @@ namespace UI::Xml
 					   {
 						   row.owner = this;
 						   row.text.set(format(m_presets[i]));
+						   row.selected.set(m_presets[i] == m_value ? 1 : 0);
 					   });
-	}
-
-	void ValueSelector::ask(std::string header, float start, std::function<void(float)> onConfirm)
-	{
-		Prompts::askNumber({.header = std::move(header),
-							.min = m_settings.min,
-							.max = m_settings.max,
-							.value = start,
-							.onConfirm = std::move(onConfirm)});
-	}
-
-	std::vector<ValueSelector::Action> ValueSelector::actions(std::initializer_list<ValueSelector*> selectors)
-	{
-		const std::vector<ValueSelector*> all(selectors);
-
-		// The selector an action is about: its choices row's, else the one its arg names
-		auto selectorOf = [all](const ActionArgs& args) -> ValueSelector*
-		{
-			if (const auto* row = args.row<ValueChoiceRow>())
-			{
-				return row->owner;
-			}
-			const auto it = std::find_if(
-				all.begin(), all.end(), [&args](const ValueSelector* s) { return s->m_settings.id == args.arg; });
-			if (it == all.end())
-			{
-				LOG_WARN("{:s}: no selector called '{:s}'", args.name, args.arg);
-				return nullptr;
-			}
-			return *it;
-		};
-
-		return {
-			{"selector.decrement",
-			 "Step the selector named by `arg` (its id) down",
-			 [selectorOf](const ActionArgs& args)
-			 {
-				 if (auto* s = selectorOf(args))
-				 {
-					 s->setValue(s->m_value - s->m_settings.step);
-				 }
-			 }},
-			{"selector.increment",
-			 "Step the selector named by `arg` (its id) up",
-			 [selectorOf](const ActionArgs& args)
-			 {
-				 if (auto* s = selectorOf(args))
-				 {
-					 s->setValue(s->m_value + s->m_settings.step);
-				 }
-			 }},
-			{"selector.edit",
-			 "Ask for a value for the selector named by `arg` (its id) with a number pad",
-			 [selectorOf](const ActionArgs& args)
-			 {
-				 if (auto* s = selectorOf(args))
-				 {
-					 s->ask(_("multi_value_selector.numberpad_input_header"),
-							s->m_value,
-							[s](float value) { s->setValue(value); });
-				 }
-			 }},
-			{"selector.pick",
-			 "Use the preset. From a row of a selector's `choices`.",
-			 [](const ActionArgs& args)
-			 {
-				 const auto* row = args.row<ValueChoiceRow>();
-				 if (row == nullptr || row->owner == nullptr)
-				 {
-					 LOG_WARN("selector.pick must come from a choices row");
-					 return;
-				 }
-				 ValueSelector& s = *row->owner;
-				 const auto index = static_cast<size_t>(row->index.get());
-				 if (index < s.m_presets.size())
-				 {
-					 s.setValue(s.m_presets[index]);
-				 }
-			 }},
-			{"selector.edit_choice",
-			 "Ask for a new value for the preset with a number pad, and use it. From a row of a selector's `choices`.",
-			 [](const ActionArgs& args)
-			 {
-				 const auto* row = args.row<ValueChoiceRow>();
-				 if (row == nullptr || row->owner == nullptr)
-				 {
-					 LOG_WARN("selector.edit_choice must come from a choices row");
-					 return;
-				 }
-				 ValueSelector* s = row->owner;
-				 const auto index = static_cast<size_t>(row->index.get());
-				 if (index >= s->m_presets.size())
-				 {
-					 return;
-				 }
-				 s->ask(_("multi_value_selector.numberpad_new_value_header"),
-						s->m_presets[index],
-						[s, index](float value)
-						{
-							s->setPreset(index, value);
-							s->setValue(value);
-						});
-			 }},
-		};
 	}
 } // namespace UI::Xml

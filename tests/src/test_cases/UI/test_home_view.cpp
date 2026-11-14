@@ -1675,17 +1675,18 @@ TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
 
 TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
 {
-	// The extruder panel is inside a plain <lv_obj> of the Temperature tab, which has nothing to pass a show on
-	auto* extruder = UI::findView<UI::Xml::XmlView>("extruder_control");
-	ASSERT_NE(extruder, nullptr);
-	ASSERT_NE(extruder->getPresenter(), nullptr);
-	EXPECT_FALSE(extruder->getPresenter()->isActive()) << "the Control page isn't open yet";
+	// The WiFi settings are inside the Connection settings' plain <lv_obj>, which has nothing to pass a show on
+	auto* wifi = UI::findView<UI::Xml::XmlView>("settings_wifi");
+	ASSERT_NE(wifi, nullptr);
+	ASSERT_NE(wifi->getPresenter(), nullptr);
+	EXPECT_FALSE(wifi->getPresenter()->isActive()) << "the Settings page isn't open yet";
 
-	openControlTab(1);
-	EXPECT_TRUE(extruder->getPresenter()->isActive());
+	UI::openScreen(std::string_view("settings"), false);
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	EXPECT_TRUE(wifi->getPresenter()->isActive());
 
 	UI::home();
-	EXPECT_FALSE(extruder->getPresenter()->isActive()) << "nothing listens while its page is closed";
+	EXPECT_FALSE(wifi->getPresenter()->isActive()) << "nothing listens while its page is closed";
 }
 
 TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)

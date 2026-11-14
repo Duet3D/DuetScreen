@@ -162,18 +162,17 @@ extern const StorageKey<std::chrono::milliseconds> ID_NOTIFICATION_TIMEOUT;
 extern const StorageKey<ResponseType> ID_NOTIFICATION_LEVEL;
 extern const StorageKey<bool> ID_NOTIFICATION_AUTO_CLOSE_ERROR;
 
-extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_BABYSTEP_AMOUNT;
-extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTANCES;
-extern const StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES;
 extern const StorageKey<bool> ID_MOVE_MACHINE_POSITION_MODE;
 
 extern const StorageKey<bool> ID_SHOW_CONFIRMATION_DIALOGS;
 extern const StorageKey<OM::JobProgressSource> ID_JOB_PROGRESS_SOURCE;
 
-/* Multi value selectors */
-// these will have the following sub keys {"values", "selected"}
+/* Value selectors (UI/Xml/View/ValueSelector.h): each has the sub keys "values" (its presets) and "selected" */
 extern const std::string_view ID_MVS_EXTRUSION_FEEDRATES;
 extern const std::string_view ID_MVS_EXTRUSION_DISTANCES;
+extern const std::string_view ID_MVS_JOG_DISTANCES;
+extern const std::string_view ID_MVS_JOG_FEEDRATES;
+extern const std::string_view ID_MVS_BABYSTEPS;
 
 extern const StorageKey<Units::UnitSystem> ID_UNIT_SYSTEM;
 

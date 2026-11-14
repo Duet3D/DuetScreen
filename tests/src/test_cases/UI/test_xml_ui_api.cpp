@@ -101,9 +101,9 @@ TEST_F(XmlUiApi, DescribesEveryKindOfName)
 	// Global data, with list rows and the `index` every row has
 	auto jog = std::find_if(reference.sources.begin(),
 							reference.sources.end(),
-							[](const auto& s) { return findField(s.fields, "source.jog.distances"); });
+							[](const auto& s) { return findField(s.fields, "source.jog.distance.choices"); });
 	ASSERT_NE(jog, reference.sources.end());
-	const auto* distances = findField(jog->fields, "source.jog.distances");
+	const auto* distances = findField(jog->fields, "source.jog.distance.choices");
 	EXPECT_EQ(distances->type, "list");
 	EXPECT_NE(findField(distances->rowFields, "row.index"), nullptr);
 	EXPECT_NE(findField(distances->rowFields, "row.text"), nullptr);

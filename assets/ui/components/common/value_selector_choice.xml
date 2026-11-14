@@ -1,12 +1,19 @@
 <!--
-  One preset of a value_selector. Tap to use it; hold to change it.
+  One preset of a value selector, shown checked while it is the value chosen. Tap to use it; hold to change it.
 
-  Fields:   a presenter.<selector>.choices row: row.text (src/UI/Xml/View/ValueSelector.h)
+  Fields:   a source.<selector>.choices row: row.text, row.selected (src/UI/Xml/View/ValueSelector.h)
+  Actions:  actions.selector.pick, actions.selector.edit_choice (src/UI/Xml/View/SelectorActions.h)
 -->
 <component>
-	<view extends="ds_button" bind_text="row.text" height="100%" flex_grow="1" style_min_height="content">
+	<api>
+		<!-- How the preset is written, e.g. "%s mm" (item.format on the list) -->
+		<prop name="format" type="string" default="%s"/>
+	</api>
+	<view extends="ds_button" bind_text="row.text" bind_text-fmt="$format" height="100%" flex_grow="1"
+		  style_min_height="content">
 		<style name="long_press"/>
-		<action trigger="clicked" name="presenter.selector.pick"/>
-		<action trigger="long_pressed" name="presenter.selector.edit_choice"/>
+		<bind_state_if_eq subject="row.selected" state="checked" ref_value="1"/>
+		<action trigger="clicked" name="actions.selector.pick"/>
+		<action trigger="long_pressed" name="actions.selector.edit_choice"/>
 	</view>
 </component>

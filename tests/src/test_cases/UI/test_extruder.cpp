@@ -1,8 +1,8 @@
 /*
  * test_extruder.cpp
  *
- * The extruder panel (assets/ui/components/control/temperature/temperature_extrusion.xml,
- * src/UI/Presenters/Control/Temperature/ExtruderPresenter.h).
+ * The extruder panel (assets/ui/components/control/temperature/temperature_extrusion.xml), its source
+ * (src/UI/Xml/Data/ExtruderSource.h) and actions (src/UI/Presenters/Control/Temperature/ExtruderActions.h).
  */
 
 #include "ObjectModel/Tree/Tree.h"
@@ -86,14 +86,15 @@ TEST_F(TestExtruder, SelectorsStepAndPick)
 
 	lv_obj_send_event(lv_obj_get_child(presets, 2), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(valueOf("distance_selector"), "5");
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_get_child(presets, 2), LV_STATE_CHECKED)) << "the preset in use is checked";
 	lv_obj_send_event(part("distance_selector", "increment"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(valueOf("distance_selector"), "6");
 	lv_obj_send_event(part("distance_selector", "decrement"), LV_EVENT_CLICKED, nullptr);
 	lv_obj_send_event(part("distance_selector", "decrement"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(valueOf("distance_selector"), "4");
-	EXPECT_EQ(valueOf("feedrate_selector"), "0.1") << "each selector has its own value";
+	EXPECT_EQ(valueOf("feedrate_selector"), "1") << "each selector has its own value, the first preset at first";
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_get_child(presets, 2), LV_STATE_CHECKED)) << "4 is no preset";
 
-	// Put back as it was, for the screenshots of other tests: the value is stored
 	for (int i = 0; i < 4; i++)
 	{
 		lv_obj_send_event(part("distance_selector", "decrement"), LV_EVENT_CLICKED, nullptr);

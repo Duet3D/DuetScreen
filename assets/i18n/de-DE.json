@@ -220,9 +220,7 @@
       "disable_motors_confirm": {
         "title": "Motoren deaktivieren bestätigen",
         "text": "Möchten Sie wirklich alle Motoren deaktivieren?"
-      },
-      "distance_adjust_header": "Verfahrdistanz aktualisieren ({:s})",
-      "feedrate_adjust_header": "Vorschub aktualisieren ({:s})"
+      }
     },
     "settings": {
       "severity": {
@@ -729,8 +727,12 @@
       "gcode_send": "G-Code senden",
       "navigation_open": "Seite öffnen",
       "babystep_open": "Babystepping",
+      "babystep_up": "Babystep nach oben",
+      "babystep_down": "Babystep nach unten",
       "factors_speed": "Geschwindigkeitsfaktor ändern",
       "factors_extrusion": "Extrusionsfaktor ändern",
+      "extruder_extrude": "Extrudieren",
+      "extruder_retract": "Zurückziehen",
       "job_pause": "Auftrag pausieren",
       "job_resume": "Auftrag fortsetzen",
       "job_ask_cancel": "Auftrag abbrechen",

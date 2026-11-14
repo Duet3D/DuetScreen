@@ -4,8 +4,7 @@
   tall as its title.
 
   Data:     the global source.jog.* (src/UI/Xml/Data/JogSource.h), shared by every view that jogs
-  Actions:  actions.jog.distance, actions.jog.feedrate, actions.jog.edit_distance, actions.jog.edit_feedrate
-            (src/UI/Presenters/Control/Move/JogActions.cpp)
+  Actions:  actions.selector.pick, actions.selector.edit_choice (in value_selector_choice.xml)
 -->
 <component>
 	<view extends="lv_obj" style_pad_all="0" style_pad_column="0" flex_flow="row">
@@ -17,7 +16,7 @@
 					style_text_align="center">
 				<style name="bg_color_header"/>
 				<style name="list_header"/>
-				<lv_label name="title" bind_text="source.jog.distance_title" width="content" height="content">
+				<lv_label name="title" bind_text="source.jog.distance.title" width="content" height="content">
 					<style name="list_title"/>
 				</lv_label>
 			</lv_obj>
@@ -26,18 +25,18 @@
 					style_text_align="center">
 				<style name="bg_color_header"/>
 				<style name="list_header"/>
-				<lv_label name="title" bind_text="source.jog.feedrate_title" width="content" height="content">
+				<lv_label name="title" bind_text="source.jog.feedrate.title" width="content" height="content">
 					<style name="list_title"/>
 				</lv_label>
 			</lv_obj>
 		</lv_obj>
 		<lv_obj name="choices" height="100%" flex_grow="1" flex_flow="column" style_pad_all="#pad"
 				style_pad_row="#pad">
-			<ds_list name="distances" list="source.jog.distances" item="move_distance" width="100%" flex_grow="1"
+			<ds_list name="distances" list="source.jog.distance.choices" item="value_selector_choice" width="100%" flex_grow="1"
 					 flex_flow="row" style_pad_all="0"
 					 style_flex_main_place="center" style_flex_cross_place="center"
 					 style_flex_track_place="center"/>
-			<ds_list name="feedrates" list="source.jog.feedrates" item="move_feedrate" width="100%" flex_grow="1"
+			<ds_list name="feedrates" list="source.jog.feedrate.choices" item="value_selector_choice" width="100%" flex_grow="1"
 					 flex_flow="row" style_pad_all="0"
 					 style_flex_main_place="center" style_flex_cross_place="center"
 					 style_flex_track_place="center"/>
