@@ -168,12 +168,6 @@ namespace UI
 					   lv_area_get_width(&indic_area));
 		lv_area_set_width(&indic_area, filled_width);
 
-		lv_style_value_t prop_value;
-		if (lv_style_get_prop(Themes::getLvglStyles().text, LV_STYLE_TEXT_COLOR, &prop_value) == LV_STYLE_RES_FOUND)
-			label_dsc.color = prop_value.color;
-		else
-			label_dsc.color = lv_color_white();
-
 		lv_area_t bg_area;
 		lv_area_copy(&bg_area, &txt_area);
 		lv_area_increase(&bg_area, label_pad_left + label_pad_right, label_pad_top + label_pad_bottom);
@@ -183,11 +177,15 @@ namespace UI
 		{
 			lv_area_align(&indic_area, &bg_area, LV_ALIGN_RIGHT_MID, -indic_pad_right, 0);
 			label_bg_dsc.bg_opa = LV_OPA_0;
+			// On the indicator: the colour the theme gives text there
+			label_dsc.color = lv_obj_get_style_text_color(self.getRootPtr(), LV_PART_INDICATOR);
 		}
 		/*If the indicator is still short put the text out of it on the right*/
 		else
 		{
 			lv_area_align(&indic_area, &bg_area, LV_ALIGN_OUT_RIGHT_MID, indic_pad_right, 0);
+			// On its own background (bar_label_bg): the label's colour
+			label_dsc.color = lv_obj_get_style_text_color(self.getRootPtr(), LV_PART_CUSTOM_FIRST);
 		}
 
 		lv_draw_rect(layer, &label_bg_dsc, &bg_area);

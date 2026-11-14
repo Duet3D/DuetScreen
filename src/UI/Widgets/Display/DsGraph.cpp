@@ -50,9 +50,12 @@ namespace UI::Xml
 							{"legend_format",
 							 "How the legend shows a series' latest value: a fmt format with one argument, e.g. "
 							 "`{}°C` (default: no value)"},
+							{"legend",
+							 "When the legend shows: `auto` (default) while the graph is at least `legend_min_width` "
+							 "wide, `shown` always, `hidden` never"},
 							{"legend_min_width",
-							 "Show the legend only while the graph is at least this many pixels wide, so a narrow "
-							 "graph keeps its room for the plot (default 0: always shown)"}}},
+							 "With `legend` auto, show the legend only while the graph is at least this many pixels "
+							 "wide, so a narrow graph keeps its room for the plot (default 0: always shown)"}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -106,6 +109,27 @@ namespace UI::Xml
 		{
 			graph.setValueFormat(format);
 		}
+		if (const char* mode = lv_xml_get_value_of(attrs, "legend"))
+		{
+			const std::string_view value = mode;
+			if (value == "shown")
+			{
+				graph.m_legendMode = LegendMode::Shown;
+			}
+			else if (value == "hidden")
+			{
+				graph.m_legendMode = LegendMode::Hidden;
+			}
+			else
+			{
+				if (value != "auto")
+				{
+					LOG_WARN("<ds_graph legend=\"{:s}\">: not auto, shown or hidden; auto it is", value);
+				}
+				graph.m_legendMode = LegendMode::Auto;
+			}
+			graph.fitLegend();
+		}
 		if (const char* width = lv_xml_get_value_of(attrs, "legend_min_width"))
 		{
 			graph.m_legendMinWidth = std::max(0, lv_xml_atoi(width));
@@ -135,9 +159,23 @@ namespace UI::Xml
 
 	void DsGraph::fitLegend()
 	{
-		// Before it is laid out it has no width: the legend shows until it has one
-		const int32_t width = lv_obj_get_width(getRootPtr());
-		showLegend(width == 0 || width >= m_legendMinWidth);
+		switch (m_legendMode)
+		{
+		case LegendMode::Shown:
+			showLegend(true);
+			break;
+		case LegendMode::Hidden:
+			showLegend(false);
+			break;
+		case LegendMode::Auto:
+		default:
+		{
+			// Before it is laid out it has no width: the legend shows until it has one
+			const int32_t width = lv_obj_get_width(getRootPtr());
+			showLegend(width == 0 || width >= m_legendMinWidth);
+			break;
+		}
+		}
 	}
 
 	void DsGraph::nameObserverCb(lv_observer_t* observer, lv_subject_t* subject)

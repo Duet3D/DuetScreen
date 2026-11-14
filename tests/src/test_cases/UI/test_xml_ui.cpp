@@ -1030,6 +1030,29 @@ TEST_F(TestXmlUi, GraphColoursSeriesFromTheThemeAndItsLegendShowsAndHidesThem)
 	EXPECT_FALSE(g.getSeries(1)->series->hidden);
 }
 
+TEST_F(TestXmlUi, GraphLegendIsShownHiddenOrFitted)
+{
+	writeFile(bundleFile("manifest.json"), manifest());
+	// Each 300 pixels wide, too narrow for a legend that needs 400 to fit
+	writeFile(bundleFile("components/legends.xml"), R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<ds_graph name="auto" legend_min_width="400" width="300" height="100"/>
+				<ds_graph name="shown" legend="shown" legend_min_width="400" width="300" height="100"/>
+				<ds_graph name="hidden" legend="hidden" width="300" height="100"/>
+			</view>
+		</component>)");
+	restartWithUserBundles();
+	auto& view = makeView("legends");
+	lv_obj_update_layout(view.getRootPtr());
+
+	auto legendShown = [&](const char* graph)
+	{ return !lv_obj_has_flag(find(find(view, graph), "legend"), LV_OBJ_FLAG_HIDDEN); };
+	EXPECT_FALSE(legendShown("auto")) << "too narrow";
+	EXPECT_TRUE(legendShown("shown"));
+	EXPECT_FALSE(legendShown("hidden"));
+}
+
 TEST_F(TestXmlUi, GraphOutlivesItsHistory)
 {
 	writeFile(bundleFile("manifest.json"), manifest());

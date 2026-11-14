@@ -738,12 +738,21 @@ TEST_F(TestHomeViewWithData, Dashboard)
 	/* Populate graph with fake sensor data, as the model ticks would */
 	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
 	ASSERT_NE(temperatures, nullptr);
+
+	// Every heater with a sensor, each sensor once: heater 4 shares the Revo's, and heater 3 is shown although the last
+	// update listed fewer sensors than its sensor's number
+	temperatures->sample();
+	ASSERT_EQ(temperatureGraph().getSeriesCount(), 3u);
+	EXPECT_EQ(temperatureGraph().getSeries(0)->legendItem->getName(), "Bed");
+	EXPECT_EQ(temperatureGraph().getSeries(1)->legendItem->getName(), "Revo with long heater name");
+	EXPECT_EQ(temperatureGraph().getSeries(2)->legendItem->getName(), "Heater 3");
+
 	int32_t reading = 25;
 	for (size_t i = 0; i < 1000; i++)
 	{
-		// A live response sends every sensor; the second keeps the test bench's reading
+		// The bed's temperature rises; the other heaters keep the test bench's
 		load_model_data(fmt::format(
-			R"json({{"key":"sensors","flags":"f","result":{{"analog":[{{"lastReading":{}}},{{"lastReading":22.32}}]}}}})json",
+			R"json({{"key":"heat","flags":"f","result":{{"heaters":[{{"current":{}}},null,{{"current":22.32}},{{"current":22.32}},{{"current":22.32}}]}}}})json",
 			reading));
 		temperatures->sample();
 		reading = (reading + 1) % 300;

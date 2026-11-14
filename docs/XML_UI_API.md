@@ -238,7 +238,7 @@ From [TemperatureSource.cpp](../src/UI/Xml/Data/TemperatureSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.temperature.temperatures` | history | One series per heater, in slot order, sampled every model tick, whole °C. Heaters sharing a sensor are shown once. |
+| `source.temperature.temperatures` | history | One series per heater with a sensor, in slot order: its current temperature, sampled every model tick, whole °C. Heaters sharing a sensor are shown once. |
 | `source.temperature.limit` | int | Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis |
 
 Each row of `source.temperature.temperatures`:
@@ -1279,7 +1279,8 @@ Also takes every `lv_obj` attribute.
 | `y_max` | Top of the Y axis (default 100) |
 | `bind_y_max` | Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a heater's limit |
 | `legend_format` | How the legend shows a series' latest value: a fmt format with one argument, e.g. `{}°C` (default: no value) |
-| `legend_min_width` | Show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown) |
+| `legend` | When the legend shows: `auto` (default) while the graph is at least `legend_min_width` wide, `shown` always, `hidden` never |
+| `legend_min_width` | With `legend` auto, show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown) |
 
 ### ds_heatmap
 
@@ -2134,6 +2135,7 @@ At its smallest, 272×184 px:
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `seconds` | Time shown | one of `30`, `60`, `120`, `300`, `600` | `60` |
+| `legend` | Legend | one of `auto`, `shown`, `hidden` | `auto` |
 
 #### temperatures
 
@@ -2258,7 +2260,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
 | `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
-| `dashboard_temperature_graph` |  | `seconds` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
+| `dashboard_temperature_graph` |  | `seconds`, `legend` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
 | `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
 | `dashboard_tool` |  |  | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
 | `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
@@ -2504,7 +2506,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `arc_indic` |  | arc_color=#highlight arc_width=12dpx arc_rounded=true |
 | `arc_indic_primary` |  | arc_color=#primary |
 | `bar` | ![bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar.png) | bg_color=#highlight bg_opa=100% radius=circle |
-| `bar_indic` |  | radius=circle |
+| `bar_indic` | ![bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_indic.png) | radius=circle text_color=#text |
 | `btnm_bg` |  | *(not set)* |
 | `btnm_btn` | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn.png) | merge=border_muted bg_color=#bg_light bg_grad_dir=none shadow_width=0 radius=#radius |
 | `btnm_btn_checked` | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn_checked.png) | bg_color=#primary bg_opa=100% text_color=#text |
@@ -2577,7 +2579,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `graph_legend_swatch_shown` | ![graph_legend_swatch_shown](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_swatch_shown.png) | bg_opa=100% |
 | `graph_legend_value` | ![graph_legend_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/graph_legend_value.png) | text_font=font_emphasis |
 | `bar_label_bg` | ![bar_label_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label_bg.png) | bg_color=#bg bg_opa=80% radius=#radius pad_hor=#pad |
-| `bar_label` |  | *(not set)* |
+| `bar_label` | ![bar_label](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label.png) | text_color=#text |
 | `widget_title` | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_title.png) | text_color=#text_muted text_font=font_emphasis |
 | `widget_value` | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value.png) | text_color=#text text_font=font_large |
 | `widget_value_large` | ![widget_value_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value_large.png) | text_font=font_xlarge |
@@ -2629,6 +2631,7 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 | `#widget_regular_min` | 180 |
 | `#widget_expanded_min` | 400 |
 | `#widget_gap` | 5 |
+| `#data_colours` | colour |
 
 ### Fonts
 

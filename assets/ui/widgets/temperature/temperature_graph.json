@@ -45,6 +45,17 @@
           "title": "10 min"
         }
       ]
+    },
+    {
+      "name": "legend",
+      "kind": "choice",
+      "title_tag": "tr.widget.temperature_graph_legend",
+      "default": "auto",
+      "options": [
+        {"value": "auto", "title_tag": "tr.widget.temperature_graph_legend_auto"},
+        {"value": "shown", "title_tag": "tr.widget.temperature_graph_legend_shown"},
+        {"value": "hidden", "title_tag": "tr.widget.temperature_graph_legend_hidden"}
+      ]
     }
   ]
 }

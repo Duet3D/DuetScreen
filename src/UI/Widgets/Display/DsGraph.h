@@ -4,8 +4,9 @@
  * <ds_graph>: a line graph of a History (see Binding/History.h), with a legend whose entries show and hide series. Its
  * attributes are in registerXml().
  *
- * With `legend_min_width`, the legend shows only while the graph is at least that wide, so a narrow graph keeps its
- * room for the plot. The graph's width is set by its parent, never by the legend, so this can't make it resize.
+ * `legend` shows the legend always, never, or (`auto`) only while the graph is at least `legend_min_width` wide, so a
+ * narrow graph keeps its room for the plot. The graph's width is set by its parent, never by the legend, so this can't
+ * make it resize.
  */
 
 #pragma once
@@ -55,7 +56,15 @@ namespace UI::Xml
 		/** The graph changed size: show the legend if it is wide enough for it */
 		static void sizeChangedCb(lv_event_t* e);
 
-		/** Show the legend if the graph is at least `legend_min_width` wide */
+		/** When the legend shows */
+		enum class LegendMode
+		{
+			Auto,	// While the graph is at least `legend_min_width` wide
+			Shown,	// Always
+			Hidden, // Never
+		};
+
+		/** Show the legend as its mode says */
 		void fitLegend();
 
 		/** Series were added to or removed from the history */
@@ -85,5 +94,6 @@ namespace UI::Xml
 		range_t m_yAxis{0, 100};					 // Configured Y range
 		int32_t m_yLimit = 0;						 // Value of the bind_y_max subject, or 0
 		int32_t m_legendMinWidth = 0;				 // Narrowest width the legend shows at, pixels; 0: always
+		LegendMode m_legendMode = LegendMode::Auto;	 // When the legend shows
 	};
 } // namespace UI::Xml

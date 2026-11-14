@@ -115,7 +115,12 @@ namespace UI::Xml
 		auto& bar = slider.getLvSlider();
 		slider.m_hues->setSize(bar.getWidth(), bar.getHeight());
 		slider.m_hues->setAlignTo(bar, LV_ALIGN_TOP_LEFT, 0, 0);
-		slider.m_hues->getCanvas().setLocalStyleProp(LV_STYLE_RADIUS, bar.getStyleProp(LV_STYLE_RADIUS));
+		// The bar's shape: its container clips the hues to its rounded corners, which the canvas, an image scaled up
+		// from a row of pixels, isn't clipped to by a radius of its own
+		const lv_style_value_t radius = bar.getStyleProp(LV_STYLE_RADIUS);
+		slider.m_hues->setLocalStyleProp(LV_STYLE_RADIUS, radius);
+		slider.m_hues->setLocalStyleProp(LV_STYLE_CLIP_CORNER, lv_style_value_t{.num = 1});
+		slider.m_hues->getCanvas().setLocalStyleProp(LV_STYLE_RADIUS, radius);
 	}
 
 	void DsHueSlider::render()

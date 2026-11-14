@@ -7,14 +7,18 @@
 
 #include "Heatmap.h"
 #include "Debug.h"
+#include "UI/Styles/Color.h"
 #include "UI/Styles/Styles.h"
+#include "UI/Styles/Theme.h"
+#include "helix_xml.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
 namespace UI
 {
-	static lv_color_t GetColorForPercent(double percent);
+	/** Blue (0) to red (1) through the hues */
+	static lv_color_t hueForPercent(double percent);
 
 	Heatmap::Heatmap(const std::string& name, LvObj& parent)
 		: LvObj(lv_obj_create, name, parent)
@@ -30,7 +34,10 @@ namespace UI
 		init();
 	}
 
-	Heatmap::~Heatmap() {}
+	Heatmap::~Heatmap()
+	{
+		Themes::removeThemeListener(m_themeListener);
+	}
 
 	void Heatmap::init()
 	{
@@ -57,7 +64,36 @@ namespace UI
 		m_colorBar.setResolution(1, 100);
 		m_colorBar.showXScale(false);
 		setValueRange(m_minValue, m_maxValue);
+		applyTheme();
+		m_themeListener = Themes::addThemeListener([this] { applyTheme(); });
+	}
+
+	void Heatmap::applyTheme()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		const char* dataColours = lv_xml_get_const_silent(nullptr, "data_colours");
+		m_grey = dataColours != nullptr && std::string_view(dataColours) == "grey";
 		renderColorBar();
+
+		uint32_t width = 0;
+		uint32_t height = 0;
+		if (m_levels.empty() || !m_canvas.getResolution(width, height) || m_levels.size() != width * height)
+		{
+			return;
+		}
+		for (uint32_t py = 0; py < height; py++)
+		{
+			for (uint32_t px = 0; px < width; px++)
+			{
+				const uint8_t level = m_levels[py * width + px];
+				if (level != NO_LEVEL)
+				{
+					m_canvas.drawPx(px, py, colorForPercent(level / 254.0), LV_OPA_COVER);
+				}
+			}
+		}
+		m_canvas.invalidate();
 	}
 
 	void Heatmap::showScale(const bool show)
@@ -94,6 +130,7 @@ namespace UI
 		// Update the color bar scale
 		m_colorBar.setYRange(range_float_t{min, max});
 		m_canvas.clear();
+		clearLevels();
 	}
 
 	float Heatmap::normalizeValue(float value) const
@@ -107,8 +144,20 @@ namespace UI
 		ZoneScoped;
 		UI_LOCK();
 		// Values outside the range take its end colours: the scale beside the map doesn't change
-		lv_color_t color = GetColorForPercent(normalizeValue(value));
-		m_canvas.drawPx(px, py, color, LV_OPA_COVER);
+		const float percent = normalizeValue(value);
+		m_canvas.drawPx(px, py, colorForPercent(percent), LV_OPA_COVER);
+
+		// Remember the level, to colour the pixel again if the theme changes
+		uint32_t width = 0;
+		uint32_t height = 0;
+		if (m_canvas.getResolution(width, height) && px < width && py < height)
+		{
+			if (m_levels.size() != width * height)
+			{
+				m_levels.assign(width * height, NO_LEVEL);
+			}
+			m_levels[py * width + px] = static_cast<uint8_t>(std::lround(percent * 254.0f));
+		}
 	}
 
 	void Heatmap::setPos(float x, float y, float value)
@@ -136,6 +185,7 @@ namespace UI
 
 		// Clear the canvas before rendering
 		m_canvas.clear();
+		clearLevels();
 
 #if 0
 		// Render the heatmap pixel by pixel
@@ -163,8 +213,7 @@ namespace UI
 		for (uint32_t y = 0; y < barHeight; y++)
 		{
 			float percent = 1.0f - static_cast<float>(y) / static_cast<float>(barHeight);
-			lv_color_t color = GetColorForPercent(percent);
-			m_colorBar.drawPx(0, y, color, LV_OPA_COVER);
+			m_colorBar.drawPx(0, y, colorForPercent(percent), LV_OPA_COVER);
 		}
 	}
 
@@ -172,9 +221,20 @@ namespace UI
 	{
 		ZoneScoped;
 		m_canvas.clear();
+		clearLevels();
 	}
 
-	static lv_color_t GetColorForPercent(double percent)
+	lv_color_t Heatmap::colorForPercent(double percent) const
+	{
+		if (m_grey)
+		{
+			// Evenly spaced lightness, from a dark grey to near white
+			return Color(static_cast<float>(0.3 + 0.65 * percent), 0.0f, 0.0f);
+		}
+		return hueForPercent(percent);
+	}
+
+	static lv_color_t hueForPercent(double percent)
 	{
 		ZoneScoped;
 		// Convert the height to a color on a HSV colorbar from blue to red

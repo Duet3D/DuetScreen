@@ -1,24 +1,59 @@
 <!--
-  Grey: no colour but the alarms. Every control is a shade of grey, so the only colour on the screen is a fault, a
-  warning or the E-stop: what an operator has to see stands out at once. The palette is fixed.
+  Grey: no colour but faults and the E-stop. Every control, state and outcome is a shade of grey, so the only colour
+  on the screen is a fault, an error or the E-stop: what an operator has to see stands out at once. The palette is
+  fixed.
 
-  Accents are greys of their own: active is a light grey, standby a darker one, a choice is edged in white.
+  The shades keep the roles apart: an action is a light grey with dark text, standby (and an unhomed axis) a middle
+  grey, off the grey of any control; a choice is tinted and edged in white. A graph's lines and a heightmap's scale
+  are shades of grey too.
 -->
 <theme name="grey" extends="base">
 	<palette primary_hue="245" secondary_hue="245" chroma="0" dark="true" customisable="false">
-		<!-- Accents are never fully grey by default; make them so -->
-		<color name="primary" chroma="0"/>
-		<color name="primary_muted" chroma="0" lightness="0.34"/>
-		<color name="secondary" chroma="0" lightness="0.43"/>
-		<color name="secondary_muted" chroma="0" lightness="0.3"/>
+		<!-- Accents: light for actions, a middle grey for standby, dark for a choice's tint -->
+		<color name="primary" chroma="0" lightness="0.86"/>
+		<color name="primary_muted" chroma="0" lightness="0.36"/>
+		<color name="secondary" chroma="0" lightness="0.64"/>
+		<color name="secondary_muted" chroma="0" lightness="0.42"/>
+		<!-- Outcomes are told apart by their words and their shade, not their colour; only an error is red. White text
+			 reads on both. -->
+		<color name="success" chroma="0" lightness="0.44"/>
+		<color name="warning" chroma="0" lightness="0.54"/>
+		<!-- A graph's lines: greys far apart in turn, all lighter than the grid -->
+		<color name="series_1" chroma="0" lightness="0.97"/>
+		<color name="series_2" chroma="0" lightness="0.6"/>
+		<color name="series_3" chroma="0" lightness="0.8"/>
+		<color name="series_4" chroma="0" lightness="0.48"/>
+		<color name="series_5" chroma="0" lightness="0.89"/>
+		<color name="series_6" chroma="0" lightness="0.7"/>
+		<color name="series_7" chroma="0" lightness="0.54"/>
+		<color name="series_8" chroma="0" lightness="0.75"/>
 	</palette>
 
+	<consts>
+		<const name="data_colours" value="grey"/>
+	</consts>
+
 	<styles>
+		<!-- On the light accents, text and icons are dark -->
+		<style name="action_btn" text_color="#bg_dark" recolor="#bg_dark"/>
+		<style name="bg_color_primary" text_color="#bg_dark"/>
+		<style name="bar_indic" text_color="#bg_dark"/>
+		<style name="bg_color_secondary" text_color="#bg_dark"/>
+		<style name="keyboard_button_checked_bg" text_color="#bg_dark"/>
+		<style name="btnm_btn_checked" text_color="#bg_dark"/>
+		<style name="object_cancel_current" text_color="#bg_dark"/>
+		<!-- A fault keeps white text on its red -->
+		<style name="heater_fault" text_color="#text" recolor="#text"/>
+
 		<!-- Without a hue to set it apart, a choice is edged in the text colour -->
 		<style name="btn_checked" outline_color="#text"/>
 		<style name="tab_btn" border_color="#text"/>
 		<style name="tool_selected" border_color="#text" outline_color="#text"/>
 		<style name="cb_marker" border_color="#text"/>
-		<style name="slider_knob" border_color="#text"/>
+		<!-- A knob dark with a white edge, so it shows on the light fill and the dark track alike -->
+		<style name="slider_knob" bg_color="#bg_light" border_color="#text"/>
+
+		<!-- A temperature bar is filled as any bar is, not shaded blue to red -->
+		<style name="temperature_bar" bg_color="#primary" bg_grad_dir="none"/>
 	</styles>
 </theme>

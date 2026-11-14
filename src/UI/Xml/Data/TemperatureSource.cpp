@@ -28,8 +28,8 @@ namespace UI::Xml
 	{
 		f.list("temperatures",
 			   m_history,
-			   "One series per heater, in slot order, sampled every model tick, whole °C. Heaters sharing a sensor are "
-			   "shown once.");
+			   "One series per heater with a sensor, in slot order: its current temperature, sampled every model tick, "
+			   "whole °C. Heaters sharing a sensor are shown once.");
 		f.field("limit",
 				m_limit,
 				"Highest maximum temperature of any heater, °C (0 with no heaters), e.g. for a graph's axis");
@@ -39,15 +39,14 @@ namespace UI::Xml
 	{
 		std::vector<Shown> shown;
 		const OM::Node& heaters = PrinterModel::root()["heat"]["heaters"];
-		const OM::Node& sensors = PrinterModel::root()["sensors"]["analog"];
 		for (size_t number = 0; number < heaters.size(); number++)
 		{
+			// Not whether sensors.analog lists the sensor: a heater carries its own reading
 			const int64_t sensor = heaters[number]["sensor"].integer(-1);
-			if (sensor < 0 || !sensors[static_cast<size_t>(sensor)].exists() ||
-				std::any_of(
-					shown.begin(),
-					shown.end(),
-					[sensor](const Shown& s) { return s.sensor == static_cast<size_t>(sensor); }))
+			if (sensor < 0 || std::any_of(
+								  shown.begin(),
+								  shown.end(),
+								  [sensor](const Shown& s) { return s.sensor == static_cast<size_t>(sensor); }))
 			{
 				continue;
 			}
@@ -94,8 +93,8 @@ namespace UI::Xml
 		MODEL_LOCK();
 		const auto heaters = heatersToShow();
 		syncSeries(heaters);
-		const OM::Node& sensors = PrinterModel::root()["sensors"]["analog"];
+		const OM::Node& heaterNodes = PrinterModel::root()["heat"]["heaters"];
 		m_history.record([&](SeriesRow&, size_t i)
-						 { return static_cast<int32_t>(sensors[heaters[i].sensor]["lastReading"].number()); });
+						 { return static_cast<int32_t>(heaterNodes[heaters[i].heater]["current"].number()); });
 	}
 } // namespace UI::Xml

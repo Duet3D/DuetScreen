@@ -47,6 +47,9 @@
 		<!-- The gap the screen leaves between widgets it places in a free layout, and which a dragged widget snaps to
 			 (see src/UI/Xml/Layout/Geometry.h) -->
 		<const name="widget_gap" value="5"/>
+		<!-- How data is coloured where colour shows a value, e.g. a heightmap: `colour` (blue to red) or `grey` (dark to
+			 light). A graph's lines take the palette's series colours (#series_1, …). -->
+		<const name="data_colours" value="colour"/>
 	</consts>
 
 	<styles>
@@ -159,7 +162,7 @@
 
 		<!-- Bar -->
 		<style name="bar" bg_color="#highlight" bg_opa="100%" radius="circle"/>
-		<style name="bar_indic" radius="circle"/>
+		<style name="bar_indic" radius="circle" text_color="#text"/>
 
 		<!-- Button matrix -->
 		<style name="btnm_btn" bg_color="#bg_light" bg_grad_dir="none" merge="border_muted" shadow_width="0" radius="#radius"/>
@@ -289,7 +292,10 @@
 		<style name="graph_legend_swatch_shown" bg_opa="100%"/>
 		<style name="graph_legend_value" text_font="font_emphasis"/>
 
+		<!-- A bar's value: on its own background beside a short indicator (bar_label_bg, bar_label), or on the indicator in
+			 the text colour the indicator has (bar_indic) -->
 		<style name="bar_label_bg" bg_color="#bg" bg_opa="80%" radius="#radius" pad_hor="#pad"/>
+		<style name="bar_label" text_color="#text"/>
 
 		<style name="object_cancel_base" copy="card" bg_color="#bg_light" bg_opa="100%"/>
 		<style name="object_cancel_cancelled" bg_color="#error" bg_opa="100%"/>

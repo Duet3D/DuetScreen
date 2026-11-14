@@ -2054,6 +2054,10 @@
 			<xs:enumeration value="tr.widget.status_speed_desc"/>
 			<xs:enumeration value="tr.widget.temperature_graph"/>
 			<xs:enumeration value="tr.widget.temperature_graph_desc"/>
+			<xs:enumeration value="tr.widget.temperature_graph_legend"/>
+			<xs:enumeration value="tr.widget.temperature_graph_legend_auto"/>
+			<xs:enumeration value="tr.widget.temperature_graph_legend_hidden"/>
+			<xs:enumeration value="tr.widget.temperature_graph_legend_shown"/>
 			<xs:enumeration value="tr.widget.temperature_graph_seconds"/>
 			<xs:enumeration value="tr.widget.temperatures"/>
 			<xs:enumeration value="tr.widget.temperatures_desc"/>
@@ -2809,6 +2813,9 @@
 		<xs:attribute name="seconds" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `seconds` (int)</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="legend" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `legend` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_text.attributes">
 		<xs:attribute name="text" type="xs:string">
@@ -2959,8 +2966,11 @@
 		<xs:attribute name="legend_format" type="xs:string">
 			<xs:annotation><xs:documentation>How the legend shows a series' latest value: a fmt format with one argument, e.g. `{}°C` (default: no value)</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="legend" type="xs:string">
+			<xs:annotation><xs:documentation>When the legend shows: `auto` (default) while the graph is at least `legend_min_width` wide, `shown` always, `hidden` never</xs:documentation></xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="legend_min_width" type="xs:string">
-			<xs:annotation><xs:documentation>Show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown)</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>With `legend` auto, show the legend only while the graph is at least this many pixels wide, so a narrow graph keeps its room for the plot (default 0: always shown)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_heatmap.attributes">
