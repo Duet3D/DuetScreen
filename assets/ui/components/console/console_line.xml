@@ -9,6 +9,6 @@
 		<lv_spangroup-span bind_text="row.command" style="text_emphasis"/>
 		<lv_spangroup-span bind_text="row.text" style="text"/>
 
-		<action trigger="clicked" name="actions.navigation.open" arg="console"/>
+		<action trigger="single_clicked" name="actions.navigation.open" arg="console"/>
 	</view>
 </component>
