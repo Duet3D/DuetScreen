@@ -6,7 +6,6 @@
 #include "Debug.h"
 #include "JobSource.h"
 #include "MoveSource.h"
-#include "ObjectModel/Axis.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "PrinterModel.h"
 #include "UI/Core/Model.h"
@@ -144,9 +143,7 @@ namespace UI::Xml
 
 	void GaugeSource::onInit()
 	{
-		watchObjectModel({"fans", "tools", "heat", "sensors.analog", "state.currentTool", "job"});
-		registerEventListener<EventType::SpeedFactor>(this, &GaugeSource::update);
-		registerEventListener<EventType::ExtruderData>(this, &GaugeSource::update);
+		watchObjectModel({"fans", "tools", "heat", "sensors.analog", "state.currentTool", "job", "move"});
 	}
 
 	void GaugeSource::update()
@@ -272,7 +269,7 @@ namespace UI::Xml
 
 		rows.push_back(percentage("job.progress", _("widget.job_progress"), JobSource::progress(), 100, false));
 		rows.push_back(percentage(
-			"speed_factor", _("widget.status_speed"), percent(OM::Move::GetSpeedFactor()), FACTOR_SCALE_MAX, true));
+			"speed_factor", _("widget.status_speed"), percent(MoveSource::speedFactor()), FACTOR_SCALE_MAX, true));
 		rows.push_back(percentage("extrusion_factor",
 								  _("widget.status_extrusion"),
 								  static_cast<int32_t>(MoveSource::extrusionFactor()),

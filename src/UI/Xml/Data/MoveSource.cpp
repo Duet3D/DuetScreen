@@ -3,8 +3,7 @@
  */
 
 #include "MoveSource.h"
-#include "ObjectModel/Axis.h"
-#include "ObjectModel/Tool.h"
+#include "PrinterModel.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 #include <algorithm>
@@ -59,12 +58,7 @@ namespace UI::Xml
 
 	void MoveSource::onInit()
 	{
-		registerEventListener<EventType::AxesData>([this]() { showAxes(); });
-		registerEventListener<EventType::ExtruderData>([this]() { showExtrusionFactor(); });
-		registerEventListener<EventType::SpeedFactor>([this]() { showSpeedFactor(); });
-		registerEventListener<EventType::CurrentMoveRequestedSpeed>([this]() { showSpeeds(); });
-		registerEventListener<EventType::CurrentMoveTopSpeed>([this]() { showSpeeds(); });
-		registerEventListener<EventType::CurrentMoveExtrusionSpeed>([this]() { showFlow(); });
+		watchObjectModel({"move", "tools", "state.currentTool"});
 	}
 
 	void MoveSource::update()
@@ -89,30 +83,54 @@ namespace UI::Xml
 		m_flow.set(0);
 	}
 
+	std::vector<size_t> MoveSource::extruders()
+	{
+		std::vector<size_t> numbers;
+		const OM::Node& all = move()["extruders"];
+		if (const auto tool = PrinterModel::currentTool())
+		{
+			const OM::Node& toolExtruders = PrinterModel::tool(*tool)["extruders"];
+			for (size_t i = 0; i < toolExtruders.size(); ++i)
+			{
+				if (const int64_t number = toolExtruders[i].integer(-1);
+					number >= 0 && all[static_cast<size_t>(number)].exists())
+				{
+					numbers.push_back(static_cast<size_t>(number));
+				}
+			}
+			return numbers;
+		}
+		for (size_t number = 0; number < all.size(); ++number)
+		{
+			if (all[number].exists())
+			{
+				numbers.push_back(number);
+			}
+		}
+		return numbers;
+	}
+
 	uint32_t MoveSource::extrusionFactor()
 	{
 		MODEL_LOCK();
 		uint32_t factors = 0;
-		uint32_t count = 0;
-		auto add = [&](OM::Move::ExtruderAxisPtr extruder)
+		const auto numbers = extruders();
+		for (const size_t number : numbers)
 		{
-			factors += static_cast<uint32_t>(std::lround(100 * extruder->factor));
-			count++;
-		};
-		if (auto tool = OM::GetCurrentTool())
-		{
-			tool->IterateExtruders([&](OM::Move::ExtruderAxisPtr extruder, size_t) { add(extruder); });
+			factors += static_cast<uint32_t>(std::lround(100 * move()["extruders"][number]["factor"].number()));
 		}
-		else
-		{
-			OM::Move::IterateExtruderAxesWhile(
-				[&](OM::Move::ExtruderAxisPtr extruder, size_t)
-				{
-					add(extruder);
-					return true;
-				});
-		}
-		return count > 0 ? factors / count : 100u;
+		return numbers.empty() ? 100u : factors / static_cast<uint32_t>(numbers.size());
+	}
+
+	float MoveSource::speedFactor()
+	{
+		MODEL_LOCK();
+		return static_cast<float>(move()["speedFactor"].number(1));
+	}
+
+	const OM::Node& MoveSource::move()
+	{
+		return PrinterModel::root()["move"];
 	}
 
 	void MoveSource::showAxes()
@@ -120,30 +138,43 @@ namespace UI::Xml
 		ZoneScoped;
 		{
 			MODEL_LOCK();
+			// The axes there are, in order
+			std::vector<size_t> axes;
+			for (size_t number = 0; number < move()["axes"].size(); ++number)
+			{
+				if (move()["axes"][number].exists())
+				{
+					axes.push_back(number);
+				}
+			}
 			int32_t maxSpeed = 1;
-			m_axes.sync(OM::Move::GetAxisCount(),
-						[&maxSpeed](AxisRow& row, size_t slot)
+			double babystep = 0;
+			m_axes.sync(axes.size(),
+						[&](AxisRow& row, size_t slot)
 						{
-							if (auto axis = OM::Move::GetAxisBySlot(slot))
+							const OM::Node& axis = move()["axes"][axes[slot]];
+							row.letter.set(axis["letter"].text());
+							row.position.set(fmt::format("{:.2f}", static_cast<float>(axis["userPosition"].number())));
+							row.homed.set(axis["homed"].boolean() ? 1 : 0);
+							row.visible.set(axis["visible"].boolean(true) ? 1 : 0);
+							// The axis' speed is in mm/min
+							maxSpeed = std::max(maxSpeed, static_cast<int32_t>(axis["speed"].integer(0) / 60));
+							if (axis["letter"].text() == "Z")
 							{
-								row.letter.set(axis->letter);
-								row.position.set(fmt::format("{:.2f}", axis->userPosition));
-								row.homed.set(axis->homed ? 1 : 0);
-								row.visible.set(axis->visible ? 1 : 0);
-								maxSpeed = std::max(maxSpeed, axis->maxSpeed);
+								babystep = axis["babystep"].number();
 							}
 						});
 			m_maxSpeed = maxSpeed;
-			auto z = OM::Move::GetAxisByLetter('Z');
-			m_babystep.set(_("status.babystep_value", z ? z->babystep : 0.0f));
+			m_babystep.set(_("status.babystep_value", static_cast<float>(babystep)));
 		}
 		showSpeeds();
 	}
 
 	void MoveSource::showSpeedFactor()
 	{
+		MODEL_LOCK();
 		m_speedFactor.set(
-			_("status.speed_multiplier", static_cast<uint32_t>(std::lround(100 * OM::Move::GetSpeedFactor()))));
+			_("status.speed_multiplier", static_cast<uint32_t>(std::lround(100 * move()["speedFactor"].number(1)))));
 	}
 
 	void MoveSource::showExtrusionFactor()
@@ -151,12 +182,15 @@ namespace UI::Xml
 		m_extrusionFactor.set(_("status.flow_multiplier", extrusionFactor()));
 		{
 			MODEL_LOCK();
-			// The current tool's extruders; with no tool (or none with extruders) the range stays as it was
+			// The current tool's extruders (speed in mm/min); with no tool (or none with extruders) the range stays
 			int32_t maxRate = 0;
-			if (auto tool = OM::GetCurrentTool())
+			if (PrinterModel::currentTool())
 			{
-				tool->IterateExtruders([&](OM::Move::ExtruderAxisPtr extruder, size_t)
-									   { maxRate = std::max(maxRate, extruder->maxSpeed); });
+				for (const size_t number : extruders())
+				{
+					maxRate =
+						std::max(maxRate, static_cast<int32_t>(move()["extruders"][number]["speed"].integer(0) / 60));
+				}
 			}
 			if (maxRate > 0)
 			{
@@ -168,16 +202,55 @@ namespace UI::Xml
 
 	void MoveSource::showSpeeds()
 	{
-		const float top = OM::Move::GetCurrentMoveTopSpeed();
-		const float requested = OM::Move::GetCurrentMoveRequestedSpeed();
+		float top = 0;
+		float requested = 0;
+		{
+			MODEL_LOCK();
+			top = static_cast<float>(move()["currentMove"]["topSpeed"].number());
+			requested = static_cast<float>(move()["currentMove"]["requestedSpeed"].number());
+		}
 		m_speedTop.set(permille(std::round(top), m_maxSpeed));
 		m_speedRequested.set(permille(std::round(requested), m_maxSpeed));
 		m_speedText.set(_("status.speed_label", top, requested));
 	}
 
+	float MoveSource::volumetricFlow()
+	{
+		MODEL_LOCK();
+		const auto tool = PrinterModel::currentTool();
+		if (!tool)
+		{
+			return 0.0f;
+		}
+		// The filament's cross section, weighted by the tool's mix, averaged over its extruders, times the
+		// extrusion rate
+		const OM::Node& toolNode = PrinterModel::tool(*tool);
+		const OM::Node& toolExtruders = toolNode["extruders"];
+		float area = 0;
+		size_t count = 0;
+		for (size_t i = 0; i < toolExtruders.size(); ++i)
+		{
+			const int64_t number = toolExtruders[i].integer(-1);
+			const OM::Node& extruder =
+				number >= 0 ? move()["extruders"][static_cast<size_t>(number)] : OM::Node::missing();
+			if (!extruder.exists())
+			{
+				continue;
+			}
+			count++;
+			const float radius = static_cast<float>(extruder["filamentDiameter"].number()) / 2.0f;
+			area += static_cast<float>(toolNode["mix"][i].number()) * static_cast<float>(M_PI) * radius * radius;
+		}
+		if (count == 0)
+		{
+			return 0.0f;
+		}
+		return area / static_cast<float>(count) * static_cast<float>(move()["currentMove"]["extrusionRate"].number());
+	}
+
 	void MoveSource::showFlow()
 	{
-		const float volumetric = OM::Move::GetVolumetricFlow();
+		const float volumetric = volumetricFlow();
 		m_flow.set(permille(std::round(volumetric), m_maxExtrusionRate));
 		m_flowText.set(_("status.flow_rate", volumetric));
 	}

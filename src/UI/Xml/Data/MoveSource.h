@@ -11,7 +11,9 @@
 
 #include "DataSource.h"
 #include "UI/Xml/Binding/List.h"
+#include "ObjectModel/Tree/Node.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include <vector>
 
 namespace UI::Xml
 {
@@ -50,11 +52,24 @@ namespace UI::Xml
 		 */
 		static uint32_t extrusionFactor();
 
+		/** The speed override, as a fraction (1 is 100%) */
+		static float speedFactor();
+
 	  protected:
-		/** Listen for axis, extruder and override changes */
+		/** Follow the move, the tools and the current tool */
 		void onInit() override;
 
 	  private:
+		/** The object model's move (the model lock held) */
+		static const OM::Node& move();
+
+		/** The current tool's extruders, or every extruder if there is no current tool (the model lock held) */
+		static std::vector<size_t> extruders();
+
+		/** The current move's volumetric flow, mm³/s: the current tool's filament cross section by its extrusion
+		 * rate; 0 with no current tool */
+		static float volumetricFlow();
+
 		/** Show every axis and the babystep */
 		void showAxes();
 
