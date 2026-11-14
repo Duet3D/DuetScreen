@@ -56,7 +56,8 @@
       "header": "Baby Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "Resetta {:g} mm"
+      "reset": "Azzera",
+      "offset": "Offset"
     },
     "console": {
       "input_placeholder": "Inserire comando G-code",
@@ -197,11 +198,12 @@
       "numberpad_new_value_header": "Inserire nuovo valore"
     },
     "move": {
+      "step": "Passo",
       "home_all": "Home tutti",
       "axis_home": "Home {:s}",
-      "distance": "Distanza di movimento\n({:s})",
-      "feedrate": "Velocità di avanzamento\n({:s})",
-      "disable_motors": "Disattiva",
+      "distance": "Passo ({:s})",
+      "feedrate": "Velocità ({:s})",
+      "disable_motors": "Motori spenti",
       "machine_position": "Pos. macchina ({:s})",
       "set_position": "Imposta posizione assoluta per l'asse {:c}",
       "tool_position": "Pos. utensile ({:s})",
@@ -220,6 +222,20 @@
       "disable_motors_confirm": {
         "title": "Conferma disattivazione motori",
         "text": "Sei sicuro di voler disattivare tutti i motori?"
+      },
+      "homing": "Azzeramento",
+      "not_homed": "Non azzerato",
+      "z_offset": "Offset Z",
+      "work_zero": "Zero pezzo qui",
+      "workplace": "Sistema di lavoro",
+      "all_axes": "Tutti",
+      "overrides": "Regolazioni",
+      "speed_factor": "Fattore di velocità",
+      "feed_override": "Override avanzamento",
+      "override_hint": "Ogni movimento, anche il jog",
+      "zero_confirm": {
+        "title": "Imposta lo zero pezzo",
+        "text": "La posizione attuale diventa 0 per {:s} nel sistema di lavoro in uso."
       }
     },
     "settings": {
@@ -451,7 +467,7 @@
       "resume": "Riprendi",
       "acceleration": "Accelerazione: {:d} mm/s²",
       "babystep_header": "Babystepping:",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Piano: {:g}/{:d} °C",
       "time_header": "Tempo:",
       "elapsed_time": "Trascorso: {:s}",
@@ -737,6 +753,8 @@
       "move_jog": "Muovi un asse",
       "move_home": "Azzera gli assi",
       "move_disable_motors": "Disattiva i motori",
+      "move_zero": "Imposta lo zero pezzo",
+      "move_workplace": "Usa un sistema di lavoro",
       "system_restart": "Riavvia DuetScreen",
       "system_reboot": "Riavvia lo schermo",
       "job_pause": "Metti in pausa il lavoro",

@@ -56,7 +56,8 @@
       "header": "Baby-Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "{:g} mm zurücksetzen"
+      "reset": "Zurücksetzen",
+      "offset": "Versatz"
     },
     "console": {
       "input_placeholder": "G-Code-Befehl eingeben",
@@ -197,11 +198,12 @@
       "numberpad_new_value_header": "Neuen Wert eingeben"
     },
     "move": {
+      "step": "Schritt",
       "home_all": "Alle referenzieren",
       "axis_home": "{:s} referenzieren",
-      "distance": "Verfahrdistanz\n({:s})",
-      "feedrate": "Vorschub\n({:s})",
-      "disable_motors": "Deaktivieren",
+      "distance": "Schritt ({:s})",
+      "feedrate": "Geschwindigkeit ({:s})",
+      "disable_motors": "Motoren aus",
       "machine_position": "Maschinenpos. ({:s})",
       "set_position": "Absolute Position für Achse {:c} setzen",
       "tool_position": "Werkzeugpos. ({:s})",
@@ -220,6 +222,20 @@
       "disable_motors_confirm": {
         "title": "Motoren deaktivieren bestätigen",
         "text": "Möchten Sie wirklich alle Motoren deaktivieren?"
+      },
+      "homing": "Referenzieren",
+      "not_homed": "Nicht referenziert",
+      "z_offset": "Z-Versatz",
+      "work_zero": "Werkstücknullpunkt hier",
+      "workplace": "Arbeitsbereich",
+      "all_axes": "Alle",
+      "overrides": "Overrides",
+      "speed_factor": "Geschwindigkeitsfaktor",
+      "feed_override": "Vorschub-Override",
+      "override_hint": "Jede Bewegung, auch das Verfahren",
+      "zero_confirm": {
+        "title": "Werkstücknullpunkt setzen",
+        "text": "Die aktuelle Position wird für {:s} im aktiven Arbeitsbereich zu 0."
       }
     },
     "settings": {
@@ -450,7 +466,7 @@
       "resume": "Fortsetzen",
       "acceleration": "Beschleunigung: {:d} mm/s²",
       "babystep_header": "Babystepping:",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Bett: {:g}/{:d} °C",
       "time_header": "Zeit:",
       "elapsed_time": "Vergangen: {:s}",
@@ -736,6 +752,8 @@
       "move_jog": "Achse verfahren",
       "move_home": "Achsen referenzieren",
       "move_disable_motors": "Motoren deaktivieren",
+      "move_zero": "Werkstücknullpunkt setzen",
+      "move_workplace": "Arbeitsbereich wählen",
       "system_restart": "DuetScreen neu starten",
       "system_reboot": "Bildschirm neu booten",
       "job_pause": "Auftrag pausieren",

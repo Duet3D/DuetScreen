@@ -1,40 +1,60 @@
 <!--
-  Babystepping: nudge Z up or down by the chosen step while printing, or reset. Hold a step to change its size.
+  Babystepping, the Z offset: the offset now, nudging Z up or down by the chosen step while printing, choosing the
+  step, and resetting the offset. Hold a step to change its size.
 
-  Data:     source.babystep.* (src/UI/Xml/Data/BabystepSource.h), shared by every babystepping panel
+  Data:     source.babystep.* (src/UI/Xml/Data/BabystepSource.h), shared by every babystepping panel;
+            source.move.babystep, the offset
   Actions:  actions.babystep.* (src/UI/Presenters/Common/BabystepActions.h); actions.selector.* for the step sizes,
             typed on the shared number pad
 -->
 <component>
 	<api>
-		<!-- true where something else titles it already, e.g. its dialog -->
+		<!-- true where something else titles it already, e.g. its dialog or the Move tab's group -->
 		<prop name="hide_title" type="bool" default="false"/>
 	</api>
-	<view extends="lv_obj" flex_flow="column"
-		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+	<view extends="lv_obj" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
 		<lv_label name="header" translation_tag="tr.babystep.header" hidden="$hide_title"/>
 
-		<lv_obj name="button_panel" width="100%" flex_grow="1" flex_flow="column"
-				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-			<ds_button name="reset" bind_text="source.babystep.reset_text" width="100%" flex_grow="1" style_min_height="content">
-				<style name="action_btn"/>
-				<bind_state_if_eq subject="source.babystep.usable" state="disabled" ref_value="0"/>
-				<action trigger="clicked" name="actions.babystep.reset"/>
-			</ds_button>
-			<ds_button name="increment" icon="babystep_increment.png" width="100%" flex_grow="3">
+		<!-- The offset now -->
+		<lv_obj name="offset" width="100%" height="content" flex_flow="row" scrollable="false"
+				style_flex_main_place="space_between" style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="pad_zero"/>
+			<lv_label name="title" translation_tag="tr.babystep.offset">
+				<style name="text_muted"/>
+			</lv_label>
+			<lv_label name="value" bind_text="source.move.babystep"/>
+		</lv_obj>
+
+		<lv_obj name="nudge" width="100%" flex_grow="1" style_min_height="56" flex_flow="row" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<ds_button name="increment" icon="babystep_increment.png" height="100%" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="source.babystep.usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="actions.babystep.up"/>
 			</ds_button>
-			<ds_button name="decrement" icon="babystep_decrement.png" width="100%" flex_grow="3">
+			<ds_button name="decrement" icon="babystep_decrement.png" height="100%" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="source.babystep.usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="actions.babystep.down"/>
 			</ds_button>
-			<ds_list name="value_list" list="source.babystep.step.choices" item="value_selector_choice" item.format="%s mm"
-					 item.long_mode="wrap" item.width="0" width="100%" flex_grow="2"
-					 style_min_height="content" flex_flow="row" style_pad_all="0"
-					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+
+		<!-- The steps, then Reset; Reset goes under them only where there is very little room -->
+		<lv_obj name="steps" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<ds_list name="value_list" list="source.babystep.step.choices" item="value_selector_choice" height="content"
+					 flex_grow="1" style_min_width="content" flex_flow="row">
+				<style name="setting_options"/>
+			</ds_list>
+			<ds_button name="reset" translation_tag="tr.babystep.reset" height="content" style_min_height="40">
+				<bind_state_if_eq subject="source.babystep.usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="actions.babystep.reset"/>
+			</ds_button>
 		</lv_obj>
 	</view>
 </component>

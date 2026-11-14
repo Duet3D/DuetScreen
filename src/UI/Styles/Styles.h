@@ -300,7 +300,13 @@ namespace UI::Themes
 		Style console_time;			// When a line arrived: muted, ahead of its text
 
 		/* Move */
-		Style unhomed; // Unhomed axes in the move view
+		Style unhomed;				// Unhomed axes in the move view
+		Style axis_tile;			// An axis' position, as a tile: tap it to move to a position
+		Style axis_tile_unhomed;	// A tile while its axis isn't homed: outlined in the unhomed colour
+		Style axis_tile_letter;		// A tile's axis letter
+		Style axis_tile_position;	// A tile's position: large
+		Style axis_tile_not_homed;	// "Not homed" on a tile, in the unhomed colour
+		Style jog_step;				// The jog step in the middle of the XY pad
 
 		/* Temperature */
 		Style temperature_bar; // Temperature bar

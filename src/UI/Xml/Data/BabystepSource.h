@@ -2,8 +2,9 @@
  * BabystepSource.h
  *
  * Publishes babystepping for every view that shows it (the Move tab, a dashboard widget, the shared dialog): the step
- * size, a value selector (UI/Xml/View/ValueSelector.h) whose presets are settings, whether Z can be babystepped, the
- * reset button's text, and whether the shared dialog (assets/ui/components/modals/babystep_dialog.xml) is open. The
+ * size, a value selector (UI/Xml/View/ValueSelector.h) whose presets are settings, whether Z can be babystepped, and
+ * whether the shared dialog (assets/ui/components/modals/babystep_dialog.xml) is open; the offset is
+ * source.move.babystep. The
  * global actions `actions.babystep.*` use them (src/UI/Presenters/Modals/BabystepActions.h); `actions.selector.*`
  * choose the step.
  *
@@ -47,7 +48,6 @@ namespace UI::Xml
 	  private:
 		ValueSelector m_step;		   // `step.*`
 		IntSubject m_usable;		   // `usable`
-		StringSubject<32> m_resetText; // `reset_text`
 		IntSubject m_dialogOpen;	   // `dialog_open`
 	};
 } // namespace UI::Xml

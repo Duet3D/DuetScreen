@@ -57,7 +57,8 @@
       "header": "Baby Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "Reset {:g} mm"
+      "reset": "Reset",
+      "offset": "Offset"
     },
     "console": { /* Console screen */
       "input_placeholder": "Enter G-code command",
@@ -198,11 +199,12 @@
       "numberpad_new_value_header": "Enter new value"
     },
     "move": { /* Move screen */
-      "home_all": "Home All",
+      "step": "Step",
+      "home_all": "Home all",
       "axis_home": "Home {:s}",
-      "distance": "Move Distance\n({:s})",
-      "feedrate": "Feedrate\n({:s})",
-      "disable_motors": "Disable",
+      "distance": "Step ({:s})",
+      "feedrate": "Speed ({:s})",
+      "disable_motors": "Motors off",
       "machine_position": "Machine Pos ({:s})",
       "set_position": "Set absolute position for axis {:c}",
       "tool_position": "Tool Pos ({:s})",
@@ -221,6 +223,20 @@
       "disable_motors_confirm": {
         "title": "Confirm Disable Motors",
         "text": "Are you sure you want to disable all motors?"
+      },
+      "homing": "Homing",
+      "not_homed": "Not homed",
+      "z_offset": "Z offset",
+      "work_zero": "Work zero here",
+      "workplace": "Workplace",
+      "all_axes": "All",
+      "overrides": "Overrides",
+      "speed_factor": "Speed factor",
+      "feed_override": "Feed override",
+      "override_hint": "Every move, jogging too",
+      "zero_confirm": {
+        "title": "Set work zero",
+        "text": "The current position becomes 0 for {:s} in the workplace in use."
       }
     },
     "settings": { /* Settings screen */
@@ -451,7 +467,7 @@
       "resume": "Resume",
       "acceleration": "Acceleration: {:d} mm/s\u00b2",
       "babystep_header": "Babystepping:",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Bed: {:g}/{:d} °C",
       "time_header": "Time:",
       "elapsed_time": "Elapsed: {:s}",
@@ -737,6 +753,8 @@
       "move_jog": "Jog an axis",
       "move_home": "Home axes",
       "move_disable_motors": "Disable the motors",
+      "move_zero": "Set work zero",
+      "move_workplace": "Use a workplace",
       "system_restart": "Restart DuetScreen",
       "system_reboot": "Reboot the screen",
       "job_pause": "Pause the job",

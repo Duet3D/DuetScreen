@@ -1,5 +1,6 @@
 <!--
-  One preset of a value selector, shown checked while it is the value chosen. Tap to use it; hold to change it.
+  One preset of a value selector, shown checked while it is the value chosen. Tap to use it; hold to change it. The
+  presets sit side by side, joined, in a list styled setting_options, as a few short options do in the settings.
 
   Fields:   a source.<selector>.choices row: row.text, row.selected (src/UI/Xml/View/ValueSelector.h)
   Actions:  actions.selector.pick, actions.selector.edit_choice (src/UI/Xml/View/SelectorActions.h)
@@ -9,8 +10,10 @@
 		<!-- How the preset is written, e.g. "%s mm" (item.format on the list) -->
 		<prop name="format" type="string" default="%s"/>
 	</api>
-	<view extends="ds_button" bind_text="row.text" bind_text-fmt="$format" height="100%" flex_grow="1"
-		  style_min_height="content">
+	<!-- At least as wide as its text, not the settings' least width, so a few fit where there is little room -->
+	<view extends="ds_button" bind_text="row.text" bind_text-fmt="$format" height="content" flex_grow="1"
+		  style_min_width="content">
+		<style name="setting_option"/>
 		<style name="long_press"/>
 		<bind_state_if_eq subject="row.selected" state="checked" ref_value="1"/>
 		<action trigger="clicked" name="actions.selector.pick"/>

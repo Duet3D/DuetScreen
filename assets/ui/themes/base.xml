@@ -360,6 +360,18 @@
 		<!-- An axis that isn't homed: in the secondary accent, which no action uses, so it stands out among the move
 			 buttons -->
 		<style name="unhomed" bg_color="#secondary" border_color="#secondary"/>
+		<!-- An axis' position as a tile, as the Move tab and the axes widget show them. One that isn't homed is
+			 outlined in the unhomed colour, inside its edge so it doesn't move, and says so -->
+		<style name="axis_tile" bg_color="#bg_light" bg_opa="100%" radius="#radius" border_color="#border_muted"
+			   border_width="#border_width" border_opa="100%" pad_hor="#pad_large" pad_ver="#pad" pad_row="#pad_small"/>
+		<style name="axis_tile_unhomed" outline_color="#secondary" outline_width="#outline_width"
+			   outline_pad="-#outline_width" outline_opa="100%"/>
+		<style name="axis_tile_letter" text_color="#text_muted" text_font="font_emphasis"/>
+		<style name="axis_tile_position" text_color="#text" text_font="font_large"/>
+		<style name="axis_tile_not_homed" text_color="#secondary" text_font="font_small"/>
+		<!-- The jog step, in the middle of the XY pad -->
+		<style name="jog_step" bg_opa="0" border_color="#border_muted" border_width="#border_width"
+			   border_opa="100%" radius="#radius" text_color="#text_muted" text_font="font_subdued"/>
 
 		<!-- Blue to red (LVGL's palette) -->
 		<style name="temperature_bar" bg_opa="100%" bg_color="0x2196f3" bg_grad_color="0xf44336" bg_grad_dir="hor"/>

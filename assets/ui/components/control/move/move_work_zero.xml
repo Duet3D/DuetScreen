@@ -1,0 +1,63 @@
+<!--
+  Work zero, for a CNC: the workplace in use (G54 to G59), and making the current position zero, for one axis or all.
+
+  Data:     om.move.workplaceNumber; source.axes.all (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.workplace, actions.move.zero (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_setting_group name="group" title_tag="tr.move.work_zero" width="100%">
+			<!-- Two rows of three, so each name fits -->
+			<lv_obj name="workplaces" height="content" scrollable="false" style_layout="grid"
+					style_grid_column_dsc_array="fr(1) fr(1) fr(1)" style_grid_row_dsc_array="content content">
+				<style name="setting_row"/>
+				<ds_button name="g54" text="G54" height="content" style_min_height="40"
+						   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+						   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+					<bind_state_if_eq subject="om.move.workplaceNumber|int" state="checked" ref_value="0"/>
+					<action trigger="clicked" name="actions.move.workplace" arg="1"/>
+				</ds_button>
+				<ds_button name="g55" text="G55" height="content" style_min_height="40"
+						   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+					<bind_state_if_eq subject="om.move.workplaceNumber|int" state="checked" ref_value="1"/>
+					<action trigger="clicked" name="actions.move.workplace" arg="2"/>
+				</ds_button>
+				<ds_button name="g56" text="G56" height="content" style_min_height="40"
+						   style_grid_cell_column_pos="2" style_grid_cell_x_align="stretch"
+						   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+					<bind_state_if_eq subject="om.move.workplaceNumber|int" state="checked" ref_value="2"/>
+					<action trigger="clicked" name="actions.move.workplace" arg="3"/>
+				</ds_button>
+				<ds_button name="g57" text="G57" height="content" style_min_height="40"
+						   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+						   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+					<bind_state_if_eq subject="om.move.workplaceNumber|int" state="checked" ref_value="3"/>
+					<action trigger="clicked" name="actions.move.workplace" arg="4"/>
+				</ds_button>
+				<ds_button name="g58" text="G58" height="content" style_min_height="40"
+						   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+						   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+					<bind_state_if_eq subject="om.move.workplaceNumber|int" state="checked" ref_value="4"/>
+					<action trigger="clicked" name="actions.move.workplace" arg="5"/>
+				</ds_button>
+				<ds_button name="g59" text="G59" height="content" style_min_height="40"
+						   style_grid_cell_column_pos="2" style_grid_cell_x_align="stretch"
+						   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
+					<bind_state_if_eq subject="om.move.workplaceNumber|int" state="checked" ref_value="5"/>
+					<action trigger="clicked" name="actions.move.workplace" arg="6"/>
+				</ds_button>
+			</lv_obj>
+			<lv_obj name="zero" height="content" flex_flow="row_wrap" scrollable="false">
+				<style name="setting_row"/>
+				<ds_list name="axes" list="source.axes.all" item="move_zero_axis" height="content" flex_grow="1"
+						 flex_flow="row_wrap" style_pad_all="0" style_pad_row="#pad" style_pad_column="#pad"/>
+				<ds_button name="all" translation_tag="tr.move.all_axes" height="content" style_min_height="40">
+					<style name="action_btn"/>
+					<action trigger="clicked" name="actions.move.zero" arg="all"/>
+				</ds_button>
+			</lv_obj>
+		</ds_setting_group>
+	</view>
+</component>

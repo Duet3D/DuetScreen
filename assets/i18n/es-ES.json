@@ -56,7 +56,8 @@
       "header": "Baby Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "Restablecer {:g} mm"
+      "reset": "Restablecer",
+      "offset": "Desfase"
     },
     "console": {
       "input_placeholder": "Introducir comando G-code",
@@ -197,11 +198,12 @@
       "numberpad_new_value_header": "Introducir nuevo valor"
     },
     "move": {
+      "step": "Paso",
       "home_all": "Origen todos",
       "axis_home": "Origen {:s}",
-      "distance": "Distancia de movimiento\n({:s})",
-      "feedrate": "Velocidad de avance\n({:s})",
-      "disable_motors": "Desactivar",
+      "distance": "Paso ({:s})",
+      "feedrate": "Velocidad ({:s})",
+      "disable_motors": "Apagar motores",
       "machine_position": "Pos. máquina ({:s})",
       "set_position": "Establecer posición absoluta para el eje {:c}",
       "tool_position": "Pos. herramienta ({:s})",
@@ -220,6 +222,20 @@
       "disable_motors_confirm": {
         "title": "Confirmar desactivar motores",
         "text": "¿Está seguro de que desea desactivar todos los motores?"
+      },
+      "homing": "Origen",
+      "not_homed": "Sin origen",
+      "z_offset": "Desfase Z",
+      "work_zero": "Cero de trabajo aquí",
+      "workplace": "Sistema de trabajo",
+      "all_axes": "Todos",
+      "overrides": "Ajustes en vivo",
+      "speed_factor": "Factor de velocidad",
+      "feed_override": "Ajuste de avance",
+      "override_hint": "Todos los movimientos, también el desplazamiento manual",
+      "zero_confirm": {
+        "title": "Fijar cero de trabajo",
+        "text": "La posición actual pasa a ser 0 para {:s} en el sistema de trabajo en uso."
       }
     },
     "settings": {
@@ -450,7 +466,7 @@
       "resume": "Reanudar",
       "acceleration": "Aceleración: {:d} mm/s²",
       "babystep_header": "Babystepping:",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Cama: {:g}/{:d} °C",
       "time_header": "Tiempo:",
       "elapsed_time": "Transcurrido: {:s}",
@@ -736,6 +752,8 @@
       "move_jog": "Mover un eje",
       "move_home": "Llevar los ejes al origen",
       "move_disable_motors": "Desactivar los motores",
+      "move_zero": "Fijar cero de trabajo",
+      "move_workplace": "Usar un sistema de trabajo",
       "system_restart": "Reiniciar DuetScreen",
       "system_reboot": "Reiniciar la pantalla",
       "job_pause": "Pausar el trabajo",

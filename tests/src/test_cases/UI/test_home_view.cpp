@@ -1199,6 +1199,37 @@ TEST_F(TestHomeViewWithData, ControlView)
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
 }
 
+TEST_F(TestHomeViewWithData, MoveTabSetsWorkZeroOnACnc)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+
+	// A printer has a Z offset; a CNC has work zero instead, and calls the speed factor the feed override
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(move, "z_offset"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(move, "work_zero"), LV_OBJ_FLAG_HIDDEN));
+	load_model_data(R"({"key":"","flags":"d99f","result":{"state":{"machineMode":"CNC"},"move":{"workplaceNumber":1}}})"
+					"\n");
+	deliverModelEvents();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(move, "z_offset"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(move, "work_zero"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_cnc.png");
+
+	// The workplace in use is checked; another is chosen by its G-code
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(move, "g55"), LV_STATE_CHECKED));
+	lv_obj_send_event(lv_obj_find_by_name(move, "g57"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "G57\n");
+
+	// Work zero for every axis, in the workplace in use (G55 is P2), once confirmed
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(move, "work_zero"), "all"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::tap("yes");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_TRUE(sent.back().starts_with("G10 L20 P2 X0 Y0 Z0")) << sent.back();
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
 TEST_F(TestHomeViewWithData, MacroView)
 {
 	openFilesTab(0);
@@ -1658,7 +1689,16 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	}
 
 	openControlTab(0);
-	EXPECT_TRUE(tapShowsNumberPad("move", "z_control", "label")) << "move Z position";
+	{
+		// A position tile: the third is Z's
+		UI::closeDialogs();
+		lv_obj_t* tiles =
+			lv_obj_find_by_name(lv_obj_find_by_name(UI::findView("move")->getRootPtr(), "positions"), "list");
+		ASSERT_NE(tiles, nullptr);
+		ASSERT_GE(lv_obj_get_child_count(tiles), 3u);
+		lv_obj_send_event(lv_obj_get_child(tiles, 2), LV_EVENT_CLICKED, nullptr);
+		EXPECT_NE(openNumberPad(), nullptr) << "move Z position";
+	}
 	openControlTab(1);
 	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "active_temperature")) << "temperature heater";
 	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "value")) << "value selector";

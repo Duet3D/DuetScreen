@@ -15,13 +15,15 @@
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/UnitSystem.h"
+#include <charconv>
 #include <fmt/format.h>
 
 namespace UI::MoveActions
 {
 	namespace
 	{
-		/** The axis letter an action is about: its row of `source.axes.others`', else its `arg`'s first character */
+		/** The axis letter an action is about: its row of `source.axes.all` or `columns`, else its `arg`'s first
+		 * character */
 		char axisOf(const Xml::ActionArgs& args)
 		{
 			if (const auto* row = args.row<Xml::AxisRow>())
@@ -96,6 +98,67 @@ namespace UI::MoveActions
 			Xml::Prompts::askNumber(std::move(request));
 		}
 
+		/** The G-code that selects workplace `number`, 1-9: G54 to G59, then G59.1 to G59.3 */
+		std::string workplaceGcode(int number)
+		{
+			return number <= 6 ? fmt::format("G{:d}", 53 + number) : fmt::format("G59.{:d}", number - 6);
+		}
+
+		/**
+		 * The current position as work zero, in the workplace in use, for the axes `letters` (G10 L20): the workplace
+		 * offsets change, so the position becomes 0
+		 */
+		void setWorkZero(const std::string& letters)
+		{
+			std::string axes;
+			int workplace = 1;
+			{
+				MODEL_LOCK();
+				workplace = static_cast<int>(Xml::PrinterModel::root()["move"]["workplaceNumber"].number()) + 1;
+				for (const char letter : letters)
+				{
+					if (Xml::PrinterModel::axis(letter).exists())
+					{
+						axes += fmt::format(" {:s}0", Xml::PrinterModel::axisGcode(letter));
+					}
+				}
+			}
+			if (!axes.empty())
+			{
+				Xml::Services::sendGcode(fmt::format("G10 L20 P{:d}{:s}\n", workplace, axes));
+			}
+		}
+
+		/** `actions.move.zero` */
+		void zeroAction(const Xml::ActionArgs& args)
+		{
+			std::string letters;
+			if (args.arg == "all")
+			{
+				MODEL_LOCK();
+				for (const size_t number : Xml::PrinterModel::visibleAxes())
+				{
+					const std::string_view letter = Xml::PrinterModel::root()["move"]["axes"][number]["letter"].text();
+					if (!letter.empty())
+					{
+						letters += letter.front();
+					}
+				}
+			}
+			else if (const char letter = axisOf(args))
+			{
+				letters = std::string(1, letter);
+			}
+			if (letters.empty())
+			{
+				return;
+			}
+			Xml::Prompts::confirm({.title = _("move.zero_confirm.title"),
+								   .text = _("move.zero_confirm.text", letters),
+								   .onYes = [letters]() { setWorkZero(letters); },
+								   .asker = args.target});
+		}
+
 		/** `actions.move.home` */
 		void homeAction(const Xml::ActionArgs& args)
 		{
@@ -132,7 +195,7 @@ namespace UI::MoveActions
 	{
 		Xml::Actions::addGlobal("move.jog",
 								"Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; "
-								"from a row of `source.axes.others`, `+` or `-`.",
+								"from a row of `source.axes.all` or `columns`, `+` or `-`.",
 								"tr.actions.move_jog",
 								[](const Xml::ActionArgs& args)
 								{
@@ -143,17 +206,35 @@ namespace UI::MoveActions
 								});
 		Xml::Actions::addGlobal("move.home",
 								"Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of "
-								"`source.axes.others`. Asks first if confirmations are on.",
+								"`source.axes.all` or `columns`. Asks first if confirmations are on.",
 								"tr.actions.move_home",
 								homeAction);
 		Xml::Actions::addGlobal("move.set_position",
 								"Ask for a position and move there. `arg` is the axis letter, or raise it from a row "
-								"of `source.axes.others`.",
+								"of `source.axes.all` or `columns`.",
 								[](const Xml::ActionArgs& args)
 								{
 									if (const char letter = axisOf(args))
 									{
 										askPosition(letter);
+									}
+								});
+		Xml::Actions::addGlobal("move.zero",
+								"Make the current position work zero in the workplace in use (G10 L20): `arg` is the "
+								"axis letter or `all`, or raise it from a row of `source.axes.all` or `columns`. Asks "
+								"first if confirmations are on.",
+								"tr.actions.move_zero",
+								zeroAction);
+		Xml::Actions::addGlobal("move.workplace",
+								"Use workplace `arg`, 1-9: G54 to G59, then G59.1 to G59.3",
+								"tr.actions.move_workplace",
+								[](const Xml::ActionArgs& args)
+								{
+									int number = 0;
+									std::from_chars(args.arg.data(), args.arg.data() + args.arg.size(), number);
+									if (number >= 1 && number <= 9)
+									{
+										Xml::Services::sendGcode(workplaceGcode(number));
 									}
 								});
 		Xml::Actions::addGlobal("move.disable_motors",

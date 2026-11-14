@@ -1,0 +1,13 @@
+<!--
+  Every axis' position, a tile each, side by side; scrolls sideways when there are more than fit. Tap one to move to a
+  position.
+
+  Data:     the global source.axes.all (src/UI/Xml/Data/AxesSource.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_list name="list" list="source.axes.all" item="move_position" width="100%" height="content" flex_flow="row"
+				 style_pad_all="0" style_pad_column="#pad" scroll_dir="hor"/>
+	</view>
+</component>

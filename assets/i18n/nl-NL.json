@@ -56,7 +56,8 @@
       "header": "Baby Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "Reset {:g} mm"
+      "reset": "Resetten",
+      "offset": "Offset"
     },
     "console": {
       "input_placeholder": "Voer G-code commando in",
@@ -197,11 +198,12 @@
       "numberpad_new_value_header": "Nieuwe waarde invoeren"
     },
     "move": {
+      "step": "Stap",
       "home_all": "Alles homen",
       "axis_home": "{:s} homen",
-      "distance": "Verplaatsafstand\n({:s})",
-      "feedrate": "Voedingssnelheid\n({:s})",
-      "disable_motors": "Uitschakelen",
+      "distance": "Stap ({:s})",
+      "feedrate": "Snelheid ({:s})",
+      "disable_motors": "Motoren uit",
       "machine_position": "Machinepositie ({:s})",
       "set_position": "Absolute positie instellen voor as {:c}",
       "tool_position": "Gereedschapspositie ({:s})",
@@ -220,6 +222,20 @@
       "disable_motors_confirm": {
         "title": "Motoren uitschakelen bevestigen",
         "text": "Weet u zeker dat u alle motoren wilt uitschakelen?"
+      },
+      "homing": "Homen",
+      "not_homed": "Niet gehomed",
+      "z_offset": "Z-offset",
+      "work_zero": "Werknulpunt hier",
+      "workplace": "Werkcoördinaten",
+      "all_axes": "Alle",
+      "overrides": "Overrides",
+      "speed_factor": "Snelheidsfactor",
+      "feed_override": "Voeding-override",
+      "override_hint": "Elke beweging, ook joggen",
+      "zero_confirm": {
+        "title": "Werknulpunt instellen",
+        "text": "De huidige positie wordt 0 voor {:s} in de gebruikte werkcoördinaten."
       }
     },
     "settings": {
@@ -450,7 +466,7 @@
       "resume": "Hervatten",
       "acceleration": "Versnelling: {:d} mm/s²",
       "babystep_header": "Babystepping:",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Bed: {:g}/{:d} °C",
       "time_header": "Tijd:",
       "elapsed_time": "Verstreken: {:s}",
@@ -736,6 +752,8 @@
       "move_jog": "Een as verplaatsen",
       "move_home": "Assen homen",
       "move_disable_motors": "Motoren uitschakelen",
+      "move_zero": "Werknulpunt instellen",
+      "move_workplace": "Werkcoördinaten kiezen",
       "system_restart": "DuetScreen herstarten",
       "system_reboot": "Het scherm opnieuw opstarten",
       "job_pause": "Taak pauzeren",

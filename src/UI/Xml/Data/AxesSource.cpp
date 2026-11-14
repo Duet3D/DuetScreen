@@ -10,6 +10,7 @@
 #include "UI/Core/Model.h"
 #include "utils/StorageHelper.h"
 #include "utils/UnitSystem.h"
+#include <algorithm>
 #include <fmt/format.h>
 #include <string>
 #include <vector>
@@ -47,17 +48,27 @@ namespace UI::Xml
 			return static_cast<float>(axis[machine ? "machinePosition" : "userPosition"].number());
 		}
 
-		/** An axis' label, e.g. "X: 0.00", in the displayed unit */
-		std::string axisLabel(char letter, float position)
+		/** Whether the axis called `letter` turns rather than slides: A, B and C, as RepRapFirmware has them */
+		bool isRotary(char letter)
 		{
-			return fmt::format("{}: {:.2f}", letter, Units::convertDistanceToCurrentDisplayedUnit(position));
+			return letter == 'A' || letter == 'B' || letter == 'C';
+		}
+
+		/** An axis' position as shown: in the displayed unit, e.g. "150.00", or in degrees, e.g. "90.00°" */
+		std::string positionText(char letter, float position)
+		{
+			return isRotary(letter) ? fmt::format("{:.2f}°", position)
+									: fmt::format("{:.2f}", Units::convertDistanceToCurrentDisplayedUnit(position));
 		}
 	} // namespace
 
 	void AxisRow::fields(FieldVisitor& f)
 	{
-		f.field("letter", letter, "Axis letter");
-		f.field("label", label, "Position in the displayed unit, e.g. \"U: 0.00\"");
+		f.field("letter", letter, "Axis letter, e.g. \"U\"");
+		f.field("position",
+				position,
+				"Position in the displayed unit, e.g. \"150.00\", or in degrees for a rotary axis (A, B, C), e.g. "
+				"\"90.00°\"");
 		f.field("homed", homed, "1 when homed");
 		f.field("jog_usable", jogUsable, "1 if the axis can be jogged or set (homed, or moves before homing allowed)");
 		f.field("home_usable", homeUsable, "1 if it can be homed");
@@ -70,22 +81,21 @@ namespace UI::Xml
 
 	void AxesSource::fields(FieldVisitor& f)
 	{
-		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}, {"z", &m_z}};
+		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}};
 		for (const auto& [prefix, axis] : named)
 		{
-			f.field(fmt::format("{}.label", prefix), axis->label, "Position in the displayed unit, e.g. \"X: 0.00\"");
 			f.field(fmt::format("{}.homed", prefix), axis->homed, "1 when homed");
 			f.field(fmt::format("{}.jog_usable", prefix),
 					axis->jogUsable,
 					"1 if the axis can be jogged or set (homed, or moves before homing allowed)");
-			f.field(fmt::format("{}.home_usable", prefix), axis->homeUsable, "1 if it can be homed");
 		}
-		f.field("xy.homed", m_xyHomed, "1 when X and Y are homed");
-		f.field("xy.home_usable", m_xyHomeUsable, "1 if X and Y can be homed");
+		f.list("all", m_all, "Every axis the user sees, in the printer's order");
+		f.field("all_homed", m_allHomed, "1 when every axis the user sees is homed");
 		f.field("home_all_usable", m_homeAllUsable, "1 if all axes can be homed");
 		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
-		f.list("others", m_others, "The axes the user sees other than X, Y and Z");
-		f.field("others_shown", m_othersShown, "1 if there are other axes");
+		f.list("columns",
+			   m_columns,
+			   "The axes the user sees other than X and Y, each jogged in a column of its own: Z, then any others");
 	}
 
 	void AxesSource::onInit()
@@ -104,51 +114,61 @@ namespace UI::Xml
 		m_homeAllUsable.set(homeable ? 1 : 0);
 		m_disableMotorsUsable.set(homeable ? 1 : 0);
 
-		// X, Y and Z have controls of their own; disabled if the printer has no such axis
-		NamedAxis* named[] = {&m_x, &m_y, &m_z};
-		const char letters[] = {'X', 'Y', 'Z'};
-		for (size_t i = 0; i < 3; i++)
+		// X and Y have controls of their own, the XY pad; disabled if the printer has no such axis
+		NamedAxis* named[] = {&m_x, &m_y};
+		const char letters[] = {'X', 'Y'};
+		for (size_t i = 0; i < 2; i++)
 		{
 			const OM::Node& axis = PrinterModel::axis(letters[i]);
 			const bool exists = axis.exists();
-			named[i]->label.set(axisLabel(letters[i], exists ? positionOf(axis, machine) : 0.0f));
 			named[i]->homed.set(exists && axis["homed"].boolean() ? 1 : 0);
 			named[i]->jogUsable.set(connected && exists && canMove(axis) ? 1 : 0);
-			named[i]->homeUsable.set(homeable && exists ? 1 : 0);
 		}
-		m_xyHomed.set(m_x.homed.get() && m_y.homed.get() ? 1 : 0);
-		m_xyHomeUsable.set(m_x.homeUsable.get() && m_y.homeUsable.get() ? 1 : 0);
 
-		// Any others the user sees
-		std::vector<size_t> others;
+		// Every axis the user sees, and those with a column of their own: all but X and Y
+		std::vector<size_t> all;
+		std::vector<size_t> columns;
 		if (connected)
 		{
 			for (const size_t number : PrinterModel::visibleAxes())
 			{
 				const std::string_view letter = PrinterModel::root()["move"]["axes"][number]["letter"].text();
-				if (!letter.empty() && letter.front() != 'X' && letter.front() != 'Y' && letter.front() != 'Z')
+				if (letter.empty())
 				{
-					others.push_back(number);
+					continue;
+				}
+				all.push_back(number);
+				if (letter.front() != 'X' && letter.front() != 'Y')
+				{
+					columns.push_back(number);
 				}
 			}
 		}
-		m_others.sync(others.size(),
-					  [&](AxisRow& row, size_t i)
-					  {
-						  const OM::Node& axis = PrinterModel::root()["move"]["axes"][others[i]];
-						  const char letter = axis["letter"].text().front();
-						  row.letter.set(std::string(1, letter));
-						  row.label.set(axisLabel(letter, positionOf(axis, machine)));
-						  row.homed.set(axis["homed"].boolean() ? 1 : 0);
-						  row.jogUsable.set(canMove(axis) ? 1 : 0);
-						  row.homeUsable.set(homeable ? 1 : 0);
-					  });
-		m_othersShown.set(others.empty() ? 0 : 1);
+		const auto show = [&](AxisRow& row, size_t number)
+		{
+			const OM::Node& axis = PrinterModel::root()["move"]["axes"][number];
+			const char letter = axis["letter"].text().front();
+			row.letter.set(std::string(1, letter));
+			row.position.set(positionText(letter, positionOf(axis, machine)));
+			row.homed.set(axis["homed"].boolean() ? 1 : 0);
+			row.jogUsable.set(canMove(axis) ? 1 : 0);
+			row.homeUsable.set(homeable ? 1 : 0);
+		};
+		m_all.sync(all.size(), [&](AxisRow& row, size_t i) { show(row, all[i]); });
+		m_columns.sync(columns.size(), [&](AxisRow& row, size_t i) { show(row, columns[i]); });
+		m_allHomed.set(!all.empty() &&
+							   std::all_of(all.begin(),
+										   all.end(),
+										   [](size_t number)
+										   { return PrinterModel::root()["move"]["axes"][number]["homed"].boolean(); })
+						   ? 1
+						   : 0);
 	}
 
 	void AxesSource::clear()
 	{
-		m_others.clear();
+		m_all.clear();
+		m_columns.clear();
 		update();
 	}
 } // namespace UI::Xml

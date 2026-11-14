@@ -1,35 +1,23 @@
 <!--
-  Controls for one axis: its position (tap to set it), forwards, home, backwards. Homing shows it unhomed until
-  done.
+  One axis jogged in a column: forwards, its letter, backwards. Z, and any axis other than X and Y, has one.
 
-  Fields:   a source.axes.others row: row.letter, row.label, row.homed, row.jog_usable, row.home_usable
-            (src/UI/Xml/Data/AxesSource.h)
-  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h)
+  Fields:   a source.axes.columns row: row.letter, row.jog_usable (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.jog (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
-	<view extends="lv_obj" height="100%" flex_grow="1" style_min_width="content" flex_flow="column"
+	<view extends="lv_obj" width="72" height="100%" flex_flow="column" scrollable="false"
 		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
-		<style name="pad_large"/>
-		<ds_button name="label" bind_text="row.label" width="100%" height="content" style_min_width="content"
-				   style_text_align="center">
-			<style name="input"/>
-			<style name="pad_base"/>
-			<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="actions.move.set_position"/>
-		</ds_button>
-		<ds_button name="increment" icon="increment.png" width="100%" flex_grow="1">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<ds_button name="increment" icon="arrow_up.png" text="+" width="100%" flex_grow="1">
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="actions.move.jog" arg="+"/>
 		</ds_button>
-		<ds_button name="home" bind_text="row.letter" icon="home_axis.png" width="100%" flex_grow="1">
-			<style name="action_btn"/>
-			<style name="unhomed" selector="checked"/>
-			<bind_state_if_eq subject="row.homed" state="checked" ref_value="0"/>
-			<bind_state_if_eq subject="row.home_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="actions.move.home"/>
-		</ds_button>
-		<ds_button name="decrement" icon="decrement.png" width="100%" flex_grow="1">
+		<lv_label name="letter" bind_text="row.letter" width="100%" flex_grow="1" style_text_align="center">
+			<style name="axis_tile_position"/>
+		</lv_label>
+		<ds_button name="decrement" icon="arrow_down.png" text="−" width="100%" flex_grow="1">
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="actions.move.jog" arg="-"/>

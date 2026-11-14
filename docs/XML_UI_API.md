@@ -83,32 +83,34 @@ From [AxesSource.cpp](../src/UI/Xml/Data/AxesSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.axes.x.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
 | `source.axes.x.homed` | int | 1 when homed |
 | `source.axes.x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `source.axes.x.home_usable` | int | 1 if it can be homed |
-| `source.axes.y.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
 | `source.axes.y.homed` | int | 1 when homed |
 | `source.axes.y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `source.axes.y.home_usable` | int | 1 if it can be homed |
-| `source.axes.z.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `source.axes.z.homed` | int | 1 when homed |
-| `source.axes.z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `source.axes.z.home_usable` | int | 1 if it can be homed |
-| `source.axes.xy.homed` | int | 1 when X and Y are homed |
-| `source.axes.xy.home_usable` | int | 1 if X and Y can be homed |
+| `source.axes.all` | list | Every axis the user sees, in the printer's order |
+| `source.axes.all_homed` | int | 1 when every axis the user sees is homed |
 | `source.axes.home_all_usable` | int | 1 if all axes can be homed |
 | `source.axes.disable_motors_usable` | int | 1 if the motors can be disabled |
-| `source.axes.others` | list | The axes the user sees other than X, Y and Z |
-| `source.axes.others_shown` | int | 1 if there are other axes |
+| `source.axes.columns` | list | The axes the user sees other than X and Y, each jogged in a column of its own: Z, then any others |
 
-Each row of `source.axes.others`:
+Each row of `source.axes.all`:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
-| `row.letter` | text | Axis letter |
-| `row.label` | text | Position in the displayed unit, e.g. "U: 0.00" |
+| `row.letter` | text | Axis letter, e.g. "U" |
+| `row.position` | text | Position in the displayed unit, e.g. "150.00", or in degrees for a rotary axis (A, B, C), e.g. "90.00°" |
+| `row.homed` | int | 1 when homed |
+| `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `row.home_usable` | int | 1 if it can be homed |
+
+Each row of `source.axes.columns`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.letter` | text | Axis letter, e.g. "U" |
+| `row.position` | text | Position in the displayed unit, e.g. "150.00", or in degrees for a rotary axis (A, B, C), e.g. "90.00°" |
 | `row.homed` | int | 1 when homed |
 | `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
 | `row.home_usable` | int | 1 if it can be homed |
@@ -120,7 +122,6 @@ From [BabystepSource.cpp](../src/UI/Xml/Data/BabystepSource.cpp).
 | Name | Type | Description |
 | --- | --- | --- |
 | `source.babystep.usable` | int | 1 if Z can be babystepped: there is a Z axis, it is homed, and connected |
-| `source.babystep.reset_text` | text | The reset button's text, with the current offset, e.g. "Reset 0.02 mm" |
 | `source.babystep.dialog_open` | int | 1 while the shared babystepping dialog is open |
 | `source.babystep.step.title` | text | The title, e.g. "Feed Distance (mm)" |
 | `source.babystep.step.value` | text | The value, e.g. "0.1" (actions.selector.* with arg `babystep.step`) |
@@ -324,7 +325,7 @@ From [MoveSource.cpp](../src/UI/Xml/Data/MoveSource.cpp).
 | `source.move.speed_factor` | text | The speed override, e.g. "100%" |
 | `source.move.extrusion_factor` | text | The extrusion override of the current tool's extruders (every extruder's, if there is no current tool), e.g. "100%" |
 | `source.move.extrusion_percent` | int | `source.move.extrusion_factor` as a number, percent |
-| `source.move.babystep` | text | The Z babystep, e.g. "0.05 mm" |
+| `source.move.babystep` | text | The Z babystep in the displayed unit, e.g. "0.05 mm" |
 | `source.move.speed_text` | text | The current move's top and requested speeds, e.g. "0/0 mm/s" |
 | `source.move.speed_top` | int | The current move's top speed, in thousandths of the fastest axis' maximum (0-1000), for a gauge |
 | `source.move.speed_requested` | int | The current move's requested speed, in thousandths of the fastest axis' maximum (0-1000) |
@@ -474,9 +475,11 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.resume` | Resume the paused job. Offered to users for their widgets' action settings, as `tr.actions.job_resume`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.move.disable_motors` | Disable the motors (M18), asking first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_disable_motors`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `source.axes.others`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_home`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.jog` | Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; from a row of `source.axes.others`, `+` or `-`. Offered to users for their widgets' action settings, as `tr.actions.move_jog`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
-| `actions.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `source.axes.others`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `source.axes.all` or `columns`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_home`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.jog` | Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; from a row of `source.axes.all` or `columns`, `+` or `-`. Offered to users for their widgets' action settings, as `tr.actions.move_jog`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `source.axes.all` or `columns`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.workplace` | Use workplace `arg`, 1-9: G54 to G59, then G59.1 to G59.3. Offered to users for their widgets' action settings, as `tr.actions.move_workplace`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.zero` | Make the current position work zero in the workplace in use (G10 L20): `arg` is the axis letter or `all`, or raise it from a row of `source.axes.all` or `columns`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_zero`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
@@ -1780,7 +1783,7 @@ Each widget is a component (with its props) and a widget file beside it, which s
 
 **Axis positions**: Where each axis is
 
-In Motion; placed in `dashboard`; component `dashboard_axes` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a free layout it is 365×89 px, and at least 272×89 px.
+In Motion; placed in `dashboard`; component `move_positions_card` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a free layout it is 365×89 px, and at least 272×89 px.
 
 ![axes](../tests/ref_imgs/xml_ui_api/widgets/axes.png)
 
@@ -2330,13 +2333,9 @@ At its smallest, 272×184 px:
 
 **Jog distance and speed**: How far and how fast every jog goes; hold one to change it
 
-In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a free layout it is 550×136 px, and at least 365×136 px.
+In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a free layout it is 642×136 px, and at least 642×136 px.
 
 ![jog_choices](../tests/ref_imgs/xml_ui_api/widgets/jog_choices.png)
-
-At its smallest, 365×136 px:
-
-![jog_choices at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_choices_smallest.png)
 
 #### jog_xy
 
@@ -2790,7 +2789,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| [`babystep`](#control) |  | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| [`babystep`](#babystep) |  | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | [`console`](#console) | `gcode_reference` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `gcode_reference` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
@@ -2811,8 +2810,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `customise_saved_layout` |  |  | `customise` | [customise_saved_layout.xml](../assets/ui/components/customise/customise_saved_layout.xml) |
 | `customise_setting` |  |  | `customise` | [customise_setting.xml](../assets/ui/components/customise/customise_setting.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
-| `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
-| `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
+| `dashboard_axis` |  |  | `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
 | `dashboard_bed` |  | `graph_key` | `dashboard_tools` | [dashboard_bed.xml](../assets/ui/components/dashboard/dashboard_bed.xml) |
 | `dashboard_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `button`, `gcode_button` | [dashboard_button.xml](../assets/ui/components/dashboard/dashboard_button.xml) |
@@ -2870,12 +2868,19 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
-| `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
+| `move_axis` |  |  | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
+| `move_home_axis` |  |  | `move_homing` | [move_home_axis.xml](../assets/ui/components/control/move/move_home_axis.xml) |
+| `move_homing` |  |  | `move` | [move_homing.xml](../assets/ui/components/control/move/move_homing.xml) |
 | `move_jog_choices` |  |  | `move`, `jog_choices` | [move_jog_choices.xml](../assets/ui/components/control/move/move_jog_choices.xml) |
+| `move_overrides` |  |  | `move` | [move_overrides.xml](../assets/ui/components/control/move/move_overrides.xml) |
+| `move_position` |  |  | `move_positions` | [move_position.xml](../assets/ui/components/control/move/move_position.xml) |
+| `move_positions` |  |  | `move`, `move_positions_card` | [move_positions.xml](../assets/ui/components/control/move/move_positions.xml) |
+| `move_positions_card` |  |  | `axes` | [move_positions_card.xml](../assets/ui/components/control/move/move_positions_card.xml) |
+| `move_work_zero` |  |  | `move` | [move_work_zero.xml](../assets/ui/components/control/move/move_work_zero.xml) |
 | `move_xy` |  |  | `move`, `move_xy_card` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
 | `move_xy_card` |  |  | `jog_xy` | [move_xy_card.xml](../assets/ui/components/control/move/move_xy_card.xml) |
-| `move_z` |  |  | `move`, `move_z_card` | [move_z.xml](../assets/ui/components/control/move/move_z.xml) |
 | `move_z_card` |  |  | `jog_z` | [move_z_card.xml](../assets/ui/components/control/move/move_z_card.xml) |
+| `move_zero_axis` |  |  | `move_work_zero` | [move_zero_axis.xml](../assets/ui/components/control/move/move_zero_axis.xml) |
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
@@ -2919,13 +2924,17 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 The components shown as views of their own, drawn with sample printer data in the `duetscreen` theme. A view that shows in another's picture (the status bar in the home screen's) is pictured only there.
 
+#### babystep
+
+![babystep](../tests/ref_imgs/xml_ui_api/views/babystep.png)
+
 #### console
 
 ![console](../tests/ref_imgs/xml_ui_api/views/console.png)
 
 #### control
 
-Also shows `babystep`, `move`.
+Also shows `move`.
 
 ![control](../tests/ref_imgs/xml_ui_api/views/control.png)
 
@@ -3164,6 +3173,12 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `console_line_error` | ![console_line_error](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_line_error.png) | border_side=left border_width=3 border_color=#error border_opa=100% bg_color=#error bg_opa=15% |
 | `console_time` | ![console_time](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_time.png) | text_color=#text_muted text_font=font_subdued pad_top=1 |
 | `unhomed` |  | bg_color=#secondary border_color=#secondary |
+| `axis_tile` | ![axis_tile](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile.png) | bg_color=#bg_light bg_opa=100% radius=#radius border_color=#border_muted border_width=#border_width border_opa=100% pad_hor=#pad_large pad_ver=#pad pad_row=#pad_small |
+| `axis_tile_unhomed` | ![axis_tile_unhomed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_unhomed.png) | outline_color=#secondary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
+| `axis_tile_letter` | ![axis_tile_letter](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_letter.png) | text_color=#text_muted text_font=font_emphasis |
+| `axis_tile_position` | ![axis_tile_position](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_position.png) | text_color=#text text_font=font_large |
+| `axis_tile_not_homed` | ![axis_tile_not_homed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_not_homed.png) | text_color=#secondary text_font=font_small |
+| `jog_step` | ![jog_step](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/jog_step.png) | bg_opa=0 border_color=#border_muted border_width=#border_width border_opa=100% radius=#radius text_color=#text_muted text_font=font_subdued |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
 | `tool_list` |  | *(not set)* |

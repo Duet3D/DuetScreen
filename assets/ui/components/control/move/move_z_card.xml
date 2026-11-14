@@ -1,15 +1,16 @@
 <!--
-  Z on its own, in a card: the `jog_z` widget (widgets/motion/jog_z.json). It jogs by the distance and speed chosen in
-  any view (the global source.jog.*), and asks before homing as the Move tab does.
+  Z on its own, in a card: the `jog_z` widget (widgets/motion/jog_z.json), Z's column from the Move tab. It jogs by
+  the distance and speed chosen in any view (the global source.jog.*).
 
-  Data:     source.axes.* (src/UI/Xml/Data/AxesSource.h), source.machine.connected
-  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h)
+  Data:     the Z row of source.axes.columns (src/UI/Xml/Data/AxesSource.h), source.machine.connected
+  Actions:  actions.move.jog (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="row"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
 		<style name="card"/>
-		<style name="pad_zero"/>
 		<bind_state_if_eq subject="source.machine.connected" state="disabled" ref_value="0"/>
-		<move_z name="z_control" width="100%" height="100%"/>
+		<ds_list name="z_control" list="source.axes.columns" key="row.letter" value="Z" item="move_axis" width="content"
+				 height="100%" flex_flow="row" style_pad_all="0" scrollable="false"/>
 	</view>
 </component>

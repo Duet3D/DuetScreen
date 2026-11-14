@@ -6,6 +6,7 @@
 #include "PrinterModel.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
+#include "utils/UnitSystem.h"
 #include <algorithm>
 #include <cmath>
 
@@ -34,7 +35,7 @@ namespace UI::Xml
 				"The extrusion override of the current tool's extruders (every extruder's, if there is no current "
 				"tool), e.g. \"100%\"");
 		f.field("extrusion_percent", m_extrusionPercent, "`source.move.extrusion_factor` as a number, percent");
-		f.field("babystep", m_babystep, "The Z babystep, e.g. \"0.05 mm\"");
+		f.field("babystep", m_babystep, "The Z babystep in the displayed unit, e.g. \"0.05 mm\"");
 		f.field("speed_text", m_speedText, "The current move's top and requested speeds, e.g. \"0/0 mm/s\"");
 		f.field("speed_top",
 				m_speedTop,
@@ -67,7 +68,7 @@ namespace UI::Xml
 		m_speedFactor.set(_("status.speed_multiplier", 100u));
 		m_extrusionFactor.set(_("status.flow_multiplier", 100u));
 		m_extrusionPercent.set(100);
-		m_babystep.set(_("status.babystep_value", 0.0f));
+		m_babystep.set(_("status.babystep_value", 0.0f, Units::getDisplayedDistanceUnit()));
 		m_speedText.set(_("status.speed_label", 0.0f, 0.0f));
 		m_speedTop.set(0);
 		m_speedRequested.set(0);
@@ -143,7 +144,10 @@ namespace UI::Xml
 				}
 			}
 			m_maxSpeed = maxSpeed;
-			m_babystep.set(_("status.babystep_value", static_cast<float>(babystep)));
+			// The object model's babystep is in mm; it is shown in the displayed unit
+			m_babystep.set(_("status.babystep_value",
+							 Units::convertDistanceToCurrentDisplayedUnit(static_cast<float>(babystep)),
+							 Units::getDisplayedDistanceUnit()));
 		}
 		showSpeeds();
 	}

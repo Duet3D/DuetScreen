@@ -56,7 +56,8 @@
       "header": "Baby Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "Repor {:g} mm"
+      "reset": "Repor",
+      "offset": "Desvio"
     },
     "console": {
       "input_placeholder": "Introduzir comando G-code",
@@ -197,11 +198,12 @@
       "numberpad_new_value_header": "Introduzir novo valor"
     },
     "move": {
+      "step": "Passo",
       "home_all": "Home todos",
       "axis_home": "Home {:s}",
-      "distance": "Distância de movimento\n({:s})",
-      "feedrate": "Velocidade de avanço\n({:s})",
-      "disable_motors": "Desativar",
+      "distance": "Passo ({:s})",
+      "feedrate": "Velocidade ({:s})",
+      "disable_motors": "Motores desligados",
       "machine_position": "Pos. máquina ({:s})",
       "set_position": "Definir posição absoluta para o eixo {:c}",
       "tool_position": "Pos. ferramenta ({:s})",
@@ -220,6 +222,20 @@
       "disable_motors_confirm": {
         "title": "Confirmar desativação dos motores",
         "text": "Tem a certeza de que deseja desativar todos os motores?"
+      },
+      "homing": "Origem",
+      "not_homed": "Sem origem",
+      "z_offset": "Desvio Z",
+      "work_zero": "Zero da peça aqui",
+      "workplace": "Sistema de trabalho",
+      "all_axes": "Todos",
+      "overrides": "Ajustes",
+      "speed_factor": "Fator de velocidade",
+      "feed_override": "Ajuste de avanço",
+      "override_hint": "Todos os movimentos, também o jog",
+      "zero_confirm": {
+        "title": "Definir o zero da peça",
+        "text": "A posição atual passa a ser 0 para {:s} no sistema de trabalho em uso."
       }
     },
     "settings": {
@@ -450,7 +466,7 @@
       "resume": "Retomar",
       "acceleration": "Aceleração: {:d} mm/s²",
       "babystep_header": "Babystepping:",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Base: {:g}/{:d} °C",
       "time_header": "Tempo:",
       "elapsed_time": "Decorrido: {:s}",
@@ -736,6 +752,8 @@
       "move_jog": "Mover um eixo",
       "move_home": "Levar os eixos à origem",
       "move_disable_motors": "Desativar os motores",
+      "move_zero": "Definir o zero da peça",
+      "move_workplace": "Usar um sistema de trabalho",
       "system_restart": "Reiniciar o DuetScreen",
       "system_reboot": "Reiniciar o ecrã",
       "job_pause": "Pausar o trabalho",

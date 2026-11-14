@@ -1,0 +1,13 @@
+<!--
+  Every axis' position, in a card: the `axes` widget (widgets/motion/axes.json). Tap one to move to a position.
+
+  Data:     the global source.axes.all (src/UI/Xml/Data/AxesSource.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scrollable="false"
+		  style_flex_main_place="center">
+		<style name="card"/>
+		<bind_state_if_eq subject="source.machine.connected" state="disabled" ref_value="0"/>
+		<move_positions name="positions" width="100%"/>
+	</view>
+</component>

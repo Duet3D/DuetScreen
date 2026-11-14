@@ -56,7 +56,8 @@
       "header": "Baby Stepping",
       "decrement": "-",
       "increment": "+",
-      "reset": "Réinitialiser {:g} mm"
+      "reset": "Réinitialiser",
+      "offset": "Décalage"
     },
     "console": {
       "input_placeholder": "Entrer une commande G-code",
@@ -197,11 +198,12 @@
       "numberpad_new_value_header": "Entrer la nouvelle valeur"
     },
     "move": {
+      "step": "Pas",
       "home_all": "Tout référencer",
       "axis_home": "Référencer {:s}",
-      "distance": "Distance de déplacement\n({:s})",
-      "feedrate": "Vitesse d'avance\n({:s})",
-      "disable_motors": "Désactiver",
+      "distance": "Pas ({:s})",
+      "feedrate": "Vitesse ({:s})",
+      "disable_motors": "Moteurs coupés",
       "machine_position": "Pos. machine ({:s})",
       "set_position": "Définir la position absolue pour l'axe {:c}",
       "tool_position": "Pos. outil ({:s})",
@@ -220,6 +222,20 @@
       "disable_motors_confirm": {
         "title": "Confirmer la désactivation des moteurs",
         "text": "Voulez-vous vraiment désactiver tous les moteurs ?"
+      },
+      "homing": "Origine",
+      "not_homed": "Origine non faite",
+      "z_offset": "Décalage Z",
+      "work_zero": "Zéro pièce ici",
+      "workplace": "Repère de travail",
+      "all_axes": "Tous",
+      "overrides": "Réglages en cours",
+      "speed_factor": "Facteur de vitesse",
+      "feed_override": "Correction d'avance",
+      "override_hint": "Chaque mouvement, déplacements manuels compris",
+      "zero_confirm": {
+        "title": "Définir le zéro pièce",
+        "text": "La position actuelle devient 0 pour {:s} dans le repère de travail utilisé."
       }
     },
     "settings": {
@@ -450,7 +466,7 @@
       "resume": "Reprendre",
       "acceleration": "Accélération : {:d} mm/s²",
       "babystep_header": "Babystepping :",
-      "babystep_value": "{:g} mm",
+      "babystep_value": "{:g} {:s}",
       "bed_temp": "Plateau : {:g}/{:d} °C",
       "time_header": "Temps :",
       "elapsed_time": "Écoulé : {:s}",
@@ -736,6 +752,8 @@
       "move_jog": "Déplacer un axe",
       "move_home": "Mettre les axes à l'origine",
       "move_disable_motors": "Désactiver les moteurs",
+      "move_zero": "Définir le zéro pièce",
+      "move_workplace": "Utiliser un repère de travail",
       "system_restart": "Redémarrer DuetScreen",
       "system_reboot": "Redémarrer l'écran",
       "job_pause": "Mettre la tâche en pause",
