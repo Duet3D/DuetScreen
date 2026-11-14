@@ -69,4 +69,16 @@ namespace UI::Xml::PrinterModel
 
 	/** The filament loaded in tool `number`'s filament extruder; empty if none */
 	std::string_view filament(size_t number);
+
+	/** The axis whose letter is `letter` (move.axes[…]), or a missing node */
+	const OM::Node& axis(char letter);
+
+	/** The axes there are and the user sees (not hidden), in order, by number */
+	std::vector<size_t> visibleAxes();
+
+	/** `letter` as G-code writes an axis: as it is, or with a ' before a lower case letter */
+	std::string axisGcode(char letter);
+
+	/** Whether the printer refuses to move an axis that isn't homed */
+	bool noMovesBeforeHoming();
 } // namespace UI::Xml::PrinterModel

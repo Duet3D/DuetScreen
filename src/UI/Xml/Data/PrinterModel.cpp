@@ -5,6 +5,7 @@
 #include "PrinterModel.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "i18n/i18n.h"
+#include <cctype>
 
 namespace UI::Xml::PrinterModel
 {
@@ -134,5 +135,43 @@ namespace UI::Xml::PrinterModel
 			return "";
 		}
 		return root()["move"]["extruders"][static_cast<size_t>(extruder)]["filament"].text();
+	}
+
+	const OM::Node& axis(char letter)
+	{
+		const OM::Node& axes = root()["move"]["axes"];
+		for (size_t number = 0; number < axes.size(); ++number)
+		{
+			const std::string_view axisLetter = axes[number]["letter"].text();
+			if (!axisLetter.empty() && axisLetter.front() == letter)
+			{
+				return axes[number];
+			}
+		}
+		return OM::Node::missing();
+	}
+
+	std::vector<size_t> visibleAxes()
+	{
+		std::vector<size_t> numbers;
+		const OM::Node& axes = root()["move"]["axes"];
+		for (size_t number = 0; number < axes.size(); ++number)
+		{
+			if (axes[number].exists() && axes[number]["visible"].boolean(true))
+			{
+				numbers.push_back(number);
+			}
+		}
+		return numbers;
+	}
+
+	std::string axisGcode(char letter)
+	{
+		return std::islower(static_cast<unsigned char>(letter)) ? "'" + std::string(1, letter) : std::string(1, letter);
+	}
+
+	bool noMovesBeforeHoming()
+	{
+		return root()["move"]["noMovesBeforeHoming"].boolean(false);
 	}
 } // namespace UI::Xml::PrinterModel

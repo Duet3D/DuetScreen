@@ -4,11 +4,12 @@
 
 #include "MovePresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/JogSource.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/View/NumberEntry.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include "utils/UnitSystem.h"
@@ -36,9 +37,16 @@ namespace UI
 		}
 
 		/** Whether `axis` can be moved: homed, or moves before homing are allowed, and the printer isn't busy */
-		bool canMove(const OM::Move::Axis& axis)
+		/** Whether `axis` can be jogged: homed, or the printer moves axes that aren't (the model lock held) */
+		bool canMove(const OM::Node& axis)
 		{
-			return (axis.homed || !OM::Move::GetNoMovesBeforeHoming()) && canHome();
+			return (axis["homed"].boolean() || !Xml::PrinterModel::noMovesBeforeHoming()) && canHome();
+		}
+
+		/** `axis`' position: machine or user, as the user chose */
+		float positionOf(const OM::Node& axis, bool machine)
+		{
+			return static_cast<float>(axis[machine ? "machinePosition" : "userPosition"].number());
 		}
 
 		/** An axis' label, e.g. "X: 0.00", in the displayed unit */
@@ -156,7 +164,7 @@ namespace UI
 
 	void MovePresenter::onInit()
 	{
-		registerEventListener<EventType::AxesData>([this]() { showAxes(); });
+		m_watch = Xml::OmWatch({"move"}, [this] { showAxes(); });
 		registerEventListener<EventType::Status>([this](const OM::PrinterStatus&) { showAxes(); });
 	}
 
@@ -189,35 +197,37 @@ namespace UI
 		const char letters[] = {'X', 'Y', 'Z'};
 		for (size_t i = 0; i < 3; i++)
 		{
-			auto axis = OM::Move::GetAxisByLetter(letters[i]);
-			const float position = axis ? (machine ? axis->machinePosition : axis->userPosition) : 0.0f;
-			named[i]->label.set(axisLabel(letters[i], position));
-			named[i]->homed.set(axis && axis->homed ? 1 : 0);
-			named[i]->jogUsable.set(connected && axis && canMove(*axis) ? 1 : 0);
-			named[i]->homeUsable.set(homeable && axis ? 1 : 0);
+			const OM::Node& axis = Xml::PrinterModel::axis(letters[i]);
+			const bool exists = axis.exists();
+			named[i]->label.set(axisLabel(letters[i], exists ? positionOf(axis, machine) : 0.0f));
+			named[i]->homed.set(exists && axis["homed"].boolean() ? 1 : 0);
+			named[i]->jogUsable.set(connected && exists && canMove(axis) ? 1 : 0);
+			named[i]->homeUsable.set(homeable && exists ? 1 : 0);
 		}
 		m_xyHomed.set(m_x.homed.get() && m_y.homed.get() ? 1 : 0);
 		m_xyHomeUsable.set(m_x.homeUsable.get() && m_y.homeUsable.get() ? 1 : 0);
 
-		// Any others
-		std::vector<OM::Move::AxisPtr> others;
+		// Any others the user sees
+		std::vector<size_t> others;
 		if (connected)
 		{
-			for (const auto& axis : OM::Move::GetAxes(false))
+			for (const size_t number : Xml::PrinterModel::visibleAxes())
 			{
-				if (axis->letter[0] != 'X' && axis->letter[0] != 'Y' && axis->letter[0] != 'Z')
+				const std::string_view letter = Xml::PrinterModel::root()["move"]["axes"][number]["letter"].text();
+				if (!letter.empty() && letter.front() != 'X' && letter.front() != 'Y' && letter.front() != 'Z')
 				{
-					others.push_back(axis);
+					others.push_back(number);
 				}
 			}
 		}
 		m_axes.sync(others.size(),
 					[&](MoveAxisRow& row, size_t i)
 					{
-						const auto& axis = *others[i];
-						row.letter.set(std::string(1, axis.letter[0]));
-						row.label.set(axisLabel(axis.letter[0], machine ? axis.machinePosition : axis.userPosition));
-						row.homed.set(axis.homed ? 1 : 0);
+						const OM::Node& axis = Xml::PrinterModel::root()["move"]["axes"][others[i]];
+						const char letter = axis["letter"].text().front();
+						row.letter.set(std::string(1, letter));
+						row.label.set(axisLabel(letter, positionOf(axis, machine)));
+						row.homed.set(axis["homed"].boolean() ? 1 : 0);
 						row.jogUsable.set(canMove(axis) ? 1 : 0);
 						row.homeUsable.set(homeable ? 1 : 0);
 					});
@@ -239,11 +249,14 @@ namespace UI
 
 	void MovePresenter::home(char letter)
 	{
-		MODEL_LOCK();
-		if (auto axis = OM::Move::GetAxisByLetter(letter))
 		{
-			axis->Home();
+			MODEL_LOCK();
+			if (!Xml::PrinterModel::axis(letter).exists())
+			{
+				return;
+			}
 		}
+		Xml::Services::sendGcode(fmt::format("G28 {:s}\n", Xml::PrinterModel::axisGcode(letter)));
 	}
 
 	void MovePresenter::jog(char letter, bool forward)
@@ -254,36 +267,48 @@ namespace UI
 		{
 			return;
 		}
-		MODEL_LOCK();
-		if (auto axis = OM::Move::GetAxisByLetter(letter))
 		{
-			axis->MoveRelative((forward ? 1.0f : -1.0f) * *distance, *feedrate);
+			MODEL_LOCK();
+			if (!Xml::PrinterModel::axis(letter).exists())
+			{
+				return;
+			}
 		}
+		// M120/M121 keep the printer's movement mode as it was
+		Xml::Services::sendGcode(
+			fmt::format("M120\nG91\nG1 {:s}{:g} F{:g}\nM121\n",
+						Xml::PrinterModel::axisGcode(letter),
+						Units::convertDisplayedDistanceToDuetUnits((forward ? 1.0f : -1.0f) * *distance),
+						Units::convertDisplayedSpeedToDuetUnits(static_cast<float>(*feedrate))));
 	}
 
 	void MovePresenter::askPosition(char letter)
 	{
-		MODEL_LOCK();
-		auto axis = OM::Move::GetAxisByLetter(letter);
 		const auto feedrate = Xml::JogSource::feedrate();
-		if (axis == nullptr || !feedrate)
-		{
-			return;
-		}
 		const bool machine = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
-		Xml::Services::askNumber({.header = _("move.set_position", letter),
-								  .min = axis->minPosition,
-								  .max = axis->maxPosition,
-								  .value = Units::convertDistanceToCurrentDisplayedUnit(machine ? axis->machinePosition
-																								: axis->userPosition),
-								  .onConfirm = [letter, machine, feedrate](float value)
-								  {
-									  MODEL_LOCK();
-									  if (auto axis = OM::Move::GetAxisByLetter(letter))
-									  {
-										  axis->MoveAbsolute(value, *feedrate, machine);
-									  }
-								  }});
+		Xml::NumberRequest request;
+		{
+			MODEL_LOCK();
+			const OM::Node& axis = Xml::PrinterModel::axis(letter);
+			if (!axis.exists() || !feedrate)
+			{
+				return;
+			}
+			request = {.header = _("move.set_position", letter),
+					   .min = static_cast<float>(axis["min"].number()),
+					   .max = static_cast<float>(axis["max"].number()),
+					   .value = Units::convertDistanceToCurrentDisplayedUnit(positionOf(axis, machine)),
+					   .onConfirm = [letter, machine, feedrate](float value)
+					   {
+						   Xml::Services::sendGcode(
+							   fmt::format("M120\nG90\n{:s}G1 {:s}{:g} F{:g}\nM121\n",
+										   machine ? "G53 " : "",
+										   Xml::PrinterModel::axisGcode(letter),
+										   Units::convertDisplayedDistanceToDuetUnits(value),
+										   Units::convertDisplayedSpeedToDuetUnits(static_cast<float>(*feedrate))));
+					   }};
+		}
+		Xml::Services::askNumber(std::move(request));
 	}
 
 	char MovePresenter::axisOf(const Xml::ActionArgs& args)

@@ -16,6 +16,7 @@
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <functional>
 #include <string>
@@ -99,5 +100,6 @@ namespace UI
 		Xml::IntSubject m_confirm;					 // 1 while asking
 		Xml::StringSubject<64> m_confirmTitle;		 // Question title
 		Xml::StringSubject<128> m_confirmText;		 // Question
+		Xml::OmWatch m_watch;						 // Shows the axes again as the move changes
 	};
 } // namespace UI
