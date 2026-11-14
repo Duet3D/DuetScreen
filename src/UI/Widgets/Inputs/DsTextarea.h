@@ -44,7 +44,10 @@ namespace UI::Xml
 		/** `bind_keyboard_mode` observer */
 		static void keyboardModeObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		/** Focus and editing events: bring up or put away the keyboard */
+		/**
+		 * Focus and editing events: bring up or put away the keyboard. Tapping outside the box (LEAVE) ends the edit
+		 * like losing focus, and tapping the box while the keyboard is away starts it again.
+		 */
 		static void keyboardEventCb(lv_event_t* e);
 
 		/** The keyboard to use, or nullptr if there is none */

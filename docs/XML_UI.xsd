@@ -3180,7 +3180,7 @@
 			<xs:annotation><xs:documentation>Put the keyboard away when its OK key is pressed (default true)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="hide_keyboard_on_defocus" type="xs:string">
-			<xs:annotation><xs:documentation>Put the keyboard away when the box loses focus (default true)</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>Put the keyboard away when the box loses focus or something outside it is tapped (default true)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="one_line" type="xs:string">
 			<xs:annotation><xs:documentation>&quot;true&quot; for a single line of text</xs:documentation></xs:annotation>

@@ -1678,7 +1678,7 @@ Also takes every `lv_obj` attribute.
 | `bind_keyboard_mode` | Follow a text subject for the keyboard layout, as `keyboard_mode` |
 | `keyboard` | The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box edited another way, such as a number pad |
 | `hide_keyboard_on_ready` | Put the keyboard away when its OK key is pressed (default true) |
-| `hide_keyboard_on_defocus` | Put the keyboard away when the box loses focus (default true) |
+| `hide_keyboard_on_defocus` | Put the keyboard away when the box loses focus or something outside it is tapped (default true) |
 | `one_line` | "true" for a single line of text |
 | `password_mode` | "true" to show dots for the characters, e.g. for a password |
 | `placeholder` | Text shown while the box is empty |
@@ -1857,11 +1857,11 @@ At its smallest, 272×136 px:
 
 **Console input**: A line to type G-code into and send to the printer
 
-In Console; placed in `dashboard`; component `console_input` ([console_input.json](../assets/ui/widgets/console/console_input.json)). In a free layout it is 300×100 px, and at least 200×60 px.
+In Console; placed in `dashboard`; component `console_input` ([console_input.json](../assets/ui/widgets/console/console_input.json)). In a free layout it is 300×60 px, and at least 200×40 px.
 
 ![console_input](../tests/ref_imgs/xml_ui_api/widgets/console_input.png)
 
-At its smallest, 200×60 px:
+At its smallest, 200×40 px:
 
 ![console_input at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_input_smallest.png)
 

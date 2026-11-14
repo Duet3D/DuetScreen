@@ -1197,6 +1197,46 @@ TEST_F(TestHomeView, AlertFollowsTheMessageBox)
 	EXPECT_TRUE(lv_obj_has_flag(alert, LV_OBJ_FLAG_HIDDEN));
 }
 
+TEST_F(TestHomeView, TappingOutsideATextBoxPutsTheKeyboardAway)
+{
+	// With an input group, as the screen and simulator have, a tap on something outside the group (here the alert's
+	// text) leaves the box focused in its group, and only tells the box it was left
+	lv_group_t* group = lv_group_create();
+	lv_group_set_default(group);
+	lv_indev_t* pointer = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	lv_indev_set_group(pointer, group);
+	UI::Xml::reload();
+
+	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
+	notifications().newAlertData(alertInObjectModel());
+	lv_obj_t* input = notificationPart("input");
+	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
+	ASSERT_NE(input, nullptr);
+	ASSERT_NE(keyboard, nullptr);
+	auto tap = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
+
+	tap(input);
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "tapping the box brings up the keyboard";
+
+	tap(notificationPart("text"));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "tapping outside it puts the keyboard away";
+	EXPECT_FALSE(lv_obj_has_state(input, LV_STATE_FOCUSED)) << "and ends the edit";
+
+	tap(input);
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "tapping the box again brings the keyboard back";
+
+	lv_test_mouse_release();
+	lv_indev_set_group(pointer, nullptr);
+	lv_group_set_default(nullptr);
+	lv_group_delete(group);
+}
+
 TEST_F(TestHomeView, AlertAnswersThePrinter)
 {
 	std::vector<std::string> sent;

@@ -35,7 +35,8 @@ namespace UI::Xml
 	DsTextarea::DsTextarea(const std::string& name, LvObjRef&& parent)
 		: LvTextarea(name, parent)
 	{
-		for (lv_event_code_t code : {LV_EVENT_FOCUSED, LV_EVENT_DEFOCUSED, LV_EVENT_READY, LV_EVENT_CANCEL})
+		for (lv_event_code_t code :
+			 {LV_EVENT_FOCUSED, LV_EVENT_DEFOCUSED, LV_EVENT_LEAVE, LV_EVENT_CLICKED, LV_EVENT_READY, LV_EVENT_CANCEL})
 		{
 			lv_obj_add_event_cb(getRootPtr(), keyboardEventCb, code, this);
 		}
@@ -85,7 +86,8 @@ namespace UI::Xml
 				   "view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box "
 				   "edited another way, such as a number pad"},
 				  {"hide_keyboard_on_ready", "Put the keyboard away when its OK key is pressed (default true)"},
-				  {"hide_keyboard_on_defocus", "Put the keyboard away when the box loses focus (default true)"},
+				  {"hide_keyboard_on_defocus",
+				   "Put the keyboard away when the box loses focus or something outside it is tapped (default true)"},
 				  {"one_line", "\"true\" for a single line of text"},
 				  {"password_mode", "\"true\" to show dots for the characters, e.g. for a password"},
 				  {"placeholder", "Text shown while the box is empty"},
@@ -227,6 +229,23 @@ namespace UI::Xml
 			{
 				lv_keyboard_set_textarea(keyboard, nullptr);
 				textarea->showKeyboard(keyboard, false);
+			}
+			break;
+		case LV_EVENT_LEAVE:
+			// A tap on something outside the input group, such as a page's background, leaves the box focused in its
+			// group and only raises this; it still ends the edit, so treat it as losing focus
+			if (textarea->m_hideOnDefocus)
+			{
+				lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+			}
+			break;
+		case LV_EVENT_CLICKED:
+			// Tapped again while its group still has it focused (after a LEAVE, or the keyboard's close key), the box
+			// raises no FOCUSED, so start the edit again here
+			if (lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN) ||
+				lv_keyboard_get_textarea(keyboard) != textarea->getRootPtr())
+			{
+				lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_FOCUSED, nullptr);
 			}
 			break;
 		case LV_EVENT_READY:
