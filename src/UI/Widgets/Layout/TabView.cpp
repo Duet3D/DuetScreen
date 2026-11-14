@@ -17,6 +17,18 @@ namespace UI
 {
 	namespace
 	{
+		/** The size of a tab's icon in a tab bar down a side, where it goes before the text */
+		constexpr lv_coord_t SIDE_TAB_ICON_SIZE = 28;
+
+		/** The least height of a tab in a tab bar down a side, so it is easy to tap */
+		constexpr lv_coord_t SIDE_TAB_MIN_HEIGHT = 52;
+
+		/** The gap between a tab bar down a side and the content; a bar over or under the content touches it */
+		constexpr lv_coord_t SIDE_TAB_GAP = 5;
+
+		/** How far a tab bar over or under the content overlaps it, so the selected tab joins its page */
+		constexpr lv_coord_t TOP_TAB_OVERLAP = 5;
+
 		static void tabSetXAnimCb(void* var, int32_t value)
 		{
 			LvObj* obj = LvObj::fromPtr(static_cast<lv_obj_t*>(var));
@@ -77,10 +89,8 @@ namespace UI
 
 	void TabView::init()
 	{
-		setTabBarPosition(LV_DIR_TOP);
 		setStylePad(0);
-		setStylePad(-5, LV_PART_MAIN, Padding::ROW);
-		setStylePad(-5, LV_PART_MAIN, Padding::COLUMN);
+		setTabBarPosition(LV_DIR_TOP); // Sets the gap between the tab bar and the content
 
 		m_tabButtons.setStylePad(0, LV_STATE_USER_1, Padding::VERTICAL);
 		m_tabButtons.setStylePad(0, LV_STATE_USER_2, Padding::HORIZONTAL);
@@ -110,12 +120,8 @@ namespace UI
 								 { return std::make_unique<TabButton>(fmt::format("tab_button_{}", index), parent); });
 		tab_button.addStyle(Themes::getLvglStyles().text_header, LV_PART_MAIN);
 		tab_button.addStyle(Themes::getComponentStyles().tab_button, LV_PART_MAIN);
-		tab_button.addStyle(Themes::getLvglStyles().tab_btn, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
 		tab_button.setText(tab_name);
-		tab_button.setFlexGrow(1);
-		tab_button.setSize(LV_PCT(100), LV_PCT(100));
-		tab_button.setMinWidth(LV_SIZE_CONTENT);
-		tab_button.setMinHeight(LV_SIZE_CONTENT);
+		styleTabButton(tab_button);
 		tab_button.addClickedCallback(
 			[](lv_event_t* e)
 			{
@@ -275,10 +281,46 @@ namespace UI
 		incoming_anim.start();
 	}
 
+	void TabView::styleTabButton(TabButton& button)
+	{
+		const lv_style_t* edge = Themes::getLvglStyles().tab_btn;
+		Icon& icon = button.getIcon();
+		if (m_barSide == LV_DIR_LEFT || m_barSide == LV_DIR_RIGHT)
+		{
+			button.removeStyle(edge, LV_STATE_CHECKED);
+			button.setFlexFlow(LV_FLEX_FLOW_ROW);
+			button.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			button.setFlexGrow(0);
+			button.setSize(LV_PCT(100), LV_SIZE_CONTENT);
+			button.getLabel().setStyleTextAlign(LV_TEXT_ALIGN_LEFT);
+			icon.setFlexGrow(0);
+			icon.setSize(SIDE_TAB_ICON_SIZE, SIDE_TAB_ICON_SIZE);
+			button.setMinHeight(SIDE_TAB_MIN_HEIGHT);
+		}
+		else
+		{
+			button.addStyle(edge, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
+			button.setFlexFlow(LV_FLEX_FLOW_COLUMN);
+			button.setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			button.setFlexGrow(1);
+			button.setSize(LV_PCT(100), LV_PCT(100));
+			button.getLabel().setStyleTextAlign(LV_TEXT_ALIGN_CENTER);
+			icon.setFlexGrow(1);
+			icon.setSize(LV_PCT(100), LV_SIZE_CONTENT);
+			button.setMinHeight(LV_SIZE_CONTENT);
+		}
+		button.setMinWidth(LV_SIZE_CONTENT);
+	}
+
 	void TabView::setTabBarPosition(lv_dir_t dir)
 	{
 		ZoneScoped;
 		UI_LOCK();
+		m_barSide = dir;
+		const bool side = dir == LV_DIR_LEFT || dir == LV_DIR_RIGHT;
+		setStylePad(side ? SIDE_TAB_GAP : -TOP_TAB_OVERLAP, LV_PART_MAIN, Padding::ROW);
+		setStylePad(side ? SIDE_TAB_GAP : -TOP_TAB_OVERLAP, LV_PART_MAIN, Padding::COLUMN);
+		m_tabButtons.iterateListItems([this](size_t, TabButton& button) { styleTabButton(button); });
 		m_tabButtons.setFlag(LV_OBJ_FLAG_FLOATING, false);
 		m_tabButtons.setState(LV_STATE_USER_1, dir == LV_DIR_TOP || dir == LV_DIR_BOTTOM);
 		m_tabButtons.setState(LV_STATE_USER_2, dir == LV_DIR_LEFT || dir == LV_DIR_RIGHT);

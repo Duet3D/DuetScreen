@@ -3367,9 +3367,17 @@
 			<xs:annotation><xs:documentation>Follow an int subject for the top of the range (scaled by `value_scale`)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_tabs.attributes">
+		<xs:attribute name="side" type="xs:string">
+			<xs:annotation><xs:documentation>Where the tab buttons are: top (the default), bottom, left or right. Down a side, each tab is a row as wide as the column, its icon before its title</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_tabs-tab.attributes">
 		<xs:attribute name="title" type="xs:string">
 			<xs:annotation><xs:documentation>The tab button's text, if there is no `title_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="icon" type="xs:string">
+			<xs:annotation><xs:documentation>Icon file from the icon set shown on the tab button, e.g. &quot;settings_display.png&quot;</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="title_tag" type="translation">
 			<xs:annotation><xs:documentation>Translation key for the tab button's text</xs:documentation></xs:annotation>
@@ -7190,9 +7198,10 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_tabs">
-		<xs:annotation><xs:documentation>A row of tab buttons over the selected tab's content. Each tab is a `&lt;ds_tabs-tab&gt;` inside it; the first starts selected. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Tab buttons beside the selected tab's content: a row over it, or a column down its side (`side`). Each tab is a `&lt;ds_tabs-tab&gt;` inside it; the first starts selected. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_tabs.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

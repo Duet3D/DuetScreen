@@ -1593,7 +1593,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_tabs
 
-A row of tab buttons over the selected tab's content. Each tab is a `<ds_tabs-tab>` inside it; the first starts selected.
+Tab buttons beside the selected tab's content: a row over it, or a column down its side (`side`). Each tab is a `<ds_tabs-tab>` inside it; the first starts selected.
 
 Also takes every `lv_obj` attribute.
 
@@ -1610,6 +1610,10 @@ Also takes every `lv_obj` attribute.
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_tabs.png)
 
+| Attribute | Description |
+| --- | --- |
+| `side` | Where the tab buttons are: top (the default), bottom, left or right. Down a side, each tab is a row as wide as the column, its icon before its title |
+
 ### ds_tabs-tab
 
 One tab of a `<ds_tabs>`, written inside it. Its content is the tab's page; the lv_obj attributes apply to that page.
@@ -1619,6 +1623,7 @@ Also takes every `lv_obj` attribute.
 | Attribute | Description |
 | --- | --- |
 | `title` | The tab button's text, if there is no `title_tag` |
+| `icon` | Icon file from the icon set shown on the tab button, e.g. "settings_display.png" |
 | `title_tag` | Translation key for the tab button's text |
 | `bind_disabled` | Disable the tab's button while this int subject is non-zero |
 | `select_on` | Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on="om.job.file.fileName"` |
