@@ -23,7 +23,8 @@
 				<style name="text_header"/>
 			</lv_label>
 			<lv_label name="in_use" translation_tag="tr.tools.in_use">
-				<style name="tool_in_use"/>
+				<style name="chip"/>
+				<style name="chip_accent"/>
 				<bind_flag_if_eq subject="row.state|eq:active" flag="hidden" ref_value="0"/>
 			</lv_label>
 			<ds_button name="select" translation_tag="tr.tools.select" height="content" style_min_height="36">

@@ -113,6 +113,12 @@
 		<!-- A word after a row's title saying what sort of setting it is, e.g. "Advanced": a small tag -->
 		<style name="setting_badge" text_color="#text_muted" text_font="font_small" text_letter_space="1" pad_hor="6"
 			   pad_ver="1" radius="#radius" border_color="#border" border_width="#border_width" border_opa="100%"/>
+		<!-- A word saying what state a row is in: a small pill, plain ("Cancelled") or tinted and edged in the accent, as
+			 a chosen option is, for the state that matters now ("In use", "Now") -->
+		<style name="chip" text_color="#text_muted" text_font="font_small" radius="circle" pad_hor="10" pad_ver="2"
+			   border_color="#border" border_width="#border_width" border_opa="100%"/>
+		<style name="chip_accent" text_color="#text" bg_color="#primary_muted" bg_opa="100%" border_width="0"
+			   outline_color="#primary" outline_width="1" outline_opa="100%" outline_pad="-1"/>
 		<!-- A row's button: big enough to tap -->
 		<style name="setting_control" min_height="40" min_width="64" pad_hor="12"/>
 		<!-- A row's choice, or its way into more (a page, a dialog): the value, if any, and a chevron, plain on the row,
@@ -182,6 +188,8 @@
 		<style name="action_btn" bg_opa="100%" bg_color="#primary" border_color="#primary"/>
 		<!-- Can't be undone, such as erasing every setting: filled with the error colour -->
 		<style name="danger_btn" bg_opa="100%" bg_color="#error" border_color="#error"/>
+		<!-- Drastic but undoable, such as cancelling an object: edged and lettered in the error colour -->
+		<style name="danger_outline_btn" border_color="#error" border_width="2" border_opa="100%" text_color="#error"/>
 
 		<!-- Icons -->
 		<style name="icon_recolor" recolor="#text" recolor_opa="100%"/>
@@ -380,9 +388,6 @@
 
 		<style name="tool_list_tool" copy="card"/>
 		<style name="tool_list_heater" pad_all="0"/>
-		<!-- "In use" on the card of the tool in use: tinted and edged in the accent, as a chosen option is -->
-		<style name="tool_in_use" bg_color="#primary_muted" bg_opa="100%" radius="circle" pad_hor="10" pad_ver="2"
-			   outline_color="#primary" outline_width="1" outline_opa="100%" outline_pad="-1" text_font="font_small"/>
 		<style name="tool_selected" border_color="#primary" outline_color="#primary" outline_opa="100%"
 			   outline_width="1" outline_pad="0"/>
 
@@ -417,9 +422,18 @@
 		<style name="bar_label_bg" bg_color="#bg" bg_opa="80%" radius="#radius" pad_hor="#pad"/>
 		<style name="bar_label" text_color="#text"/>
 
-		<style name="object_cancel_base" copy="card" bg_color="#bg_light" bg_opa="100%"/>
-		<style name="object_cancel_cancelled" bg_color="#error" bg_opa="100%"/>
-		<style name="object_cancel_current" bg_color="#primary" bg_opa="100%"/>
+		<!-- A job's objects on the bed: still to print in the button colour, the one being printed in the accent, and a
+			 cancelled one hollow and crossed out (not red: red means a fault). The one chosen to cancel or resume is
+			 outlined in the text colour. -->
+		<style name="object_shape" bg_color="#bg_light" bg_opa="100%" border_color="#border" border_width="1"
+			   border_opa="100%" radius="3"/>
+		<style name="object_shape_now" bg_color="#primary" border_color="#primary"/>
+		<style name="object_shape_cancelled" bg_opa="0" border_color="#border_muted"/>
+		<!-- The X (a ds_cross) on a cancelled object, inset from its edges -->
+		<style name="object_cross" line_color="#text_muted" line_width="2" line_opa="100%" line_rounded="true"
+			   pad_all="4"/>
+		<style name="object_shape_chosen" outline_color="#text" outline_width="2" outline_opa="100%" outline_pad="1"/>
+		<style name="object_name_cancelled" text_color="#text_muted" text_decor="strikethrough"/>
 
 		<!-- Placed widgets (assets/ui/widgets): each is a card, headed by its title, its main value large and
 			 anything else in the detail style. The value is larger in a regular widget (widget_value_large) and

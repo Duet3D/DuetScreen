@@ -924,7 +924,12 @@ Used by `object_cancel`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `presenter.current_object` | text | Name of the object being printed, or "None" |
+| `presenter.current_object` | text | Name of the object being printed, or "Nothing" |
+| `presenter.chosen.name` | text | Name of the object chosen: the one the user tapped, or else the one being printed |
+| `presenter.chosen.cancelled` | int | 1 if the object chosen is cancelled |
+| `presenter.chosen.shown` | int | 1 if an object is chosen |
+| `presenter.chosen.cancel_text` | text | E.g. "Cancel gear (Instance 37)…" |
+| `presenter.chosen.resume_text` | text | E.g. "Resume gear (Instance 37)…" |
 | `presenter.x_min` | int | Lowest X of the bed, whole mm: the X axis' travel allowing for the tool's offset, or the objects' bounds with a margin if the axes aren't known |
 | `presenter.x_max` | int | Highest X of the bed, whole mm; as `x_min` |
 | `presenter.y_min` | int | Lowest Y of the bed, whole mm; as `x_min` |
@@ -937,18 +942,20 @@ Each row of `presenter.objects`:
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
 | `row.number` | int | Object number |
-| `row.label` | text | E.g. "[2]: gear (Instance 37)" |
+| `row.name` | text | Its name, as the slicer wrote it, e.g. "gear (Instance 37)" |
 | `row.x1` | int | Lowest X of its bounds, whole mm |
 | `row.y1` | int | Lowest Y of its bounds, whole mm |
 | `row.x2` | int | Highest X of its bounds, whole mm |
 | `row.y2` | int | Highest Y of its bounds, whole mm |
 | `row.current` | int | 1 if it is being printed |
 | `row.cancelled` | int | 1 if it has been cancelled |
+| `row.chosen` | int | 1 if it is the one chosen to cancel or resume |
 
 | Action | Description |
 | --- | --- |
-| `presenter.object_cancel.cancel_current` | Cancel the object being printed, asking first if confirmations are on |
-| `presenter.object_cancel.select` | Cancel the object, or resume it if cancelled, asking first. From a row of `objects`. |
+| `presenter.object_cancel.cancel` | Cancel the chosen object (M486 P), asking first if confirmations are on |
+| `presenter.object_cancel.choose` | Choose the object to cancel or resume. From a row of `objects`. |
+| `presenter.object_cancel.resume` | Print the chosen object again after it was cancelled (M486 U), asking first if confirmations are on |
 
 ### settings_theme_preview
 
@@ -1166,6 +1173,20 @@ Also takes every `lv_obj` attribute.
 | `bind_text` | Follow a text subject shown instead of the option chosen, e.g. the filament loaded |
 | `title` | The choice dialog's title, if there is no `title_tag` |
 | `title_tag` | Translation key for the choice dialog's title |
+
+### ds_cross
+
+An X drawn corner to corner across its content area (inside its padding), in its line style (`line_color`, `line_width`, `line_opa`, `line_rounded`), to cross something out, such as a cancelled object on the bed. Taps pass through it to its parent.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<lv_obj width="120" height="80">
+	<ds_cross width="100%" height="100%" style_line_width="2" style_line_color="0x9E9E9E"/>
+</lv_obj>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_cross.png)
 
 ### ds_dialog
 
@@ -3125,6 +3146,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `anim_fast` |  | anim_duration=120 |
 | `action_btn` | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/action_btn.png) | bg_opa=100% bg_color=#primary border_color=#primary |
 | `danger_btn` | ![danger_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/danger_btn.png) | bg_opa=100% bg_color=#error border_color=#error |
+| `danger_outline_btn` | ![danger_outline_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/danger_outline_btn.png) | border_color=#error border_width=2 border_opa=100% text_color=#error |
 | `input` | ![input](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/input.png) | border_color=#border border_width=1 pad_hor=20 pad_ver=0 text_align=center |
 | `long_press` |  | *(not set)* |
 | `draggable` |  | transition_props=transform_width transform_height transition_duration=200ms transition_easing=ease_in_out transition_delay=100ms |
@@ -3202,7 +3224,6 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `axis_tile_not_homed` | ![axis_tile_not_homed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_not_homed.png) | text_color=#secondary text_font=font_small |
 | `jog_step` | ![jog_step](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/jog_step.png) | bg_opa=0 border_color=#border_muted border_width=#border_width border_opa=100% radius=#radius text_color=#text_muted text_font=font_subdued |
 | `reading` | ![reading](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/reading.png) | text_color=#text text_font=font_large |
-| `tool_in_use` | ![tool_in_use](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_in_use.png) | bg_color=#primary_muted bg_opa=100% radius=circle pad_hor=10 pad_ver=2 outline_color=#primary outline_width=1 outline_opa=100% outline_pad=-1 text_font=font_small |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
 | `tool_list` |  | *(not set)* |
@@ -3255,6 +3276,8 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `setting_title` | ![setting_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_title.png) | text_color=#text text_font=font_title |
 | `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | text_color=#text_muted text_font=font_subdued |
 | `setting_badge` | ![setting_badge](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_badge.png) | text_color=#text_muted text_font=font_small text_letter_space=1 pad_hor=6 pad_ver=1 radius=#radius border_color=#border border_width=#border_width border_opa=100% |
+| `chip` | ![chip](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chip.png) | text_color=#text_muted text_font=font_small radius=circle pad_hor=10 pad_ver=2 border_color=#border border_width=#border_width border_opa=100% |
+| `chip_accent` | ![chip_accent](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chip_accent.png) | text_color=#text bg_color=#primary_muted bg_opa=100% border_width=0 outline_color=#primary outline_width=1 outline_opa=100% outline_pad=-1 |
 | `setting_control` |  | min_height=40 min_width=64 pad_hor=12 |
 | `setting_value` | ![setting_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_value.png) | min_height=40 pad_hor=4 pad_column=8 bg_opa=0 border_width=0 shadow_width=0 outline_width=0 text_color=#text_muted |
 | `setting_options` | ![setting_options](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_options.png) | width=content height=content layout=flex flex_flow=row pad_all=0 pad_column=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |
@@ -3280,9 +3303,12 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `customise_handle` | ![customise_handle](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_handle.png) | bg_color=#primary bg_opa=100% radius=0 pad_all=0 border_width=0 |
 | `customise_guide` | ![customise_guide](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_guide.png) | bg_color=#text bg_opa=100% radius=0 border_width=0 pad_all=0 |
 | `customise_place` | ![customise_place](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/customise_place.png) | bg_color=#primary bg_opa=25% radius=#radius border_color=#primary border_width=2 border_opa=100% border_side=full |
-| `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=100% |
-| `object_cancel_current` | ![object_cancel_current](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_current.png) | bg_color=#primary bg_opa=100% |
-| `object_cancel_cancelled` | ![object_cancel_cancelled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_cancelled.png) | bg_color=#error bg_opa=100% |
+| `object_shape` | ![object_shape](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_shape.png) | bg_color=#bg_light bg_opa=100% border_color=#border border_width=1 border_opa=100% radius=3 |
+| `object_shape_now` |  | bg_color=#primary border_color=#primary |
+| `object_shape_cancelled` |  | bg_opa=0 border_color=#border_muted |
+| `object_cross` |  | line_color=#text_muted line_width=2 line_opa=100% line_rounded=true pad_all=4 |
+| `object_shape_chosen` | ![object_shape_chosen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_shape_chosen.png) | outline_color=#text outline_width=2 outline_opa=100% outline_pad=1 |
+| `object_name_cancelled` | ![object_name_cancelled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_name_cancelled.png) | text_color=#text_muted text_decor=strikethrough |
 | `debug_borders` | ![debug_borders](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/debug_borders.png) | outline_color=#text outline_width=1 outline_opa=100% |
 
 ### Colours

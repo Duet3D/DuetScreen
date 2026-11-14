@@ -341,38 +341,52 @@ TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/clear_object_name.png");
 }
 
-TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
+TEST_F(TestHomeView, ObjectsTabCancelsAndResumesTheChosenObject)
 {
+	// The first is being printed, the second was cancelled
 	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
-					R"json({"cancelled":false,"name":"gear (Instance 1)","x":[0,0],"y":[0,0]}]}}})json"
+					R"json({"cancelled":false,"name":"gear (Instance 1)","x":[100,120],"y":[100,120]},)json"
+					R"json({"cancelled":true,"name":"gear (Instance 2)","x":[140,160],"y":[100,120]}]}}})json"
 					"\n");
-
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 	openControlTab(3);
 	lv_obj_t* page = UI::findView("object_cancel")->getRootPtr();
-	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	lv_obj_t* cancel = lv_obj_find_by_name(page, "cancel");
+	lv_obj_t* resume = lv_obj_find_by_name(page, "resume");
+	ASSERT_NE(cancel, nullptr);
+	ASSERT_NE(resume, nullptr);
 
-	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
-	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
-	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_current_title"));
-	EXPECT_NE(TestDialogs::text("text").find("gear (Instance 1)"), std::string::npos);
-	TestDialogs::tap("no");
-	EXPECT_EQ(TestDialogs::shown(), nullptr);
-
-	// Pressing the object on the bed asks to cancel it
-	lv_obj_t* rects = lv_obj_find_by_name(page, "objects");
-	ASSERT_NE(rects, nullptr);
-	ASSERT_EQ(lv_obj_get_child_count(rects), 1u);
-	lv_obj_send_event(lv_obj_get_child(rects, 0), LV_EVENT_PRESSED, nullptr);
+	// Until one is chosen, the one being printed is: cancelling it asks first
+	EXPECT_FALSE(lv_obj_has_flag(cancel, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(resume, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(cancel, LV_EVENT_CLICKED, nullptr);
 	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
 	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_title"));
-	TestDialogs::tap("no");
+	EXPECT_NE(TestDialogs::text("text").find("gear (Instance 1)"), std::string::npos);
+	TestDialogs::tap("yes");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "M486 P0\n");
 
+	// Pressing the cancelled one on the bed chooses it, to resume
+	lv_obj_t* shapes = lv_obj_find_by_name(page, "objects");
+	ASSERT_NE(shapes, nullptr);
+	ASSERT_EQ(lv_obj_get_child_count(shapes), 2u);
+	lv_obj_send_event(lv_obj_get_child(shapes, 1), LV_EVENT_PRESSED, nullptr);
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "choosing doesn't ask anything";
+	EXPECT_TRUE(lv_obj_has_flag(cancel, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(resume, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/chosen_cancelled.png");
+
+	// Without confirmations, it is resumed straight away
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, false);
-	lv_obj_send_event(lv_obj_find_by_name(page, "cancel_current"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(TestDialogs::shown(), nullptr) << "cancelled without asking";
+	lv_obj_send_event(resume, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "resumed without asking";
+	EXPECT_EQ(sent.back(), "M486 U1\n");
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
+	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
 TEST_F(TestHomeView, BlankConsoleView)

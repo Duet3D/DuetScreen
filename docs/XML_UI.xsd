@@ -32,6 +32,11 @@
 			<xs:enumeration value="presenter.catalogue"/>
 			<xs:enumeration value="presenter.catalogue_open"/>
 			<xs:enumeration value="presenter.choices"/>
+			<xs:enumeration value="presenter.chosen.cancel_text"/>
+			<xs:enumeration value="presenter.chosen.cancelled"/>
+			<xs:enumeration value="presenter.chosen.name"/>
+			<xs:enumeration value="presenter.chosen.resume_text"/>
+			<xs:enumeration value="presenter.chosen.shown"/>
 			<xs:enumeration value="presenter.chroma"/>
 			<xs:enumeration value="presenter.colour"/>
 			<xs:enumeration value="presenter.colour_shown"/>
@@ -507,8 +512,9 @@
 			<xs:enumeration value="presenter.number.confirm"/>
 			<xs:enumeration value="presenter.number.key"/>
 			<xs:enumeration value="presenter.number.sign"/>
-			<xs:enumeration value="presenter.object_cancel.cancel_current"/>
-			<xs:enumeration value="presenter.object_cancel.select"/>
+			<xs:enumeration value="presenter.object_cancel.cancel"/>
+			<xs:enumeration value="presenter.object_cancel.choose"/>
+			<xs:enumeration value="presenter.object_cancel.resume"/>
 			<xs:enumeration value="presenter.preview.chroma"/>
 			<xs:enumeration value="presenter.preview.primary_hue"/>
 			<xs:enumeration value="presenter.preview.secondary_hue"/>
@@ -978,6 +984,7 @@
 			<xs:enumeration value="ds_bar_marker"/>
 			<xs:enumeration value="ds_button"/>
 			<xs:enumeration value="ds_choice"/>
+			<xs:enumeration value="ds_cross"/>
 			<xs:enumeration value="ds_dialog"/>
 			<xs:enumeration value="ds_dialog_footer"/>
 			<xs:enumeration value="ds_dialog_host"/>
@@ -1177,6 +1184,8 @@
 			<xs:enumeration value="chart_bg"/>
 			<xs:enumeration value="chart_indic"/>
 			<xs:enumeration value="chart_series"/>
+			<xs:enumeration value="chip"/>
+			<xs:enumeration value="chip_accent"/>
 			<xs:enumeration value="circle"/>
 			<xs:enumeration value="clip_corner"/>
 			<xs:enumeration value="console_btn_anim"/>
@@ -1192,6 +1201,7 @@
 			<xs:enumeration value="customise_handle"/>
 			<xs:enumeration value="customise_place"/>
 			<xs:enumeration value="danger_btn"/>
+			<xs:enumeration value="danger_outline_btn"/>
 			<xs:enumeration value="debug_borders"/>
 			<xs:enumeration value="dialog"/>
 			<xs:enumeration value="dialog_backdrop"/>
@@ -1274,9 +1284,12 @@
 			<xs:enumeration value="numpad_readout"/>
 			<xs:enumeration value="numpad_unit"/>
 			<xs:enumeration value="numpad_value"/>
-			<xs:enumeration value="object_cancel_base"/>
-			<xs:enumeration value="object_cancel_cancelled"/>
-			<xs:enumeration value="object_cancel_current"/>
+			<xs:enumeration value="object_cross"/>
+			<xs:enumeration value="object_name_cancelled"/>
+			<xs:enumeration value="object_shape"/>
+			<xs:enumeration value="object_shape_cancelled"/>
+			<xs:enumeration value="object_shape_chosen"/>
+			<xs:enumeration value="object_shape_now"/>
 			<xs:enumeration value="outline_primary"/>
 			<xs:enumeration value="outline_secondary"/>
 			<xs:enumeration value="pad_base"/>
@@ -1333,7 +1346,6 @@
 			<xs:enumeration value="text_header"/>
 			<xs:enumeration value="text_muted"/>
 			<xs:enumeration value="text_warning"/>
-			<xs:enumeration value="tool_in_use"/>
 			<xs:enumeration value="tool_list"/>
 			<xs:enumeration value="tool_list_heater"/>
 			<xs:enumeration value="tool_list_tool"/>
@@ -1848,17 +1860,21 @@
 			<xs:enumeration value="tr.msgbox.text_length_range"/>
 			<xs:enumeration value="tr.multi_value_selector.numberpad_input_header"/>
 			<xs:enumeration value="tr.multi_value_selector.numberpad_new_value_header"/>
-			<xs:enumeration value="tr.object_cancel.cancel_current"/>
-			<xs:enumeration value="tr.object_cancel.confirm_cancel_current_text"/>
-			<xs:enumeration value="tr.object_cancel.confirm_cancel_current_title"/>
+			<xs:enumeration value="tr.object_cancel.cancel"/>
+			<xs:enumeration value="tr.object_cancel.cancel_named"/>
+			<xs:enumeration value="tr.object_cancel.cancelled"/>
 			<xs:enumeration value="tr.object_cancel.confirm_cancel_text"/>
 			<xs:enumeration value="tr.object_cancel.confirm_cancel_title"/>
-			<xs:enumeration value="tr.object_cancel.confirm_uncancel_text"/>
-			<xs:enumeration value="tr.object_cancel.confirm_uncancel_title"/>
+			<xs:enumeration value="tr.object_cancel.confirm_resume_text"/>
+			<xs:enumeration value="tr.object_cancel.confirm_resume_title"/>
 			<xs:enumeration value="tr.object_cancel.current_object_none"/>
 			<xs:enumeration value="tr.object_cancel.current_object_prefix"/>
-			<xs:enumeration value="tr.object_cancel.objects_header"/>
+			<xs:enumeration value="tr.object_cancel.now"/>
+			<xs:enumeration value="tr.object_cancel.printing"/>
+			<xs:enumeration value="tr.object_cancel.resume"/>
+			<xs:enumeration value="tr.object_cancel.resume_named"/>
 			<xs:enumeration value="tr.object_cancel.title"/>
+			<xs:enumeration value="tr.object_cancel.to_print"/>
 			<xs:enumeration value="tr.settings.advanced"/>
 			<xs:enumeration value="tr.settings.back_up"/>
 			<xs:enumeration value="tr.settings.backup_failed"/>
@@ -6767,6 +6783,14 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_choice.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_cross">
+		<xs:annotation><xs:documentation>An X drawn corner to corner across its content area (inside its padding), in its line style (`line_color`, `line_width`, `line_opa`, `line_rounded`), to cross something out, such as a cancelled object on the bed. Taps pass through it to its parent. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

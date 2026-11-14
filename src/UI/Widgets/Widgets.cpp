@@ -9,6 +9,7 @@
 #include "UI/Widgets/Display/DsArc.h"
 #include "UI/Widgets/Display/DsBar.h"
 #include "UI/Widgets/Display/DsBarMarker.h"
+#include "UI/Widgets/Display/DsCross.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Display/DsGraphKey.h"
 #include "UI/Widgets/Display/DsHeatmap.h"
@@ -69,6 +70,7 @@ namespace UI::Xml::Widgets
 		DsBarMarker::registerXml();
 		DsButton::registerXml();
 		DsChoice::registerXml();
+		DsCross::registerXml();
 		DsDragButton::registerXml();
 		DialogHost::registerXml();
 		DsGraph::registerXml();

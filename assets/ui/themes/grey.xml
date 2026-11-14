@@ -41,7 +41,6 @@
 		<style name="bg_color_secondary" text_color="#bg_dark"/>
 		<style name="keyboard_button_checked_bg" text_color="#bg_dark"/>
 		<style name="btnm_btn_checked" text_color="#bg_dark"/>
-		<style name="object_cancel_current" text_color="#bg_dark"/>
 		<!-- A fault keeps white text on its red -->
 		<style name="heater_fault" text_color="#text" recolor="#text"/>
 

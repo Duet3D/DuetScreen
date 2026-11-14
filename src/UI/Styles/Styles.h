@@ -156,6 +156,7 @@ namespace UI::Themes
 
 		Style action_btn; // UI elements that perform actions on the Duet
 		Style danger_btn; // A button whose action can't be undone, such as erasing every setting
+		Style danger_outline_btn; // A button whose action is drastic but can be undone, e.g. cancelling an object: edged in the error colour
 		Style input; // Text inputs
 		Style long_press; // Long-press feedback
 		Style draggable; // Draggable widgets
@@ -311,7 +312,6 @@ namespace UI::Themes
 		Style jog_step;				// The jog step in the middle of the XY pad
 
 		/* Tools */
-		Style tool_in_use;			// "In use" on the tool in use's card: a small tinted pill
 
 		/* Temperature */
 		Style temperature_bar; // Temperature bar
@@ -385,6 +385,8 @@ namespace UI::Themes
 		Style setting_title;	   // A row's title
 		Style setting_hint;		   // The line under a row's title that says more about it
 		Style setting_badge;	   // A word after a row's title saying what sort of setting it is, e.g. "Advanced"
+		Style chip;				   // A word saying what state a row is in, e.g. "Cancelled": a small pill
+		Style chip_accent;		   // A chip for the state that matters now, e.g. "In use": tinted in the accent
 		Style setting_control;	   // A row's button: big enough to tap
 		Style setting_value;	   // A row's choice, or its way into more: the value and a chevron, plain on the row
 		Style setting_options;	   // One of a few options: the box the buttons are joined in
@@ -417,10 +419,13 @@ namespace UI::Themes
 		Style customise_guide;			// A line showing what a dragged widget snapped to
 		Style customise_place;			// The empty place tapped, where a new widget goes
 
-		/* Object cancel */
-		Style object_cancel_base;	   // Base style for object cancel list items
-		Style object_cancel_current;   // Style for the current object label in the object cancel view
-		Style object_cancel_cancelled; // Style for the cancelled object label in the object cancel view
+		/* Objects */
+		Style object_shape;			  // A job's object on the bed, still to print
+		Style object_shape_now;		  // The object being printed: filled with the accent
+		Style object_shape_cancelled; // A cancelled object: hollow (a ds_cross crosses it out)
+		Style object_cross;			  // The X (a ds_cross) on a cancelled object
+		Style object_shape_chosen;	  // The object chosen to cancel or resume: outlined
+		Style object_name_cancelled;  // A cancelled object's name in the list: struck through, muted
 
 		Style debug_borders; // Outlines every widget when debug borders are shown (DEBUG_BORDERS builds)
 	};

@@ -1,51 +1,87 @@
 <!--
-  The Object Cancel tab: the job's objects drawn on the bed and listed, the one being printed named above the bed,
-  and a button to cancel it. Tapping an object cancels it, or resumes it if cancelled, after asking. Cancel Current
-  Object only asks if confirmations are on, and stands out when it won't.
+  The Objects tab, shown while a job has labelled objects. On the left, the bed with the job's objects on it, named
+  above it the one being printed, and a key to how they are drawn: still to print, being printed, cancelled (crossed
+  out, not red: red means a fault). On the right, the objects listed. Tap one, on the bed or in the list, to choose
+  it; until you do, the one being printed is chosen. The button below cancels the chosen object, or resumes it if it
+  is cancelled, asking first if confirmations are on.
 
   Fields and actions: src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h
 -->
 <component presenter="object_cancel">
-	<view extends="lv_obj" width="100%" height="100%" style_layout="grid"
-		  style_grid_column_dsc_array="fr(2) fr(1)" style_grid_row_dsc_array="fr(1) content">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="row" scrollable="false">
 		<style name="bg_dark"/>
 
-		<ds_plot name="object_canvas" title_tag="tr.object_cancel.current_object_prefix" title_style="text_emphasis"
-				 bind_detail="presenter.current_object" bind_x_min="presenter.x_min" bind_x_max="presenter.x_max" bind_y_min="presenter.y_min"
-				 bind_y_max="presenter.y_max" style_pad_right="20"
-				 style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-				 style_grid_cell_row_pos="0" style_grid_cell_row_span="2" style_grid_cell_y_align="stretch">
+		<lv_obj name="bed" height="100%" flex_grow="1" flex_flow="column" scrollable="false">
 			<style name="card"/>
 			<style name="pad_base"/>
-			<ds_plot_layer name="objects_layer">
-				<ds_list name="objects" list="presenter.objects" item="object_cancel_outline" width="100%" height="100%"
-						 style_pad_all="0" scrollable="false"/>
-			</ds_plot_layer>
-		</ds_plot>
-
-		<lv_obj name="object_list" flex_flow="column"
-				style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-				style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
-			<style name="card"/>
-			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-				<style name="bg_color_header"/>
-				<style name="list_header"/>
-				<lv_label name="title" translation_tag="tr.object_cancel.objects_header" width="content" height="content">
-					<style name="list_title"/>
-				</lv_label>
+			<ds_plot name="object_canvas" title_tag="tr.object_cancel.current_object_prefix" title_style="text_emphasis"
+					 bind_detail="presenter.current_object" bind_x_min="presenter.x_min" bind_x_max="presenter.x_max"
+					 bind_y_min="presenter.y_min" bind_y_max="presenter.y_max" width="100%" flex_grow="1"
+					 style_pad_all="0" style_pad_right="20">
+				<ds_plot_layer name="objects_layer">
+					<ds_list name="objects" list="presenter.objects" item="object_cancel_outline" width="100%"
+							 height="100%" style_pad_all="0" scrollable="false"/>
+				</ds_plot_layer>
+			</ds_plot>
+			<!-- The key: a small shape of each sort, and what it means -->
+			<lv_obj name="key" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
+					style_flex_cross_place="center" style_pad_all="0" style_pad_column="20" style_pad_row="4">
+				<lv_obj name="to_print" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_pad_all="0" style_pad_column="8">
+					<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
+						<style name="object_shape"/>
+					</lv_obj>
+					<lv_label translation_tag="tr.object_cancel.to_print">
+						<style name="text_muted"/>
+					</lv_label>
+				</lv_obj>
+				<lv_obj name="printing" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_pad_all="0" style_pad_column="8">
+					<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
+						<style name="object_shape"/>
+						<style name="object_shape_now"/>
+					</lv_obj>
+					<lv_label translation_tag="tr.object_cancel.printing">
+						<style name="text_muted"/>
+					</lv_label>
+				</lv_obj>
+				<lv_obj name="cancelled" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_pad_all="0" style_pad_column="8">
+					<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
+						<style name="object_shape"/>
+						<style name="object_shape_cancelled"/>
+						<ds_cross name="cross" width="100%" height="100%">
+							<style name="object_cross"/>
+						</ds_cross>
+					</lv_obj>
+					<lv_label translation_tag="tr.object_cancel.cancelled">
+						<style name="text_muted"/>
+					</lv_label>
+				</lv_obj>
 			</lv_obj>
-			<ds_list name="list" list="presenter.objects" item="object_cancel_row" width="100%" flex_grow="1" flex_flow="column"
-					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 
-		<ds_button name="cancel_current" translation_tag="tr.object_cancel.cancel_current" width="100%" height="50"
-				   style_min_height="content"
-				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-				   style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
-			<bind_style name="action_btn" subject="source.settings.confirmations" ref_value="0"/>
-			<action trigger="clicked" name="presenter.object_cancel.cancel_current"/>
-		</ds_button>
-
+		<lv_obj name="side" width="34%" height="100%" flex_flow="column" scrollable="false" style_min_width="200">
+			<style name="card"/>
+			<style name="pad_gap"/>
+			<lv_obj name="list_area" width="100%" flex_grow="1" flex_flow="column" scroll_dir="ver" style_pad_all="0">
+				<ds_list name="list" list="presenter.objects" item="object_cancel_row">
+					<style name="setting_list"/>
+					<style name="setting_group"/>
+				</ds_list>
+			</lv_obj>
+			<ds_button name="cancel" bind_text="presenter.chosen.cancel_text" long_mode="wrap" width="100%" height="content"
+					   style_min_height="50">
+				<style name="danger_outline_btn"/>
+				<bind_flag_if_eq subject="presenter.chosen.shown" flag="hidden" ref_value="0"/>
+				<bind_flag_if_eq subject="presenter.chosen.cancelled" flag="hidden" ref_value="1"/>
+				<action trigger="clicked" name="presenter.object_cancel.cancel"/>
+			</ds_button>
+			<ds_button name="resume" bind_text="presenter.chosen.resume_text" long_mode="wrap" width="100%" height="content"
+					   style_min_height="50">
+				<bind_flag_if_eq subject="presenter.chosen.cancelled" flag="hidden" ref_value="0"/>
+				<action trigger="clicked" name="presenter.object_cancel.resume"/>
+			</ds_button>
+		</lv_obj>
 	</view>
 </component>

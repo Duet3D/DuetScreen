@@ -24,66 +24,51 @@ namespace UI
 	void JobObjectRow::fields(Xml::FieldVisitor& f)
 	{
 		f.field("number", number, "Object number");
-		f.field("label", label, "E.g. \"[2]: gear (Instance 37)\"");
+		f.field("name", name, "Its name, as the slicer wrote it, e.g. \"gear (Instance 37)\"");
 		f.field("x1", x1, "Lowest X of its bounds, whole mm");
 		f.field("y1", y1, "Lowest Y of its bounds, whole mm");
 		f.field("x2", x2, "Highest X of its bounds, whole mm");
 		f.field("y2", y2, "Highest Y of its bounds, whole mm");
 		f.field("current", current, "1 if it is being printed");
 		f.field("cancelled", cancelled, "1 if it has been cancelled");
+		f.field("chosen", chosen, "1 if it is the one chosen to cancel or resume");
 	}
 
 	ObjectCancelPresenter::ObjectCancelPresenter()
 		: XmlPresenter("object_cancel")
 	{
-		action(
-			"object_cancel.select",
-			"Cancel the object, or resume it if cancelled, asking first. From a row of `objects`.",
-			[](const Xml::ActionArgs& args)
-			{
-				const auto* row = args.row<JobObjectRow>();
-				if (row == nullptr)
-				{
-					LOG_WARN("object_cancel.select must come from an objects row");
-					return;
-				}
-				const auto index = static_cast<size_t>(row->number.get());
-				std::string name;
-				bool resume = false;
-				{
-					MODEL_LOCK();
-					const OM::Node& object = objects()[index];
-					if (!object.exists())
-					{
-						return;
-					}
-					name = object["name"].text();
-					resume = object["cancelled"].boolean();
-				}
-				// M486 P cancels an object, M486 U resumes it
-				const std::string gcode = fmt::format("M486 {:c}{:d}\n", resume ? 'U' : 'P', index);
-				Xml::Prompts::askQuestion(
-					{.title = _(resume ? "object_cancel.confirm_uncancel_title" : "object_cancel.confirm_cancel_title"),
-					 .text =
-						 _(resume ? "object_cancel.confirm_uncancel_text" : "object_cancel.confirm_cancel_text", name),
-					 .onYes = [gcode]() { Xml::Services::sendGcode(gcode); },
-					 .asker = args.target});
-			});
-		action("object_cancel.cancel_current",
-			   "Cancel the object being printed, asking first if confirmations are on",
-			   [](const Xml::ActionArgs& args)
+		action("object_cancel.choose",
+			   "Choose the object to cancel or resume. From a row of `objects`.",
+			   [this](const Xml::ActionArgs& args)
 			   {
-				   Xml::Prompts::confirm({.title = _("object_cancel.confirm_cancel_current_title"),
-										  .text = _("object_cancel.confirm_cancel_current_text", currentObjectName()),
-										  .onYes = []() { Xml::Services::sendGcode("M486 C\n"); },
-										  .asker = args.target});
+				   const auto* row = args.row<JobObjectRow>();
+				   if (row == nullptr)
+				   {
+					   LOG_WARN("object_cancel.choose must come from an objects row");
+					   return;
+				   }
+				   m_userChoice = row->number.get();
+				   showObjects();
 			   });
+		action("object_cancel.cancel",
+			   "Cancel the chosen object (M486 P), asking first if confirmations are on",
+			   [this](const Xml::ActionArgs& args) { cancelChosen(false, args.target); });
+		action("object_cancel.resume",
+			   "Print the chosen object again after it was cancelled (M486 U), asking first if confirmations are on",
+			   [this](const Xml::ActionArgs& args) { cancelChosen(true, args.target); });
 		m_currentObject.set(_("object_cancel.current_object_none"));
 	}
 
 	void ObjectCancelPresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("current_object", m_currentObject, "Name of the object being printed, or \"None\"");
+		f.field("current_object", m_currentObject, "Name of the object being printed, or \"Nothing\"");
+		f.field("chosen.name",
+				m_chosenName,
+				"Name of the object chosen: the one the user tapped, or else the one being printed");
+		f.field("chosen.cancelled", m_chosenCancelled, "1 if the object chosen is cancelled");
+		f.field("chosen.shown", m_chosenShown, "1 if an object is chosen");
+		f.field("chosen.cancel_text", m_cancelText, "E.g. \"Cancel gear (Instance 37)…\"");
+		f.field("chosen.resume_text", m_resumeText, "E.g. \"Resume gear (Instance 37)…\"");
 		f.field("x_min",
 				m_xMin,
 				"Lowest X of the bed, whole mm: the X axis' travel allowing for the tool's offset, or the objects' "
@@ -111,10 +96,42 @@ namespace UI
 
 	std::string ObjectCancelPresenter::currentObjectName()
 	{
-		MODEL_LOCK();
 		const int64_t current = Xml::PrinterModel::root()["job"]["build"]["currentObject"].integer(-1);
 		const std::string_view name = current >= 0 ? objects()[static_cast<size_t>(current)]["name"].text() : "";
 		return name.empty() ? _("object_cancel.current_object_none") : std::string(name);
+	}
+
+	int32_t ObjectCancelPresenter::chosenObject() const
+	{
+		if (m_userChoice >= 0 && objects()[static_cast<size_t>(m_userChoice)].exists())
+		{
+			return m_userChoice;
+		}
+		const int64_t current = Xml::PrinterModel::root()["job"]["build"]["currentObject"].integer(-1);
+		return current >= 0 && objects()[static_cast<size_t>(current)].exists() ? static_cast<int32_t>(current) : -1;
+	}
+
+	void ObjectCancelPresenter::cancelChosen(bool resume, lv_obj_t* asker)
+	{
+		int32_t chosen = -1;
+		std::string name;
+		{
+			MODEL_LOCK();
+			chosen = chosenObject();
+			if (chosen < 0)
+			{
+				return;
+			}
+			name = objects()[static_cast<size_t>(chosen)]["name"].text();
+		}
+		// M486 P cancels an object, M486 U resumes it
+		const std::string gcode = fmt::format("M486 {:c}{:d}\n", resume ? 'U' : 'P', chosen);
+		Xml::Prompts::confirm(
+			{.title = _(resume ? "object_cancel.confirm_resume_title" : "object_cancel.confirm_cancel_title"),
+			 .text = _(resume ? "object_cancel.confirm_resume_text" : "object_cancel.confirm_cancel_text", name),
+			 .yes = _(resume ? "object_cancel.resume" : "object_cancel.cancel"),
+			 .onYes = [gcode]() { Xml::Services::sendGcode(gcode); },
+			 .asker = asker});
 	}
 
 	void ObjectCancelPresenter::showObjects()
@@ -131,21 +148,35 @@ namespace UI
 				numbers.push_back(number);
 			}
 		}
+		// A choice is forgotten once its object has gone, e.g. with the job
+		if (m_userChoice >= 0 && !objects()[static_cast<size_t>(m_userChoice)].exists())
+		{
+			m_userChoice = -1;
+		}
 		const int64_t current = Xml::PrinterModel::root()["job"]["build"]["currentObject"].integer(-1);
+		const int32_t chosen = chosenObject();
 		m_objects.sync(numbers.size(),
-					   [&numbers, current](JobObjectRow& row, size_t i)
+					   [&numbers, current, chosen](JobObjectRow& row, size_t i)
 					   {
 						   const OM::Node& object = objects()[numbers[i]];
 						   row.number.set(static_cast<int32_t>(numbers[i]));
-						   row.label.set(fmt::format("[{:d}]: {:s}", numbers[i], object["name"].text()));
+						   row.name.set(object["name"].text());
 						   row.x1.set(static_cast<int32_t>(object["x"][0].integer(0)));
 						   row.y1.set(static_cast<int32_t>(object["y"][0].integer(0)));
 						   row.x2.set(static_cast<int32_t>(object["x"][1].integer(0)));
 						   row.y2.set(static_cast<int32_t>(object["y"][1].integer(0)));
 						   row.current.set(static_cast<int64_t>(numbers[i]) == current ? 1 : 0);
 						   row.cancelled.set(object["cancelled"].boolean() ? 1 : 0);
+						   row.chosen.set(static_cast<int32_t>(numbers[i]) == chosen ? 1 : 0);
 					   });
 		m_currentObject.set(currentObjectName());
+
+		const std::string name = chosen >= 0 ? std::string(objects()[static_cast<size_t>(chosen)]["name"].text()) : "";
+		m_chosenName.set(name);
+		m_chosenShown.set(chosen >= 0 ? 1 : 0);
+		m_chosenCancelled.set(chosen >= 0 && objects()[static_cast<size_t>(chosen)]["cancelled"].boolean() ? 1 : 0);
+		m_cancelText.set(_("object_cancel.cancel_named", name));
+		m_resumeText.set(_("object_cancel.resume_named", name));
 	}
 
 	void ObjectCancelPresenter::showSpan()

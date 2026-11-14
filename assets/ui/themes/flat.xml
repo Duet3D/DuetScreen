@@ -22,7 +22,6 @@
 		<style name="tool_list_tool" bg_opa="0" radius="0" border_width="1" border_side="bottom"
 			   border_color="#border_muted"/>
 		<style name="tool_selected" outline_width="0" bg_color="#primary_muted" bg_opa="45%" border_color="#border_muted"/>
-		<style name="object_cancel_base" border_width="0"/>
 		<style name="input" border_width="0" bg_color="#bg_light" bg_opa="100%"/>
 
 		<style name="chart_bg" border_width="0"/>
