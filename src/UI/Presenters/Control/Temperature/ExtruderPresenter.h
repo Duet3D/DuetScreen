@@ -12,6 +12,7 @@
 #pragma once
 
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/ValueSelector.h"
 #include "UI/Xml/View/XmlPresenter.h"
 
@@ -44,5 +45,6 @@ namespace UI
 		Xml::IntSubject m_retractUsable;	// 1 if the tool can retract
 		Xml::ValueSelector m_distance;		// Feed distance
 		Xml::ValueSelector m_feedrate;		// Feed rate
+		Xml::OmWatch m_watch;				// Checks again as the tools and heaters change
 	};
 } // namespace UI

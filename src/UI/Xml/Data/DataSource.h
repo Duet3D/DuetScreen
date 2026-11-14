@@ -33,6 +33,7 @@
 
 #include "UI/Core/Presenter.h"
 #include "UI/Xml/Binding/Fields.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include <string>
 #include <vector>
 
@@ -46,9 +47,6 @@ namespace UI::Xml
 			: m_name(std::move(name))
 		{
 		}
-
-		/** Stops watching the object model */
-		~DataSource() override;
 
 		/** Name used in logs */
 		std::string_view getName() const override { return m_name; }
@@ -73,7 +71,7 @@ namespace UI::Xml
 		void watchObjectModel(std::vector<std::string> paths);
 
 	  private:
-		std::string m_name;	 // Name used in logs
-		size_t m_watch = 0; // The object model watcher, or 0 if none
+		std::string m_name; // Name used in logs
+		OmWatch m_watch;	// Calls update() as the object model changes, once watchObjectModel() has
 	};
 } // namespace UI::Xml

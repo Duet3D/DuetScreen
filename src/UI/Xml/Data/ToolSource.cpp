@@ -4,8 +4,7 @@
 
 #include "ToolSource.h"
 #include "Debug.h"
-#include "ObjectModel/Heat.h"
-#include "ObjectModel/Tool.h"
+#include "PrinterModel.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 
@@ -20,33 +19,33 @@ namespace UI::Xml
 		f.list("heaters", heaters, "One row per heater of the tool");
 	}
 
-	void ToolRow::update(OM::Tool& tool)
+	void ToolRow::update(size_t toolNumber)
 	{
-		number.set(static_cast<int32_t>(tool.index));
-		name.set(tool.GetName());
-		selected.set(tool.status == OM::ToolStatus::active ? 1 : 0);
-		heaterCount.set(static_cast<int32_t>(tool.GetHeaterCount()));
+		const OM::Node& tool = PrinterModel::tool(toolNumber);
+		number.set(static_cast<int32_t>(toolNumber));
+		name.set(PrinterModel::toolName(toolNumber));
+		selected.set(tool["state"].text() == "active" ? 1 : 0);
+		heaterCount.set(static_cast<int32_t>(tool["heaters"].size()));
 
-		heaters.sync(tool.GetHeaterCount(),
-					 [&tool](ToolHeaterRow& row, size_t i)
+		// The tool's own targets for its heaters run parallel to their numbers
+		heaters.sync(tool["heaters"].size(),
+					 [&](ToolHeaterRow& row, size_t slot)
 					 {
-						 auto toolHeater = tool.GetHeater(i);
-						 if (toolHeater == nullptr || toolHeater->heater == nullptr)
+						 const auto heaterNumber = PrinterModel::toolHeater(toolNumber, slot);
+						 if (!heaterNumber)
 						 {
 							 return;
 						 }
-						 const auto& heater = *toolHeater->heater;
-						 const std::string_view sensorName = heater.GetName();
-						 const std::string name =
-							 sensorName.empty() ? _("temperature.heater", heater.index) : std::string(sensorName);
-						 row.update({.heater = static_cast<int32_t>(heater.index),
-									 .name = name,
-									 .state = heater.GetHeaterStatusStr(),
-									 .current = heater.current,
-									 .active = toolHeater->activeTemp,
-									 .standby = toolHeater->standbyTemp,
-									 .min = heater.min,
-									 .max = heater.max});
+						 const OM::Node& heater = PrinterModel::heater(*heaterNumber);
+						 const std::string state = PrinterModel::heaterState(*heaterNumber);
+						 row.update({.heater = static_cast<int32_t>(*heaterNumber),
+									 .name = PrinterModel::heaterName(*heaterNumber),
+									 .state = state,
+									 .current = static_cast<float>(heater["current"].number()),
+									 .active = static_cast<int32_t>(tool["active"][slot].integer(0)),
+									 .standby = static_cast<int32_t>(tool["standby"][slot].integer(0)),
+									 .min = static_cast<float>(heater["min"].number()),
+									 .max = static_cast<float>(heater["max"].number())});
 					 });
 	}
 
@@ -68,22 +67,15 @@ namespace UI::Xml
 
 	void ToolSource::onInit()
 	{
-		registerEventListener<EventType::ToolData>(this, &ToolSource::update);
-		registerEventListener<EventType::HeaterData>(this, &ToolSource::update);
+		watchObjectModel({"tools", "heat", "state.currentTool", "sensors.analog"});
 	}
 
 	void ToolSource::update()
 	{
 		ZoneScoped;
 		MODEL_LOCK();
-		m_tools.sync(OM::GetToolCount(),
-					 [](ToolRow& row, size_t slot)
-					 {
-						 if (auto tool = OM::GetToolBySlot(slot))
-						 {
-							 row.update(*tool);
-						 }
-					 });
+		const auto tools = PrinterModel::tools();
+		m_tools.sync(tools.size(), [&tools](ToolRow& row, size_t slot) { row.update(tools[slot]); });
 		showCurrentTool();
 	}
 
@@ -96,8 +88,9 @@ namespace UI::Xml
 
 	void ToolSource::showCurrentTool()
 	{
-		const auto tool = OM::GetCurrentTool();
-		if (!tool || tool->GetHeaterCount() == 0)
+		const auto current = PrinterModel::currentTool();
+		const OM::Node& heaterNumbers = current ? PrinterModel::tool(*current)["heaters"] : OM::Node::missing();
+		if (heaterNumbers.size() == 0)
 		{
 			m_currentShown.set(0);
 			m_currentLabel.set("");
@@ -107,17 +100,18 @@ namespace UI::Xml
 		}
 		std::string heaters;
 		bool fault = false;
-		tool->IterateHeaters(
-			[&](OM::ToolHeaterPtr toolHeater, size_t)
+		for (size_t slot = 0; slot < heaterNumbers.size(); ++slot)
+		{
+			if (const auto number = PrinterModel::toolHeater(*current, slot))
 			{
-				if (const auto heater = toolHeater->heater)
-				{
-					heaters += fmt::format(" {:g}°C/{:d}°C", heater->current, heater->GetTargetTemp());
-					fault |= heater->status == OM::Heat::HeaterStatus::fault;
-				}
-			});
+				heaters += fmt::format(" {:g}°C/{:d}°C",
+									   static_cast<float>(PrinterModel::heater(*number)["current"].number()),
+									   PrinterModel::heaterTarget(*number));
+				fault |= PrinterModel::heaterState(*number) == "fault";
+			}
+		}
 		m_currentShown.set(1);
-		m_currentLabel.set(fmt::format("T{:d}:", tool->index));
+		m_currentLabel.set(fmt::format("T{:d}:", *current));
 		m_currentHeaters.set(heaters);
 		m_currentFault.set(fault ? 1 : 0);
 	}

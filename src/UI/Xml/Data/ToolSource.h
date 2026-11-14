@@ -11,11 +11,6 @@
 #include "DataSource.h"
 #include "HeaterRow.h"
 
-namespace OM
-{
-	struct Tool;
-}
-
 namespace UI::Xml
 {
 	/** One heater of a tool; its `index` is its position in the tool */
@@ -30,8 +25,8 @@ namespace UI::Xml
 		/** Declare the row's fields */
 		void fields(FieldVisitor& f) override;
 
-		/** Copy `tool`, and its heaters, into the subjects */
-		void update(OM::Tool& tool);
+		/** Show tool `toolNumber`, and its heaters, from the object model (the model lock held) */
+		void update(size_t toolNumber);
 
 		IntSubject number;			 // Tool number
 		StringSubject<32> name;		 // Display name
@@ -57,11 +52,11 @@ namespace UI::Xml
 		void clear() override;
 
 	  protected:
-		/** Listen for tool and heater changes */
+		/** Follow the tools, their heaters, the current tool and the sensors' names */
 		void onInit() override;
 
 	  private:
-		/** Show the current tool's heaters, as the status bar does. Call with the model locked. */
+		/** Show the current tool's heaters, as the status bar does (the model lock held) */
 		void showCurrentTool();
 
 		List<ToolRow> m_tools;				 // One row per tool

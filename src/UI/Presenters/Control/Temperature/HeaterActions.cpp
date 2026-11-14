@@ -4,14 +4,15 @@
 
 #include "HeaterActions.h"
 #include "Debug.h"
-#include "ObjectModel/BedOrChamber.h"
-#include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/HeatSource.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
+#include <algorithm>
+#include <fmt/format.h>
 
 namespace UI::HeaterActions
 {
@@ -21,7 +22,7 @@ namespace UI::HeaterActions
 		return active ? _("temperature.status.active") : _("temperature.status.standby");
 	}
 
-	/** `tools.toggle` */
+	/** `tools.toggle`: select the tool, or deselect it if it is selected */
 	static void toggleTool(const Xml::ActionArgs& args)
 	{
 		ZoneScoped;
@@ -31,9 +32,94 @@ namespace UI::HeaterActions
 			LOG_WARN("tools.toggle must come from a row of the tools list");
 			return;
 		}
-		if (auto tool = OM::GetTool(static_cast<size_t>(row->number.get())))
+		const auto number = static_cast<size_t>(row->number.get());
+		bool active = false;
 		{
-			tool->ToggleState();
+			MODEL_LOCK();
+			active = Xml::PrinterModel::tool(number)["state"].text() == "active";
+		}
+		Xml::Services::sendGcode(active ? std::string("T-1\n") : fmt::format("T{:d}\n", number));
+	}
+
+	/**
+	 * Cycle one of tool `tool`'s heaters (`slot` in its list) on: active, then standby, then off, as M568 A sets the
+	 * tool's heaters; a heater with a fault is reset instead
+	 */
+	static void toggleToolHeater(size_t tool, size_t slot)
+	{
+		std::string gcode;
+		{
+			MODEL_LOCK();
+			const auto heater = Xml::PrinterModel::toolHeater(tool, slot);
+			if (!heater)
+			{
+				return;
+			}
+			const std::string state = Xml::PrinterModel::heaterState(*heater);
+			if (state == "active")
+			{
+				gcode = fmt::format("M568 P{:d} A1\n", tool);
+			}
+			else if (state == "standby")
+			{
+				gcode = fmt::format("M568 P{:d} A0\n", tool);
+			}
+			else if (state == "off")
+			{
+				gcode = fmt::format("M568 P{:d} A2\n", tool);
+			}
+			else if (state == "fault")
+			{
+				gcode = fmt::format("M562 P{:d}\n", *heater);
+			}
+		}
+		if (!gcode.empty())
+		{
+			Xml::Services::sendGcode(gcode);
+		}
+	}
+
+	/**
+	 * Cycle bed or chamber `number` on, as M140/M141 do: a bed goes active, standby (M144), off; a chamber has no
+	 * standby, so goes active, off. A heater with a fault is reset instead.
+	 */
+	static void toggleBedOrChamber(bool bed, size_t number)
+	{
+		std::string gcode;
+		{
+			MODEL_LOCK();
+			const auto places = bed ? Xml::PrinterModel::beds() : Xml::PrinterModel::chambers();
+			const auto place =
+				std::find_if(places.begin(),
+							 places.end(),
+							 [number](const Xml::PrinterModel::HeatedPlace& p) { return p.number == number; });
+			if (place == places.end())
+			{
+				return;
+			}
+			const char* code = bed ? "M140" : "M141";
+			const std::string state = Xml::PrinterModel::heaterState(place->heater);
+			const auto active = Xml::PrinterModel::heater(place->heater)["active"].integer(0);
+			if (state == "active" && bed)
+			{
+				gcode = fmt::format("M144 P{:d}\n", number);
+			}
+			else if (state == "active" || state == "standby")
+			{
+				gcode = fmt::format("{:s} P{:d} S-273.15\n", code, number);
+			}
+			else if (state == "off")
+			{
+				gcode = fmt::format("{:s} P{:d} S{:d}\n", code, number, active);
+			}
+			else if (state == "fault")
+			{
+				gcode = fmt::format("M562 P{:d}\n", place->heater);
+			}
+		}
+		if (!gcode.empty())
+		{
+			Xml::Services::sendGcode(gcode);
 		}
 	}
 
@@ -43,26 +129,18 @@ namespace UI::HeaterActions
 		ZoneScoped;
 		if (const auto* heater = args.row<Xml::ToolHeaterRow>())
 		{
-			const auto* toolRow = args.row<Xml::ToolRow>();
-			auto tool = toolRow ? OM::GetTool(static_cast<size_t>(toolRow->number.get())) : nullptr;
-			if (tool)
+			if (const auto* toolRow = args.row<Xml::ToolRow>())
 			{
-				tool->ToggleHeaterState(static_cast<size_t>(heater->index.get()));
+				toggleToolHeater(static_cast<size_t>(toolRow->number.get()), static_cast<size_t>(heater->index.get()));
 			}
 		}
 		else if (const auto* bed = args.row<Xml::BedRow>())
 		{
-			if (auto item = OM::GetBed(static_cast<size_t>(bed->number.get())))
-			{
-				item->ToggleBedState();
-			}
+			toggleBedOrChamber(true, static_cast<size_t>(bed->number.get()));
 		}
 		else if (const auto* chamber = args.row<Xml::ChamberRow>())
 		{
-			if (auto item = OM::GetChamber(static_cast<size_t>(chamber->number.get())))
-			{
-				item->ToggleChamberState();
-			}
+			toggleBedOrChamber(false, static_cast<size_t>(chamber->number.get()));
 		}
 		else
 		{
@@ -80,20 +158,33 @@ namespace UI::HeaterActions
 			{
 			case Heated::ToolHeater:
 			{
-				auto tool = OM::GetTool(number);
-				auto toolHeater = tool ? tool->GetHeater(slot) : nullptr;
-				if (toolHeater == nullptr || toolHeater->heater == nullptr)
+				const auto heater = Xml::PrinterModel::toolHeater(number, slot);
+				if (!heater)
 				{
 					return;
 				}
 				request.header = _("temperature.numpad_header_tool_heater", number, slot, modeText(active));
-				request.min = toolHeater->heater->min;
-				request.max = toolHeater->heater->max;
+				request.min = static_cast<float>(Xml::PrinterModel::heater(*heater)["min"].number());
+				request.max = static_cast<float>(Xml::PrinterModel::heater(*heater)["max"].number());
 				request.onConfirm = [number, slot, active](float v)
 				{
-					if (auto t = OM::GetTool(number))
+					// M568 sets every heater of the tool: the others keep their targets
+					std::string targets;
 					{
-						t->SetHeaterTemps(slot, static_cast<int32_t>(v), active);
+						MODEL_LOCK();
+						const OM::Node& tool = Xml::PrinterModel::tool(number);
+						const OM::Node& temps = tool[active ? "active" : "standby"];
+						for (size_t i = 0; i < tool["heaters"].size(); ++i)
+						{
+							targets += fmt::format("{:s}{:d}",
+												   i > 0 ? ":" : "",
+												   i == slot ? static_cast<int64_t>(v) : temps[i].integer(0));
+						}
+					}
+					if (!targets.empty())
+					{
+						Xml::Services::sendGcode(
+							fmt::format("M568 P{:d} {:c}{:s}\n", number, active ? 'S' : 'R', targets));
 					}
 				};
 				break;
@@ -102,8 +193,12 @@ namespace UI::HeaterActions
 			case Heated::Chamber:
 			{
 				const bool bed = what == Heated::Bed;
-				auto item = bed ? OM::GetBed(number) : OM::GetChamber(number);
-				if (item == nullptr)
+				const auto places = bed ? Xml::PrinterModel::beds() : Xml::PrinterModel::chambers();
+				const auto place =
+					std::find_if(places.begin(),
+								 places.end(),
+								 [number](const Xml::PrinterModel::HeatedPlace& p) { return p.number == number; });
+				if (place == places.end())
 				{
 					return;
 				}
@@ -111,19 +206,15 @@ namespace UI::HeaterActions
 								   bed ? _("temperature.bed") : _("temperature.chamber"),
 								   slot,
 								   modeText(active));
-				request.min = item->GetMin();
-				request.max = item->GetMax();
+				request.min = static_cast<float>(Xml::PrinterModel::heater(place->heater)["min"].number());
+				request.max = static_cast<float>(Xml::PrinterModel::heater(place->heater)["max"].number());
 				request.onConfirm = [bed, number, active](float v)
 				{
-					auto i = bed ? OM::GetBed(number) : OM::GetChamber(number);
-					if (i && bed)
-					{
-						i->SetBedTemp(static_cast<int32_t>(v), active);
-					}
-					else if (i)
-					{
-						i->SetChamberTemp(static_cast<int32_t>(v), active);
-					}
+					Xml::Services::sendGcode(fmt::format("{:s} P{:d} {:s}{:d}\n",
+														 bed ? "M140" : "M141",
+														 number,
+														 active ? "S" : "R",
+														 static_cast<int32_t>(v)));
 				};
 				break;
 			}

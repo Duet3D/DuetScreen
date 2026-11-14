@@ -7,11 +7,8 @@
 #include "JobSource.h"
 #include "MoveSource.h"
 #include "ObjectModel/Axis.h"
-#include "ObjectModel/BedOrChamber.h"
-#include "ObjectModel/Heat.h"
-#include "ObjectModel/Sensor.h"
-#include "ObjectModel/Tool.h"
 #include "ObjectModel/Tree/Tree.h"
+#include "PrinterModel.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 #include <algorithm>
@@ -36,8 +33,13 @@ namespace UI::Xml
 		 * A heater's row: its temperature on the heater's scale, heading for `target` (0 when it isn't heating),
 		 * and a detail saying the target, or its state when it has none
 		 */
-		GaugeRow::Values heater(
-			std::string id, std::string name, const char* state, float current, int32_t target, float min, float max)
+		GaugeRow::Values heater(std::string id,
+								std::string name,
+								std::string_view state,
+								float current,
+								int32_t target,
+								float min,
+								float max)
 		{
 			const int32_t scaleMin = static_cast<int32_t>(std::floor(std::max(0.0f, min)));
 			return {.id = std::move(id),
@@ -51,20 +53,24 @@ namespace UI::Xml
 					.target = target > 0 ? target : scaleMin,
 					.detail = target > 0 ? _("widget.gauge_target", target)
 										 : _(fmt::format("temperature.status.{:s}", state)),
-					.state = state,
+					.state = std::string(state),
 					.editable = true};
 		}
 
 		/** A bed's or chamber's row; `kind` is "bed" or "chamber", `title` its translated name */
-		GaugeRow::Values bedOrChamber(OM::BedOrChamber& item, const char* kind, const std::string& title, size_t count)
+		GaugeRow::Values bedOrChamber(const PrinterModel::HeatedPlace& place,
+									  const char* kind,
+									  const std::string& title,
+									  size_t count)
 		{
-			return heater(fmt::format("{:s}.{:d}", kind, item.index),
-						  count > 1 ? fmt::format("{:s} {:d}", title, item.index) : title,
-						  item.GetHeaterStatusStr(),
-						  item.GetCurrentTemp(),
-						  item.GetCurrentTarget(),
-						  item.GetMin(),
-						  item.GetMax());
+			const OM::Node& h = PrinterModel::heater(place.heater);
+			return heater(fmt::format("{:s}.{:d}", kind, place.number),
+						  count > 1 ? fmt::format("{:s} {:d}", title, place.number) : title,
+						  PrinterModel::heaterState(place.heater),
+						  static_cast<float>(h["current"].number()),
+						  PrinterModel::heaterTarget(place.heater),
+						  static_cast<float>(h["min"].number()),
+						  static_cast<float>(h["max"].number()));
 		}
 
 		/** A percentage on a scale of 0 to `max` */
@@ -138,18 +144,11 @@ namespace UI::Xml
 
 	void GaugeSource::onInit()
 	{
-		watchObjectModel({"fans"});
-		registerEventListener<EventType::HeaterData>(this, &GaugeSource::update);
-		registerEventListener<EventType::BedHeaterData>(this, &GaugeSource::update);
-		registerEventListener<EventType::ChamberHeaterData>(this, &GaugeSource::update);
-		registerEventListener<EventType::ToolData>(this, &GaugeSource::update);
-		registerEventListener<EventType::ToolHeaterData>([this](size_t) { update(); });
-		registerEventListener<EventType::AnalogSensorData>(this, &GaugeSource::update);
+		watchObjectModel({"fans", "tools", "heat", "sensors.analog", "state.currentTool"});
 		registerEventListener<EventType::JobDuration>(this, &GaugeSource::update);
 		registerEventListener<EventType::JobFileProgress>(this, &GaugeSource::update);
 		registerEventListener<EventType::SpeedFactor>(this, &GaugeSource::update);
 		registerEventListener<EventType::ExtruderData>(this, &GaugeSource::update);
-		registerEventListener<EventType::CurrentTool>(this, &GaugeSource::update);
 	}
 
 	void GaugeSource::update()
@@ -170,58 +169,48 @@ namespace UI::Xml
 		std::vector<GaugeRow::Values> rows;
 
 		// Every tool's heaters, named after the tool, and after the heater too if the tool has several
-		for (size_t slot = 0; slot < OM::GetToolCount(); ++slot)
+		for (const size_t toolNumber : PrinterModel::tools())
 		{
-			auto tool = OM::GetToolBySlot(slot);
-			if (tool == nullptr)
+			const OM::Node& tool = PrinterModel::tool(toolNumber);
+			const size_t count = tool["heaters"].size();
+			for (size_t slot = 0; slot < count; ++slot)
 			{
-				continue;
-			}
-			const size_t count = tool->GetHeaterCount();
-			tool->IterateHeaters(
-				[&](OM::ToolHeaterPtr toolHeater, size_t index)
+				const auto heaterNumber = PrinterModel::toolHeater(toolNumber, slot);
+				if (!heaterNumber)
 				{
-					if (toolHeater == nullptr || toolHeater->heater == nullptr)
-					{
-						return;
-					}
-					const auto& h = *toolHeater->heater;
-					std::string name = tool->GetName();
-					if (count > 1)
-					{
-						const std::string_view sensor = h.GetName();
-						name += " " + (sensor.empty() ? _("temperature.heater", h.index) : std::string(sensor));
-					}
-					const int32_t target = h.status == OM::Heat::HeaterStatus::active	 ? toolHeater->activeTemp
-										   : h.status == OM::Heat::HeaterStatus::standby ? toolHeater->standbyTemp
-																						 : 0;
-					rows.push_back(heater(fmt::format("tool.{:d}.{:d}", tool->index, index),
-										  std::move(name),
-										  h.GetHeaterStatusStr(),
-										  h.current,
-										  target,
-										  h.min,
-										  h.max));
-				});
+					continue;
+				}
+				const OM::Node& h = PrinterModel::heater(*heaterNumber);
+				std::string name = PrinterModel::toolName(toolNumber);
+				if (count > 1)
+				{
+					name += " " + PrinterModel::heaterName(*heaterNumber);
+				}
+				const std::string state = PrinterModel::heaterState(*heaterNumber);
+				const int32_t target = state == "active"	? static_cast<int32_t>(tool["active"][slot].integer(0))
+									   : state == "standby" ? static_cast<int32_t>(tool["standby"][slot].integer(0))
+															: 0;
+				rows.push_back(heater(fmt::format("tool.{:d}.{:d}", toolNumber, slot),
+									  std::move(name),
+									  state,
+									  static_cast<float>(h["current"].number()),
+									  target,
+									  static_cast<float>(h["min"].number()),
+									  static_cast<float>(h["max"].number())));
+			}
 		}
 
-		const size_t beds = OM::GetBedCount();
+		const auto beds = PrinterModel::beds();
 		const std::string bed = _("temperature.bed");
-		for (size_t slot = 0; slot < beds; ++slot)
+		for (const auto& place : beds)
 		{
-			if (auto item = OM::GetBedBySlot(slot))
-			{
-				rows.push_back(bedOrChamber(*item, "bed", bed, beds));
-			}
+			rows.push_back(bedOrChamber(place, "bed", bed, beds.size()));
 		}
-		const size_t chambers = OM::GetChamberCount();
+		const auto chambers = PrinterModel::chambers();
 		const std::string chamber = _("temperature.chamber");
-		for (size_t slot = 0; slot < chambers; ++slot)
+		for (const auto& place : chambers)
 		{
-			if (auto item = OM::GetChamberBySlot(slot))
-			{
-				rows.push_back(bedOrChamber(*item, "chamber", chamber, chambers));
-			}
+			rows.push_back(bedOrChamber(place, "chamber", chamber, chambers.size()));
 		}
 
 		const OM::Node& fans = OM::Tree::get().root()["fans"];
@@ -249,31 +238,33 @@ namespace UI::Xml
 
 		// Sensors a heater uses are shown as that heater
 		std::set<size_t> heaterSensors;
-		OM::Heat::IterateHeatersWhile(
-			[&](OM::Heat::HeaterPtr h, size_t)
-			{
-				if (h && h->sensor)
-				{
-					heaterSensors.insert(h->sensor->index);
-				}
-				return true;
-			});
-		for (size_t slot = 0; slot < OM::GetAnalogSensorCount(); ++slot)
+		const OM::Node& heaters = PrinterModel::root()["heat"]["heaters"];
+		for (size_t number = 0; number < heaters.size(); ++number)
 		{
-			auto sensor = OM::GetAnalogSensorBySlot(slot);
-			if (sensor == nullptr || heaterSensors.contains(sensor->index))
+			if (const int64_t sensor = heaters[number]["sensor"].integer(-1); sensor >= 0)
+			{
+				heaterSensors.insert(static_cast<size_t>(sensor));
+			}
+		}
+		const OM::Node& sensors = PrinterModel::root()["sensors"]["analog"];
+		for (size_t number = 0; number < sensors.size(); ++number)
+		{
+			const OM::Node& sensor = sensors[number];
+			if (sensor.isNull() || heaterSensors.contains(number))
 			{
 				continue;
 			}
 			// No scale is known: 0 to 100, or to the next hundred above the reading
-			const int32_t reading = static_cast<int32_t>(std::lround(sensor->lastReading));
-			rows.push_back({.id = fmt::format("sensor.{:d}", sensor->index),
-							.name = sensor->name.empty() ? _("widget.gauge_sensor", sensor->index) : sensor->name,
+			const double lastReading = sensor["lastReading"].number();
+			const int32_t reading = static_cast<int32_t>(std::lround(lastReading));
+			const std::string_view sensorName = sensor["name"].text();
+			rows.push_back({.id = fmt::format("sensor.{:d}", number),
+							.name = sensorName.empty() ? _("widget.gauge_sensor", number) : std::string(sensorName),
 							.kind = "sensor",
 							.value = reading,
 							.min = 0,
 							.max = std::max(100, (reading / 100 + 1) * 100),
-							.text = fmt::format("{:.1f}", sensor->lastReading),
+							.text = fmt::format("{:.1f}", static_cast<float>(lastReading)),
 							.unit = "°C",
 							.target = 0,
 							.detail = {},

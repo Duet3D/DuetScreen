@@ -10,6 +10,7 @@
 #include "ObjectModel/Tool.h"
 #include "Storage.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "i18n/i18n.h"
 #include "utils/UnitSystem.h"
 
@@ -59,8 +60,7 @@ namespace UI
 
 	void ExtruderPresenter::onInit()
 	{
-		registerEventListener<EventType::ToolData>([this]() { update(); });
-		registerEventListener<EventType::HeaterData>([this]() { update(); });
+		m_watch = Xml::OmWatch({"tools", "heat", "state.currentTool"}, [this] { update(); });
 		registerEventListener<EventType::Status>([this](const OM::PrinterStatus&) { update(); });
 	}
 
@@ -79,27 +79,27 @@ namespace UI
 	{
 		ZoneScoped;
 		MODEL_LOCK();
-		auto tool = OM::GetCurrentTool();
+		const auto tool = Xml::PrinterModel::currentTool();
 		const bool jobRunning = OM::PrintInProgress() && OM::GetStatus() != OM::PrinterStatus::paused;
-		bool canExtrude = tool != nullptr && !jobRunning;
+		bool canExtrude = tool.has_value() && !jobRunning;
 		bool canRetract = canExtrude;
-		if (tool != nullptr)
+		if (tool)
 		{
 			// Every heater of the tool must be hot enough. A limit of 0 is how the Duet reports cold extrusion
 			// allowed (M302 P1): it then checks no temperature at all, so neither does this, even a heater whose
 			// sensor reads nothing (-273°C).
-			const float coldExtrude = OM::Heat::GetColdExtrudeTemperature();
-			const float coldRetract = OM::Heat::GetColdRetractTemperature();
-			tool->IterateHeaters(
-				[&](OM::ToolHeaterPtr heater, size_t)
+			const OM::Node& heat = Xml::PrinterModel::root()["heat"];
+			const double coldExtrude = heat["coldExtrudeTemperature"].number();
+			const double coldRetract = heat["coldRetractTemperature"].number();
+			for (size_t slot = 0; slot < Xml::PrinterModel::tool(*tool)["heaters"].size(); ++slot)
+			{
+				if (const auto heater = Xml::PrinterModel::toolHeater(*tool, slot))
 				{
-					if (heater == nullptr || heater->heater == nullptr)
-					{
-						return;
-					}
-					canExtrude = canExtrude && (coldExtrude <= 0.0f || heater->heater->current >= coldExtrude);
-					canRetract = canRetract && (coldRetract <= 0.0f || heater->heater->current >= coldRetract);
-				});
+					const double current = Xml::PrinterModel::heater(*heater)["current"].number();
+					canExtrude = canExtrude && (coldExtrude <= 0.0 || current >= coldExtrude);
+					canRetract = canRetract && (coldRetract <= 0.0 || current >= coldRetract);
+				}
+			}
 		}
 		m_extrudeUsable.set(canExtrude ? 1 : 0);
 		m_retractUsable.set(canRetract ? 1 : 0);

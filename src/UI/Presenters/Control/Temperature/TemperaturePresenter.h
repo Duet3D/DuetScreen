@@ -15,6 +15,7 @@
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/Data/ToolSource.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <string>
 #include <vector>
@@ -43,8 +44,8 @@ namespace UI
 		/** Declare the row's fields: a tools row's, and the tab's own */
 		void fields(Xml::FieldVisitor& f) override;
 
-		/** Copy `tool` into the subjects */
-		void update(OM::Tool& tool);
+		/** Show tool `toolNumber` from the object model (the model lock held) */
+		void update(size_t toolNumber);
 
 		/** Pick `filament`, to load with change_filament */
 		void pick(std::string filament);
@@ -75,7 +76,7 @@ namespace UI
 		void fields(Xml::FieldVisitor& f) override;
 
 	  protected:
-		/** Listen for tools, heaters and filaments */
+		/** Follow the tools, heaters and extruders, and the filaments */
 		void onInit() override;
 
 		/** Show the tools and ask the printer for its filaments */
@@ -91,11 +92,15 @@ namespace UI
 		/** Show the filaments the printer knows */
 		void showFilaments(const std::vector<std::string>& filaments);
 
-		/** The tool an action's row is about, or nullptr */
-		static std::shared_ptr<OM::Tool> toolOf(const Xml::ActionArgs& args);
+		/** Load `filament` in `tool`, unloading what is loaded first; unload if it is empty */
+		static void changeFilament(size_t tool, const std::string& filament);
+
+		/** Unload `tool`'s filament, if it has some */
+		static void unloadFilament(size_t tool);
 
 		Xml::List<TemperatureToolRow> m_tools;	   // Tools with heaters
 		Xml::StringSubject<2048> m_filaments;	   // Known filaments, one per line
 		Xml::StringSubject<64> m_selectedTool;	   // "Selected Tool: …"
+		Xml::OmWatch m_watch;					   // Shows the tools again as the object model changes
 	};
 } // namespace UI

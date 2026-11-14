@@ -11,7 +11,6 @@
 
 #include "DataSource.h"
 #include "UI/Xml/Binding/History.h"
-#include "ObjectModel/Heat.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include <vector>
 
@@ -36,12 +35,22 @@ namespace UI::Xml
 		void sample();
 
 	  protected:
-		/** Sample every model tick */
+		/** Sample every model tick, and follow the heaters and sensors' names */
 		void onInit() override;
 
 	  private:
-		/** Make the series match `heaters`, and update the limit */
-		void syncSeries(const std::vector<OM::Heat::HeaterPtr>& heaters);
+		/** A heater shown */
+		struct Shown
+		{
+			size_t heater; // Heater number
+			size_t sensor; // Its sensor's number
+		};
+
+		/** The heaters to show, in order: those with a sensor, each sensor once (the model lock held) */
+		static std::vector<Shown> heatersToShow();
+
+		/** Make the series match `heaters`, and update the limit (the model lock held) */
+		void syncSeries(const std::vector<Shown>& heaters);
 
 		History m_history; // One series per heater
 		IntSubject m_limit; // Highest heater maximum, °C

@@ -6,6 +6,7 @@
  */
 
 #include "ObjectModel/Heat.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/UiTestSuite.h"
@@ -65,22 +66,21 @@ TEST_F(TestExtruder, ColdExtrusionAllowedNeedsNoHeat)
 	load_model_data_from_file("tests/object_model/test_bench/model_heat_v.json");
 	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
 	load_model_data_from_file("tests/object_model/test_bench/model_state_vn.json");
+	// A live response: heater 2 reads nothing (the other heaters, sent empty, keep what they have)
+	load_model_data(R"({"key":"","flags":"d99f","result":{"heat":{"heaters":[{},null,{"current":-273.15},{},{}]}}})"
+					"\n");
+	runEvents();
 	{
 		MODEL_LOCK();
-		auto heater = OM::Heat::GetHeater(2);
-		ASSERT_NE(heater, nullptr);
-		heater->current = -273.15f;
+		ASSERT_EQ(OM::Tree::get().root().at("heat.coldExtrudeTemperature").number(-1), 0.0);
 	}
-	Model::get().post<EventType::HeaterData>();
-	runEvents();
-	ASSERT_EQ(OM::Heat::GetColdExtrudeTemperature(), 0.0f);
 	EXPECT_FALSE(disabled("extrude"));
 	EXPECT_FALSE(disabled("retract"));
 
 	// With limits, the heater is too cold for either
-	OM::Heat::SetColdExtrudeTemperature(160.0f);
-	OM::Heat::SetColdRetractTemperature(90.0f);
-	Model::get().post<EventType::HeaterData>();
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"heat":{"coldExtrudeTemperature":160,"coldRetractTemperature":90}}})"
+		"\n");
 	runEvents();
 	EXPECT_TRUE(disabled("extrude"));
 	EXPECT_TRUE(disabled("retract"));

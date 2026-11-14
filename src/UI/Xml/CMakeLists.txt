@@ -27,6 +27,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MoveSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/NavigationSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ObjectModelSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/PrinterModel.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/WidgetSource.cpp
@@ -47,6 +48,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmName.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmPath.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmWatch.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/HotReload.cpp

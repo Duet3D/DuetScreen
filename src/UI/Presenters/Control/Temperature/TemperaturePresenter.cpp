@@ -4,10 +4,10 @@
 
 #include "TemperaturePresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
 #include "ObjectModel/Files.h"
-#include "ObjectModel/Tool.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include <fmt/format.h>
 
@@ -31,23 +31,31 @@ namespace UI
 		f.field("change_text", changeText, "\"Load\", or \"Change\" when filament is loaded");
 	}
 
-	void TemperatureToolRow::update(OM::Tool& tool)
+	void TemperatureToolRow::update(size_t toolNumber)
 	{
-		ToolRow::update(tool);
-		state.set(tool.GetStatusStr());
-		status.set(_(fmt::format("temperature.status.{:s}", tool.GetStatusStr())));
-		extruders.sync(tool.GetExtruderCount(),
-					   [&tool](ToolExtruderRow& row, size_t i)
+		ToolRow::update(toolNumber);
+		const OM::Node& tool = Xml::PrinterModel::tool(toolNumber);
+		const std::string_view toolState = tool["state"].text();
+		const std::string key = toolState.empty() ? "off" : std::string(toolState);
+		state.set(key);
+		status.set(_(fmt::format("temperature.status.{:s}", key)));
+		const OM::Node& extruderNumbers = tool["extruders"];
+		const OM::Node& allExtruders = Xml::PrinterModel::root()["move"]["extruders"];
+		extruders.sync(extruderNumbers.size(),
+					   [&](ToolExtruderRow& row, size_t i)
 					   {
-						   if (auto extruder = tool.GetExtruder(i))
+						   const OM::Node& extruder =
+							   allExtruders[static_cast<size_t>(std::max<int64_t>(extruderNumbers[i].integer(-1), 0))];
+						   if (extruder.exists())
 						   {
-							   row.factor.set(fmt::format("{:d}%", static_cast<int>(100 * extruder->factor)));
+							   row.factor.set(
+								   fmt::format("{:d}%", static_cast<int>(100 * extruder["factor"].number())));
 						   }
 					   });
-		filamentShown.set(tool.filamentExtruder >= 0 ? 1 : 0);
+		filamentShown.set(Xml::PrinterModel::takesFilament(toolNumber) ? 1 : 0);
 
 		// A new filament loaded replaces whatever was picked
-		std::string filament(tool.GetFilament().c_str());
+		std::string filament(Xml::PrinterModel::filament(toolNumber));
 		if (filament != loaded)
 		{
 			loaded = std::move(filament);
@@ -86,19 +94,18 @@ namespace UI
 			   "Load the filament picked, unloading any loaded first. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
-				   const auto* row = args.row<TemperatureToolRow>();
-				   if (auto tool = toolOf(args); tool && row)
+				   if (const auto* row = args.row<TemperatureToolRow>())
 				   {
-					   tool->ChangeFilament(row->picked);
+					   changeFilament(static_cast<size_t>(row->number.get()), row->picked);
 				   }
 			   });
 		action("temperature.unload_filament",
 			   "Unload the tool's filament. From a row of `tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
-				   if (auto tool = toolOf(args))
+				   if (const auto* row = args.row<Xml::ToolRow>())
 				   {
-					   tool->UnloadFilament();
+					   unloadFilament(static_cast<size_t>(row->number.get()));
 				   }
 			   });
 	}
@@ -112,9 +119,8 @@ namespace UI
 
 	void TemperaturePresenter::onInit()
 	{
-		registerEventListener<EventType::ToolData>([this]() { showTools(); });
-		registerEventListener<EventType::ToolHeaterData>([this](size_t) { showTools(); });
-		registerEventListener<EventType::HeaterData>([this]() { showTools(); });
+		m_watch = Xml::OmWatch({"tools", "heat", "state.currentTool", "sensors.analog", "move.extruders"},
+							   [this] { showTools(); });
 		registerEventListener<EventType::Filaments>([this](const std::vector<std::string>& filaments)
 													{ showFilaments(filaments); });
 	}
@@ -139,21 +145,19 @@ namespace UI
 	{
 		ZoneScoped;
 		MODEL_LOCK();
-		std::vector<OM::ToolPtr> heated;
-		heated.reserve(OM::GetToolCount());
-		OM::IterateToolsWhile(
-			[&heated](OM::ToolPtr tool, size_t)
+		std::vector<size_t> heated;
+		for (const size_t number : Xml::PrinterModel::tools())
+		{
+			if (Xml::PrinterModel::tool(number)["heaters"].size() > 0)
 			{
-				if (tool->GetHeaterCount() > 0)
-				{
-					heated.push_back(tool);
-				}
-				return true;
-			});
-		m_tools.sync(heated.size(), [&heated](TemperatureToolRow& row, size_t i) { row.update(*heated[i]); });
+				heated.push_back(number);
+			}
+		}
+		m_tools.sync(heated.size(), [&heated](TemperatureToolRow& row, size_t i) { row.update(heated[i]); });
 
-		const auto current = OM::GetCurrentTool();
-		m_selectedTool.set(_("temperature.selected_tool_label", current ? current->GetName() : std::string()));
+		const auto current = Xml::PrinterModel::currentTool();
+		m_selectedTool.set(
+			_("temperature.selected_tool_label", current ? Xml::PrinterModel::toolName(*current) : std::string()));
 	}
 
 	void TemperaturePresenter::showFilaments(const std::vector<std::string>& filaments)
@@ -161,14 +165,41 @@ namespace UI
 		m_filaments.set(fmt::format("{}", fmt::join(filaments, "\n")));
 	}
 
-	OM::ToolPtr TemperaturePresenter::toolOf(const Xml::ActionArgs& args)
+	void TemperaturePresenter::changeFilament(size_t tool, const std::string& filament)
 	{
-		const auto* row = args.row<Xml::ToolRow>();
-		if (row == nullptr)
+		std::string loaded;
 		{
-			LOG_WARN("{:s} must come from a tools row", args.name);
-			return nullptr;
+			MODEL_LOCK();
+			if (!Xml::PrinterModel::takesFilament(tool))
+			{
+				LOG_WARN("Tool {:d} has no filament extruder", tool);
+				return;
+			}
+			loaded = Xml::PrinterModel::filament(tool);
 		}
-		return OM::GetTool(static_cast<size_t>(row->number.get()));
+		if (loaded == filament)
+		{
+			return;
+		}
+		if (filament.empty())
+		{
+			unloadFilament(tool);
+			return;
+		}
+		// Select the tool, unload what is loaded, load the new filament and run its config
+		Xml::Services::sendGcode(
+			fmt::format("T{:d}\n{:s}M701 S\"{:s}\"\nM703\n", tool, loaded.empty() ? "" : "M702\n", filament));
+	}
+
+	void TemperaturePresenter::unloadFilament(size_t tool)
+	{
+		{
+			MODEL_LOCK();
+			if (!Xml::PrinterModel::takesFilament(tool) || Xml::PrinterModel::filament(tool).empty())
+			{
+				return;
+			}
+		}
+		Xml::Services::sendGcode(fmt::format("T{:d}\nM702\n", tool));
 	}
 } // namespace UI

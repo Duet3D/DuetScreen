@@ -1,7 +1,8 @@
 /*
  * HeatSource.h
  *
- * Publishes the object model's beds and chambers. Each row is a HeaterRow (see HeaterRow.h) with a number.
+ * Publishes the object model's beds and chambers (heat.bedHeaters, heat.chamberHeaters), named "Bed" or "Bed 1"…, as
+ * HeaterRows (see HeaterRow.h) with a number.
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -50,7 +51,7 @@ namespace UI::Xml
 		void clear() override;
 
 	  protected:
-		/** Listen for bed, chamber and heater changes */
+		/** Follow the heaters and their sensors' names */
 		void onInit() override;
 
 	  private:
