@@ -1,8 +1,8 @@
 {
   "component": "heightmap",
-  "title_tag": "control.heightmap_tab",
-  "description_tag": "widget.heightmap_desc",
-  "category_tag": "widget.category_motion",
+  "title_tag": "tr.control.heightmap_tab",
+  "description_tag": "tr.widget.heightmap_desc",
+  "category_tag": "tr.widget.category_motion",
   "icon": "heightmap.png",
   "slots": [
     "dashboard"

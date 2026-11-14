@@ -1,8 +1,8 @@
 {
   "component": "dashboard_gcode_button",
-  "title_tag": "widget.gcode_button",
-  "description_tag": "widget.gcode_button_desc",
-  "category_tag": "widget.category_commands",
+  "title_tag": "tr.widget.gcode_button",
+  "description_tag": "tr.widget.gcode_button_desc",
+  "category_tag": "tr.widget.category_commands",
   "icon": "send.png",
   "slots": [
     "dashboard"
@@ -21,14 +21,14 @@
     {
       "name": "label",
       "kind": "text",
-      "title_tag": "widget.setting_label",
+      "title_tag": "tr.widget.setting_label",
       "default": "Home",
       "max_length": 32
     },
     {
       "name": "gcode",
       "kind": "text",
-      "title_tag": "widget.setting_gcode",
+      "title_tag": "tr.widget.setting_gcode",
       "default": "G28",
       "max_length": 120
     }

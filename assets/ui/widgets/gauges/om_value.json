@@ -1,8 +1,8 @@
 {
   "component": "gauge_om_value",
-  "title_tag": "widget.om_value",
-  "description_tag": "widget.om_value_desc",
-  "category_tag": "widget.category_gauges",
+  "title_tag": "tr.widget.om_value",
+  "description_tag": "tr.widget.om_value_desc",
+  "category_tag": "tr.widget.category_gauges",
   "icon": "status.png",
   "slots": [
     "dashboard"
@@ -21,21 +21,21 @@
     {
       "name": "path",
       "kind": "text",
-      "title_tag": "widget.setting_path",
-      "default": "state.upTime|duration",
+      "title_tag": "tr.widget.setting_path",
+      "default": "om.state.upTime|duration",
       "max_length": 120
     },
     {
       "name": "label",
       "kind": "text",
-      "title_tag": "widget.setting_label",
+      "title_tag": "tr.widget.setting_label",
       "default": "Up time",
       "max_length": 40
     },
     {
       "name": "unit",
       "kind": "text",
-      "title_tag": "widget.setting_unit",
+      "title_tag": "tr.widget.setting_unit",
       "default": "",
       "max_length": 12
     }

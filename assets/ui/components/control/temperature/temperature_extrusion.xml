@@ -9,14 +9,14 @@
 		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
 		<lv_obj name="controls" width="100%" flex_grow="1" style_layout="grid"
 				style_grid_column_dsc_array="fr(1) fr(1)" style_grid_row_dsc_array="fr(3) fr(5) fr(5)">
-			<ds_button name="retract" translation_tag="extrude.retract" icon="retract.png"
+			<ds_button name="retract" translation_tag="tr.extrude.retract" icon="retract.png"
 					   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="retract_usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="extruder.retract"/>
 			</ds_button>
-			<ds_button name="extrude" translation_tag="extrude.extrude" icon="extrude.png"
+			<ds_button name="extrude" translation_tag="tr.extrude.extrude" icon="extrude.png"
 					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
 				<style name="action_btn"/>

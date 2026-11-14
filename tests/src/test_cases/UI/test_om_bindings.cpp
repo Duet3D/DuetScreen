@@ -114,13 +114,19 @@ TEST_F(TestOmBindings, ConvertersGiveWhatTheySay)
 	EXPECT_EQ(findConverter("duration")->toText(seconds, {}, ""), "1:02:05");
 	EXPECT_EQ(findConverter("duration")->toText(fraction, {}, ""), "0:00");
 	EXPECT_EQ(findConverter("bytes")->toText(size, {}, ""), "1.5 MB");
-	EXPECT_EQ(findConverter("tr")->toText(state, {}, "no.such.prefix"), "active") << "no translation gives the value";
+	EXPECT_EQ(findConverter("translate")->toText(state, {}, "tr.no.such.prefix"), "active")
+		<< "no translation gives the value";
+	EXPECT_EQ(findConverter("translate")->toText(state, {}, "temperature.status"), "active")
+		<< "a key not written tr.<key> gives the value";
+	EXPECT_EQ(findConverter("tr"), nullptr);
 	const OM::Node unnamed(OM::Node::Kind::string, "");
 	const OM::Node named(OM::Node::Kind::string, "Part cooling");
-	EXPECT_EQ(findConverter("default")->toText(named, *OM::Path::parse("fans[2].name"), "fine_tune.fan"),
+	EXPECT_EQ(findConverter("default")->toText(named, *OM::Path::parse("fans[2].name"), "tr.fine_tune.fan"),
 			  "Part cooling");
-	EXPECT_EQ(findConverter("default")->toText(unnamed, *OM::Path::parse("fans[2].name"), "fine_tune.fan"), "Fan 2");
-	EXPECT_EQ(findConverter("default")->toText(missing, *OM::Path::parse("fans[3].name"), "fine_tune.fan"), "Fan 3");
+	EXPECT_EQ(findConverter("default")->toText(unnamed, *OM::Path::parse("fans[2].name"), "tr.fine_tune.fan"), "Fan 2");
+	EXPECT_EQ(findConverter("default")->toText(missing, *OM::Path::parse("fans[3].name"), "tr.fine_tune.fan"), "Fan 3");
+	EXPECT_EQ(findConverter("default")->toText(missing, *OM::Path::parse("fans[3].name"), "fine_tune.fan"), "")
+		<< "a key not written tr.<key> gives nothing";
 	EXPECT_EQ(findConverter("nonsense"), nullptr);
 }
 

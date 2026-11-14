@@ -1,8 +1,8 @@
 {
   "component": "dashboard_current_tool",
-  "title_tag": "widget.current_tool",
-  "description_tag": "widget.current_tool_desc",
-  "category_tag": "widget.category_temperature",
+  "title_tag": "tr.widget.current_tool",
+  "description_tag": "tr.widget.current_tool_desc",
+  "category_tag": "tr.widget.category_temperature",
   "icon": "temperature.png",
   "slots": [
     "dashboard"

@@ -37,6 +37,15 @@ namespace UI::Xml
 		std::string_view argument;	  // What its argument is, for the UI API reference; empty if it takes none
 		int32_t (*toInteger)(const OM::Node& node, const OM::Path& path, std::string_view argument); // For integer
 		std::string (*toText)(const OM::Node& node, const OM::Path& path, std::string_view argument); // For text
+
+		/** What a converter's argument is, for the API lint to check */
+		enum class Argument
+		{
+			other,			  // Anything, or none
+			translationKey,	  // A translation key, `tr.<key>`
+			translationGroup, // The start of translation keys, `tr.<group>`, the value added after a '.'
+		};
+		Argument argumentKind = Argument::other; // What its argument is
 	};
 
 	/** The converter called `name` ("" for the default, the value as text), or nullptr if there is none */

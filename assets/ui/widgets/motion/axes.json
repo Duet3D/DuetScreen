@@ -1,8 +1,8 @@
 {
   "component": "dashboard_axes",
-  "title_tag": "widget.axes",
-  "description_tag": "widget.axes_desc",
-  "category_tag": "widget.category_motion",
+  "title_tag": "tr.widget.axes",
+  "description_tag": "tr.widget.axes_desc",
+  "category_tag": "tr.widget.category_motion",
   "icon": "move.png",
   "slots": [
     "dashboard"

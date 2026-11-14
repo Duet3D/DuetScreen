@@ -55,7 +55,7 @@
 			<bind_state_if_eq subject="y.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.jog" arg="Y-"/>
 		</ds_button>
-		<ds_button name="home_all" translation_tag="move.home_all" icon="home_axis.png"
+		<ds_button name="home_all" translation_tag="tr.move.home_all" icon="home_axis.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
@@ -90,7 +90,7 @@
 			<bind_state_if_eq subject="y.home_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="move.home" arg="Y"/>
 		</ds_button>
-		<ds_button name="disable_motors" translation_tag="move.disable_motors" icon="disable_motors.png"
+		<ds_button name="disable_motors" translation_tag="tr.move.disable_motors" icon="disable_motors.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>

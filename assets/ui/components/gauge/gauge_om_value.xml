@@ -22,7 +22,7 @@
 		<lv_obj name="readout" width="100%" flex_grow="1" flex_flow="row" style_flex_main_place="center"
 				style_flex_cross_place="end" style_flex_track_place="center" scrollable="false">
 			<style name="pad_zero"/>
-			<lv_label name="value" bind_text="om.${path}">
+			<lv_label name="value" bind_text="${path}">
 				<style name="widget_value"/>
 				<!-- The value is the widget's point, so it grows with the room there is -->
 				<bind_style_if name="widget_value_large" cond="widget.size_class eq 1"/>
@@ -32,5 +32,6 @@
 				<style name="widget_detail"/>
 			</lv_label>
 		</lv_obj>
+		<ds_bar name="bar" width="100%" height="10"></ds_bar>
 	</view>
 </component>

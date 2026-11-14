@@ -7,6 +7,7 @@
 #include "UI/Xml/Om/Converters.h"
 #include "UI/Xml/Om/OmName.h"
 #include "UI/Xml/Om/OmPath.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "XmlTree.h"
 #include "helix_xml.h"
 #include "src/xml/lv_xml_widget.h"
@@ -646,10 +647,7 @@ namespace UI::Xml::Api
 					checkStyle(value, element, context);
 					return;
 				case AttributeKind::Translation:
-					if (!m_translations.contains(value))
-					{
-						issue(context, element, fmt::format("no translation `{:s}`", value));
-					}
+					checkTranslation(value, element, context);
 					return;
 				case AttributeKind::Action:
 					checkAction(value, element, context);
@@ -710,9 +708,18 @@ namespace UI::Xml::Api
 				}
 				// An object model name: its converter must exist, and the names of its `{…}` indices too
 				const auto parsed = OmName::parse(name);
-				if (!findConverter(parsed->converter))
+				const Converter* converter = findConverter(parsed->converter);
+				if (!converter)
 				{
 					issue(context, element, fmt::format("`{:s}`: no converter `{:s}`", name, parsed->converter));
+				}
+				else if (converter->argumentKind == Converter::Argument::translationKey)
+				{
+					checkTranslation(parsed->argument, element, context);
+				}
+				else if (converter->argumentKind == Converter::Argument::translationGroup)
+				{
+					checkTranslationGroup(parsed->argument, element, context);
 				}
 				for (const auto& segment : OmTemplate::parse(parsed->path)->segments())
 				{
@@ -913,6 +920,41 @@ namespace UI::Xml::Api
 					{
 						checkSubject(name, element, context);
 					}
+				}
+			}
+
+			/** Report a translation key, written `tr.<key>`, that isn't written so or isn't in the translations */
+			void checkTranslation(const std::string& tag, const Element& element, const Context& context)
+			{
+				const auto key = Translations::key(tag);
+				if (!key)
+				{
+					issue(context,
+						  element,
+						  fmt::format("`{:s}`: translation keys are written `{:s}<key>`", tag, Translations::PREFIX));
+				}
+				else if (!m_translations.contains(*key))
+				{
+					issue(context, element, fmt::format("no translation `{:s}`", tag));
+				}
+			}
+
+			/** Report the start of translation keys, written `tr.<group>`, that isn't written so or starts none */
+			void checkTranslationGroup(const std::string& tag, const Element& element, const Context& context)
+			{
+				const auto key = Translations::key(tag);
+				if (!key)
+				{
+					issue(context,
+						  element,
+						  fmt::format("`{:s}`: translation keys are written `{:s}<key>`", tag, Translations::PREFIX));
+					return;
+				}
+				const std::string group = std::string(*key) + ".";
+				const auto it = m_translations.lower_bound(group);
+				if (it == m_translations.end() || !it->starts_with(group))
+				{
+					issue(context, element, fmt::format("no translations `{:s}.…`", tag));
 				}
 			}
 

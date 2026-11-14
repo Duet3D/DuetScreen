@@ -1,8 +1,8 @@
 {
   "component": "dashboard_macros_card",
-  "title_tag": "file.macros",
-  "description_tag": "widget.macros_desc",
-  "category_tag": "widget.category_jobs",
+  "title_tag": "tr.file.macros",
+  "description_tag": "tr.widget.macros_desc",
+  "category_tag": "tr.widget.category_jobs",
   "icon": "macros.png",
   "slots": [
     "dashboard"

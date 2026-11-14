@@ -6,6 +6,7 @@
 #include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/List.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -54,6 +55,26 @@ namespace UI::Xml
 				return fallback;
 			}
 			return it->get<std::string>();
+		}
+
+		/**
+		 * The translation key `json[key]` names (written `tr.<key>`, see Runtime/Translations.h), without its `tr.`;
+		 * empty if it isn't there. Sets `error` if it is there but isn't written so.
+		 */
+		std::string tagOf(const nlohmann::json& json, const char* key, std::string& error)
+		{
+			const std::string tag = stringOf(json, key, error);
+			if (tag.empty())
+			{
+				return tag;
+			}
+			const auto found = Translations::key(tag);
+			if (!found)
+			{
+				error = fmt::format("\"{:s}\" is a translation key, written {:s}<key>", key, Translations::PREFIX);
+				return {};
+			}
+			return std::string(*found);
 		}
 
 		/** Read a [width, height] size in pixels; sets `error` if it is there but isn't one */
@@ -112,7 +133,7 @@ namespace UI::Xml
 				return setting;
 			}
 			setting.title = stringOf(json, "title", error, setting.name);
-			setting.titleTag = stringOf(json, "title_tag", error);
+			setting.titleTag = tagOf(json, "title_tag", error);
 			setting.unit = stringOf(json, "unit", error);
 
 			switch (setting.kind)
@@ -138,7 +159,7 @@ namespace UI::Xml
 					}
 					const std::string value = SettingDef::toProp(option["value"]);
 					setting.options.push_back(
-						{value, stringOf(option, "title", error, value), stringOf(option, "title_tag", error)});
+						{value, stringOf(option, "title", error, value), tagOf(option, "title_tag", error)});
 				}
 				if (setting.options.empty())
 				{
@@ -319,11 +340,11 @@ namespace UI::Xml
 			widget.id = std::move(id);
 			widget.component = stringOf(json, "component", error, "widget_" + widget.id);
 			widget.title = stringOf(json, "title", error, widget.id);
-			widget.titleTag = stringOf(json, "title_tag", error);
+			widget.titleTag = tagOf(json, "title_tag", error);
 			widget.description = stringOf(json, "description", error);
-			widget.descriptionTag = stringOf(json, "description_tag", error);
+			widget.descriptionTag = tagOf(json, "description_tag", error);
 			widget.category = stringOf(json, "category", error);
-			widget.categoryTag = stringOf(json, "category_tag", error);
+			widget.categoryTag = tagOf(json, "category_tag", error);
 			widget.icon = stringOf(json, "icon", error);
 			if (!error.empty())
 			{

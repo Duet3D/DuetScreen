@@ -17,7 +17,7 @@
 						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 					<style name="bg_color_header"/>
 					<style name="list_header"/>
-					<lv_label name="title" translation_tag="temperature.tools" width="content" height="content">
+					<lv_label name="title" translation_tag="tr.temperature.tools" width="content" height="content">
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
@@ -31,7 +31,7 @@
 						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 					<style name="bg_color_header"/>
 					<style name="list_header"/>
-					<lv_label name="title" translation_tag="temperature.beds" width="content" height="content">
+					<lv_label name="title" translation_tag="tr.temperature.beds" width="content" height="content">
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
@@ -45,7 +45,7 @@
 						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 					<style name="bg_color_header"/>
 					<style name="list_header"/>
-					<lv_label name="title" translation_tag="temperature.chambers" width="content" height="content">
+					<lv_label name="title" translation_tag="tr.temperature.chambers" width="content" height="content">
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>

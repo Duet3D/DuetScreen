@@ -1,8 +1,8 @@
 {
   "component": "gauge_arc",
-  "title_tag": "widget.arc_gauge",
-  "description_tag": "widget.arc_gauge_desc",
-  "category_tag": "widget.category_gauges",
+  "title_tag": "tr.widget.arc_gauge",
+  "description_tag": "tr.widget.arc_gauge_desc",
+  "category_tag": "tr.widget.category_gauges",
   "icon": "temperature.png",
   "slots": [
     "dashboard"
@@ -25,7 +25,7 @@
       "key": "id",
       "label": "name",
       "default": "tool.0.0",
-      "title_tag": "widget.setting_source"
+      "title_tag": "tr.widget.setting_source"
     }
   ]
 }

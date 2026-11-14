@@ -6,6 +6,7 @@
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -42,7 +43,7 @@ namespace UI::Xml
 				 "changes without echoing the data back to the printer. Also raises `value_changed` as it is "
 				 "dragged.",
 			 .example =
-				 R"(<ds_slider label_tag="settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
+				 R"(<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
 		   numberpad="true" send="change" width="100%">
 	<action trigger="value_confirmed" name="settings.brightness"/>
 </ds_slider>)",
@@ -152,7 +153,7 @@ namespace UI::Xml
 		}
 		if (const char* tag = lv_xml_get_value_of(attrs, "label_tag"))
 		{
-			slider.setLabel(_(tag));
+			slider.setLabel(Xml::Translations::translate(tag));
 		}
 		else if (const char* label = lv_xml_get_value_of(attrs, "label"))
 		{

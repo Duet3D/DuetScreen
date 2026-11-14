@@ -56,7 +56,7 @@ namespace UI::Xml
 	{
 		std::string value{};	  // The value, as XML writes it
 		std::string title{};	  // Shown name, if there is no translation
-		std::string titleTag{}; // Translation key of the shown name; empty for none
+		std::string titleTag{}; // Translation key (as `_()` takes it, without `tr.`) of the shown name; empty for none
 	};
 
 	/** A widget setting: a prop of the widget's component that the user chooses */
@@ -65,7 +65,7 @@ namespace UI::Xml
 		std::string name{};		   // The prop it sets
 		SettingKind kind{};		   // How it is chosen
 		std::string title{};		   // Shown name, if there is no translation
-		std::string titleTag{};	   // Translation key of the shown name; empty for none
+		std::string titleTag{};	   // Translation key (as `_()` takes it, without `tr.`) of the shown name; empty for none
 		nlohmann::json fallback{};   // The value until the user chooses one ("default" in the widget file)
 		int32_t min = std::numeric_limits<int32_t>::min(); // Int: smallest value
 		int32_t max = std::numeric_limits<int32_t>::max(); // Int: largest value
@@ -105,7 +105,7 @@ namespace UI::Xml
 		std::string bundle{};				   // Id of the bundle it came from
 		std::filesystem::path source{};	   // The widget file
 		std::string title{};				   // Shown name, if there is no translation
-		std::string titleTag{};			   // Translation key of the shown name; empty for none
+		std::string titleTag{};			   // Translation key (as `_()` takes it, without `tr.`) of the shown name; empty for none
 		std::string description{};		   // What it shows, if there is no translation
 		std::string descriptionTag{};		   // Translation key of the description; empty for none
 		std::string category{};				   // Its group in the widget pool, if there is no translation

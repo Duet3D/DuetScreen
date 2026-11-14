@@ -1,8 +1,8 @@
 {
   "component": "object_cancel",
-  "title_tag": "control.object_cancel_tab",
-  "description_tag": "widget.object_cancel_desc",
-  "category_tag": "widget.category_jobs",
+  "title_tag": "tr.control.object_cancel_tab",
+  "description_tag": "tr.widget.object_cancel_desc",
+  "category_tag": "tr.widget.category_jobs",
   "icon": "cancel.png",
   "slots": [
     "dashboard"

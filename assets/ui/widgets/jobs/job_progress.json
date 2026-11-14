@@ -1,8 +1,8 @@
 {
   "component": "dashboard_job_progress",
-  "title_tag": "widget.job_progress",
-  "description_tag": "widget.job_progress_desc",
-  "category_tag": "widget.category_jobs",
+  "title_tag": "tr.widget.job_progress",
+  "description_tag": "tr.widget.job_progress_desc",
+  "category_tag": "tr.widget.category_jobs",
   "icon": "status.png",
   "slots": [
     "dashboard"

@@ -243,7 +243,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	<view extends="lv_obj">
 		<lv_label bind_text="no_such_subject"/>
 		<style name="no_such_style"/>
-		<ds_button translation_tag="no.such.key">
+		<ds_button translation_tag="tr.no.such.key">
 			<action name="no.such_action"/>
 			<action name="fans.set_speed" trigger="clickd"/>
 		</ds_button>
@@ -255,6 +255,8 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<ds_list list="om.fans" key="numbr" value="2" item="lint_plain"/>
 		<ds_list list="tools" key="heaters" value="2" item="lint_plain"/>
 		<ds_list list="om.fans" key="index" value="2" item="lint_plain"/>
+		<lv_label translation_tag="fan.max"/>
+		<lv_label bind_text="om.fans[0].name|default:fine_tune.fan"/>
 	</view>
 </component>)";
 
@@ -314,7 +316,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_fan.xml:5: no subject `nothing` (in lint_screen › lint_fan)",
 		"lint_screen.xml:3: no subject `no_such_subject` (in lint_screen)",
 		"lint_screen.xml:4: no style `no_such_style` (in lint_screen)",
-		"lint_screen.xml:5: no translation `no.such.key` (in lint_screen)",
+		"lint_screen.xml:5: no translation `tr.no.such.key` (in lint_screen)",
 		"lint_screen.xml:6: no action `no.such_action` (in lint_screen)",
 		"lint_screen.xml:7: no trigger `clickd` (in lint_screen)",
 		"lint_screen.xml:11: <no_such_widget> is no widget, component or binding (in lint_screen)",
@@ -322,6 +324,8 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:13: no subject `no_such_operand` (in lint_screen)",
 		"lint_screen.xml:14: rows of `om.fans` have no field `numbr` (in lint_screen)",
 		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
+		"lint_screen.xml:17: `fan.max`: translation keys are written `tr.<key>` (in lint_screen)",
+		"lint_screen.xml:18: `fine_tune.fan`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",
 	};
 	EXPECT_EQ(found, expected) << fmt::format("{}", fmt::join(found, "\n"));
@@ -363,7 +367,7 @@ TEST_F(XmlUiApi, LintChecksObjectModelNames)
 	<view extends="lv_obj">
 		<lv_label bind_text="value|int"/>
 		<lv_label bind_text="active[{index}]"/>
-		<lv_label bind_text="om.heat.heaters[{value}].state|tr:temperature.status"/>
+		<lv_label bind_text="om.heat.heaters[{value}].state|translate:tr.temperature.status"/>
 	</view>
 </component>)";
 	std::ofstream(userDir / "test" / "components" / "lint_om_heater.xml") << R"(<component>

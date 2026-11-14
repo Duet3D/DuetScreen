@@ -5,6 +5,7 @@
 #include "DsDragButton.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -42,8 +43,8 @@ namespace UI::Xml
 			 .description = "A button that must be dragged, not just tapped, to act, such as the E-stop. When let go "
 							"it raises `value_confirmed` with how far it was dragged, from 0 (a tap) to 1 (all the "
 							"way, when it shows its `user_1` state).",
-			 .example = R"(<ds_drag_button name="estop" translation_tag="estop.label" icon="estop.png"
-				 hint_tag="estop.prompt" width="80" height="80">
+			 .example = R"(<ds_drag_button name="estop" translation_tag="tr.estop.label" icon="estop.png"
+				 hint_tag="tr.estop.prompt" width="80" height="80">
 	<style name="estop"/>
 	<action trigger="value_confirmed" name="estop.dragged"/>
 </ds_drag_button>)",
@@ -59,7 +60,7 @@ namespace UI::Xml
 	void* DsDragButton::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
 	{
 		const char* tag = lv_xml_get_value_of(attrs, "translation_tag");
-		const std::string text = tag ? _(tag) : attrOr(attrs, "text", "");
+		const std::string text = tag ? Xml::Translations::translate(tag) : attrOr(attrs, "text", "");
 		auto* button = new DsDragButton(attrOr(attrs, "name", "drag_button"), parentOf(state), text);
 		deleteWith(button->getRootPtr(), button);
 		return button->getRootPtr();
@@ -78,7 +79,7 @@ namespace UI::Xml
 		const char* hint = lv_xml_get_value_of(attrs, "hint");
 		if (hintTag != nullptr || hint != nullptr)
 		{
-			button.m_hint.setText(hintTag ? _(hintTag) : std::string(hint));
+			button.m_hint.setText(hintTag ? Xml::Translations::translate(hintTag) : std::string(hint));
 			button.m_hint.show();
 			button.m_hasHint = true;
 		}

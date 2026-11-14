@@ -5,6 +5,7 @@
 #include "DsTabs.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
@@ -47,10 +48,10 @@ namespace UI::Xml
 					  .description = "A row of tab buttons over the selected tab's content. Each tab is a "
 									 "`<ds_tabs-tab>` inside it; the first starts selected.",
 					  .example = R"(<ds_tabs width="100%" height="200">
-	<ds_tabs-tab name="macros" title_tag="file.macros">
+	<ds_tabs-tab name="macros" title_tag="tr.file.macros">
 		<lv_label text="The first tab's content"/>
 	</ds_tabs-tab>
-	<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
+	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="machine.job_active">
 		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
 </ds_tabs>)"},
@@ -98,7 +99,7 @@ namespace UI::Xml
 		std::string title;
 		if (const char* tag = lv_xml_get_value_of(attrs, "title_tag"))
 		{
-			title = _(tag);
+			title = Xml::Translations::translate(tag);
 		}
 		else
 		{

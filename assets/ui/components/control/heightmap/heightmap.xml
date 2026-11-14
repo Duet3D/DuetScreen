@@ -21,13 +21,13 @@
 				style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 			<style name="card"/>
 			<!-- A width, though flex_grow sets it, so the text wraps rather than widening the button -->
-			<ds_button name="true_bed_level" translation_tag="heightmap.true_bed_level" width="0" height="100%"
+			<ds_button name="true_bed_level" translation_tag="tr.heightmap.true_bed_level" width="0" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="levelling_usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="gcode" arg="G32"/>
 			</ds_button>
-			<ds_button name="mesh_bed_level" translation_tag="heightmap.mesh_bed_level" width="0" height="100%"
+			<ds_button name="mesh_bed_level" translation_tag="tr.heightmap.mesh_bed_level" width="0" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_state_if_eq subject="levelling_usable" state="disabled" ref_value="0"/>
@@ -43,7 +43,7 @@
 					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="bg_color_header"/>
 				<style name="list_header"/>
-				<lv_label name="title" translation_tag="heightmap.list_header" width="content" height="content">
+				<lv_label name="title" translation_tag="tr.heightmap.list_header" width="content" height="content">
 					<style name="list_title"/>
 				</lv_label>
 			</lv_obj>
@@ -55,14 +55,14 @@
 				style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
 			<style name="card"/>
-			<lv_label name="label" translation_tag="heightmap.render_mode"/>
+			<lv_label name="label" translation_tag="tr.heightmap.render_mode"/>
 			<lv_obj name="btns" width="100%" height="content" flex_flow="row"
 					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start">
-				<ds_button name="heightmap_fixed" translation_tag="heightmap.fixed" height="content" flex_grow="1">
+				<ds_button name="heightmap_fixed" translation_tag="tr.heightmap.fixed" height="content" flex_grow="1">
 					<bind_state_if_eq subject="mode" state="checked" ref_value="0"/>
 					<action trigger="clicked" name="heightmap.mode" arg="fixed"/>
 				</ds_button>
-				<ds_button name="heightmap_auto" translation_tag="heightmap.auto" height="content" flex_grow="1">
+				<ds_button name="heightmap_auto" translation_tag="tr.heightmap.auto" height="content" flex_grow="1">
 					<bind_state_if_eq subject="mode" state="checked" ref_value="1"/>
 					<action trigger="clicked" name="heightmap.mode" arg="auto"/>
 				</ds_button>

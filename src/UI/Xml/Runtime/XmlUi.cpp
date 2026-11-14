@@ -102,6 +102,7 @@ namespace UI::Xml
 
 		s_paths = paths;
 		lv_xml_init();
+		Translations::init();
 		Globals::init();
 		ThemeStyles::registerAll();
 		Translations::sync();

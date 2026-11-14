@@ -3,6 +3,7 @@
  */
 
 #include "Converters.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
 #include <algorithm>
 #include <array>
@@ -157,7 +158,12 @@ namespace UI::Xml
 			{
 				return std::string(node.text());
 			}
-			const std::string key(argument);
+			const auto tag = Translations::key(argument);
+			if (!tag)
+			{
+				return "";
+			}
+			const std::string key(*tag);
 			const std::string* translation = i18n::find(key);
 			if (translation == nullptr || *translation == key)
 			{
@@ -167,14 +173,19 @@ namespace UI::Xml
 			return number ? fmt::format(fmt::runtime(*translation), *number) : *translation;
 		}
 
-		/** The translation of "<argument>.<value>", or the value if there is none */
+		/** The translation of "<argument>.<value>" (the argument written `tr.<key>`), or the value if there is none */
 		std::string translated(const OM::Node& node, const OM::Path&, std::string_view argument)
 		{
 			if (!node.isValue())
 			{
 				return "";
 			}
-			const std::string key = fmt::format("{:s}.{:s}", argument, node.text());
+			const auto prefix = Translations::key(argument);
+			if (!prefix)
+			{
+				return std::string(node.text());
+			}
+			const std::string key = fmt::format("{:s}.{:s}", *prefix, node.text());
 			const std::string* translation = i18n::find(key);
 			// translate() files a missing key as its own translation; that isn't one
 			return translation != nullptr && *translation != key ? *translation : std::string(node.text());
@@ -246,20 +257,21 @@ namespace UI::Xml
 					  .toText = bytes},
 			Converter{.name = "default",
 					  .type = Converter::Type::text,
-					  .description =
-						  "The value, or if it is empty, the translation of the argument with the item's "
-						  "number (the last index in the path): `name|default:fine_tune.fan` gives \"Fan 2\" "
-						  "for fan 2 if it has no name",
-					  .argument = "The translation key of the default; `{:d}` in it is the number",
+					  .description = "The value, or if it is empty, the translation of the argument with the item's "
+									 "number (the last index in the path): `name|default:tr.fine_tune.fan` gives "
+									 "\"Fan 2\" for fan 2 if it has no name",
+					  .argument = "The translation key of the default, `tr.<key>`; `{:d}` in it is the number",
 					  .toInteger = nullptr,
-					  .toText = orDefault},
-			Converter{.name = "tr",
+					  .toText = orDefault,
+					  .argumentKind = Converter::Argument::translationKey},
+			Converter{.name = "translate",
 					  .type = Converter::Type::text,
 					  .description = "The translation of `<argument>.<value>`, or the value if there is none, e.g. "
-									 "`state|tr:heater.state`",
-					  .argument = "The translation key the value is added to",
+									 "`state|translate:tr.heater.state`",
+					  .argument = "The translation key the value is added to, `tr.<key>`",
 					  .toInteger = nullptr,
-					  .toText = translated},
+					  .toText = translated,
+					  .argumentKind = Converter::Argument::translationGroup},
 		};
 	} // namespace
 

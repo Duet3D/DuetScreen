@@ -6,6 +6,7 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
 
@@ -119,7 +120,7 @@ namespace UI::Xml
 		}
 		if (const char* tag = lv_xml_get_value_of(attrs, "placeholder_tag"))
 		{
-			lv_textarea_set_placeholder_text(root, _(tag).c_str());
+			lv_textarea_set_placeholder_text(root, Xml::Translations::translate(tag).c_str());
 		}
 		else if (const char* placeholder = lv_xml_get_value_of(attrs, "placeholder"))
 		{

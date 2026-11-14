@@ -1,8 +1,8 @@
 {
   "component": "dashboard_babystep",
-  "title_tag": "widget.babystep",
-  "description_tag": "widget.babystep_desc",
-  "category_tag": "widget.category_motion",
+  "title_tag": "tr.widget.babystep",
+  "description_tag": "tr.widget.babystep_desc",
+  "category_tag": "tr.widget.category_motion",
   "icon": "babystep.png",
   "slots": [
     "dashboard"

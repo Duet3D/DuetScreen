@@ -6,6 +6,7 @@
 #include "UI/Lvgl/LvAnim.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
 #include "src/xml/lv_xml_base_types.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -25,7 +26,7 @@ namespace UI::Xml
 			{.name = "ds_button",
 			 .extends = "lv_obj",
 			 .description = "A button showing text, an icon or both",
-			 .example = R"(<ds_button translation_tag="fan.max" icon="fan.png">
+			 .example = R"(<ds_button translation_tag="tr.fan.max" icon="fan.png">
 	<action trigger="clicked" name="fans.set_speed" arg="100"/>
 </ds_button>)",
 			 .attributes =
@@ -51,7 +52,7 @@ namespace UI::Xml
 	void* DsButton::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
 	{
 		const char* tag = lv_xml_get_value_of(attrs, "translation_tag");
-		const std::string text = tag ? _(tag) : attrOr(attrs, "text", "");
+		const std::string text = tag ? Xml::Translations::translate(tag) : attrOr(attrs, "text", "");
 		auto* button = new DsButton(attrOr(attrs, "name", "button"), parentOf(state), text);
 		deleteWith(button->getRootPtr(), button);
 		return button->getRootPtr();
@@ -168,6 +169,6 @@ namespace UI::Xml
 	void DsButton::languageChangedCb(lv_event_t* e)
 	{
 		auto* button = static_cast<DsButton*>(lv_event_get_user_data(e));
-		button->setText(_(button->m_translationTag));
+		button->setText(Xml::Translations::translate(button->m_translationTag));
 	}
 } // namespace UI::Xml

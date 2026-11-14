@@ -24,7 +24,7 @@
 			<ds_bar name="progress" min="0" max="100" label_format="{}%" bind_value="job.progress" height="content"
 					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					style_grid_cell_row_pos="3" style_grid_cell_y_align="end"/>
-			<lv_label name="printed_tag" translation_tag="status.print_finished" width="100%" height="content"
+			<lv_label name="printed_tag" translation_tag="tr.status.print_finished" width="100%" height="content"
 					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 				<bind_flag_if_eq subject="job.finished" flag="hidden" ref_value="0"/>
@@ -50,7 +50,7 @@
 						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 					<style name="bg_color_header"/>
 					<style name="list_header"/>
-					<lv_label name="title" translation_tag="status.positions" width="content" height="content">
+					<lv_label name="title" translation_tag="tr.status.positions" width="content" height="content">
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
@@ -63,7 +63,7 @@
 					style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content"
 					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 					style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
-				<lv_label name="speed_header" translation_tag="status.speed_header"
+				<lv_label name="speed_header" translation_tag="tr.status.speed_header"
 						  style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 					<style name="bg_color_header"/>
@@ -96,7 +96,7 @@
 					style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content"
 					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 					style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
-				<lv_label name="flow_header" translation_tag="status.flow_header"
+				<lv_label name="flow_header" translation_tag="tr.status.flow_header"
 						  style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 					<style name="bg_color_header"/>
@@ -121,7 +121,7 @@
 			<lv_obj name="time_cont" height="content" flex_flow="column"
 					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 					style_grid_cell_row_pos="3" style_grid_cell_y_align="end">
-				<lv_label name="time_header" translation_tag="status.time_header" width="100%" height="content"
+				<lv_label name="time_header" translation_tag="tr.status.time_header" width="100%" height="content"
 						  style_min_width="content">
 					<style name="bg_color_header"/>
 					<style name="pad_normal"/>
@@ -134,7 +134,7 @@
 			<lv_obj name="babystep_cont" width="content" height="content" flex_flow="column"
 					style_grid_cell_column_pos="1" style_grid_cell_x_align="end"
 					style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
-				<lv_label name="babystep_header" translation_tag="status.babystep_header" width="100%"
+				<lv_label name="babystep_header" translation_tag="tr.status.babystep_header" width="100%"
 						  height="content" style_min_width="content">
 					<style name="bg_color_header"/>
 					<style name="pad_normal"/>
@@ -150,28 +150,28 @@
 		<!-- Job controls: each is hidden (0), disabled (1) or usable (2) -->
 		<lv_obj name="footer" width="100%" height="15%" style_min_height="content" flex_flow="row">
 			<style name="card"/>
-			<ds_button name="pause" translation_tag="status.pause" icon="pause.png" height="100%"
+			<ds_button name="pause" translation_tag="tr.status.pause" icon="pause.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="job.pause_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.pause_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.pause"/>
 			</ds_button>
-			<ds_button name="resume" translation_tag="status.resume" icon="resume.png" height="100%"
+			<ds_button name="resume" translation_tag="tr.status.resume" icon="resume.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="job.resume_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.resume_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.resume"/>
 			</ds_button>
-			<ds_button name="print_again" translation_tag="status.print_again" icon="print_again.png" height="100%"
+			<ds_button name="print_again" translation_tag="tr.status.print_again" icon="print_again.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="job.print_again_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.print_again_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="job.print_again"/>
 			</ds_button>
-			<ds_button name="cancel" translation_tag="status.cancel" icon="cancel.png" height="100%"
+			<ds_button name="cancel" translation_tag="tr.status.cancel" icon="cancel.png" height="100%"
 					   style_min_height="content" flex_grow="1">
 				<bind_flag_if_eq subject="job.cancel_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="job.cancel_control" state="disabled" ref_value="2"/>

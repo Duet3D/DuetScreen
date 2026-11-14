@@ -10,26 +10,26 @@
 		  style_grid_row_dsc_array="content content content content content content content content content content content content content content">
 		<style name="card"/>
 
-		<lv_label name="row_label_0" translation_tag="settings.firmware_version"
+		<lv_label name="row_label_0" translation_tag="tr.settings.firmware_version"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
 		<lv_label name="build_time" bind_text="firmware"
 				  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				  style_grid_cell_row_pos="0" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_1" translation_tag="settings.buildroot_version"
+		<lv_label name="row_label_1" translation_tag="tr.settings.buildroot_version"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 		<lv_label name="buildroot_version" bind_text="buildroot"
 				  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				  style_grid_cell_row_pos="1" style_grid_cell_y_align="center"/>
 
-		<lv_label name="row_label_2" translation_tag="settings.language"
+		<lv_label name="row_label_2" translation_tag="tr.settings.language"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="language" options="languages" selected="language" action="settings.language"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="2" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_3" translation_tag="settings.keyboard_layout"
+		<lv_label name="row_label_3" translation_tag="tr.settings.keyboard_layout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="keyboard_layout" options="keyboard_layouts" selected="keyboard_layout"
@@ -37,26 +37,26 @@
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 
-		<lv_label name="row_label_4" translation_tag="settings.brightness"
+		<lv_label name="row_label_4" translation_tag="tr.settings.brightness"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="4" style_grid_cell_y_align="center"/>
-		<ds_slider name="brightness" label_tag="settings.brightness" label_shown="false" numberpad="true" min="0" max="100"
+		<ds_slider name="brightness" label_tag="tr.settings.brightness" label_shown="false" numberpad="true" min="0" max="100"
 				   bind_value="brightness" height="content" send="change"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
 			<action trigger="value_confirmed" name="settings.brightness"/>
 		</ds_slider>
-		<lv_label name="row_label_5" translation_tag="settings.screensaver_timeout"
+		<lv_label name="row_label_5" translation_tag="tr.settings.screensaver_timeout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="5" style_grid_cell_y_align="center"/>
-		<ds_slider name="screensaver_timeout" label_tag="settings.screensaver_timeout" label_shown="false"
+		<ds_slider name="screensaver_timeout" label_tag="tr.settings.screensaver_timeout" label_shown="false"
 				   numberpad="true" min="0" max="300" bind_value="screensaver_timeout" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="5" style_grid_cell_y_align="center">
 			<action trigger="value_confirmed" name="settings.screensaver_timeout"/>
 		</ds_slider>
 
-		<lv_label name="row_label_6" translation_tag="settings.show_confirmation_dialogs"
+		<lv_label name="row_label_6" translation_tag="tr.settings.show_confirmation_dialogs"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="6" style_grid_cell_y_align="center"/>
 		<ds_toggle name="show_confirmation_dialogs"
@@ -65,7 +65,7 @@
 			<bind_state_if_eq subject="confirmations" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="settings.confirmations"/>
 		</ds_toggle>
-		<lv_label name="row_label_7" translation_tag="settings.move_machine_position_mode"
+		<lv_label name="row_label_7" translation_tag="tr.settings.move_machine_position_mode"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="7" style_grid_cell_y_align="center"/>
 		<ds_toggle name="move_machine_position_mode"
@@ -74,7 +74,7 @@
 			<bind_state_if_eq subject="machine_position_mode" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="settings.machine_position_mode"/>
 		</ds_toggle>
-		<lv_label name="row_label_8" translation_tag="settings.job_progress_source"
+		<lv_label name="row_label_8" translation_tag="tr.settings.job_progress_source"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="job_progress_source" options="progress_sources" selected="progress_source"
@@ -83,12 +83,12 @@
 						  style_grid_cell_row_pos="8" style_grid_cell_y_align="center"/>
 
 		<!-- Notifications -->
-		<lv_label name="row_label_9" translation_tag="settings.headers.notifications"
+		<lv_label name="row_label_9" translation_tag="tr.settings.headers.notifications"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="start"
 				  style_grid_cell_row_pos="9" style_grid_cell_y_align="center">
 			<style name="text_emphasis"/>
 		</lv_label>
-		<lv_label name="row_label_10" translation_tag="settings.display_connected_message"
+		<lv_label name="row_label_10" translation_tag="tr.settings.display_connected_message"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="10" style_grid_cell_y_align="center"/>
 		<ds_toggle name="display_connected_message"
@@ -97,23 +97,23 @@
 			<bind_state_if_eq subject="connected_message" state="checked" ref_value="1"/>
 			<action trigger="value_changed" name="settings.connected_message"/>
 		</ds_toggle>
-		<lv_label name="row_label_11" translation_tag="settings.notification_level"
+		<lv_label name="row_label_11" translation_tag="tr.settings.notification_level"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
 		<settings_dropdown name="notification_level" options="notification_levels" selected="notification_level"
 						  action="settings.notification_level"
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="11" style_grid_cell_y_align="center"/>
-		<lv_label name="row_label_12" translation_tag="settings.notification_timeout"
+		<lv_label name="row_label_12" translation_tag="tr.settings.notification_timeout"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="12" style_grid_cell_y_align="center"/>
-		<ds_slider name="info_timeout" label_tag="settings.notification_timeout" label_shown="false"
+		<ds_slider name="info_timeout" label_tag="tr.settings.notification_timeout" label_shown="false"
 				   numberpad="true" min="0" max="5000" bind_value="notification_timeout" height="content" out_of_range="upper"
 				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="12" style_grid_cell_y_align="center">
 			<action trigger="value_confirmed" name="settings.notification_timeout"/>
 		</ds_slider>
-		<lv_label name="row_label_13" translation_tag="settings.notification_auto_close_error"
+		<lv_label name="row_label_13" translation_tag="tr.settings.notification_auto_close_error"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
 				  style_grid_cell_row_pos="13" style_grid_cell_y_align="center"/>
 		<ds_toggle name="notification_auto_close_error"

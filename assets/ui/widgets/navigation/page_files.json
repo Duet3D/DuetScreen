@@ -1,8 +1,8 @@
 {
   "component": "sidebar_page_button",
-  "title_tag": "side_bar.files",
-  "description_tag": "widget.page_files_desc",
-  "category_tag": "widget.category_navigation",
+  "title_tag": "tr.side_bar.files",
+  "description_tag": "tr.widget.page_files_desc",
+  "category_tag": "tr.widget.category_navigation",
   "icon": "macros.png",
   "slots": [
     "sidebar"
@@ -10,7 +10,7 @@
   "props": {
     "page": "files",
     "action": "nav.open",
-    "label": "side_bar.files",
+    "label_tag": "tr.side_bar.files",
     "icon": "macros.png"
   }
 }

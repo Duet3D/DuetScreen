@@ -1,8 +1,8 @@
 {
   "component": "gauge_bar",
-  "title_tag": "widget.bar_gauge",
-  "description_tag": "widget.bar_gauge_desc",
-  "category_tag": "widget.category_gauges",
+  "title_tag": "tr.widget.bar_gauge",
+  "description_tag": "tr.widget.bar_gauge_desc",
+  "category_tag": "tr.widget.category_gauges",
   "icon": "fine_tune.png",
   "slots": [
     "dashboard"
@@ -25,7 +25,7 @@
       "key": "id",
       "label": "name",
       "default": "bed.0",
-      "title_tag": "widget.setting_source"
+      "title_tag": "tr.widget.setting_source"
     }
   ]
 }

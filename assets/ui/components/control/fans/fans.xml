@@ -15,7 +15,7 @@
 					flex_flow="row" style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="bg_color_header"/>
 				<style name="list_header"/>
-				<lv_label name="title" width="content" height="content" translation_tag="fan.title">
+				<lv_label name="title" width="content" height="content" translation_tag="tr.fan.title">
 					<style name="list_title"/>
 				</lv_label>
 			</lv_obj>

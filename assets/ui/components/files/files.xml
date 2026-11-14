@@ -8,10 +8,10 @@
 		<ds_tabs name="tabs" width="100%" height="100%">
 			<style name="bg_dark"/>
 
-			<ds_tabs-tab name="macros" title_tag="file.macros">
+			<ds_tabs-tab name="macros" title_tag="tr.file.macros">
 				<ds_view name="files_macros" view="file_browser" presenter="files_macros" shown="true"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
+			<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="machine.job_active">
 				<ds_view name="files_jobs" view="file_browser" presenter="files_jobs" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>

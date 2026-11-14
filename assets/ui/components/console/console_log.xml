@@ -8,7 +8,7 @@
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false" flex_flow="column">
 		<style name="card"/>
 		<action trigger="clicked" name="nav.open" arg="console"/>
-		<lv_label name="title" translation_tag="side_bar.console" width="100%" long_mode="dots" clickable="false">
+		<lv_label name="title" translation_tag="tr.side_bar.console" width="100%" long_mode="dots" clickable="false">
 			<style name="widget_title"/>
 		</lv_label>
 		<ds_list name="output" list="console.lines" item="console_line" follow_end="true" width="100%" flex_grow="1"

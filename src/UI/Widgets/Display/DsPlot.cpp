@@ -7,6 +7,7 @@
 #include "UI/Widgets/Display/DsPlotRect.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
 #include "src/xml/lv_xml_style.h"
 #include "src/xml/parsers/lv_xml_obj_parser.h"
@@ -43,7 +44,7 @@ namespace UI::Xml
 							"widgets placed by X/Y position. `<ds_plot_layer>`s written inside it are kept over its "
 							"drawing area, and `<ds_plot_rect>`s inside a layer are kept at their X/Y bounds.",
 			 .example =
-				 R"(<ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
+				 R"(<ds_plot title_tag="tr.object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
 		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
 		<ds_list list="objects" item="object_cancel_outline" width="100%" height="100%"/>
@@ -118,7 +119,7 @@ namespace UI::Xml
 
 		if (const char* tag = lv_xml_get_value_of(attrs, "title_tag"))
 		{
-			plot.setTitle(_(tag));
+			plot.setTitle(Xml::Translations::translate(tag));
 		}
 		else if (const char* title = lv_xml_get_value_of(attrs, "title"))
 		{

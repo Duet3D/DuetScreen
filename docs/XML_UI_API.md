@@ -46,8 +46,8 @@ Each row of an object model list:
 | `\|eq` | int | The value compared with | 1 if the value is the argument, else 0, e.g. `state\|eq:fault` |
 | `\|duration` | text |  | Seconds as h:mm:ss, or m:ss under an hour |
 | `\|bytes` | text |  | A number of bytes as B, KB, MB or GB |
-| `\|default` | text | The translation key of the default; `{:d}` in it is the number | The value, or if it is empty, the translation of the argument with the item's number (the last index in the path): `name\|default:fine_tune.fan` gives "Fan 2" for fan 2 if it has no name |
-| `\|tr` | text | The translation key the value is added to | The translation of `<argument>.<value>`, or the value if there is none, e.g. `state\|tr:heater.state` |
+| `\|default` | text | The translation key of the default, `tr.<key>`; `{:d}` in it is the number | The value, or if it is empty, the translation of the argument with the item's number (the last index in the path): `name\|default:tr.fine_tune.fan` gives "Fan 2" for fan 2 if it has no name |
+| `\|translate` | text | The translation key the value is added to, `tr.<key>` | The translation of `<argument>.<value>`, or the value if there is none, e.g. `state\|translate:tr.heater.state` |
 
 ## Global data
 
@@ -1231,7 +1231,7 @@ A button showing text, an icon or both
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_button translation_tag="fan.max" icon="fan.png">
+<ds_button translation_tag="tr.fan.max" icon="fan.png">
 	<action trigger="clicked" name="fans.set_speed" arg="100"/>
 </ds_button>
 ```
@@ -1256,8 +1256,8 @@ A button that must be dragged, not just tapped, to act, such as the E-stop. When
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_drag_button name="estop" translation_tag="estop.label" icon="estop.png"
-				 hint_tag="estop.prompt" width="80" height="80">
+<ds_drag_button name="estop" translation_tag="tr.estop.label" icon="estop.png"
+				 hint_tag="tr.estop.prompt" width="80" height="80">
 	<style name="estop"/>
 	<action trigger="value_confirmed" name="estop.dragged"/>
 </ds_drag_button>
@@ -1488,7 +1488,7 @@ An X/Y area with scales and a grid, such as the bed with its objects, whose cont
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_plot title_tag="object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
+<ds_plot title_tag="tr.object_cancel.current_object_prefix" title_style="text_emphasis" bind_detail="current"
 		 bind_x_min="x_min" bind_x_max="x_max" bind_y_min="y_min" bind_y_max="y_max" width="400" height="300">
 	<ds_plot_layer name="layer">
 		<ds_list list="objects" item="object_cancel_outline" width="100%" height="100%"/>
@@ -1566,7 +1566,7 @@ A slider with a label, its value and -/+ buttons, and optionally a number pad. R
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_slider label_tag="settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
+<ds_slider label_tag="tr.settings.brightness" min="0" max="100" increment="1" decimals="0" bind_value="brightness"
 		   numberpad="true" send="change" width="100%">
 	<action trigger="value_confirmed" name="settings.brightness"/>
 </ds_slider>
@@ -1601,10 +1601,10 @@ Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_tabs width="100%" height="200">
-	<ds_tabs-tab name="macros" title_tag="file.macros">
+	<ds_tabs-tab name="macros" title_tag="tr.file.macros">
 		<lv_label text="The first tab's content"/>
 	</ds_tabs-tab>
-	<ds_tabs-tab name="jobs" title_tag="file.jobs" bind_disabled="machine.job_active">
+	<ds_tabs-tab name="jobs" title_tag="tr.file.jobs" bind_disabled="machine.job_active">
 		<lv_label text="The second tab's content"/>
 	</ds_tabs-tab>
 </ds_tabs>
@@ -2042,7 +2042,7 @@ At its smallest, 134×89 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `path` | Path | text, up to 120 bytes | `state.upTime|duration` |
+| `path` | Path | text, up to 120 bytes | `om.state.upTime|duration` |
 | `label` | Label | text, up to 40 bytes | `Up time` |
 | `unit` | Unit | text, up to 12 bytes | `` |
 
@@ -2326,7 +2326,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`sidebar`](#home) |  |  | `home` | [sidebar.xml](../assets/ui/components/sidebar/sidebar.xml) |
 | `sidebar_estop` |  |  | `estop` | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
 | `sidebar_gcode_button` |  | `label`, `icon`, `gcode` | `sidebar_gcode` | [sidebar_gcode_button.xml](../assets/ui/components/sidebar/sidebar_gcode_button.xml) |
-| `sidebar_page_button` |  | `page`, `action`, `label`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
+| `sidebar_page_button` |  | `page`, `action`, `label_tag`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
 | `status_bar_gcode_button` |  | `label`, `gcode` | `status_gcode` | [status_bar_gcode_button.xml](../assets/ui/components/status_bar/status_bar_gcode_button.xml) |

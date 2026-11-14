@@ -7,11 +7,11 @@
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
 		<style name="card"/>
 		<lv_label name="name" bind_text="name" flex_grow="1" long_mode="dots"/>
-		<ds_button name="load" translation_tag="customise.load" icon="folder.png">
+		<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
 			<style name="action_btn"/>
 			<action trigger="clicked" name="customise.load_saved"/>
 		</ds_button>
-		<ds_button name="delete" translation_tag="customise.delete" icon="clear.png">
+		<ds_button name="delete" translation_tag="tr.customise.delete" icon="clear.png">
 			<action trigger="clicked" name="customise.ask_delete"/>
 		</ds_button>
 	</view>

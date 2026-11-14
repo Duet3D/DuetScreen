@@ -7,7 +7,7 @@
 <component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="card"/>
-		<lv_label name="no_tool" translation_tag="widget.no_tool">
+		<lv_label name="no_tool" translation_tag="tr.widget.no_tool">
 			<style name="widget_detail"/>
 			<bind_flag_if cond="om.state.currentTool|exists eq 1 and om.state.currentTool|int ge 0" flag="hidden"/>
 		</lv_label>

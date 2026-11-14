@@ -4,6 +4,7 @@
 
 #include "ApiXsd.h"
 #include "ApiLvgl.h"
+#include "UI/Xml/Runtime/Translations.h"
 #include <algorithm>
 #include <fmt/format.h>
 #include <iterator>
@@ -207,7 +208,12 @@ namespace UI::Xml::Api
 				writeNameType("view", views);
 				writeNameType("widget", widgets);
 				writeNameType("style", styles);
-				writeNameType("translation", {m_reference.translationKeys.begin(), m_reference.translationKeys.end()});
+				std::set<std::string> translations;
+				for (const auto& key : m_reference.translationKeys)
+				{
+					translations.insert(std::string(Translations::PREFIX) + key);
+				}
+				writeNameType("translation", translations);
 				writeNameType("font", {m_reference.fonts.begin(), m_reference.fonts.end()});
 				writeNameType("image", {m_reference.images.begin(), m_reference.images.end()});
 			}

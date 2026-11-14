@@ -17,7 +17,7 @@
 				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 				<action trigger="clicked" name="heaters.toggle"/>
 			</ds_button>
-			<lv_label name="heater_state" bind_text="om.heat.heaters[{heater}].state|tr:temperature.status" width="100%" height="content" style_text_align="center"/>
+			<lv_label name="heater_state" bind_text="om.heat.heaters[{heater}].state|translate:tr.temperature.status" width="100%" height="content" style_text_align="center"/>
 		</lv_obj>
 
 		<lv_obj name="temperature_cont" height="100%" style_min_height="100" flex_grow="1" scrollable="false">

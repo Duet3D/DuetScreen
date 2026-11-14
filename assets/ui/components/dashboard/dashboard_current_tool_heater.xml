@@ -15,6 +15,6 @@
 		<lv_label name="current" bind_text="om.heat.heaters[{value}].current|fixed:1" bind_text-fmt="%s°C"
 				  width="content"/>
 		<lv_label name="active" bind_text="active[{index}]|int" bind_text-fmt="%d°C" width="content"/>
-		<lv_label name="state" bind_text="om.heat.heaters[{value}].state|tr:temperature.status" width="content"/>
+		<lv_label name="state" bind_text="om.heat.heaters[{value}].state|translate:tr.temperature.status" width="content"/>
 	</view>
 </component>

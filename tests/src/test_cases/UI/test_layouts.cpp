@@ -132,13 +132,13 @@ namespace
 TEST_F(TestLayouts, WidgetFileGivesTheWidgetAndItsSettings)
 {
 	const WidgetDef def = widget("fan", R"({
-		"title_tag": "widget.fan.title", "icon": "fan.png", "slots": ["dashboard", "sidebar"],
+		"title_tag": "tr.widget.fan.title", "icon": "fan.png", "slots": ["dashboard", "sidebar"],
 		"size": {"default": [300, 200], "min": [200, 100], "max": [500, 300]},
 		"props": {"style": "card", "big": true},
 		"settings": [
 			{"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0},
 			{"name": "seconds", "kind": "choice", "default": 60,
-			 "options": [{"value": 30, "title": "30 s"}, {"value": 60, "title_tag": "time.minute"}]}
+			 "options": [{"value": 30, "title": "30 s"}, {"value": 60, "title_tag": "tr.time.minute"}]}
 		]})");
 
 	EXPECT_EQ(def.component, "widget_fan");

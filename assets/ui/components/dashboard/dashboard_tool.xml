@@ -10,7 +10,7 @@
 		<style name="tool_selected" selector="checked"/>
 		<bind_state_if_eq subject="om.tools[{number}].state|eq:active" state="checked" ref_value="1"/>
 
-		<ds_button name="tool_name" bind_text="om.tools[{number}].name|default:temperature.default_tool_name" width="content" height="content">
+		<ds_button name="tool_name" bind_text="om.tools[{number}].name|default:tr.temperature.default_tool_name" width="content" height="content">
 			<style name="action_btn"/>
 			<style name="border_color_card" selector="checked"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>

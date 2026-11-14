@@ -1,8 +1,8 @@
 {
   "component": "sidebar_estop",
-  "title_tag": "widget.estop",
-  "description_tag": "widget.estop_desc",
-  "category_tag": "widget.category_safety",
+  "title_tag": "tr.widget.estop",
+  "description_tag": "tr.widget.estop_desc",
+  "category_tag": "tr.widget.category_safety",
   "icon": "estop.png",
   "slots": [
     "sidebar",

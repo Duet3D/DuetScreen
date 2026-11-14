@@ -1,8 +1,8 @@
 {
   "component": "dashboard_tool_card",
-  "title_tag": "widget.tool",
-  "description_tag": "widget.tool_desc",
-  "category_tag": "widget.category_temperature",
+  "title_tag": "tr.widget.tool",
+  "description_tag": "tr.widget.tool_desc",
+  "category_tag": "tr.widget.category_temperature",
   "icon": "temperature.png",
   "slots": [
     "dashboard"
@@ -25,7 +25,7 @@
       "key": "index",
       "label": "name|default:temperature.default_tool_name",
       "default": 0,
-      "title_tag": "widget.setting_tool"
+      "title_tag": "tr.widget.setting_tool"
     }
   ]
 }

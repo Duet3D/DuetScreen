@@ -13,7 +13,7 @@
 
 		<lv_label name="label" bind_text="name" flex_grow="3" style_text_align="left"/>
 
-		<ds_button name="status" bind_text="om.heat.heaters[{heater}].state|tr:temperature.status" flex_grow="3">
+		<ds_button name="status" bind_text="om.heat.heaters[{heater}].state|translate:tr.temperature.status" flex_grow="3">
 			<style name="border_color_card" selector="checked"/>
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>

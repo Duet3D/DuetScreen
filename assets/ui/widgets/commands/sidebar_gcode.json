@@ -1,8 +1,8 @@
 {
   "component": "sidebar_gcode_button",
-  "title_tag": "widget.gcode_button",
-  "description_tag": "widget.sidebar_gcode_desc",
-  "category_tag": "widget.category_commands",
+  "title_tag": "tr.widget.gcode_button",
+  "description_tag": "tr.widget.sidebar_gcode_desc",
+  "category_tag": "tr.widget.category_commands",
   "icon": "send.png",
   "slots": [
     "sidebar"
@@ -11,14 +11,14 @@
     {
       "name": "label",
       "kind": "text",
-      "title_tag": "widget.setting_label",
+      "title_tag": "tr.widget.setting_label",
       "default": "Home",
       "max_length": 32
     },
     {
       "name": "icon",
       "kind": "choice",
-      "title_tag": "widget.setting_icon",
+      "title_tag": "tr.widget.setting_icon",
       "default": "send.png",
       "options": [
         {
@@ -90,7 +90,7 @@
     {
       "name": "gcode",
       "kind": "text",
-      "title_tag": "widget.setting_gcode",
+      "title_tag": "tr.widget.setting_gcode",
       "default": "G28",
       "max_length": 120
     }

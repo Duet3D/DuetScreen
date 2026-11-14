@@ -70,7 +70,7 @@ namespace
 	constexpr std::string_view TOOL_CARD = R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-				<lv_label name="tool_name" bind_text="om.tools[{number}].name|default:temperature.default_tool_name"/>
+				<lv_label name="tool_name" bind_text="om.tools[{number}].name|default:tr.temperature.default_tool_name"/>
 				<ds_list name="heaters" list="heaters" item="tool_heater_row" width="100%" height="content"/>
 			</view>
 		</component>)";
@@ -593,9 +593,9 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 	writeFile(bundleFile("components/fan_card.xml"), R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="custom" bind_text="name|default:fine_tune.fan"/>
+				<lv_label name="custom" bind_text="name|default:tr.fine_tune.fan"/>
 				<ds_button name="home" text="Home">
-					<action trigger="clicked" name="gcode" arg="G28 ; from {name|default:fine_tune.fan} at {index}"/>
+					<action trigger="clicked" name="gcode" arg="G28 ; from {name|default:tr.fine_tune.fan} at {index}"/>
 				</ds_button>
 			</view>
 		</component>)");

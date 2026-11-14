@@ -195,7 +195,7 @@ A name is looked up from the inside out:
 
 So in a heater row inside a tool card, `name` is the heater's name, `number` is the tool's number (heater rows have no `number`), and `fans` is the global fan list.
 
-The [UI API reference](XML_UI_API.md) lists the names of each kind: the globals by data source, each presenter's, and the fields of every list's rows. Theme styles (`<style name="card"/>`), palette colours and consts (`style_bg_color="#primary"`, `style_radius="#radius"`) and fonts (`font_header`) are listed there too; they all follow theme changes. Translation keys, for `translation_tag="fan.title"` on labels and `ds_button`, are those in `assets/i18n/*.json`.
+The [UI API reference](XML_UI_API.md) lists the names of each kind: the globals by data source, each presenter's, and the fields of every list's rows. Theme styles (`<style name="card"/>`), palette colours and consts (`style_bg_color="#primary"`, `style_radius="#radius"`) and fonts (`font_header`) are listed there too; they all follow theme changes. Translation keys are those in `assets/i18n/*.json`, written `tr.<key>` wherever XML or a widget file names one, so a key can't be mistaken for a subject: `translation_tag="tr.fan.title"` on labels and `ds_button`, the `*_tag` attributes and props, and converter arguments (`name|default:tr.fine_tune.fan`). Literal text (`text="XY"`) is shown as written, never looked up.
 
 A string subject can be compared with `bind_*_if_eq`: the sidebar checks the button of the open page with `<bind_state_if_eq subject="nav.screen" state="checked" ref_value="control"/>`.
 
@@ -257,7 +257,7 @@ A dialog is a `<ds_modal>` whose subject says whether it is open, so the present
 For a plain question, `confirm_dialog.xml` is ready-made, as in the shared question before cancelling the job (`modals/job_cancel.xml`):
 
 ```xml
-<confirm_dialog open="confirm" title_tag="status.print_cancel_title" text_tag="status.print_cancel_message"
+<confirm_dialog open="confirm" title_tag="tr.status.print_cancel_title" text_tag="tr.status.print_cancel_message"
                 confirm="job.cancel" close="job.close_cancel"/>
 ```
 
@@ -333,16 +333,16 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
 ```json
 {
   "component": "dashboard_fan",
-  "title_tag": "widget.fan",
-  "description_tag": "widget.fan_desc",
-  "category_tag": "widget.category_fans",
+  "title_tag": "tr.widget.fan",
+  "description_tag": "tr.widget.fan_desc",
+  "category_tag": "tr.widget.category_fans",
   "icon": "fine_tune.png",
   "slots": ["dashboard"],
   "size": {"default": [458, 89], "min": [365, 89]},
   "props": {},
   "settings": [
     {"name": "fan", "kind": "row", "list": "fans", "key": "number", "label": "name", "default": 0,
-     "title_tag": "widget.setting_fan"}
+     "title_tag": "tr.widget.setting_fan"}
   ]
 }
 ```

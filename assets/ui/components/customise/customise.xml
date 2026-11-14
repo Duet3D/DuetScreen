@@ -35,41 +35,41 @@
 			<ds_move_handle name="grip" width="content" height="content" style_pad_all="0">
 				<ds_icon name="grip_icon" icon="drag.png" width="32" height="48" clickable="false"/>
 			</ds_move_handle>
-			<ds_button name="add" translation_tag="customise.add" icon="increment.png">
+			<ds_button name="add" translation_tag="tr.customise.add" icon="increment.png">
 				<action trigger="clicked" name="customise.open_catalogue"/>
 			</ds_button>
-			<ds_button name="configure" translation_tag="customise.configure" icon="settings.png">
+			<ds_button name="configure" translation_tag="tr.customise.configure" icon="settings.png">
 				<bind_state_if_eq subject="customise.can_configure" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="customise.configure"/>
 			</ds_button>
-			<ds_button name="remove" translation_tag="customise.remove" icon="clear.png">
+			<ds_button name="remove" translation_tag="tr.customise.remove" icon="clear.png">
 				<bind_state_if_eq subject="customise.can_remove" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="customise.remove"/>
 			</ds_button>
 			<!-- Checked while dragged widgets snap to the edges near them -->
-			<ds_button name="snap" translation_tag="customise.snap" icon="apps.png">
+			<ds_button name="snap" translation_tag="tr.customise.snap" icon="apps.png">
 				<bind_flag_if_eq subject="customise.is_free" flag="hidden" ref_value="0"/>
 				<bind_state_if_eq subject="customise.snap" state="checked" ref_value="1"/>
 				<action trigger="clicked" name="customise.snap"/>
 			</ds_button>
-			<ds_button name="undo" translation_tag="customise.undo" icon="back.png">
+			<ds_button name="undo" translation_tag="tr.customise.undo" icon="back.png">
 				<bind_state_if_eq subject="customise.can_undo" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="customise.undo"/>
 			</ds_button>
-			<ds_button name="reset" translation_tag="customise.reset" icon="print_again.png">
+			<ds_button name="reset" translation_tag="tr.customise.reset" icon="print_again.png">
 				<action trigger="clicked" name="customise.reset"/>
 			</ds_button>
-			<ds_button name="save" translation_tag="customise.save" icon="save.png">
+			<ds_button name="save" translation_tag="tr.customise.save" icon="save.png">
 				<bind_state_if_eq subject="can_save" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="customise.save"/>
 			</ds_button>
-			<ds_button name="load" translation_tag="customise.load" icon="folder.png">
+			<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
 				<action trigger="clicked" name="customise.load"/>
 			</ds_button>
-			<ds_button name="cancel" translation_tag="common.cancel" icon="close.png">
+			<ds_button name="cancel" translation_tag="tr.common.cancel" icon="close.png">
 				<action trigger="clicked" name="customise.cancel"/>
 			</ds_button>
-			<ds_button name="done" translation_tag="customise.done" icon="send.png">
+			<ds_button name="done" translation_tag="tr.customise.done" icon="send.png">
 				<style name="action_btn"/>
 				<action trigger="clicked" name="customise.done"/>
 			</ds_button>
@@ -82,7 +82,7 @@
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
-				<lv_label name="title" translation_tag="customise.add_title"/>
+				<lv_label name="title" translation_tag="tr.customise.add_title"/>
 			</lv_obj>
 			<ds_list name="list" list="catalogue" item="customise_catalogue_category" width="100%" flex_grow="1"
 					 flex_flow="column"/>
@@ -99,7 +99,7 @@
 			</lv_obj>
 			<ds_list name="list" list="settings" item="customise_setting" width="100%" height="content"
 					 flex_flow="column"/>
-			<ds_button name="close" translation_tag="common.close" width="100%">
+			<ds_button name="close" translation_tag="tr.common.close" width="100%">
 				<action trigger="clicked" name="customise.close_settings"/>
 			</ds_button>
 		</ds_modal>
@@ -122,10 +122,10 @@
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
-				<lv_label name="title" translation_tag="customise.save_title"/>
+				<lv_label name="title" translation_tag="tr.customise.save_title"/>
 			</lv_obj>
 			<ds_textarea name="name" bind_text="save_name" one_line="true" width="100%"
-						 placeholder_tag="customise.name_hint">
+						 placeholder_tag="tr.customise.name_hint">
 				<action trigger="value_changed" name="customise.save_name"/>
 				<action trigger="focused" name="customise.keyboard" arg="1"/>
 				<action trigger="defocused" name="customise.keyboard" arg="0"/>
@@ -138,10 +138,10 @@
 			</lv_label>
 			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 				<style name="pad_zero"/>
-				<ds_button name="cancel" translation_tag="common.cancel" flex_grow="1">
+				<ds_button name="cancel" translation_tag="tr.common.cancel" flex_grow="1">
 					<action trigger="clicked" name="customise.close_save"/>
 				</ds_button>
-				<ds_button name="ok" translation_tag="customise.save" flex_grow="1">
+				<ds_button name="ok" translation_tag="tr.customise.save" flex_grow="1">
 					<style name="action_btn"/>
 					<action trigger="clicked" name="customise.save_ok"/>
 				</ds_button>
@@ -154,9 +154,9 @@
 			<lv_obj name="header" width="100%" height="content">
 				<style name="bg_color_header"/>
 				<style name="text_header"/>
-				<lv_label name="title" translation_tag="customise.saved_title"/>
+				<lv_label name="title" translation_tag="tr.customise.saved_title"/>
 			</lv_obj>
-			<lv_label name="none" translation_tag="customise.none_saved" width="100%" long_mode="wrap">
+			<lv_label name="none" translation_tag="tr.customise.none_saved" width="100%" long_mode="wrap">
 				<bind_flag_if_eq subject="has_saved" flag="hidden" ref_value="1"/>
 			</lv_label>
 			<ds_list name="list" list="saved" item="customise_saved_layout" width="100%" flex_grow="1"

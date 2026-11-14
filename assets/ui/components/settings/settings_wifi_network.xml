@@ -13,7 +13,7 @@
 				   style_min_width="content" flex_grow="1">
 			<action trigger="clicked" name="wifi.connect"/>
 		</ds_button>
-		<ds_button name="forget" translation_tag="settings.network.forget" width="content" height="content"
+		<ds_button name="forget" translation_tag="tr.settings.network.forget" width="content" height="content"
 				   style_min_width="content" flex_grow="1">
 			<bind_flag_if_eq subject="known" flag="hidden" ref_value="0"/>
 			<action trigger="clicked" name="wifi.forget"/>

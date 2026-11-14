@@ -3,7 +3,7 @@
  *
  * Actions are how an XML view asks for something to happen. A view never calls code; it names an action:
  *
- *     <ds_button translation_tag="fan.max">
+ *     <ds_button translation_tag="tr.fan.max">
  *         <action trigger="clicked" name="fans.set_speed" arg="100"/>
  *     </ds_button>
  *

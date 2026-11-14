@@ -1,8 +1,8 @@
 {
   "component": "move_xy_card",
-  "title_tag": "widget.jog_xy",
-  "description_tag": "widget.jog_xy_desc",
-  "category_tag": "widget.category_motion",
+  "title_tag": "tr.widget.jog_xy",
+  "description_tag": "tr.widget.jog_xy_desc",
+  "category_tag": "tr.widget.category_motion",
   "icon": "move.png",
   "slots": [
     "dashboard"

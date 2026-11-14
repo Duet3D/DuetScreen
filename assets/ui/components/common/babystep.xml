@@ -6,7 +6,7 @@
 <component presenter="babystep">
 	<view extends="lv_obj" flex_flow="column"
 		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-		<lv_label name="header" translation_tag="babystep.header"/>
+		<lv_label name="header" translation_tag="tr.babystep.header"/>
 
 		<lv_obj name="button_panel" width="100%" flex_grow="1" flex_flow="column"
 				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">

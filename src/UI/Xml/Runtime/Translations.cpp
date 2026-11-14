@@ -4,6 +4,7 @@
 
 #include "Translations.h"
 #include "Debug.h"
+#include "helix_xml.h"
 #include "i18n/i18n.h"
 #include "lvgl/lvgl.h"
 #include <set>
@@ -21,7 +22,7 @@ namespace UI::Xml::Translations
 		i18n::forEachTranslation(
 			[pack](std::string_view key, std::string_view value)
 			{
-				const std::string k(key);
+				const std::string k = std::string(PREFIX) + key;
 				const std::string v(value);
 				if (lv_translation_tag_dsc_t* tag = lv_translation_add_tag(pack, k.c_str()))
 				{
@@ -29,6 +30,11 @@ namespace UI::Xml::Translations
 				}
 			});
 		s_languages.insert(language);
+	}
+
+	void init()
+	{
+		lv_xml_set_translation_key_cb([](const char*) { return false; });
 	}
 
 	void sync()
@@ -49,5 +55,29 @@ namespace UI::Xml::Translations
 	void reset()
 	{
 		s_languages.clear();
+	}
+
+	std::optional<std::string_view> key(std::string_view tag)
+	{
+		if (!tag.starts_with(PREFIX))
+		{
+			return std::nullopt;
+		}
+		return tag.substr(PREFIX.size());
+	}
+
+	std::string translate(std::string_view tag)
+	{
+		if (tag.empty())
+		{
+			return "";
+		}
+		const auto found = key(tag);
+		if (!found)
+		{
+			LOG_WARN("Translation key '{:s}' isn't written {:s}<key>", tag, PREFIX);
+			return "";
+		}
+		return _(std::string(*found).c_str());
 	}
 } // namespace UI::Xml::Translations

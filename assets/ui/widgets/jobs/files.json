@@ -1,8 +1,8 @@
 {
   "component": "dashboard_files",
-  "title_tag": "widget.files",
-  "description_tag": "widget.files_desc",
-  "category_tag": "widget.category_jobs",
+  "title_tag": "tr.widget.files",
+  "description_tag": "tr.widget.files_desc",
+  "category_tag": "tr.widget.category_jobs",
   "icon": "macros.png",
   "slots": [
     "dashboard"
