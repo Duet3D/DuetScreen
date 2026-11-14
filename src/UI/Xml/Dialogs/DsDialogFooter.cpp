@@ -63,7 +63,7 @@ namespace UI::Xml::DsDialogFooter
 			 .example = R"(<ds_dialog_footer>
 	<ds_button name="cancel" translation_tag="tr.common.cancel">
 		<style name="dialog_button"/>
-		<action trigger="clicked" name="presenter.files.close_dialog"/>
+		<action trigger="clicked" name="actions.dialog.close"/>
 	</ds_button>
 	<ds_button name="ok" translation_tag="tr.common.ok">
 		<style name="dialog_button"/>

@@ -80,7 +80,6 @@ namespace UI
 		action("wifi.password",
 			   "Store the text edited (`value_changed` on the password's text box) as the password",
 			   [this](const Xml::ActionArgs& args) { m_password.set(args.text()); });
-		action("wifi.close", "Close the network's dialog", [this](const Xml::ActionArgs&) { m_open.set(0); });
 		m_ip.set("-");
 	}
 

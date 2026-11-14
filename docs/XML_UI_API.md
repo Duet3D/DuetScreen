@@ -331,17 +331,16 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 
 | Action | Description | Added in |
 | --- | --- | --- |
-| `actions.babystep.close` | Close the shared babystepping dialog | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.babystep.down` | Move Z down by the chosen step (M290). Offered to users for their widgets' action settings, as `tr.actions.babystep_down`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.babystep.open` | Open the shared babystepping dialog. Offered to users for their widgets' action settings, as `tr.actions.babystep_open`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.babystep.reset` | Undo all babystepping | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.babystep.up` | Move Z up by the chosen step (M290). Offered to users for their widgets' action settings, as `tr.actions.babystep_up`. | [BabystepActions.cpp](../src/UI/Presenters/Common/BabystepActions.cpp) |
 | `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
+| `actions.dialog.close` | Close the dialog step the widget is in, and any opened from it, as the user closing it does: a `<ds_dialog>` empties its subject and raises `dismissed`. E.g. on a Cancel button. | [DialogActions.cpp](../src/UI/Xml/Dialogs/DialogActions.cpp) |
 | `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
 | `actions.extruder.extrude` | Extrude the chosen distance (`source.extruder.distance`) at the chosen feed rate with the current tool. Offered to users for their widgets' action settings, as `tr.actions.extruder_extrude`. | [ExtruderActions.cpp](../src/UI/Presenters/Control/Temperature/ExtruderActions.cpp) |
 | `actions.extruder.retract` | Retract the chosen distance at the chosen feed rate with the current tool. Offered to users for their widgets' action settings, as `tr.actions.extruder_retract`. | [ExtruderActions.cpp](../src/UI/Presenters/Control/Temperature/ExtruderActions.cpp) |
-| `actions.factors.close` | Close the dialog named by `arg`, `speed` or `extrusion`, e.g. when it is dismissed | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of a dialog's `factors`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
@@ -396,7 +395,6 @@ Each row of `presenter.gcodes`:
 | Action | Description |
 | --- | --- |
 | `presenter.console.clear` | Empty the text box |
-| `presenter.console.close_reference` | Close the G-code reference (`dismissed` on its dialog) |
 | `presenter.console.input` | What is typed changed to the text box's text (`value_changed` on it) |
 | `presenter.console.open_reference` | Open the G-code reference, searched for the first word typed |
 | `presenter.console.pick` | Put the G-code in the text box and close the reference. From a row of `gcodes`. |
@@ -411,7 +409,6 @@ Used by `customise`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `presenter.dialog_open` | int | 1 while any of the dialogs below is open, else 0 |
 | `presenter.catalogue` | list | The widgets that can be added where the user chose, by category |
 | `presenter.catalogue_open` | int | 1 while the widget pool is open |
 | `presenter.settings` | list | The selected widget's settings |
@@ -466,10 +463,6 @@ Each row of `presenter.saved`:
 | `presenter.customise.add` | Add the widget of the widget pool's row where it was asked for, and close the pool |
 | `presenter.customise.ask_delete` | Ask whether to delete the saved layout of the row |
 | `presenter.customise.cancel` | Stop customising and throw the changes away |
-| `presenter.customise.close_catalogue` | Close the widget pool |
-| `presenter.customise.close_load` | Close the saved layouts |
-| `presenter.customise.close_save` | Close the question without saving |
-| `presenter.customise.close_settings` | Close the settings |
 | `presenter.customise.configure` | Show the selected widget's settings |
 | `presenter.customise.done` | Stop customising and keep the changes |
 | `presenter.customise.edit_setting` | Change the setting of the row: on a number pad or a choice of its values, the settings' next step |
@@ -532,7 +525,6 @@ Each row of `presenter.crumbs`:
 | Action | Description |
 | --- | --- |
 | `presenter.files.ask_delete` | Ask whether to delete the file the dialog is about, as the dialog's next step; deleting it closes the dialog |
-| `presenter.files.close_dialog` | Close the dialog without doing anything |
 | `presenter.files.confirm` | Do what the dialog asks (start the job or run the macro), and close it |
 | `presenter.files.crumb` | Open that folder. From a row of `crumbs`. |
 | `presenter.files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
@@ -818,7 +810,6 @@ Each row of `presenter.alert.axes`:
 | `presenter.alert.pad.sign` | Make the number negative, or positive again, if it may be negative |
 | `presenter.response.close` | Close the response showing and show the next |
 | `presenter.response.open_console` | Forget every response and open the console |
-| `presenter.update.close` | Close the update prompt without installing |
 | `presenter.update.confirm` | Install the update offered (nothing when a result is showing), and close |
 
 ### object_cancel
@@ -1070,7 +1061,6 @@ Each row of `presenter.networks`:
 
 | Action | Description |
 | --- | --- |
-| `presenter.wifi.close` | Close the network's dialog |
 | `presenter.wifi.connect` | Connect to the network open, which the screen has joined before |
 | `presenter.wifi.disconnect` | Leave the network open |
 | `presenter.wifi.forget` | Forget the network open |
@@ -1235,13 +1225,12 @@ Also takes every `lv_obj` attribute.
 
 ### ds_dialog
 
-A dialog, shown by the dialog surface (`<ds_dialog_host>`) while its subject says so, as the dialog or as the next step of the one open, which the card slides to. Its content stays where it is written, hidden, so its actions go to that view. The surface draws its title, a close button (and a back button on a later step); closed by them, by tapping outside or by the back key, it raises `dismissed` so the view can update the subject. Closing it by its subject takes any steps opened from it too. The lv_obj attributes apply to its content.
+A dialog, shown by the dialog surface (`<ds_dialog_host>`) while its subject says so, as the dialog or as the next step of the one open, which the card slides to. Its content stays where it is written, hidden, so its actions go to that view. The surface draws its title, a close button (and a back button on a later step); closed by them, by tapping outside or by the back key, it empties its subject (0, or empty text) and raises `dismissed`, for anything else closing it should do. Closing it by its subject takes any steps opened from it too. The lv_obj attributes apply to its content.
 
 Also takes every `lv_obj` attribute.
 
 ```xml
 <ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
-	<action trigger="dismissed" name="presenter.files.close_dialog"/>
 	…the dialog's content…
 </ds_dialog>
 ```
@@ -1268,7 +1257,7 @@ Also takes every `lv_obj` attribute.
 <ds_dialog_footer>
 	<ds_button name="cancel" translation_tag="tr.common.cancel">
 		<style name="dialog_button"/>
-		<action trigger="clicked" name="presenter.files.close_dialog"/>
+		<action trigger="clicked" name="actions.dialog.close"/>
 	</ds_button>
 	<ds_button name="ok" translation_tag="tr.common.ok">
 		<style name="dialog_button"/>
@@ -2923,7 +2912,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`dialog_number`](#dialog_number) | `dialog_number` |  |  | [dialog_number.xml](../assets/ui/components/dialogs/dialog_number.xml) |
 | [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
 | `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
-| `factors_dialog` |  | `dialog`, `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
+| `factors_dialog` |  | `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
 | `fan_card` |  |  | `dashboard_fan`, `fans` | [fan_card.xml](../assets/ui/components/control/fans/fan_card.xml) |
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |

@@ -64,7 +64,6 @@
 			<xs:enumeration value="presenter.dialog_can_delete"/>
 			<xs:enumeration value="presenter.dialog_has_image"/>
 			<xs:enumeration value="presenter.dialog_image"/>
-			<xs:enumeration value="presenter.dialog_open"/>
 			<xs:enumeration value="presenter.dialog_text"/>
 			<xs:enumeration value="presenter.dialog_title"/>
 			<xs:enumeration value="presenter.disable_motors_usable"/>
@@ -388,17 +387,16 @@
 	</xs:simpleType>
 	<xs:simpleType name="action.names">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="actions.babystep.close"/>
 			<xs:enumeration value="actions.babystep.down"/>
 			<xs:enumeration value="actions.babystep.open"/>
 			<xs:enumeration value="actions.babystep.reset"/>
 			<xs:enumeration value="actions.babystep.up"/>
 			<xs:enumeration value="actions.customise.open_catalogue"/>
 			<xs:enumeration value="actions.customise.start"/>
+			<xs:enumeration value="actions.dialog.close"/>
 			<xs:enumeration value="actions.estop.dragged"/>
 			<xs:enumeration value="actions.extruder.extrude"/>
 			<xs:enumeration value="actions.extruder.retract"/>
-			<xs:enumeration value="actions.factors.close"/>
 			<xs:enumeration value="actions.factors.extrusion"/>
 			<xs:enumeration value="actions.factors.set"/>
 			<xs:enumeration value="actions.factors.speed"/>
@@ -434,7 +432,6 @@
 			<xs:enumeration value="presenter.alert.pad.sign"/>
 			<xs:enumeration value="presenter.choice.choose"/>
 			<xs:enumeration value="presenter.console.clear"/>
-			<xs:enumeration value="presenter.console.close_reference"/>
 			<xs:enumeration value="presenter.console.input"/>
 			<xs:enumeration value="presenter.console.open_reference"/>
 			<xs:enumeration value="presenter.console.pick"/>
@@ -445,10 +442,6 @@
 			<xs:enumeration value="presenter.customise.add"/>
 			<xs:enumeration value="presenter.customise.ask_delete"/>
 			<xs:enumeration value="presenter.customise.cancel"/>
-			<xs:enumeration value="presenter.customise.close_catalogue"/>
-			<xs:enumeration value="presenter.customise.close_load"/>
-			<xs:enumeration value="presenter.customise.close_save"/>
-			<xs:enumeration value="presenter.customise.close_settings"/>
 			<xs:enumeration value="presenter.customise.configure"/>
 			<xs:enumeration value="presenter.customise.done"/>
 			<xs:enumeration value="presenter.customise.edit_setting"/>
@@ -467,7 +460,6 @@
 			<xs:enumeration value="presenter.dialog.close"/>
 			<xs:enumeration value="presenter.dialog.outside"/>
 			<xs:enumeration value="presenter.files.ask_delete"/>
-			<xs:enumeration value="presenter.files.close_dialog"/>
 			<xs:enumeration value="presenter.files.confirm"/>
 			<xs:enumeration value="presenter.files.crumb"/>
 			<xs:enumeration value="presenter.files.open"/>
@@ -548,9 +540,7 @@
 			<xs:enumeration value="presenter.temperature.change_filament"/>
 			<xs:enumeration value="presenter.temperature.pick_filament"/>
 			<xs:enumeration value="presenter.temperature.unload_filament"/>
-			<xs:enumeration value="presenter.update.close"/>
 			<xs:enumeration value="presenter.update.confirm"/>
-			<xs:enumeration value="presenter.wifi.close"/>
 			<xs:enumeration value="presenter.wifi.connect"/>
 			<xs:enumeration value="presenter.wifi.disconnect"/>
 			<xs:enumeration value="presenter.wifi.forget"/>
@@ -3609,9 +3599,6 @@
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="factors_dialog.attributes">
-		<xs:attribute name="dialog" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `dialog` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="open" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `open` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -6673,7 +6660,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_dialog">
-		<xs:annotation><xs:documentation>A dialog, shown by the dialog surface (`&lt;ds_dialog_host&gt;`) while its subject says so, as the dialog or as the next step of the one open, which the card slides to. Its content stays where it is written, hidden, so its actions go to that view. The surface draws its title, a close button (and a back button on a later step); closed by them, by tapping outside or by the back key, it raises `dismissed` so the view can update the subject. Closing it by its subject takes any steps opened from it too. The lv_obj attributes apply to its content. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>A dialog, shown by the dialog surface (`&lt;ds_dialog_host&gt;`) while its subject says so, as the dialog or as the next step of the one open, which the card slides to. Its content stays where it is written, hidden, so its actions go to that view. The surface draws its title, a close button (and a back button on a later step); closed by them, by tapping outside or by the back key, it empties its subject (0, or empty text) and raises `dismissed`, for anything else closing it should do. Closing it by its subject takes any steps opened from it too. The lv_obj attributes apply to its content. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_dialog.attributes"/>

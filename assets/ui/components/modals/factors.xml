@@ -8,9 +8,9 @@
 <component>
 	<!-- Takes no room: its dialogs open on the dialog surface -->
 	<view extends="lv_obj" width="0" height="0" floating="true">
-		<factors_dialog name="speed_dialog" dialog="speed" open="source.factors.speed.open"
+		<factors_dialog name="speed_dialog" open="source.factors.speed.open"
 						title="source.factors.speed.title" factors="source.factors.speed.factors"/>
-		<factors_dialog name="extrusion_dialog" dialog="extrusion" open="source.factors.extrusion.open"
+		<factors_dialog name="extrusion_dialog" open="source.factors.extrusion.open"
 						title="source.factors.extrusion.title" factors="source.factors.extrusion.factors"/>
 	</view>
 </component>

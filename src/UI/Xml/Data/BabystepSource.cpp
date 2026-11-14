@@ -57,8 +57,8 @@ namespace UI::Xml
 		Services::sendGcode(fmt::format("M290 S{:g}", static_cast<float>(direction) * m_step.value()));
 	}
 
-	void BabystepSource::setDialogOpen(bool open)
+	void BabystepSource::openDialog()
 	{
-		m_dialogOpen.set(open ? 1 : 0);
+		m_dialogOpen.set(1);
 	}
 } // namespace UI::Xml

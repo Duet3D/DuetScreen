@@ -39,7 +39,6 @@
 
 		<ds_dialog name="reference_dialog" bind_open="presenter.reference_open" title_tag="tr.console.reference"
 				   width="70%" height="85%" flex_flow="column">
-			<action trigger="dismissed" name="presenter.console.close_reference"/>
 			<ds_textarea name="search" one_line="true" placeholder_tag="tr.console.search_placeholder" width="100%"
 						 style_text_align="left" bind_text="presenter.search" keyboard_mode="text_upper">
 				<action trigger="value_changed" name="presenter.console.search"/>

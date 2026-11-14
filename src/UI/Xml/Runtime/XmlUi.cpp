@@ -18,6 +18,7 @@
 #include "UI/Xml/Binding/Constants.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Dialogs/DialogActions.h"
 #include "UI/Xml/Layout/LayoutEditor.h"
 #include "UI/Xml/Layout/LayoutLibrary.h"
 #include "UI/Xml/Layout/LayoutStore.h"
@@ -130,6 +131,7 @@ namespace UI::Xml
 		Translations::sync();
 		Actions::init();
 		Widgets::registerAll();
+		DialogActions::registerAll();
 		GcodeActions::registerAll();
 		NavigationActions::registerAll();
 		SelectorActions::registerAll();

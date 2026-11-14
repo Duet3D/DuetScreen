@@ -120,9 +120,6 @@ namespace UI
 			   "Ask whether to delete the file the dialog is about, as the dialog's next step; deleting it closes the "
 			   "dialog",
 			   [this](const Xml::ActionArgs& args) { askDelete(args.target); });
-		action("files.close_dialog",
-			   "Close the dialog without doing anything",
-			   [this](const Xml::ActionArgs&) { closeDialog(); });
 	}
 
 	void FileBrowserPresenter::fields(Xml::FieldVisitor& f)

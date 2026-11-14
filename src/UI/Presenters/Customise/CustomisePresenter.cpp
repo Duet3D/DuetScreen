@@ -131,26 +131,20 @@ namespace UI
 			   "Add the widget of the widget pool's row where it was asked for, and close the pool",
 			   [this](const Xml::ActionArgs& args)
 			   {
-				   setOpen(m_catalogueOpen, 0);
+				   m_catalogueOpen.set(0);
 				   if (const auto* row = args.row<CatalogueRow>())
 				   {
 					   editor().add(std::string(row->id.get()));
 				   }
 			   });
-		action("customise.close_catalogue",
-			   "Close the widget pool",
-			   [this](const Xml::ActionArgs&) { setOpen(m_catalogueOpen, 0); });
 		action("customise.configure",
 			   "Show the selected widget's settings",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   showSettings();
 				   m_openedFor = editor().selection();
-				   setOpen(m_settingsOpen, editor().canConfigure() ? 1 : 0);
+				   m_settingsOpen.set(editor().canConfigure() ? 1 : 0);
 			   });
-		action("customise.close_settings",
-			   "Close the settings",
-			   [this](const Xml::ActionArgs&) { setOpen(m_settingsOpen, 0); });
 		action("customise.edit_setting",
 			   "Change the setting of the row: on a number pad or a choice of its values, the settings' next step",
 			   [this](const Xml::ActionArgs& args)
@@ -190,19 +184,13 @@ namespace UI
 				   m_saveProblem.set("");
 			   });
 		action("customise.save_ok", "Save under the name typed", [this](const Xml::ActionArgs&) { saveAs(); });
-		action("customise.close_save",
-			   "Close the question without saving",
-			   [this](const Xml::ActionArgs&) { setOpen(m_saveOpen, 0); });
 		action("customise.load",
 			   "List the saved layouts, to load one",
 			   [this](const Xml::ActionArgs&)
 			   {
 				   showSaved();
-				   setOpen(m_loadOpen, 1);
+				   m_loadOpen.set(1);
 			   });
-		action("customise.close_load",
-			   "Close the saved layouts",
-			   [this](const Xml::ActionArgs&) { setOpen(m_loadOpen, 0); });
 		action("customise.load_saved",
 			   "Show the saved layout of the row, as one change, and close the list",
 			   [this](const Xml::ActionArgs& args)
@@ -261,7 +249,6 @@ namespace UI
 
 	void CustomisePresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.field("dialog_open", m_dialogOpen, "1 while any of the dialogs below is open, else 0");
 		f.list("catalogue", m_catalogue, "The widgets that can be added where the user chose, by category");
 		f.field("catalogue_open", m_catalogueOpen, "1 while the widget pool is open");
 		f.list("settings", m_settings, "The selected widget's settings");
@@ -285,8 +272,8 @@ namespace UI
 		// dialog, in the sidebar or status bar) closes them, as tapping outside a dialog does
 		else if ((m_settingsOpen.get() != 0 || m_catalogueOpen.get() != 0) && editor().selection() != m_openedFor)
 		{
-			setOpen(m_settingsOpen, 0);
-			setOpen(m_catalogueOpen, 0);
+			m_settingsOpen.set(0);
+			m_catalogueOpen.set(0);
 		}
 		m_canSave.set(Xml::LayoutLibrary::canSave() ? 1 : 0);
 	}
@@ -331,7 +318,7 @@ namespace UI
 											  });
 						 });
 		m_openedFor = editor().selection();
-		setOpen(m_catalogueOpen, 1);
+		m_catalogueOpen.set(1);
 	}
 
 	void CustomisePresenter::showSettings()
@@ -409,17 +396,17 @@ namespace UI
 
 	void CustomisePresenter::closeDialogs()
 	{
-		setOpen(m_saveOpen, 0);
-		setOpen(m_loadOpen, 0);
-		setOpen(m_catalogueOpen, 0);
-		setOpen(m_settingsOpen, 0);
+		m_saveOpen.set(0);
+		m_loadOpen.set(0);
+		m_catalogueOpen.set(0);
+		m_settingsOpen.set(0);
 	}
 
 	void CustomisePresenter::askSaveName()
 	{
 		m_saveName.set("");
 		m_saveProblem.set("");
-		setOpen(m_saveOpen, 1);
+		m_saveOpen.set(1);
 	}
 
 	void CustomisePresenter::saveAs()
@@ -435,7 +422,7 @@ namespace UI
 		{
 			warn(fmt::format("{:s}: {:s}", _("customise.not_saved"), error));
 		}
-		setOpen(m_saveOpen, 0);
+		m_saveOpen.set(0);
 	}
 
 	void CustomisePresenter::showSaved()
@@ -448,7 +435,7 @@ namespace UI
 
 	void CustomisePresenter::loadSaved(const std::string& name)
 	{
-		setOpen(m_loadOpen, 0);
+		m_loadOpen.set(0);
 		std::string error;
 		if (auto layouts = Xml::LayoutLibrary::load(name, error))
 		{
@@ -463,13 +450,6 @@ namespace UI
 	void CustomisePresenter::warn(const std::string& message)
 	{
 		Model::get().post<EventType::Response>(ResponseType::WARNING, message);
-	}
-
-	void CustomisePresenter::setOpen(Xml::IntSubject& dialog, bool open)
-	{
-		dialog.set(open ? 1 : 0);
-		const bool any = m_catalogueOpen.get() || m_settingsOpen.get() || m_saveOpen.get() || m_loadOpen.get();
-		m_dialogOpen.set(any ? 1 : 0);
 	}
 
 	void CustomisePresenter::finish()

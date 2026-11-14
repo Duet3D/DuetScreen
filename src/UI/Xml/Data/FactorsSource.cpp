@@ -101,18 +101,6 @@ namespace UI::Xml
 		m_extrusion.open();
 	}
 
-	FactorDialog* FactorsSource::dialog(std::string_view id)
-	{
-		for (FactorDialog* dialog : {&m_speed, &m_extrusion})
-		{
-			if (dialog->id() == id)
-			{
-				return dialog;
-			}
-		}
-		return nullptr;
-	}
-
 	void FactorsSource::showSpeed()
 	{
 		const float percent = 100 * MoveSource::speedFactor();

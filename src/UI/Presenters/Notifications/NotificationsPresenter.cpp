@@ -91,10 +91,6 @@ namespace UI
 					   m_install();
 				   }
 			   });
-		action("update.close",
-			   "Close the update prompt without installing",
-			   [this](const Xml::ActionArgs&) { m_updateOpen.set(0); });
-
 		action("alert.ok",
 			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it; nothing "
 			   "while OK can't be used (what is typed isn't valid), e.g. from the keyboard's OK key",

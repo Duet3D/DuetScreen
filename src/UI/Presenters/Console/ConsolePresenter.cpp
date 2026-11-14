@@ -78,9 +78,6 @@ namespace UI
 				   filter(word);
 				   m_referenceOpen.set(1);
 			   });
-		action("console.close_reference",
-			   "Close the G-code reference (`dismissed` on its dialog)",
-			   [this](const Xml::ActionArgs&) { m_referenceOpen.set(0); });
 		action("console.search",
 			   "Search the reference for the search box's text (`value_changed` on it)",
 			   [this](const Xml::ActionArgs& args)

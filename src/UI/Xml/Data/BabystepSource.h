@@ -37,8 +37,8 @@ namespace UI::Xml
 		/** Move Z up (`direction` 1) or down (-1) by the chosen step */
 		void step(int direction) const;
 
-		/** Open (true) or close the shared dialog */
-		void setDialogOpen(bool open);
+		/** Open the shared dialog; it closes itself (DsDialog.h) */
+		void openDialog();
 
 	  protected:
 		/** Follow the axes */

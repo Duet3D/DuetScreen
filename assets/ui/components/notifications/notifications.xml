@@ -77,13 +77,12 @@
 		<!-- An update to install, or how one went -->
 		<ds_dialog name="update_prompt" alert="true" bind_open="presenter.update.open" bind_title="presenter.update.title"
 				   flex_flow="column" style_pad_row="#pad">
-			<action trigger="dismissed" name="presenter.update.close"/>
 			<lv_label name="text" bind_text="presenter.update.text" width="100%" style_text_align="center"/>
 			<ds_dialog_footer name="footer">
 				<ds_button name="cancel" translation_tag="tr.message.update_cancel">
 					<style name="dialog_button"/>
 					<bind_flag_if_eq subject="presenter.update.can_cancel" flag="hidden" ref_value="0"/>
-					<action trigger="clicked" name="presenter.update.close"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
 				</ds_button>
 				<ds_button name="ok" bind_text="presenter.update.ok_text">
 					<style name="dialog_button"/>

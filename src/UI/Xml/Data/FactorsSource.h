@@ -3,8 +3,9 @@
  *
  * Publishes the shared speed and extrusion factor dialogs (assets/ui/components/modals/factors.xml, hosted once by
  * the home screen): whether each is open, its title and its percentages. Any view opens them with the global actions
- * `actions.factors.speed` and `actions.factors.extrusion`, and the dialogs change them with `actions.factors.set` and
- * `actions.factors.close` (src/UI/Presenters/Modals/FactorsActions.h).
+ * `actions.factors.speed` and `actions.factors.extrusion`, and their sliders set the factors with
+ * `actions.factors.set` (src/UI/Presenters/Modals/FactorsActions.h). The dialogs close themselves
+ * (src/UI/Xml/Dialogs/DsDialog.h).
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -15,7 +16,6 @@
 #include "UI/Xml/View/FactorDialog.h"
 #include <cstddef>
 #include <optional>
-#include <string_view>
 #include <vector>
 
 namespace UI::Xml
@@ -41,9 +41,6 @@ namespace UI::Xml
 
 		/** Open the extrusion factor dialog for the extruders of the tool numbered `tool`, or every extruder if none */
 		void openExtrusion(std::optional<size_t> tool);
-
-		/** The dialog called `id` ("speed" or "extrusion"), or nullptr */
-		FactorDialog* dialog(std::string_view id);
 
 	  protected:
 		/** Follow the speed and extrusion factors */

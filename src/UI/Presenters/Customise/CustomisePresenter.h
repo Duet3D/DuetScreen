@@ -124,13 +124,9 @@ namespace UI
 		/** Tell the user `message`, e.g. why a layout couldn't be saved */
 		static void warn(const std::string& message);
 
-		/** Open or close the dialog whose subject is `dialog`, and show whether any is open */
-		void setOpen(Xml::IntSubject& dialog, bool open);
-
 		/** Stop customising, keeping the changes; say so if they couldn't be saved */
 		void finish();
 
-		Xml::IntSubject m_dialogOpen;					 // 1 while any of the dialogs is open
 		Xml::LayoutEditor::Selection m_openedFor;		 // What was selected when the pool or settings opened
 		Xml::List<CategoryRow> m_catalogue;				 // The widgets that can be added, by category
 		Xml::IntSubject m_catalogueOpen;				 // 1 while the widget pool is open

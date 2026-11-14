@@ -17,6 +17,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Surface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/BabystepSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ConsoleSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogActions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogHost.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogHostPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DsDialog.cpp

@@ -796,7 +796,7 @@ TEST_F(TestCustomiseHome, LayoutsAreSavedUnderANameLoadedAndDeleted)
 	tapToolbar("load");
 	ASSERT_TRUE(shownOnScreen(loadDialog));
 	EXPECT_TRUE(shownOnScreen(lv_obj_find_by_name(loadDialog, "none"))); // Nothing saved yet
-	UI::Xml::Actions::dispatch(UI::findView("customise")->getRootPtr(), "presenter.customise.close_load", "");
+	UI::Xml::Actions::dispatch(lv_obj_find_by_name(loadDialog, "none"), "actions.dialog.close", "");
 	update();
 
 	editor.select("dashboard", "temperature_graph");

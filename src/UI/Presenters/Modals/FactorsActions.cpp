@@ -65,18 +65,5 @@ namespace UI::FactorsActions
 									}
 									row->owner->set(static_cast<size_t>(row->index.get()), *value);
 								});
-		Xml::Actions::addGlobal("factors.close",
-								"Close the dialog named by `arg`, `speed` or `extrusion`, e.g. when it is dismissed",
-								[](const Xml::ActionArgs& args)
-								{
-									auto* source = factors();
-									auto* dialog = source != nullptr ? source->dialog(args.arg) : nullptr;
-									if (dialog == nullptr)
-									{
-										LOG_WARN("actions.factors.close: no factor dialog called '{:s}'", args.arg);
-										return;
-									}
-									dialog->close();
-								});
 	}
 } // namespace UI::FactorsActions

@@ -7,11 +7,11 @@
  *
  *     void FactorsSource::fields(FieldVisitor& f) { m_speed.fields(f); }  // source.factors.speed.open, ...
  *
- *     <factors_dialog dialog="speed" open="source.factors.speed.open" title="source.factors.speed.title"
+ *     <factors_dialog open="source.factors.speed.open" title="source.factors.speed.title"
  *                     factors="source.factors.speed.factors"/>
  *
- * The global actions `actions.factors.set` (from a row, which knows its dialog) and `actions.factors.close` change it
- * (src/UI/Presenters/Modals/FactorsActions.h).
+ * The global action `actions.factors.set`, raised from a row, which knows its dialog, sets a factor
+ * (src/UI/Presenters/Modals/FactorsActions.h). The dialog closes itself when the user closes it (DsDialog.h).
  */
 
 #pragma once
@@ -59,9 +59,6 @@ namespace UI::Xml
 
 		/** Declare `<id>.open`, `<id>.title` and `<id>.factors` */
 		void fields(FieldVisitor& f) override;
-
-		/** Its id, the prefix of its fields */
-		const std::string& id() const { return m_settings.id; }
 
 		/** Show `count` factors, called `labelOf(i)` with percentage `valueOf(i)` */
 		void show(size_t count,

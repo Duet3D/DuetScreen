@@ -181,12 +181,9 @@ namespace
 		{
 			action("test.ok", "Record ok", [this](const UI::Xml::ActionArgs&) { calls.emplace_back("ok"); });
 			action("test.dismissed",
-				   "Record dismissed",
+				   "Record dismissed, with what the subject says by then",
 				   [this](const UI::Xml::ActionArgs&)
-				   {
-					   calls.emplace_back("dismissed");
-					   dialog.set("");
-				   });
+				   { calls.emplace_back("dismissed '" + std::string(dialog.get()) + "'"); });
 		}
 
 		void fields(UI::Xml::FieldVisitor& f) override
@@ -225,6 +222,11 @@ namespace
 					<ds_button name="ok" text="OK">
 						<action trigger="clicked" name="presenter.test.ok"/>
 					</ds_button>
+					<ds_dialog_footer name="footer">
+						<ds_button name="cancel" text="Cancel">
+							<action trigger="clicked" name="actions.dialog.close"/>
+						</ds_button>
+					</ds_dialog_footer>
 				</ds_dialog>
 				<ds_tabs name="tabs" width="300" height="100">
 					<ds_tabs-tab name="first" title="First"/>
@@ -1171,12 +1173,19 @@ TEST_F(TestXmlUi, DialogFollowsItsSubject)
 	lv_obj_send_event(find(dialog, "ok"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok"}));
 
-	// Closed by the user, it says so, and the presenter's answer doesn't reopen it
+	// Closed by the user, it empties its subject, then says so
 	TestDialogs::tapHeader("close");
-	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok", "dismissed"}));
+	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok", "dismissed ''"}));
 	EXPECT_EQ(presenter.dialog.get(), "");
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
 	EXPECT_EQ(lv_obj_get_parent(dialog), view.getRootPtr()) << "back where it is written";
+
+	// A button in its footer closes it as the user would
+	presenter.dialog.set("ask");
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(presenter.calls, (std::vector<std::string>{"ok", "dismissed ''", "dismissed ''"}));
+	EXPECT_EQ(presenter.dialog.get(), "");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
 }
 
 TEST_F(TestXmlUi, DialogOutlivesItsSurface)

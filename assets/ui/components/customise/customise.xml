@@ -26,7 +26,9 @@
 		<lv_obj name="bar" width="content" height="content" scrollable="false" flex_flow="row"
 				style_flex_cross_place="center" style_pad_column="#pad_small">
 			<style name="card"/>
-			<bind_flag_if_eq subject="presenter.dialog_open" flag="hidden" ref_value="1"/>
+			<!-- Out of the way while any of its dialogs is open -->
+			<bind_flag_if cond="presenter.catalogue_open eq 1 or presenter.settings_open eq 1 or presenter.save_open eq 1 or presenter.load_open eq 1"
+						  flag="hidden"/>
 			<!-- The grip: dragging it moves the bar -->
 			<ds_move_handle name="grip" width="content" height="content" style_pad_all="0">
 				<ds_icon name="grip_icon" icon="drag.png" width="32" height="48" clickable="false"/>
@@ -75,7 +77,6 @@
 		<!-- The widget pool: the widgets that can go where the user chose, by category -->
 		<ds_dialog name="catalogue_dialog" bind_open="presenter.catalogue_open" title_tag="tr.customise.add_title"
 				   width="70%" height="80%" flex_flow="column">
-			<action trigger="dismissed" name="presenter.customise.close_catalogue"/>
 			<ds_list name="list" list="presenter.catalogue" item="customise_catalogue_category" width="100%" flex_grow="1"
 					 flex_flow="column"/>
 		</ds_dialog>
@@ -83,14 +84,13 @@
 		<!-- The selected widget's settings. Text is typed in place; a number or a choice is the next step. -->
 		<ds_dialog name="settings_dialog" bind_open="presenter.settings_open" bind_title="source.customise.title"
 				   flex_flow="column">
-			<action trigger="dismissed" name="presenter.customise.close_settings"/>
 			<ds_list name="list" list="presenter.settings" item="customise_setting" width="100%" height="content"
 					 flex_flow="column" style_pad_row="0"/>
 			<ds_dialog_footer name="footer">
 				<ds_button name="done" translation_tag="tr.customise.done">
 					<style name="dialog_button"/>
 					<style name="action_btn"/>
-					<action trigger="clicked" name="presenter.customise.close_settings"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
 				</ds_button>
 			</ds_dialog_footer>
 		</ds_dialog>
@@ -98,7 +98,6 @@
 		<!-- Saving: the name to save the layouts as -->
 		<ds_dialog name="save_dialog" bind_open="presenter.save_open" title_tag="tr.customise.save_title"
 				   flex_flow="column">
-			<action trigger="dismissed" name="presenter.customise.close_save"/>
 			<ds_textarea name="name" bind_text="presenter.save_name" one_line="true" width="100%"
 						 placeholder_tag="tr.customise.name_hint">
 				<action trigger="value_changed" name="presenter.customise.save_name"/>
@@ -111,7 +110,7 @@
 			<ds_dialog_footer name="footer">
 				<ds_button name="cancel" translation_tag="tr.common.cancel">
 					<style name="dialog_button"/>
-					<action trigger="clicked" name="presenter.customise.close_save"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
 				</ds_button>
 				<ds_button name="ok" translation_tag="tr.customise.save">
 					<style name="dialog_button"/>
@@ -124,7 +123,6 @@
 		<!-- Loading: the saved layouts; deleting one asks first, the next step -->
 		<ds_dialog name="load_dialog" bind_open="presenter.load_open" title_tag="tr.customise.saved_title"
 				   flex_flow="column">
-			<action trigger="dismissed" name="presenter.customise.close_load"/>
 			<lv_label name="none" translation_tag="tr.customise.none_saved" width="100%" long_mode="wrap">
 				<bind_flag_if_eq subject="presenter.has_saved" flag="hidden" ref_value="1"/>
 			</lv_label>

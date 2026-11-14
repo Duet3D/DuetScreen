@@ -32,7 +32,6 @@
 
 		<ds_dialog name="network_dialog" bind_open="presenter.network.open" bind_title="presenter.network.ssid"
 				   flex_flow="column">
-			<action trigger="dismissed" name="presenter.wifi.close"/>
 			<!-- Joining a secured network: first, so it stays in sight over the keyboard -->
 			<ds_setting name="password" title_tag="tr.settings.network.enter_password_title">
 				<style name="dialog_row"/>

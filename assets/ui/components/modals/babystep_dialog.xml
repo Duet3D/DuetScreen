@@ -9,7 +9,6 @@
 	<view extends="lv_obj" width="0" height="0" floating="true">
 		<ds_dialog name="babystep_dialog" bind_open="source.babystep.dialog_open" title_tag="tr.babystep.header" width="40%"
 				   height="85%">
-			<action trigger="dismissed" name="actions.babystep.close"/>
 			<ds_view name="dialog_babystep" view="babystep" shown="true" prop_hide_title="true" width="100%"
 					 height="100%" style_pad_all="0"/>
 		</ds_dialog>

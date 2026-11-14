@@ -57,16 +57,7 @@ namespace UI::BabystepActions
 								{
 									if (auto* source = babystep())
 									{
-										source->setDialogOpen(true);
-									}
-								});
-		Xml::Actions::addGlobal("babystep.close",
-								"Close the shared babystepping dialog",
-								[](const Xml::ActionArgs&)
-								{
-									if (auto* source = babystep())
-									{
-										source->setDialogOpen(false);
+										source->openDialog();
 									}
 								});
 	}

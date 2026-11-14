@@ -105,6 +105,9 @@ namespace UI::Xml
 		/** The back button: dismiss the step on top, unless it is blocking */
 		void goBack();
 
+		/** Dismiss the step `obj` is in and those above it, e.g. for a Cancel button in it; nothing if it is in none */
+		void dismissHolding(lv_obj_t* obj);
+
 		/** Tapping outside the card: as the close button */
 		void tappedOutside() { closeShown(); }
 

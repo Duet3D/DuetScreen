@@ -64,12 +64,12 @@ namespace UI::Xml
 				 "or "
 				 "as the next step of the one open, which the card slides to. Its content stays where it is written, "
 				 "hidden, so its actions go to that view. The surface draws its title, a close button (and a back "
-				 "button on a later step); closed by them, by tapping outside or by the back key, it raises "
-				 "`dismissed` so the view can update the subject. Closing it by its subject takes any steps opened "
+				 "button on a later step); closed by them, by tapping outside or by the back key, it empties its "
+				 "subject (0, or empty text) and raises `dismissed`, for anything else closing it should do. Closing "
+				 "it by its subject takes any steps opened "
 				 "from it too. The lv_obj attributes apply to its content.",
 			 .example =
 				 R"(<ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
-	<action trigger="dismissed" name="presenter.files.close_dialog"/>
 	…the dialog's content…
 </ds_dialog>)",
 			 .attributes =
@@ -98,6 +98,18 @@ namespace UI::Xml
 
 	void DsDialog::dismissed()
 	{
+		// Closed by the user: its subject says so first, so a `dismissed` action may open it again
+		if (m_open != nullptr && wantsOpen(m_open))
+		{
+			if (m_open->type == LV_SUBJECT_TYPE_INT)
+			{
+				lv_subject_set_int(m_open, 0);
+			}
+			else if (m_open->type == LV_SUBJECT_TYPE_STRING)
+			{
+				lv_subject_copy_string(m_open, "");
+			}
+		}
 		lv_obj_send_event(m_content, Actions::dismissedEvent(), nullptr);
 	}
 

@@ -337,6 +337,26 @@ namespace UI::Xml
 		update(Motion::backward);
 	}
 
+	void DialogHost::dismissHolding(lv_obj_t* obj)
+	{
+		// The step shown has its footer moved out of its content, under the card's body
+		const auto holds = [this, obj](DialogStep* step)
+		{
+			return isInside(obj, step->content()) ||
+				   (step == m_top && m_shownFooter != nullptr && isInside(obj, m_shownFooter));
+		};
+		auto& stack = shown();
+		for (size_t i = stack.size(); i-- > 0;)
+		{
+			if (holds(stack[i].step))
+			{
+				remove(stack, i, i);
+				update(i > 0 ? Motion::backward : Motion::none);
+				return;
+			}
+		}
+	}
+
 	void DialogHost::makeRoom(int32_t keyboardTop, lv_obj_t* focused)
 	{
 		// Handed on to another box, with the room made already, the card stays as it is: laying it out again would

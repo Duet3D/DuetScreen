@@ -4,10 +4,10 @@
  * <ds_dialog>: a dialog written in XML where it belongs, opened while its subject says so. Its content stays where it
  * is written, hidden, until it opens: then the dialog surface (DialogHost.h) shows it in its card, as the dialog or as
  * the next step of the one open. Actions raised in it still go to the view it is written in. Its attributes are in
- * registerXml().
+ * registerXml(). When the user closes it, it empties its subject (0, or empty text), so the code that opens it need
+ * not close it, then raises `dismissed`.
  *
  *     <ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
- *         <action trigger="dismissed" name="presenter.files.close_dialog"/>
  *         …the content…
  *     </ds_dialog>
  *
@@ -55,7 +55,7 @@ namespace UI::Xml
 		/** From `alert` */
 		bool alert() const override { return m_alert; }
 
-		/** Raise `dismissed`, for the view to update the subject */
+		/** Empty the subject, then raise `dismissed` */
 		void dismissed() override;
 
 	  private:
