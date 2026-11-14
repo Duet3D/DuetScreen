@@ -6,7 +6,6 @@
  * covered by test_home_view.cpp (control_view/fan.png), these tests check behaviour and structure.
  */
 
-#include "ObjectModel/Fan.h"
 #include "ObjectModel/Tool.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
@@ -18,10 +17,10 @@
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/History.h"
-#include "UI/Xml/Data/FanSource.h"
 #include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
+#include "UI/Xml/Om/OmList.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/View/XmlView.h"
@@ -104,7 +103,7 @@ namespace
 			int32_t tool;	// ToolRow::number, or -1 if no tool row was found
 			int32_t heater; // Row index of the ToolHeaterRow, or -1 if none was found
 			bool innermost; // Whether row() (any type) found the heater row
-			bool noFanRow;	// Whether row<FanRow>() found nothing
+			bool noOmRow;	// Whether row<OmRow>() found nothing: there is a row, but not of that type
 			bool operator==(const Call&) const = default;
 		};
 
@@ -120,7 +119,7 @@ namespace
 					   calls.push_back({tool ? tool->number.get() : -1,
 										heater ? heater->index.get() : -1,
 										heater != nullptr && args.row() == heater,
-										args.row<UI::Xml::FanRow>() == nullptr});
+										args.row<UI::Xml::OmRow>() == nullptr});
 				   });
 		}
 
@@ -273,7 +272,7 @@ namespace
 		<component>
 			<api><prop name="fan" type="int"/></api>
 			<view extends="lv_obj" width="100%" height="content">
-				<ds_list name="list" list="fans" key="number" value="$fan" item="fan_card" width="100%"
+				<ds_list name="list" list="om.fans" key="index" value="$fan" item="fan_card" width="100%"
 						 height="content"/>
 			</view>
 		</component>)";
@@ -549,7 +548,8 @@ TEST_F(TestXmlUi, ListGrowsAndShrinksAtTheEnd)
 	ASSERT_EQ(lv_obj_get_child_count(fanList(view)), 1u);
 	EXPECT_EQ(fanCard(view, 0), first);
 
-	// Disconnecting empties the list
+	// Disconnecting empties the list: the connection forgets the object model
+	OM::RemoveAll();
 	Model::get().post<EventType::Disconnected>();
 	pump();
 	EXPECT_EQ(lv_obj_get_child_count(fanList(view)), 0u);
@@ -593,9 +593,9 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 	writeFile(bundleFile("components/fan_card.xml"), R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content">
-				<lv_label name="custom" bind_text="name"/>
+				<lv_label name="custom" bind_text="name|default:fine_tune.fan"/>
 				<ds_button name="home" text="Home">
-					<action trigger="clicked" name="gcode" arg="G28 ; from fan {number} at {index}"/>
+					<action trigger="clicked" name="gcode" arg="G28 ; from {name|default:fine_tune.fan} at {index}"/>
 				</ds_button>
 			</view>
 		</component>)");
@@ -617,7 +617,7 @@ TEST_F(TestXmlUi, UserBundleOverridesAComponent)
 
 	// A global action with placeholders filled from the row
 	lv_obj_send_event(find(fanCard(view, 2), "home"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQ(m_sent, (std::vector<std::string>{"G28 ; from fan 2 at 2\n"}));
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"G28 ; from Fan 2 at 2\n"}));
 }
 
 TEST_F(TestXmlUi, BrokenOverrideFallsBackToBuiltin)
@@ -786,8 +786,8 @@ TEST_F(TestXmlUi, ActionsFindEveryEnclosingRow)
 	lv_obj_send_event(find(heaterRow(view, 1, 1), "edit"), LV_EVENT_CLICKED, nullptr);
 	lv_obj_send_event(find(heaterRow(view, 3, 0), "edit"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(presenter->calls,
-			  (std::vector<RecordingPresenter::Call>{{.tool = 2, .heater = 1, .innermost = true, .noFanRow = true},
-													 {.tool = 4, .heater = 0, .innermost = true, .noFanRow = true}}));
+			  (std::vector<RecordingPresenter::Call>{{.tool = 2, .heater = 1, .innermost = true, .noOmRow = true},
+													 {.tool = 4, .heater = 0, .innermost = true, .noOmRow = true}}));
 
 	// Placeholders resolve like bindings: the heater's index, the tool's number, the presenter's title
 	lv_obj_send_event(find(heaterRow(view, 1, 1), "send"), LV_EVENT_CLICKED, nullptr);

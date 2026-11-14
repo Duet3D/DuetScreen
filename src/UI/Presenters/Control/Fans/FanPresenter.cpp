@@ -4,9 +4,9 @@
 
 #include "FanPresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Fan.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
-#include "UI/Xml/Data/FanSource.h"
+#include "UI/Xml/Om/OmList.h"
 #include "UI/Xml/Runtime/Services.h"
 #include <algorithm>
 #include <cmath>
@@ -16,19 +16,19 @@ namespace UI
 	FanPresenter::FanPresenter()
 		: XmlPresenter("fans")
 	{
-		action(
-			"fans.set_speed",
-			"Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `fans`.",
-			[this](const Xml::ActionArgs& args) { setSpeed(args); });
+		action("fans.set_speed",
+			   "Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of "
+			   "`om.fans`.",
+			   [this](const Xml::ActionArgs& args) { setSpeed(args); });
 	}
 
 	void FanPresenter::setSpeed(const Xml::ActionArgs& args)
 	{
 		ZoneScoped;
-		const Xml::FanRow* row = args.row<Xml::FanRow>();
+		const Xml::OmRow* row = args.row<Xml::OmRow>();
 		if (row == nullptr)
 		{
-			LOG_WARN("fans.set_speed must come from a row of the fans list");
+			LOG_WARN("fans.set_speed must come from a row of the om.fans list");
 			return;
 		}
 
@@ -39,7 +39,7 @@ namespace UI
 			return;
 		}
 
-		setFanSpeed(row->number.get(), *value);
+		setFanSpeed(row->index.get(), *value);
 	}
 
 	void setFanSpeed(int32_t number, float value)
@@ -49,8 +49,8 @@ namespace UI
 		// Don't send what the fan is already set to
 		{
 			MODEL_LOCK();
-			if (auto fan = OM::GetFan(static_cast<size_t>(number));
-				fan && static_cast<int32_t>(std::lround(100 * fan->requestedValue)) == percent)
+			const OM::Node& fan = OM::Tree::get().root()["fans"][static_cast<size_t>(std::max(number, 0))];
+			if (fan.exists() && static_cast<int32_t>(std::lround(100 * fan["requestedValue"].number())) == percent)
 			{
 				return;
 			}

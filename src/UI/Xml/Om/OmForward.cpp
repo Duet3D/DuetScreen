@@ -90,11 +90,11 @@ namespace UI::Xml
 	{
 		if (m_integer)
 		{
-			m_integer->set(m_converter.toInteger(OM::Node::missing(), m_argument));
+			m_integer->set(m_converter.toInteger(OM::Node::missing(), m_target.value_or(OM::Path()), m_argument));
 		}
 		else
 		{
-			m_textSubject->set(m_converter.toText(OM::Node::missing(), m_argument));
+			m_textSubject->set(m_converter.toText(OM::Node::missing(), m_target.value_or(OM::Path()), m_argument));
 		}
 	}
 

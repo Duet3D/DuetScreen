@@ -8,10 +8,10 @@
 #include "MoveSource.h"
 #include "ObjectModel/Axis.h"
 #include "ObjectModel/BedOrChamber.h"
-#include "ObjectModel/Fan.h"
 #include "ObjectModel/Heat.h"
 #include "ObjectModel/Sensor.h"
 #include "ObjectModel/Tool.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 #include <algorithm>
@@ -138,12 +138,12 @@ namespace UI::Xml
 
 	void GaugeSource::onInit()
 	{
+		watchObjectModel({"fans"});
 		registerEventListener<EventType::HeaterData>(this, &GaugeSource::update);
 		registerEventListener<EventType::BedHeaterData>(this, &GaugeSource::update);
 		registerEventListener<EventType::ChamberHeaterData>(this, &GaugeSource::update);
 		registerEventListener<EventType::ToolData>(this, &GaugeSource::update);
 		registerEventListener<EventType::ToolHeaterData>([this](size_t) { update(); });
-		registerEventListener<EventType::FanData>(this, &GaugeSource::update);
 		registerEventListener<EventType::AnalogSensorData>(this, &GaugeSource::update);
 		registerEventListener<EventType::JobDuration>(this, &GaugeSource::update);
 		registerEventListener<EventType::JobFileProgress>(this, &GaugeSource::update);
@@ -224,21 +224,26 @@ namespace UI::Xml
 			}
 		}
 
-		for (size_t slot = 0; slot < OM::GetFanCount(); ++slot)
+		const OM::Node& fans = OM::Tree::get().root()["fans"];
+		for (size_t number = 0; number < fans.size(); ++number)
 		{
-			auto fan = OM::GetFanBySlot(slot);
-			if (fan == nullptr)
+			const OM::Node& fan = fans[number];
+			if (fan.isNull())
 			{
 				continue;
 			}
-			GaugeRow::Values row = percentage(fmt::format("fan.{:d}", fan->index),
-											  _("fine_tune.fan", fan->index),
-											  percent(fan->actualValue),
+			const std::string_view name = fan["name"].text();
+			// A thermostatic fan follows its sensors' temperature, so it can't be set by hand
+			const bool thermostatic = fan["thermostatic"]["lowTemperature"].exists();
+			GaugeRow::Values row = percentage(fmt::format("fan.{:d}", number),
+											  name.empty() ? _("fine_tune.fan", number) : std::string(name),
+											  percent(static_cast<float>(fan["actualValue"].number())),
 											  100,
-											  !fan->thermostatic);
+											  !thermostatic);
 			row.kind = "fan";
-			row.target = percent(fan->requestedValue);
-			row.detail = fan->rpm >= 0 ? _("widget.gauge_rpm", fan->rpm) : std::string();
+			row.target = percent(static_cast<float>(fan["requestedValue"].number()));
+			const int64_t rpm = fan["rpm"].integer(-1);
+			row.detail = rpm >= 0 ? _("widget.gauge_rpm", rpm) : std::string();
 			rows.push_back(std::move(row));
 		}
 

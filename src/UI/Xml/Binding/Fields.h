@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "Resolver.h"
 #include "Scope.h"
 #include <string_view>
 
@@ -81,7 +82,7 @@ namespace UI::Xml
 		Scope& m_scope; // Scope the fields are added to
 	};
 
-	/** Finds the field called `name` among those it visits */
+	/** Finds the field called `name` among those it visits, or failing that, asks their resolver for it */
 	class FieldFinder : public FieldVisitor
 	{
 	  public:
@@ -90,6 +91,9 @@ namespace UI::Xml
 			: m_name(name)
 		{
 		}
+
+		/** The subject called `name`: a field visited, else the resolver's, else nullptr. Call after the visit. */
+		Subject* subject() const;
 
 		/** Note the subject if it is the one looked for */
 		void field(std::string_view name, Subject& subject, std::string_view) override
@@ -109,10 +113,22 @@ namespace UI::Xml
 			}
 		}
 
-		Subject* foundSubject = nullptr; // The subject called `name`, or nullptr
+		/** Note the resolver, asked by subject() if no field visited is called `name` */
+		void resolver(Resolver& resolver) override { m_resolver = &resolver; }
+
+		Subject* foundSubject = nullptr; // The field called `name`, or nullptr
 		ListBase* foundList = nullptr;	   // The list called `name`, or nullptr
 
 	  private:
-		std::string_view m_name; // Name looked for; must outlive the visit
+		std::string_view m_name;		  // Name looked for; must outlive the visit
+		Resolver* m_resolver = nullptr; // The resolver visited, or nullptr
 	};
+	inline Subject* FieldFinder::subject() const
+	{
+		if (foundSubject != nullptr || m_resolver == nullptr)
+		{
+			return foundSubject;
+		}
+		return m_resolver->findSubject(nullptr, m_name, true);
+	}
 } // namespace UI::Xml

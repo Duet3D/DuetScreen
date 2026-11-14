@@ -257,14 +257,21 @@ namespace UI::Xml
 		{
 			FieldFinder keyField(key);
 			FieldFinder labelField(label);
+			FieldFinder existsField("exists");
 			rowList->row(i).allFields(keyField);
 			rowList->row(i).allFields(labelField);
-			if (keyField.foundSubject != nullptr)
+			rowList->row(i).allFields(existsField);
+			// A row of an object model list that is a gap (a null item, e.g. no fan 0) can't be chosen
+			if (existsField.foundSubject != nullptr && existsField.foundSubject->equals("0"))
 			{
-				const std::string value = keyField.foundSubject->text();
-				rows.push_back({.value = value,
-								.title = labelField.foundSubject ? labelField.foundSubject->text() : value,
-								.titleTag = ""});
+				continue;
+			}
+			// A row of an object model list has names besides its fields (`name|default:…`): FieldFinder asks for them
+			if (const Subject* keySubject = keyField.subject())
+			{
+				const std::string value = keySubject->text();
+				const Subject* labelSubject = labelField.subject();
+				rows.push_back({.value = value, .title = labelSubject ? labelSubject->text() : value, .titleTag = ""});
 			}
 		}
 		return rows;

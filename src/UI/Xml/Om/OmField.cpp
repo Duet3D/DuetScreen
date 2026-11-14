@@ -36,11 +36,11 @@ namespace UI::Xml
 		const OM::Node& node = root.at(m_path);
 		if (m_integer)
 		{
-			m_integer->set(m_converter.toInteger(node, m_argument));
+			m_integer->set(m_converter.toInteger(node, m_path, m_argument));
 		}
 		else
 		{
-			m_text->set(m_converter.toText(node, m_argument));
+			m_text->set(m_converter.toText(node, m_path, m_argument));
 		}
 	}
 } // namespace UI::Xml

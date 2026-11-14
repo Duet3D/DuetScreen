@@ -88,7 +88,8 @@ namespace UI::Xml
 
 		/**
 		 * What the user chooses from: a Choice's options, or a Row's list as it is now, one option per row (its key
-		 * as the value, its label as the title); empty for the other kinds, or a list that isn't published
+		 * as the value, its label as the title) but the gaps of an object model list (rows whose `exists` is 0);
+		 * empty for the other kinds, or a list that isn't published
 		 */
 		std::vector<SettingOption> choices() const;
 	};

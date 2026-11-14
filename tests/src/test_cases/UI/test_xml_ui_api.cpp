@@ -247,14 +247,14 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 			<action name="no.such_action"/>
 			<action name="fans.set_speed" trigger="clickd"/>
 		</ds_button>
-		<ds_list list="fans" item="lint_fan"/>
+		<ds_list list="om.fans" item="lint_fan"/>
 		<lint_dialog open="no_such_open"/>
 		<no_such_widget/>
 		<lv_obj style_radius="#no_such_const" style_pad_all="#pad"/>
 		<bind_flag_if cond="machine.printing and no_such_operand" flag="hidden"/>
-		<ds_list list="fans" key="numbr" value="2" item="lint_plain"/>
+		<ds_list list="om.fans" key="numbr" value="2" item="lint_plain"/>
 		<ds_list list="tools" key="heaters" value="2" item="lint_plain"/>
-		<ds_list list="fans" key="number" value="2" item="lint_plain"/>
+		<ds_list list="om.fans" key="index" value="2" item="lint_plain"/>
 	</view>
 </component>)";
 
@@ -268,7 +268,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 	<view extends="lv_obj">
 		<lv_label bind_text="rpm"/>
 		<lv_label bind_text="rpmx"/>
-		<ds_button><action name="gcode" arg="M106 P{number} S{value} X{nothing}"/></ds_button>
+		<ds_button><action name="gcode" arg="M106 P{index} S{value} X{nothing}"/></ds_button>
 	</view>
 </component>)";
 
@@ -320,7 +320,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:11: <no_such_widget> is no widget, component or binding (in lint_screen)",
 		"lint_screen.xml:12: no const or colour `#no_such_const` (in lint_screen)",
 		"lint_screen.xml:13: no subject `no_such_operand` (in lint_screen)",
-		"lint_screen.xml:14: rows of `fans` have no field `numbr` (in lint_screen)",
+		"lint_screen.xml:14: rows of `om.fans` have no field `numbr` (in lint_screen)",
 		"lint_screen.xml:15: `heaters` is a list, so it can't be a key (in lint_screen)",
 		"lint_sized.xml:4: no font `font_giant` (in widget lint_sized › lint_sized)",
 	};

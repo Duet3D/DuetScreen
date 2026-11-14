@@ -21,9 +21,9 @@
     {
       "name": "fan",
       "kind": "row",
-      "list": "fans",
-      "key": "number",
-      "label": "name",
+      "list": "om.fans",
+      "key": "index",
+      "label": "name|default:fine_tune.fan",
       "default": 0,
       "title_tag": "widget.setting_fan"
     }

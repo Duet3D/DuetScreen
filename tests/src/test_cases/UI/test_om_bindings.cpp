@@ -98,23 +98,29 @@ TEST_F(TestOmBindings, ConvertersGiveWhatTheySay)
 	const OM::Node size(OM::Node::Kind::number, "1572864");
 	const OM::Node& missing = OM::Node::missing();
 
-	EXPECT_EQ(findConverter("")->toText(number, ""), "61.25");
-	EXPECT_EQ(findConverter("")->toText(missing, ""), "");
-	EXPECT_EQ(findConverter("int")->toInteger(number, ""), 61);
-	EXPECT_EQ(findConverter("int")->toInteger(yes, ""), 1);
-	EXPECT_EQ(findConverter("int")->toInteger(state, ""), 0);
-	EXPECT_EQ(findConverter("percent")->toInteger(fraction, ""), 46);
-	EXPECT_EQ(findConverter("scale")->toInteger(number, "10"), 613);
-	EXPECT_EQ(findConverter("fixed")->toText(number, "1"), "61.2");
-	EXPECT_EQ(findConverter("fixed")->toText(state, "1"), "");
-	EXPECT_EQ(findConverter("exists")->toInteger(missing, ""), 0);
-	EXPECT_EQ(findConverter("exists")->toInteger(number, ""), 1);
-	EXPECT_EQ(findConverter("eq")->toInteger(state, "active"), 1);
-	EXPECT_EQ(findConverter("eq")->toInteger(state, "fault"), 0);
-	EXPECT_EQ(findConverter("duration")->toText(seconds, ""), "1:02:05");
-	EXPECT_EQ(findConverter("duration")->toText(fraction, ""), "0:00");
-	EXPECT_EQ(findConverter("bytes")->toText(size, ""), "1.5 MB");
-	EXPECT_EQ(findConverter("tr")->toText(state, "no.such.prefix"), "active") << "no translation gives the value";
+	EXPECT_EQ(findConverter("")->toText(number, {}, ""), "61.25");
+	EXPECT_EQ(findConverter("")->toText(missing, {}, ""), "");
+	EXPECT_EQ(findConverter("int")->toInteger(number, {}, ""), 61);
+	EXPECT_EQ(findConverter("int")->toInteger(yes, {}, ""), 1);
+	EXPECT_EQ(findConverter("int")->toInteger(state, {}, ""), 0);
+	EXPECT_EQ(findConverter("percent")->toInteger(fraction, {}, ""), 46);
+	EXPECT_EQ(findConverter("scale")->toInteger(number, {}, "10"), 613);
+	EXPECT_EQ(findConverter("fixed")->toText(number, {}, "1"), "61.2");
+	EXPECT_EQ(findConverter("fixed")->toText(state, {}, "1"), "");
+	EXPECT_EQ(findConverter("exists")->toInteger(missing, {}, ""), 0);
+	EXPECT_EQ(findConverter("exists")->toInteger(number, {}, ""), 1);
+	EXPECT_EQ(findConverter("eq")->toInteger(state, {}, "active"), 1);
+	EXPECT_EQ(findConverter("eq")->toInteger(state, {}, "fault"), 0);
+	EXPECT_EQ(findConverter("duration")->toText(seconds, {}, ""), "1:02:05");
+	EXPECT_EQ(findConverter("duration")->toText(fraction, {}, ""), "0:00");
+	EXPECT_EQ(findConverter("bytes")->toText(size, {}, ""), "1.5 MB");
+	EXPECT_EQ(findConverter("tr")->toText(state, {}, "no.such.prefix"), "active") << "no translation gives the value";
+	const OM::Node unnamed(OM::Node::Kind::string, "");
+	const OM::Node named(OM::Node::Kind::string, "Part cooling");
+	EXPECT_EQ(findConverter("default")->toText(named, *OM::Path::parse("fans[2].name"), "fine_tune.fan"),
+			  "Part cooling");
+	EXPECT_EQ(findConverter("default")->toText(unnamed, *OM::Path::parse("fans[2].name"), "fine_tune.fan"), "Fan 2");
+	EXPECT_EQ(findConverter("default")->toText(missing, *OM::Path::parse("fans[3].name"), "fine_tune.fan"), "Fan 3");
 	EXPECT_EQ(findConverter("nonsense"), nullptr);
 }
 

@@ -46,6 +46,7 @@ Each row of an object model list:
 | `\|eq` | int | The value compared with | 1 if the value is the argument, else 0, e.g. `state\|eq:fault` |
 | `\|duration` | text |  | Seconds as h:mm:ss, or m:ss under an hour |
 | `\|bytes` | text |  | A number of bytes as B, KB, MB or GB |
+| `\|default` | text | The translation key of the default; `{:d}` in it is the number | The value, or if it is empty, the translation of the argument with the item's number (the last index in the path): `name\|default:fine_tune.fan` gives "Fan 2" for fan 2 if it has no name |
 | `\|tr` | text | The translation key the value is added to | The translation of `<argument>.<value>`, or the value if there is none, e.g. `state\|tr:heater.state` |
 
 ## Global data
@@ -80,24 +81,6 @@ Each row of `console.lines`:
 | `customise.is_free` | int | 1 if new widgets go into a free layout, whose widgets can snap |
 | `customise.snap` | int | 1 if dragged widgets snap to the edges near them, in that free layout |
 | `customise.title` | text | The selected widget's name, translated; empty if none is selected |
-
-### fans
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `fans` | list | One row per fan, in slot order |
-
-Each row of `fans`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `number` | int | Fan number, as used by M106 P |
-| `name` | text | Display name, e.g. "Fan 1" |
-| `requested` | int | Requested speed, percent 0-100 |
-| `actual` | int | Measured speed, percent 0-100 |
-| `rpm` | int | Tachometer reading, -1 if none |
-| `thermostatic` | int | 1 if the fan is temperature controlled, else 0 |
 
 ### gauges
 
@@ -635,7 +618,7 @@ Used by `dashboard_fan`, `fans`.
 
 | Action | Description |
 | --- | --- |
-| `fans.set_speed` | Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `fans`. |
+| `fans.set_speed` | Set the fan's speed in percent: the edited value (`value_confirmed`), else `arg`. From a row of `om.fans`. |
 
 ### hardware_test
 
@@ -1931,7 +1914,7 @@ At its smallest, 365×89 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `fan` | Fan | a row of `fans`, by its `number`, shown by its `name` | `0` |
+| `fan` | Fan | a row of `om.fans`, by its `index`, shown by its `name\|default:fine_tune.fan` | `0` |
 
 #### fans
 

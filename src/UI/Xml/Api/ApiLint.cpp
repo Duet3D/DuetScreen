@@ -250,9 +250,33 @@ namespace UI::Xml::Api
 				}
 			}
 
-			/** Check a row setting's list is a global list whose rows have its key and label */
+			/**
+			 * Check a row setting's list is a global list whose rows have its key and label. For an object model list,
+			 * the key must be a field every row has (`index`); the label may also be a field of the item.
+			 */
 			void rowSetting(const SettingDef& setting, const std::function<void(std::string)>& report) const
 			{
+				const Context global{.def = nullptr, .props = nullptr, .scope = {}};
+				if (const auto omList = omPath(setting.list, global, true))
+				{
+					Context item = global;
+					item.scope.omItems.push_back(omList->index(0));
+					if (!isRowField(m_reference.omRowFields, setting.key))
+					{
+						report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
+										   setting.name,
+										   setting.list,
+										   setting.key));
+					}
+					if (!isRowField(m_reference.omRowFields, setting.label) && !omPath(setting.label, item, false))
+					{
+						report(fmt::format("setting `{:s}`: the rows of `{:s}` have no field `{:s}`",
+										   setting.name,
+										   setting.list,
+										   setting.label));
+					}
+					return;
+				}
 				const auto list = std::find_if(
 					m_globals.begin(), m_globals.end(), [&](const Field& field) { return field.name == setting.list; });
 				if (list == m_globals.end() || list->rowFields.empty())
@@ -273,6 +297,15 @@ namespace UI::Xml::Api
 										   *field));
 					}
 				}
+			}
+
+			/** Whether `fields` has a field (not a list) called `name` */
+			static bool isRowField(const std::vector<Field>& fields, const std::string& name)
+			{
+				return std::any_of(fields.begin(),
+								   fields.end(),
+								   [&name](const Field& field)
+								   { return field.name == name && field.rowFields.empty(); });
 			}
 
 			/** Read `component`'s file and what it declares */
@@ -520,11 +553,14 @@ namespace UI::Xml::Api
 					auto item = valueOf(element, "item", context);
 					const Field* field = list ? findField(*list, context) : nullptr;
 					auto component = item ? m_components.find(*item) : m_components.end();
-					if (auto key = valueOf(element, "key", context); key && field)
-					{
-						checkKey(*key, *field, element, context);
-					}
 					const auto omList = field || !list ? std::nullopt : omPath(*list, context, true);
+					if (auto key = valueOf(element, "key", context); key && (field || omList))
+					{
+						// The rows of an object model list are keyed by a field every row has, e.g. `index`
+						const Field omRows{
+							.name = *list, .type = "list", .description = "", .rowFields = m_reference.omRowFields};
+						checkKey(*key, field ? *field : omRows, element, context);
+					}
 					if (component != m_components.end() && (field || omList))
 					{
 						// An object model list's rows have names relative to their item besides their fields

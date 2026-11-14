@@ -4,7 +4,6 @@
 
 #include "GaugeActions.h"
 #include "Debug.h"
-#include "ObjectModel/Fan.h"
 #include "UI/Core/Model.h"
 #include "UI/Presenters/Control/Fans/FanPresenter.h"
 #include "UI/Presenters/Control/Temperature/HeaterActions.h"

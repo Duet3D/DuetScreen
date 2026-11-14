@@ -1354,8 +1354,8 @@ TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
 	runEvents();
 	openControlTab(4);
 	ASSERT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true));
-	OM::RemoveFan(0, true);
-	Model::get().post<EventType::FanData>();
+	load_model_data(R"({"key":"fans","flags":"v","result":[]})"
+					"\n");
 	runEvents();
 	EXPECT_EQ(openNumberPad(), nullptr);
 }

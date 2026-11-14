@@ -4,7 +4,6 @@
 	<xs:simpleType name="subject.names">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="active"/>
-			<xs:enumeration value="actual"/>
 			<xs:enumeration value="adb"/>
 			<xs:enumeration value="advanced_settings"/>
 			<xs:enumeration value="alert.accepted_chars"/>
@@ -119,7 +118,6 @@
 			<xs:enumeration value="extrusion_dialog.title"/>
 			<xs:enumeration value="factor"/>
 			<xs:enumeration value="failed"/>
-			<xs:enumeration value="fans"/>
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrate.title"/>
 			<xs:enumeration value="feedrate.value"/>
@@ -245,7 +243,6 @@
 			<xs:enumeration value="primary_hue"/>
 			<xs:enumeration value="progress_source"/>
 			<xs:enumeration value="progress_sources"/>
-			<xs:enumeration value="requested"/>
 			<xs:enumeration value="reset_text"/>
 			<xs:enumeration value="response.open"/>
 			<xs:enumeration value="response.progress"/>
@@ -256,7 +253,6 @@
 			<xs:enumeration value="retract_usable"/>
 			<xs:enumeration value="rotation"/>
 			<xs:enumeration value="rotations"/>
-			<xs:enumeration value="rpm"/>
 			<xs:enumeration value="save_name"/>
 			<xs:enumeration value="save_open"/>
 			<xs:enumeration value="save_problem"/>
@@ -319,7 +315,6 @@
 			<xs:enumeration value="text_style"/>
 			<xs:enumeration value="theme"/>
 			<xs:enumeration value="themes"/>
-			<xs:enumeration value="thermostatic"/>
 			<xs:enumeration value="thumbnail"/>
 			<xs:enumeration value="tiles"/>
 			<xs:enumeration value="time"/>
@@ -386,7 +381,6 @@
 			<xs:enumeration value="extruders"/>
 			<xs:enumeration value="extrusion_dialog.factors"/>
 			<xs:enumeration value="failed"/>
-			<xs:enumeration value="fans"/>
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="files"/>
 			<xs:enumeration value="gauges"/>

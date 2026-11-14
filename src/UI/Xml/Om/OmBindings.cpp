@@ -10,6 +10,7 @@
 #include "OmName.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Scope.h"
+#include <algorithm>
 
 namespace UI::Xml
 {
@@ -100,6 +101,34 @@ namespace UI::Xml
 				list->refresh(root);
 			}
 		}
+
+		// A watcher may watch or unwatch, so call a copy of those to tell
+		std::vector<std::function<void()>> told;
+		for (const auto& watcher : m_watchers)
+		{
+			if (std::any_of(watcher.paths.begin(),
+							watcher.paths.end(),
+							[&changes](const std::string& path) { return changes.touches(path); }))
+			{
+				told.push_back(watcher.callback);
+			}
+		}
+		for (const auto& callback : told)
+		{
+			callback();
+		}
+	}
+
+	size_t OmBindings::watch(std::vector<std::string> paths, std::function<void()> callback)
+	{
+		const size_t id = m_nextWatcher++;
+		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback)});
+		return id;
+	}
+
+	void OmBindings::unwatch(size_t id)
+	{
+		std::erase_if(m_watchers, [id](const Watcher& watcher) { return watcher.id == id; });
 	}
 
 	void OmBindings::refreshAll()
@@ -115,6 +144,15 @@ namespace UI::Xml
 		for (auto& [path, list] : m_lists)
 		{
 			list->refresh(root);
+		}
+		std::vector<std::function<void()>> told;
+		for (const auto& watcher : m_watchers)
+		{
+			told.push_back(watcher.callback);
+		}
+		for (const auto& callback : told)
+		{
+			callback();
 		}
 	}
 

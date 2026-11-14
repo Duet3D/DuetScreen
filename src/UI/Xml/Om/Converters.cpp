@@ -10,6 +10,7 @@
 #include <cmath>
 #include <fmt/format.h>
 #include <limits>
+#include <optional>
 
 namespace UI::Xml
 {
@@ -50,31 +51,31 @@ namespace UI::Xml
 		}
 
 		/** The value as text, as received */
-		std::string asText(const OM::Node& node, std::string_view)
+		std::string asText(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			return std::string(node.text());
 		}
 
 		/** The value rounded to a whole number */
-		int32_t asInteger(const OM::Node& node, std::string_view)
+		int32_t asInteger(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			return toInt32(node.number(0));
 		}
 
 		/** The value × 100, rounded */
-		int32_t asPercent(const OM::Node& node, std::string_view)
+		int32_t asPercent(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			return toInt32(node.number(0) * 100);
 		}
 
 		/** The value × the argument, rounded */
-		int32_t scaled(const OM::Node& node, std::string_view argument)
+		int32_t scaled(const OM::Node& node, const OM::Path&, std::string_view argument)
 		{
 			return toInt32(node.number(0) * toDouble(argument, 1));
 		}
 
 		/** The value with the argument's number of decimals */
-		std::string fixed(const OM::Node& node, std::string_view argument)
+		std::string fixed(const OM::Node& node, const OM::Path&, std::string_view argument)
 		{
 			if (!isNumeric(node))
 			{
@@ -85,25 +86,25 @@ namespace UI::Xml
 		}
 
 		/** An array's length */
-		int32_t count(const OM::Node& node, std::string_view)
+		int32_t count(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			return node.isArray() ? static_cast<int32_t>(node.size()) : 0;
 		}
 
 		/** 1 if there and not null */
-		int32_t exists(const OM::Node& node, std::string_view)
+		int32_t exists(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			return node.exists() ? 1 : 0;
 		}
 
 		/** 1 if the value, as text, is the argument */
-		int32_t equals(const OM::Node& node, std::string_view argument)
+		int32_t equals(const OM::Node& node, const OM::Path&, std::string_view argument)
 		{
 			return node.isValue() && node.text() == argument ? 1 : 0;
 		}
 
 		/** Seconds as h:mm:ss, or m:ss under an hour */
-		std::string duration(const OM::Node& node, std::string_view)
+		std::string duration(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			if (!isNumeric(node))
 			{
@@ -118,7 +119,7 @@ namespace UI::Xml
 		}
 
 		/** A size in bytes, as B, KB, MB or GB */
-		std::string bytes(const OM::Node& node, std::string_view)
+		std::string bytes(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			if (!isNumeric(node))
 			{
@@ -136,8 +137,38 @@ namespace UI::Xml
 							 : fmt::format("{:.1f} {:s}", value, units[unit]);
 		}
 
+		/** The number of the item the field belongs to: the last index in its path, or nothing if there is none */
+		std::optional<size_t> itemNumber(const OM::Path& path)
+		{
+			for (auto it = path.segments().rbegin(); it != path.segments().rend(); ++it)
+			{
+				if (const auto* index = std::get_if<size_t>(&*it))
+				{
+					return *index;
+				}
+			}
+			return std::nullopt;
+		}
+
+		/** The value, or if it is empty, the translation of the argument with the item's number */
+		std::string orDefault(const OM::Node& node, const OM::Path& path, std::string_view argument)
+		{
+			if (node.isValue() && !node.text().empty())
+			{
+				return std::string(node.text());
+			}
+			const std::string key(argument);
+			const std::string* translation = i18n::find(key);
+			if (translation == nullptr || *translation == key)
+			{
+				return "";
+			}
+			const auto number = itemNumber(path);
+			return number ? fmt::format(fmt::runtime(*translation), *number) : *translation;
+		}
+
 		/** The translation of "<argument>.<value>", or the value if there is none */
-		std::string translated(const OM::Node& node, std::string_view argument)
+		std::string translated(const OM::Node& node, const OM::Path&, std::string_view argument)
 		{
 			if (!node.isValue())
 			{
@@ -213,6 +244,15 @@ namespace UI::Xml
 					  .argument = "",
 					  .toInteger = nullptr,
 					  .toText = bytes},
+			Converter{.name = "default",
+					  .type = Converter::Type::text,
+					  .description =
+						  "The value, or if it is empty, the translation of the argument with the item's "
+						  "number (the last index in the path): `name|default:fine_tune.fan` gives \"Fan 2\" "
+						  "for fan 2 if it has no name",
+					  .argument = "The translation key of the default; `{:d}` in it is the number",
+					  .toInteger = nullptr,
+					  .toText = orDefault},
 			Converter{.name = "tr",
 					  .type = Converter::Type::text,
 					  .description = "The translation of `<argument>.<value>`, or the value if there is none, e.g. "

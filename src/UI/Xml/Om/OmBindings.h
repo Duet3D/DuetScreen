@@ -26,11 +26,13 @@
 #include "OmList.h"
 #include "OmPath.h"
 #include "UI/Xml/Binding/Resolver.h"
+#include <functional>
 #include <map>
 #include <optional>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace UI::Xml
 {
@@ -72,11 +74,22 @@ namespace UI::Xml
 		 * ObjectModel/Tree/Schema.h) */
 		bool isField(const OM::Path& path) const;
 
-		/** Update everything at, below or above the paths the object model changed since the last flush */
+		/** Update everything at, below or above the paths the object model changed since the last flush, then tell
+		 * the watchers of those paths */
 		void flush();
 
-		/** Read everything again */
+		/** Read everything again, and tell every watcher */
 		void refreshAll();
+
+		/**
+		 * Call `callback` after a flush changes anything at, below or above one of `paths` (e.g. "fans",
+		 * "heat.heaters"), for C++ that reads the object model itself (see Data/DataSource.h)
+		 * @return what unwatch() takes
+		 */
+		size_t watch(std::vector<std::string> paths, std::function<void()> callback);
+
+		/** Stop the watcher watch() returned `id` for */
+		void unwatch(size_t id);
 
 		/** An `om.` name's subject (see the file comment) */
 		Subject* findSubject(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last) override;
@@ -97,5 +110,15 @@ namespace UI::Xml
 		std::map<std::string, std::unique_ptr<OmList>, std::less<>> m_lists;   // By path
 		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_forwards;	// Forwarders made outside any scope
 		std::map<std::string, std::unique_ptr<ListBase>, std::less<>> m_forwardLists; // As m_forwards, for lists
+
+		/** One watch() */
+		struct Watcher
+		{
+			size_t id;						// What unwatch() takes
+			std::vector<std::string> paths; // Paths watched
+			std::function<void()> callback; // Called after a flush changing one
+		};
+		std::vector<Watcher> m_watchers; // Told about changes
+		size_t m_nextWatcher = 1;		 // Id of the next watcher
 	};
 } // namespace UI::Xml

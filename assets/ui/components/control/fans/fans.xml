@@ -1,7 +1,7 @@
 <!--
   Fan screen: one card per fan in the object model.
 
-  Data:     the global `fans` list (src/UI/Xml/Data/FanSource.h). Each fan_card binds to its own fan's fields.
+  Data:     the object model's fans (om.fans). Each fan_card binds to its own fan's fields.
   Actions:  fans.set_speed, from the `fans` presenter (src/UI/Presenters/Control/Fans/FanPresenter.h).
 -->
 <component presenter="fans">
@@ -20,7 +20,7 @@
 				</lv_label>
 			</lv_obj>
 
-			<ds_list name="list" list="fans" item="fan_card" width="100%" height="content"
+			<ds_list name="list" list="om.fans" item="fan_card" width="100%" height="content"
 					 flex_flow="column" style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 	</view>
