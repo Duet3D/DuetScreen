@@ -66,9 +66,9 @@
     },
     "control": {
       "move_tab": "Bewegen",
-      "temperature_tab": "Werkzeug / Temperatur",
-      "heightmap_tab": "Bettnivellierung",
-      "object_cancel_tab": "Objekt abbrechen",
+      "tools_tab": "Werkzeuge",
+      "heightmap_tab": "Bett-Mesh",
+      "object_cancel_tab": "Objekte",
       "fan_tab": "Lüfter"
     },
     "estop": {

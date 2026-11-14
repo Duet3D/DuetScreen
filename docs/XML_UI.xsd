@@ -1348,7 +1348,7 @@
 			<xs:enumeration value="tr.control.heightmap_tab"/>
 			<xs:enumeration value="tr.control.move_tab"/>
 			<xs:enumeration value="tr.control.object_cancel_tab"/>
-			<xs:enumeration value="tr.control.temperature_tab"/>
+			<xs:enumeration value="tr.control.tools_tab"/>
 			<xs:enumeration value="tr.customise.add"/>
 			<xs:enumeration value="tr.customise.add_title"/>
 			<xs:enumeration value="tr.customise.bad_name"/>
@@ -3505,6 +3505,9 @@
 		</xs:attribute>
 		<xs:attribute name="bind_disabled" type="subject">
 			<xs:annotation><xs:documentation>Disable the tab's button while this int subject is non-zero</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_shown" type="subject">
+			<xs:annotation><xs:documentation>Show the tab only while this int subject is non-zero, e.g. a tab for a part the machine may not have: `bind_shown=&quot;om.fans|count&quot;`. Hiding the selected tab selects the next one</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="select_on" type="subject">
 			<xs:annotation><xs:documentation>Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on=&quot;om.job.file.fileName&quot;`</xs:documentation></xs:annotation>

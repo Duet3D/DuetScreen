@@ -1,5 +1,6 @@
 <!--
-  The Control page: moving the axes, temperatures, the height map, cancelling objects, and fans, in tabs.
+  The Control page: moving the axes, the tools, the bed mesh, cancelling objects, and fans, in tabs. A tab shows only
+  while the machine has what it is for: tools, a probe, a job's labelled objects, fans. Moving always shows.
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
@@ -8,16 +9,17 @@
 			<ds_tabs-tab name="move" title_tag="tr.control.move_tab">
 				<ds_view name="move" view="move" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="temperature" title_tag="tr.control.temperature_tab">
+			<ds_tabs-tab name="temperature" title_tag="tr.control.tools_tab" bind_shown="om.tools|count">
 				<ds_view name="temperature" view="temperature" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="heightmap" title_tag="tr.control.heightmap_tab">
+			<ds_tabs-tab name="heightmap" title_tag="tr.control.heightmap_tab" bind_shown="om.sensors.probes|count">
 				<ds_view name="heightmap" view="heightmap" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="object_cancel" title_tag="tr.control.object_cancel_tab">
+			<ds_tabs-tab name="object_cancel" title_tag="tr.control.object_cancel_tab"
+						 bind_shown="om.job.build.objects|count">
 				<ds_view name="object_cancel" view="object_cancel" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="fans" title_tag="tr.control.fan_tab">
+			<ds_tabs-tab name="fans" title_tag="tr.control.fan_tab" bind_shown="om.fans|count">
 				<ds_view name="fans" view="fans" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>

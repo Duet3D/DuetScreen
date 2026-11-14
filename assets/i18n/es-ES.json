@@ -66,9 +66,9 @@
     },
     "control": {
       "move_tab": "Mover",
-      "temperature_tab": "Herramienta / Temperatura",
-      "heightmap_tab": "Nivelación de cama",
-      "object_cancel_tab": "Cancelar objeto",
+      "tools_tab": "Herramientas",
+      "heightmap_tab": "Malla de la cama",
+      "object_cancel_tab": "Objetos",
       "fan_tab": "Ventiladores"
     },
     "estop": {

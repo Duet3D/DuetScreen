@@ -67,9 +67,9 @@
     },
     "control": {
       "move_tab": "Move",
-      "temperature_tab": "Tool / Temperature",
-      "heightmap_tab": "Bed Levelling",
-      "object_cancel_tab": "Object Cancel",
+      "tools_tab": "Tools",
+      "heightmap_tab": "Bed mesh",
+      "object_cancel_tab": "Objects",
       "fan_tab": "Fans"
     },
     "estop": { /* Estop widget */

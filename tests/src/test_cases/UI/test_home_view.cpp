@@ -287,23 +287,42 @@ TEST_F(TestHomeView, BlankControlView)
 {
 	auto& control = controlPage();
 
+	// A machine that reports nothing has only moving: the other tabs are for parts it doesn't have
 	openControlTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
+	EXPECT_TRUE(control.isTabAvailable(0)) << "Move";
+	for (size_t tab = 1; tab < control.getTabCount(); tab++)
+	{
+		EXPECT_FALSE(control.isTabAvailable(tab)) << "tab " << tab;
+	}
+}
 
-	control.setActiveTab(1);
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_blank.png");
+TEST_F(TestHomeView, ControlTabsFollowTheMachine)
+{
+	auto& control = controlPage();
+	openControlTab(0);
 
-	control.setActiveTab(2);
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_blank.png");
+	// Each tab shows once the machine reports its part, and goes with it
+	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_sensors_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_fans_v.json");
+	deliverModelEvents();
+	EXPECT_TRUE(control.isTabAvailable(1)) << "Tools";
+	EXPECT_TRUE(control.isTabAvailable(2)) << "Bed mesh";
+	EXPECT_FALSE(control.isTabAvailable(3)) << "Objects: no job";
+	EXPECT_TRUE(control.isTabAvailable(4)) << "Fans";
 
-	control.setActiveTab(3);
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel_blank.png");
+	load_model_data_from_file("tests/object_model/job/model_job_objects.json");
+	deliverModelEvents();
+	EXPECT_TRUE(control.isTabAvailable(3)) << "Objects: a job with labelled objects";
 
-	control.setActiveTab(4);
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/fan_blank.png");
-
-	control.setActiveTab(0);
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
+	// The tab shown goes when its part does: the next one available is shown
+	control.setActiveTab(3, false);
+	load_model_data(R"({"key":"","flags":"d99f","result":{"job":{"build":null}}})"
+					"\n");
+	deliverModelEvents();
+	EXPECT_FALSE(control.isTabAvailable(3));
+	EXPECT_EQ(control.getActiveTabIndex(), 4u);
 }
 
 TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)

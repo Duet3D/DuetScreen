@@ -1654,6 +1654,7 @@ Also takes every `lv_obj` attribute.
 | `end` | "true" to put the tab, and those after it, at the far end of the tab bar, e.g. the bottom of a bar down a side |
 | `title_tag` | Translation key for the tab button's text |
 | `bind_disabled` | Disable the tab's button while this int subject is non-zero |
+| `bind_shown` | Show the tab only while this int subject is non-zero, e.g. a tab for a part the machine may not have: `bind_shown="om.fans\|count"`. Hiding the selected tab selects the next one |
 | `select_on` | Select the tab whenever this subject changes to a non-empty text or non-zero int, e.g. the status tab when a job starts: `select_on="om.job.file.fileName"` |
 
 ### ds_textarea
@@ -2283,7 +2284,7 @@ At its smallest, 180×136 px:
 
 #### heightmap
 
-**Bed Levelling**: The bed's height map, levelling and probing
+**Bed mesh**: The bed's height map, levelling and probing
 
 In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a free layout it is 642×467 px, and at least 550×372 px.
 
@@ -2387,7 +2388,7 @@ At its smallest, 920×420 px:
 
 #### object_cancel
 
-**Object Cancel**: The job's objects, to cancel one
+**Objects**: The job's objects, to cancel one
 
 In Jobs; placed in `dashboard`; component `object_cancel` ([object_cancel.json](../assets/ui/widgets/jobs/object_cancel.json)). In a free layout it is 642×467 px, and at least 458×278 px.
 

@@ -66,9 +66,9 @@
     },
     "control": {
       "move_tab": "Déplacer",
-      "temperature_tab": "Outil / Température",
-      "heightmap_tab": "Nivellement du plateau",
-      "object_cancel_tab": "Annuler objet",
+      "tools_tab": "Outils",
+      "heightmap_tab": "Maillage du plateau",
+      "object_cancel_tab": "Objets",
       "fan_tab": "Ventilateurs"
     },
     "estop": {

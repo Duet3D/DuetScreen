@@ -77,6 +77,11 @@ namespace UI::Xml
 							{"bind_disabled",
 							 "Disable the tab's button while this int subject is non-zero",
 							 AttributeKind::Subject},
+							{"bind_shown",
+							 "Show the tab only while this int subject is non-zero, e.g. a tab for a part the "
+							 "machine may not have: `bind_shown=\"om.fans|count\"`. Hiding the selected tab selects "
+							 "the next one",
+							 AttributeKind::Subject},
 							{"select_on",
 							 "Select the tab whenever this subject changes to a non-empty text or non-zero "
 							 "int, e.g. the status tab when a job starts: `select_on=\"om.job.file.fileName\"`",
@@ -168,6 +173,12 @@ namespace UI::Xml
 			deleteWith(tab, ref);
 			lv_subject_add_observer_obj(subject, disabledObserverCb, tab, ref);
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_shown"))
+		{
+			auto* ref = new TabRef{tabs, index};
+			deleteWith(tab, ref);
+			lv_subject_add_observer_obj(subject, shownObserverCb, tab, ref);
+		}
 		if (lv_subject_t* subject = findSubject(state, attrs, "select_on"))
 		{
 			auto* ref = new TabRef{tabs, index};
@@ -196,5 +207,11 @@ namespace UI::Xml
 	{
 		const auto* ref = static_cast<const TabRef*>(lv_observer_get_user_data(observer));
 		ref->tabs->disableTab(ref->index, lv_subject_get_int(subject) != 0);
+	}
+
+	void DsTabs::shownObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		const auto* ref = static_cast<const TabRef*>(lv_observer_get_user_data(observer));
+		ref->tabs->showTab(ref->index, lv_subject_get_int(subject) != 0);
 	}
 } // namespace UI::Xml

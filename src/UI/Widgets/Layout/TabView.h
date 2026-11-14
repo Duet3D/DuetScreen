@@ -44,15 +44,28 @@ namespace UI
 
 		bool disableTab(size_t index, bool disable);
 
+		/**
+		 * Show or hide tab `index`'s button. A hidden tab can't be selected: hiding the selected tab selects the next
+		 * one available, and showing a tab while none is selected selects it.
+		 * @return false if there is no such tab
+		 */
+		bool showTab(size_t index, bool shown);
+
 		/** Put tab `index`, and those after it, at the far end of the tab bar, e.g. the bottom of a bar down a side */
 		void pinToEnd(size_t index);
 
 		/** Whether tab `index`'s button is disabled; false if there is no such tab */
 		bool isTabDisabled(size_t index);
 
+		/** Whether tab `index` can be selected: its button is shown and not disabled; false if there is no such tab */
+		bool isTabAvailable(size_t index);
+
 	  private:
 		/** Lay out the tab bar and content area */
 		void init();
+
+		/** Tab `index` can no longer be selected: if it is the one selected, select the next available, or none */
+		void leaveTab(size_t index);
 
 		/**
 		 * Style `button` for the side the tab bar is on. Across the top or bottom, the tabs share the bar's width, the

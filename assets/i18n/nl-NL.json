@@ -66,9 +66,9 @@
     },
     "control": {
       "move_tab": "Verplaatsen",
-      "temperature_tab": "Gereedschap / Temperatuur",
-      "heightmap_tab": "Bednivellering",
-      "object_cancel_tab": "Object annuleren",
+      "tools_tab": "Gereedschappen",
+      "heightmap_tab": "Bedmesh",
+      "object_cancel_tab": "Objecten",
       "fan_tab": "Ventilatoren"
     },
     "estop": {

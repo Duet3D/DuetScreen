@@ -296,6 +296,14 @@ namespace UI
 		return tab_button != nullptr && tab_button->hasState(LV_STATE_DISABLED);
 	}
 
+	bool TabView::isTabAvailable(size_t index)
+	{
+		UI_LOCK();
+		TabButton* tab_button = m_tabButtons.getItem(index);
+		return tab_button != nullptr && !tab_button->hasState(LV_STATE_DISABLED) &&
+			   !tab_button->hasFlag(LV_OBJ_FLAG_HIDDEN);
+	}
+
 	bool TabView::disableTab(size_t index, bool disable)
 	{
 		ZoneScoped;
@@ -313,29 +321,57 @@ namespace UI
 		}
 
 		tab_button->setDisabled(disable);
-
-		if (disable && index == m_currentTabIndex)
+		if (disable)
 		{
-			// If disabling the active tab, switch to the first available tab
-			bool switched = false;
-			for (size_t i = 0; i < m_tabs.size(); i++)
-			{
-				size_t shifted_index = (index + i + 1) % m_tabs.size();
-				TabButton* next_button = m_tabButtons.getItem(shifted_index);
-				if (shifted_index != index && next_button && !next_button->hasState(LV_STATE_DISABLED))
-				{
-					setActiveTab(shifted_index);
-					switched = true;
-					break;
-				}
-			}
-			if (!switched)
-			{
-				m_currentTabIndex = -1; // No active tab
-				m_tabs.at(index)->hide();
-			}
+			leaveTab(index);
+		}
+		return true;
+	}
+
+	bool TabView::showTab(size_t index, bool shown)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		TabButton* tab_button = m_tabButtons.getItem(index);
+		if (!tab_button)
+		{
+			LOG_ERROR("Tab index {} out of range", index);
+			return false;
 		}
 
+		if (tab_button->hasFlag(LV_OBJ_FLAG_HIDDEN) != shown)
+		{
+			return true; // Already in desired state
+		}
+
+		tab_button->setFlag(LV_OBJ_FLAG_HIDDEN, !shown);
+		if (!shown)
+		{
+			leaveTab(index);
+		}
+		else if (m_currentTabIndex >= m_tabs.size() && isTabAvailable(index))
+		{
+			setActiveTab(index, false);
+		}
 		return true;
+	}
+
+	void TabView::leaveTab(size_t index)
+	{
+		if (index != m_currentTabIndex)
+		{
+			return;
+		}
+		for (size_t i = 1; i < m_tabs.size(); i++)
+		{
+			const size_t next = (index + i) % m_tabs.size();
+			if (isTabAvailable(next))
+			{
+				setActiveTab(next, false);
+				return;
+			}
+		}
+		m_currentTabIndex = -1; // No active tab
+		m_tabs.at(index)->hide();
 	}
 } // namespace UI

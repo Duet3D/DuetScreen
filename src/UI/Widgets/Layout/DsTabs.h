@@ -47,6 +47,9 @@ namespace UI::Xml
 		/** `bind_disabled` observer */
 		static void disabledObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
+		/** `bind_shown` observer */
+		static void shownObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
 		/** `select_on` observer */
 		static void selectObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 	};
