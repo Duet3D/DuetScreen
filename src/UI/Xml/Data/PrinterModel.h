@@ -73,6 +73,12 @@ namespace UI::Xml::PrinterModel
 	/** The axis whose letter is `letter` (move.axes[…]), or a missing node */
 	const OM::Node& axis(char letter);
 
+	/** The number of the axis whose letter is `letter`, or nothing */
+	std::optional<size_t> axisNumber(char letter);
+
+	/** The current tool's offset along the axis whose letter is `letter`; 0 with no current tool or no such axis */
+	float toolOffset(char letter);
+
 	/** The axes there are and the user sees (not hidden), in order, by number */
 	std::vector<size_t> visibleAxes();
 

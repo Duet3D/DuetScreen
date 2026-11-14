@@ -11,9 +11,12 @@
 #pragma once
 
 #include "UI/Xml/Binding/List.h"
+#include "ObjectModel/Tree/Node.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <functional>
+#include <string>
 
 namespace UI
 {
@@ -54,8 +57,15 @@ namespace UI
 		/** Show every object, the one being printed, and the bed's span */
 		void showObjects();
 
-		/** Show the bed's span */
+		/** Show the bed's span: the X and Y axes' travel, shifted by the current tool's offsets, or without them
+		 * the objects' bounds with a margin */
 		void showSpan();
+
+		/** The job's objects (job.build.objects; the model lock held) */
+		static const OM::Node& objects();
+
+		/** The name of the object being printed, or "None" if it has none or none is */
+		static std::string currentObjectName();
 
 		/** Ask `title` and `text`, then do `action` if the answer is yes */
 		void ask(std::string title, std::string text, std::function<void()> action);
@@ -72,5 +82,6 @@ namespace UI
 		Xml::IntSubject m_confirm;				 // 1 while asking
 		Xml::StringSubject<64> m_confirmTitle;	 // Question title
 		Xml::StringSubject<160> m_confirmText;	 // Question
+		Xml::OmWatch m_watch;					 // Shows the objects again as the job, axes or tool change
 	};
 } // namespace UI

@@ -4,11 +4,10 @@
 
 #include "ObjectCancelPresenter.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
-#include "ObjectModel/Job.h"
-#include "ObjectModel/Tool.h"
 #include "Storage.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Runtime/Services.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
@@ -43,44 +42,52 @@ namespace UI
 			   [this](const Xml::ActionArgs& args)
 			   {
 				   const auto* row = args.row<JobObjectRow>();
-				   auto object = row ? OM::GetJobObject(static_cast<size_t>(row->number.get())) : nullptr;
-				   if (object == nullptr)
+				   if (row == nullptr)
 				   {
 					   LOG_WARN("object_cancel.select must come from an objects row");
 					   return;
 				   }
-				   const size_t index = object->index;
-				   const bool resume = object->cancelled;
+				   const auto index = static_cast<size_t>(row->number.get());
+				   std::string name;
+				   bool resume = false;
+				   {
+					   MODEL_LOCK();
+					   const OM::Node& object = objects()[index];
+					   if (!object.exists())
+					   {
+						   return;
+					   }
+					   name = object["name"].text();
+					   resume = object["cancelled"].boolean();
+				   }
+				   // M486 P cancels an object, M486 U resumes it
+				   const std::string gcode = fmt::format("M486 {:c}{:d}\n", resume ? 'U' : 'P', index);
 				   if (resume)
 				   {
 					   ask(_("object_cancel.confirm_uncancel_title"),
-						   _("object_cancel.confirm_uncancel_text", object->name),
-						   [index]() { OM::SetJobObjectActive(index, true); });
+						   _("object_cancel.confirm_uncancel_text", name),
+						   [gcode]() { Xml::Services::sendGcode(gcode); });
 				   }
 				   else
 				   {
 					   ask(_("object_cancel.confirm_cancel_title"),
-						   _("object_cancel.confirm_cancel_text", object->name),
-						   [index]() { OM::SetJobObjectActive(index, false); });
+						   _("object_cancel.confirm_cancel_text", name),
+						   [gcode]() { Xml::Services::sendGcode(gcode); });
 				   }
 			   });
 		action("object_cancel.cancel_current",
 			   "Cancel the object being printed, asking first if confirmations are on",
 			   [this](const Xml::ActionArgs&)
 			   {
+				   const auto cancelCurrent = []() { Xml::Services::sendGcode("M486 C\n"); };
 				   if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
 				   {
-					   OM::CancelCurrentJobObject();
+					   cancelCurrent();
 					   return;
 				   }
-				   const int8_t current = OM::GetCurrentJobObjectIndex();
-				   auto object = current >= 0 ? OM::GetJobObject(static_cast<size_t>(current)) : nullptr;
-				   const std::string name = object != nullptr && !object->name.empty()
-												? std::string(object->name)
-												: _("object_cancel.current_object_none");
 				   ask(_("object_cancel.confirm_cancel_current_title"),
-					   _("object_cancel.confirm_cancel_current_text", name),
-					   []() { OM::CancelCurrentJobObject(); });
+					   _("object_cancel.confirm_cancel_current_text", currentObjectName()),
+					   cancelCurrent);
 			   });
 		action("object_cancel.confirm",
 			   "Answer yes to the question (`confirm`): close it and do what it asked",
@@ -121,10 +128,7 @@ namespace UI
 
 	void ObjectCancelPresenter::onInit()
 	{
-		registerEventListener<EventType::JobBuild>([this]() { showObjects(); });
-		registerEventListener<EventType::JobCurrentObject>([this]() { showObjects(); });
-		registerEventListener<EventType::JobObjectData>([this]() { showObjects(); });
-		registerEventListener<EventType::AxesData>([this]() { showSpan(); });
+		m_watch = Xml::OmWatch({"job.build", "move.axes", "tools", "state.currentTool"}, [this] { showObjects(); });
 	}
 
 	void ObjectCancelPresenter::onActivate()
@@ -141,82 +145,97 @@ namespace UI
 		m_confirm.set(1);
 	}
 
+	const OM::Node& ObjectCancelPresenter::objects()
+	{
+		return Xml::PrinterModel::root()["job"]["build"]["objects"];
+	}
+
+	std::string ObjectCancelPresenter::currentObjectName()
+	{
+		MODEL_LOCK();
+		const int64_t current = Xml::PrinterModel::root()["job"]["build"]["currentObject"].integer(-1);
+		const std::string_view name = current >= 0 ? objects()[static_cast<size_t>(current)]["name"].text() : "";
+		return name.empty() ? _("object_cancel.current_object_none") : std::string(name);
+	}
+
 	void ObjectCancelPresenter::showObjects()
 	{
 		ZoneScoped;
 		MODEL_LOCK();
 		showSpan();
 
-		std::vector<std::shared_ptr<OM::JobObject>> objects;
-		objects.reserve(OM::GetJobObjectCount());
-		OM::IterateJobObjectsWhile(
-			[&objects](std::shared_ptr<OM::JobObject> object, size_t)
+		std::vector<size_t> numbers;
+		for (size_t number = 0; number < objects().size(); ++number)
+		{
+			if (objects()[number].exists())
 			{
-				objects.push_back(std::move(object));
-				return true;
-			});
-		const int8_t current = OM::GetCurrentJobObjectIndex();
-		m_objects.sync(objects.size(),
-					   [&objects, current](JobObjectRow& row, size_t i)
+				numbers.push_back(number);
+			}
+		}
+		const int64_t current = Xml::PrinterModel::root()["job"]["build"]["currentObject"].integer(-1);
+		m_objects.sync(numbers.size(),
+					   [&numbers, current](JobObjectRow& row, size_t i)
 					   {
-						   const auto& object = *objects[i];
-						   row.number.set(static_cast<int32_t>(object.index));
-						   row.label.set(fmt::format("[{:d}]: {:s}", object.index, object.name));
-						   row.x1.set(object.bounds.x[0]);
-						   row.y1.set(object.bounds.y[0]);
-						   row.x2.set(object.bounds.x[1]);
-						   row.y2.set(object.bounds.y[1]);
-						   row.current.set(static_cast<int8_t>(object.index) == current ? 1 : 0);
-						   row.cancelled.set(object.cancelled ? 1 : 0);
+						   const OM::Node& object = objects()[numbers[i]];
+						   row.number.set(static_cast<int32_t>(numbers[i]));
+						   row.label.set(fmt::format("[{:d}]: {:s}", numbers[i], object["name"].text()));
+						   row.x1.set(static_cast<int32_t>(object["x"][0].integer(0)));
+						   row.y1.set(static_cast<int32_t>(object["y"][0].integer(0)));
+						   row.x2.set(static_cast<int32_t>(object["x"][1].integer(0)));
+						   row.y2.set(static_cast<int32_t>(object["y"][1].integer(0)));
+						   row.current.set(static_cast<int64_t>(numbers[i]) == current ? 1 : 0);
+						   row.cancelled.set(object["cancelled"].boolean() ? 1 : 0);
 					   });
-
-		auto currentObject = current >= 0 ? OM::GetJobObject(static_cast<size_t>(current)) : nullptr;
-		m_currentObject.set(currentObject != nullptr && !currentObject->name.empty()
-								? std::string(currentObject->name)
-								: _("object_cancel.current_object_none"));
+		m_currentObject.set(currentObjectName());
 	}
 
 	void ObjectCancelPresenter::showSpan()
 	{
 		MODEL_LOCK();
-		auto axisX = OM::Move::GetAxisByLetter('X');
-		auto axisY = OM::Move::GetAxisByLetter('Y');
+		const OM::Node& axisX = Xml::PrinterModel::axis('X');
+		const OM::Node& axisY = Xml::PrinterModel::axis('Y');
 		float xMin = 0.0f;
 		float xMax = DEFAULT_SPAN;
 		float yMin = 0.0f;
 		float yMax = DEFAULT_SPAN;
-		if (axisX)
+		if (axisX.exists())
 		{
-			const float offset = OM::GetCurrentToolAxisOffset(axisX);
-			xMin = axisX->minPosition + offset;
-			xMax = axisX->maxPosition + offset;
+			const float offset = Xml::PrinterModel::toolOffset('X');
+			xMin = static_cast<float>(axisX["min"].number()) + offset;
+			xMax = static_cast<float>(axisX["max"].number()) + offset;
 		}
-		if (axisY)
+		if (axisY.exists())
 		{
-			const float offset = OM::GetCurrentToolAxisOffset(axisY);
-			yMin = axisY->minPosition + offset;
-			yMax = axisY->maxPosition + offset;
+			const float offset = Xml::PrinterModel::toolOffset('Y');
+			yMin = static_cast<float>(axisY["min"].number()) + offset;
+			yMax = static_cast<float>(axisY["max"].number()) + offset;
 		}
 
 		// Without the axes, the objects' bounds with a margin
-		if (!axisX || !axisY)
+		if (!axisX.exists() || !axisY.exists())
 		{
 			bool any = false;
 			float oxMin = 0.0f;
 			float oxMax = 0.0f;
 			float oyMin = 0.0f;
 			float oyMax = 0.0f;
-			OM::IterateJobObjectsWhile(
-				[&](std::shared_ptr<OM::JobObject> object, size_t)
+			for (size_t number = 0; number < objects().size(); ++number)
+			{
+				const OM::Node& object = objects()[number];
+				if (!object.exists())
 				{
-					const auto& b = object->bounds;
-					oxMin = any ? std::min(oxMin, static_cast<float>(b.x[0])) : static_cast<float>(b.x[0]);
-					oxMax = any ? std::max(oxMax, static_cast<float>(b.x[1])) : static_cast<float>(b.x[1]);
-					oyMin = any ? std::min(oyMin, static_cast<float>(b.y[0])) : static_cast<float>(b.y[0]);
-					oyMax = any ? std::max(oyMax, static_cast<float>(b.y[1])) : static_cast<float>(b.y[1]);
-					any = true;
-					return true;
-				});
+					continue;
+				}
+				const auto x0 = static_cast<float>(object["x"][0].number());
+				const auto x1 = static_cast<float>(object["x"][1].number());
+				const auto y0 = static_cast<float>(object["y"][0].number());
+				const auto y1 = static_cast<float>(object["y"][1].number());
+				oxMin = any ? std::min(oxMin, x0) : x0;
+				oxMax = any ? std::max(oxMax, x1) : x1;
+				oyMin = any ? std::min(oyMin, y0) : y0;
+				oyMax = any ? std::max(oyMax, y1) : y1;
+				any = true;
+			}
 			if (!any)
 			{
 				xMin = yMin = 0.0f;
@@ -226,12 +245,12 @@ namespace UI
 			{
 				const float marginX = (oxMax - oxMin) * OBJECT_MARGIN;
 				const float marginY = (oyMax - oyMin) * OBJECT_MARGIN;
-				if (!axisX)
+				if (!axisX.exists())
 				{
 					xMin = oxMin - marginX;
 					xMax = oxMax + marginX;
 				}
-				if (!axisY)
+				if (!axisY.exists())
 				{
 					yMin = oyMin - marginY;
 					yMax = oyMax + marginY;

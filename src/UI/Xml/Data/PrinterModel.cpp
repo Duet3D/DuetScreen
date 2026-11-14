@@ -137,7 +137,7 @@ namespace UI::Xml::PrinterModel
 		return root()["move"]["extruders"][static_cast<size_t>(extruder)]["filament"].text();
 	}
 
-	const OM::Node& axis(char letter)
+	std::optional<size_t> axisNumber(char letter)
 	{
 		const OM::Node& axes = root()["move"]["axes"];
 		for (size_t number = 0; number < axes.size(); ++number)
@@ -145,10 +145,23 @@ namespace UI::Xml::PrinterModel
 			const std::string_view axisLetter = axes[number]["letter"].text();
 			if (!axisLetter.empty() && axisLetter.front() == letter)
 			{
-				return axes[number];
+				return number;
 			}
 		}
-		return OM::Node::missing();
+		return std::nullopt;
+	}
+
+	const OM::Node& axis(char letter)
+	{
+		const auto number = axisNumber(letter);
+		return number ? root()["move"]["axes"][*number] : OM::Node::missing();
+	}
+
+	float toolOffset(char letter)
+	{
+		const auto tool = currentTool();
+		const auto number = axisNumber(letter);
+		return tool && number ? static_cast<float>(PrinterModel::tool(*tool)["offsets"][*number].number()) : 0.0f;
 	}
 
 	std::vector<size_t> visibleAxes()

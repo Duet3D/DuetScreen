@@ -283,38 +283,25 @@ TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 {
 	openControlTab(3);
 
-	OM::ClearJobObjects();
-	auto object = OM::GetOrCreateJobObject(0);
-	ASSERT_NE(object, nullptr);
-	object->index = 0;
-	object->name = "gear (Instance 5)";
-	object->bounds.x[0] = 100;
-	object->bounds.x[1] = 150;
-	object->bounds.y[0] = 100;
-	object->bounds.y[1] = 150;
-	OM::SetCurrentJobObject(0);
-	Model::get().post<EventType::JobCurrentObject>();
+	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
+					R"json({"cancelled":false,"name":"gear (Instance 5)","x":[100,150],"y":[100,150]}]}}})json"
+					"\n");
 	Model::get().startEventLoop();
 	Model::get().stopEventLoop();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/set_object_name.png");
 
-	OM::SetCurrentJobObject(-1);
-	Model::get().post<EventType::JobCurrentObject>();
+	load_model_data(R"({"key":"","flags":"d99f","result":{"job":{"build":{"currentObject":-1}}}})"
+					"\n");
 	Model::get().startEventLoop();
 	Model::get().stopEventLoop();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/clear_object_name.png");
-
-	OM::ClearJobObjects();
 }
 
 TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 {
-	OM::ClearJobObjects();
-	auto object = OM::GetOrCreateJobObject(0);
-	ASSERT_NE(object, nullptr);
-	object->index = 0;
-	object->name = "gear (Instance 1)";
-	OM::SetCurrentJobObject(0);
+	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
+					R"json({"cancelled":false,"name":"gear (Instance 1)","x":[0,0],"y":[0,0]}]}}})json"
+					"\n");
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
 	openControlTab(3);
@@ -347,8 +334,6 @@ TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN)) << "cancelled without asking";
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
-	OM::SetCurrentJobObject(-1);
-	OM::ClearJobObjects();
 }
 
 TEST_F(TestHomeView, BlankConsoleView)
@@ -917,15 +902,10 @@ TEST_F(TestHomeViewWithData, ControlView)
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/fan.png");
 
 	load_model_data_from_file("tests/object_model/job/model_job_objects.json");
-	{
-		auto x = OM::Move::GetAxisByLetter('X');
-		x->minPosition = -200.0f;
-		x->maxPosition = 100.0f;
-
-		auto y = OM::Move::GetAxisByLetter('Y');
-		y->minPosition = -100.0f;
-		y->maxPosition = 100.0f;
-	}
+	// The objects were recorded on a printer whose bed is centred: its X and Y limits, for the 10 axes there are
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"move":{"axes":[{"min":-200,"max":100},{"min":-100,"max":100},{},{},{},{},{},{},{},{}]}}})"
+		"\n");
 	control.setActiveTab(3);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel.png");
 
