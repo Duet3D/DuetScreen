@@ -21,12 +21,9 @@ namespace UI::Xml
 		{
 			const OM::Node& heater = PrinterModel::heater(place.heater);
 			const std::string name = count > 1 ? fmt::format("{:s} {:d}", kind, place.number) : kind;
-			const std::string state = PrinterModel::heaterState(place.heater);
 			row.number.set(static_cast<int32_t>(place.number));
 			row.update({.heater = static_cast<int32_t>(place.heater),
 						.name = name,
-						.state = state,
-						.current = static_cast<float>(heater["current"].number()),
 						.active = static_cast<int32_t>(heater["active"].integer(0)),
 						.standby = static_cast<int32_t>(heater["standby"].integer(0)),
 						.min = static_cast<float>(heater["min"].number()),

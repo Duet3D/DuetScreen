@@ -121,10 +121,7 @@ Each row of `tools`:
 | Name | Type | Description |
 | --- | --- | --- |
 | `index` | int | Position in the list, from 0 |
-| `number` | int | Tool number, as used by T |
-| `name` | text | Display name |
-| `selected` | int | 1 if this is the active tool, else 0 |
-| `heater_count` | int | Number of heaters |
+| `number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
 | `heaters` | list | One row per heater of the tool |
 
 Each row of `tools` › `heaters`:
@@ -134,10 +131,6 @@ Each row of `tools` › `heaters`:
 | `index` | int | Position in the list, from 0 |
 | `heater` | int | Heater number |
 | `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `state` | text | Status key: active, standby, off, fault, tuning, offline or unknown |
-| `status` | text | Status, translated for display |
-| `current` | text | Current temperature as text, one decimal place, e.g. "21.2" |
-| `current_value` | int | Current temperature, whole °C, for a bar |
 | `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
 | `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
 | `active` | int | Active target temperature, °C |
@@ -158,10 +151,6 @@ Each row of `beds`:
 | `number` | int | Bed or chamber number, as used by M140/M141 P |
 | `heater` | int | Heater number |
 | `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `state` | text | Status key: active, standby, off, fault, tuning, offline or unknown |
-| `status` | text | Status, translated for display |
-| `current` | text | Current temperature as text, one decimal place, e.g. "21.2" |
-| `current_value` | int | Current temperature, whole °C, for a bar |
 | `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
 | `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
 | `active` | int | Active target temperature, °C |
@@ -175,10 +164,6 @@ Each row of `chambers`:
 | `number` | int | Bed or chamber number, as used by M140/M141 P |
 | `heater` | int | Heater number |
 | `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `state` | text | Status key: active, standby, off, fault, tuning, offline or unknown |
-| `status` | text | Status, translated for display |
-| `current` | text | Current temperature as text, one decimal place, e.g. "21.2" |
-| `current_value` | int | Current temperature, whole °C, for a bar |
 | `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
 | `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
 | `active` | int | Active target temperature, °C |
@@ -1109,14 +1094,8 @@ Each row of `tools`:
 | Name | Type | Description |
 | --- | --- | --- |
 | `index` | int | Position in the list, from 0 |
-| `number` | int | Tool number, as used by T |
-| `name` | text | Display name |
-| `selected` | int | 1 if this is the active tool, else 0 |
-| `heater_count` | int | Number of heaters |
+| `number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
 | `heaters` | list | One row per heater of the tool |
-| `state` | text | Status key, e.g. active, standby, off |
-| `status` | text | Status, translated for display |
-| `extruders` | list | The tool's extruders, each with `factor` |
 | `filament_shown` | int | 1 if the tool takes filament |
 | `filament_text` | text | The filament picked or loaded, or "No Filament Loaded" |
 | `filament_loaded` | int | 1 if filament is loaded, so it can be unloaded |
@@ -1130,21 +1109,10 @@ Each row of `tools` › `heaters`:
 | `index` | int | Position in the list, from 0 |
 | `heater` | int | Heater number |
 | `name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `state` | text | Status key: active, standby, off, fault, tuning, offline or unknown |
-| `status` | text | Status, translated for display |
-| `current` | text | Current temperature as text, one decimal place, e.g. "21.2" |
-| `current_value` | int | Current temperature, whole °C, for a bar |
 | `scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
 | `scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
 | `active` | int | Active target temperature, °C |
 | `standby` | int | Standby target temperature, °C |
-
-Each row of `tools` › `extruders`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `index` | int | Position in the list, from 0 |
-| `factor` | text | Extrusion factor, e.g. "100%" |
 
 | Action | Description |
 | --- | --- |
@@ -2236,7 +2204,7 @@ At its smallest, 458×100 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `tool` | Tool | a row of `tools`, by its `number`, shown by its `name` | `0` |
+| `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:temperature.default_tool_name` | `0` |
 
 #### tools
 

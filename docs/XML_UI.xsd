@@ -68,7 +68,6 @@
 			<xs:enumeration value="current_tool.heaters"/>
 			<xs:enumeration value="current_tool.label"/>
 			<xs:enumeration value="current_tool.shown"/>
-			<xs:enumeration value="current_value"/>
 			<xs:enumeration value="customise.can_configure"/>
 			<xs:enumeration value="customise.can_remove"/>
 			<xs:enumeration value="customise.can_undo"/>
@@ -106,7 +105,6 @@
 			<xs:enumeration value="error_notifications_stay"/>
 			<xs:enumeration value="exit_shown"/>
 			<xs:enumeration value="extrude_usable"/>
-			<xs:enumeration value="extruders"/>
 			<xs:enumeration value="extrusion_dialog.factors"/>
 			<xs:enumeration value="extrusion_dialog.open"/>
 			<xs:enumeration value="extrusion_dialog.pad.accepted"/>
@@ -116,7 +114,6 @@
 			<xs:enumeration value="extrusion_dialog.pad.text"/>
 			<xs:enumeration value="extrusion_dialog.pad_shown"/>
 			<xs:enumeration value="extrusion_dialog.title"/>
-			<xs:enumeration value="factor"/>
 			<xs:enumeration value="failed"/>
 			<xs:enumeration value="feedrate.choices"/>
 			<xs:enumeration value="feedrate.title"/>
@@ -134,7 +131,6 @@
 			<xs:enumeration value="gcodes"/>
 			<xs:enumeration value="has_saved"/>
 			<xs:enumeration value="heater"/>
-			<xs:enumeration value="heater_count"/>
 			<xs:enumeration value="heaters"/>
 			<xs:enumeration value="home_all_usable"/>
 			<xs:enumeration value="home_usable"/>
@@ -378,7 +374,6 @@
 			<xs:enumeration value="console.lines"/>
 			<xs:enumeration value="crumbs"/>
 			<xs:enumeration value="distance.choices"/>
-			<xs:enumeration value="extruders"/>
 			<xs:enumeration value="extrusion_dialog.factors"/>
 			<xs:enumeration value="failed"/>
 			<xs:enumeration value="feedrate.choices"/>

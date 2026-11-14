@@ -20,23 +20,8 @@
 #include <string>
 #include <vector>
 
-namespace OM
-{
-	struct Tool;
-}
-
 namespace UI
 {
-	/** One extruder of a tool */
-	class ToolExtruderRow : public Xml::Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(Xml::FieldVisitor& f) override;
-
-		Xml::StringSubject<8> factor; // Extrusion factor, e.g. "100%"
-	};
-
 	/** One tool with heaters, as the Temperature tab shows it */
 	class TemperatureToolRow : public Xml::ToolRow
 	{
@@ -50,9 +35,6 @@ namespace UI
 		/** Pick `filament`, to load with change_filament */
 		void pick(std::string filament);
 
-		Xml::StringSubject<16> state;			  // Status key
-		Xml::StringSubject<32> status;			  // Translated status
-		Xml::List<ToolExtruderRow> extruders;	  // The tool's extruders
 		Xml::IntSubject filamentShown;			  // 1 if the tool takes filament
 		Xml::StringSubject<64> filamentText;	  // Picked or loaded filament, or "No Filament Loaded"
 		Xml::IntSubject filamentLoaded;			  // 1 if filament is loaded

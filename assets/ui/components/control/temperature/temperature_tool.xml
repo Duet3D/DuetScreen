@@ -4,28 +4,29 @@
 
   Pick a filament, then Load (or Change) to load it. Nothing that would change the job can be pressed while printing.
 
-  Fields and actions: a tools row (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h); tools.toggle
+  Fields and actions: a tools row (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h), with the tool's name,
+  state and extruders from its om.tools[{number}]; tools.toggle
   (src/UI/Presenters/Control/Temperature/HeaterActions.h)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
 		<style name="card"/>
 		<style name="tool_selected" selector="checked"/>
-		<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
+		<bind_state_if_eq subject="om.tools[{number}].state|eq:active" state="checked" ref_value="1"/>
 
 		<lv_obj name="tool_info" width="100%" height="content" flex_flow="row_wrap"
 				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-			<ds_button name="tool_name" bind_text="name" width="content" height="content">
+			<ds_button name="tool_name" bind_text="om.tools[{number}].name|default:temperature.default_tool_name" width="content" height="content">
 				<style name="action_btn"/>
-				<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
+				<bind_state_if_eq subject="om.tools[{number}].state|eq:active" state="checked" ref_value="1"/>
 				<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 				<action trigger="clicked" name="tools.toggle"/>
 			</ds_button>
-			<lv_label name="tool_state" bind_text="status" width="content" height="content"/>
+			<lv_label name="tool_state" bind_text="om.tools[{number}].state|tr:temperature.status" width="content" height="content"/>
 			<lv_obj name="tool_info_spacer" height="0" flex_grow="1"/>
 
 			<lv_obj name="extrusion_factors" width="content" height="content" style_pad_all="0" flex_flow="column">
-				<ds_list name="list" list="extruders" item="temperature_extruder" width="content" height="content"
+				<ds_list name="list" list="om.tools[{number}].extruders" item="temperature_extruder" width="content" height="content"
 						 flex_flow="row"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>

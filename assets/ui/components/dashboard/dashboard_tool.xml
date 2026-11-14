@@ -1,15 +1,16 @@
 <!--
   One tool in the tool list: its name, which selects it, and a row per heater. Outlined while selected.
 
-  Fields:   a row of the tools list: number, name, selected, heater_count, heaters (src/UI/Xml/Data/ToolSource.h)
+  Fields:   a row of the tools list: number, heaters (src/UI/Xml/Data/ToolSource.h); the tool's name and state are
+            its om.tools[{number}]
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
 		<style name="tool_list_tool"/>
 		<style name="tool_selected" selector="checked"/>
-		<bind_state_if_eq subject="selected" state="checked" ref_value="1"/>
+		<bind_state_if_eq subject="om.tools[{number}].state|eq:active" state="checked" ref_value="1"/>
 
-		<ds_button name="tool_name" bind_text="name" width="content" height="content">
+		<ds_button name="tool_name" bind_text="om.tools[{number}].name|default:temperature.default_tool_name" width="content" height="content">
 			<style name="action_btn"/>
 			<style name="border_color_card" selector="checked"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
@@ -18,7 +19,7 @@
 
 		<lv_obj name="heaters" width="100%" height="content" flex_flow="column"
 				style_pad_bottom="0" style_pad_left="0" style_pad_right="0">
-			<bind_flag_if_eq subject="heater_count" flag="hidden" ref_value="0"/>
+			<bind_flag_if_eq subject="om.tools[{number}].heaters|count" flag="hidden" ref_value="0"/>
 			<ds_list name="list" list="heaters" item="dashboard_heater" width="100%" height="content" flex_flow="column"
 					 style_pad_all="0"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>

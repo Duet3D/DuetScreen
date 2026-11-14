@@ -13,17 +13,9 @@
 
 namespace UI
 {
-	void ToolExtruderRow::fields(Xml::FieldVisitor& f)
-	{
-		f.field("factor", factor, "Extrusion factor, e.g. \"100%\"");
-	}
-
 	void TemperatureToolRow::fields(Xml::FieldVisitor& f)
 	{
 		ToolRow::fields(f);
-		f.field("state", state, "Status key, e.g. active, standby, off");
-		f.field("status", status, "Status, translated for display");
-		f.list("extruders", extruders, "The tool's extruders, each with `factor`");
 		f.field("filament_shown", filamentShown, "1 if the tool takes filament");
 		f.field("filament_text", filamentText, "The filament picked or loaded, or \"No Filament Loaded\"");
 		f.field("filament_loaded", filamentLoaded, "1 if filament is loaded, so it can be unloaded");
@@ -34,24 +26,6 @@ namespace UI
 	void TemperatureToolRow::update(size_t toolNumber)
 	{
 		ToolRow::update(toolNumber);
-		const OM::Node& tool = Xml::PrinterModel::tool(toolNumber);
-		const std::string_view toolState = tool["state"].text();
-		const std::string key = toolState.empty() ? "off" : std::string(toolState);
-		state.set(key);
-		status.set(_(fmt::format("temperature.status.{:s}", key)));
-		const OM::Node& extruderNumbers = tool["extruders"];
-		const OM::Node& allExtruders = Xml::PrinterModel::root()["move"]["extruders"];
-		extruders.sync(extruderNumbers.size(),
-					   [&](ToolExtruderRow& row, size_t i)
-					   {
-						   const OM::Node& extruder =
-							   allExtruders[static_cast<size_t>(std::max<int64_t>(extruderNumbers[i].integer(-1), 0))];
-						   if (extruder.exists())
-						   {
-							   row.factor.set(
-								   fmt::format("{:d}%", static_cast<int>(100 * extruder["factor"].number())));
-						   }
-					   });
 		filamentShown.set(Xml::PrinterModel::takesFilament(toolNumber) ? 1 : 0);
 
 		// A new filament loaded replaces whatever was picked

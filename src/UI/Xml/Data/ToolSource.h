@@ -29,9 +29,6 @@ namespace UI::Xml
 		void update(size_t toolNumber);
 
 		IntSubject number;			 // Tool number
-		StringSubject<32> name;		 // Display name
-		IntSubject selected;		 // 1 if active
-		IntSubject heaterCount;		 // Number of heaters
 		List<ToolHeaterRow> heaters; // The tool's heaters
 	};
 

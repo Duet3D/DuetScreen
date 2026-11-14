@@ -3,7 +3,8 @@
   targets (tap to set). The state can't be changed while printing. In a widget less than wide (widget.*), the standby
   target isn't shown.
 
-  Fields:   a heater row: heater, name, state, status, current, active, standby (src/UI/Xml/Data/HeaterRow.h)
+  Fields:   a heater row: heater, name, active, standby (src/UI/Xml/Data/HeaterRow.h); the heater's state and
+            temperature are its om.heat.heaters[{heater}]
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_text_align="center"
@@ -12,14 +13,14 @@
 
 		<lv_label name="label" bind_text="name" flex_grow="3" style_text_align="left"/>
 
-		<ds_button name="status" bind_text="status" flex_grow="3">
+		<ds_button name="status" bind_text="om.heat.heaters[{heater}].state|tr:temperature.status" flex_grow="3">
 			<style name="border_color_card" selector="checked"/>
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="machine.printing" state="disabled" ref_value="1"/>
 			<action trigger="clicked" name="heaters.toggle"/>
 		</ds_button>
 
-		<lv_label name="current" bind_text="current" flex_grow="2"/>
+		<lv_label name="current" bind_text="om.heat.heaters[{heater}].current|fixed:1" flex_grow="2"/>
 
 		<ds_button name="active" bind_text="active" flex_grow="2">
 			<style name="input"/>

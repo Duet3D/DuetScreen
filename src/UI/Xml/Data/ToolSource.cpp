@@ -12,10 +12,7 @@ namespace UI::Xml
 {
 	void ToolRow::fields(FieldVisitor& f)
 	{
-		f.field("number", number, "Tool number, as used by T");
-		f.field("name", name, "Display name");
-		f.field("selected", selected, "1 if this is the active tool, else 0");
-		f.field("heater_count", heaterCount, "Number of heaters");
+		f.field("number", number, "Tool number, as used by T; the tool's own fields are om.tools[{number}]");
 		f.list("heaters", heaters, "One row per heater of the tool");
 	}
 
@@ -23,9 +20,6 @@ namespace UI::Xml
 	{
 		const OM::Node& tool = PrinterModel::tool(toolNumber);
 		number.set(static_cast<int32_t>(toolNumber));
-		name.set(PrinterModel::toolName(toolNumber));
-		selected.set(tool["state"].text() == "active" ? 1 : 0);
-		heaterCount.set(static_cast<int32_t>(tool["heaters"].size()));
 
 		// The tool's own targets for its heaters run parallel to their numbers
 		heaters.sync(tool["heaters"].size(),
@@ -37,11 +31,9 @@ namespace UI::Xml
 							 return;
 						 }
 						 const OM::Node& heater = PrinterModel::heater(*heaterNumber);
-						 const std::string state = PrinterModel::heaterState(*heaterNumber);
+						 const std::string name = PrinterModel::heaterName(*heaterNumber);
 						 row.update({.heater = static_cast<int32_t>(*heaterNumber),
-									 .name = PrinterModel::heaterName(*heaterNumber),
-									 .state = state,
-									 .current = static_cast<float>(heater["current"].number()),
+									 .name = name,
 									 .active = static_cast<int32_t>(tool["active"][slot].integer(0)),
 									 .standby = static_cast<int32_t>(tool["standby"][slot].integer(0)),
 									 .min = static_cast<float>(heater["min"].number()),

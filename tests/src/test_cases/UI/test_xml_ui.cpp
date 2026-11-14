@@ -70,7 +70,7 @@ namespace
 	constexpr std::string_view TOOL_CARD = R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-				<lv_label name="tool_name" bind_text="name"/>
+				<lv_label name="tool_name" bind_text="om.tools[{number}].name|default:temperature.default_tool_name"/>
 				<ds_list name="heaters" list="heaters" item="tool_heater_row" width="100%" height="content"/>
 			</view>
 		</component>)";

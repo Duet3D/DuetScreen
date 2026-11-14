@@ -21,9 +21,9 @@
     {
       "name": "tool",
       "kind": "row",
-      "list": "tools",
-      "key": "number",
-      "label": "name",
+      "list": "om.tools",
+      "key": "index",
+      "label": "name|default:temperature.default_tool_name",
       "default": 0,
       "title_tag": "widget.setting_tool"
     }
