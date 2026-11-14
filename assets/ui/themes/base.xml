@@ -289,7 +289,10 @@
 			   border_side="full"/>
 		<style name="folder_icon" recolor="#primary" recolor_opa="100%"/>
 		<style name="file_crumb" bg_color="#bg" bg_opa="100%" border_color="#primary" border_width="#border_width"
-			   border_opa="100%" border_side="full"/>
+			   border_opa="100%" border_side="full" pad_all="#pad"/>
+		<!-- The open folder, last in the path: plain text, as tall as a folder before it, so the path stays one height
+			 whether or not there are folders to go back to -->
+		<style name="file_crumb_current" pad_all="#pad" border_width="#border_width" border_opa="0" border_side="full"/>
 
 		<!-- An axis that isn't homed: in the secondary accent, which no action uses, so it stands out among the move
 			 buttons -->

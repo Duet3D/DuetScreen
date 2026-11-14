@@ -1177,6 +1177,7 @@
 			<xs:enumeration value="estop"/>
 			<xs:enumeration value="file"/>
 			<xs:enumeration value="file_crumb"/>
+			<xs:enumeration value="file_crumb_current"/>
 			<xs:enumeration value="folder"/>
 			<xs:enumeration value="folder_icon"/>
 			<xs:enumeration value="gauge_arc"/>

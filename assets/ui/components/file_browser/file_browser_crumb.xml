@@ -18,6 +18,7 @@
 			<action trigger="clicked" name="presenter.files.crumb"/>
 		</ds_button>
 		<lv_label name="open_folder" bind_text="row.name">
+			<style name="file_crumb_current"/>
 			<bind_flag_if_eq subject="row.last" flag="hidden" ref_value="0"/>
 		</lv_label>
 	</view>

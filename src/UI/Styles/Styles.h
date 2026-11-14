@@ -286,7 +286,9 @@ namespace UI::Themes
 		Style file;		   // File items
 		Style folder;	   // Folder items: set apart from files
 		Style folder_icon; // A folder item's icon
-		Style file_crumb;  // A folder in the path above the files, tapped to go back to it
+		Style file_crumb;		  // A folder in the path above the files, tapped to go back to it
+		Style file_crumb_current; // The open folder, last in the path: as tall as a file_crumb, so the path's height
+								  // doesn't change
 
 		/* Move */
 		Style unhomed; // Unhomed axes in the move view
