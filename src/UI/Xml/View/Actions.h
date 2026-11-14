@@ -63,8 +63,8 @@ namespace UI::Xml
 		/** The innermost list row the widget is in, or nullptr */
 		Row* row() const;
 
-		/** The innermost list row of type R the widget is in, or nullptr. Rows of other types are skipped, so a heater
-		 * row's handler can ask for its tool with `row<ToolRow>()`. */
+		/** The innermost list row of type R the widget is in, or nullptr. Rows of other types are skipped, so a handler
+		 * can ask for the innermost object model row with `row<OmRow>()` from inside a row of another list. */
 		template <typename R>
 			requires std::derived_from<R, Row>
 		R* row() const

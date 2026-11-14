@@ -15,7 +15,7 @@ namespace UI
 {
 	void TemperatureToolRow::fields(Xml::FieldVisitor& f)
 	{
-		ToolRow::fields(f);
+		f.field("number", number, "Tool number, as used by T; the tool's own fields are om.tools[{row.number}]");
 		f.field("filament_shown", filamentShown, "1 if the tool takes filament");
 		f.field("filament_text", filamentText, "The filament picked or loaded, or \"No Filament Loaded\"");
 		f.field("filament_loaded", filamentLoaded, "1 if filament is loaded, so it can be unloaded");
@@ -25,7 +25,7 @@ namespace UI
 
 	void TemperatureToolRow::update(size_t toolNumber)
 	{
-		ToolRow::update(toolNumber);
+		number.set(static_cast<int32_t>(toolNumber));
 		filamentShown.set(Xml::PrinterModel::takesFilament(toolNumber) ? 1 : 0);
 
 		// A new filament loaded replaces whatever was picked
@@ -56,7 +56,7 @@ namespace UI
 		: XmlPresenter("temperature")
 	{
 		action("temperature.pick_filament",
-			   "Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`.",
+			   "Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `presenter.tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   if (auto* row = args.row<TemperatureToolRow>())
@@ -65,7 +65,7 @@ namespace UI
 				   }
 			   });
 		action("temperature.change_filament",
-			   "Load the filament picked, unloading any loaded first. From a row of `tools`.",
+			   "Load the filament picked, unloading any loaded first. From a row of `presenter.tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
 				   if (const auto* row = args.row<TemperatureToolRow>())
@@ -74,10 +74,10 @@ namespace UI
 				   }
 			   });
 		action("temperature.unload_filament",
-			   "Unload the tool's filament. From a row of `tools`.",
+			   "Unload the tool's filament. From a row of `presenter.tools`.",
 			   [](const Xml::ActionArgs& args)
 			   {
-				   if (const auto* row = args.row<Xml::ToolRow>())
+				   if (const auto* row = args.row<TemperatureToolRow>())
 				   {
 					   unloadFilament(static_cast<size_t>(row->number.get()));
 				   }
@@ -86,7 +86,7 @@ namespace UI
 
 	void TemperaturePresenter::fields(Xml::FieldVisitor& f)
 	{
-		f.list("tools", m_tools, "The tools with heaters; each row also has the fields of a global `tools` row");
+		f.list("tools", m_tools, "The tools with heaters");
 		f.field("filaments", m_filaments, "The filaments the printer knows, one per line");
 		f.field("selected_tool", m_selectedTool, "E.g. \"Selected Tool: Tool 0\"");
 	}

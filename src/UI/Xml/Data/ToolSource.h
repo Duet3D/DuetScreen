@@ -1,7 +1,8 @@
 /*
  * ToolSource.h
  *
- * Publishes the object model's tools, each with its heaters (see HeaterRow.h).
+ * Publishes a summary of the current tool, as the status bar shows it: its heaters' temperatures in one line, and
+ * whether one has a fault. The tools themselves are the object model's, `om.tools`.
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -9,43 +10,24 @@
 #pragma once
 
 #include "DataSource.h"
-#include "HeaterRow.h"
+#include "UI/Xml/Binding/Subjects.h"
 
 namespace UI::Xml
 {
-	/** One heater of a tool; its `index` is its position in the tool */
-	class ToolHeaterRow : public HeaterRow
-	{
-	};
-
-	/** One tool */
-	class ToolRow : public Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(FieldVisitor& f) override;
-
-		/** Show tool `toolNumber`, and its heaters, from the object model (the model lock held) */
-		void update(size_t toolNumber);
-
-		IntSubject number;			 // Tool number
-		List<ToolHeaterRow> heaters; // The tool's heaters
-	};
-
-	/** Publishes the `tools` list */
+	/** Publishes `source.tool.current.*` */
 	class ToolSource : public DataSource
 	{
 	  public:
 		/** Create the source. Nothing is published until DataSources::start(). */
 		ToolSource();
 
-		/** Declare the `tools` list */
+		/** Declare the current tool's summary */
 		void fields(FieldVisitor& f) override;
 
-		/** Re-read every tool */
+		/** Show the current tool again */
 		void update() override;
 
-		/** Empty the list */
+		/** Show no current tool */
 		void clear() override;
 
 	  protected:
@@ -56,7 +38,6 @@ namespace UI::Xml
 		/** Show the current tool's heaters, as the status bar does (the model lock held) */
 		void showCurrentTool();
 
-		List<ToolRow> m_tools;				 // One row per tool
 		IntSubject m_currentShown;			 // 1 if there is a current tool with heaters
 		StringSubject<16> m_currentLabel;	 // e.g. "T0:"
 		StringSubject<96> m_currentHeaters; // e.g. " 210°C/215°C 60°C/60°C"

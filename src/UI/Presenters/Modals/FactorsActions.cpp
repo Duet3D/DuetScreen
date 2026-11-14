@@ -4,7 +4,6 @@
 
 #include "FactorsActions.h"
 #include "FactorsPresenter.h"
-#include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/View/Actions.h"
 #include <optional>
 
@@ -23,7 +22,7 @@ namespace UI::FactorsActions
 								});
 		Xml::Actions::addGlobal(
 			"factors.extrusion",
-			"Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every "
+			"Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every "
 			"extruder's",
 			[](const Xml::ActionArgs& args)
 			{
@@ -32,9 +31,8 @@ namespace UI::FactorsActions
 				{
 					return;
 				}
-				const auto* row = args.row<Xml::ToolRow>();
-				factors->openExtrusion(row != nullptr ? std::optional(static_cast<size_t>(row->number.get()))
-													  : std::nullopt);
+				const auto tool = args.argInt();
+				factors->openExtrusion(tool && *tool >= 0 ? std::optional(static_cast<size_t>(*tool)) : std::nullopt);
 			});
 	}
 } // namespace UI::FactorsActions

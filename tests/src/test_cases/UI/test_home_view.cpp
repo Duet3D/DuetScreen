@@ -1082,7 +1082,8 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 	UI::home();
 	ASSERT_EQ(dashboardTabs().getTabCount(), 3u);
 	lv_obj_t* tools = lv_obj_find_by_name(dashboardToolList(), "tools");
-	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 4u) << "the test bench's four tools";
+	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 5u)
+		<< "the test bench's four tools, and the gap where T1 isn't";
 }
 
 TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)

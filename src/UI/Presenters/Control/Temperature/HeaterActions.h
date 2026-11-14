@@ -2,8 +2,9 @@
  * HeaterActions.h
  *
  * Actions on the heaters of the tools, beds and chambers, available to every view: `actions.heater.toggle`,
- * `actions.heater.set_active` and `actions.heater.set_standby`. They are raised from a row of a tool's `heaters`
- * (src/UI/Xml/Data/ToolSource.h), or of the global `beds` or `chambers` lists (src/UI/Xml/Data/HeatSource.h). What each does is in its registration, and in the
+ * `actions.heater.set_active` and `actions.heater.set_standby`. They are raised from a row of an object model list of
+ * heaters: a tool's (`om.tools[…].heaters`), the beds' (`om.heat.bedHeaters`) or the chambers'
+ * (`om.heat.chamberHeaters`), and tell which from where the row's item is. What each does is in its registration, and in the
  * UI API reference (docs/XML_UI_API.md).
  */
 

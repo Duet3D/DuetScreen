@@ -1,0 +1,8 @@
+<!--
+  A chamber on the Temperature tab (temperature_heater_card.xml), named for its sensor, else "Chamber <number>".
+
+  Fields:   a row of om.heat.chamberHeaters
+-->
+<component>
+	<view extends="temperature_heater_card" label_tag="tr.temperature.chamber_number"/>
+</component>

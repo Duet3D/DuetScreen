@@ -5,14 +5,15 @@
 #include "HeaterActions.h"
 #include "Debug.h"
 #include "UI/Core/Model.h"
-#include "UI/Xml/Data/HeatSource.h"
 #include "UI/Xml/Data/PrinterModel.h"
-#include "UI/Xml/Data/ToolSource.h"
+#include "UI/Xml/Om/OmList.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
 #include <algorithm>
 #include <fmt/format.h>
+#include <optional>
+#include <variant>
 
 namespace UI::HeaterActions
 {
@@ -104,28 +105,71 @@ namespace UI::HeaterActions
 		}
 	}
 
+	/** What a heater row is about, from its object model item's path */
+	struct HeaterOf
+	{
+		Heated what;   // A tool's heater, a bed or a chamber
+		size_t number; // The tool's, bed's or chamber's number
+		size_t slot;   // For a tool's heater, its position among the tool's heaters; else the number
+	};
+
+	/**
+	 * The heater the object model row the action came from is about: an item of `tools[N].heaters` (tool N's heater
+	 * at that slot), `heat.bedHeaters` (that bed) or `heat.chamberHeaters` (that chamber); nothing for anything else
+	 */
+	static std::optional<HeaterOf> heaterOf(const Xml::ActionArgs& args)
+	{
+		const auto* row = args.row<Xml::OmRow>();
+		if (row == nullptr)
+		{
+			return std::nullopt;
+		}
+		const auto& segments = row->item().segments();
+		const auto field = [&](size_t i) -> std::string_view
+		{
+			const auto* name = i < segments.size() ? std::get_if<std::string>(&segments[i]) : nullptr;
+			return name ? std::string_view(*name) : std::string_view();
+		};
+		const auto index = [&](size_t i) -> std::optional<size_t>
+		{
+			const auto* number = i < segments.size() ? std::get_if<size_t>(&segments[i]) : nullptr;
+			return number ? std::optional(*number) : std::nullopt;
+		};
+		if (segments.size() == 4 && field(0) == "tools" && index(1) && field(2) == "heaters" && index(3))
+		{
+			return HeaterOf{.what = Heated::ToolHeater, .number = *index(1), .slot = *index(3)};
+		}
+		if (segments.size() == 3 && field(0) == "heat" && index(2))
+		{
+			if (field(1) == "bedHeaters")
+			{
+				return HeaterOf{.what = Heated::Bed, .number = *index(2), .slot = *index(2)};
+			}
+			if (field(1) == "chamberHeaters")
+			{
+				return HeaterOf{.what = Heated::Chamber, .number = *index(2), .slot = *index(2)};
+			}
+		}
+		return std::nullopt;
+	}
+
 	/** `actions.heater.toggle` */
 	static void toggleHeater(const Xml::ActionArgs& args)
 	{
 		ZoneScoped;
-		if (const auto* heater = args.row<Xml::ToolHeaterRow>())
+		const auto heater = heaterOf(args);
+		if (!heater)
 		{
-			if (const auto* toolRow = args.row<Xml::ToolRow>())
-			{
-				toggleToolHeater(static_cast<size_t>(toolRow->number.get()), static_cast<size_t>(heater->index.get()));
-			}
+			LOG_WARN("actions.heater.toggle must come from a row of a tool's heaters, the beds or the chambers");
+			return;
 		}
-		else if (const auto* bed = args.row<Xml::BedRow>())
+		if (heater->what == Heated::ToolHeater)
 		{
-			toggleBedOrChamber(true, static_cast<size_t>(bed->number.get()));
-		}
-		else if (const auto* chamber = args.row<Xml::ChamberRow>())
-		{
-			toggleBedOrChamber(false, static_cast<size_t>(chamber->number.get()));
+			toggleToolHeater(heater->number, heater->slot);
 		}
 		else
 		{
-			LOG_WARN("heaters.toggle must come from a tool heater, bed or chamber row");
+			toggleBedOrChamber(heater->what == Heated::Bed, heater->number);
 		}
 	}
 
@@ -213,44 +257,21 @@ namespace UI::HeaterActions
 	/** `actions.heater.set_active` (`active`) and `actions.heater.set_standby`: set the edited value, or ask for one */
 	static void setTemperature(const Xml::ActionArgs& args, bool active)
 	{
-		if (const auto* heaterRow = args.row<Xml::ToolHeaterRow>())
+		const auto heater = heaterOf(args);
+		if (!heater)
 		{
-			if (const auto* toolRow = args.row<Xml::ToolRow>())
-			{
-				setTemperature(Heated::ToolHeater,
-							   static_cast<size_t>(toolRow->number.get()),
-							   static_cast<size_t>(heaterRow->index.get()),
-							   active,
-							   args.value());
-			}
+			LOG_WARN("actions.heater.set_active/standby must come from a row of a tool's heaters, the beds or the "
+					 "chambers");
+			return;
 		}
-		else if (const auto* bedRow = args.row<Xml::BedRow>())
-		{
-			setTemperature(Heated::Bed,
-						   static_cast<size_t>(bedRow->number.get()),
-						   static_cast<size_t>(bedRow->index.get()),
-						   active,
-						   args.value());
-		}
-		else if (const auto* chamberRow = args.row<Xml::ChamberRow>())
-		{
-			setTemperature(Heated::Chamber,
-						   static_cast<size_t>(chamberRow->number.get()),
-						   static_cast<size_t>(chamberRow->index.get()),
-						   active,
-						   args.value());
-		}
-		else
-		{
-			LOG_WARN("actions.heater.set_active/standby must come from a tool heater, bed or chamber row");
-		}
+		setTemperature(heater->what, heater->number, heater->slot, active, args.value());
 	}
 
 	void registerAll()
 	{
 		Xml::Actions::addGlobal("heater.toggle",
-								"Cycle the heater through active, standby and off. From a tool's `heaters` row, or a "
-								"row of `beds` or `chambers`.",
+								"Cycle the heater through active, standby and off. From a row of a tool's heaters "
+								"(`om.tools[…].heaters`), or of `om.heat.bedHeaters` or `om.heat.chamberHeaters`.",
 								toggleHeater);
 		Xml::Actions::addGlobal("heater.set_active",
 								"Set the heater's active temperature to the edited value (`value_confirmed`), else ask "

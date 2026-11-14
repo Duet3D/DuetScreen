@@ -17,7 +17,6 @@
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Binding/History.h"
 #include "UI/Xml/Data/PrinterModel.h"
-#include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/WidgetCatalogue.h"
 #include "UI/Xml/Om/OmList.h"
@@ -63,29 +62,30 @@ namespace
 	constexpr std::string_view TOOLS_SCREEN = R"(
 		<component presenter="test_tools">
 			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
-				<ds_list name="tools" list="source.tool.tools" item="dashboard_tool" width="100%" height="content" flex_flow="column"/>
+				<ds_list name="tools" list="om.tools" item="dashboard_tool" width="100%" height="content" flex_flow="column"/>
 			</view>
 		</component>)";
 
 	constexpr std::string_view TOOL_CARD = R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-				<lv_label name="tool_name" bind_text="om.tools[{row.number}].name|default:tr.temperature.default_tool_name"/>
+				<lv_label name="tool_name" bind_text="row.name|default:tr.temperature.default_tool_name"/>
 				<ds_list name="heaters" list="row.heaters" item="tool_heater_row" width="100%" height="content"/>
 			</view>
 		</component>)";
 
-	/* `row.name` and `row.index` are the heater's, `parent.number` the tool row's, `presenter.title` the presenter's */
+	/* `row.value` and `row.index` are the heater's, `parent.index` the tool row's, `presenter.title` the presenter's */
 	constexpr std::string_view TOOL_HEATER_ROW = R"(
 		<component>
 			<view extends="lv_obj" width="100%" height="content" flex_flow="row">
-				<lv_label name="heater_name" bind_text="row.name"/>
+				<lv_label name="heater_name"
+						  bind_text="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature.heater:{row.value}"/>
 				<lv_label name="title" bind_text="presenter.title"/>
 				<ds_button name="edit" text="Edit">
 					<action trigger="clicked" name="presenter.test.heater"/>
 				</ds_button>
 				<ds_button name="send" text="Send">
-					<action trigger="clicked" name="actions.gcode.send" arg="T{parent.number} H{row.index} {presenter.title}"/>
+					<action trigger="clicked" name="actions.gcode.send" arg="T{parent.index} H{row.index} {presenter.title}"/>
 				</ds_button>
 			</view>
 		</component>)";
@@ -100,10 +100,8 @@ namespace
 	  public:
 		struct Call
 		{
-			int32_t tool;	// ToolRow::number, or -1 if no tool row was found
-			int32_t heater; // Row index of the ToolHeaterRow, or -1 if none was found
-			bool innermost; // Whether row() (any type) found the heater row
-			bool noOmRow;	// Whether row<OmRow>() found nothing: there is a row, but not of that type
+			std::string item; // Where the innermost object model row's item is, or empty if none was found
+			bool innermost;	  // Whether row() (any type) found that row
 			bool operator==(const Call&) const = default;
 		};
 
@@ -114,12 +112,8 @@ namespace
 				   "Record the heater and tool the action came from",
 				   [this](const UI::Xml::ActionArgs& args)
 				   {
-					   auto* tool = args.row<UI::Xml::ToolRow>();
-					   auto* heater = args.row<UI::Xml::ToolHeaterRow>();
-					   calls.push_back({tool ? tool->number.get() : -1,
-										heater ? heater->index.get() : -1,
-										heater != nullptr && args.row() == heater,
-										args.row<UI::Xml::OmRow>() == nullptr});
+					   auto* row = args.row<UI::Xml::OmRow>();
+					   calls.push_back({row ? row->item().str() : std::string(), row != nullptr && args.row() == row});
 				   });
 		}
 
@@ -754,19 +748,21 @@ TEST_F(TestXmlUi, NestedListsShowEachRowsOwnChildren)
 {
 	auto& view = makeToolsView();
 
-	// Test bench: T0 (heater 2), T2 (heaters 0 and 3), T3 (none), T4 (heater 2)
-	const std::vector<size_t> heaterCounts = {1, 2, 0, 1};
+	// Test bench: T0 (heater 2), no T1, T2 (heaters 0 and 3), T3 (none), T4 (heater 2); a row per item, nulls too
+	const std::vector<size_t> heaterCounts = {1, 0, 2, 0, 1};
 	ASSERT_EQ(lv_obj_get_child_count(find(view, "tools")), heaterCounts.size());
-	for (size_t slot = 0; slot < heaterCounts.size(); slot++)
+	for (size_t tool = 0; tool < heaterCounts.size(); tool++)
 	{
-		const size_t tool = UI::Xml::PrinterModel::tools()[slot];
-		lv_obj_t* card = toolCard(view, static_cast<int32_t>(slot));
-		EXPECT_EQ(text(card, "tool_name"), UI::Xml::PrinterModel::toolName(tool));
-		ASSERT_EQ(lv_obj_get_child_count(find(card, "heaters")), heaterCounts[slot]) << "tool slot " << slot;
-
-		for (size_t h = 0; h < heaterCounts[slot]; h++)
+		lv_obj_t* card = toolCard(view, static_cast<int32_t>(tool));
+		if (UI::Xml::PrinterModel::tool(tool).exists())
 		{
-			lv_obj_t* row = heaterRow(view, static_cast<int32_t>(slot), static_cast<int32_t>(h));
+			EXPECT_EQ(text(card, "tool_name"), UI::Xml::PrinterModel::toolName(tool));
+		}
+		ASSERT_EQ(lv_obj_get_child_count(find(card, "heaters")), heaterCounts[tool]) << "tool " << tool;
+
+		for (size_t h = 0; h < heaterCounts[tool]; h++)
+		{
+			lv_obj_t* row = heaterRow(view, static_cast<int32_t>(tool), static_cast<int32_t>(h));
 			const size_t heater = UI::Xml::PrinterModel::toolHeater(tool, h).value();
 			const std::string expected = UI::Xml::PrinterModel::heaterName(heater);
 			EXPECT_EQ(text(row, "heater_name"), expected) << "the heater's own name, not the tool's";
@@ -775,27 +771,52 @@ TEST_F(TestXmlUi, NestedListsShowEachRowsOwnChildren)
 	}
 }
 
+TEST_F(TestXmlUi, BedsAndChambersAreNamedAndTheirActionsKnowWhichTheyAre)
+{
+	// Bed 0 on heater 0, whose sensor is named; no bed 1; chamber 0 on heater 3, whose sensor isn't
+	load_model_data(
+		R"({"key":"heat","flags":"v","result":{"bedHeaters":[0,-1],"chamberHeaters":[3],"heaters":[{"active":60,"standby":0,"state":"off","current":20,"sensor":0},null,null,{"active":40,"standby":0,"state":"active","current":30,"sensor":3}]}})");
+	load_model_data(
+		R"({"key":"sensors","flags":"v","result":{"analog":[{"name":"Bed plate"},null,null,{"name":""}]}})");
+	auto& view = makeView("dashboard_tools");
+	pump();
+
+	lv_obj_t* beds = find(find(view, "beds"), "list");
+	ASSERT_EQ(lv_obj_get_child_count(beds), 2u);
+	EXPECT_EQ(text(lv_obj_get_child(beds, 0), "label"), "Bed plate") << "its sensor's name";
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_get_child(beds, 1), LV_OBJ_FLAG_HIDDEN)) << "no heater, so no bed 1";
+	lv_obj_t* chamber = lv_obj_get_child(find(find(view, "chambers"), "list"), 0);
+	EXPECT_EQ(text(chamber, "label"), "Chamber 0") << "its sensor has no name: its number";
+	EXPECT_EQ(static_cast<UI::Button*>(UI::LvObj::fromPtr(find(chamber, "active")))->getText(), "40")
+		<< "the chamber's heater's own target";
+
+	// The heater actions tell a bed from a chamber, and which, by where their row's item is
+	lv_obj_send_event(find(lv_obj_get_child(beds, 0), "status"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(chamber, "status"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(m_sent, (std::vector<std::string>{"M140 P0 S60\n", "M141 P0 S-273.15\n"}));
+}
+
 TEST_F(TestXmlUi, ActionsFindEveryEnclosingRow)
 {
 	auto& view = makeToolsView();
 	auto* presenter = dynamic_cast<RecordingPresenter*>(view.getPresenter());
 	ASSERT_NE(presenter, nullptr);
 
-	lv_obj_send_event(find(heaterRow(view, 1, 1), "edit"), LV_EVENT_CLICKED, nullptr);
-	lv_obj_send_event(find(heaterRow(view, 3, 0), "edit"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(heaterRow(view, 2, 1), "edit"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(heaterRow(view, 4, 0), "edit"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(presenter->calls,
-			  (std::vector<RecordingPresenter::Call>{{.tool = 2, .heater = 1, .innermost = true, .noOmRow = true},
-													 {.tool = 4, .heater = 0, .innermost = true, .noOmRow = true}}));
+			  (std::vector<RecordingPresenter::Call>{{.item = "tools[2].heaters[1]", .innermost = true},
+													 {.item = "tools[4].heaters[0]", .innermost = true}}));
 
 	// Placeholders resolve like bindings: the heater's index, the tool's number, the presenter's title
-	lv_obj_send_event(find(heaterRow(view, 1, 1), "send"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(heaterRow(view, 2, 1), "send"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(m_sent, (std::vector<std::string>{"T2 H1 hot\n"}));
 }
 
 TEST_F(TestXmlUi, NestedListFollowsItsRowsLength)
 {
 	auto& view = makeToolsView();
-	ASSERT_EQ(lv_obj_get_child_count(find(toolCard(view, 1), "heaters")), 2u);
+	ASSERT_EQ(lv_obj_get_child_count(find(toolCard(view, 2), "heaters")), 2u);
 	lv_obj_t* firstCard = toolCard(view, 0);
 
 	load_model_data(ONE_TOOL);

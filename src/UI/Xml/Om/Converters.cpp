@@ -190,14 +190,11 @@ namespace UI::Xml
 			return translatedWith(argument, number ? std::optional(static_cast<int64_t>(*number)) : std::nullopt);
 		}
 
-		/** The translation of the argument (`tr.<key>`) with the value, a whole number, in it */
-		std::string numbered(const OM::Node& node, const OM::Path&, std::string_view argument)
+		/** The translation of the argument (`tr.<key>`) with the item's number in it; empty if there is none */
+		std::string numbered(const OM::Node&, const OM::Path& path, std::string_view argument)
 		{
-			if (!isNumeric(node))
-			{
-				return "";
-			}
-			return translatedWith(argument, static_cast<int64_t>(std::round(node.number(0))));
+			const auto number = itemNumber(path);
+			return number ? translatedWith(argument, static_cast<int64_t>(*number)) : "";
 		}
 
 		/** The value rounded down, but not below the argument */
@@ -318,9 +315,11 @@ namespace UI::Xml
 					  .argumentKind = Converter::Argument::translationKey},
 			Converter{.name = "numbered",
 					  .type = Converter::Type::text,
-					  .description = "The translation of the argument with the value, a whole number, in it: "
-									 "`row.index|numbered:tr.temperature.bed_number` gives \"Bed 0\" for bed 0",
-					  .argument = "The translation key, `tr.<key>`; `{:d}` in the translation is the value",
+					  .description =
+						  "The translation of the argument with the item's number (the last index in the path) "
+						  "in it, whatever the value: `row.value|numbered:tr.temperature.bed_number` in a row "
+						  "of `om.heat.bedHeaters` gives \"Bed 0\" for bed 0",
+					  .argument = "The translation key, `tr.<key>`; `{:d}` in the translation is the number",
 					  .toInteger = nullptr,
 					  .toText = numbered,
 					  .argumentKind = Converter::Argument::translationKey},

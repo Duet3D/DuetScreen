@@ -1,0 +1,13 @@
+<!--
+  One of a tool's heaters on the Temperature tab: a heater (temperature_heater.xml) named for its sensor, else "Heater
+  <number>", with the tool's own targets for it.
+
+  Fields:   a row of the tool's om.tools[…].heaters: row.value (the heater number), row.index (its slot); the tool is
+            the row around it, a row of presenter.tools (parent.number)
+-->
+<component>
+	<view extends="temperature_heater"
+		  label="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature.heater:{row.value}"
+		  active="om.tools[{parent.number}].active[{row.index}]|int"
+		  standby="om.tools[{parent.number}].standby[{row.index}]|int"/>
+</component>

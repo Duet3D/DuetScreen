@@ -62,7 +62,7 @@ Each row of an object model list:
 | `\|duration` | text |  | Seconds as h:mm:ss, or m:ss under an hour |
 | `\|bytes` | text |  | A number of bytes as B, KB, MB or GB |
 | `\|default` | text | The translation key of the default, `tr.<key>`, or `tr.<key>:<number>` (the number may be a subject's, `{name}`); `{:d}` in the translation is the number | The value, or if it is empty, the translation of the argument with a number: the one after the key, else the item's (the last index in the path). `row.name\|default:tr.fine_tune.fan` gives "Fan 2" for fan 2 if it has no name; `om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name\|default:tr.temperature.heater:{row.value}` gives "Heater 2" for heater 2 if its sensor has no name |
-| `\|numbered` | text | The translation key, `tr.<key>`; `{:d}` in the translation is the value | The translation of the argument with the value, a whole number, in it: `row.index\|numbered:tr.temperature.bed_number` gives "Bed 0" for bed 0 |
+| `\|numbered` | text | The translation key, `tr.<key>`; `{:d}` in the translation is the number | The translation of the argument with the item's number (the last index in the path) in it, whatever the value: `row.value\|numbered:tr.temperature.bed_number` in a row of `om.heat.bedHeaters` gives "Bed 0" for bed 0 |
 | `\|atleast` | int | The least it gives | The value rounded down, but not below the argument, e.g. a bar's bottom: `om.heat.heaters[1].min\|atleast:0` |
 | `\|atmost` | int | The most it gives | The value rounded up, but not above the argument |
 | `\|clamp` | int | The least and the most it gives, `<min>:<max>` | The value rounded, kept between the argument's two numbers, e.g. `\|clamp:0:100` |
@@ -137,66 +137,10 @@ From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.tool.tools` | list | One row per tool, in slot order |
 | `source.tool.current.shown` | int | 1 if there is a current tool with heaters, else 0 |
 | `source.tool.current.label` | text | The current tool, e.g. "T0:", or empty if it has no heaters |
 | `source.tool.current.heaters` | text | The current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C" |
 | `source.tool.current.fault` | int | 1 if any of the current tool's heaters has a fault, else 0 |
-
-Each row of `source.tool.tools`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
-| `row.heaters` | list | One row per heater of the tool |
-
-Each row of `source.tool.tools` › `row.heaters`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.heater` | int | Heater number |
-| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `row.active` | int | Active target temperature, °C |
-| `row.standby` | int | Standby target temperature, °C |
-
-### heat
-
-From [HeatSource.cpp](../src/UI/Xml/Data/HeatSource.cpp).
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `source.heat.beds` | list | One row per bed, in slot order |
-| `source.heat.chambers` | list | One row per chamber, in slot order |
-
-Each row of `source.heat.beds`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.number` | int | Bed or chamber number, as used by M140/M141 P |
-| `row.heater` | int | Heater number |
-| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `row.active` | int | Active target temperature, °C |
-| `row.standby` | int | Standby target temperature, °C |
-
-Each row of `source.heat.chambers`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.number` | int | Bed or chamber number, as used by M140/M141 P |
-| `row.heater` | int | Heater number |
-| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `row.active` | int | Active target temperature, °C |
-| `row.standby` | int | Standby target temperature, °C |
 
 ### job
 
@@ -314,13 +258,13 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.customise.open_catalogue` | While customising, open the widget pool to add a widget where the user chose | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.customise.start` | Go to the home screen and start customising it: its widgets can be moved, resized, added and removed, and their settings changed | [CustomiseActions.cpp](../src/UI/Presenters/Customise/CustomiseActions.cpp) |
 | `actions.estop.dragged` | Emergency stop the printer when a ds_drag_button was dragged all the way (`value_confirmed` 1); if it was only tapped, say to drag it | [EStopActions.cpp](../src/UI/Presenters/Sidebar/EStopActions.cpp) |
-| `actions.factors.extrusion` | Open the dialog to change extrusion factors: the tool's, from a row of a list of tools, else every extruder's | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.gauge.edit` | Change the value a row of `gauges` shows: a heater's target (its standby one while on standby) or a fan's speed, to the edited value (`value_confirmed`) or `arg`, else asking for it on the number pad; or open the speed or extrusion factor dialog. Does nothing for a row that isn't `editable`. | [GaugeActions.cpp](../src/UI/Presenters/Gauge/GaugeActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"` | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
-| `actions.heater.toggle` | Cycle the heater through active, standby and off. From a tool's `heaters` row, or a row of `beds` or `chambers`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
+| `actions.heater.toggle` | Cycle the heater through active, standby and off. From a row of a tool's heaters (`om.tools[…].heaters`), or of `om.heat.bedHeaters` or `om.heat.chamberHeaters`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.job.ask_cancel` | Ask whether to cancel the job; it is cancelled, which also turns the heaters off, only if the user says so | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.pause` | Pause the job | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
@@ -332,7 +276,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"` | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
-| `actions.tool.toggle` | Select the tool, or deselect it if selected. From a row of `tools`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
+| `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools` | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`, `value_tapped`
 
@@ -1106,7 +1050,7 @@ Used by `temperature`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `presenter.tools` | list | The tools with heaters; each row also has the fields of a global `tools` row |
+| `presenter.tools` | list | The tools with heaters |
 | `presenter.filaments` | text | The filaments the printer knows, one per line |
 | `presenter.selected_tool` | text | E.g. "Selected Tool: Tool 0" |
 
@@ -1115,31 +1059,18 @@ Each row of `presenter.tools`:
 | Name | Type | Description |
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
-| `row.number` | int | Tool number, as used by T; the tool's own fields are om.tools[{number}] |
-| `row.heaters` | list | One row per heater of the tool |
+| `row.number` | int | Tool number, as used by T; the tool's own fields are om.tools[{row.number}] |
 | `row.filament_shown` | int | 1 if the tool takes filament |
 | `row.filament_text` | text | The filament picked or loaded, or "No Filament Loaded" |
 | `row.filament_loaded` | int | 1 if filament is loaded, so it can be unloaded |
 | `row.change_shown` | int | 1 if a filament other than the loaded one has been picked |
 | `row.change_text` | text | "Load", or "Change" when filament is loaded |
 
-Each row of `presenter.tools` › `row.heaters`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.heater` | int | Heater number |
-| `row.name` | text | Display name, e.g. "Heater 1" or "Bed" |
-| `row.scale_min` | int | Bottom of a temperature scale, °C: the heater's minimum, or 0 if that is below 0 |
-| `row.scale_max` | int | Top of a temperature scale, °C: the heater's maximum |
-| `row.active` | int | Active target temperature, °C |
-| `row.standby` | int | Standby target temperature, °C |
-
 | Action | Description |
 | --- | --- |
-| `presenter.temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `tools`. |
-| `presenter.temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `tools`. |
-| `presenter.temperature.unload_filament` | Unload the tool's filament. From a row of `tools`. |
+| `presenter.temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `presenter.tools`. |
+| `presenter.temperature.pick_filament` | Pick the dropdown's chosen filament (`value_changed`) to load next. From a row of `presenter.tools`. |
+| `presenter.temperature.unload_filament` | Unload the tool's filament. From a row of `presenter.tools`. |
 
 ### temperature_extrusion
 
@@ -2311,14 +2242,16 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
 | `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
+| `dashboard_bed` |  |  | `dashboard_tools` | [dashboard_bed.xml](../assets/ui/components/dashboard/dashboard_bed.xml) |
+| `dashboard_chamber` |  |  | `dashboard_tools` | [dashboard_chamber.xml](../assets/ui/components/dashboard/dashboard_chamber.xml) |
 | `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_current_tool_card` |  |  | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
 | `dashboard_current_tool_heater` |  |  | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
 | `dashboard_fan` | `fans` | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
 | `dashboard_gcode_button` |  | `label`, `gcode` | `gcode_button` | [dashboard_gcode_button.xml](../assets/ui/components/dashboard/dashboard_gcode_button.xml) |
-| `dashboard_heater` |  |  | `dashboard_heater_card`, `dashboard_tool` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
-| `dashboard_heater_card` |  |  | `dashboard_tools` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
+| `dashboard_heater` |  | `label`, `active`, `standby` | `dashboard_heater_card`, `dashboard_tool_heater` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
+| `dashboard_heater_card` |  | `label_tag` | `dashboard_bed`, `dashboard_chamber` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
 | [`dashboard_job_status`](#dashboard_job_status) |  |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
@@ -2328,6 +2261,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
 | `dashboard_tool` |  |  | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
 | `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
+| `dashboard_tool_heater` |  |  | `dashboard_tool` | [dashboard_tool_heater.xml](../assets/ui/components/dashboard/dashboard_tool_heater.xml) |
 | `dashboard_tools` |  |  | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
 | `factors` | `factors` |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `dialog`, `open`, `title`, `factors`, `pad_shown`, `pad`, `pad_header`, `pad_text`, `pad_accepted`, `pad_confirmable`, `pad_signed` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
@@ -2391,12 +2325,15 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
 | `status_bar_gcode_button` |  | `label`, `gcode` | `status_gcode` | [status_bar_gcode_button.xml](../assets/ui/components/status_bar/status_bar_gcode_button.xml) |
 | [`temperature`](#temperature) | `temperature` |  | `control`, `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
+| `temperature_bed` |  |  | `temperature` | [temperature_bed.xml](../assets/ui/components/control/temperature/temperature_bed.xml) |
+| `temperature_chamber` |  |  | `temperature` | [temperature_chamber.xml](../assets/ui/components/control/temperature/temperature_chamber.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
 | [`temperature_extrusion`](#temperature) | `temperature_extrusion` |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
 | `temperature_extrusion_card` |  |  | `extrude` | [temperature_extrusion_card.xml](../assets/ui/components/control/temperature/temperature_extrusion_card.xml) |
-| `temperature_heater` |  |  | `temperature_heater_card`, `temperature_tool` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
-| `temperature_heater_card` |  |  | `temperature` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
+| `temperature_heater` |  | `label`, `active`, `standby` | `temperature_heater_card`, `temperature_tool_heater` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
+| `temperature_heater_card` |  | `label_tag` | `temperature_bed`, `temperature_chamber` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
+| `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  |  | `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 

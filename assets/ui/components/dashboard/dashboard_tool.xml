@@ -1,27 +1,29 @@
 <!--
-  One tool in the tool list: its name, which selects it, and a row per heater. Outlined while selected.
+  One tool in the tool list: its name, which selects it, and a row per heater (dashboard_tool_heater.xml). Outlined
+  while selected; a gap in the tools (a null item) isn't shown.
 
-  Fields:   a row of source.tool.tools: row.number, row.heaters (src/UI/Xml/Data/ToolSource.h); the tool's name and state are
-            its om.tools[{row.number}]
+  Fields:   a row of om.tools: row.index (the tool number), row.name, row.state, row.heaters
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
 		<style name="tool_list_tool"/>
 		<style name="tool_selected" selector="checked"/>
-		<bind_state_if_eq subject="om.tools[{row.number}].state|eq:active" state="checked" ref_value="1"/>
+		<bind_flag_if_eq subject="row.exists" flag="hidden" ref_value="0"/>
+		<bind_state_if_eq subject="row.state|eq:active" state="checked" ref_value="1"/>
 
-		<ds_button name="tool_name" bind_text="om.tools[{row.number}].name|default:tr.temperature.default_tool_name" width="content" height="content">
+		<ds_button name="tool_name" bind_text="row.name|default:tr.temperature.default_tool_name" width="content"
+				   height="content">
 			<style name="action_btn"/>
 			<style name="border_color_card" selector="checked"/>
 			<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
-			<action trigger="clicked" name="actions.tool.toggle"/>
+			<action trigger="clicked" name="actions.tool.toggle" arg="{row.index}"/>
 		</ds_button>
 
 		<lv_obj name="heaters" width="100%" height="content" flex_flow="column"
 				style_pad_bottom="0" style_pad_left="0" style_pad_right="0">
-			<bind_flag_if_eq subject="om.tools[{row.number}].heaters|count" flag="hidden" ref_value="0"/>
-			<ds_list name="list" list="row.heaters" item="dashboard_heater" width="100%" height="content" flex_flow="column"
-					 style_pad_all="0"
+			<bind_flag_if_eq subject="row.heaters|count" flag="hidden" ref_value="0"/>
+			<ds_list name="list" list="row.heaters" item="dashboard_tool_heater" width="100%" height="content"
+					 flex_flow="column" style_pad_all="0"
 					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 		</lv_obj>
 	</view>

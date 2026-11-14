@@ -49,7 +49,7 @@ src/UI/
                ApiLint (checks every name the components use against the reference), ApiXsd (docs/XML_UI.xsd),
                ApiImages (the reference's pictures, drawn by the UI itself)
     Theme/     ThemeStyles (theme styles and fonts made available to XML)
-    Data/      DataSource, DataSources (the list of sources), one file per area: FanSource, ToolSource, HeatSource,
+    Data/      DataSource, DataSources (the list of sources), one file per area: ToolSource (the current tool, as the status bar sums it up),
                ConsoleSource, JobSource, MachineSource, MoveSource, NavigationSource, ResponseSource,
                TemperatureSource, GaugeSource (every value a gauge can show), JogSource (the jog distance and speed
                every view shares), WidgetSource (widget.* for views that aren't placed widgets), and
@@ -207,13 +207,13 @@ A string subject can be compared with `bind_*_if_eq`: the sidebar checks the but
 ### Lists
 
 ```xml
-<ds_list list="source.tool.tools" item="dashboard_tool" flex_flow="column"/>
+<ds_list list="om.tools" item="dashboard_tool" flex_flow="column"/>
 ```
 
-builds one `dashboard_tool` per row of `source.tool.tools` (see [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml)). Inside `dashboard_tool`, a list belonging to the row is shown the same way:
+builds one `dashboard_tool` per row of `om.tools` (see [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml)). Inside `dashboard_tool`, a list belonging to the row is shown the same way:
 
 ```xml
-<ds_list list="row.heaters" item="tool_heater_row"/>
+<ds_list list="row.heaters" item="dashboard_tool_heater"/>
 ```
 
 Lists add and remove rows at the end, so existing rows keep their scroll position and in-progress edits when the list changes length.
@@ -229,7 +229,7 @@ A keyed list shows only the rows whose `key` field (written `row.<field>`) is `v
 
 ```xml
 <ds_list list="om.fans" key="row.index" value="2" item="fan_card"/>
-<ds_list list="source.heat.beds" key="row.number" value="$bed" item="dashboard_heater_card"/>
+<ds_list list="om.heat.bedHeaters" key="row.index" value="$bed" item="dashboard_bed"/>
 ```
 
 Each item is still a row of the list, so its names and actions work as in the full list. The list watches every row's key, so it follows the data: an item appears when its fan does and goes when it goes, and stays right when the rows are refilled (removing fan 1 moves fan 2 into fan 1's row). Key on the item's number rather than its position (for an object model list, `row.index` is both). Any field of the rows can be a key, and every row that matches is shown, so `key="row.state" value="active"` shows every active heater. A keyed list can't be windowed.
@@ -291,7 +291,7 @@ When the user closes it another way (tapping outside, the back button) it raises
 <action trigger="clicked" name="presenter.fans.set_speed" arg="100"/>
 ```
 
-An action's name says where it is: `presenter.<action>` is the presenter of the nearest enclosing view that handles it (then the next view out), and `actions.<group>.<action>` is a global action, added in `<Group>Actions.cpp`. A handler can find the rows the widget is inside: `args.row<FanRow>()`, or from a heater row both `args.row<ToolHeaterRow>()` and `args.row<ToolRow>()`.
+An action's name says where it is: `presenter.<action>` is the presenter of the nearest enclosing view that handles it (then the next view out), and `actions.<group>.<action>` is a global action, added in `<Group>Actions.cpp`. A handler can find the rows the widget is inside: `args.row<FanRow>()`, or the innermost object model row, `args.row<OmRow>()`, whose `item()` says what it is about (`tools[2].heaters[1]`). Where a row only says which thing it is about, pass it in `arg` instead: `<action name="actions.tool.toggle" arg="{row.index}"/>`.
 
 `trigger` is any LVGL event name (`clicked`, `value_changed`, `long_pressed`, ...), `value_confirmed` (an edit finished) or `dismissed` (a `<ds_modal>` was closed by the user).
 
@@ -465,10 +465,10 @@ Tabs of a page live in their own folder inside it when they are parts in their o
 Rows, presenters and data sources all declare their names the same way, once, in `fields()`:
 
 ```cpp
-void ToolRow::fields(FieldVisitor& f)
+void TemperatureToolRow::fields(Xml::FieldVisitor& f)
 {
-	f.field("number", number, "Tool number, as used by T");
-	f.list("heaters", heaters, "One row per heater of the tool");
+	f.field("number", number, "Tool number, as used by T");  // row.number in XML
+	f.field("filament_text", filamentText, "The filament picked or loaded");
 }
 ```
 

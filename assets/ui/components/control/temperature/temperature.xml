@@ -2,8 +2,8 @@
   The Temperature tab: the tools, beds and chambers with their heaters on the left; the selected tool and the extruder
   panel (temperature_extrusion.xml) on the right.
 
-  Fields and actions: src/UI/Presenters/Control/Temperature/TemperaturePresenter.h; the beds and chambers are the global lists
-  (src/UI/Xml/Data/HeatSource.h).
+  Fields and actions: src/UI/Presenters/Control/Temperature/TemperaturePresenter.h; the beds and chambers are the
+  object model's (om.heat.bedHeaters, om.heat.chamberHeaters).
 -->
 <component presenter="temperature">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="row">
@@ -35,7 +35,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="source.heat.beds" item="temperature_heater_card" width="100%" height="content"
+				<ds_list name="list" list="om.heat.bedHeaters" item="temperature_bed" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>
@@ -49,7 +49,7 @@
 						<style name="list_title"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="source.heat.chambers" item="temperature_heater_card" width="100%" height="content"
+				<ds_list name="list" list="om.heat.chamberHeaters" item="temperature_chamber" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>

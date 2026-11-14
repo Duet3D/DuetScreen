@@ -1,6 +1,6 @@
 <!--
   The shared speed and extrusion factor dialogs. Any view opens them with the global actions `factors.speed` and
-  `factors.extrusion` (the tool's extruders from a row of a list of tools, else every extruder).
+  `actions.factors.extrusion` (the extruders of the tool numbered `arg`, else every extruder).
 
   Fields and actions: src/UI/Presenters/Modals/FactorsPresenter.h
 -->

@@ -1,10 +1,20 @@
 <!--
-  A bed or chamber on the Temperature tab: its heater (temperature_heater.xml) in a card.
+  A bed or chamber on the Temperature tab: its heater (temperature_heater.xml) in a card, named for its heater's sensor,
+  else "<label_tag> <number>". A slot without a heater (-1) isn't shown.
 
-  Fields:   a row of source.heat.beds or source.heat.chambers (src/UI/Xml/Data/HeatSource.h)
+  Props:    label_tag  the translation of its name when its sensor has none, with the number in it
+                       (temperature_bed.xml, temperature_chamber.xml)
+  Fields:   a row of om.heat.bedHeaters or om.heat.chamberHeaters: row.index (its number), row.value (its heater)
 -->
 <component>
-	<view extends="temperature_heater">
+	<api>
+		<prop name="label_tag" type="string"/>
+	</api>
+
+	<view extends="temperature_heater"
+		  label="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:${label_tag}:{row.index}"
+		  active="om.heat.heaters[{row.value}].active|int" standby="om.heat.heaters[{row.value}].standby|int">
 		<style name="card"/>
+		<bind_flag_if cond="row.value|int lt 0" flag="hidden"/>
 	</view>
 </component>

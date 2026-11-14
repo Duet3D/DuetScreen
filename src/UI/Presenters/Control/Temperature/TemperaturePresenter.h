@@ -2,8 +2,9 @@
  * TemperaturePresenter.h
  *
  * Behaviour for the Temperature tab (assets/ui/components/control/temperature/temperature.xml): every tool with a
- * heater, with its state, extrusion factors, filament and heaters; the beds and chambers (the global `beds` and
- * `chambers` lists, src/UI/Xml/Data/HeatSource.h); and the extruder panel (temperature_extrusion.xml).
+ * heater, with its filament (the rest of a tool, its state, extrusion factors and heaters, is read from the object
+ * model, `om.tools[{row.number}]`); the beds and chambers, from the object model too; and the extruder panel
+ * (temperature_extrusion.xml).
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md). Tool selection and heater states and temperatures use the global actions in
@@ -14,7 +15,6 @@
 
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
-#include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
 #include <string>
@@ -22,15 +22,17 @@
 
 namespace UI
 {
-	/** One tool with heaters, as the Temperature tab shows it */
-	class TemperatureToolRow : public Xml::ToolRow
+	/** One tool with heaters, as the Temperature tab shows it: which tool, and the filament picked for it */
+	class TemperatureToolRow : public Xml::Row
 	{
 	  public:
-		/** Declare the row's fields: a tools row's, and the tab's own */
+		/** Declare the row's fields */
 		void fields(Xml::FieldVisitor& f) override;
 
 		/** Show tool `toolNumber` from the object model (the model lock held) */
 		void update(size_t toolNumber);
+
+		Xml::IntSubject number;					  // Tool number
 
 		/** Pick `filament`, to load with change_filament */
 		void pick(std::string filament);

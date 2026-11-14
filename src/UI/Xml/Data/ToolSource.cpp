@@ -10,37 +10,6 @@
 
 namespace UI::Xml
 {
-	void ToolRow::fields(FieldVisitor& f)
-	{
-		f.field("number", number, "Tool number, as used by T; the tool's own fields are om.tools[{number}]");
-		f.list("heaters", heaters, "One row per heater of the tool");
-	}
-
-	void ToolRow::update(size_t toolNumber)
-	{
-		const OM::Node& tool = PrinterModel::tool(toolNumber);
-		number.set(static_cast<int32_t>(toolNumber));
-
-		// The tool's own targets for its heaters run parallel to their numbers
-		heaters.sync(tool["heaters"].size(),
-					 [&](ToolHeaterRow& row, size_t slot)
-					 {
-						 const auto heaterNumber = PrinterModel::toolHeater(toolNumber, slot);
-						 if (!heaterNumber)
-						 {
-							 return;
-						 }
-						 const OM::Node& heater = PrinterModel::heater(*heaterNumber);
-						 const std::string name = PrinterModel::heaterName(*heaterNumber);
-						 row.update({.heater = static_cast<int32_t>(*heaterNumber),
-									 .name = name,
-									 .active = static_cast<int32_t>(tool["active"][slot].integer(0)),
-									 .standby = static_cast<int32_t>(tool["standby"][slot].integer(0)),
-									 .min = static_cast<float>(heater["min"].number()),
-									 .max = static_cast<float>(heater["max"].number())});
-					 });
-	}
-
 	ToolSource::ToolSource()
 		: DataSource("tool")
 	{
@@ -48,7 +17,6 @@ namespace UI::Xml
 
 	void ToolSource::fields(FieldVisitor& f)
 	{
-		f.list("tools", m_tools, "One row per tool, in slot order");
 		f.field("current.shown", m_currentShown, "1 if there is a current tool with heaters, else 0");
 		f.field("current.label", m_currentLabel, "The current tool, e.g. \"T0:\", or empty if it has no heaters");
 		f.field("current.heaters",
@@ -66,14 +34,11 @@ namespace UI::Xml
 	{
 		ZoneScoped;
 		MODEL_LOCK();
-		const auto tools = PrinterModel::tools();
-		m_tools.sync(tools.size(), [&tools](ToolRow& row, size_t slot) { row.update(tools[slot]); });
 		showCurrentTool();
 	}
 
 	void ToolSource::clear()
 	{
-		m_tools.clear();
 		MODEL_LOCK();
 		showCurrentTool();
 	}

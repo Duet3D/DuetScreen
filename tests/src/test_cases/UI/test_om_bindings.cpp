@@ -131,8 +131,11 @@ TEST_F(TestOmBindings, ConvertersGiveWhatTheySay)
 				  unnamed, *OM::Path::parse("sensors.analog[5].name"), "tr.temperature.heater:2"),
 			  "Heater 2")
 		<< "the number after the key, not the item's";
-	EXPECT_EQ(findConverter("numbered")->toText(number, {}, "tr.temperature.bed_number"), "Bed 61");
-	EXPECT_EQ(findConverter("numbered")->toText(state, {}, "tr.temperature.bed_number"), "") << "not a number";
+	EXPECT_EQ(
+		findConverter("numbered")->toText(number, *OM::Path::parse("heat.bedHeaters[1]"), "tr.temperature.bed_number"),
+		"Bed 1")
+		<< "the item's number, whatever its value";
+	EXPECT_EQ(findConverter("numbered")->toText(number, {}, "tr.temperature.bed_number"), "") << "no item number";
 	const OM::Node below(OM::Node::Kind::number, "-10.5");
 	EXPECT_EQ(findConverter("atleast")->toInteger(below, {}, "0"), 0);
 	EXPECT_EQ(findConverter("atleast")->toInteger(number, {}, "0"), 61) << "rounded down";

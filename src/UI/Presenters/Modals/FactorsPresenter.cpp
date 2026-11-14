@@ -8,7 +8,6 @@
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/Data/MoveSource.h"
 #include "UI/Xml/Data/PrinterModel.h"
-#include "UI/Xml/Data/ToolSource.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"

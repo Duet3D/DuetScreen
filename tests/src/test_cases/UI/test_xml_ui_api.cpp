@@ -98,17 +98,18 @@ TEST_F(XmlUiApi, DescribesEveryKindOfName)
 {
 	const auto reference = UI::Xml::Api::build();
 
-	// Global data, with list rows, nested lists and the `index` every row has
-	auto tools = std::find_if(reference.sources.begin(),
-							  reference.sources.end(),
-							  [](const auto& s) { return findField(s.fields, "source.tool.tools"); });
-	ASSERT_NE(tools, reference.sources.end());
-	const auto* toolList = findField(tools->fields, "source.tool.tools");
-	EXPECT_EQ(toolList->type, "list");
-	EXPECT_NE(findField(toolList->rowFields, "row.index"), nullptr);
-	const auto* heaters = findField(toolList->rowFields, "row.heaters");
-	ASSERT_NE(heaters, nullptr);
-	EXPECT_FALSE(heaters->rowFields.empty());
+	// Global data, with list rows and the `index` every row has
+	auto jog = std::find_if(reference.sources.begin(),
+							reference.sources.end(),
+							[](const auto& s) { return findField(s.fields, "source.jog.distances"); });
+	ASSERT_NE(jog, reference.sources.end());
+	const auto* distances = findField(jog->fields, "source.jog.distances");
+	EXPECT_EQ(distances->type, "list");
+	EXPECT_NE(findField(distances->rowFields, "row.index"), nullptr);
+	EXPECT_NE(findField(distances->rowFields, "row.text"), nullptr);
+
+	// Nested lists: the console presenter's G-codes are a list of a presenter, the object model rows' fields
+	EXPECT_NE(findField(reference.omRowFields, "row.value"), nullptr);
 
 	// Every action says what it does
 	EXPECT_FALSE(reference.globalActions.empty());
@@ -288,11 +289,18 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		<lv_obj style_radius="#no_such_const" style_pad_all="#pad"/>
 		<bind_flag_if cond="source.machine.printing and no_such_operand" flag="hidden"/>
 		<ds_list list="om.fans" key="row.numbr" value="2" item="lint_plain"/>
-		<ds_list list="source.tool.tools" key="row.heaters" value="2" item="lint_plain"/>
+		<ds_view name="catalogue" view="lint_catalogue" presenter="customise" shown="true"/>
 		<ds_list list="om.fans" key="row.index" value="2" item="lint_plain"/>
 		<lv_label translation_tag="fan.max"/>
 		<lv_label bind_text="om.fans[0].name|default:fine_tune.fan"/>
 		<ds_button><action name="fans.set_speed"/></ds_button>
+	</view>
+</component>)";
+
+	// A view with the customise presenter, whose catalogue's rows each have a list of widgets
+	std::ofstream(userDir / "test" / "components" / "lint_catalogue.xml") << R"(<component>
+	<view extends="lv_obj">
+		<ds_list list="presenter.catalogue" key="row.widgets" value="2" item="lint_plain"/>
 	</view>
 </component>)";
 
@@ -347,6 +355,7 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		}
 	}
 	const std::vector<std::string> expected = {
+		"lint_catalogue.xml:3: `row.widgets` is a list, so it can't be a key (in lint_screen › lint_catalogue)",
 		"lint_dialog.xml:3: no subject `presenter.no_such_open` (in lint_screen › lint_dialog)",
 		"lint_dialog.xml:4: no prop `missing_prop` (in lint_screen › lint_dialog)",
 		"lint_fan.xml:4: no subject `row.rpmx` (in lint_screen › lint_fan)",
@@ -364,7 +373,6 @@ TEST_F(XmlUiApi, LintFindsNamesTheUiDoesNotProvide)
 		"lint_screen.xml:13: `no_such_operand`: names are written with where they come from (row., parent., "
 		"presenter., widget., source., om.) (in lint_screen)",
 		"lint_screen.xml:14: rows of `om.fans` have no field `row.numbr` (in lint_screen)",
-		"lint_screen.xml:15: `row.heaters` is a list, so it can't be a key (in lint_screen)",
 		"lint_screen.xml:17: `fan.max`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:18: `fine_tune.fan`: translation keys are written `tr.<key>` (in lint_screen)",
 		"lint_screen.xml:19: `fans.set_speed`: actions are written `presenter.<action>` or `actions.<group>.<action>` "

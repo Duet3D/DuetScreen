@@ -42,11 +42,15 @@ namespace UI::Xml
 		 */
 		void show(OmBindings& bindings, const OM::Path& path, const OM::Node& node);
 
+		/** Where the item is, e.g. `tools[0].heaters[1]`, for an action from the row to tell what it is about */
+		const OM::Path& item() const { return m_item; }
+
 		StringSubject<OmField::TEXT_SIZE> value; // The item as text, if it isn't an object
 		IntSubject exists;						 // 1 unless the item is null
 
 	  private:
 		OmItemNames m_names; // The names relative to the item
+		OM::Path m_item;	 // Where the item is
 	};
 
 	/** An object model array */

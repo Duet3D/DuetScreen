@@ -1,0 +1,8 @@
+<!--
+  A chamber in the tool list (dashboard_heater_card.xml), named for its sensor, else "Chamber <number>".
+
+  Fields:   a row of om.heat.chamberHeaters
+-->
+<component>
+	<view extends="dashboard_heater_card" label_tag="tr.temperature.chamber_number"/>
+</component>

@@ -240,7 +240,6 @@
 			<xs:enumeration value="presenter.z.homed"/>
 			<xs:enumeration value="presenter.z.jog_usable"/>
 			<xs:enumeration value="presenter.z.label"/>
-			<xs:enumeration value="row.active"/>
 			<xs:enumeration value="row.cancelled"/>
 			<xs:enumeration value="row.change_shown"/>
 			<xs:enumeration value="row.change_text"/>
@@ -259,8 +258,6 @@
 			<xs:enumeration value="row.filament_shown"/>
 			<xs:enumeration value="row.filament_text"/>
 			<xs:enumeration value="row.gcode"/>
-			<xs:enumeration value="row.heater"/>
-			<xs:enumeration value="row.heaters"/>
 			<xs:enumeration value="row.home_usable"/>
 			<xs:enumeration value="row.homed"/>
 			<xs:enumeration value="row.icon"/>
@@ -282,12 +279,9 @@
 			<xs:enumeration value="row.on"/>
 			<xs:enumeration value="row.output"/>
 			<xs:enumeration value="row.passed"/>
-			<xs:enumeration value="row.scale_max"/>
-			<xs:enumeration value="row.scale_min"/>
 			<xs:enumeration value="row.selected"/>
 			<xs:enumeration value="row.signal"/>
 			<xs:enumeration value="row.ssid"/>
-			<xs:enumeration value="row.standby"/>
 			<xs:enumeration value="row.state"/>
 			<xs:enumeration value="row.target"/>
 			<xs:enumeration value="row.text"/>
@@ -313,8 +307,6 @@
 			<xs:enumeration value="source.customise.snap"/>
 			<xs:enumeration value="source.customise.title"/>
 			<xs:enumeration value="source.gauge.gauges"/>
-			<xs:enumeration value="source.heat.beds"/>
-			<xs:enumeration value="source.heat.chambers"/>
 			<xs:enumeration value="source.job.cancel_control"/>
 			<xs:enumeration value="source.job.elapsed"/>
 			<xs:enumeration value="source.job.elapsed_text"/>
@@ -353,7 +345,6 @@
 			<xs:enumeration value="source.tool.current.heaters"/>
 			<xs:enumeration value="source.tool.current.label"/>
 			<xs:enumeration value="source.tool.current.shown"/>
-			<xs:enumeration value="source.tool.tools"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="subject">
@@ -383,16 +374,12 @@
 			<xs:enumeration value="presenter.steps"/>
 			<xs:enumeration value="presenter.swatches"/>
 			<xs:enumeration value="presenter.tools"/>
-			<xs:enumeration value="row.heaters"/>
 			<xs:enumeration value="row.widgets"/>
 			<xs:enumeration value="source.console.lines"/>
 			<xs:enumeration value="source.gauge.gauges"/>
-			<xs:enumeration value="source.heat.beds"/>
-			<xs:enumeration value="source.heat.chambers"/>
 			<xs:enumeration value="source.jog.distances"/>
 			<xs:enumeration value="source.jog.feedrates"/>
 			<xs:enumeration value="source.temperature.temperatures"/>
-			<xs:enumeration value="source.tool.tools"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="list">
@@ -717,6 +704,8 @@
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
+			<xs:enumeration value="dashboard_bed"/>
+			<xs:enumeration value="dashboard_chamber"/>
 			<xs:enumeration value="dashboard_current_tool"/>
 			<xs:enumeration value="dashboard_current_tool_card"/>
 			<xs:enumeration value="dashboard_current_tool_heater"/>
@@ -734,6 +723,7 @@
 			<xs:enumeration value="dashboard_text"/>
 			<xs:enumeration value="dashboard_tool"/>
 			<xs:enumeration value="dashboard_tool_card"/>
+			<xs:enumeration value="dashboard_tool_heater"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
@@ -797,12 +787,15 @@
 			<xs:enumeration value="status_bar_factor_button"/>
 			<xs:enumeration value="status_bar_gcode_button"/>
 			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="temperature_bed"/>
+			<xs:enumeration value="temperature_chamber"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_extrusion_card"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
+			<xs:enumeration value="temperature_tool_heater"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
@@ -838,6 +831,8 @@
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
+			<xs:enumeration value="dashboard_bed"/>
+			<xs:enumeration value="dashboard_chamber"/>
 			<xs:enumeration value="dashboard_current_tool"/>
 			<xs:enumeration value="dashboard_current_tool_card"/>
 			<xs:enumeration value="dashboard_current_tool_heater"/>
@@ -855,6 +850,7 @@
 			<xs:enumeration value="dashboard_text"/>
 			<xs:enumeration value="dashboard_tool"/>
 			<xs:enumeration value="dashboard_tool_card"/>
+			<xs:enumeration value="dashboard_tool_heater"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
@@ -918,12 +914,15 @@
 			<xs:enumeration value="status_bar_factor_button"/>
 			<xs:enumeration value="status_bar_gcode_button"/>
 			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="temperature_bed"/>
+			<xs:enumeration value="temperature_chamber"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_extrusion_card"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
+			<xs:enumeration value="temperature_tool_heater"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
@@ -959,6 +958,8 @@
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
+			<xs:enumeration value="dashboard_bed"/>
+			<xs:enumeration value="dashboard_chamber"/>
 			<xs:enumeration value="dashboard_current_tool"/>
 			<xs:enumeration value="dashboard_current_tool_card"/>
 			<xs:enumeration value="dashboard_current_tool_heater"/>
@@ -976,6 +977,7 @@
 			<xs:enumeration value="dashboard_text"/>
 			<xs:enumeration value="dashboard_tool"/>
 			<xs:enumeration value="dashboard_tool_card"/>
+			<xs:enumeration value="dashboard_tool_heater"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="ds_arc"/>
 			<xs:enumeration value="ds_bar"/>
@@ -1092,12 +1094,15 @@
 			<xs:enumeration value="status_bar_factor_button"/>
 			<xs:enumeration value="status_bar_gcode_button"/>
 			<xs:enumeration value="temperature"/>
+			<xs:enumeration value="temperature_bed"/>
+			<xs:enumeration value="temperature_chamber"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_extrusion_card"/>
 			<xs:enumeration value="temperature_heater"/>
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
+			<xs:enumeration value="temperature_tool_heater"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
@@ -2769,6 +2774,22 @@
 		</xs:attribute>
 		<xs:attribute name="gcode" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `gcode` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_heater.attributes">
+		<xs:attribute name="label" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="active" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="standby" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_heater_card.attributes">
+		<xs:attribute name="label_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_temperature_graph.attributes">
@@ -5250,6 +5271,22 @@
 			<xs:annotation><xs:documentation>How long before it starts, in ms (`50` or `50ms`)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="temperature_heater.attributes">
+		<xs:attribute name="label" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="active" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="standby" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="temperature_heater_card.attributes">
+		<xs:attribute name="label_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="value_selector.attributes">
 		<xs:attribute name="selector" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `selector` (string)</xs:documentation></xs:annotation>
@@ -7523,6 +7560,24 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="dashboard_bed">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_bed.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_heater_card.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_chamber">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_chamber.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_heater_card.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="dashboard_current_tool">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -7577,6 +7632,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_heater.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -7585,6 +7641,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_heater_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_heater_card.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8172,6 +8229,15 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="dashboard_tool_card.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_tool_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tool_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_heater.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -10236,6 +10302,26 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="temperature_bed">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_bed.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="temperature_heater_card.attributes"/>
+			<xs:attributeGroup ref="temperature_heater.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_chamber">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_chamber.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="temperature_heater_card.attributes"/>
+			<xs:attributeGroup ref="temperature_heater.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="temperature_extruder">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extruder.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -10777,6 +10863,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="temperature_heater.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -10785,6 +10872,8 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_heater_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="temperature_heater_card.attributes"/>
+			<xs:attributeGroup ref="temperature_heater.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -10793,6 +10882,15 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_tool.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="temperature_tool_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_tool_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="temperature_heater.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

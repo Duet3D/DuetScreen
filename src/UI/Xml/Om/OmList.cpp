@@ -24,6 +24,7 @@ namespace UI::Xml
 	void OmRow::show(OmBindings& bindings, const OM::Path& path, const OM::Node& node)
 	{
 		m_names.setItem(bindings, OmBoundPath(path));
+		m_item = path;
 		value.set(node.isValue() ? node.text() : "");
 		exists.set(node.exists() ? 1 : 0);
 	}
