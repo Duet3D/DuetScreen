@@ -67,9 +67,6 @@ namespace UI
 		/** The name of the object being printed, or "None" if it has none or none is */
 		static std::string currentObjectName();
 
-		/** Ask `title` and `text`, then do `action` if the answer is yes; the question goes with `asker` */
-		static void ask(lv_obj_t* asker, std::string title, std::string text, std::function<void()> action);
-
 		Xml::StringSubject<96> m_currentObject;	 // Name of the object being printed
 		Xml::IntSubject m_xMin;					 // Bed span, mm
 		Xml::IntSubject m_xMax;					 // …

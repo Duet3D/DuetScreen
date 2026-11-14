@@ -38,60 +38,47 @@ namespace UI
 	ObjectCancelPresenter::ObjectCancelPresenter()
 		: XmlPresenter("object_cancel")
 	{
-		action("object_cancel.select",
-			   "Cancel the object, or resume it if cancelled, asking first. From a row of `objects`.",
-			   [](const Xml::ActionArgs& args)
-			   {
-				   const auto* row = args.row<JobObjectRow>();
-				   if (row == nullptr)
-				   {
-					   LOG_WARN("object_cancel.select must come from an objects row");
-					   return;
-				   }
-				   const auto index = static_cast<size_t>(row->number.get());
-				   std::string name;
-				   bool resume = false;
-				   {
-					   MODEL_LOCK();
-					   const OM::Node& object = objects()[index];
-					   if (!object.exists())
-					   {
-						   return;
-					   }
-					   name = object["name"].text();
-					   resume = object["cancelled"].boolean();
-				   }
-				   // M486 P cancels an object, M486 U resumes it
-				   const std::string gcode = fmt::format("M486 {:c}{:d}\n", resume ? 'U' : 'P', index);
-				   if (resume)
-				   {
-					   ask(args.target,
-						   _("object_cancel.confirm_uncancel_title"),
-						   _("object_cancel.confirm_uncancel_text", name),
-						   [gcode]() { Xml::Services::sendGcode(gcode); });
-				   }
-				   else
-				   {
-					   ask(args.target,
-						   _("object_cancel.confirm_cancel_title"),
-						   _("object_cancel.confirm_cancel_text", name),
-						   [gcode]() { Xml::Services::sendGcode(gcode); });
-				   }
-			   });
+		action(
+			"object_cancel.select",
+			"Cancel the object, or resume it if cancelled, asking first. From a row of `objects`.",
+			[](const Xml::ActionArgs& args)
+			{
+				const auto* row = args.row<JobObjectRow>();
+				if (row == nullptr)
+				{
+					LOG_WARN("object_cancel.select must come from an objects row");
+					return;
+				}
+				const auto index = static_cast<size_t>(row->number.get());
+				std::string name;
+				bool resume = false;
+				{
+					MODEL_LOCK();
+					const OM::Node& object = objects()[index];
+					if (!object.exists())
+					{
+						return;
+					}
+					name = object["name"].text();
+					resume = object["cancelled"].boolean();
+				}
+				// M486 P cancels an object, M486 U resumes it
+				const std::string gcode = fmt::format("M486 {:c}{:d}\n", resume ? 'U' : 'P', index);
+				Xml::Prompts::askQuestion(
+					{.title = _(resume ? "object_cancel.confirm_uncancel_title" : "object_cancel.confirm_cancel_title"),
+					 .text =
+						 _(resume ? "object_cancel.confirm_uncancel_text" : "object_cancel.confirm_cancel_text", name),
+					 .onYes = [gcode]() { Xml::Services::sendGcode(gcode); },
+					 .asker = args.target});
+			});
 		action("object_cancel.cancel_current",
 			   "Cancel the object being printed, asking first if confirmations are on",
 			   [](const Xml::ActionArgs& args)
 			   {
-				   const auto cancelCurrent = []() { Xml::Services::sendGcode("M486 C\n"); };
-				   if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
-				   {
-					   cancelCurrent();
-					   return;
-				   }
-				   ask(args.target,
-					   _("object_cancel.confirm_cancel_current_title"),
-					   _("object_cancel.confirm_cancel_current_text", currentObjectName()),
-					   cancelCurrent);
+				   Xml::Prompts::confirm({.title = _("object_cancel.confirm_cancel_current_title"),
+										  .text = _("object_cancel.confirm_cancel_current_text", currentObjectName()),
+										  .onYes = []() { Xml::Services::sendGcode("M486 C\n"); },
+										  .asker = args.target});
 			   });
 		m_currentObject.set(_("object_cancel.current_object_none"));
 	}
@@ -119,12 +106,6 @@ namespace UI
 	{
 		m_confirmations.set(StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS) ? 1 : 0);
 		showObjects();
-	}
-
-	void ObjectCancelPresenter::ask(lv_obj_t* asker, std::string title, std::string text, std::function<void()> action)
-	{
-		Xml::Prompts::askQuestion(
-			{.title = std::move(title), .text = std::move(text), .onYes = std::move(action), .asker = asker});
 	}
 
 	const OM::Node& ObjectCancelPresenter::objects()

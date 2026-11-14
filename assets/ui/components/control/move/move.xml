@@ -2,10 +2,11 @@
   The Move tab: X and Y on a pad, Z beside it and any other axes after, babystepping on the right, and the jog
   distance and speed along the bottom. Tap a position to move to one; hold a distance or speed to change it.
 
-  Fields and actions: src/UI/Presenters/Control/Move/MovePresenter.h. The jog
-  distance and speed are the global source.jog.* (src/UI/Xml/Data/JogSource.h), shared with any jog widgets.
+  Data:     source.axes.* (src/UI/Xml/Data/AxesSource.h), source.machine.connected
+  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h). The jog distance and speed are the global source.jog.*
+            (src/UI/Xml/Data/JogSource.h), shared with any jog widgets.
 -->
-<component presenter="move">
+<component>
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="bg_dark"/>
 
@@ -13,7 +14,7 @@
 			<lv_obj name="axis_control" height="100%" flex_grow="1" scrollable="false" flex_flow="row"
 					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="card"/>
-				<bind_state_if_eq subject="presenter.connected" state="disabled" ref_value="0"/>
+				<bind_state_if_eq subject="source.machine.connected" state="disabled" ref_value="0"/>
 
 				<!-- X and Y -->
 				<move_xy name="xy_control" width="38%" height="100%"/>
@@ -22,10 +23,10 @@
 				<move_z name="z_control" width="13%" height="100%" style_min_width="content"/>
 
 				<!-- Any other axes -->
-				<ds_list name="generic_axis_controls" list="presenter.axes" item="move_axis" height="100%" flex_grow="1"
+				<ds_list name="generic_axis_controls" list="source.axes.others" item="move_axis" height="100%" flex_grow="1"
 						 flex_flow="row" style_pad_all="0" style_pad_column="0">
 					<style name="no_border"/>
-					<bind_flag_if_eq subject="presenter.axes_shown" flag="hidden" ref_value="0"/>
+					<bind_flag_if_eq subject="source.axes.others_shown" flag="hidden" ref_value="0"/>
 				</ds_list>
 			</lv_obj>
 

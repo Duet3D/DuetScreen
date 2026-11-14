@@ -87,4 +87,10 @@ namespace UI::Xml::Prompts
 
 	/** Ask a yes or no question. @return false if it couldn't be shown */
 	bool askQuestion(QuestionRequest request);
+
+	/**
+	 * Ask the question if the user has actions confirmed first (the setting), else go straight on with `onYes`
+	 * @return false if the question couldn't be shown
+	 */
+	bool confirm(QuestionRequest request);
 } // namespace UI::Xml::Prompts

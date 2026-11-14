@@ -15,6 +15,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/List.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Scope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Binding/Surface.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/AxesSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/BabystepSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ConsoleSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogActions.cpp

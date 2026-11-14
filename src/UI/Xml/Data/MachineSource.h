@@ -49,6 +49,7 @@ namespace UI::Xml
 		/** Show the state key `state`, e.g. "idle", translated, with the connection */
 		void showState(std::string_view state);
 
+		IntSubject m_connected;			 // 1 while connected
 		StringSubject<16> m_status;		 // State key
 		IntSubject m_printing;			 // 1 while a job is running and not paused
 		IntSubject m_jobActive;			 // 1 while there is a job, even paused

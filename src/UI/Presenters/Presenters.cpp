@@ -7,7 +7,7 @@
 #include "Console/ConsolePresenter.h"
 #include "Control/Fans/FanActions.h"
 #include "Control/Heightmap/HeightmapPresenter.h"
-#include "Control/Move/MovePresenter.h"
+#include "Control/Move/MoveActions.h"
 #include "Control/ObjectCancel/ObjectCancelPresenter.h"
 #include "Control/Temperature/ExtruderActions.h"
 #include "Control/Temperature/HeaterActions.h"
@@ -46,6 +46,7 @@ namespace UI
 		HeaterActions::registerAll();
 		FanActions::registerAll();
 		ExtruderActions::registerAll();
+		MoveActions::registerAll();
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
 		EStopActions::registerAll();
@@ -58,7 +59,6 @@ namespace UI
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<CustomisePresenter>("customise");
 		Xml::Presenters::add<ConsolePresenter>("console");
-		Xml::Presenters::add<MovePresenter>("move");
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");

@@ -2,7 +2,9 @@
   Controls for one axis: its position (tap to set it), forwards, home, backwards. Homing shows it unhomed until
   done.
 
-  Fields:   an axes row: row.letter, row.label, row.homed, row.jog_usable, row.home_usable (src/UI/Presenters/Control/Move/MovePresenter.h)
+  Fields:   a source.axes.others row: row.letter, row.label, row.homed, row.jog_usable, row.home_usable
+            (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
 	<view extends="lv_obj" height="100%" flex_grow="1" style_min_width="content" flex_flow="column"
@@ -13,24 +15,24 @@
 			<style name="input"/>
 			<style name="pad_base"/>
 			<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.set_position"/>
+			<action trigger="clicked" name="actions.move.set_position"/>
 		</ds_button>
 		<ds_button name="increment" icon="increment.png" width="100%" flex_grow="1">
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="+"/>
+			<action trigger="clicked" name="actions.move.jog" arg="+"/>
 		</ds_button>
 		<ds_button name="home" bind_text="row.letter" icon="home_axis.png" width="100%" flex_grow="1">
 			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
 			<bind_state_if_eq subject="row.homed" state="checked" ref_value="0"/>
 			<bind_state_if_eq subject="row.home_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.home"/>
+			<action trigger="clicked" name="actions.move.home"/>
 		</ds_button>
 		<ds_button name="decrement" icon="decrement.png" width="100%" flex_grow="1">
 			<style name="action_btn"/>
 			<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="-"/>
+			<action trigger="clicked" name="actions.move.jog" arg="-"/>
 		</ds_button>
 	</view>
 </component>

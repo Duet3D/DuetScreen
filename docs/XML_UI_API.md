@@ -77,6 +77,42 @@ Each row of an object model list:
 
 Printer data published by the data sources in [src/UI/Xml/Data](../src/UI/Xml/Data), each source's as `source.<source>.<field>`, from `<Source>Source.cpp`. Any view can bind to these. A list is shown with `<ds_list list="…">`; inside each row, the row's fields are `row.*`.
 
+### axes
+
+From [AxesSource.cpp](../src/UI/Xml/Data/AxesSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.axes.x.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
+| `source.axes.x.homed` | int | 1 when homed |
+| `source.axes.x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.x.home_usable` | int | 1 if it can be homed |
+| `source.axes.y.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
+| `source.axes.y.homed` | int | 1 when homed |
+| `source.axes.y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.y.home_usable` | int | 1 if it can be homed |
+| `source.axes.z.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
+| `source.axes.z.homed` | int | 1 when homed |
+| `source.axes.z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.z.home_usable` | int | 1 if it can be homed |
+| `source.axes.xy.homed` | int | 1 when X and Y are homed |
+| `source.axes.xy.home_usable` | int | 1 if X and Y can be homed |
+| `source.axes.home_all_usable` | int | 1 if all axes can be homed |
+| `source.axes.disable_motors_usable` | int | 1 if the motors can be disabled |
+| `source.axes.others` | list | The axes the user sees other than X, Y and Z |
+| `source.axes.others_shown` | int | 1 if there are other axes |
+
+Each row of `source.axes.others`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.letter` | text | Axis letter |
+| `row.label` | text | Position in the displayed unit, e.g. "U: 0.00" |
+| `row.homed` | int | 1 when homed |
+| `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `row.home_usable` | int | 1 if it can be homed |
+
 ### babystep
 
 From [BabystepSource.cpp](../src/UI/Xml/Data/BabystepSource.cpp).
@@ -268,6 +304,7 @@ From [MachineSource.cpp](../src/UI/Xml/Data/MachineSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
+| `source.machine.connected` | int | 1 while the printer is connected, else 0 |
 | `source.machine.status` | text | State key, e.g. idle, processing, paused; translated under state.* |
 | `source.machine.printing` | int | 1 while a job is running and not paused, else 0: controls that would change the job are disabled |
 | `source.machine.job_active` | int | 1 while there is a job (running, pausing, paused, resuming or simulating), else 0 |
@@ -354,6 +391,10 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.job.pause` | Pause the job. Offered to users for their widgets' action settings, as `tr.actions.job_pause`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.print_again` | Start the last job again | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
 | `actions.job.resume` | Resume the paused job. Offered to users for their widgets' action settings, as `tr.actions.job_resume`. | [JobActions.cpp](../src/UI/Presenters/Dashboard/JobActions.cpp) |
+| `actions.move.disable_motors` | Disable the motors (M18), asking first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_disable_motors`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `source.axes.others`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_home`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.jog` | Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; from a row of `source.axes.others`, `+` or `-`. Offered to users for their widgets' action settings, as `tr.actions.move_jog`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
+| `actions.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `source.axes.others`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
@@ -696,50 +737,6 @@ Each row of `presenter.maps`:
 | `presenter.heightmap.mode` | Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range) |
 | `presenter.heightmap.show` | Show that height map. From a row of `maps`. |
 | `presenter.heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
-
-### move
-
-Used by `move`, `move_xy_card`, `move_z_card`.
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `presenter.connected` | int | 1 while connected |
-| `presenter.x.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `presenter.x.homed` | int | 1 when homed |
-| `presenter.x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `presenter.x.home_usable` | int | 1 if it can be homed |
-| `presenter.y.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `presenter.y.homed` | int | 1 when homed |
-| `presenter.y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `presenter.y.home_usable` | int | 1 if it can be homed |
-| `presenter.z.label` | text | Position in the displayed unit, e.g. "X: 0.00" |
-| `presenter.z.homed` | int | 1 when homed |
-| `presenter.z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `presenter.z.home_usable` | int | 1 if it can be homed |
-| `presenter.xy.homed` | int | 1 when X and Y are homed |
-| `presenter.xy.home_usable` | int | 1 if X and Y can be homed |
-| `presenter.home_all_usable` | int | 1 if all axes can be homed |
-| `presenter.disable_motors_usable` | int | 1 if the motors can be disabled |
-| `presenter.axes` | list | The axes other than X, Y and Z |
-| `presenter.axes_shown` | int | 1 if there are other axes |
-
-Each row of `presenter.axes`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.letter` | text | Axis letter |
-| `row.label` | text | Position in the displayed unit, e.g. "U: 0.00" |
-| `row.homed` | int | 1 when homed |
-| `row.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
-| `row.home_usable` | int | 1 if it can be homed |
-
-| Action | Description |
-| --- | --- |
-| `presenter.move.disable_motors` | Disable the motors (M18), asking first if confirmations are on |
-| `presenter.move.home` | Home: `arg` is `X`, `Y`, `Z`, `XY` or `all`, or raise it from a row of `axes`. Asks first if confirmations are on. |
-| `presenter.move.jog` | Jog by the chosen distance at the chosen speed. `arg` is `X+`, `Z-`, …; from a row of `axes`, `+` or `-`. |
-| `presenter.move.set_position` | Ask for a position and move there. `arg` is the axis letter, or raise it from a row of `axes`. |
 
 ### notifications
 
@@ -2940,13 +2937,13 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
-| [`move`](#control) | `move` |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
+| [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  |  | `move` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_jog_choices` |  |  | `move`, `jog_choices` | [move_jog_choices.xml](../assets/ui/components/control/move/move_jog_choices.xml) |
 | `move_xy` |  |  | `move`, `move_xy_card` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
-| `move_xy_card` | `move` |  | `jog_xy` | [move_xy_card.xml](../assets/ui/components/control/move/move_xy_card.xml) |
+| `move_xy_card` |  |  | `jog_xy` | [move_xy_card.xml](../assets/ui/components/control/move/move_xy_card.xml) |
 | `move_z` |  |  | `move`, `move_z_card` | [move_z.xml](../assets/ui/components/control/move/move_z.xml) |
-| `move_z_card` | `move` |  | `jog_z` | [move_z_card.xml](../assets/ui/components/control/move/move_z_card.xml) |
+| `move_z_card` |  |  | `jog_z` | [move_z_card.xml](../assets/ui/components/control/move/move_z_card.xml) |
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |

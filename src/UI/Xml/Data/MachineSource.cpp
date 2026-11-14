@@ -18,6 +18,7 @@ namespace UI::Xml
 
 	void MachineSource::fields(FieldVisitor& f)
 	{
+		f.field("connected", m_connected, "1 while the printer is connected, else 0");
 		f.field("status", m_status, "State key, e.g. idle, processing, paused; translated under state.*");
 		f.field("printing",
 				m_printing,
@@ -54,6 +55,7 @@ namespace UI::Xml
 
 	void MachineSource::statusChanged(const OM::PrinterStatus& status)
 	{
+		m_connected.set(OM::IsConnected() ? 1 : 0);
 		m_status.set(OM::GetStatusText());
 		m_printing.set(OM::IsPrintingStatus(status) && status != OM::PrinterStatus::paused ? 1 : 0);
 		m_jobActive.set(OM::IsPrintingStatus(status) ? 1 : 0);

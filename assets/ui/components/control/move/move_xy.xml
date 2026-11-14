@@ -2,100 +2,100 @@
   X and Y on a pad: their positions (tap to set one), the arrows to jog them, and homing X, Y, both or everything,
   and disabling the motors. Homing buttons show unhomed axes until homed.
 
-  Binds to the Move tab's x.*, y.*, xy.*, home_all_usable and disable_motors_usable, and raises its source.move.* actions
-  (src/UI/Presenters/Control/Move/MovePresenter.h).
+  Data:     source.axes.x.*, y.*, xy.*, home_all_usable, disable_motors_usable (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
 	<view extends="lv_obj" style_layout="grid" style_grid_column_dsc_array="fr(2) fr(1) fr(1) fr(2)"
 		  style_grid_row_dsc_array="content fr(1) fr(1) fr(1)">
 		<style name="pad_large"/>
-		<ds_button name="x_label" bind_text="presenter.x.label" width="content" height="content"
+		<ds_button name="x_label" bind_text="source.axes.x.label" width="content" height="content"
 				   style_text_align="center"
 				   style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 			<style name="input"/>
 			<style name="pad_base"/>
-			<bind_state_if_eq subject="presenter.x.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.set_position" arg="X"/>
+			<bind_state_if_eq subject="source.axes.x.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.set_position" arg="X"/>
 		</ds_button>
-		<ds_button name="y_label" bind_text="presenter.y.label" width="content" height="content"
+		<ds_button name="y_label" bind_text="source.axes.y.label" width="content" height="content"
 				   style_text_align="center"
 				   style_grid_cell_column_pos="2" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
 			<style name="input"/>
 			<style name="pad_base"/>
-			<bind_state_if_eq subject="presenter.y.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.set_position" arg="Y"/>
+			<bind_state_if_eq subject="source.axes.y.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.set_position" arg="Y"/>
 		</ds_button>
 		<ds_button name="x_increment" icon="arrow_right.png"
 				   style_grid_cell_column_pos="3" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.x.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="X+"/>
+			<bind_state_if_eq subject="source.axes.x.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.jog" arg="X+"/>
 		</ds_button>
 		<ds_button name="x_decrement" icon="arrow_left.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.x.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="X-"/>
+			<bind_state_if_eq subject="source.axes.x.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.jog" arg="X-"/>
 		</ds_button>
 		<ds_button name="y_increment" icon="arrow_up.png"
 				   style_grid_cell_column_pos="1" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.y.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="Y+"/>
+			<bind_state_if_eq subject="source.axes.y.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.jog" arg="Y+"/>
 		</ds_button>
 		<ds_button name="y_decrement" icon="arrow_down.png"
 				   style_grid_cell_column_pos="1" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.y.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="Y-"/>
+			<bind_state_if_eq subject="source.axes.y.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.jog" arg="Y-"/>
 		</ds_button>
 		<ds_button name="home_all" translation_tag="tr.move.home_all" icon="home_axis.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
-			<bind_state_if_eq subject="presenter.home_all_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.home" arg="all"/>
+			<bind_state_if_eq subject="source.axes.home_all_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.home" arg="all"/>
 		</ds_button>
 		<ds_button name="home_xy" text="XY" icon="home_axis.png"
 				   style_grid_cell_column_pos="1" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
-			<bind_state_if_eq subject="presenter.xy.homed" state="checked" ref_value="0"/>
-			<bind_state_if_eq subject="presenter.xy.home_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.home" arg="XY"/>
+			<bind_state_if_eq subject="source.axes.xy.homed" state="checked" ref_value="0"/>
+			<bind_state_if_eq subject="source.axes.xy.home_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.home" arg="XY"/>
 		</ds_button>
 		<ds_button name="home_x" text="X" icon="home_axis.png"
 				   style_grid_cell_column_pos="3" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
-			<bind_state_if_eq subject="presenter.x.homed" state="checked" ref_value="0"/>
-			<bind_state_if_eq subject="presenter.x.home_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.home" arg="X"/>
+			<bind_state_if_eq subject="source.axes.x.homed" state="checked" ref_value="0"/>
+			<bind_state_if_eq subject="source.axes.x.home_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.home" arg="X"/>
 		</ds_button>
 		<ds_button name="home_y" text="Y" icon="home_axis.png"
 				   style_grid_cell_column_pos="3" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
-			<bind_state_if_eq subject="presenter.y.homed" state="checked" ref_value="0"/>
-			<bind_state_if_eq subject="presenter.y.home_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.home" arg="Y"/>
+			<bind_state_if_eq subject="source.axes.y.homed" state="checked" ref_value="0"/>
+			<bind_state_if_eq subject="source.axes.y.home_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.home" arg="Y"/>
 		</ds_button>
 		<ds_button name="disable_motors" translation_tag="tr.move.disable_motors" icon="disable_motors.png"
 				   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 				   style_grid_cell_row_pos="3" style_grid_cell_y_align="stretch">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.disable_motors_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.disable_motors"/>
+			<bind_state_if_eq subject="source.axes.disable_motors_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.disable_motors"/>
 		</ds_button>
 	</view>
 </component>

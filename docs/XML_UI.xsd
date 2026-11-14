@@ -30,8 +30,6 @@
 			<xs:enumeration value="presenter.alert.title"/>
 			<xs:enumeration value="presenter.alert.warning"/>
 			<xs:enumeration value="presenter.animations"/>
-			<xs:enumeration value="presenter.axes"/>
-			<xs:enumeration value="presenter.axes_shown"/>
 			<xs:enumeration value="presenter.brightness"/>
 			<xs:enumeration value="presenter.build_tools_shown"/>
 			<xs:enumeration value="presenter.buildroot"/>
@@ -46,7 +44,6 @@
 			<xs:enumeration value="presenter.colour"/>
 			<xs:enumeration value="presenter.colour_shown"/>
 			<xs:enumeration value="presenter.confirmations"/>
-			<xs:enumeration value="presenter.connected"/>
 			<xs:enumeration value="presenter.connected_message"/>
 			<xs:enumeration value="presenter.connection_method"/>
 			<xs:enumeration value="presenter.connection_methods"/>
@@ -66,7 +63,6 @@
 			<xs:enumeration value="presenter.dialog_image"/>
 			<xs:enumeration value="presenter.dialog_text"/>
 			<xs:enumeration value="presenter.dialog_title"/>
-			<xs:enumeration value="presenter.disable_motors_usable"/>
 			<xs:enumeration value="presenter.duet_ip"/>
 			<xs:enumeration value="presenter.duet_password"/>
 			<xs:enumeration value="presenter.error_notifications_stay"/>
@@ -81,7 +77,6 @@
 			<xs:enumeration value="presenter.gcodes"/>
 			<xs:enumeration value="presenter.has_saved"/>
 			<xs:enumeration value="presenter.header_shown"/>
-			<xs:enumeration value="presenter.home_all_usable"/>
 			<xs:enumeration value="presenter.icon_set"/>
 			<xs:enumeration value="presenter.icon_sets"/>
 			<xs:enumeration value="presenter.info_date"/>
@@ -199,25 +194,11 @@
 			<xs:enumeration value="presenter.usb_mode"/>
 			<xs:enumeration value="presenter.usb_modes"/>
 			<xs:enumeration value="presenter.version"/>
-			<xs:enumeration value="presenter.x.home_usable"/>
-			<xs:enumeration value="presenter.x.homed"/>
-			<xs:enumeration value="presenter.x.jog_usable"/>
-			<xs:enumeration value="presenter.x.label"/>
 			<xs:enumeration value="presenter.x_max"/>
 			<xs:enumeration value="presenter.x_min"/>
-			<xs:enumeration value="presenter.xy.home_usable"/>
-			<xs:enumeration value="presenter.xy.homed"/>
-			<xs:enumeration value="presenter.y.home_usable"/>
-			<xs:enumeration value="presenter.y.homed"/>
-			<xs:enumeration value="presenter.y.jog_usable"/>
-			<xs:enumeration value="presenter.y.label"/>
 			<xs:enumeration value="presenter.y_max"/>
 			<xs:enumeration value="presenter.y_min"/>
 			<xs:enumeration value="presenter.yes"/>
-			<xs:enumeration value="presenter.z.home_usable"/>
-			<xs:enumeration value="presenter.z.homed"/>
-			<xs:enumeration value="presenter.z.jog_usable"/>
-			<xs:enumeration value="presenter.z.label"/>
 			<xs:enumeration value="row.cancelled"/>
 			<xs:enumeration value="row.change_shown"/>
 			<xs:enumeration value="row.change_text"/>
@@ -273,6 +254,24 @@
 			<xs:enumeration value="row.x2"/>
 			<xs:enumeration value="row.y1"/>
 			<xs:enumeration value="row.y2"/>
+			<xs:enumeration value="source.axes.disable_motors_usable"/>
+			<xs:enumeration value="source.axes.home_all_usable"/>
+			<xs:enumeration value="source.axes.others"/>
+			<xs:enumeration value="source.axes.others_shown"/>
+			<xs:enumeration value="source.axes.x.home_usable"/>
+			<xs:enumeration value="source.axes.x.homed"/>
+			<xs:enumeration value="source.axes.x.jog_usable"/>
+			<xs:enumeration value="source.axes.x.label"/>
+			<xs:enumeration value="source.axes.xy.home_usable"/>
+			<xs:enumeration value="source.axes.xy.homed"/>
+			<xs:enumeration value="source.axes.y.home_usable"/>
+			<xs:enumeration value="source.axes.y.homed"/>
+			<xs:enumeration value="source.axes.y.jog_usable"/>
+			<xs:enumeration value="source.axes.y.label"/>
+			<xs:enumeration value="source.axes.z.home_usable"/>
+			<xs:enumeration value="source.axes.z.homed"/>
+			<xs:enumeration value="source.axes.z.jog_usable"/>
+			<xs:enumeration value="source.axes.z.label"/>
 			<xs:enumeration value="source.babystep.dialog_open"/>
 			<xs:enumeration value="source.babystep.reset_text"/>
 			<xs:enumeration value="source.babystep.step.choices"/>
@@ -322,6 +321,7 @@
 			<xs:enumeration value="source.jog.feedrate.choices"/>
 			<xs:enumeration value="source.jog.feedrate.title"/>
 			<xs:enumeration value="source.jog.feedrate.value"/>
+			<xs:enumeration value="source.machine.connected"/>
 			<xs:enumeration value="source.machine.connection"/>
 			<xs:enumeration value="source.machine.job_active"/>
 			<xs:enumeration value="source.machine.printing"/>
@@ -354,7 +354,6 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="presenter.alert.axes"/>
 			<xs:enumeration value="presenter.alert.choices"/>
-			<xs:enumeration value="presenter.axes"/>
 			<xs:enumeration value="presenter.catalogue"/>
 			<xs:enumeration value="presenter.choices"/>
 			<xs:enumeration value="presenter.crumbs"/>
@@ -370,6 +369,7 @@
 			<xs:enumeration value="presenter.swatches"/>
 			<xs:enumeration value="presenter.tools"/>
 			<xs:enumeration value="row.widgets"/>
+			<xs:enumeration value="source.axes.others"/>
 			<xs:enumeration value="source.babystep.step.choices"/>
 			<xs:enumeration value="source.console.lines"/>
 			<xs:enumeration value="source.console.recent"/>
@@ -410,6 +410,10 @@
 			<xs:enumeration value="actions.job.pause"/>
 			<xs:enumeration value="actions.job.print_again"/>
 			<xs:enumeration value="actions.job.resume"/>
+			<xs:enumeration value="actions.move.disable_motors"/>
+			<xs:enumeration value="actions.move.home"/>
+			<xs:enumeration value="actions.move.jog"/>
+			<xs:enumeration value="actions.move.set_position"/>
 			<xs:enumeration value="actions.navigation.back"/>
 			<xs:enumeration value="actions.navigation.home"/>
 			<xs:enumeration value="actions.navigation.open"/>
@@ -480,10 +484,6 @@
 			<xs:enumeration value="presenter.heightmap.mode"/>
 			<xs:enumeration value="presenter.heightmap.show"/>
 			<xs:enumeration value="presenter.heightmap.toggle"/>
-			<xs:enumeration value="presenter.move.disable_motors"/>
-			<xs:enumeration value="presenter.move.home"/>
-			<xs:enumeration value="presenter.move.jog"/>
-			<xs:enumeration value="presenter.move.set_position"/>
 			<xs:enumeration value="presenter.number.backspace"/>
 			<xs:enumeration value="presenter.number.cancel"/>
 			<xs:enumeration value="presenter.number.clear"/>
@@ -643,7 +643,6 @@
 			<xs:enumeration value="files_macros"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
-			<xs:enumeration value="move"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="settings_connection"/>
@@ -1344,6 +1343,9 @@
 			<xs:enumeration value="tr.actions.job_ask_cancel"/>
 			<xs:enumeration value="tr.actions.job_pause"/>
 			<xs:enumeration value="tr.actions.job_resume"/>
+			<xs:enumeration value="tr.actions.move_disable_motors"/>
+			<xs:enumeration value="tr.actions.move_home"/>
+			<xs:enumeration value="tr.actions.move_jog"/>
 			<xs:enumeration value="tr.actions.navigation_open"/>
 			<xs:enumeration value="tr.actions.none"/>
 			<xs:enumeration value="tr.actions.tool_toggle"/>
@@ -10644,7 +10646,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move.xml, with presenter move.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -10676,7 +10678,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move_xy_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_xy_card.xml, with presenter move.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_xy_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
@@ -10692,7 +10694,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="move_z_card">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_z_card.xml, with presenter move.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_z_card.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

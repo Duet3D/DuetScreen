@@ -6,6 +6,8 @@
 #include "DialogHost.h"
 #include "PromptPresenters.h"
 #include "PromptStep.h"
+#include "Storage.h"
+#include "utils/StorageHelper.h"
 #include <memory>
 
 namespace UI::Xml::Prompts
@@ -92,5 +94,18 @@ namespace UI::Xml::Prompts
 									std::move(onNo),
 									[&request](QuestionPrompt& prompt, PromptStep& step)
 									{ prompt.ask(std::move(request), step); });
+	}
+
+	bool confirm(QuestionRequest request)
+	{
+		if (!StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS))
+		{
+			if (request.onYes)
+			{
+				request.onYes();
+			}
+			return true;
+		}
+		return askQuestion(std::move(request));
 	}
 } // namespace UI::Xml::Prompts

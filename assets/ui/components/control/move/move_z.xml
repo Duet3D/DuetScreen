@@ -1,35 +1,36 @@
 <!--
   Z on its own: its position (tap to set it), up, home and down. Homing shows it unhomed until done.
 
-  Binds to the Move tab's z.* and raises its source.move.* actions (src/UI/Presenters/Control/Move/MovePresenter.h).
+  Data:     source.axes.z.* (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
 	<view extends="lv_obj" flex_flow="column" style_flex_main_place="center" style_flex_cross_place="center"
 		  style_flex_track_place="center">
 		<style name="pad_large"/>
-		<ds_button name="label" bind_text="presenter.z.label" width="100%" height="content" style_min_width="content"
+		<ds_button name="label" bind_text="source.axes.z.label" width="100%" height="content" style_min_width="content"
 				   style_text_align="center">
 			<style name="input"/>
 			<style name="pad_base"/>
-			<bind_state_if_eq subject="presenter.z.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.set_position" arg="Z"/>
+			<bind_state_if_eq subject="source.axes.z.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.set_position" arg="Z"/>
 		</ds_button>
 		<ds_button name="increment" icon="increment.png" width="100%" flex_grow="1">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.z.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="Z+"/>
+			<bind_state_if_eq subject="source.axes.z.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.jog" arg="Z+"/>
 		</ds_button>
 		<ds_button name="home" text="Z" icon="home_axis.png" width="100%" flex_grow="1">
 			<style name="action_btn"/>
 			<style name="unhomed" selector="checked"/>
-			<bind_state_if_eq subject="presenter.z.homed" state="checked" ref_value="0"/>
-			<bind_state_if_eq subject="presenter.z.home_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.home" arg="Z"/>
+			<bind_state_if_eq subject="source.axes.z.homed" state="checked" ref_value="0"/>
+			<bind_state_if_eq subject="source.axes.z.home_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.home" arg="Z"/>
 		</ds_button>
 		<ds_button name="decrement" icon="decrement.png" width="100%" flex_grow="1">
 			<style name="action_btn"/>
-			<bind_state_if_eq subject="presenter.z.jog_usable" state="disabled" ref_value="0"/>
-			<action trigger="clicked" name="presenter.move.jog" arg="Z-"/>
+			<bind_state_if_eq subject="source.axes.z.jog_usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="actions.move.jog" arg="Z-"/>
 		</ds_button>
 	</view>
 </component>
