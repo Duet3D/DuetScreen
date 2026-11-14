@@ -37,6 +37,7 @@
       "mm": "mm",
       "inches": "po",
       "mm_speed": "mm/s",
+      "mm_per_minute": "mm/min",
       "inches_speed": "ipm",
       "degrees": "{:d}°",
       "rpm": "{:d} rpm"

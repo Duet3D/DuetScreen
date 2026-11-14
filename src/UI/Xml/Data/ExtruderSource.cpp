@@ -15,18 +15,31 @@
 
 namespace UI::Xml
 {
+	namespace
+	{
+		/** How much filament to feed, in millimetres or in inches */
+		ValueSelector::Presets distances(bool metric)
+		{
+			const std::string key(ID_MVS_EXTRUSION_DISTANCES);
+			return metric ? ValueSelector::Presets{.storageKey = key, .values = {1.0f, 2.0f, 5.0f, 10.0f}, .min = 0.1f}
+						  : ValueSelector::Presets{
+								.storageKey = key + "_in", .values = {0.05f, 0.1f, 0.2f, 0.5f}, .min = 0.005f};
+		}
+
+		/** How fast to feed it, in mm/s or in inches per minute */
+		ValueSelector::Presets feedrates(bool metric)
+		{
+			const std::string key(ID_MVS_EXTRUSION_FEEDRATES);
+			return metric ? ValueSelector::Presets{.storageKey = key, .values = {1.0f, 5.0f, 20.0f, 50.0f}, .min = 0.1f}
+						  : ValueSelector::Presets{
+								.storageKey = key + "_in", .values = {2.0f, 10.0f, 50.0f, 120.0f}, .min = 0.2f};
+		}
+	} // namespace
+
 	ExtruderSource::ExtruderSource()
 		: DataSource("extruder")
-		, m_distance({.id = "extruder.distance",
-					  .storageKey = std::string(ID_MVS_EXTRUSION_DISTANCES),
-					  .presets = {1.0f, 2.0f, 5.0f, 10.0f},
-					  .keepValue = true,
-					  .min = 0.1f})
-		, m_feedrate({.id = "extruder.feedrate",
-					  .storageKey = std::string(ID_MVS_EXTRUSION_FEEDRATES),
-					  .presets = {1.0f, 5.0f, 20.0f, 50.0f},
-					  .keepValue = true,
-					  .min = 0.1f})
+		, m_distance({.id = "extruder.distance", .presets = distances(true), .keepValue = true})
+		, m_feedrate({.id = "extruder.feedrate", .presets = feedrates(true), .keepValue = true})
 	{
 	}
 
@@ -53,6 +66,9 @@ namespace UI::Xml
 	void ExtruderSource::update()
 	{
 		ZoneScoped;
+		const bool metric = Units::getCurrentDisplayedUnitSystem() == Units::UnitSystem::Metric;
+		m_distance.use(distances(metric));
+		m_feedrate.use(feedrates(metric));
 		m_distance.setTitle(_("extrude.feed_dist", Units::getDisplayedDistanceUnit()));
 		m_distance.setUnit(Units::getDisplayedDistanceUnit());
 		m_feedrate.setTitle(_("extrude.feed_rate", Units::getDisplayedSpeedUnit()));

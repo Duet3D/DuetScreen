@@ -14,13 +14,22 @@
 
 namespace UI::Xml
 {
+	namespace
+	{
+		/** The babystep sizes, in millimetres or in inches */
+		ValueSelector::Presets steps(bool metric)
+		{
+			const std::string key(ID_MVS_BABYSTEPS);
+			return metric
+					   ? ValueSelector::Presets{.storageKey = key, .values = {0.01f, 0.05f}, .min = 0.001f, .max = 1.0f}
+					   : ValueSelector::Presets{
+							 .storageKey = key + "_in", .values = {0.0005f, 0.002f}, .min = 0.0001f, .max = 0.04f};
+		}
+	} // namespace
+
 	BabystepSource::BabystepSource()
 		: DataSource("babystep")
-		, m_step({.id = "babystep.step",
-				  .storageKey = std::string(ID_MVS_BABYSTEPS),
-				  .presets = {0.01f, 0.05f},
-				  .min = 0.001f,
-				  .max = 1.0f})
+		, m_step({.id = "babystep.step", .presets = steps(true)})
 	{
 	}
 
@@ -38,6 +47,7 @@ namespace UI::Xml
 
 	void BabystepSource::update()
 	{
+		m_step.use(steps(Units::getCurrentDisplayedUnitSystem() == Units::UnitSystem::Metric));
 		m_step.setTitle(_("babystep.header"));
 		m_step.setUnit(Units::getDisplayedDistanceUnit());
 		MODEL_LOCK();

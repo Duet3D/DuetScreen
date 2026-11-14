@@ -60,7 +60,7 @@ namespace UI::MoveActions
 		void jog(char letter, bool forward)
 		{
 			const auto distance = Xml::JogSource::distance();
-			const auto feedrate = Xml::JogSource::feedrate();
+			const auto feedrate = Xml::JogSource::feedrateGcode();
 			if (!distance || !feedrate || !hasAxis(letter))
 			{
 				return;
@@ -70,13 +70,13 @@ namespace UI::MoveActions
 				fmt::format("M120\nG91\nG1 {:s}{:g} F{:g}\nM121\n",
 							Xml::PrinterModel::axisGcode(letter),
 							Units::convertDisplayedDistanceToDuetUnits((forward ? 1.0f : -1.0f) * *distance),
-							Units::convertDisplayedSpeedToDuetUnits(*feedrate)));
+							*feedrate));
 		}
 
 		/** Ask for a position for the axis called `letter`, and move there at the chosen jog speed */
 		void askPosition(char letter)
 		{
-			const auto feedrate = Xml::JogSource::feedrate();
+			const auto feedrate = Xml::JogSource::feedrateGcode();
 			const bool machine = StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE);
 			Xml::Prompts::NumberRequest request;
 			{
@@ -93,12 +93,11 @@ namespace UI::MoveActions
 						   .value = Units::convertDistanceToCurrentDisplayedUnit(position),
 						   .onConfirm = [letter, machine, feedrate](float value)
 						   {
-							   Xml::Services::sendGcode(
-								   fmt::format("M120\nG90\n{:s}G1 {:s}{:g} F{:g}\nM121\n",
-											   machine ? "G53 " : "",
-											   Xml::PrinterModel::axisGcode(letter),
-											   Units::convertDisplayedDistanceToDuetUnits(value),
-											   Units::convertDisplayedSpeedToDuetUnits(*feedrate)));
+							   Xml::Services::sendGcode(fmt::format("M120\nG90\n{:s}G1 {:s}{:g} F{:g}\nM121\n",
+																	machine ? "G53 " : "",
+																	Xml::PrinterModel::axisGcode(letter),
+																	Units::convertDisplayedDistanceToDuetUnits(value),
+																	*feedrate));
 						   }};
 			}
 			Xml::Prompts::askNumber(std::move(request));

@@ -26,7 +26,8 @@ class SelectorPresenter : public UI::Xml::XmlPresenter
 
   private:
 	UI::Xml::ValueSelector m_selector{
-		{.id = "test", .storageKey = "test:selector", .presets = {0.1f, 0.5f, 1.0f, 5.0f, 10.0f}}}; // The selector
+		{.id = "test",
+		 .presets = {.storageKey = "test:selector", .values = {0.1f, 0.5f, 1.0f, 5.0f, 10.0f}}}}; // The selector
 };
 
 class TestValueSelector : public UiTestSuite

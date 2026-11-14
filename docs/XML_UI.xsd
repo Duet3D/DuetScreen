@@ -2174,6 +2174,7 @@
 			<xs:enumeration value="tr.units.inches"/>
 			<xs:enumeration value="tr.units.inches_speed"/>
 			<xs:enumeration value="tr.units.mm"/>
+			<xs:enumeration value="tr.units.mm_per_minute"/>
 			<xs:enumeration value="tr.units.mm_speed"/>
 			<xs:enumeration value="tr.units.rpm"/>
 			<xs:enumeration value="tr.widget.align_center"/>

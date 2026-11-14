@@ -1263,10 +1263,11 @@ TEST_F(TestHomeViewWithData, TheScreenShowsItsOwnUnitsWhateverTheDuetUses)
 			  _("units.inches"))
 		<< "the step's unit is inches";
 
-	// A jog of 10 inches goes to the Duet in its millimetres
+	// The step is from the inch presets (0.5 in), not the millimetre ones read as inches; a jog goes to the Duet in its
+	// millimetres, at the 100 ipm chosen made mm/min
 	lv_obj_send_event(lv_obj_find_by_name(move, "x_increment"), LV_EVENT_CLICKED, nullptr);
 	ASSERT_FALSE(sent.empty());
-	EXPECT_NE(sent.back().find("X254"), std::string::npos) << sent.back();
+	EXPECT_NE(sent.back().find("X12.7 F2540"), std::string::npos) << sent.back();
 
 	ASSERT_TRUE(settings->set("units", 0.0f));
 	UI::Xml::Services::setGcodeSender(nullptr);

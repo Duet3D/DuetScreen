@@ -15,8 +15,10 @@
  * id is the `arg` of the global actions that change it, `actions.selector.*` (SelectorActions.h). Actions raised from a
  * row of its `choices` find it through the row.
  *
- * The presets are kept in storage under the selector's storage key, so they survive a restart; so is the value, if
- * the selector keeps it.
+ * The presets are kept in storage under their set's storage key, so they survive a restart; so is the value, if
+ * the selector keeps it. A selector whose values have a unit has a set of presets for each unit, and its source picks
+ * the set in use with use(): the jog distances in millimetres or in inches, say, as the screen shows lengths. Each
+ * set keeps its own presets, so changing units never turns 50 mm into 50 inches.
  */
 
 #pragma once
@@ -49,17 +51,23 @@ namespace UI::Xml
 	class ValueSelector : public FieldProvider
 	{
 	  public:
-		/** How a selector is set up */
-		struct Settings
+		/** A set of presets, in one unit, and the limits its values keep to, e.g. the jog distances in millimetres */
+		struct Presets
 		{
-			std::string id;								   // `<source>.<name>`, e.g. "jog.distance"
-			std::string storageKey;						   // Where its presets (and value) are kept
-			std::vector<float> presets;					   // The presets until others are stored
+			std::string storageKey;						   // Where the presets (and value) are kept
+			std::vector<float> values;					   // The presets until others are stored
 			size_t initial = 0;							   // The preset chosen at first
-			bool keepValue = false;						   // Store the value chosen, so it survives a restart
 			float min = 0.0f;							   // Lowest value
 			float max = std::numeric_limits<float>::max(); // Highest value
 			float step = 1.0f;							   // What - and + take off or add
+		};
+
+		/** How a selector is set up */
+		struct Settings
+		{
+			std::string id;			// `<source>.<name>`, e.g. "jog.distance"
+			Presets presets;		// The presets used until use() picks others
+			bool keepValue = false; // Store the value chosen, so it survives a restart
 		};
 
 		/** Create the selector, with the presets (and value) last stored, else the defaults */
@@ -79,6 +87,12 @@ namespace UI::Xml
 
 		/** Declare `<name>.title`, `<name>.value` and `<name>.choices`, for its source to publish */
 		void fields(FieldVisitor& f) override;
+
+		/**
+		 * Use another set of presets, e.g. those in inches once the screen shows inches: those last stored under its
+		 * storage key, else its defaults, and its value. Nothing changes if the set is already in use.
+		 */
+		void use(const Presets& presets);
 
 		/** Show `title` above the value */
 		void setTitle(std::string_view title);
@@ -105,6 +119,9 @@ namespace UI::Xml
 		void editPreset(size_t index);
 
 	  private:
+		/** Show the presets in use (m_settings.presets) as last stored, else their defaults, and their value */
+		void load();
+
 		/** Change preset `index` to `value`, and store the presets */
 		void setPreset(size_t index, float value);
 

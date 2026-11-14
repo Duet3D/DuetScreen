@@ -45,25 +45,40 @@ namespace UI::Xml
 
 	ValueSelector::ValueSelector(Settings settings)
 		: m_settings(std::move(settings))
-		, m_presets(m_settings.presets)
 	{
-		if (auto stored = StorageHelper::getData(presetsKey(m_settings.storageKey)); !stored.empty())
+		load();
+		s_live.push_back(this);
+	}
+
+	void ValueSelector::use(const Presets& presets)
+	{
+		if (presets.storageKey == m_settings.presets.storageKey)
+		{
+			return;
+		}
+		m_settings.presets = presets;
+		load();
+	}
+
+	void ValueSelector::load()
+	{
+		const Presets& set = m_settings.presets;
+		m_presets = set.values;
+		if (auto stored = StorageHelper::getData(presetsKey(set.storageKey)); !stored.empty())
 		{
 			m_presets = std::move(stored);
 		}
-		float value =
-			m_presets.empty() ? m_settings.min : m_presets[std::min(m_settings.initial, m_presets.size() - 1)];
+		float value = m_presets.empty() ? set.min : m_presets[std::min(set.initial, m_presets.size() - 1)];
 		if (m_settings.keepValue)
 		{
-			if (const float stored = StorageHelper::getData(valueKey(m_settings.storageKey)); !std::isnan(stored))
+			if (const float stored = StorageHelper::getData(valueKey(set.storageKey)); !std::isnan(stored))
 			{
 				value = stored;
 			}
 		}
-		m_value = std::clamp(value, m_settings.min, m_settings.max);
+		m_value = std::clamp(value, set.min, set.max);
 		m_valueText.set(format(m_value));
 		showPresets();
-		s_live.push_back(this);
 	}
 
 	ValueSelector::~ValueSelector()
@@ -103,12 +118,12 @@ namespace UI::Xml
 
 	void ValueSelector::setValue(float value)
 	{
-		m_value = std::clamp(value, m_settings.min, m_settings.max);
+		m_value = std::clamp(value, m_settings.presets.min, m_settings.presets.max);
 		m_valueText.set(format(m_value));
 		showPresets();
 		if (m_settings.keepValue)
 		{
-			StorageHelper::setData(valueKey(m_settings.storageKey), m_value);
+			StorageHelper::setData(valueKey(m_settings.presets.storageKey), m_value);
 		}
 	}
 
@@ -122,14 +137,14 @@ namespace UI::Xml
 
 	void ValueSelector::step(int direction)
 	{
-		setValue(m_value + static_cast<float>(direction) * m_settings.step);
+		setValue(m_value + static_cast<float>(direction) * m_settings.presets.step);
 	}
 
 	void ValueSelector::edit()
 	{
 		Prompts::askNumber({.header = _("multi_value_selector.numberpad_input_header"),
-							.min = m_settings.min,
-							.max = m_settings.max,
+							.min = m_settings.presets.min,
+							.max = m_settings.presets.max,
 							.value = m_value,
 							.unit = m_unit,
 							.onConfirm = [this](float value) { setValue(value); }});
@@ -142,8 +157,8 @@ namespace UI::Xml
 			return;
 		}
 		Prompts::askNumber({.header = _("multi_value_selector.numberpad_new_value_header"),
-							.min = m_settings.min,
-							.max = m_settings.max,
+							.min = m_settings.presets.min,
+							.max = m_settings.presets.max,
 							.value = m_presets[index],
 							.unit = m_unit,
 							.onConfirm = [this, index](float value)
@@ -160,9 +175,9 @@ namespace UI::Xml
 			LOG_ERROR("{:s} has no preset {:d}", m_settings.id, index);
 			return;
 		}
-		m_presets[index] = std::clamp(value, m_settings.min, m_settings.max);
+		m_presets[index] = std::clamp(value, m_settings.presets.min, m_settings.presets.max);
 		showPresets();
-		StorageHelper::setData(presetsKey(m_settings.storageKey), m_presets);
+		StorageHelper::setData(presetsKey(m_settings.presets.storageKey), m_presets);
 	}
 
 	void ValueSelector::showPresets()
