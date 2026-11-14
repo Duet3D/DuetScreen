@@ -88,6 +88,16 @@
 			   border_side="bottom" border_width="1" border_color="#border_muted" border_opa="100%"/>
 		<style name="dialog_row_chosen" text_color="#primary"/>
 
+		<!-- Settings (ds_setting): rows in boxed groups under headings. A group's background shows in the gaps between
+			 its rows, as the rules between them. A row is tall enough to tap anywhere on. -->
+		<style name="setting_group" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
+			   pad_row="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
+		<style name="setting_group_title" text_color="#text_muted" text_font="font_emphasis" pad_left="4" pad_top="6"/>
+		<style name="setting_row" width="100%" min_height="56" pad_hor="12" pad_ver="6" pad_column="16" radius="0"
+			   bg_color="#bg" bg_opa="100%" border_width="0"/>
+		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
+
 		<!-- The number pad: what is typed, large, in a box edged in the accent, over keys a size apart; the keys that
 			 edit rather than type are a step darker -->
 		<style name="numpad" pad_row="8" pad_column="8"/>

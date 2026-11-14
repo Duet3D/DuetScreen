@@ -1588,6 +1588,32 @@ Also takes every `lv_obj` attribute.
 | `item` | The component built (required) |
 | `item.<attribute>` | Given to the item as if written where it is used: a prop of the item component, or an attribute of its root. Its names are looked up in the item's scope. |
 
+### ds_setting
+
+One setting, a row: its title, a hint under it if it has one, then its control, the children written inside it, at the end of the row. Tapping the row anywhere works the control as tapping it would, if it is a switch, a button or a `<ds_choice>`. In a group, an `lv_obj` with the `setting_group` style under a label with the `setting_group_title` style. In a dialog's list, add the `dialog_row` style.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_setting title_tag="tr.settings.show_confirmation_dialogs"
+			hint="Ask first before actions that change the machine">
+	<ds_toggle>
+		<bind_state_if_eq subject="presenter.confirmations" state="checked" ref_value="1"/>
+		<action trigger="value_changed" name="presenter.settings.confirmations"/>
+	</ds_toggle>
+</ds_setting>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_setting.png)
+
+| Attribute | Description |
+| --- | --- |
+| `title` | The setting's title, if there is no `title_tag` or `bind_title` |
+| `title_tag` | Translation key for the title; follows language changes |
+| `bind_title` | Follow a text subject for the title |
+| `hint` | A line under the title saying more about the setting, if there is no `hint_tag` |
+| `hint_tag` | Translation key for the hint; follows language changes |
+
 ### ds_slider
 
 A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send="change"` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also raises `value_changed` as it is dragged.
@@ -3194,6 +3220,10 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `dialog_button` |  | min_width=120 min_height=40 pad_hor=16 |
 | `dialog_row` | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row.png) | min_height=44 pad_hor=4 pad_ver=4 pad_column=10 radius=0 bg_opa=0 border_side=bottom border_width=1 border_color=#border_muted border_opa=100% |
 | `dialog_row_chosen` | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row_chosen.png) | text_color=#primary |
+| `setting_group` | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group.png) | width=100% height=content layout=flex flex_flow=column pad_all=0 pad_row=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |
+| `setting_group_title` | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group_title.png) | text_color=#text_muted text_font=font_emphasis pad_left=4 pad_top=6 |
+| `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | width=100% min_height=56 pad_hor=12 pad_ver=6 pad_column=16 radius=0 bg_color=#bg bg_opa=100% border_width=0 |
+| `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | text_color=#text_muted text_font=font_subdued |
 | `numpad` |  | pad_row=8 pad_column=8 |
 | `numpad_readout` | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_readout.png) | bg_color=#bg_dark bg_opa=100% border_color=#primary border_width=1 border_opa=100% radius=#radius pad_hor=12 pad_ver=6 pad_column=12 |
 | `numpad_value` | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_value.png) | text_color=#text text_font=font_xlarge |

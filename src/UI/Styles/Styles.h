@@ -352,6 +352,12 @@ namespace UI::Themes
 		Style dialog_row;		  // A row of a list in a dialog (settings, choices): a rule under it
 		Style dialog_row_chosen;  // The value chosen in a list of choices
 
+		/* Settings (ds_setting): rows in boxed groups, each group under a heading */
+		Style setting_group;	   // A box of rows: its background shows in the gaps between them, as rules
+		Style setting_group_title; // The heading over a group
+		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
+		Style setting_hint;		   // The line under a row's title that says more about it
+
 		/* The number pad (assets/ui/components/dialogs/dialog_number.xml) */
 		Style numpad;		   // The pad, and its grid of keys: the gaps between them
 		Style numpad_readout;  // The box showing what is typed, with the numbers that can be

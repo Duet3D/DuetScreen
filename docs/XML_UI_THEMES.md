@@ -72,6 +72,7 @@ In dark mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_textarea.png) |
@@ -116,6 +117,7 @@ In light mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_textarea.png) |
@@ -164,6 +166,7 @@ In light mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_textarea.png) |
@@ -208,6 +211,7 @@ Consts: `#data_colours=grey`
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_textarea.png) |
@@ -260,6 +264,7 @@ In dark mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_textarea.png) |
@@ -308,6 +313,7 @@ In light mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_textarea.png) |
@@ -360,6 +366,7 @@ In dark mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_textarea.png) |
@@ -412,6 +419,7 @@ In dark mode:
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_scope.png) |
+| [`ds_setting`](XML_UI_API.md#ds_setting) | ![ds_setting](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_setting.png) |
 | [`ds_slider`](XML_UI_API.md#ds_slider) | ![ds_slider](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_slider.png) |
 | [`ds_tabs`](XML_UI_API.md#ds_tabs) | ![ds_tabs](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_tabs.png) |
 | [`ds_textarea`](XML_UI_API.md#ds_textarea) | ![ds_textarea](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_textarea.png) |
@@ -585,6 +593,10 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `dialog_button` |  |  |  |  |  |  |  |  |
 | `dialog_row` | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_row.png) | ![dialog_row](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_row.png) |
 | `dialog_row_chosen` | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/3d/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/flat/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/grey/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/neon/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/retro/styles/dialog_row_chosen.png) | ![dialog_row_chosen](../tests/ref_imgs/xml_ui_api/themes/soft/styles/dialog_row_chosen.png) |
+| `setting_group` | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/3d/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/flat/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/grey/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/neon/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/retro/styles/setting_group.png) | ![setting_group](../tests/ref_imgs/xml_ui_api/themes/soft/styles/setting_group.png) |
+| `setting_group_title` | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/3d/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/flat/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/grey/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/neon/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/retro/styles/setting_group_title.png) | ![setting_group_title](../tests/ref_imgs/xml_ui_api/themes/soft/styles/setting_group_title.png) |
+| `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/3d/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/flat/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/grey/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/neon/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/retro/styles/setting_row.png) | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/soft/styles/setting_row.png) |
+| `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/3d/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/flat/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/grey/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/neon/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/retro/styles/setting_hint.png) | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/soft/styles/setting_hint.png) |
 | `numpad` |  |  |  |  |  |  |  |  |
 | `numpad_readout` | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/3d/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/flat/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/grey/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/neon/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/retro/styles/numpad_readout.png) | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/soft/styles/numpad_readout.png) |
 | `numpad_value` | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/3d/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/flat/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/grey/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/neon/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/retro/styles/numpad_value.png) | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/soft/styles/numpad_value.png) |
