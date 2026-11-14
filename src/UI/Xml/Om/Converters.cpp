@@ -151,26 +151,74 @@ namespace UI::Xml
 			return std::nullopt;
 		}
 
-		/** The value, or if it is empty, the translation of the argument with the item's number */
+		/** The translation of `tag` (`tr.<key>`) with `number` in it (if any); empty if there is none */
+		std::string translatedWith(std::string_view tag, std::optional<int64_t> number)
+		{
+			const auto key = Translations::key(tag);
+			if (!key)
+			{
+				return "";
+			}
+			const std::string name(*key);
+			const std::string* translation = i18n::find(name);
+			if (translation == nullptr || *translation == name)
+			{
+				return "";
+			}
+			return number ? fmt::format(fmt::runtime(*translation), *number) : *translation;
+		}
+
+		/**
+		 * The value, or if it is empty, the translation of the argument (`tr.<key>`, or `tr.<key>:<number>`) with the
+		 * number given, else the item's number
+		 */
 		std::string orDefault(const OM::Node& node, const OM::Path& path, std::string_view argument)
 		{
 			if (node.isValue() && !node.text().empty())
 			{
 				return std::string(node.text());
 			}
-			const auto tag = Translations::key(argument);
-			if (!tag)
+			const size_t colon = argument.find(':');
+			if (colon != std::string_view::npos)
 			{
-				return "";
-			}
-			const std::string key(*tag);
-			const std::string* translation = i18n::find(key);
-			if (translation == nullptr || *translation == key)
-			{
-				return "";
+				const double number = toDouble(argument.substr(colon + 1), std::nan(""));
+				return translatedWith(argument.substr(0, colon),
+									  std::isnan(number) ? std::nullopt
+														 : std::optional(static_cast<int64_t>(std::round(number))));
 			}
 			const auto number = itemNumber(path);
-			return number ? fmt::format(fmt::runtime(*translation), *number) : *translation;
+			return translatedWith(argument, number ? std::optional(static_cast<int64_t>(*number)) : std::nullopt);
+		}
+
+		/** The translation of the argument (`tr.<key>`) with the value, a whole number, in it */
+		std::string numbered(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			if (!isNumeric(node))
+			{
+				return "";
+			}
+			return translatedWith(argument, static_cast<int64_t>(std::round(node.number(0))));
+		}
+
+		/** The value rounded down, but not below the argument */
+		int32_t atLeast(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			return toInt32(std::max(std::floor(node.number(0)), toDouble(argument, 0)));
+		}
+
+		/** The value rounded up, but not above the argument */
+		int32_t atMost(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			return toInt32(std::min(std::ceil(node.number(0)), toDouble(argument, 0)));
+		}
+
+		/** The value rounded, kept between the argument's two numbers (`<min>:<max>`) */
+		int32_t clamped(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			const size_t colon = argument.find(':');
+			const double low = toDouble(argument.substr(0, colon), 0);
+			const double high = colon == std::string_view::npos ? low : toDouble(argument.substr(colon + 1), low);
+			return toInt32(std::clamp(std::round(node.number(0)), std::min(low, high), std::max(low, high)));
 		}
 
 		/** The translation of "<argument>.<value>" (the argument written `tr.<key>`), or the value if there is none */
@@ -257,13 +305,44 @@ namespace UI::Xml
 					  .toText = bytes},
 			Converter{.name = "default",
 					  .type = Converter::Type::text,
-					  .description = "The value, or if it is empty, the translation of the argument with the item's "
-									 "number (the last index in the path): `name|default:tr.fine_tune.fan` gives "
-									 "\"Fan 2\" for fan 2 if it has no name",
-					  .argument = "The translation key of the default, `tr.<key>`; `{:d}` in it is the number",
+					  .description =
+						  "The value, or if it is empty, the translation of the argument with a number: the one after "
+						  "the key, else the item's (the last index in the path). `row.name|default:tr.fine_tune.fan` "
+						  "gives \"Fan 2\" for fan 2 if it has no name; "
+						  "`om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature."
+						  "heater:{row.value}` gives \"Heater 2\" for heater 2 if its sensor has no name",
+					  .argument = "The translation key of the default, `tr.<key>`, or `tr.<key>:<number>` (the "
+								  "number may be a subject's, `{name}`); `{:d}` in the translation is the number",
 					  .toInteger = nullptr,
 					  .toText = orDefault,
 					  .argumentKind = Converter::Argument::translationKey},
+			Converter{.name = "numbered",
+					  .type = Converter::Type::text,
+					  .description = "The translation of the argument with the value, a whole number, in it: "
+									 "`row.index|numbered:tr.temperature.bed_number` gives \"Bed 0\" for bed 0",
+					  .argument = "The translation key, `tr.<key>`; `{:d}` in the translation is the value",
+					  .toInteger = nullptr,
+					  .toText = numbered,
+					  .argumentKind = Converter::Argument::translationKey},
+			Converter{.name = "atleast",
+					  .type = Converter::Type::integer,
+					  .description = "The value rounded down, but not below the argument, e.g. a bar's bottom: "
+									 "`om.heat.heaters[1].min|atleast:0`",
+					  .argument = "The least it gives",
+					  .toInteger = atLeast,
+					  .toText = nullptr},
+			Converter{.name = "atmost",
+					  .type = Converter::Type::integer,
+					  .description = "The value rounded up, but not above the argument",
+					  .argument = "The most it gives",
+					  .toInteger = atMost,
+					  .toText = nullptr},
+			Converter{.name = "clamp",
+					  .type = Converter::Type::integer,
+					  .description = "The value rounded, kept between the argument's two numbers, e.g. `|clamp:0:100`",
+					  .argument = "The least and the most it gives, `<min>:<max>`",
+					  .toInteger = clamped,
+					  .toText = nullptr},
 			Converter{.name = "translate",
 					  .type = Converter::Type::text,
 					  .description = "The translation of `<argument>.<value>`, or the value if there is none, e.g. "

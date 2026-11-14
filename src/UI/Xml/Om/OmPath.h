@@ -95,6 +95,37 @@ namespace UI::Xml
 	};
 
 	/**
+	 * A converter's argument whose `{name}`s have been looked up, e.g. `tr.temperature.heater:{row.value}`: the text it
+	 * stands for follows the subjects' values
+	 */
+	class OmBoundText
+	{
+	  public:
+		/**
+		 * Look up each `{name}` of `text` with `lookup`
+		 * @param missing Set to the first name not found
+		 * @return the bound text, or nothing if a name wasn't found or a brace isn't closed
+		 */
+		static std::optional<OmBoundText> bind(std::string_view text,
+											   const OmBoundPath::Lookup& lookup,
+											   std::string& missing);
+
+		/** Whether part of it is a subject's value, so the text can change */
+		bool indirect() const;
+
+		/** The subjects whose values are part of it */
+		std::vector<lv_subject_t*> subjects() const;
+
+		/** The text now: each subject's value as text (an int subject's number) in its place */
+		std::string resolve() const;
+
+	  private:
+		using Part = std::variant<std::string, lv_subject_t*>;
+
+		std::vector<Part> m_parts; // First first
+	};
+
+	/**
 	 * The subject called `name` as a widget built in `origin` would find it: in `origin` and its parents, then the
 	 * globals and the global resolver
 	 */

@@ -1,10 +1,11 @@
 /*
  * OmForward.h
  *
- * A name with a subject index (`om.heat.heaters[{value}].current`, see OmPath.h) can stand for different fields over
- * time, but LVGL can't move a widget's binding to another subject. So the widget binds to a forwarder instead: a
- * subject of its own that observes the shared subject of the field its path points at now (an OmField), copies it,
- * and moves to another field when an index changes. Widgets keep their binding; nothing is rebuilt.
+ * A name with a subject index (`om.heat.heaters[{row.value}].current`, see OmPath.h), or a converter argument with a
+ * subject's value in it (`|default:tr.temperature.heater:{row.value}`), can stand for different fields over time,
+ * but LVGL can't move a widget's binding to another subject. So the widget binds to a forwarder instead: a subject of
+ * its own that observes the shared subject of the field its path points at now (an OmField), copies it, and moves to
+ * another field when an index or the argument changes. Widgets keep their binding; nothing is rebuilt.
  *
  *   OmTree ──flush──▶ [heat.heaters[2].current] ──observed by──▶ [forwarder] ──▶ label
  *
@@ -35,11 +36,11 @@ namespace UI::Xml
 	  public:
 		/**
 		 * @param bindings Where the fields' shared subjects come from
-		 * @param path The path, with subject indices
+		 * @param path The path, which may have subject indices
 		 * @param converter What the subject holds
-		 * @param argument The converter's argument
+		 * @param argument The converter's argument, which may have subjects' values in it
 		 */
-		OmForward(OmBindings& bindings, OmBoundPath path, const Converter& converter, std::string argument);
+		OmForward(OmBindings& bindings, OmBoundPath path, const Converter& converter, OmBoundText argument);
 
 		/** Stops observing */
 		~OmForward() override;
@@ -60,7 +61,7 @@ namespace UI::Xml
 		std::string text() const override { return m_own->text(); }
 
 	  private:
-		/** An index changed: follow the field the path points at now */
+		/** An index or the argument changed: follow the field the path and argument point at now */
 		static void indexChangedCb(lv_observer_t* observer, lv_subject_t* subject);
 
 		/** The field followed changed: copy it */
@@ -75,13 +76,14 @@ namespace UI::Xml
 		OmBindings& m_bindings;							   // Where the fields' shared subjects come from
 		OmBoundPath m_path;								   // The path
 		const Converter& m_converter;					   // What the subject holds
-		std::string m_argument;							   // The converter's argument
+		OmBoundText m_argument;							   // The converter's argument
 		std::unique_ptr<IntSubject> m_integer;			   // Own subject, for an integer converter
 		std::unique_ptr<StringSubject<OmField::TEXT_SIZE>> m_textSubject; // Own subject, for a text converter
 		Subject* m_own = nullptr;						   // Whichever of the two there is
 		std::vector<lv_observer_t*> m_indexObservers;	   // On the index subjects
 		lv_observer_t* m_targetObserver = nullptr;		   // On the field followed, or nullptr
 		std::optional<OM::Path> m_target;				   // The field followed, or nothing
+		std::string m_targetArgument;					   // The argument it is followed with
 	};
 
 	/** A list following an array whose path has subject indices */

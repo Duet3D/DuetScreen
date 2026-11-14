@@ -410,8 +410,10 @@
     },
     "temperature": { /* Temperature widgets */
       "bed": "Bed",
+      "bed_number": "Bed {:d}",
       "beds": "Beds:",
       "chamber": "Chamber",
+      "chamber_number": "Chamber {:d}",
       "chambers": "Chambers:",
       "default_tool_name": "Tool {:d}",
       "heater": "Heater {:d}",

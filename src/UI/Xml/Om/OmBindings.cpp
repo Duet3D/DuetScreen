@@ -151,7 +151,15 @@ namespace UI::Xml
 									const lv_xml_subject_ctx_t* origin,
 									std::string_view key)
 	{
-		if (!path.indirect())
+		std::string missing;
+		auto boundArgument = OmBoundText::bind(
+			argument, [origin](std::string_view name) { return lookupSubject(origin, name); }, missing);
+		if (!boundArgument)
+		{
+			LOG_WARN("Object model name '{:s}': no subject '{:s}' for its converter's argument", key, missing);
+			return nullptr;
+		}
+		if (!path.indirect() && !boundArgument->indirect())
 		{
 			return subject(*path.resolve(), converterName, argument);
 		}
@@ -170,7 +178,7 @@ namespace UI::Xml
 			LOG_WARN("Object model name '{:s}': there is no converter '{:s}'", key, converterName);
 			return nullptr;
 		}
-		auto forward = std::make_unique<OmForward>(*this, path, *converter, std::string(argument));
+		auto forward = std::make_unique<OmForward>(*this, path, *converter, std::move(*boundArgument));
 		if (owner)
 		{
 			return &owner->keep(std::string(key), std::move(forward));

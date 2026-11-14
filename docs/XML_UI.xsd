@@ -1895,8 +1895,10 @@
 			<xs:enumeration value="tr.status.time_header"/>
 			<xs:enumeration value="tr.status.z_offset"/>
 			<xs:enumeration value="tr.temperature.bed"/>
+			<xs:enumeration value="tr.temperature.bed_number"/>
 			<xs:enumeration value="tr.temperature.beds"/>
 			<xs:enumeration value="tr.temperature.chamber"/>
+			<xs:enumeration value="tr.temperature.chamber_number"/>
 			<xs:enumeration value="tr.temperature.chambers"/>
 			<xs:enumeration value="tr.temperature.default_tool_name"/>
 			<xs:enumeration value="tr.temperature.heater"/>

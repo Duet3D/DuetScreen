@@ -61,7 +61,11 @@ Each row of an object model list:
 | `\|eq` | int | The value compared with | 1 if the value is the argument, else 0, e.g. `state\|eq:fault` |
 | `\|duration` | text |  | Seconds as h:mm:ss, or m:ss under an hour |
 | `\|bytes` | text |  | A number of bytes as B, KB, MB or GB |
-| `\|default` | text | The translation key of the default, `tr.<key>`; `{:d}` in it is the number | The value, or if it is empty, the translation of the argument with the item's number (the last index in the path): `name\|default:tr.fine_tune.fan` gives "Fan 2" for fan 2 if it has no name |
+| `\|default` | text | The translation key of the default, `tr.<key>`, or `tr.<key>:<number>` (the number may be a subject's, `{name}`); `{:d}` in the translation is the number | The value, or if it is empty, the translation of the argument with a number: the one after the key, else the item's (the last index in the path). `row.name\|default:tr.fine_tune.fan` gives "Fan 2" for fan 2 if it has no name; `om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name\|default:tr.temperature.heater:{row.value}` gives "Heater 2" for heater 2 if its sensor has no name |
+| `\|numbered` | text | The translation key, `tr.<key>`; `{:d}` in the translation is the value | The translation of the argument with the value, a whole number, in it: `row.index\|numbered:tr.temperature.bed_number` gives "Bed 0" for bed 0 |
+| `\|atleast` | int | The least it gives | The value rounded down, but not below the argument, e.g. a bar's bottom: `om.heat.heaters[1].min\|atleast:0` |
+| `\|atmost` | int | The most it gives | The value rounded up, but not above the argument |
+| `\|clamp` | int | The least and the most it gives, `<min>:<max>` | The value rounded, kept between the argument's two numbers, e.g. `\|clamp:0:100` |
 | `\|translate` | text | The translation key the value is added to, `tr.<key>` | The translation of `<argument>.<value>`, or the value if there is none, e.g. `state\|translate:tr.heater.state` |
 
 ## Global data

@@ -409,8 +409,10 @@
     },
     "temperature": {
       "bed": "Bed",
+      "bed_number": "Bed {:d}",
       "beds": "Bedden:",
       "chamber": "Kamer",
+      "chamber_number": "Kamer {:d}",
       "chambers": "Kamers:",
       "default_tool_name": "Gereedschap {:d}",
       "heater": "Verwarmer {:d}",

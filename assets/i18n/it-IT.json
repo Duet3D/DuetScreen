@@ -409,8 +409,10 @@
     },
     "temperature": {
       "bed": "Piano",
+      "bed_number": "Piano {:d}",
       "beds": "Piani:",
       "chamber": "Camera",
+      "chamber_number": "Camera {:d}",
       "chambers": "Camere:",
       "default_tool_name": "Utensile {:d}",
       "heater": "Riscaldatore {:d}",

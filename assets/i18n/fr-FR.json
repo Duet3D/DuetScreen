@@ -409,8 +409,10 @@
     },
     "temperature": {
       "bed": "Plateau",
+      "bed_number": "Plateau {:d}",
       "beds": "Plateaux :",
       "chamber": "Chambre",
+      "chamber_number": "Chambre {:d}",
       "chambers": "Chambres :",
       "default_tool_name": "Outil {:d}",
       "heater": "Chauffage {:d}",

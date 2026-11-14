@@ -8,7 +8,7 @@
 
 namespace UI::Xml
 {
-	OmForward::OmForward(OmBindings& bindings, OmBoundPath path, const Converter& converter, std::string argument)
+	OmForward::OmForward(OmBindings& bindings, OmBoundPath path, const Converter& converter, OmBoundText argument)
 		: m_bindings(bindings)
 		, m_path(std::move(path))
 		, m_converter(converter)
@@ -24,11 +24,20 @@ namespace UI::Xml
 			m_textSubject = std::make_unique<StringSubject<OmField::TEXT_SIZE>>();
 			m_own = m_textSubject.get();
 		}
+		m_targetArgument = m_argument.resolve();
 		showMissing();
-		// Adding an observer calls it, which follows the field: m_path is complete by then
+		// Adding an observer calls it, which follows the field: m_path and m_argument are complete by then
 		for (lv_subject_t* subject : m_path.subjects())
 		{
 			m_indexObservers.push_back(lv_subject_add_observer(subject, indexChangedCb, this));
+		}
+		for (lv_subject_t* subject : m_argument.subjects())
+		{
+			m_indexObservers.push_back(lv_subject_add_observer(subject, indexChangedCb, this));
+		}
+		if (m_indexObservers.empty())
+		{
+			retarget();
 		}
 	}
 
@@ -65,7 +74,8 @@ namespace UI::Xml
 	void OmForward::retarget()
 	{
 		const auto target = m_path.resolve();
-		if (target == m_target && (m_targetObserver != nullptr || !target))
+		std::string argument = m_argument.resolve();
+		if (target == m_target && argument == m_targetArgument && (m_targetObserver != nullptr || !target))
 		{
 			return;
 		}
@@ -75,8 +85,9 @@ namespace UI::Xml
 			m_targetObserver = nullptr;
 		}
 		m_target = target;
+		m_targetArgument = std::move(argument);
 
-		Subject* field = target ? m_bindings.subject(*target, m_converter.name, m_argument) : nullptr;
+		Subject* field = target ? m_bindings.subject(*target, m_converter.name, m_targetArgument) : nullptr;
 		if (field == nullptr)
 		{
 			showMissing(); // Points at nothing, e.g. no current tool
@@ -90,11 +101,12 @@ namespace UI::Xml
 	{
 		if (m_integer)
 		{
-			m_integer->set(m_converter.toInteger(OM::Node::missing(), m_target.value_or(OM::Path()), m_argument));
+			m_integer->set(m_converter.toInteger(OM::Node::missing(), m_target.value_or(OM::Path()), m_targetArgument));
 		}
 		else
 		{
-			m_textSubject->set(m_converter.toText(OM::Node::missing(), m_target.value_or(OM::Path()), m_argument));
+			m_textSubject->set(
+				m_converter.toText(OM::Node::missing(), m_target.value_or(OM::Path()), m_targetArgument));
 		}
 	}
 

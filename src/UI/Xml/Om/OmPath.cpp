@@ -232,6 +232,86 @@ namespace UI::Xml
 		return path;
 	}
 
+	std::optional<OmBoundText> OmBoundText::bind(std::string_view text,
+												 const OmBoundPath::Lookup& lookup,
+												 std::string& missing)
+	{
+		OmBoundText result;
+		size_t from = 0;
+		while (from < text.size())
+		{
+			const size_t open = text.find('{', from);
+			if (open == std::string_view::npos)
+			{
+				result.m_parts.emplace_back(std::string(text.substr(from)));
+				break;
+			}
+			const size_t close = text.find('}', open);
+			if (close == std::string_view::npos)
+			{
+				missing = text.substr(open);
+				return std::nullopt;
+			}
+			if (open > from)
+			{
+				result.m_parts.emplace_back(std::string(text.substr(from, open - from)));
+			}
+			const std::string_view name = text.substr(open + 1, close - open - 1);
+			lv_subject_t* subject = lookup(name);
+			if (subject == nullptr)
+			{
+				missing = name;
+				return std::nullopt;
+			}
+			result.m_parts.emplace_back(subject);
+			from = close + 1;
+		}
+		return result;
+	}
+
+	bool OmBoundText::indirect() const
+	{
+		return std::any_of(m_parts.begin(),
+						   m_parts.end(),
+						   [](const Part& part) { return std::holds_alternative<lv_subject_t*>(part); });
+	}
+
+	std::vector<lv_subject_t*> OmBoundText::subjects() const
+	{
+		std::vector<lv_subject_t*> result;
+		for (const auto& part : m_parts)
+		{
+			if (const auto* subject = std::get_if<lv_subject_t*>(&part))
+			{
+				result.push_back(*subject);
+			}
+		}
+		return result;
+	}
+
+	std::string OmBoundText::resolve() const
+	{
+		std::string text;
+		for (const auto& part : m_parts)
+		{
+			if (const auto* literal = std::get_if<std::string>(&part))
+			{
+				text += *literal;
+				continue;
+			}
+			lv_subject_t* subject = std::get<lv_subject_t*>(part);
+			if (subject->type == LV_SUBJECT_TYPE_INT)
+			{
+				text += std::to_string(lv_subject_get_int(subject));
+			}
+			else if (subject->type == LV_SUBJECT_TYPE_STRING || subject->type == LV_SUBJECT_TYPE_POINTER)
+			{
+				text += lv_subject_get_string(subject);
+			}
+		}
+		return text;
+	}
+
 	lv_subject_t* lookupSubject(const lv_xml_subject_ctx_t* origin, std::string_view name)
 	{
 		const std::string terminated(name);

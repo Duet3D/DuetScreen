@@ -409,8 +409,10 @@
     },
     "temperature": {
       "bed": "Cama",
+      "bed_number": "Cama {:d}",
       "beds": "Camas:",
       "chamber": "Cámara",
+      "chamber_number": "Cámara {:d}",
       "chambers": "Cámaras:",
       "default_tool_name": "Herramienta {:d}",
       "heater": "Calentador {:d}",

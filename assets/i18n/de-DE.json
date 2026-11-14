@@ -409,8 +409,10 @@
     },
     "temperature": {
       "bed": "Bett",
+      "bed_number": "Bett {:d}",
       "beds": "Betten:",
       "chamber": "Kammer",
+      "chamber_number": "Kammer {:d}",
       "chambers": "Kammern:",
       "default_tool_name": "Werkzeug {:d}",
       "heater": "Heizer {:d}",

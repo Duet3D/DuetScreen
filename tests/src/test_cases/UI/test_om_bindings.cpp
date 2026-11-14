@@ -127,6 +127,20 @@ TEST_F(TestOmBindings, ConvertersGiveWhatTheySay)
 	EXPECT_EQ(findConverter("default")->toText(missing, *OM::Path::parse("fans[3].name"), "tr.fine_tune.fan"), "Fan 3");
 	EXPECT_EQ(findConverter("default")->toText(missing, *OM::Path::parse("fans[3].name"), "fine_tune.fan"), "")
 		<< "a key not written tr.<key> gives nothing";
+	EXPECT_EQ(findConverter("default")->toText(
+				  unnamed, *OM::Path::parse("sensors.analog[5].name"), "tr.temperature.heater:2"),
+			  "Heater 2")
+		<< "the number after the key, not the item's";
+	EXPECT_EQ(findConverter("numbered")->toText(number, {}, "tr.temperature.bed_number"), "Bed 61");
+	EXPECT_EQ(findConverter("numbered")->toText(state, {}, "tr.temperature.bed_number"), "") << "not a number";
+	const OM::Node below(OM::Node::Kind::number, "-10.5");
+	EXPECT_EQ(findConverter("atleast")->toInteger(below, {}, "0"), 0);
+	EXPECT_EQ(findConverter("atleast")->toInteger(number, {}, "0"), 61) << "rounded down";
+	EXPECT_EQ(findConverter("atmost")->toInteger(number, {}, "300"), 62) << "rounded up";
+	EXPECT_EQ(findConverter("atmost")->toInteger(number, {}, "50"), 50);
+	EXPECT_EQ(findConverter("clamp")->toInteger(number, {}, "0:50"), 50);
+	EXPECT_EQ(findConverter("clamp")->toInteger(below, {}, "0:50"), 0);
+	EXPECT_EQ(findConverter("clamp")->toInteger(number, {}, "0:100"), 61);
 	EXPECT_EQ(findConverter("nonsense"), nullptr);
 }
 
@@ -274,6 +288,35 @@ TEST_F(TestOmBindings, ANameIsOnlyFoundWhereItsPrefixSays)
 
 	m_views.clear();
 	UI::Xml::Globals::remove("source.test.state");
+}
+
+TEST_F(TestOmBindings, AConvertersArgumentFollowsTheNamesInIt)
+{
+	// A heater's name: its sensor's, else "Heater <its number>", the number being the row's
+	lv_xml_register_component_from_data("om_named_heater", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="name"
+						  bind_text="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature.heater:{row.value}"/>
+			</view>
+		</component>)");
+	receive(R"({"key":"heat","flags":"v","result":{"heaters":[null,{"sensor":1},{"sensor":2},{"sensor":3}]}})");
+	receive(R"({"key":"sensors","flags":"v","result":{"analog":[null,{"name":"Nozzle"},{"name":""},{"name":""}]}})");
+	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[1,2]}]})");
+	auto& view = show("om_named", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_list name="tools" list="om.tools[0].heaters" item="om_named_heater" width="100%" height="content"/>
+			</view>
+		</component>)");
+
+	lv_obj_t* heaters = list(view, "tools");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 0), "name"), "Nozzle");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "name"), "Heater 2") << "the row's number, not the sensor's";
+
+	// The tool's second heater becomes heater 3: the name follows, the number in the argument too
+	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[1,3]}]})");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "name"), "Heater 3");
 }
 
 TEST_F(TestOmBindings, AFieldTheItemHasntSentYetIsStillItsOwn)

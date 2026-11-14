@@ -290,7 +290,8 @@ namespace UI::Xml::Api
 					const Converter* converter = parsed ? findConverter(parsed->converter) : nullptr;
 					if (converter != nullptr && converter->argumentKind == Converter::Argument::translationKey)
 					{
-						const auto key = Translations::key(parsed->argument);
+						const std::string tag = parsed->argument.substr(0, parsed->argument.find(':'));
+						const auto key = Translations::key(tag);
 						if (!key || !m_translations.contains(*key))
 						{
 							report(fmt::format("setting `{:s}`: no translation `{:s}`, written `{:s}<key>`",
@@ -752,13 +753,30 @@ namespace UI::Xml::Api
 				}
 				else if (converter->argumentKind == Converter::Argument::translationKey)
 				{
-					checkTranslation(parsed->argument, element, context);
+					// `tr.<key>`, or `tr.<key>:<number>` for `default`
+					checkTranslation(parsed->argument.substr(0, parsed->argument.find(':')), element, context);
 				}
 				else if (converter->argumentKind == Converter::Argument::translationGroup)
 				{
 					checkTranslationGroup(parsed->argument, element, context);
 				}
 				checkIndices(parsed->path, element, context);
+				checkArgumentNames(parsed->argument, element, context);
+			}
+
+			/** Check the names of the `{…}`s in a converter's argument */
+			void checkArgumentNames(const std::string& argument, const Element& element, const Context& context)
+			{
+				for (size_t open = argument.find('{'); open != std::string::npos; open = argument.find('{', open + 1))
+				{
+					const size_t close = argument.find('}', open);
+					if (close == std::string::npos)
+					{
+						issue(context, element, fmt::format("`{:s}`: a `{{` isn't closed", argument));
+						return;
+					}
+					checkSubject(argument.substr(open + 1, close - open - 1), element, context);
+				}
 			}
 
 			/** Check the names of the `{…}` indices of object model path `path` */
@@ -904,7 +922,7 @@ namespace UI::Xml::Api
 						i++;
 					}
 					else if (c == ':' && i + 1 < expression.size() &&
-							 (isNameChar(expression[i + 1]) ||
+							 (isNameChar(expression[i + 1]) || expression[i + 1] == '{' ||
 							  (expression[i + 1] == '-' && i + 2 < expression.size() &&
 							   std::isdigit(static_cast<unsigned char>(expression[i + 2])))))
 					{

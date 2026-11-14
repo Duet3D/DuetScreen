@@ -50,10 +50,13 @@ namespace UI::Xml
 		OmList* list(const OM::Path& path);
 
 		/**
-		 * The subject for `path` through `converter`, for a widget built in `origin`: the shared one if `path` has no
-		 * subject indices, else a forwarder kept by `origin`'s scope (or by this, if it has none)
+		 * The subject for `path` through `converter`, for a widget built in `origin`: the shared one if neither `path`
+		 * nor `argument` has subject values in it, else a forwarder kept by `origin`'s scope (or by this, if it has
+		 * none)
+		 * @param argument The converter's argument as written: its `{name}`s are looked up from `origin`
 		 * @param key The name as written, which finds the forwarder again for the same scope
-		 * @return the subject, or nullptr (with a warning) if there is no such converter
+		 * @return the subject, or nullptr (with a warning) if there is no such converter, or an argument's name isn't
+		 *         found
 		 */
 		Subject* subjectFor(const OmBoundPath& path,
 							std::string_view converter,
