@@ -1,10 +1,24 @@
-<!-- Greyscale: no colour at all. The palette is fixed. -->
+<!--
+  Grey: no colour but the alarms. Every control is a shade of grey, so the only colour on the screen is a fault, a
+  warning or the E-stop: what an operator has to see stands out at once. The palette is fixed.
+
+  Accents are greys of their own: active is a light grey, standby a darker one, a choice is edged in white.
+-->
 <theme name="grey" extends="base">
-	<palette primary_hue="245" secondary_hue="190" chroma="0" dark="true" customisable="false">
+	<palette primary_hue="245" secondary_hue="245" chroma="0" dark="true" customisable="false">
 		<!-- Accents are never fully grey by default; make them so -->
 		<color name="primary" chroma="0"/>
-		<color name="primary_muted" chroma="0"/>
-		<color name="secondary" chroma="0"/>
-		<color name="secondary_muted" chroma="0"/>
+		<color name="primary_muted" chroma="0" lightness="0.34"/>
+		<color name="secondary" chroma="0" lightness="0.43"/>
+		<color name="secondary_muted" chroma="0" lightness="0.3"/>
 	</palette>
+
+	<styles>
+		<!-- Without a hue to set it apart, a choice is edged in the text colour -->
+		<style name="btn_checked" outline_color="#text"/>
+		<style name="tab_btn" border_color="#text"/>
+		<style name="tool_selected" border_color="#text" outline_color="#text"/>
+		<style name="cb_marker" border_color="#text"/>
+		<style name="slider_knob" border_color="#text"/>
+	</styles>
 </theme>

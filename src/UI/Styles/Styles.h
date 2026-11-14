@@ -299,6 +299,12 @@ namespace UI::Themes
 		Style tool_list_heater; // One heater in the tool list
 		Style tool_selected; // The selected tool
 
+		/* Heater state: a heater's state button is an action button, which shows it active; these show the others,
+		   in the colours the gauges use */
+		Style heater_standby; // A heater's state button while the heater is on standby
+		Style heater_off;	  // A heater's state button while the heater is off
+		Style heater_fault;	  // A heater's state button while the heater has a fault
+
 		/* Tabview */
 		Style tab_button;			 // Used in tabview tabs
 

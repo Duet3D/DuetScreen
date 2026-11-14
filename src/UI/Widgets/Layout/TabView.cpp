@@ -110,6 +110,7 @@ namespace UI
 								 { return std::make_unique<TabButton>(fmt::format("tab_button_{}", index), parent); });
 		tab_button.addStyle(Themes::getLvglStyles().text_header, LV_PART_MAIN);
 		tab_button.addStyle(Themes::getComponentStyles().tab_button, LV_PART_MAIN);
+		tab_button.addStyle(Themes::getLvglStyles().tab_btn, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
 		tab_button.setText(tab_name);
 		tab_button.setFlexGrow(1);
 		tab_button.setSize(LV_PCT(100), LV_PCT(100));

@@ -1,49 +1,59 @@
-<!-- Industrial: angular and mechanical. Sharp corners, thick borders, heavy padding, hard offset shadows. -->
+<!--
+  Industrial: a light, engineered control panel. Square corners, crisp dark edges on every control, no decoration;
+  actions are solid steel blue with white text, standby amber. Built to be read at a distance under workshop light.
+-->
 <theme name="industrial" extends="base">
-	<palette primary_hue="245" secondary_hue="50" chroma="0.02" dark="false"/>
+	<palette primary_hue="240" secondary_hue="70" chroma="0.012" dark="false">
+		<!-- A deep accent, filled behind white text (action_btn) -->
+		<color name="primary" lightness="0.5" chroma="0.13"/>
+		<color name="primary_muted" lightness="0.88"/>
+		<!-- A grey panel, so white cards and controls stand off it -->
+		<color name="bg_dark" lightness="0.89"/>
+		<color name="bg" lightness="0.975"/>
+		<color name="border" lightness="0.6"/>
+	</palette>
 
 	<fonts>
 		<font name="header" size="18" weight="800" style="bold"/>
 		<font name="normal" size="14" weight="500" style="normal"/>
 		<font name="emphasis" size="14" weight="700" style="bold"/>
-		<font name="subdued" size="12" weight="300" style="normal"/>
+		<font name="subdued" size="12" weight="500" style="normal"/>
 	</fonts>
 
+	<consts>
+		<const name="radius" value="2"/>
+	</consts>
+
 	<styles>
-		<!-- Sharp corners everywhere -->
-		<style name="card" radius="0"/>
-		<style name="btn" radius="0"/>
-		<style name="knob" radius="2"/>
+		<!-- Every control edged in the strong border colour -->
+		<style name="card" border_color="#border"/>
+		<style name="tool_list_tool" border_color="#border"/>
+		<style name="btn" border_color="#border"/>
+		<style name="btnm_btn" border_color="#border"/>
+		<style name="keyboard_button" border_color="#border"/>
+		<style name="input" border_color="#border"/>
 
-		<!-- Thick, prominent borders -->
-		<style name="card" border_width="3" border_side="full"/>
+		<!-- Actions: steel blue with white text and icons -->
+		<style name="action_btn" border_color="rgb_darken(#primary, 30)" text_color="0xffffff" recolor="0xffffff"/>
+		<style name="keyboard_button_checked_bg" text_color="0xffffff" recolor="0xffffff"/>
+		<style name="btnm_btn_checked" text_color="0xffffff"/>
+		<style name="tool_selected" outline_width="2"/>
 
-		<!-- Buttons: flat, angular, bordered -->
-		<style name="btn" bg_color="#bg_light" border_width="2" border_color="#primary" border_side="full" text_color="#primary"/>
-		<style name="action_btn" bg_color="#primary" text_color="#text"/>
-
-		<!-- Heavier padding for an industrial panel feel -->
-		<style name="card" pad_all="8" pad_row="4" pad_column="4"/>
-
-		<!-- Hard offset shadow, no blur, for a stamped look -->
-		<style name="card" shadow_width="0" shadow_offset_x="3" shadow_offset_y="3" shadow_color="0x000000" shadow_opa="60%"/>
-
-		<!-- Thin rectangular scrollbar -->
-		<style name="scrollbar" radius="0" width="4"/>
-
-		<style name="btnm_btn" radius="0" border_width="2" border_color="#border"/>
-		<style name="bar" radius="0"/>
-		<style name="bar_indic" radius="0"/>
-		<style name="slider" radius="0"/>
-		<style name="slider_indic" radius="0"/>
-		<style name="slider_knob" radius="2" border_width="2"/>
+		<!-- Square marks -->
 		<style name="cb_marker" radius="0"/>
 		<style name="bg_switch" radius="2"/>
-		<style name="switch_knob" radius="1"/>
-		<style name="keyboard_button" radius="0"/>
-		<style name="tab_btn" border_width="3" border_side="bottom"/>
-
+		<style name="switch_knob" radius="2"/>
+		<style name="slider" radius="2"/>
+		<style name="slider_indic" radius="2"/>
+		<style name="slider_knob" radius="2"/>
+		<style name="bar" radius="0"/>
+		<style name="bar_indic" radius="0"/>
+		<style name="scrollbar" radius="0"/>
 		<style name="bar_label_bg" radius="0"/>
+		<style name="gauge_bar" radius="0"/>
+		<style name="gauge_bar_indic" radius="0"/>
+		<style name="gauge_arc" arc_rounded="false"/>
+		<style name="gauge_arc_indic" arc_rounded="false"/>
 		<style name="estop" radius="4"/>
 
 		<!-- Files and folders follow the restyled buttons -->

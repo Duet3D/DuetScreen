@@ -8,8 +8,9 @@
 
 namespace UI::Themes
 {
-	static constexpr float s_minColorChroma = 0.1f; // Accents are never fully grey
-	static constexpr float s_mutedDiff = 0.2f;		// How much darker a muted accent is
+	static constexpr float s_minColorChroma = 0.12f; // Accents are never fully grey, nor dull
+	static constexpr float s_mutedChroma = 0.6f;	 // A muted accent's chroma, as a share of its accent's
+	static constexpr float s_maxLineChroma = 0.04f;	 // Text and lines are only tinted: colourful text is hard to read
 
 	void forEachColor(ThemeColors& colors, const std::function<void(std::string_view name, Color& color)>& fn)
 	{
@@ -73,7 +74,15 @@ namespace UI::Themes
 		return change;
 	}
 
-	/** The palette before adjustments */
+	/**
+	 * The palette before adjustments. Each colour's lightness is chosen for its role, so text stays readable on
+	 * whatever it is drawn on whatever the hues and chroma:
+	 * - Surfaces step away from the screen: the screen (bg_dark), a card on it (bg), a control on a card (bg_light).
+	 * - Accents are filled behind body text (#text), so they keep a contrast of about 4.5:1 with it in both modes.
+	 * - Muted accents sit between their accent and the background: darker in dark mode, a pale tint in light mode.
+	 * - The state colours (success, warning, error) work both as a fill behind body text and as text on a card.
+	 * - The highlight is a track or a grid line: plainly visible on a card, quieter than a border.
+	 */
 	static ThemeColors generateBase(PaletteInputs in)
 	{
 		ThemeColors colors;
@@ -82,31 +91,34 @@ namespace UI::Themes
 		in.chroma = std::clamp<float>(in.chroma, 0.0f, 0.2f);
 
 		const float bgChroma = in.chroma / 2;
+		const float lineChroma = std::min(in.chroma, s_maxLineChroma);
 		const float colorChroma = std::max(s_minColorChroma, in.chroma);
-		const float colorL = in.dark ? 0.45f : 0.7f;
-		const float mutedL = colorL - s_mutedDiff;
+		const float mutedChroma = colorChroma * s_mutedChroma;
+		const float colorL = in.dark ? 0.55f : 0.68f;
+		const float mutedL = in.dark ? 0.38f : 0.87f;
 
-		colors.bg_dark = Color(in.dark ? 0.1f : 0.92f, bgChroma, in.primaryHue);
-		colors.bg = Color(in.dark ? 0.15f : 0.96f, bgChroma, in.primaryHue);
-		colors.bg_light = Color(in.dark ? 0.25f : 1.0f, bgChroma, in.primaryHue);
+		colors.bg_dark = Color(in.dark ? 0.16f : 0.93f, bgChroma, in.primaryHue);
+		colors.bg = Color(in.dark ? 0.205f : 0.985f, bgChroma, in.primaryHue);
+		colors.bg_light = Color(in.dark ? 0.28f : 1.0f, bgChroma, in.primaryHue);
 
 		colors.primary = Color(colorL, colorChroma, in.primaryHue);
-		colors.primary_muted = Color(mutedL, colorChroma, in.primaryHue);
+		colors.primary_muted = Color(mutedL, mutedChroma, in.primaryHue);
 		colors.secondary = Color(colorL, colorChroma, in.secondaryHue);
-		colors.secondary_muted = Color(mutedL, colorChroma, in.secondaryHue);
+		colors.secondary_muted = Color(mutedL, mutedChroma, in.secondaryHue);
 
-		colors.text = Color(in.dark ? 0.96f : 0.15f, in.chroma, in.primaryHue);
-		colors.text_muted = Color(in.dark ? 0.82f : 0.25f, in.chroma, in.primaryHue);
-		colors.text_header = Color(in.dark ? 1.0f : 0.0f, in.chroma, in.primaryHue);
+		colors.text = Color(in.dark ? 0.96f : 0.2f, lineChroma, in.primaryHue);
+		colors.text_muted = Color(in.dark ? 0.76f : 0.42f, lineChroma, in.primaryHue);
+		colors.text_header = Color(in.dark ? 1.0f : 0.1f, lineChroma, in.primaryHue);
 
-		colors.border = Color(in.dark ? 0.40f : 0.6f, in.chroma, in.primaryHue);
-		colors.border_muted = Color(in.dark ? 0.30f : 0.7f, in.chroma, in.primaryHue);
-		colors.highlight = Color(in.dark ? 0.70f : 1.0f, in.chroma, in.primaryHue);
-		colors.shadow = Color(in.dark ? 0.2f : 0.4f, bgChroma, in.primaryHue);
+		colors.border = Color(in.dark ? 0.42f : 0.72f, lineChroma, in.primaryHue);
+		colors.border_muted = Color(in.dark ? 0.31f : 0.86f, lineChroma, in.primaryHue);
+		colors.highlight = Color(in.dark ? 0.36f : 0.84f, lineChroma, in.primaryHue);
+		colors.shadow = Color(in.dark ? 0.08f : 0.4f, bgChroma, in.primaryHue);
 
-		colors.success = Color(in.dark ? 0.6f : 0.8f, std::max(0.15f, in.chroma), 144);
-		colors.warning = Color(in.dark ? 0.75f : 0.85f, std::max(0.17f, in.chroma), 78);
-		colors.error = Color(in.dark ? 0.6f : 0.8f, std::max(0.2f, in.chroma), 27);
+		const float stateL = in.dark ? 0.56f : 0.64f;
+		colors.success = Color(stateL, std::max(0.14f, in.chroma), 150);
+		colors.warning = Color(in.dark ? 0.6f : 0.76f, std::max(0.14f, in.chroma), 75); // Amber is only amber if light
+		colors.error = Color(stateL, std::max(0.18f, in.chroma), 27);
 		return colors;
 	}
 

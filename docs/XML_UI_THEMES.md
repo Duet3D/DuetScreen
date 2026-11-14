@@ -21,19 +21,21 @@ The root theme; only a base for other themes, so not offered in the settings. It
 
 Palette: `chroma=0.02`, `customisable=true`, `dark=true`, `primary_hue=245`, `secondary_hue=50`
 
-Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 700, bold; huge: 44 px, weight 700, bold; large: 22 px, weight 600, bold; normal: 14 px, weight 400, normal; small: 12 px, weight 400, normal; subdued: 12 px, weight 200, italic; xlarge: 30 px, weight 700, bold
+Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 700, bold; huge: 44 px, weight 700, bold; large: 22 px, weight 600, bold; normal: 14 px, weight 400, normal; small: 12 px, weight 400, normal; subdued: 12 px, weight 400, normal; xlarge: 30 px, weight 700, bold
 
-Consts: `#border_width=2`, `#outline_width=3`, `#radius=5`, `#pad_large=10`, `#pad=5`, `#pad_small=2`, `#pad_tiny=1`, `#shadow_offset=3`, `#transition_time=80`, `#widget_regular_min=180`, `#widget_expanded_min=400`, `#widget_gap=5`
+Consts: `#border_width=1`, `#outline_width=2`, `#radius=6`, `#pad_large=10`, `#pad=5`, `#pad_small=2`, `#pad_tiny=1`, `#shadow_offset=3`, `#transition_time=80`, `#widget_regular_min=180`, `#widget_expanded_min=400`, `#widget_gap=5`
 
 ## 3d
 
 Extends `base`. Its file is [3d.xml](../assets/ui/themes/3d.xml).
 
-Palette: `chroma=0.06`, `dark=false`, `primary_hue=220`, `secondary_hue=160`
+Palette: `chroma=0.02`, `dark=false`, `primary_hue=240`, `secondary_hue=70`
 
-Colour adjustments: `bg_light lightness=+0.04`
+Colour adjustments: `primary lightness=0.66 chroma=0.13`, `bg_dark lightness=0.9`, `bg_light lightness=0.97`
 
-Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; normal: 14 px, weight 450, normal; subdued: 12 px, weight 350, normal
+Fonts: emphasis: 14 px, weight 600, bold; normal: 14 px, weight 450, normal
+
+Consts: `#radius=7`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/3d/colours.png)
 
@@ -105,7 +107,9 @@ Extends `base`. Its file is [duetscreen.xml](../assets/ui/themes/duetscreen.xml)
 
 Extends `base`. Its file is [flat.xml](../assets/ui/themes/flat.xml).
 
-Palette: `chroma=0`, `dark=true`, `primary_hue=80`, `secondary_hue=30`
+Palette: `chroma=0.01`, `dark=true`, `primary_hue=200`, `secondary_hue=70`
+
+Consts: `#radius=4`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/flat/colours.png)
 
@@ -142,9 +146,9 @@ Palette: `chroma=0`, `dark=true`, `primary_hue=80`, `secondary_hue=30`
 
 Extends `base`. Its file is [grey.xml](../assets/ui/themes/grey.xml).
 
-Palette: `chroma=0`, `customisable=false`, `dark=true`, `primary_hue=245`, `secondary_hue=190`
+Palette: `chroma=0`, `customisable=false`, `dark=true`, `primary_hue=245`, `secondary_hue=245`
 
-Colour adjustments: `primary chroma=0`, `primary_muted chroma=0`, `secondary chroma=0`, `secondary_muted chroma=0`
+Colour adjustments: `primary chroma=0`, `primary_muted lightness=0.34 chroma=0`, `secondary lightness=0.43 chroma=0`, `secondary_muted lightness=0.3 chroma=0`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/grey/colours.png)
 
@@ -181,9 +185,13 @@ Colour adjustments: `primary chroma=0`, `primary_muted chroma=0`, `secondary chr
 
 Extends `base`. Its file is [industrial.xml](../assets/ui/themes/industrial.xml).
 
-Palette: `chroma=0.02`, `dark=false`, `primary_hue=245`, `secondary_hue=50`
+Palette: `chroma=0.012`, `dark=false`, `primary_hue=240`, `secondary_hue=70`
 
-Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 800, bold; normal: 14 px, weight 500, normal; subdued: 12 px, weight 300, normal
+Colour adjustments: `primary lightness=0.5 chroma=0.13`, `primary_muted lightness=0.88`, `bg_dark lightness=0.89`, `bg lightness=0.975`, `border lightness=0.6`
+
+Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 800, bold; normal: 14 px, weight 500, normal; subdued: 12 px, weight 500, normal
+
+Consts: `#radius=2`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/industrial/colours.png)
 
@@ -220,11 +228,9 @@ Fonts: emphasis: 14 px, weight 700, bold; header: 18 px, weight 800, bold; norma
 
 Extends `base`. Its file is [neon.xml](../assets/ui/themes/neon.xml).
 
-Palette: `chroma=0.05`, `dark=true`, `primary_hue=340`, `secondary_hue=45`
+Palette: `chroma=0.03`, `dark=true`, `primary_hue=345`, `secondary_hue=95`
 
-Colour adjustments: `primary chroma=+0.1`, `secondary chroma=+0.1`, `primary lightness=+0.2 when=dark`, `secondary lightness=+0.2 when=dark`, `primary_muted from=primary lightness=+0.2 chroma=*0.5 when=dark`, `secondary_muted from=secondary lightness=+0.2 chroma=*0.5 when=dark`, `text_header from=text lightness=+0.3 chroma=+0.1 when=dark`
-
-Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; normal: 13 px, weight 400, normal; subdued: 11 px, weight 300, normal
+Colour adjustments: `primary lightness=0.72 chroma=0.19`, `secondary lightness=0.88 chroma=0.17`, `primary_muted from=primary lightness=0.36 chroma=0.12`, `secondary_muted from=secondary lightness=0.38 chroma=0.08`, `bg_dark lightness=0.12`, `bg lightness=0.165`, `bg_light lightness=0.22`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/neon/colours.png)
 
@@ -261,9 +267,13 @@ Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 700, bold; norma
 
 Extends `base`. Its file is [retro.xml](../assets/ui/themes/retro.xml).
 
-Palette: `chroma=0.03`, `dark=false`, `primary_hue=65`, `secondary_hue=115`
+Palette: `chroma=0.035`, `dark=false`, `primary_hue=55`, `secondary_hue=115`
 
-Fonts: emphasis: 15 px, weight 700, bold; header: 20 px, weight 800, bold; normal: 14 px, weight 500, normal; subdued: 12 px, weight 400, normal
+Colour adjustments: `bg_dark lightness=0.9`, `primary_muted chroma=0.06`
+
+Fonts: emphasis: 15 px, weight 700, bold; header: 20 px, weight 800, bold; normal: 14 px, weight 500, normal; subdued: 12 px, weight 500, normal
+
+Consts: `#border_width=2`, `#radius=0`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/retro/colours.png)
 
@@ -300,9 +310,13 @@ Fonts: emphasis: 15 px, weight 700, bold; header: 20 px, weight 800, bold; norma
 
 Extends `base`. Its file is [soft.xml](../assets/ui/themes/soft.xml).
 
-Palette: `chroma=0.08`, `dark=false`, `primary_hue=250`, `secondary_hue=180`
+Palette: `chroma=0.05`, `dark=false`, `primary_hue=275`, `secondary_hue=170`
 
-Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 600, bold; normal: 14 px, weight 400, normal; subdued: 12 px, weight 300, italic
+Colour adjustments: `bg_dark lightness=0.93`, `bg lightness=1`, `bg_light lightness=0.955`, `primary lightness=0.72`, `secondary lightness=0.8`
+
+Fonts: emphasis: 14 px, weight 600, bold; header: 18 px, weight 600, bold
+
+Consts: `#radius=12`, `#pad=6`
 
 ![The palette](../tests/ref_imgs/xml_ui_api/themes/soft/colours.png)
 
@@ -373,7 +387,7 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `tab_card` |  |  |  |  |  |  |  |  |
 | `modal` |  |  |  |  |  |  |  |  |
 | `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/btn.png) | ![btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/btn.png) |
-| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/3d/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/flat/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/grey/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/neon/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/retro/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/soft/styles/btn_checked.png) |
+| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/3d/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) |  | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/grey/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/btn_checked.png) | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/neon/styles/btn_checked.png) |  | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/soft/styles/btn_checked.png) |
 | `icon` |  |  |  |  |  |  |  |  |
 | `icon_recolor` | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/3d/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/flat/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/grey/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/neon/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/retro/styles/icon_recolor.png) | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/soft/styles/icon_recolor.png) |
 | `pressed` | ![pressed](../tests/ref_imgs/xml_ui_api/themes/3d/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/flat/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/grey/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/neon/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/retro/styles/pressed.png) | ![pressed](../tests/ref_imgs/xml_ui_api/themes/soft/styles/pressed.png) |
@@ -411,17 +425,17 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `bar` | ![bar](../tests/ref_imgs/xml_ui_api/themes/3d/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/flat/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/grey/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/neon/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/retro/styles/bar.png) | ![bar](../tests/ref_imgs/xml_ui_api/themes/soft/styles/bar.png) |
 | `bar_indic` |  |  |  |  |  |  |  |  |
 | `btnm_bg` |  |  |  |  |  |  |  |  |
-| `btnm_btn` | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/btnm_btn.png) |
+| `btnm_btn` | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn.png) |  | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/btnm_btn.png) | ![btnm_btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/btnm_btn.png) |
 | `btnm_btn_checked` | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/3d/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/flat/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/grey/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/neon/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/retro/styles/btnm_btn_checked.png) | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/soft/styles/btnm_btn_checked.png) |
 | `chart_series` |  |  |  |  |  |  |  |  |
 | `chart_indic` | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/3d/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/flat/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/grey/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/neon/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/retro/styles/chart_indic.png) | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/soft/styles/chart_indic.png) |
-| `chart_bg` | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/3d/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/flat/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/grey/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/neon/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/retro/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/soft/styles/chart_bg.png) |
+| `chart_bg` | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/3d/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_bg.png) |  | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/grey/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/neon/styles/chart_bg.png) | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/retro/styles/chart_bg.png) |  |
 | `dropdown` |  |  |  |  |  |  |  |  |
 | `dropdown_list` |  |  |  |  |  |  |  |  |
 | `cb_marker` | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/3d/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/flat/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/grey/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/neon/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/retro/styles/cb_marker.png) | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/soft/styles/cb_marker.png) |
 | `cb_marker_checked` | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/3d/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/flat/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/grey/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/neon/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/retro/styles/cb_marker_checked.png) | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/soft/styles/cb_marker_checked.png) |
 | `bg_switch` | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/3d/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/flat/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/grey/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/neon/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/retro/styles/bg_switch.png) | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/soft/styles/bg_switch.png) |
-| `switch_knob` | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/3d/styles/switch_knob.png) |  |  |  |  |  |  |  |
+| `switch_knob` | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/3d/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/flat/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/grey/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/neon/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/retro/styles/switch_knob.png) | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/soft/styles/switch_knob.png) |
 | `line` |  |  |  |  |  |  |  |  |
 | `table` |  |  |  |  |  |  |  |  |
 | `table_cell` | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/3d/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/flat/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/grey/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/neon/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/retro/styles/table_cell.png) | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/soft/styles/table_cell.png) |
@@ -440,34 +454,37 @@ Each style's swatch in each theme. What `base` sets in each is in [XML_UI_API.md
 | `menu_header_cont` |  |  |  |  |  |  |  |  |
 | `menu_header_btn` | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/menu_header_btn.png) | ![menu_header_btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/menu_header_btn.png) |
 | `menu_section` | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/3d/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/flat/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/grey/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/neon/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/retro/styles/menu_section.png) | ![menu_section](../tests/ref_imgs/xml_ui_api/themes/soft/styles/menu_section.png) |
-| `menu_pressed` | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/3d/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/flat/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/grey/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/neon/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/retro/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/soft/styles/menu_pressed.png) |
+| `menu_pressed` | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/3d/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/flat/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/grey/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/neon/styles/menu_pressed.png) | ![menu_pressed](../tests/ref_imgs/xml_ui_api/themes/retro/styles/menu_pressed.png) |  |
 | `menu_separator` |  |  |  |  |  |  |  |  |
 | `msgbox_backdrop_bg` |  |  |  |  |  |  |  |  |
-| `keyboard_button` | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/3d/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/flat/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/grey/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/neon/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/retro/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/soft/styles/keyboard_button.png) |
+| `keyboard_button` | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/3d/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button.png) |  | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/grey/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/neon/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/retro/styles/keyboard_button.png) | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/soft/styles/keyboard_button.png) |
 | `keyboard_button_checked_bg` | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/3d/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/flat/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/grey/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/neon/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/retro/styles/keyboard_button_checked_bg.png) | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/soft/styles/keyboard_button_checked_bg.png) |
 | `list_bg` |  |  |  |  |  |  |  |  |
-| `list_btn` | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/list_btn.png) |  |
+| `list_btn` | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_btn.png) |  | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/list_btn.png) | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/list_btn.png) |  |
 | `list_item_grow` |  |  |  |  |  |  |  |  |
 | `tab_bg_focus` |  |  |  |  |  |  |  |  |
-| `tab_btn` | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/flat/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/tab_btn.png) |
+| `tab_btn` | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/3d/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_btn.png) |  | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/grey/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/neon/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/retro/styles/tab_btn.png) | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/soft/styles/tab_btn.png) |
 | `led` | ![led](../tests/ref_imgs/xml_ui_api/themes/3d/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/flat/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/grey/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/neon/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/retro/styles/led.png) | ![led](../tests/ref_imgs/xml_ui_api/themes/soft/styles/led.png) |
 | `scale` |  |  |  |  |  |  |  |  |
 | `slider` | ![slider](../tests/ref_imgs/xml_ui_api/themes/3d/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/flat/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/grey/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/neon/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/retro/styles/slider.png) | ![slider](../tests/ref_imgs/xml_ui_api/themes/soft/styles/slider.png) |
 | `slider_indic` |  |  |  |  |  |  |  |  |
-| `slider_knob` | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/3d/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/flat/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/grey/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/neon/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/retro/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/soft/styles/slider_knob.png) |
+| `slider_knob` | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/3d/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider_knob.png) |  | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/grey/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/neon/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/retro/styles/slider_knob.png) | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/soft/styles/slider_knob.png) |
 | `sidebar` |  |  |  |  |  |  |  |  |
 | `sidebar_btn` |  |  |  |  |  |  |  |  |
 | `console_btn_anim` |  |  |  |  |  |  |  |  |
 | `estop` | ![estop](../tests/ref_imgs/xml_ui_api/themes/3d/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/flat/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/grey/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/neon/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/retro/styles/estop.png) | ![estop](../tests/ref_imgs/xml_ui_api/themes/soft/styles/estop.png) |
 | `file` | ![file](../tests/ref_imgs/xml_ui_api/themes/3d/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/flat/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/grey/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/neon/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/retro/styles/file.png) | ![file](../tests/ref_imgs/xml_ui_api/themes/soft/styles/file.png) |
 | `folder` | ![folder](../tests/ref_imgs/xml_ui_api/themes/3d/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/flat/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/grey/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/neon/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/retro/styles/folder.png) | ![folder](../tests/ref_imgs/xml_ui_api/themes/soft/styles/folder.png) |
-| `unhomed` |  |  |  |  |  |  |  |  |
+| `unhomed` |  |  |  |  |  | ![unhomed](../tests/ref_imgs/xml_ui_api/themes/neon/styles/unhomed.png) |  |  |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/3d/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/flat/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/grey/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/neon/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/retro/styles/temperature_bar.png) | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/soft/styles/temperature_bar.png) |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/3d/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/flat/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/grey/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/neon/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/retro/styles/temperature_bar_indic.png) | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/soft/styles/temperature_bar_indic.png) |
 | `tool_list` |  |  |  |  |  |  |  |  |
 | `tool_list_tool` | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/3d/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/flat/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/grey/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/neon/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/retro/styles/tool_list_tool.png) | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/soft/styles/tool_list_tool.png) |
 | `tool_list_heater` |  |  |  |  |  |  |  |  |
-| `tool_selected` | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/3d/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/flat/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/grey/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/neon/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/retro/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/soft/styles/tool_selected.png) |
+| `tool_selected` | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/3d/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/flat/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/grey/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/tool_selected.png) | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/neon/styles/tool_selected.png) |  | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/soft/styles/tool_selected.png) |
+| `heater_standby` |  |  |  |  |  | ![heater_standby](../tests/ref_imgs/xml_ui_api/themes/neon/styles/heater_standby.png) |  |  |
+| `heater_off` | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/3d/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/flat/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/grey/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/industrial/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/neon/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/retro/styles/heater_off.png) | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/soft/styles/heater_off.png) |
+| `heater_fault` |  |  |  |  |  | ![heater_fault](../tests/ref_imgs/xml_ui_api/themes/neon/styles/heater_fault.png) |  |  |
 | `tab_button` |  |  |  |  |  |  |  |  |
 | `slider_buttons` |  |  |  |  |  |  |  |  |
 | `list_header` |  |  |  |  |  |  |  |  |

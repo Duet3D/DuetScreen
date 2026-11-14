@@ -1,101 +1,75 @@
 <!--
-  3D: raised, bevelled controls. Light-to-dark gradients suggest light from above, and offset shadows give depth
-  beneath every interactive element. lighten()/darken() change a palette colour's lightness (see Theme.h).
+  3D: raised, bevelled controls. Light-to-dark gradients suggest light from above, and a soft shadow lifts every
+  control off its card; a chosen control is pressed in, its gradient inverted and its shadow gone. Actions are a
+  raised blue, standby amber. lighten()/darken() change a palette colour's lightness (see Theme.h).
 -->
 <theme name="3d" extends="base">
-	<palette primary_hue="220" secondary_hue="160" chroma="0.06" dark="false">
-		<!-- Slightly lighter raised backgrounds, so gradients have room to darken without looking muddy -->
-		<color name="bg_light" lightness="+0.04"/>
+	<palette primary_hue="240" secondary_hue="70" chroma="0.02" dark="false">
+		<color name="primary" lightness="0.66" chroma="0.13"/>
+		<color name="bg_dark" lightness="0.9"/>
+		<color name="bg_light" lightness="0.97"/>
 	</palette>
 
 	<fonts>
-		<font name="header" size="18" weight="700" style="bold"/>
 		<font name="normal" size="14" weight="450" style="normal"/>
 		<font name="emphasis" size="14" weight="600" style="bold"/>
-		<font name="subdued" size="12" weight="350" style="normal"/>
 	</fonts>
 
+	<consts>
+		<const name="radius" value="7"/>
+	</consts>
+
 	<styles>
-		<!-- Cards: rounded, light top to slightly darker bottom, subtle border, drop shadow -->
-		<style name="card" radius="8"
-			   bg_color="lighten(#bg, 0.04)" bg_grad_color="darken(#bg, 0.06)" bg_grad_dir="ver"
-			   border_width="1" border_color="darken(#border, 0.05)" border_opa="60%" border_side="full"
-			   shadow_width="10" shadow_spread="1" shadow_offset_x="0" shadow_offset_y="4" shadow_color="0x000000"
-			   shadow_opa="20%"
-			   pad_all="8" pad_row="4" pad_column="4"/>
+		<!-- Cards: lit from above, with a drop shadow -->
+		<style name="card" bg_color="lighten(#bg, 0.01)" bg_grad_color="darken(#bg, 0.03)" bg_grad_dir="ver"
+			   border_color="#border" border_opa="60%" shadow_width="10" shadow_offset_y="3" shadow_color="0x000000"
+			   shadow_opa="12%"/>
+		<style name="tool_list_tool" shadow_opa="0" bg_grad_dir="none"/>
 
-		<!-- Buttons: raised, with a highlight along the top edge and a drop shadow -->
-		<style name="btn" radius="6"
-			   bg_color="lighten(#primary, 0.08)" bg_grad_color="darken(#primary, 0.10)" bg_grad_dir="ver"
-			   border_width="1" border_color="lighten(#primary, 0.15)" border_opa="40%" border_side="top"
-			   shadow_width="6" shadow_spread="0" shadow_offset_x="0" shadow_offset_y="3" shadow_color="0x000000"
-			   shadow_opa="30%"/>
+		<!-- Buttons: raised, a highlight along the top, a shadow below -->
+		<style name="btn" bg_color="lighten(#bg_light, 0.03)" bg_grad_color="darken(#bg_light, 0.08)" bg_grad_dir="ver"
+			   border_color="#border" shadow_width="5" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="20%"/>
+		<style name="action_btn" bg_color="lighten(#primary, 0.08)" bg_grad_color="darken(#primary, 0.08)"
+			   bg_grad_dir="ver" border_color="darken(#primary, 0.18)"/>
+		<style name="heater_standby" bg_color="lighten(#secondary, 0.06)" bg_grad_color="darken(#secondary, 0.08)"
+			   bg_grad_dir="ver" border_color="darken(#secondary, 0.18)"/>
+		<style name="heater_off" bg_color="lighten(#bg_light, 0.03)" bg_grad_color="darken(#bg_light, 0.08)"
+			   bg_grad_dir="ver" border_color="#border"/>
+		<style name="heater_fault" bg_color="lighten(#error, 0.06)" bg_grad_color="darken(#error, 0.08)"
+			   bg_grad_dir="ver" border_color="darken(#error, 0.18)"/>
+		<style name="unhomed" bg_color="lighten(#warning, 0.06)" bg_grad_color="darken(#warning, 0.08)"
+			   bg_grad_dir="ver" border_color="darken(#warning, 0.18)"/>
+		<!-- Chosen: pressed in, the gradient inverted and no shadow -->
+		<style name="btn_checked" bg_color="darken(#primary_muted, 0.06)" bg_grad_color="#primary_muted"
+			   bg_grad_dir="ver" shadow_opa="0"/>
+		<style name="tab_btn" bg_grad_dir="none"/>
 
-		<!-- Action buttons: the same in the secondary colour -->
-		<style name="action_btn"
-			   bg_color="lighten(#secondary, 0.08)" bg_grad_color="darken(#secondary, 0.10)" bg_grad_dir="ver"
-			   border_width="1" border_color="lighten(#secondary, 0.15)" border_opa="40%" border_side="top"/>
-
-		<!-- Checked: inverted gradient, pressed in -->
-		<style name="btn_checked"
-			   bg_color="darken(#primary, 0.06)" bg_grad_color="lighten(#primary, 0.04)" bg_grad_dir="ver"
-			   shadow_width="2" shadow_offset_y="1" shadow_opa="20%"/>
-
-		<!-- Pressed: darker -->
 		<style name="pressed" recolor="0x000000" recolor_opa="25"/>
+		<style name="knob" shadow_width="6" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="30%"/>
 
-		<style name="knob" radius="circle" shadow_width="6" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="30%"/>
-
-		<style name="scrollbar" radius="4" width="6" bg_opa="30%"/>
-
-		<!-- Button matrix: raised cells -->
-		<style name="btnm_btn" radius="5"
-			   bg_color="lighten(#bg, 0.03)" bg_grad_color="darken(#bg, 0.08)" bg_grad_dir="ver"
-			   border_width="1" border_color="lighten(#bg, 0.06)" border_opa="50%" border_side="top"
-			   shadow_width="4" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="20%"/>
-		<style name="btnm_btn_checked"
-			   bg_color="lighten(#primary, 0.06)" bg_grad_color="darken(#primary, 0.08)" bg_grad_dir="ver"/>
-
-		<style name="bar" radius="6"/>
-		<style name="bar_indic" radius="6"/>
-
-		<!-- Slider: an inset groove, a raised fill and a raised knob -->
-		<style name="slider" radius="6" height="14"
-			   bg_color="darken(#highlight, 0.06)" bg_grad_color="lighten(#highlight, 0.03)" bg_grad_dir="ver"
-			   shadow_width="4" shadow_offset_y="-1" shadow_color="0x000000" shadow_opa="10%"/>
-		<style name="slider_indic" radius="6" bg_grad_color="darken(#primary, 0.08)" bg_grad_dir="ver"/>
-		<style name="slider_knob" radius="circle"
-			   bg_color="lighten(#primary, 0.12)" bg_grad_color="darken(#primary, 0.06)" bg_grad_dir="ver"
-			   shadow_width="8" shadow_offset_y="3" shadow_color="0x000000" shadow_opa="30%"
-			   border_width="1" border_color="lighten(#primary, 0.15)" border_opa="40%" border_side="top"/>
-
-		<!-- Checkbox: an inset well -->
-		<style name="cb_marker" radius="4"
-			   bg_color="darken(#bg, 0.04)" bg_grad_color="lighten(#bg, 0.02)" bg_grad_dir="ver"
-			   border_width="1" border_color="darken(#border, 0.08)"
-			   shadow_width="4" shadow_offset_y="-1" shadow_color="0x000000" shadow_opa="10%"/>
-
-		<!-- Switch: an inset groove with a raised knob -->
-		<style name="bg_switch" radius="circle" bg_grad_color="darken(#bg_light, 0.06)" bg_grad_dir="ver"
-			   shadow_width="3" shadow_offset_y="-1" shadow_color="0x000000" shadow_opa="10%"/>
-		<style name="switch_knob" radius="circle" shadow_width="5" shadow_offset_y="2" shadow_color="0x000000"
+		<!-- Keys: raised like the buttons -->
+		<style name="btnm_btn" bg_color="lighten(#bg_light, 0.03)" bg_grad_color="darken(#bg_light, 0.08)"
+			   bg_grad_dir="ver" border_color="#border" shadow_width="3" shadow_offset_y="1" shadow_color="0x000000"
 			   shadow_opa="20%"/>
+		<style name="btnm_btn_checked" bg_color="lighten(#primary, 0.06)" bg_grad_color="darken(#primary, 0.08)"
+			   bg_grad_dir="ver"/>
+		<style name="keyboard_button" bg_color="lighten(#bg_light, 0.03)" bg_grad_color="darken(#bg_light, 0.08)"
+			   bg_grad_dir="ver" border_color="#border" shadow_width="3" shadow_offset_y="1" shadow_color="0x000000"
+			   shadow_opa="20%"/>
+		<style name="keyboard_button_checked_bg" bg_color="lighten(#primary, 0.06)"
+			   bg_grad_color="darken(#primary, 0.08)" bg_grad_dir="ver"/>
 
-		<!-- Keyboard: raised keys -->
-		<style name="keyboard_button" radius="5"
-			   bg_color="lighten(#bg_light, 0.03)" bg_grad_color="darken(#bg_light, 0.06)" bg_grad_dir="ver"
-			   shadow_width="4" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="20%"
-			   border_width="1" border_color="lighten(#bg_light, 0.06)" border_opa="50%" border_side="top"/>
-		<style name="keyboard_button_checked_bg"
-			   bg_color="lighten(#primary, 0.06)" bg_grad_color="darken(#primary, 0.08)" bg_grad_dir="ver"/>
-
-		<style name="tab_btn" border_width="0" shadow_width="3" shadow_offset_y="1" shadow_color="0x000000"
-			   shadow_opa="10%"/>
-
-		<style name="list_btn" pad_all="6" border_width="0" shadow_width="3" shadow_offset_y="1" shadow_opa="10%"
-			   shadow_color="0x000000"/>
-
-		<style name="bar_label_bg" radius="6"/>
+		<!-- Tracks are inset grooves; knobs are raised -->
+		<style name="bar" bg_grad_color="lighten(#highlight, 0.06)" bg_grad_dir="ver"/>
+		<style name="slider" bg_color="darken(#highlight, 0.04)" bg_grad_color="lighten(#highlight, 0.04)"
+			   bg_grad_dir="ver"/>
+		<style name="slider_indic" bg_color="lighten(#primary, 0.06)" bg_grad_color="darken(#primary, 0.08)"
+			   bg_grad_dir="ver"/>
+		<style name="slider_knob" bg_color="0xffffff" bg_grad_color="darken(#bg_light, 0.1)" bg_grad_dir="ver"
+			   shadow_width="6" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="30%"/>
+		<style name="bg_switch" bg_grad_color="lighten(#highlight, 0.06)" bg_grad_dir="ver"/>
+		<style name="switch_knob" shadow_width="5" shadow_offset_y="2" shadow_color="0x000000" shadow_opa="25%"/>
+		<style name="cb_marker" bg_color="darken(#bg, 0.04)" bg_grad_color="#bg" bg_grad_dir="ver"/>
 
 		<!-- E-stop: a red gradient of its own (LVGL's palette red, lightened 1 to darkened 3) -->
 		<style name="estop" bg_color="0xef5350" bg_grad_color="0xc62828" bg_grad_dir="ver"
@@ -103,6 +77,6 @@
 
 		<!-- Files and folders follow the restyled buttons -->
 		<style name="folder" copy="btn"/>
-		<style name="file" merge="btn bg_light" pad_hor="12" pad_ver="10"/>
+		<style name="file" merge="btn bg_light"/>
 	</styles>
 </theme>

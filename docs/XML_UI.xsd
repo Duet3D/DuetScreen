@@ -1182,6 +1182,9 @@
 			<xs:enumeration value="gauge_standby_target"/>
 			<xs:enumeration value="graph_legend"/>
 			<xs:enumeration value="grow"/>
+			<xs:enumeration value="heater_fault"/>
+			<xs:enumeration value="heater_off"/>
+			<xs:enumeration value="heater_standby"/>
 			<xs:enumeration value="icon"/>
 			<xs:enumeration value="icon_recolor"/>
 			<xs:enumeration value="input"/>

@@ -1,58 +1,54 @@
-<!-- Soft: rounded, pill-shaped controls, soft shadows instead of borders, generous padding, pastel tones. -->
+<!--
+  Soft: light and friendly. Rounded shapes, soft shadows instead of borders and pastel accents: periwinkle for
+  actions, mint for standby. Cards are white on a pale screen; controls are pale chips lifted by a shadow.
+-->
 <theme name="soft" extends="base">
-	<palette primary_hue="250" secondary_hue="180" chroma="0.08" dark="false"/>
+	<palette primary_hue="275" secondary_hue="170" chroma="0.05" dark="false">
+		<color name="bg_dark" lightness="0.93"/>
+		<color name="bg" lightness="1.0"/>
+		<color name="bg_light" lightness="0.955"/>
+		<color name="primary" lightness="0.72"/>
+		<color name="secondary" lightness="0.8"/>
+	</palette>
 
 	<fonts>
 		<font name="header" size="18" weight="600" style="bold"/>
-		<font name="normal" size="14" weight="400" style="normal"/>
 		<font name="emphasis" size="14" weight="600" style="bold"/>
-		<font name="subdued" size="12" weight="300" style="italic"/>
 	</fonts>
 
+	<consts>
+		<const name="radius" value="12"/>
+		<const name="pad" value="6"/>
+	</consts>
+
 	<styles>
-		<!-- Very rounded: pills -->
-		<style name="card" radius="12"/>
-		<style name="btn" radius="circle"/>
-		<style name="knob" radius="circle"/>
-
-		<!-- Soft shadow instead of borders -->
-		<style name="card" border_width="0" shadow_width="12" shadow_spread="2" shadow_opa="10%" shadow_color="0x000000"/>
-
-		<!-- Generous padding -->
-		<style name="card" pad_all="12" pad_row="6" pad_column="6"/>
-
-		<!-- Buttons: pills with a subtle shadow, and extra horizontal padding so text clears the rounded ends -->
-		<style name="btn" pad_hor="14" shadow_width="6" shadow_opa="10%" shadow_color="0x000000" shadow_offset_y="2"
-			   border_width="0" clip_corner="true"/>
+		<!-- Soft shadows instead of borders -->
+		<style name="card" border_width="0" shadow_width="16" shadow_spread="0" shadow_offset_y="3" shadow_opa="8%"
+			   shadow_color="0x000000"/>
+		<style name="tool_list_tool" border_width="0" bg_color="#bg_light" shadow_opa="0"/>
+		<style name="btn" border_width="0" shadow_width="6" shadow_offset_y="2" shadow_opa="12%" shadow_color="0x000000"/>
+		<style name="input" border_width="0" bg_color="#bg_light" bg_opa="100%"/>
+		<style name="tool_selected" border_width="0" outline_width="2" bg_color="#primary_muted"/>
 
 		<!-- Pressed: a lighter tint -->
 		<style name="pressed" recolor_opa="15"/>
 
-		<!-- Round scrollbar -->
-		<style name="scrollbar" radius="circle" width="6" bg_opa="20%"/>
-
-		<style name="btnm_btn" radius="circle" pad_hor="10" clip_corner="true" border_width="0" shadow_width="4"
-			   shadow_opa="10%" shadow_color="0x000000"/>
-		<style name="bar" radius="circle"/>
-		<style name="bar_indic" radius="circle"/>
-		<style name="slider" radius="circle"/>
-		<style name="slider_indic" radius="circle"/>
-		<style name="slider_knob" radius="circle"/>
-		<style name="slider" height="14"/>
-		<style name="slider_knob" border_width="0" shadow_width="6" shadow_opa="20%" shadow_color="0x000000"/>
-		<style name="cb_marker" radius="circle" border_width="1"/>
-		<style name="bg_switch" radius="circle"/>
-		<style name="switch_knob" radius="circle"/>
-		<style name="keyboard_button" radius="10" border_width="0" shadow_width="4" shadow_opa="10%" shadow_color="0x000000"/>
-		<style name="tab_btn" border_width="0" pad_top="4"/>
-		<style name="list_btn" border_width="0" pad_all="6"/>
-
+		<style name="scrollbar" width="6" bg_opa="30%"/>
+		<style name="chart_bg" border_width="0"/>
+		<style name="list_btn" border_width="0"/>
+		<style name="btnm_btn" border_width="0" shadow_width="4" shadow_offset_y="1" shadow_opa="10%"
+			   shadow_color="0x000000"/>
+		<style name="keyboard_button" radius="10" border_width="0" shadow_width="4" shadow_offset_y="1" shadow_opa="10%"
+			   shadow_color="0x000000"/>
+		<style name="slider_knob" border_width="0" bg_color="0xffffff" shadow_width="8" shadow_offset_y="2"
+			   shadow_opa="25%" shadow_color="0x000000"/>
+		<style name="cb_marker" radius="6"/>
 		<style name="bar_label_bg" radius="circle"/>
+		<style name="gauge_bar" radius="circle"/>
+		<style name="gauge_bar_indic" radius="circle"/>
 
 		<!-- Files and folders follow the restyled buttons -->
 		<style name="folder" copy="btn"/>
-		<style name="file" merge="btn bg_light" pad_hor="16" pad_ver="14"/>
-
-		<style name="sidebar_btn" pad_all="16"/>
+		<style name="file" merge="btn bg_light"/>
 	</styles>
 </theme>

@@ -1,5 +1,5 @@
 <!--
-  One heater: its name, its state (tap to cycle active, standby and off), its temperature, and its active and standby
+  One heater: its name, its state (tap to cycle active, standby and off), coloured as the gauges colour it, its temperature, and its active and standby
   targets (tap to set). The state can't be changed while printing. In a widget less than wide (widget.*), the standby
   target isn't shown.
 
@@ -21,8 +21,10 @@
 		<lv_label name="label" bind_text="$label" flex_grow="3" style_text_align="left"/>
 
 		<ds_button name="status" bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status" flex_grow="3">
-			<style name="border_color_card" selector="checked"/>
 			<style name="action_btn"/>
+			<bind_style_if_eq name="heater_standby" subject="om.heat.heaters[{row.value}].state" ref_value="standby"/>
+			<bind_style_if_eq name="heater_off" subject="om.heat.heaters[{row.value}].state" ref_value="off"/>
+			<bind_style_if_eq name="heater_fault" subject="om.heat.heaters[{row.value}].state" ref_value="fault"/>
 			<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
 			<action trigger="clicked" name="actions.heater.toggle"/>
 		</ds_button>

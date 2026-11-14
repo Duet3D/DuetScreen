@@ -1,6 +1,15 @@
 <!--
   The base theme: every style the UI uses. The other themes extend it and change what they need.
 
+  Colour carries meaning, so the screen stays calm and what matters stands out:
+    - Surfaces: the screen (#bg_dark), cards on it (#bg), and controls on those (#bg_light), each a step apart.
+    - Buttons are neutral controls (btn). A button that acts on the machine is filled with the accent (action_btn).
+      A chosen option, the open page and the selected tab are tinted with the muted accent and edged in the accent
+      (btn_checked, tab_btn), so a choice never looks like an action.
+    - State colours mean the same everywhere: a heater active is the accent, on standby the secondary accent, off
+      neutral, and at fault the error colour (heater_*, gauge_*); #success, #warning and #error report outcomes.
+    - Borders are thin and quiet (#border_muted); text is #text, or #text_muted for what is less important.
+
   How a theme is built, and the values it can use (#name, dpx, lighten(), …): src/UI/Styles/Theme.h
   Palette colours (#bg, #primary, #text, …) and how they are generated:        src/UI/Styles/Palette.h
   Style names are the members of LvglStyles and ComponentStyles:               src/UI/Styles/Styles.h
@@ -12,7 +21,7 @@
 		<font name="header" size="18" weight="700" style="bold"/>
 		<font name="normal" size="14" weight="400" style="normal"/>
 		<font name="emphasis" size="14" weight="700" style="bold"/>
-		<font name="subdued" size="12" weight="200" style="italic"/>
+		<font name="subdued" size="12" weight="400" style="normal"/>
 		<!-- For widgets' text and values: the text widget's sizes, and gauges' readings -->
 		<font name="small" size="12" weight="400" style="normal"/>
 		<font name="large" size="22" weight="600" style="bold"/>
@@ -21,9 +30,9 @@
 	</fonts>
 
 	<consts>
-		<const name="border_width" value="2"/>
-		<const name="outline_width" value="3"/>
-		<const name="radius" value="5"/>
+		<const name="border_width" value="1"/>
+		<const name="outline_width" value="2"/>
+		<const name="radius" value="6"/>
 		<const name="pad_large" value="10"/>
 		<const name="pad" value="5"/>
 		<const name="pad_small" value="2"/>
@@ -52,11 +61,13 @@
 		<style name="bg_color_success" bg_color="#success" bg_opa="100%" bg_grad_dir="none"/>
 		<style name="bg_color_warning" bg_color="#warning" bg_opa="100%" bg_grad_dir="none"/>
 		<style name="bg_color_error" bg_color="#error" bg_opa="100%" bg_grad_dir="none"/>
-		<style name="bg_color_header" bg_color="0xffffff" bg_opa="10%"/>
+		<style name="bg_color_header" bg_color="#bg_light" bg_opa="100%"/>
 		<style name="bg_color_list_item" bg_color="#bg" bg_opa="100%" bg_grad_color="#bg_light"/>
-		<style name="bg_modal" bg_color="#bg" bg_opa="70%"/>
-		<!-- A dialog's card, centred over its backdrop; a view's own style can place it elsewhere -->
-		<style name="modal" align="center"/>
+		<style name="bg_modal" bg_color="#bg_dark" bg_opa="75%"/>
+		<!-- A dialog's card, centred over its backdrop (a view's own style can place it elsewhere), lifted above the
+			 dimmed screen by a stronger edge and a shadow -->
+		<style name="modal" align="center" border_color="#border" shadow_width="32" shadow_spread="2"
+			   shadow_offset_y="6" shadow_color="0x000000" shadow_opa="40%"/>
 
 		<!-- Text -->
 		<style name="text" text_color="#text" text_font="font_normal"/>
@@ -79,8 +90,8 @@
 		<style name="outline_secondary" outline_color="#secondary" outline_width="#outline_width" outline_opa="50%"/>
 
 		<!-- Scrollbar -->
-		<style name="scrollbar" bg_color="#bg_light" border_color="#border" border_width="1" radius="circle"
-			   pad_all="7dpx" width="5dpx" bg_opa="40%"/>
+		<style name="scrollbar" bg_color="#border" border_width="0" radius="circle" pad_all="7dpx" width="4dpx"
+			   bg_opa="50%"/>
 		<style name="scrollbar_scrolled" bg_opa="100%"/>
 
 		<!-- Base, applied to every widget -->
@@ -90,15 +101,17 @@
 
 		<style name="card" radius="#radius" pad_all="#pad" pad_row="#pad_small" pad_column="#pad_small"
 			   bg_opa="100%" bg_color="#bg"
-			   border_color="#border" border_width="#border_width" border_opa="100%" border_side="full"/>
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"/>
 
-		<!-- Buttons -->
-		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#primary"/>
-		<!-- Checked: highlighted by an outline drawn inside the edge, which (unlike a border) takes no layout space, so
-		     a content-sized button doesn't grow when checked -->
-		<style name="btn_checked" bg_grad_dir="none" outline_color="#highlight" outline_width="#border_width"
-			   outline_pad="-#border_width" outline_opa="100%"/>
-		<style name="action_btn" bg_opa="100%" bg_color="#secondary"/>
+		<!-- Buttons: a neutral control, edged so it shows on a light card -->
+		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#bg_light" text_color="#text"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<!-- Checked (a chosen option, the open page): tinted, and edged in the accent by an outline drawn inside the
+			 edge, which (unlike a border) takes no layout space, so a content-sized button doesn't grow when checked -->
+		<style name="btn_checked" bg_color="#primary_muted" bg_grad_dir="none" outline_color="#primary"
+			   outline_width="#outline_width" outline_pad="-#outline_width" outline_opa="100%"/>
+		<!-- Acts on the machine: filled with the accent -->
+		<style name="action_btn" bg_opa="100%" bg_color="#primary" border_color="#primary"/>
 
 		<!-- Icons -->
 		<style name="icon_recolor" recolor="#text" recolor_opa="100%"/>
@@ -141,7 +154,7 @@
 		<style name="drag_complete" outline_color="0xffffff" outline_width="3"/>
 
 		<!-- Arc -->
-		<style name="arc_indic" arc_color="#highlight" arc_width="15dpx" arc_rounded="true"/>
+		<style name="arc_indic" arc_color="#highlight" arc_width="12dpx" arc_rounded="true"/>
 		<style name="arc_indic_primary" arc_color="#primary"/>
 
 		<!-- Bar -->
@@ -157,20 +170,22 @@
 		<style name="dropdown_list" max_height="260"/>
 
 		<!-- Checkbox -->
-		<style name="cb_marker" pad_all="3dpx" border_width="#border_width" border_color="#primary" bg_color="#bg"
-			   bg_opa="100%" radius="2"/>
+		<style name="cb_marker" pad_all="3dpx" border_width="2" border_color="#primary" bg_color="#bg"
+			   bg_opa="100%" radius="3"/>
 		<style name="cb_marker_checked" bg_image_src="symbol_ok"/>
 
 		<!-- Switch -->
-		<style name="bg_switch" bg_color="#bg_light" bg_opa="100%" radius="circle"/>
-		<style name="switch_knob" pad_all="-4dpx" bg_color="#text" radius="circle"/>
+		<style name="bg_switch" bg_color="#highlight" bg_opa="100%" radius="circle"/>
+		<!-- The knob is white, with a shadow to lift it off a light track -->
+		<style name="switch_knob" pad_all="-4dpx" bg_color="0xffffff" radius="circle" shadow_width="4" shadow_offset_y="1"
+			   shadow_color="0x000000" shadow_opa="30%"/>
 
 		<!-- Line -->
 		<style name="line" line_width="1" line_color="#highlight"/>
 
 		<!-- Chart -->
-		<style name="chart_bg" border_width="#border_width" border_color="#highlight" border_opa="100%" border_post="false"
-			   pad_column="10dpx" line_color="#highlight"/>
+		<style name="chart_bg" border_width="#border_width" border_color="#border_muted" border_opa="100%"
+			   border_post="false" pad_column="10dpx" line_color="#highlight" line_opa="60%"/>
 		<style name="chart_series" line_width="3dpx" radius="3dpx" width="8dpx" height="8dpx" pad_column="2dpx"/>
 		<style name="chart_indic" radius="circle" width="8dpx" height="8dpx" bg_color="#primary" bg_opa="100%"/>
 
@@ -191,7 +206,7 @@
 		<!-- Table -->
 		<style name="table" radius="0"/>
 		<style name="table_cell" bg_color="#bg" bg_opa="100%" text_color="#text" border_width="1dpx"
-			   border_color="#highlight" border_side="top|bottom"/>
+			   border_color="#border_muted" border_side="top|bottom"/>
 
 		<!-- Text area -->
 		<style name="text_area" pad_all="#pad"/>
@@ -210,13 +225,13 @@
 		<style name="keyboard_button" bg_color="#bg_light" merge="border_muted" shadow_width="0" radius="#radius"/>
 		<style name="keyboard_button_checked_bg" bg_color="#primary" bg_opa="100%" text_color="#text"/>
 
-		<!-- Tab view: the selected tab is underlined with a double-width border -->
-		<style name="tab_btn" border_color="#primary" border_width="4" border_side="bottom" pad_top="4"/>
+		<!-- Tabs: the selected one (as a checked button, tinted) is underlined in the accent, instead of edged -->
+		<style name="tab_btn" border_color="#primary" border_width="3" border_side="bottom" outline_width="0"/>
 		<style name="tab_bg_focus" outline_pad="-#border_width"/>
 
 		<!-- List -->
 		<style name="list_bg" pad_hor="#pad" pad_ver="0" pad_gap="0" clip_corner="true"/>
-		<style name="list_btn" border_width="1" border_color="#border" border_side="bottom" pad_all="#pad_small"
+		<style name="list_btn" border_width="1" border_color="#border_muted" border_side="bottom" pad_all="#pad_small"
 			   pad_column="#pad_small"/>
 		<style name="list_item_grow" transform_width="#pad"/>
 
@@ -228,9 +243,9 @@
 		<style name="scale" line_color="#text" line_width="2dpx" arc_color="#text" arc_width="2dpx" length="6dpx"/>
 
 		<!-- Slider -->
-		<style name="slider" height="20" bg_color="#highlight" bg_opa="100%" radius="#radius"/>
-		<style name="slider_indic" radius="#radius"/>
-		<style name="slider_knob" radius="#radius" border_color="#primary_muted" border_width="#border_width"/>
+		<style name="slider" height="16" bg_color="#highlight" bg_opa="100%" radius="circle"/>
+		<style name="slider_indic" bg_color="#primary" radius="circle"/>
+		<style name="slider_knob" radius="circle" bg_color="0xffffff" border_color="#primary" border_width="3"/>
 
 		<!-- DuetScreen components -->
 		<style name="console_btn_anim" recolor="#secondary"/>
@@ -241,7 +256,8 @@
 		<style name="folder" copy="btn"/>
 		<style name="file" merge="btn bg_light border"/>
 
-		<style name="unhomed" bg_color="0xfb9514" border_width="0"/>
+		<!-- An axis that isn't homed: a warning -->
+		<style name="unhomed" bg_color="#warning" border_color="#warning"/>
 
 		<!-- Blue to red (LVGL's palette) -->
 		<style name="temperature_bar" bg_opa="100%" bg_color="0x2196f3" bg_grad_color="0xf44336" bg_grad_dir="hor"/>
@@ -249,9 +265,13 @@
 
 		<style name="tool_list_tool" copy="card"/>
 		<style name="tool_list_heater" pad_all="0"/>
-		<style name="tool_selected" outline_color="#primary" outline_opa="100%" outline_width="3"
-			   shadow_color="rgb_darken(#primary, 10)" shadow_opa="50%" shadow_width="0"
-			   shadow_offset_x="-#shadow_offset" shadow_offset_y="#shadow_offset"/>
+		<style name="tool_selected" border_color="#primary" outline_color="#primary" outline_opa="100%"
+			   outline_width="1" outline_pad="0"/>
+
+		<!-- A heater's state button (an action button, so the accent while active) in its other states -->
+		<style name="heater_standby" bg_color="#secondary" border_color="#secondary"/>
+		<style name="heater_off" bg_color="#bg_light" border_color="#border_muted" text_color="#text"/>
+		<style name="heater_fault" bg_color="#error" border_color="#error"/>
 
 		<style name="list_title" merge="text_emphasis"/>
 
@@ -259,9 +279,9 @@
 
 		<style name="graph_legend" min_width="150"/>
 
-		<style name="bar_label_bg" bg_color="#bg_light" bg_opa="50%" radius="#radius" pad_hor="#pad"/>
+		<style name="bar_label_bg" bg_color="#bg" bg_opa="80%" radius="#radius" pad_hor="#pad"/>
 
-		<style name="object_cancel_base" copy="card" bg_color="#bg_light" bg_opa="50%"/>
+		<style name="object_cancel_base" copy="card" bg_color="#bg_light" bg_opa="100%"/>
 		<style name="object_cancel_cancelled" bg_color="#error" bg_opa="100%"/>
 		<style name="object_cancel_current" bg_color="#primary" bg_opa="100%"/>
 

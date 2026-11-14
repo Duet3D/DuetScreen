@@ -875,12 +875,13 @@ TEST_F(TestXmlUi, UserThemeExtendsABuiltinTheme)
 	const auto& components = UI::Themes::getComponentStyles();
 
 	// The parent's styles, built with the child's palette and consts
-	EXPECT_EQ(styleColor(lvgl.btn, LV_STYLE_BG_COLOR), rgb(colors.primary));
+	EXPECT_EQ(styleColor(lvgl.btn, LV_STYLE_BG_COLOR), rgb(colors.bg_light));
+	EXPECT_EQ(styleColor(lvgl.action_btn, LV_STYLE_BG_COLOR), rgb(colors.primary));
 	EXPECT_EQ(styleNum(lvgl.card, LV_STYLE_RADIUS), 9);
 	// ...then the child's changes
 	EXPECT_EQ(styleNum(lvgl.card, LV_STYLE_BORDER_WIDTH), 0);
 	// A copy made in the parent sees the card as the parent left it: the child's change came later
-	EXPECT_EQ(styleNum(components.tool_list_tool, LV_STYLE_BORDER_WIDTH), 2);
+	EXPECT_EQ(styleNum(components.tool_list_tool, LV_STYLE_BORDER_WIDTH), 1);
 	EXPECT_EQ(styleNum(components.tool_list_tool, LV_STYLE_RADIUS), 9);
 }
 
@@ -929,7 +930,7 @@ TEST_F(TestXmlUi, ComponentsCanUseThemeColours)
 	auto& view = makeView("swatch");
 	EXPECT_EQ(rgb(lv_obj_get_style_bg_color(view.getRootPtr(), LV_PART_MAIN)),
 			  rgb(UI::Themes::getCurrentTheme()->getColors().primary));
-	EXPECT_EQ(lv_obj_get_style_radius(view.getRootPtr(), LV_PART_MAIN), 5);
+	EXPECT_EQ(lv_obj_get_style_radius(view.getRootPtr(), LV_PART_MAIN), 6);
 
 	// Switching theme recolours the view
 	UI::Themes::Theme* grey = UI::Themes::getThemeByName("grey");

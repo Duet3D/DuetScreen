@@ -1,19 +1,35 @@
-<!-- Flat: no borders or gradients; buttons are outlined in the accent colour. -->
+<!--
+  Flat: dark and borderless. Surfaces are told apart by their tone alone, with no borders, outlines, gradients or
+  shadows; a teal accent marks actions and an amber one standby.
+-->
 <theme name="flat" extends="base">
-	<palette primary_hue="80" secondary_hue="30" chroma="0" dark="true"/>
+	<palette primary_hue="200" secondary_hue="70" chroma="0.01" dark="true"/>
+
+	<consts>
+		<const name="radius" value="4"/>
+	</consts>
 
 	<styles>
 		<style name="card" border_width="0"/>
+		<!-- A dialog stands out by its tone alone, a step lighter than a card -->
+		<style name="modal" border_width="0" shadow_opa="0" bg_color="#bg_light"/>
+		<style name="btn" border_width="0"/>
+		<!-- A choice is filled with the muted accent, without an edge -->
+		<style name="btn_checked" outline_width="0"/>
+		<style name="tab_btn" border_width="0"/>
+		<!-- The tools are cards too (tool_list_tool copied the base theme's card); the selected one is marked by a bar
+			 in the accent down its side -->
+		<style name="tool_list_tool" border_width="0" bg_color="#bg_dark"/>
+		<style name="tool_selected" outline_width="0" border_width="4" border_side="left" border_color="#primary"/>
+		<style name="object_cancel_base" border_width="0"/>
+		<style name="input" border_width="0" bg_color="#bg_light" bg_opa="100%"/>
 
-		<style name="btn" bg_color="#bg_light" bg_grad_dir="none" text_color="#primary"/>
-		<style name="btn_checked" outline_color="#primary"/>
-		<style name="action_btn" bg_color="#secondary" bg_grad_dir="none" text_color="#text" recolor="#text"/>
-
-		<style name="card" bg_color="#bg" bg_grad_dir="none"/>
-
-		<style name="icon_recolor" recolor="#primary"/>
-
-		<!-- Folders look like the restyled buttons -->
-		<style name="folder" copy="btn"/>
+		<style name="chart_bg" border_width="0"/>
+		<style name="list_btn" border_width="0"/>
+		<style name="btnm_btn" border_width="0"/>
+		<style name="keyboard_button" border_width="0"/>
+		<style name="slider_knob" border_width="0" bg_color="#primary"/>
+		<style name="cb_marker" border_width="0" bg_color="#bg_light"/>
+		<style name="bg_color_header" bg_color="#bg_light"/>
 	</styles>
 </theme>

@@ -2446,9 +2446,9 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `bg_color_success` | ![bg_color_success](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_success.png) | bg_color=#success bg_opa=100% bg_grad_dir=none |
 | `bg_color_warning` | ![bg_color_warning](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_warning.png) | bg_color=#warning bg_opa=100% bg_grad_dir=none |
 | `bg_color_error` | ![bg_color_error](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_error.png) | bg_color=#error bg_opa=100% bg_grad_dir=none |
-| `bg_color_header` | ![bg_color_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_header.png) | bg_color=0xffffff bg_opa=10% |
+| `bg_color_header` | ![bg_color_header](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_header.png) | bg_color=#bg_light bg_opa=100% |
 | `bg_color_list_item` | ![bg_color_list_item](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_color_list_item.png) | bg_color=#bg bg_opa=100% bg_grad_color=#bg_light |
-| `bg_modal` | ![bg_modal](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_modal.png) | bg_color=#bg bg_opa=70% |
+| `bg_modal` | ![bg_modal](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_modal.png) | bg_color=#bg_dark bg_opa=75% |
 | `text` | ![text](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text.png) | text_color=#text text_font=font_normal |
 | `text_muted` | ![text_muted](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_muted.png) | text_color=#text_muted text_font=font_subdued |
 | `text_emphasis` | ![text_emphasis](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/text_emphasis.png) | text_color=#text text_font=font_emphasis |
@@ -2461,13 +2461,13 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `border_color_secondary` | ![border_color_secondary](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/border_color_secondary.png) | border_color=#secondary border_width=#border_width border_opa=100% border_side=full |
 | `border_color_card` |  | *(not set)* |
 | `screen` |  | bg_color=#bg_dark bg_opa=100% |
-| `scrollbar` | ![scrollbar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar.png) | bg_color=#bg_light border_color=#border border_width=1 radius=circle pad_all=7dpx width=5dpx bg_opa=40% |
+| `scrollbar` | ![scrollbar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar.png) | bg_color=#border border_width=0 radius=circle pad_all=7dpx width=4dpx bg_opa=50% |
 | `scrollbar_scrolled` | ![scrollbar_scrolled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/scrollbar_scrolled.png) | bg_opa=100% |
-| `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border border_width=#border_width border_opa=100% border_side=full |
+| `card` | ![card](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/card.png) | radius=#radius pad_all=#pad pad_row=#pad_small pad_column=#pad_small bg_opa=100% bg_color=#bg border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
 | `tab_card` |  | *(not set)* |
-| `modal` |  | align=center |
-| `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#primary |
-| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_grad_dir=none outline_color=#highlight outline_width=#border_width outline_pad=-#border_width outline_opa=100% |
+| `modal` |  | align=center border_color=#border shadow_width=32 shadow_spread=2 shadow_offset_y=6 shadow_color=0x000000 shadow_opa=40% |
+| `btn` | ![btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn.png) | radius=#radius bg_opa=100% bg_color=#bg_light text_color=#text border_color=#border_muted border_width=#border_width border_opa=100% border_side=full |
+| `btn_checked` | ![btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btn_checked.png) | bg_color=#primary_muted bg_grad_dir=none outline_color=#primary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
 | `icon` |  | *(not set)* |
 | `icon_recolor` | ![icon_recolor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/icon_recolor.png) | recolor=#text recolor_opa=100% |
 | `pressed` | ![pressed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/pressed.png) | recolor=0x000000 recolor_opa=35 |
@@ -2493,14 +2493,14 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `transition_normal` |  | *(not set)* |
 | `anim` |  | anim_duration=200 |
 | `anim_fast` |  | anim_duration=120 |
-| `action_btn` | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/action_btn.png) | bg_opa=100% bg_color=#secondary |
+| `action_btn` | ![action_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/action_btn.png) | bg_opa=100% bg_color=#primary border_color=#primary |
 | `input` | ![input](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/input.png) | border_color=#border border_width=1 pad_hor=20 pad_ver=0 text_align=center |
 | `long_press` |  | *(not set)* |
 | `draggable` |  | transition_props=transform_width transform_height transition_duration=200ms transition_easing=ease_in_out transition_delay=100ms |
 | `dragging` | ![dragging](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/dragging.png) | transform_width=20 transform_height=20 border_color=0xffffff border_opa=30% border_width=20 transition_props=outline_width transition_duration=#transition_time transition_easing=ease_in_out |
 | `drag_complete` | ![drag_complete](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/drag_complete.png) | outline_color=0xffffff outline_width=3 |
 | `knob` | ![knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/knob.png) | bg_color=#primary bg_opa=100% pad_all=6dpx radius=circle |
-| `arc_indic` |  | arc_color=#highlight arc_width=15dpx arc_rounded=true |
+| `arc_indic` |  | arc_color=#highlight arc_width=12dpx arc_rounded=true |
 | `arc_indic_primary` |  | arc_color=#primary |
 | `bar` | ![bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar.png) | bg_color=#highlight bg_opa=100% radius=circle |
 | `bar_indic` |  | radius=circle |
@@ -2509,16 +2509,16 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `btnm_btn_checked` | ![btnm_btn_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/btnm_btn_checked.png) | bg_color=#primary bg_opa=100% text_color=#text |
 | `chart_series` |  | line_width=3dpx radius=3dpx width=8dpx height=8dpx pad_column=2dpx |
 | `chart_indic` | ![chart_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_indic.png) | radius=circle width=8dpx height=8dpx bg_color=#primary bg_opa=100% |
-| `chart_bg` | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_bg.png) | border_width=#border_width border_color=#highlight border_opa=100% border_post=false pad_column=10dpx line_color=#highlight |
+| `chart_bg` | ![chart_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chart_bg.png) | border_width=#border_width border_color=#border_muted border_opa=100% border_post=false pad_column=10dpx line_color=#highlight line_opa=60% |
 | `dropdown` |  | pad_ver=#pad |
 | `dropdown_list` |  | max_height=260 |
-| `cb_marker` | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker.png) | pad_all=3dpx border_width=#border_width border_color=#primary bg_color=#bg bg_opa=100% radius=2 |
+| `cb_marker` | ![cb_marker](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker.png) | pad_all=3dpx border_width=2 border_color=#primary bg_color=#bg bg_opa=100% radius=3 |
 | `cb_marker_checked` | ![cb_marker_checked](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/cb_marker_checked.png) | bg_image_src=symbol_ok |
-| `bg_switch` | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_switch.png) | bg_color=#bg_light bg_opa=100% radius=circle |
-| `switch_knob` |  | pad_all=-4dpx bg_color=#text radius=circle |
+| `bg_switch` | ![bg_switch](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bg_switch.png) | bg_color=#highlight bg_opa=100% radius=circle |
+| `switch_knob` | ![switch_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/switch_knob.png) | pad_all=-4dpx bg_color=0xffffff radius=circle shadow_width=4 shadow_offset_y=1 shadow_color=0x000000 shadow_opa=30% |
 | `line` |  | line_width=1 line_color=#highlight |
 | `table` |  | radius=0 |
-| `table_cell` | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/table_cell.png) | bg_color=#bg bg_opa=100% text_color=#text border_width=1dpx border_color=#highlight border_side=top\|bottom |
+| `table_cell` | ![table_cell](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/table_cell.png) | bg_color=#bg bg_opa=100% text_color=#text border_width=1dpx border_color=#border_muted border_side=top\|bottom |
 | `text_area` |  | pad_all=#pad |
 | `ta_cursor` | ![ta_cursor](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/ta_cursor.png) | border_color=#text border_width=2dpx pad_left=-1dpx border_side=left anim_duration=400 |
 | `ta_placeholder` | ![ta_placeholder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/ta_placeholder.png) | text_color=#text_muted |
@@ -2540,34 +2540,37 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `keyboard_button` | ![keyboard_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button.png) | merge=border_muted bg_color=#bg_light shadow_width=0 radius=#radius |
 | `keyboard_button_checked_bg` | ![keyboard_button_checked_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/keyboard_button_checked_bg.png) | bg_color=#primary bg_opa=100% text_color=#text |
 | `list_bg` |  | pad_hor=#pad pad_ver=0 pad_gap=0 clip_corner=true |
-| `list_btn` | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_btn.png) | border_width=1 border_color=#border border_side=bottom pad_all=#pad_small pad_column=#pad_small |
+| `list_btn` | ![list_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_btn.png) | border_width=1 border_color=#border_muted border_side=bottom pad_all=#pad_small pad_column=#pad_small |
 | `list_item_grow` |  | transform_width=#pad |
 | `tab_bg_focus` |  | outline_pad=-#border_width |
-| `tab_btn` | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_btn.png) | border_color=#primary border_width=4 border_side=bottom pad_top=4 |
+| `tab_btn` | ![tab_btn](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_btn.png) | border_color=#primary border_width=3 border_side=bottom outline_width=0 |
 | `led` | ![led](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/led.png) | bg_opa=100% bg_color=0xffffff bg_grad_color=#bg_dark radius=circle shadow_width=15dpx shadow_color=0xffffff shadow_spread=5dpx |
 | `scale` |  | line_color=#text line_width=2dpx arc_color=#text arc_width=2dpx length=6dpx |
-| `slider` | ![slider](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider.png) | height=20 bg_color=#highlight bg_opa=100% radius=#radius |
-| `slider_indic` |  | radius=#radius |
-| `slider_knob` | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider_knob.png) | radius=#radius border_color=#primary_muted border_width=#border_width |
+| `slider` | ![slider](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider.png) | height=16 bg_color=#highlight bg_opa=100% radius=circle |
+| `slider_indic` |  | bg_color=#primary radius=circle |
+| `slider_knob` | ![slider_knob](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/slider_knob.png) | radius=circle bg_color=0xffffff border_color=#primary border_width=3 |
 | `sidebar` |  | *(not set)* |
 | `sidebar_btn` |  | *(not set)* |
 | `console_btn_anim` |  | recolor=#secondary |
 | `estop` | ![estop](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/estop.png) | bg_color=0xf44336 text_color=0xffffff radius=circle |
 | `file` | ![file](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file.png) | merge=btn merge=bg_light merge=border |
 | `folder` | ![folder](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder.png) | copy=btn |
-| `unhomed` |  | bg_color=0xfb9514 border_width=0 |
+| `unhomed` |  | bg_color=#warning border_color=#warning |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
 | `tool_list` |  | *(not set)* |
 | `tool_list_tool` | ![tool_list_tool](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_list_tool.png) | copy=card |
 | `tool_list_heater` |  | pad_all=0 |
-| `tool_selected` | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_selected.png) | outline_color=#primary outline_opa=100% outline_width=3 shadow_color=rgb_darken(#primary, 10) shadow_opa=50% shadow_width=0 shadow_offset_x=-#shadow_offset shadow_offset_y=#shadow_offset |
+| `tool_selected` | ![tool_selected](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_selected.png) | border_color=#primary outline_color=#primary outline_opa=100% outline_width=1 outline_pad=0 |
+| `heater_standby` |  | bg_color=#secondary border_color=#secondary |
+| `heater_off` | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/heater_off.png) | bg_color=#bg_light border_color=#border_muted text_color=#text |
+| `heater_fault` |  | bg_color=#error border_color=#error |
 | `tab_button` |  | *(not set)* |
 | `slider_buttons` |  | width=40 height=40 |
 | `list_header` |  | *(not set)* |
 | `list_title` | ![list_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_title.png) | merge=text_emphasis |
 | `graph_legend` |  | min_width=150 |
-| `bar_label_bg` | ![bar_label_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label_bg.png) | bg_color=#bg_light bg_opa=50% radius=#radius pad_hor=#pad |
+| `bar_label_bg` | ![bar_label_bg](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/bar_label_bg.png) | bg_color=#bg bg_opa=80% radius=#radius pad_hor=#pad |
 | `bar_label` |  | *(not set)* |
 | `widget_title` | ![widget_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_title.png) | text_color=#text_muted text_font=font_emphasis |
 | `widget_value` | ![widget_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/widget_value.png) | text_color=#text text_font=font_large |
@@ -2584,7 +2587,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `gauge_standby_target` |  | arc_color=#secondary_muted bg_color=#secondary_muted |
 | `gauge_off` |  | arc_color=#text_muted bg_color=#text_muted |
 | `gauge_fault` |  | arc_color=#error bg_color=#error |
-| `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=50% |
+| `object_cancel_base` | ![object_cancel_base](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_base.png) | copy=card bg_color=#bg_light bg_opa=100% |
 | `object_cancel_current` | ![object_cancel_current](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_current.png) | bg_color=#primary bg_opa=100% |
 | `object_cancel_cancelled` | ![object_cancel_cancelled](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/object_cancel_cancelled.png) | bg_color=#error bg_opa=100% |
 | `debug_borders` | ![debug_borders](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/debug_borders.png) | outline_color=#text outline_width=1 outline_opa=100% |
@@ -2603,9 +2606,9 @@ Used as attribute values, e.g. `style_radius="#radius"`.
 
 | Const | Value in `base` |
 | --- | --- |
-| `#border_width` | 2 |
-| `#outline_width` | 3 |
-| `#radius` | 5 |
+| `#border_width` | 1 |
+| `#outline_width` | 2 |
+| `#radius` | 6 |
 | `#pad_large` | 10 |
 | `#pad` | 5 |
 | `#pad_small` | 2 |

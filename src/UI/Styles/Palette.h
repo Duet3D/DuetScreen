@@ -33,11 +33,11 @@ namespace UI::Themes
 	{
 		Color bg_dark;		   // Screen background
 		Color bg;			   // Card background
-		Color bg_light;		   // Raised background, e.g. list items
-		Color primary;		   // Main accent: buttons, indicators
-		Color primary_muted;   // Darker primary
-		Color secondary;	   // Second accent: action buttons
-		Color secondary_muted; // Darker secondary
+		Color bg_light;		   // A control's background on a card, e.g. buttons and list items
+		Color primary;		   // Main accent: actions, selections, indicators
+		Color primary_muted;   // Primary nearer the background: darker in dark mode, a tint in light mode
+		Color secondary;	   // Second accent, e.g. a heater on standby
+		Color secondary_muted; // Secondary nearer the background
 
 		Color text;		   // Body text
 		Color text_muted;  // Secondary text
@@ -45,7 +45,7 @@ namespace UI::Themes
 
 		Color border;		// Card and button borders
 		Color border_muted; // Subtle borders
-		Color highlight;	// Highlights, tracks
+		Color highlight;	// Tracks and grid lines
 		Color shadow;		// Shadows
 
 		Color success; // Success state
