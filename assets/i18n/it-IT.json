@@ -37,7 +37,9 @@
       "mm": "mm",
       "inches": "in",
       "mm_speed": "mm/s",
-      "inches_speed": "ipm"
+      "inches_speed": "ipm",
+      "degrees": "{:d}°",
+      "rpm": "{:d} rpm"
     },
     "app_drawer": {
       "select_view": "Seleziona vista",
@@ -102,7 +104,8 @@
       "select": "Seleziona filamento",
       "select_tool": "Seleziona filamento per {:s}",
       "select_tool_list_header": "Utensili",
-      "not_loaded": "Nessun filamento caricato"
+      "not_loaded": "Nessun filamento caricato",
+      "none": "Sul Duet non ci sono filamenti configurati"
     },
     "file": {
       "macros": "Macro",
@@ -495,6 +498,28 @@
       "speed_label": "{:g}/{:g} mm/s",
       "z_offset": "Offset Z: {:g} mm",
       "print_finished": "Stampato:"
+    },
+    "tools": { /* The Control page's Tools tab */
+      "in_use": "In uso",
+      "select": "Scegli",
+      "filament": "Filamento",
+      "bed_and_chamber": "Piano e camera",
+      "extrude": "Estrudi",
+      "amount": "Quantità",
+      "speed": "Velocità",
+      "extrusion_factor": "Fattore di estrusione",
+      "no_tool": "Nessun utensile in uso",
+      "no_tool_hint": "Scegli un utensile per estrudere o far girare il suo mandrino qui",
+      "no_extruder": "Questo utensile non ha estrusore né mandrino",
+      "spindle": "Mandrino",
+      "forward": "Avanti",
+      "reverse": "Indietro",
+      "stop": "Ferma",
+      "active": "Attivo",
+      "standby": "Standby"
+    },
+    "spindle": {
+      "speed": "Velocità del mandrino"
     },
     "temperature": {
       "bed": "Piano",

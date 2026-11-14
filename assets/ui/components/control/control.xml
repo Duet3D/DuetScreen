@@ -9,8 +9,8 @@
 			<ds_tabs-tab name="move" title_tag="tr.control.move_tab">
 				<ds_view name="move" view="move" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="temperature" title_tag="tr.control.tools_tab" bind_shown="om.tools|count">
-				<ds_view name="temperature" view="temperature" shown="true" style_pad_all="0"/>
+			<ds_tabs-tab name="tools" title_tag="tr.control.tools_tab" bind_shown="om.tools|count">
+				<ds_view name="tools" view="tools" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
 			<ds_tabs-tab name="heightmap" title_tag="tr.control.heightmap_tab" bind_shown="om.sensors.probes|count">
 				<ds_view name="heightmap" view="heightmap" shown="true" style_pad_all="0"/>

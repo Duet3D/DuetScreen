@@ -1,0 +1,114 @@
+<!--
+  What can be done with the tool in use, beside the tools: extruding, if it has an extruder, with its extrusion
+  factor; and turning its spindle, if it has one, at the speed its card sets. With no tool in use, it says to select
+  one.
+
+  Fields:   the tool in use, om.tools[{om.state.currentTool}], in a ds_scope: row.extruders, row.spindle,
+            row.spindleRpm; its number is om.state.currentTool, -1 while there is none
+  Data:     source.extruder.* (the amount and speed), source.move.extrusion_factor
+  Actions:  actions.extruder.*, actions.factors.extrusion, actions.spindle.*
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+
+		<lv_obj name="no_tool" width="100%" height="content" flex_flow="column" scrollable="false">
+			<style name="pad_zero"/>
+			<bind_flag_if cond="om.state.currentTool|int gt -1" flag="hidden"/>
+			<lv_label name="title" translation_tag="tr.tools.no_tool" width="100%">
+				<style name="setting_title"/>
+			</lv_label>
+			<lv_label name="hint" translation_tag="tr.tools.no_tool_hint" width="100%">
+				<style name="setting_hint"/>
+			</lv_label>
+		</lv_obj>
+
+		<ds_setting_group name="extrude" title_tag="tr.tools.extrude" width="100%">
+			<bind_flag_if_eq subject="row.extruders|count" flag="hidden" ref_value="0"/>
+			<!-- Its title over its presets, which have the panel's width -->
+			<lv_obj name="amount" height="content" flex_flow="column" scrollable="false">
+				<style name="setting_row"/>
+				<lv_obj name="heading" width="100%" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="pad_zero"/>
+					<style name="pad_gap"/>
+					<lv_label name="title" translation_tag="tr.tools.amount">
+						<style name="setting_title"/>
+					</lv_label>
+					<lv_label name="unit" bind_text="source.extruder.distance.unit">
+						<style name="setting_hint"/>
+					</lv_label>
+				</lv_obj>
+				<ds_list name="amounts" list="source.extruder.distance.choices" item="value_selector_choice" width="100%" height="content"
+						 flex_flow="row">
+					<style name="setting_options"/>
+				</ds_list>
+			</lv_obj>
+			<!-- Its title over its presets, which have the panel's width -->
+			<lv_obj name="speed" height="content" flex_flow="column" scrollable="false">
+				<style name="setting_row"/>
+				<lv_obj name="heading" width="100%" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="pad_zero"/>
+					<style name="pad_gap"/>
+					<lv_label name="title" translation_tag="tr.tools.speed">
+						<style name="setting_title"/>
+					</lv_label>
+					<lv_label name="unit" bind_text="source.extruder.feedrate.unit">
+						<style name="setting_hint"/>
+					</lv_label>
+				</lv_obj>
+				<ds_list name="speeds" list="source.extruder.feedrate.choices" item="value_selector_choice" width="100%" height="content"
+						 flex_flow="row">
+					<style name="setting_options"/>
+				</ds_list>
+			</lv_obj>
+			<lv_obj name="buttons" height="content" flex_flow="row" scrollable="false">
+				<style name="setting_row"/>
+				<ds_button name="retract" icon="retract.png" translation_tag="tr.extrude.retract" height="56"
+						   flex_grow="1">
+					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="actions.extruder.retract"/>
+				</ds_button>
+				<ds_button name="extrude" icon="extrude.png" translation_tag="tr.extrude.extrude" height="56"
+						   flex_grow="1">
+					<style name="action_btn"/>
+					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="actions.extruder.extrude"/>
+				</ds_button>
+			</lv_obj>
+			<ds_setting name="extrusion_factor" title_tag="tr.tools.extrusion_factor">
+				<ds_button name="value" bind_text="source.move.extrusion_factor">
+					<action trigger="clicked" name="actions.factors.extrusion" arg="{om.state.currentTool}"/>
+				</ds_button>
+			</ds_setting>
+		</ds_setting_group>
+
+		<ds_setting_group name="spindle" title_tag="tr.tools.spindle" width="100%">
+			<bind_flag_if cond="row.spindle|int lt 0" flag="hidden"/>
+			<ds_setting name="speed" title_tag="tr.spindle.speed">
+				<ds_button name="value" bind_text="row.spindleRpm|format:tr.units.rpm">
+					<action trigger="clicked" name="actions.spindle.set_rpm" arg="{om.state.currentTool}"/>
+				</ds_button>
+			</ds_setting>
+			<lv_obj name="buttons" height="content" flex_flow="row_wrap" scrollable="false">
+				<style name="setting_row"/>
+				<ds_button name="forward" translation_tag="tr.tools.forward" height="48" flex_grow="1"
+						   style_min_width="content">
+					<style name="action_btn"/>
+					<action trigger="clicked" name="actions.spindle.forward" arg="{om.state.currentTool}"/>
+				</ds_button>
+				<ds_button name="reverse" translation_tag="tr.tools.reverse" height="48" flex_grow="1"
+						   style_min_width="content">
+					<bind_flag_if_eq subject="om.spindles[{row.spindle}].canReverse|int" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="actions.spindle.reverse" arg="{om.state.currentTool}"/>
+				</ds_button>
+				<ds_button name="stop" translation_tag="tr.tools.stop" height="48" flex_grow="1"
+						   style_min_width="content">
+					<action trigger="clicked" name="actions.spindle.stop" arg="{om.state.currentTool}"/>
+				</ds_button>
+			</lv_obj>
+		</ds_setting_group>
+	</view>
+</component>

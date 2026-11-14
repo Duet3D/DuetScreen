@@ -11,7 +11,9 @@
 #include "Control/Move/MoveActions.h"
 #include "Control/ObjectCancel/ObjectCancelPresenter.h"
 #include "Control/Temperature/ExtruderActions.h"
+#include "Control/Temperature/FilamentActions.h"
 #include "Control/Temperature/HeaterActions.h"
+#include "Control/Temperature/SpindleActions.h"
 #include "Control/Temperature/TemperaturePresenter.h"
 #include "Control/Temperature/ToolActions.h"
 #include "Customise/CustomiseActions.h"
@@ -56,6 +58,8 @@ namespace UI
 		FanActions::registerAll();
 		ConsoleActions::registerAll();
 		ExtruderActions::registerAll();
+		FilamentActions::registerAll();
+		SpindleActions::registerAll();
 		MoveActions::registerAll();
 		SettingsActions::registerAll();
 		SystemActions::registerAll();

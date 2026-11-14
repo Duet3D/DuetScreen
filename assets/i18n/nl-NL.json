@@ -37,7 +37,9 @@
       "mm": "mm",
       "inches": "in",
       "mm_speed": "mm/s",
-      "inches_speed": "ipm"
+      "inches_speed": "ipm",
+      "degrees": "{:d}°",
+      "rpm": "{:d} rpm"
     },
     "app_drawer": {
       "select_view": "Weergave kiezen",
@@ -102,7 +104,8 @@
       "select": "Filament selecteren",
       "select_tool": "Filament selecteren voor {:s}",
       "select_tool_list_header": "Gereedschappen",
-      "not_loaded": "Geen filament geladen"
+      "not_loaded": "Geen filament geladen",
+      "none": "Er zijn geen filamenten ingesteld op de Duet"
     },
     "file": {
       "macros": "Macro's",
@@ -494,6 +497,28 @@
       "speed_label": "{:g}/{:g} mm/s",
       "z_offset": "Z-offset: {:g} mm",
       "print_finished": "Geprint:"
+    },
+    "tools": { /* The Control page's Tools tab */
+      "in_use": "In gebruik",
+      "select": "Kiezen",
+      "filament": "Filament",
+      "bed_and_chamber": "Bed en kamer",
+      "extrude": "Extruderen",
+      "amount": "Hoeveelheid",
+      "speed": "Snelheid",
+      "extrusion_factor": "Extrusiefactor",
+      "no_tool": "Geen gereedschap in gebruik",
+      "no_tool_hint": "Kies een gereedschap om hier te extruderen of de spindel te draaien",
+      "no_extruder": "Dit gereedschap heeft geen extruder of spindel",
+      "spindle": "Spindel",
+      "forward": "Vooruit",
+      "reverse": "Achteruit",
+      "stop": "Stop",
+      "active": "Actief",
+      "standby": "Stand-by"
+    },
+    "spindle": {
+      "speed": "Spindeltoerental"
     },
     "temperature": {
       "bed": "Bed",

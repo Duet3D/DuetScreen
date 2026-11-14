@@ -1,11 +1,12 @@
 /*
  * test_temperature.cpp
  *
- * The Temperature tab's tool rows (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h).
+ * The temperatures widget's tool rows (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h).
  */
 
 #include "UI/Core/Model.h"
 #include "UI/Presenters/Control/Temperature/TemperaturePresenter.h"
+#include "i18n/i18n.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 
@@ -29,20 +30,16 @@ class TestTemperature : public UiTestSuite
 	}
 };
 
-TEST_F(TestTemperature, AFilamentIsPickedThenLoaded)
+TEST_F(TestTemperature, ARowShowsTheFilamentLoaded)
 {
 	UI::TemperatureToolRow row;
 	show(row);
 	EXPECT_EQ(row.filamentLoaded.get(), 0);
-	EXPECT_EQ(row.changeShown.get(), 0) << "nothing picked yet";
+	EXPECT_EQ(row.filamentText.get(), _("filament.not_loaded"));
 
-	row.pick("PLA");
-	EXPECT_EQ(row.filamentText.get(), "PLA");
-	EXPECT_EQ(row.changeShown.get(), 1) << "Load is offered";
-
+	load_model_data(R"({"key":"move.extruders","flags":"v","result":[{"filament":"PLA","factor":1}]})"
+					"\n");
 	show(row);
-	EXPECT_EQ(row.filamentText.get(), "PLA") << "the pick lasts until a filament is loaded";
-
-	row.pick("");
-	EXPECT_EQ(row.changeShown.get(), 0) << "picking what is loaded offers nothing";
+	EXPECT_EQ(row.filamentLoaded.get(), 1);
+	EXPECT_EQ(row.filamentText.get(), "PLA");
 }

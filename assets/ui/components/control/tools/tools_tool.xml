@@ -1,0 +1,62 @@
+<!--
+  One tool, as a card: its name, then "In use" or Select; a row per heater (tools_tool_heater.xml); its filament, if it
+  takes any (tap to choose one to load); and its spindle's speed, if it has one (tap to set it), on a printer's tool
+  too. Outlined while it is the tool in use. A gap in the tools (a null item) isn't shown. Nothing that would change
+  the job can be pressed while printing.
+
+  Fields:   a row of om.tools: row.index (the tool number), row.name, row.state, row.heaters, row.filamentExtruder,
+            row.spindle, row.spindleRpm
+  Actions:  actions.tool.toggle, actions.filament.*, actions.spindle.set_rpm (src/UI/Presenters/Control/Temperature/)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" scrollable="false">
+		<style name="setting_group"/>
+		<style name="tool_selected" selector="checked"/>
+		<bind_flag_if_eq subject="row.exists" flag="hidden" ref_value="0"/>
+		<bind_state_if_eq subject="row.state|eq:active" state="checked" ref_value="1"/>
+
+		<lv_obj name="header" height="content" flex_flow="row" scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="setting_row"/>
+			<lv_label name="name" bind_text="row.name|default:tr.temperature.default_tool_name:{row.index}"
+					  flex_grow="1" long_mode="dots">
+				<style name="text_header"/>
+			</lv_label>
+			<lv_label name="in_use" translation_tag="tr.tools.in_use">
+				<style name="tool_in_use"/>
+				<bind_flag_if_eq subject="row.state|eq:active" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<ds_button name="select" translation_tag="tr.tools.select" height="content" style_min_height="36">
+				<bind_flag_if_eq subject="row.state|eq:active" flag="hidden" ref_value="1"/>
+				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="actions.tool.toggle" arg="{row.index}"/>
+			</ds_button>
+		</lv_obj>
+
+		<ds_list name="heaters" list="row.heaters" item="tools_tool_heater">
+			<style name="setting_list"/>
+		</ds_list>
+
+		<ds_setting name="filament" title_tag="tr.tools.filament">
+			<bind_flag_if cond="row.filamentExtruder|int lt 0" flag="hidden"/>
+			<ds_button name="choose"
+					   bind_text="om.move.extruders[{row.filamentExtruder}].filament|default:tr.filament.not_loaded"
+					   height="content" style_min_height="36">
+				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="actions.filament.choose" arg="{row.index}"/>
+			</ds_button>
+			<ds_button name="unload" translation_tag="tr.filament.unload" height="content" style_min_height="36">
+				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="actions.filament.unload" arg="{row.index}"/>
+			</ds_button>
+		</ds_setting>
+
+		<ds_setting name="spindle" title_tag="tr.tools.spindle">
+			<bind_flag_if cond="row.spindle|int lt 0" flag="hidden"/>
+			<ds_button name="speed" bind_text="row.spindleRpm|format:tr.units.rpm" height="content"
+					   style_min_height="36">
+				<action trigger="clicked" name="actions.spindle.set_rpm" arg="{row.index}"/>
+			</ds_button>
+		</ds_setting>
+	</view>
+</component>

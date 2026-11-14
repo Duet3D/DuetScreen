@@ -26,7 +26,7 @@
 			</lv_label>
 		</lv_obj>
 		<lv_label name="position" bind_text="row.position" clickable="false">
-			<style name="axis_tile_position"/>
+			<style name="reading"/>
 		</lv_label>
 	</view>
 </component>

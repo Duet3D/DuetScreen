@@ -2,7 +2,8 @@
   One tool on the Temperature tab, outlined while selected: its name, which selects it, its state, its extrusion
   factors, its filament, and a row per heater (temperature_tool_heater.xml).
 
-  Pick a filament, then Load (or Change) to load it. Nothing that would change the job can be pressed while printing.
+  Tap the filament to choose one to load (actions.filament.choose). Nothing that would change the job can be pressed
+  while printing.
 
   Fields and actions: a row of presenter.tools (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h), with
   the tool's name, state, extruders and heaters from its om.tools[{row.number}]; actions.tool.toggle
@@ -34,22 +35,17 @@
 			<lv_obj name="filament_select" width="content" height="content" style_min_width="content" flex_grow="1"
 					flex_flow="row">
 				<bind_flag_if_eq subject="row.filament_shown" flag="hidden" ref_value="0"/>
-				<ds_choice name="filament_choice" title_tag="tr.filament.select" bind_options="presenter.filaments"
-						   bind_text="row.filament_text" height="content" style_min_width="content" flex_grow="1">
+				<ds_button name="filament_choice" bind_text="row.filament_text" height="content"
+						   style_min_width="content" flex_grow="1">
+					<style name="input"/>
 					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="value_confirmed" name="presenter.temperature.pick_filament"/>
-				</ds_choice>
-				<ds_button name="filament_change" bind_text="row.change_text" width="content" height="100%">
-					<style name="action_btn"/>
-					<bind_flag_if_eq subject="row.change_shown" flag="hidden" ref_value="0"/>
-					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="clicked" name="presenter.temperature.change_filament"/>
+					<action trigger="clicked" name="actions.filament.choose" arg="{row.number}"/>
 				</ds_button>
 				<ds_button name="filament_load_unload" translation_tag="tr.filament.unload" width="content" height="100%">
 					<style name="action_btn"/>
 					<bind_state_if_eq subject="row.filament_loaded" state="disabled" ref_value="0"/>
 					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
-					<action trigger="clicked" name="presenter.temperature.unload_filament"/>
+					<action trigger="clicked" name="actions.filament.unload" arg="{row.number}"/>
 				</ds_button>
 			</lv_obj>
 		</lv_obj>

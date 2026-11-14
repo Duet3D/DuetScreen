@@ -37,7 +37,9 @@
       "mm": "mm",
       "inches": "po",
       "mm_speed": "mm/s",
-      "inches_speed": "ipm"
+      "inches_speed": "ipm",
+      "degrees": "{:d}°",
+      "rpm": "{:d} rpm"
     },
     "app_drawer": {
       "select_view": "Sélectionner la vue",
@@ -102,7 +104,8 @@
       "select": "Sélectionner le filament",
       "select_tool": "Sélectionner le filament pour {:s}",
       "select_tool_list_header": "Outils",
-      "not_loaded": "Aucun filament chargé"
+      "not_loaded": "Aucun filament chargé",
+      "none": "Aucun filament n'est configuré sur le Duet"
     },
     "file": {
       "macros": "Macros",
@@ -494,6 +497,28 @@
       "speed_label": "{:g}/{:g} mm/s",
       "z_offset": "Décalage Z : {:g} mm",
       "print_finished": "Imprimé:"
+    },
+    "tools": { /* The Control page's Tools tab */
+      "in_use": "Utilisé",
+      "select": "Choisir",
+      "filament": "Filament",
+      "bed_and_chamber": "Plateau et caisson",
+      "extrude": "Extruder",
+      "amount": "Quantité",
+      "speed": "Vitesse",
+      "extrusion_factor": "Facteur d'extrusion",
+      "no_tool": "Aucun outil utilisé",
+      "no_tool_hint": "Choisissez un outil pour extruder ou faire tourner sa broche ici",
+      "no_extruder": "Cet outil n'a ni extrudeur ni broche",
+      "spindle": "Broche",
+      "forward": "Avant",
+      "reverse": "Arrière",
+      "stop": "Arrêt",
+      "active": "Actif",
+      "standby": "En attente"
+    },
+    "spindle": {
+      "speed": "Vitesse de broche"
     },
     "temperature": {
       "bed": "Plateau",

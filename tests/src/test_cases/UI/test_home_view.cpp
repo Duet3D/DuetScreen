@@ -1171,15 +1171,7 @@ TEST_F(TestHomeViewWithData, ControlView)
 	}
 
 	control.setActiveTab(1);
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature.png");
-	{
-		lv_obj_t* selector = lv_obj_find_by_name(page<UI::LvObj>("temperature").getRootPtr(), "distance_selector");
-		ASSERT_NE(selector, nullptr);
-		lv_obj_t* input = lv_obj_find_by_name(selector, "value");
-		ASSERT_NE(input, nullptr);
-		lv_obj_send_event(input, LV_EVENT_CLICKED, nullptr);
-		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_distance_input.png");
-	}
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools.png");
 
 	control.setActiveTab(2);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap.png");
@@ -1490,7 +1482,7 @@ TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)
 	EXPECT_TRUE(page<UI::LvObj>("control").isShownOnScreen());
 	EXPECT_FALSE(page<UI::LvObj>("dashboard").isVisible()) << "the home screen stays under the page";
 	EXPECT_EQ(controlPage().getActiveTabIndex(), 1u);
-	EXPECT_TRUE(page<UI::LvObj>("temperature").isShownOnScreen());
+	EXPECT_TRUE(page<UI::LvObj>("tools").isShownOnScreen());
 	EXPECT_FALSE(page<UI::LvObj>("move").isShownOnScreen());
 	EXPECT_EQ(settingsPage().getActiveTabIndex(), 2u) << "a page that isn't open keeps its tab too";
 
@@ -1736,8 +1728,7 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 		EXPECT_NE(openNumberPad(), nullptr) << "move Z position";
 	}
 	openControlTab(1);
-	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "active_temperature")) << "temperature heater";
-	EXPECT_TRUE(tapShowsNumberPad("temperature", nullptr, "value")) << "value selector";
+	EXPECT_TRUE(tapShowsNumberPad("tools", nullptr, "active")) << "a heater's active target";
 	openControlTab(4);
 	EXPECT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true)) << "fan slider";
 
@@ -1763,18 +1754,45 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	setSetting("advanced_settings", advanced ? 1 : 0);
 }
 
-TEST_F(TestHomeViewWithData, TemperatureTabOpensTheExtrusionFactorDialog)
+TEST_F(TestHomeViewWithData, ToolsTabSelectsToolsAndTurnsAPrintersSpindle)
 {
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	deliverModelEvents();
 	openControlTab(1);
-	lv_obj_t* factors = lv_obj_find_by_name(UI::findView("temperature")->getRootPtr(), "extrusion_factors");
-	ASSERT_NE(factors, nullptr);
-	ASSERT_GT(lv_obj_get_child_count(factors), 0u);
-	lv_obj_t* firstFactor = lv_obj_get_child(lv_obj_find_by_name(factors, "list"), 0);
-	ASSERT_NE(firstFactor, nullptr);
-	lv_obj_send_event(firstFactor, LV_EVENT_CLICKED, nullptr);
+	lv_obj_t* tools = page<UI::LvObj>("tools").getRootPtr();
+	lv_obj_t* cards = lv_obj_find_by_name(tools, "tools");
+	ASSERT_NE(cards, nullptr);
+	const auto card = [&](uint32_t number) { return lv_obj_get_child(cards, static_cast<int32_t>(number)); };
+
+	// Another tool is selected from its card
+	lv_obj_send_event(lv_obj_find_by_name(card(2), "select"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "T2\n");
+
+	// The extrusion factor opens its shared dialog
+	lv_obj_t* factor = lv_obj_find_by_name(lv_obj_find_by_name(tools, "extrusion_factor"), "value");
+	ASSERT_NE(factor, nullptr);
+	lv_obj_send_event(factor, LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
 	UI::closeDialogs();
+
+	// A printer's tool with a spindle (Hybrid, T4): its card sets the speed, and in use it can be turned
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"state":{"currentTool":4},"tools":[{"state":"standby"},null,{},{},{"state":"active","spindleRpm":5000}]}})"
+		"\n");
+	deliverModelEvents();
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools_spindle.png");
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(card(4), "spindle"), "speed"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_NE(openNumberPad(), nullptr) << "the spindle's speed";
+	UI::closeDialogs();
+	// The panel for the tool in use (a ds_scope builds it beside itself, so it is found from the page)
+	lv_obj_t* forward = lv_obj_find_by_name(tools, "forward");
+	ASSERT_NE(forward, nullptr);
+	lv_obj_send_event(forward, LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "M3 P0 S5000\n");
+	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
 TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)

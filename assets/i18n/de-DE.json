@@ -37,7 +37,9 @@
       "mm": "mm",
       "inches": "in",
       "mm_speed": "mm/s",
-      "inches_speed": "ipm"
+      "inches_speed": "ipm",
+      "degrees": "{:d}°",
+      "rpm": "{:d} rpm"
     },
     "app_drawer": {
       "select_view": "Ansicht wählen",
@@ -102,7 +104,8 @@
       "select": "Filament wählen",
       "select_tool": "Filament für {:s} wählen",
       "select_tool_list_header": "Werkzeuge",
-      "not_loaded": "Kein Filament geladen"
+      "not_loaded": "Kein Filament geladen",
+      "none": "Auf dem Duet sind keine Filamente eingerichtet"
     },
     "file": {
       "macros": "Makros",
@@ -494,6 +497,28 @@
       "speed_label": "{:g}/{:g} mm/s",
       "z_offset": "Z-Versatz: {:g} mm",
       "print_finished": "Gedruckt:"
+    },
+    "tools": { /* The Control page's Tools tab */
+      "in_use": "In Benutzung",
+      "select": "Wählen",
+      "filament": "Filament",
+      "bed_and_chamber": "Bett und Kammer",
+      "extrude": "Extrudieren",
+      "amount": "Menge",
+      "speed": "Geschwindigkeit",
+      "extrusion_factor": "Extrusionsfaktor",
+      "no_tool": "Kein Werkzeug gewählt",
+      "no_tool_hint": "Wähle ein Werkzeug, um hier zu extrudieren oder seine Spindel zu drehen",
+      "no_extruder": "Dieses Werkzeug hat keinen Extruder und keine Spindel",
+      "spindle": "Spindel",
+      "forward": "Vorwärts",
+      "reverse": "Rückwärts",
+      "stop": "Stopp",
+      "active": "Aktiv",
+      "standby": "Standby"
+    },
+    "spindle": {
+      "speed": "Spindeldrehzahl"
     },
     "temperature": {
       "bed": "Bett",

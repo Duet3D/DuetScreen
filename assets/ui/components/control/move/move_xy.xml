@@ -31,7 +31,7 @@
 			<style name="jog_step"/>
 			<lv_label name="title" translation_tag="tr.move.step"/>
 			<lv_label name="value" bind_text="source.jog.distance.value">
-				<style name="axis_tile_position"/>
+				<style name="reading"/>
 			</lv_label>
 		</lv_obj>
 		<ds_button name="x_increment" icon="arrow_right.png" text="X+"

@@ -1,0 +1,11 @@
+<!--
+  A bed's heater, as a row (heater_row.xml), named for its sensor, else "Bed <number>", with the heater's own targets.
+
+  Fields:   a row of om.heat.bedHeaters: row.value (the heater number, -1 for none), row.index (the bed's number)
+-->
+<component>
+	<view extends="heater_row"
+		  label="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature.bed_number:{row.index}"
+		  active="om.heat.heaters[{row.value}].active|format:tr.units.degrees"
+		  standby="om.heat.heaters[{row.value}].standby|format:tr.units.degrees"/>
+</component>

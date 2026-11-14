@@ -367,8 +367,9 @@
 		<style name="axis_tile_unhomed" outline_color="#secondary" outline_width="#outline_width"
 			   outline_pad="-#outline_width" outline_opa="100%"/>
 		<style name="axis_tile_letter" text_color="#text_muted" text_font="font_emphasis"/>
-		<style name="axis_tile_position" text_color="#text" text_font="font_large"/>
 		<style name="axis_tile_not_homed" text_color="#secondary" text_font="font_small"/>
+		<!-- A value read at a glance, such as an axis' position or a heater's temperature -->
+		<style name="reading" text_color="#text" text_font="font_large"/>
 		<!-- The jog step, in the middle of the XY pad -->
 		<style name="jog_step" bg_opa="0" border_color="#border_muted" border_width="#border_width"
 			   border_opa="100%" radius="#radius" text_color="#text_muted" text_font="font_subdued"/>
@@ -379,6 +380,9 @@
 
 		<style name="tool_list_tool" copy="card"/>
 		<style name="tool_list_heater" pad_all="0"/>
+		<!-- "In use" on the card of the tool in use: tinted and edged in the accent, as a chosen option is -->
+		<style name="tool_in_use" bg_color="#primary_muted" bg_opa="100%" radius="circle" pad_hor="10" pad_ver="2"
+			   outline_color="#primary" outline_width="1" outline_opa="100%" outline_pad="-1" text_font="font_small"/>
 		<style name="tool_selected" border_color="#primary" outline_color="#primary" outline_opa="100%"
 			   outline_width="1" outline_pad="0"/>
 

@@ -25,7 +25,7 @@
 			<action trigger="clicked" name="actions.move.jog" arg="$plus"/>
 		</ds_button>
 		<lv_label name="letter" bind_text="$letter" width="100%" flex_grow="1" style_text_align="center">
-			<style name="axis_tile_position"/>
+			<style name="reading"/>
 		</lv_label>
 		<ds_button name="decrement" icon="arrow_down.png" text="−" width="100%" flex_grow="1">
 			<style name="action_btn"/>

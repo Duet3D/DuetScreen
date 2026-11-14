@@ -479,6 +479,8 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.factors.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of a dialog's `factors`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.fan.set_speed` | Set a fan's speed in percent. In a row of `om.fans` the fan is the row's, and the speed the edited value (`value_confirmed`), else `arg` (e.g. 0 or 100 for off and full). Elsewhere `arg` is the fan's number, and the speed the edited value. Without a speed it is asked for on the number pad. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
+| `actions.filament.choose` | Ask which of the printer's filaments to load into the tool numbered `arg`, and load it, unloading any loaded first (M701, M702, M703) | [FilamentActions.cpp](../src/UI/Presenters/Control/Temperature/FilamentActions.cpp) |
+| `actions.filament.unload` | Unload the filament of the tool numbered `arg` (M702), if it has any loaded | [FilamentActions.cpp](../src/UI/Presenters/Control/Temperature/FilamentActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
@@ -506,6 +508,10 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.selector.pick` | Use the preset. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.settings.ask` | Ask for the text setting `arg` names on the number keys, e.g. the Duet's IP address | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
 | `actions.settings.set` | Change the setting `arg` names (source.settings.<name>) to the edited value: a switch's 0 or 1, a choice's index, a slider's value, or a text area's text. `arg="<name>=<value>"` sets it to that value instead, e.g. from a row of buttons. | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
+| `actions.spindle.forward` | Turn the spindle of the tool numbered `arg` forwards at its speed (M3) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.reverse` | Turn the spindle of the tool numbered `arg` in reverse at its speed (M4) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.set_rpm` | Ask for the speed the tool numbered `arg` turns its spindle at, and set it (M568 F) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.stop` | Stop the spindle of the tool numbered `arg` (M5) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
 | `actions.system.buildroot_setup` | Restart the system's setup service (developer mode builds) | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.clear_cache` | Delete the cached settings and file information, show the storage used again, and say so | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.erase_and_restart` | Ask whether to erase every setting, the WiFi networks and the layouts made on the screen, then restart | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
@@ -1022,7 +1028,6 @@ Used by `temperature`.
 | Name | Type | Description |
 | --- | --- | --- |
 | `presenter.tools` | list | The tools with heaters |
-| `presenter.filaments` | text | The filaments the printer knows, one per line |
 | `presenter.selected_tool` | text | E.g. "Selected Tool: Tool 0" |
 
 Each row of `presenter.tools`:
@@ -1032,16 +1037,8 @@ Each row of `presenter.tools`:
 | `row.index` | int | Position in the list, from 0 |
 | `row.number` | int | Tool number, as used by T; the tool's own fields are om.tools[{row.number}] |
 | `row.filament_shown` | int | 1 if the tool takes filament |
-| `row.filament_text` | text | The filament picked or loaded, or "No Filament Loaded" |
+| `row.filament_text` | text | The filament loaded, or "No Filament Loaded" |
 | `row.filament_loaded` | int | 1 if filament is loaded, so it can be unloaded |
-| `row.change_shown` | int | 1 if a filament other than the loaded one has been picked |
-| `row.change_text` | text | "Load", or "Change" when filament is loaded |
-
-| Action | Description |
-| --- | --- |
-| `presenter.temperature.change_filament` | Load the filament picked, unloading any loaded first. From a row of `presenter.tools`. |
-| `presenter.temperature.pick_filament` | Pick the filament at the confirmed index of `filaments` (`value_confirmed`) to load next. From a row of `presenter.tools`. |
-| `presenter.temperature.unload_filament` | Unload the tool's filament. From a row of `presenter.tools`. |
 
 ## Widgets
 
@@ -2878,6 +2875,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
+| `heater_row` |  | `label`, `active`, `standby` | `tools_bed_heater`, `tools_chamber_heater`, `tools_tool_heater` | [heater_row.xml](../assets/ui/components/common/heater_row.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
@@ -2923,18 +2921,24 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `status_button`, `status_gcode` | [status_bar_button.xml](../assets/ui/components/status_bar/status_bar_button.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
-| [`temperature`](#temperature) | `temperature` |  | `control`, `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
+| `temperature` | `temperature` |  | `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_bed` |  |  | `temperature` | [temperature_bed.xml](../assets/ui/components/control/temperature/temperature_bed.xml) |
 | `temperature_chamber` |  |  | `temperature` | [temperature_chamber.xml](../assets/ui/components/control/temperature/temperature_chamber.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
-| [`temperature_extrusion`](#temperature) |  |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
+| [`temperature_extrusion`](#temperature_extrusion) |  |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
 | `temperature_extrusion_card` |  |  | `extrude` | [temperature_extrusion_card.xml](../assets/ui/components/control/temperature/temperature_extrusion_card.xml) |
 | `temperature_heater` |  | `label`, `active`, `standby` | `temperature_heater_card`, `temperature_tool_heater` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
 | `temperature_heater_card` |  | `label_tag` | `temperature_bed`, `temperature_chamber` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
 | `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
+| [`tools`](#tools) |  |  | `control` | [tools.xml](../assets/ui/components/control/tools/tools.xml) |
+| `tools_bed_heater` |  |  | `tools` | [tools_bed_heater.xml](../assets/ui/components/control/tools/tools_bed_heater.xml) |
+| `tools_chamber_heater` |  |  | `tools` | [tools_chamber_heater.xml](../assets/ui/components/control/tools/tools_chamber_heater.xml) |
+| `tools_current` |  |  | `tools` | [tools_current.xml](../assets/ui/components/control/tools/tools_current.xml) |
+| `tools_tool` |  |  | `tools` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
+| `tools_tool_heater` |  |  | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
-| `value_selector_choice` |  | `format` | `babystep`, `move_jog_choices`, `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
+| `value_selector_choice` |  | `format` | `babystep`, `move_jog_choices`, `tools_current`, `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 
 ### Views
 
@@ -3042,11 +3046,13 @@ Also shows `settings_wifi`.
 
 ![settings_theme_preview](../tests/ref_imgs/xml_ui_api/views/settings_theme_preview.png)
 
-#### temperature
+#### temperature_extrusion
 
-Also shows `temperature_extrusion`.
+![temperature_extrusion](../tests/ref_imgs/xml_ui_api/views/temperature_extrusion.png)
 
-![temperature](../tests/ref_imgs/xml_ui_api/views/temperature.png)
+#### tools
+
+![tools](../tests/ref_imgs/xml_ui_api/views/tools.png)
 
 ## Theme
 
@@ -3192,9 +3198,10 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `axis_tile` | ![axis_tile](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile.png) | bg_color=#bg_light bg_opa=100% radius=#radius border_color=#border_muted border_width=#border_width border_opa=100% pad_hor=#pad_large pad_ver=#pad pad_row=#pad_small |
 | `axis_tile_unhomed` | ![axis_tile_unhomed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_unhomed.png) | outline_color=#secondary outline_width=#outline_width outline_pad=-#outline_width outline_opa=100% |
 | `axis_tile_letter` | ![axis_tile_letter](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_letter.png) | text_color=#text_muted text_font=font_emphasis |
-| `axis_tile_position` | ![axis_tile_position](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_position.png) | text_color=#text text_font=font_large |
 | `axis_tile_not_homed` | ![axis_tile_not_homed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_not_homed.png) | text_color=#secondary text_font=font_small |
 | `jog_step` | ![jog_step](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/jog_step.png) | bg_opa=0 border_color=#border_muted border_width=#border_width border_opa=100% radius=#radius text_color=#text_muted text_font=font_subdued |
+| `reading` | ![reading](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/reading.png) | text_color=#text text_font=font_large |
+| `tool_in_use` | ![tool_in_use](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_in_use.png) | bg_color=#primary_muted bg_opa=100% radius=circle pad_hor=10 pad_ver=2 outline_color=#primary outline_width=1 outline_opa=100% outline_pad=-1 text_font=font_small |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
 | `tool_list` |  | *(not set)* |

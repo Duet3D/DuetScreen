@@ -37,7 +37,9 @@
       "mm": "mm",
       "inches": "in",
       "mm_speed": "mm/s",
-      "inches_speed": "ipm"
+      "inches_speed": "ipm",
+      "degrees": "{:d}°",
+      "rpm": "{:d} rpm"
     },
     "app_drawer": {
       "select_view": "Selecionar vista",
@@ -102,7 +104,8 @@
       "select": "Selecionar filamento",
       "select_tool": "Selecionar filamento para {:s}",
       "select_tool_list_header": "Ferramentas",
-      "not_loaded": "Nenhum filamento carregado"
+      "not_loaded": "Nenhum filamento carregado",
+      "none": "O Duet não tem filamentos configurados"
     },
     "file": {
       "macros": "Macros",
@@ -494,6 +497,28 @@
       "speed_label": "{:g}/{:g} mm/s",
       "z_offset": "Deslocamento Z: {:g} mm",
       "print_finished": "Impresso:"
+    },
+    "tools": { /* The Control page's Tools tab */
+      "in_use": "Em uso",
+      "select": "Escolher",
+      "filament": "Filamento",
+      "bed_and_chamber": "Mesa e câmara",
+      "extrude": "Extrudir",
+      "amount": "Quantidade",
+      "speed": "Velocidade",
+      "extrusion_factor": "Fator de extrusão",
+      "no_tool": "Nenhuma ferramenta em uso",
+      "no_tool_hint": "Escolha uma ferramenta para extrudir ou rodar o seu fuso aqui",
+      "no_extruder": "Esta ferramenta não tem extrusor nem fuso",
+      "spindle": "Fuso",
+      "forward": "Para a frente",
+      "reverse": "Para trás",
+      "stop": "Parar",
+      "active": "Ativo",
+      "standby": "Em espera"
+    },
+    "spindle": {
+      "speed": "Velocidade do fuso"
     },
     "temperature": {
       "bed": "Base",

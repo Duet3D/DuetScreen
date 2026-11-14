@@ -299,14 +299,19 @@ namespace UI::Themes
 		Style console_line_error;	// An error: edged and tinted in the error colour
 		Style console_time;			// When a line arrived: muted, ahead of its text
 
+		/* Readings */
+		Style reading;				// A value read at a glance, such as an axis' position or a heater's temperature: large
+
 		/* Move */
 		Style unhomed;				// Unhomed axes in the move view
 		Style axis_tile;			// An axis' position, as a tile: tap it to move to a position
 		Style axis_tile_unhomed;	// A tile while its axis isn't homed: outlined in the unhomed colour
 		Style axis_tile_letter;		// A tile's axis letter
-		Style axis_tile_position;	// A tile's position: large
 		Style axis_tile_not_homed;	// "Not homed" on a tile, in the unhomed colour
 		Style jog_step;				// The jog step in the middle of the XY pad
+
+		/* Tools */
+		Style tool_in_use;			// "In use" on the tool in use's card: a small tinted pill
 
 		/* Temperature */
 		Style temperature_bar; // Temperature bar

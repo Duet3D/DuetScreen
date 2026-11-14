@@ -37,7 +37,9 @@
       "mm": "mm",
       "inches": "in",
       "mm_speed": "mm/s",
-      "inches_speed": "ipm"
+      "inches_speed": "ipm",
+      "degrees": "{:d}°",
+      "rpm": "{:d} rpm"
     },
     "app_drawer": {
       "select_view": "Seleccionar vista",
@@ -102,7 +104,8 @@
       "select": "Seleccionar filamento",
       "select_tool": "Seleccionar filamento para {:s}",
       "select_tool_list_header": "Herramientas",
-      "not_loaded": "Sin filamento cargado"
+      "not_loaded": "Sin filamento cargado",
+      "none": "El Duet no tiene filamentos configurados"
     },
     "file": {
       "macros": "Macros",
@@ -494,6 +497,28 @@
       "speed_label": "{:g}/{:g} mm/s",
       "z_offset": "Desplazamiento Z: {:g} mm",
       "print_finished": "Impreso:"
+    },
+    "tools": { /* The Control page's Tools tab */
+      "in_use": "En uso",
+      "select": "Elegir",
+      "filament": "Filamento",
+      "bed_and_chamber": "Cama y cámara",
+      "extrude": "Extruir",
+      "amount": "Cantidad",
+      "speed": "Velocidad",
+      "extrusion_factor": "Factor de extrusión",
+      "no_tool": "Ninguna herramienta en uso",
+      "no_tool_hint": "Elige una herramienta para extruir o girar su husillo aquí",
+      "no_extruder": "Esta herramienta no tiene extrusor ni husillo",
+      "spindle": "Husillo",
+      "forward": "Adelante",
+      "reverse": "Atrás",
+      "stop": "Parar",
+      "active": "Activo",
+      "standby": "En espera"
+    },
+    "spindle": {
+      "speed": "Velocidad del husillo"
     },
     "temperature": {
       "bed": "Cama",

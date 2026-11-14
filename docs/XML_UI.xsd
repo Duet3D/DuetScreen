@@ -46,7 +46,6 @@
 			<xs:enumeration value="presenter.dialog_title"/>
 			<xs:enumeration value="presenter.exit_shown"/>
 			<xs:enumeration value="presenter.failed"/>
-			<xs:enumeration value="presenter.filaments"/>
 			<xs:enumeration value="presenter.files"/>
 			<xs:enumeration value="presenter.from"/>
 			<xs:enumeration value="presenter.gcodes"/>
@@ -143,8 +142,6 @@
 			<xs:enumeration value="presenter.y_min"/>
 			<xs:enumeration value="presenter.yes"/>
 			<xs:enumeration value="row.cancelled"/>
-			<xs:enumeration value="row.change_shown"/>
-			<xs:enumeration value="row.change_text"/>
 			<xs:enumeration value="row.chosen"/>
 			<xs:enumeration value="row.color"/>
 			<xs:enumeration value="row.command"/>
@@ -409,6 +406,8 @@
 			<xs:enumeration value="actions.factors.set"/>
 			<xs:enumeration value="actions.factors.speed"/>
 			<xs:enumeration value="actions.fan.set_speed"/>
+			<xs:enumeration value="actions.filament.choose"/>
+			<xs:enumeration value="actions.filament.unload"/>
 			<xs:enumeration value="actions.gcode.send"/>
 			<xs:enumeration value="actions.heater.set_active"/>
 			<xs:enumeration value="actions.heater.set_standby"/>
@@ -436,6 +435,10 @@
 			<xs:enumeration value="actions.selector.pick"/>
 			<xs:enumeration value="actions.settings.ask"/>
 			<xs:enumeration value="actions.settings.set"/>
+			<xs:enumeration value="actions.spindle.forward"/>
+			<xs:enumeration value="actions.spindle.reverse"/>
+			<xs:enumeration value="actions.spindle.set_rpm"/>
+			<xs:enumeration value="actions.spindle.stop"/>
 			<xs:enumeration value="actions.system.buildroot_setup"/>
 			<xs:enumeration value="actions.system.clear_cache"/>
 			<xs:enumeration value="actions.system.erase_and_restart"/>
@@ -515,9 +518,6 @@
 			<xs:enumeration value="presenter.reference.search"/>
 			<xs:enumeration value="presenter.response.close"/>
 			<xs:enumeration value="presenter.response.open_console"/>
-			<xs:enumeration value="presenter.temperature.change_filament"/>
-			<xs:enumeration value="presenter.temperature.pick_filament"/>
-			<xs:enumeration value="presenter.temperature.unload_filament"/>
 			<xs:enumeration value="presenter.update.confirm"/>
 			<xs:enumeration value="presenter.wifi.connect"/>
 			<xs:enumeration value="presenter.wifi.disconnect"/>
@@ -707,6 +707,7 @@
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
+			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
@@ -762,6 +763,12 @@
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
 			<xs:enumeration value="temperature_tool_heater"/>
+			<xs:enumeration value="tools"/>
+			<xs:enumeration value="tools_bed_heater"/>
+			<xs:enumeration value="tools_chamber_heater"/>
+			<xs:enumeration value="tools_current"/>
+			<xs:enumeration value="tools_tool"/>
+			<xs:enumeration value="tools_tool_heater"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
@@ -845,6 +852,7 @@
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
+			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
@@ -900,6 +908,12 @@
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
 			<xs:enumeration value="temperature_tool_heater"/>
+			<xs:enumeration value="tools"/>
+			<xs:enumeration value="tools_bed_heater"/>
+			<xs:enumeration value="tools_chamber_heater"/>
+			<xs:enumeration value="tools_current"/>
+			<xs:enumeration value="tools_tool"/>
+			<xs:enumeration value="tools_tool_heater"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
@@ -1017,6 +1031,7 @@
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
+			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
@@ -1098,6 +1113,12 @@
 			<xs:enumeration value="temperature_heater_card"/>
 			<xs:enumeration value="temperature_tool"/>
 			<xs:enumeration value="temperature_tool_heater"/>
+			<xs:enumeration value="tools"/>
+			<xs:enumeration value="tools_bed_heater"/>
+			<xs:enumeration value="tools_chamber_heater"/>
+			<xs:enumeration value="tools_current"/>
+			<xs:enumeration value="tools_tool"/>
+			<xs:enumeration value="tools_tool_heater"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 		</xs:restriction>
@@ -1115,7 +1136,6 @@
 			<xs:enumeration value="axis_tile"/>
 			<xs:enumeration value="axis_tile_letter"/>
 			<xs:enumeration value="axis_tile_not_homed"/>
-			<xs:enumeration value="axis_tile_position"/>
 			<xs:enumeration value="axis_tile_unhomed"/>
 			<xs:enumeration value="bar"/>
 			<xs:enumeration value="bar_indic"/>
@@ -1266,6 +1286,7 @@
 			<xs:enumeration value="pad_tiny"/>
 			<xs:enumeration value="pad_zero"/>
 			<xs:enumeration value="pressed"/>
+			<xs:enumeration value="reading"/>
 			<xs:enumeration value="rotary_scroll"/>
 			<xs:enumeration value="scale"/>
 			<xs:enumeration value="screen"/>
@@ -1311,6 +1332,7 @@
 			<xs:enumeration value="text_header"/>
 			<xs:enumeration value="text_muted"/>
 			<xs:enumeration value="text_warning"/>
+			<xs:enumeration value="tool_in_use"/>
 			<xs:enumeration value="tool_list"/>
 			<xs:enumeration value="tool_list_heater"/>
 			<xs:enumeration value="tool_list_tool"/>
@@ -1429,6 +1451,7 @@
 			<xs:enumeration value="tr.filament.confirm_filament_change"/>
 			<xs:enumeration value="tr.filament.load"/>
 			<xs:enumeration value="tr.filament.management_header"/>
+			<xs:enumeration value="tr.filament.none"/>
 			<xs:enumeration value="tr.filament.not_loaded"/>
 			<xs:enumeration value="tr.filament.select"/>
 			<xs:enumeration value="tr.filament.select_tool"/>
@@ -2016,6 +2039,7 @@
 			<xs:enumeration value="tr.side_bar.menu"/>
 			<xs:enumeration value="tr.side_bar.settings"/>
 			<xs:enumeration value="tr.slider.reset"/>
+			<xs:enumeration value="tr.spindle.speed"/>
 			<xs:enumeration value="tr.state.busy"/>
 			<xs:enumeration value="tr.state.cancelling"/>
 			<xs:enumeration value="tr.state.changingTool"/>
@@ -2096,10 +2120,29 @@
 			<xs:enumeration value="tr.theme.id.soft"/>
 			<xs:enumeration value="tr.theme.primary_hue"/>
 			<xs:enumeration value="tr.theme.secondary_hue"/>
+			<xs:enumeration value="tr.tools.active"/>
+			<xs:enumeration value="tr.tools.amount"/>
+			<xs:enumeration value="tr.tools.bed_and_chamber"/>
+			<xs:enumeration value="tr.tools.extrude"/>
+			<xs:enumeration value="tr.tools.extrusion_factor"/>
+			<xs:enumeration value="tr.tools.filament"/>
+			<xs:enumeration value="tr.tools.forward"/>
+			<xs:enumeration value="tr.tools.in_use"/>
+			<xs:enumeration value="tr.tools.no_extruder"/>
+			<xs:enumeration value="tr.tools.no_tool"/>
+			<xs:enumeration value="tr.tools.no_tool_hint"/>
+			<xs:enumeration value="tr.tools.reverse"/>
+			<xs:enumeration value="tr.tools.select"/>
+			<xs:enumeration value="tr.tools.speed"/>
+			<xs:enumeration value="tr.tools.spindle"/>
+			<xs:enumeration value="tr.tools.standby"/>
+			<xs:enumeration value="tr.tools.stop"/>
+			<xs:enumeration value="tr.units.degrees"/>
 			<xs:enumeration value="tr.units.inches"/>
 			<xs:enumeration value="tr.units.inches_speed"/>
 			<xs:enumeration value="tr.units.mm"/>
 			<xs:enumeration value="tr.units.mm_speed"/>
+			<xs:enumeration value="tr.units.rpm"/>
 			<xs:enumeration value="tr.widget.align_center"/>
 			<xs:enumeration value="tr.widget.align_left"/>
 			<xs:enumeration value="tr.widget.align_right"/>
@@ -4021,6 +4064,17 @@
 		</xs:attribute>
 		<xs:attribute name="hold_arg" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="heater_row.attributes">
+		<xs:attribute name="label" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="active" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="standby" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_arc.attributes">
@@ -10644,6 +10698,15 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="heater_row">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/heater_row.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="heater_row.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="heightmap">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/heightmap/heightmap.xml, with presenter heightmap.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -14175,6 +14238,57 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="temperature_heater.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools_bed_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_bed_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="heater_row.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools_chamber_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_chamber_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="heater_row.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools_current">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_current.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools_tool">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_tool.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools_tool_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_tool_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="heater_row.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
