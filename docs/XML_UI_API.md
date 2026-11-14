@@ -1015,12 +1015,17 @@ Used by `settings_wifi`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `presenter.ip` | text | E.g. "IP Address: 192.168.1.100" |
+| `presenter.ip` | text | The screen's IP address, or "-" |
 | `presenter.status` | text | How the last connection attempt went, or empty |
 | `presenter.networks` | list | The networks found |
-| `presenter.password_open` | int | 1 while asking for a network's password |
-| `presenter.password_title` | text | The password question |
-| `presenter.password` | text | The password typed |
+| `presenter.network.open` | int | 1 while a network is open in the dialog |
+| `presenter.network.ssid` | text | The network open |
+| `presenter.network.signal` | text | Its signal, e.g. "Good (-61 dBm)" |
+| `presenter.network.security` | text | "Secured" or "Open" |
+| `presenter.network.known` | int | 1 if the screen has joined it before: it can be connected to or forgotten |
+| `presenter.network.connected` | int | 1 if the screen is on it: it can be left |
+| `presenter.network.password_shown` | int | 1 if joining it asks for a password |
+| `presenter.network.password` | text | The password typed |
 
 Each row of `presenter.networks`:
 
@@ -1028,17 +1033,21 @@ Each row of `presenter.networks`:
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
 | `row.ssid` | text | Network name |
-| `row.signal` | text | Signal level, e.g. "75 dBm" |
+| `row.signal` | text | How strong its signal is, e.g. "Good (-61 dBm)" |
+| `row.signal_icon` | text | Its signal as bars: wifi_signal_1.png to wifi_signal_4.png |
+| `row.state` | text | "Connected", "Saved" (joined before), or empty |
 | `row.known` | int | 1 if the screen has joined it before, so it can be forgotten |
 | `row.connected` | int | 1 if the screen is on it |
-| `row.connect_text` | text | "Disconnect" (connected), "Connect" (known) or "Join" |
+| `row.secured` | int | 1 if joining it takes a password |
 
 | Action | Description |
 | --- | --- |
-| `presenter.wifi.close_password` | Stop asking for a password |
-| `presenter.wifi.connect` | Disconnect from the network if on it, connect to it if known, else ask for its password to join it. From a row of `networks`. |
-| `presenter.wifi.forget` | Forget the network. From a row of `networks`. |
-| `presenter.wifi.join` | Join the network asked about with the password typed |
+| `presenter.wifi.close` | Close the network's dialog |
+| `presenter.wifi.connect` | Connect to the network open, which the screen has joined before |
+| `presenter.wifi.disconnect` | Leave the network open |
+| `presenter.wifi.forget` | Forget the network open |
+| `presenter.wifi.join` | Join the network open, with the password typed if it is secured |
+| `presenter.wifi.open` | Open the network in the dialog. From a row of `networks`. |
 | `presenter.wifi.password` | Store the text edited (`value_changed` on the password's text box) as the password |
 | `presenter.wifi.refresh` | Scan for networks now |
 
@@ -1406,6 +1415,7 @@ Also takes every `lv_image` attribute.
 | Attribute | Description |
 | --- | --- |
 | `icon` | Icon file from the icon set, e.g. "folder.png" |
+| `bind_icon` | Follow a text subject naming the icon file, e.g. a WiFi network's signal |
 | `folder` | Take `icon` from this folder of assets/icons instead, whatever the icon set, e.g. "hardware_test" |
 
 ### ds_keyboard
@@ -1634,8 +1644,9 @@ Also takes every `lv_obj` attribute.
 | `title` | The setting's title, if there is no `title_tag` or `bind_title` |
 | `title_tag` | Translation key for the title; follows language changes |
 | `bind_title` | Follow a text subject for the title |
-| `hint` | A line under the title saying more about the setting, if there is no `hint_tag` |
+| `hint` | A line under the title saying more about the setting, if there is no `hint_tag` or `bind_hint` |
 | `hint_tag` | Translation key for the hint; follows language changes |
+| `bind_hint` | Follow a text subject for the hint, e.g. how something went; no hint while it is empty |
 
 ### ds_slider
 
@@ -3260,6 +3271,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `setting_row` | ![setting_row](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_row.png) | width=100% min_height=56 pad_hor=12 pad_ver=6 pad_column=16 radius=0 bg_color=#bg bg_opa=100% border_width=0 |
 | `setting_hint` | ![setting_hint](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_hint.png) | text_color=#text_muted text_font=font_subdued |
 | `setting_control` |  | min_height=40 min_width=64 pad_hor=12 |
+| `setting_open` |  | width=44 height=40 pad_all=0 |
 | `numpad` |  | pad_row=8 pad_column=8 |
 | `numpad_readout` | ![numpad_readout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_readout.png) | bg_color=#bg_dark bg_opa=100% border_color=#primary border_width=1 border_opa=100% radius=#radius pad_hor=12 pad_ver=6 pad_column=12 |
 | `numpad_value` | ![numpad_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/numpad_value.png) | text_color=#text text_font=font_xlarge |

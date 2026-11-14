@@ -115,6 +115,14 @@
 			<xs:enumeration value="presenter.message"/>
 			<xs:enumeration value="presenter.mode"/>
 			<xs:enumeration value="presenter.mode_icon"/>
+			<xs:enumeration value="presenter.network.connected"/>
+			<xs:enumeration value="presenter.network.known"/>
+			<xs:enumeration value="presenter.network.open"/>
+			<xs:enumeration value="presenter.network.password"/>
+			<xs:enumeration value="presenter.network.password_shown"/>
+			<xs:enumeration value="presenter.network.security"/>
+			<xs:enumeration value="presenter.network.signal"/>
+			<xs:enumeration value="presenter.network.ssid"/>
 			<xs:enumeration value="presenter.network_shown"/>
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.no"/>
@@ -130,9 +138,6 @@
 			<xs:enumeration value="presenter.open"/>
 			<xs:enumeration value="presenter.output"/>
 			<xs:enumeration value="presenter.passed"/>
-			<xs:enumeration value="presenter.password"/>
-			<xs:enumeration value="presenter.password_open"/>
-			<xs:enumeration value="presenter.password_title"/>
 			<xs:enumeration value="presenter.poll_interval"/>
 			<xs:enumeration value="presenter.primary.chroma"/>
 			<xs:enumeration value="presenter.primary.lightness"/>
@@ -233,7 +238,6 @@
 			<xs:enumeration value="row.chosen"/>
 			<xs:enumeration value="row.color"/>
 			<xs:enumeration value="row.command"/>
-			<xs:enumeration value="row.connect_text"/>
 			<xs:enumeration value="row.connected"/>
 			<xs:enumeration value="row.control"/>
 			<xs:enumeration value="row.current"/>
@@ -265,10 +269,13 @@
 			<xs:enumeration value="row.on"/>
 			<xs:enumeration value="row.output"/>
 			<xs:enumeration value="row.passed"/>
+			<xs:enumeration value="row.secured"/>
 			<xs:enumeration value="row.selected"/>
 			<xs:enumeration value="row.shown"/>
 			<xs:enumeration value="row.signal"/>
+			<xs:enumeration value="row.signal_icon"/>
 			<xs:enumeration value="row.ssid"/>
+			<xs:enumeration value="row.state"/>
 			<xs:enumeration value="row.text"/>
 			<xs:enumeration value="row.text_style"/>
 			<xs:enumeration value="row.thumbnail"/>
@@ -536,10 +543,12 @@
 			<xs:enumeration value="presenter.temperature.unload_filament"/>
 			<xs:enumeration value="presenter.update.close"/>
 			<xs:enumeration value="presenter.update.confirm"/>
-			<xs:enumeration value="presenter.wifi.close_password"/>
+			<xs:enumeration value="presenter.wifi.close"/>
 			<xs:enumeration value="presenter.wifi.connect"/>
+			<xs:enumeration value="presenter.wifi.disconnect"/>
 			<xs:enumeration value="presenter.wifi.forget"/>
 			<xs:enumeration value="presenter.wifi.join"/>
+			<xs:enumeration value="presenter.wifi.open"/>
 			<xs:enumeration value="presenter.wifi.password"/>
 			<xs:enumeration value="presenter.wifi.refresh"/>
 		</xs:restriction>
@@ -1275,6 +1284,7 @@
 			<xs:enumeration value="setting_group_danger"/>
 			<xs:enumeration value="setting_group_title"/>
 			<xs:enumeration value="setting_hint"/>
+			<xs:enumeration value="setting_open"/>
 			<xs:enumeration value="setting_row"/>
 			<xs:enumeration value="sidebar"/>
 			<xs:enumeration value="sidebar_btn"/>
@@ -1880,11 +1890,23 @@
 			<xs:enumeration value="tr.settings.network.enter_password_title"/>
 			<xs:enumeration value="tr.settings.network.forget"/>
 			<xs:enumeration value="tr.settings.network.ip_address"/>
+			<xs:enumeration value="tr.settings.network.ip_title"/>
 			<xs:enumeration value="tr.settings.network.join"/>
 			<xs:enumeration value="tr.settings.network.known"/>
+			<xs:enumeration value="tr.settings.network.open"/>
 			<xs:enumeration value="tr.settings.network.password_for"/>
 			<xs:enumeration value="tr.settings.network.refresh"/>
+			<xs:enumeration value="tr.settings.network.saved"/>
+			<xs:enumeration value="tr.settings.network.scan_hint"/>
+			<xs:enumeration value="tr.settings.network.scan_title"/>
+			<xs:enumeration value="tr.settings.network.secured"/>
+			<xs:enumeration value="tr.settings.network.security"/>
 			<xs:enumeration value="tr.settings.network.signal"/>
+			<xs:enumeration value="tr.settings.network.signal_excellent"/>
+			<xs:enumeration value="tr.settings.network.signal_fair"/>
+			<xs:enumeration value="tr.settings.network.signal_good"/>
+			<xs:enumeration value="tr.settings.network.signal_value"/>
+			<xs:enumeration value="tr.settings.network.signal_weak"/>
 			<xs:enumeration value="tr.settings.network.ssid"/>
 			<xs:enumeration value="tr.settings.network.status_auth_failure"/>
 			<xs:enumeration value="tr.settings.network.status_connected"/>
@@ -3256,6 +3278,9 @@
 		<xs:attribute name="icon" type="xs:string">
 			<xs:annotation><xs:documentation>Icon file from the icon set, e.g. &quot;folder.png&quot;</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="bind_icon" type="subject">
+			<xs:annotation><xs:documentation>Follow a text subject naming the icon file, e.g. a WiFi network's signal</xs:documentation></xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="folder" type="xs:string">
 			<xs:annotation><xs:documentation>Take `icon` from this folder of assets/icons instead, whatever the icon set, e.g. &quot;hardware_test&quot;</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -3404,10 +3429,13 @@
 			<xs:annotation><xs:documentation>Follow a text subject for the title</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="hint" type="xs:string">
-			<xs:annotation><xs:documentation>A line under the title saying more about the setting, if there is no `hint_tag`</xs:documentation></xs:annotation>
+			<xs:annotation><xs:documentation>A line under the title saying more about the setting, if there is no `hint_tag` or `bind_hint`</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="hint_tag" type="translation">
 			<xs:annotation><xs:documentation>Translation key for the hint; follows language changes</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_hint" type="subject">
+			<xs:annotation><xs:documentation>Follow a text subject for the hint, e.g. how something went; no hint while it is empty</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_slider.attributes">
@@ -13371,6 +13399,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_wifi_network.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_setting.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

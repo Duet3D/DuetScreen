@@ -360,6 +360,7 @@ namespace UI::Themes
 		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
 		Style setting_hint;		   // The line under a row's title that says more about it
 		Style setting_control;	   // A row's button or choice, or one of a few options: big enough to tap
+		Style setting_open;		   // A row's way into more (a page, a dialog): a chevron in a small square
 
 		/* The number pad (assets/ui/components/dialogs/dialog_number.xml) */
 		Style numpad;		   // The pad, and its grid of keys: the gaps between them

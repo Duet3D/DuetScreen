@@ -101,6 +101,8 @@
 		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
 		<!-- A row's button or choice, or one of a few options: big enough to tap -->
 		<style name="setting_control" min_height="40" min_width="64" pad_hor="12"/>
+		<!-- A row's way into more, such as a page or a dialog of its own: a chevron in a small square -->
+		<style name="setting_open" width="44" height="40" pad_all="0"/>
 
 		<!-- The number pad: what is typed, large, in a box edged in the accent, over keys a size apart; the keys that
 			 edit rather than type are a step darker -->

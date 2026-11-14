@@ -16,9 +16,10 @@
 struct WiFiNetwork
 {
 	std::string ssid;
-	int32_t signal_level = 0;
+	int32_t signal_level = 0; ///< dBm
 	int32_t id = -1;
 	bool connected = false;
+	bool secured = false; ///< True if joining it takes a password (WEP, WPA or WPA3)
 
 	bool isKnown() const { return id != -1; }
 
@@ -28,6 +29,7 @@ struct WiFiNetwork
 		signal_level = 0;
 		id = -1;
 		connected = false;
+		secured = false;
 	}
 };
 
@@ -85,7 +87,7 @@ namespace NetworkHelper
 	/// Connect to a known network by SSID. Returns the outcome.
 	[[nodiscard]] ConnectResult connect(std::string_view ssid);
 
-	/// Connect to a network with a password. Returns the outcome.
+	/// Join a network with its password, or, for an open network, an empty one. Returns the outcome.
 	[[nodiscard]] ConnectResult connect(std::string_view ssid, std::string_view password);
 
 	[[nodiscard]] bool isNetworkKnown(std::string_view ssid);

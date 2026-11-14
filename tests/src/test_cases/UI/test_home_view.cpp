@@ -1125,17 +1125,22 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	}
 	ASSERT_GT(lv_obj_get_child_count(networks), 0u);
 
-	// The last network found isn't known, so connecting to it asks for its password
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_networks.png")
+
+	// The last network found is secured and isn't known: tapping it opens it, to join with its password
 	lv_obj_t* unknown = lv_obj_get_child(networks, -1);
-	ASSERT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(unknown, "forget"), LV_OBJ_FLAG_HIDDEN));
-	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "wifi_password_modal");
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(unknown, "lock"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "network_dialog");
 	ASSERT_NE(dialog, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
-	lv_obj_send_event(lv_obj_find_by_name(unknown, "connect"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(unknown, LV_EVENT_CLICKED, nullptr);
 	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("forget"), LV_OBJ_FLAG_HIDDEN)) << "it can't be forgotten";
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("join"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("password"), LV_OBJ_FLAG_HIDDEN));
 
 	// Typing the password brings up the keyboard, and the dialog moves out of its way
-	lv_obj_t* input = lv_obj_find_by_name(dialog, "wifi_password_input");
+	lv_obj_t* input = lv_obj_find_by_name(dialog, "password_input");
 	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
 	lv_obj_t* keyboard = lv_obj_find_by_name(home.getRootPtr(), "keyboard");
 	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
@@ -1167,16 +1172,27 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 	lv_area_t centred;
 	lv_obj_get_coords(dialog, &centred);
 	EXPECT_GT(centred.y1, dialogArea.y1) << "the dialog is back in the middle";
-	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::tapHeader("close");
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 
-	// The keyboard's OK key joins, as OK does
-	lv_obj_send_event(lv_obj_find_by_name(unknown, "connect"), LV_EVENT_CLICKED, nullptr);
+	// The keyboard's OK key joins, as Join does
+	lv_obj_send_event(unknown, LV_EVENT_CLICKED, nullptr);
 	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
 	lv_obj_send_event(input, LV_EVENT_READY, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
 	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// The first network is the one the screen is on: it can be left or forgotten, not joined
+	lv_obj_send_event(lv_obj_get_child(networks, 0), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("disconnect"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("forget"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("connect"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("join"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("password"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_network.png")
+	TestDialogs::tapHeader("close");
 }
 
 TEST_F(TestHomeViewWithData, StatusView)

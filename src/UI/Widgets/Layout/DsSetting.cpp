@@ -66,8 +66,12 @@ namespace UI::Xml
 				 {{"title", "The setting's title, if there is no `title_tag` or `bind_title`"},
 				  {"title_tag", "Translation key for the title; follows language changes", AttributeKind::Translation},
 				  {"bind_title", "Follow a text subject for the title", AttributeKind::Subject},
-				  {"hint", "A line under the title saying more about the setting, if there is no `hint_tag`"},
-				  {"hint_tag", "Translation key for the hint; follows language changes", AttributeKind::Translation}},
+				  {"hint",
+				   "A line under the title saying more about the setting, if there is no `hint_tag` or `bind_hint`"},
+				  {"hint_tag", "Translation key for the hint; follows language changes", AttributeKind::Translation},
+				  {"bind_hint",
+				   "Follow a text subject for the hint, e.g. how something went; no hint while it is empty",
+				   AttributeKind::Subject}},
 			 .exampleSubjects = {{"presenter.confirmations", "int", "1"}}},
 			xmlCreate,
 			xmlApply);
@@ -126,6 +130,16 @@ namespace UI::Xml
 		{
 			setting->setHint(hint);
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_hint"))
+		{
+			lv_subject_add_observer_obj(subject, hintObserverCb, setting->getRootPtr(), setting);
+		}
+	}
+
+	void DsSetting::hintObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* setting = static_cast<DsSetting*>(lv_observer_get_user_data(observer));
+		setting->setHint(lv_subject_get_string(subject));
 	}
 
 	void DsSetting::titleObserverCb(lv_observer_t* observer, lv_subject_t* subject)

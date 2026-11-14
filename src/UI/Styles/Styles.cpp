@@ -356,6 +356,7 @@ namespace UI::Themes
 		{"setting_row", &ComponentStyles::setting_row},
 		{"setting_hint", &ComponentStyles::setting_hint},
 		{"setting_control", &ComponentStyles::setting_control},
+		{"setting_open", &ComponentStyles::setting_open},
 		{"numpad", &ComponentStyles::numpad},
 		{"numpad_readout", &ComponentStyles::numpad_readout},
 		{"numpad_value", &ComponentStyles::numpad_value},

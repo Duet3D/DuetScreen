@@ -29,7 +29,10 @@ namespace UI::Xml
 		/** `<ds_icon>` create callback: create the C++ icon, deleted with its widget */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_icon>` apply callback: lv_image attributes, then `icon` */
+		/** `<ds_icon>` apply callback: lv_image attributes, then `icon` and `bind_icon` */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
+
+		/** `bind_icon` observer: show the icon the subject names */
+		static void iconObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 	};
 } // namespace UI::Xml

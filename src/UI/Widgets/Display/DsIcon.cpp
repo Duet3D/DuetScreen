@@ -30,6 +30,9 @@ namespace UI::Xml
 									 "follows icon set changes.",
 					  .example = R"(<ds_icon icon="folder.png" width="72" height="72"/>)",
 					  .attributes = {{"icon", "Icon file from the icon set, e.g. \"folder.png\""},
+									 {"bind_icon",
+									  "Follow a text subject naming the icon file, e.g. a WiFi network's signal",
+									  AttributeKind::Subject},
 									 {"folder",
 									  "Take `icon` from this folder of assets/icons instead, whatever the icon set, "
 									  "e.g. \"hardware_test\""}}},
@@ -59,5 +62,16 @@ namespace UI::Xml
 				item.setIcon(icon);
 			}
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_icon"))
+		{
+			lv_obj_t* root = itemOf(state);
+			lv_subject_add_observer_obj(subject, iconObserverCb, root, LvObj::fromPtr(root));
+		}
+	}
+
+	void DsIcon::iconObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* icon = static_cast<DsIcon*>(lv_observer_get_user_data(observer));
+		icon->setIcon(lv_subject_get_string(subject));
 	}
 } // namespace UI::Xml

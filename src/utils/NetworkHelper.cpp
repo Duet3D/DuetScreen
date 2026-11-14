@@ -567,10 +567,11 @@ namespace NetworkHelper
 		ZoneScoped;
 		LOG_INFO("Scanning for WiFi networks");
 #if SIMULATION
-		std::vector<WiFiNetwork> networks = {{.ssid = "Network 1", .signal_level = 100, .id = 1, .connected = true},
-											 {.ssid = "Network 2", .signal_level = 75, .id = 2, .connected = false},
-											 {.ssid = "Network 3", .signal_level = 50, .id = 3, .connected = false},
-											 {.ssid = "Network 4", .signal_level = 25, .id = -1, .connected = false}};
+		std::vector<WiFiNetwork> networks = {
+			{.ssid = "Network 1", .signal_level = -48, .id = 1, .connected = true, .secured = true},
+			{.ssid = "Network 2", .signal_level = -61, .id = 2, .connected = false, .secured = true},
+			{.ssid = "Network 3", .signal_level = -72, .id = 3, .connected = false, .secured = false},
+			{.ssid = "Network 4", .signal_level = -84, .id = -1, .connected = false, .secured = true}};
 		return networks;
 #else
 		std::vector<WiFiNetwork> networks;
@@ -609,6 +610,8 @@ namespace NetworkHelper
 					network.ssid = ssid;
 					network.signal_level = std::stoi(signal);
 					network.id = -1;
+					network.secured = flags.find("WPA") != std::string::npos ||
+									  flags.find("WEP") != std::string::npos || flags.find("SAE") != std::string::npos;
 
 					// Check if this is a known network
 					for (const WiFiNetwork& known : knownNetworks)
@@ -745,7 +748,9 @@ namespace NetworkHelper
 		cmd = fmt::format("SET_NETWORK {:d} ssid \"{:s}\"", networkId, ssid);
 		sendCommand(cmd);
 
-		cmd = fmt::format("SET_NETWORK {:d} psk \"{:s}\"", networkId, password);
+		// An open network takes no password
+		cmd = password.empty() ? fmt::format("SET_NETWORK {:d} key_mgmt NONE", networkId)
+							   : fmt::format("SET_NETWORK {:d} psk \"{:s}\"", networkId, password);
 		sendCommand(cmd);
 
 		cmd = fmt::format("ENABLE_NETWORK {}", networkId);

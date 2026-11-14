@@ -1,56 +1,84 @@
 <!--
-  The screen's WiFi: its IP address, how the last connection attempt went, and the networks around it, scanned for
-  every few seconds while shown. Joining a new network asks for its password, typed on the shared keyboard.
+  The screen's WiFi, in groups of rows (ds_setting): its IP address, with how the last connection attempt went under
+  it, and a row to scan again now; then the networks around it (settings_wifi_network.xml), scanned for every few
+  seconds while shown. Tapping a network opens it in a dialog: connect to it, leave it or forget it, or join it, typing its
+  password on the shared keyboard if it is secured.
 
   Fields and actions: src/UI/Presenters/Settings/WifiPresenter.h
 -->
 <component presenter="settings_wifi">
-	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
-		<lv_obj name="header" width="100%" height="content">
-			<lv_label name="status_message" bind_text="presenter.status" align="right_mid"/>
-			<lv_label name="ip_address" bind_text="presenter.ip" align="left_mid"/>
-		</lv_obj>
-
-		<lv_obj name="wifi_list" width="100%" height="content" flex_flow="column">
-			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-				<style name="bg_color_header"/>
-				<style name="list_header"/>
-				<lv_label name="title" translation_tag="tr.settings.network.available_wifi" width="content"
-						  height="content" flex_grow="1">
-					<style name="list_title"/>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" style_pad_all="0">
+		<lv_obj name="screen">
+			<style name="setting_group"/>
+			<ds_setting name="ip_address" title_tag="tr.settings.network.ip_title" bind_hint="presenter.status">
+				<lv_label name="value" bind_text="presenter.ip">
+					<style name="text_muted"/>
 				</lv_label>
+			</ds_setting>
+			<ds_setting name="scan" title_tag="tr.settings.network.scan_title" hint_tag="tr.settings.network.scan_hint">
 				<ds_button name="refresh" translation_tag="tr.settings.network.refresh">
+					<style name="setting_control"/>
 					<action trigger="clicked" name="presenter.wifi.refresh"/>
 				</ds_button>
-			</lv_obj>
-			<ds_list name="list" list="presenter.networks" item="settings_wifi_network" width="100%" height="content" flex_flow="column"
-					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</ds_setting>
 		</lv_obj>
 
-		<ds_dialog name="wifi_password_modal" bind_open="presenter.password_open" bind_title="presenter.password_title"
-				   flex_flow="column">
-			<action trigger="dismissed" name="presenter.wifi.close_password"/>
+		<lv_label name="networks_title" translation_tag="tr.settings.network.available_wifi">
+			<style name="setting_group_title"/>
+		</lv_label>
+		<ds_list name="list" list="presenter.networks" item="settings_wifi_network">
+			<style name="setting_group"/>
+		</ds_list>
 
-			<lv_obj name="password_row" width="100%" height="content" flex_flow="row" style_pad_all="0"
-					style_flex_cross_place="center" style_bg_opa="0" style_border_width="0">
-				<ds_textarea name="wifi_password_input" bind_text="presenter.password" one_line="true" password_mode="true"
-							 placeholder_tag="tr.settings.network.enter_password_hint" height="content" flex_grow="1">
+		<ds_dialog name="network_dialog" bind_open="presenter.network.open" bind_title="presenter.network.ssid"
+				   flex_flow="column">
+			<action trigger="dismissed" name="presenter.wifi.close"/>
+			<!-- Joining a secured network: first, so it stays in sight over the keyboard -->
+			<ds_setting name="password" title_tag="tr.settings.network.enter_password_title">
+				<style name="dialog_row"/>
+				<bind_flag_if_eq subject="presenter.network.password_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="password_input" bind_text="presenter.network.password" one_line="true"
+							 password_mode="true" placeholder_tag="tr.settings.network.enter_password_hint" width="55%"
+							 height="content">
 					<action trigger="value_changed" name="presenter.wifi.password"/>
-					<!-- The keyboard's OK key joins, as OK does -->
+					<!-- The keyboard's OK key joins, as Join does -->
 					<action trigger="ready" name="presenter.wifi.join"/>
 				</ds_textarea>
-				<ds_password_toggle name="show_password" textarea="wifi_password_input" height="content"/>
-			</lv_obj>
+				<ds_password_toggle name="show_password" textarea="password_input" height="content"/>
+			</ds_setting>
+
+			<ds_setting name="signal" title_tag="tr.settings.network.signal">
+				<style name="dialog_row"/>
+				<lv_label name="value" bind_text="presenter.network.signal"/>
+			</ds_setting>
+			<ds_setting name="security" title_tag="tr.settings.network.security">
+				<style name="dialog_row"/>
+				<lv_label name="value" bind_text="presenter.network.security"/>
+			</ds_setting>
 
 			<ds_dialog_footer name="footer">
-				<ds_button name="cancel" translation_tag="tr.common.cancel">
+				<ds_button name="forget" translation_tag="tr.settings.network.forget">
 					<style name="dialog_button"/>
-					<action trigger="clicked" name="presenter.wifi.close_password"/>
+					<bind_flag_if_eq subject="presenter.network.known" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="presenter.wifi.forget"/>
 				</ds_button>
-				<ds_button name="ok" translation_tag="tr.common.ok">
+				<ds_button name="disconnect" translation_tag="tr.settings.network.disconnect">
+					<style name="dialog_button"/>
+					<bind_flag_if_eq subject="presenter.network.connected" flag="hidden" ref_value="0"/>
+					<action trigger="clicked" name="presenter.wifi.disconnect"/>
+				</ds_button>
+				<!-- Known and not on it -->
+				<ds_button name="connect" translation_tag="tr.settings.network.connect">
 					<style name="dialog_button"/>
 					<style name="action_btn"/>
+					<bind_flag_if_eq subject="presenter.network.known" flag="hidden" ref_value="0"/>
+					<bind_flag_if_eq subject="presenter.network.connected" flag="hidden" ref_value="1"/>
+					<action trigger="clicked" name="presenter.wifi.connect"/>
+				</ds_button>
+				<ds_button name="join" translation_tag="tr.settings.network.join">
+					<style name="dialog_button"/>
+					<style name="action_btn"/>
+					<bind_flag_if_eq subject="presenter.network.known" flag="hidden" ref_value="1"/>
 					<action trigger="clicked" name="presenter.wifi.join"/>
 				</ds_button>
 			</ds_dialog_footer>

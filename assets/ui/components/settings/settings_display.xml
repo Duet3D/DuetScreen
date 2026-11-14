@@ -75,8 +75,8 @@
 				</ds_toggle>
 			</ds_setting>
 			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
-				<ds_button name="open" icon="arrow_right.png" width="40" height="40">
-					<style name="setting_control"/>
+				<ds_button name="open" text="&#xF054;">
+					<style name="setting_open"/>
 					<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
 				</ds_button>
 			</ds_setting>

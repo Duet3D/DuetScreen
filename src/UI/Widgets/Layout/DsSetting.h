@@ -40,6 +40,9 @@ namespace UI::Xml
 		/** `bind_title` observer: show the subject's text as the title */
 		static void titleObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
+		/** `bind_hint` observer: show the subject's text as the hint, or no hint if it is empty */
+		static void hintObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
 		/** Translate the title and hint again after a language change */
 		static void languageChangedCb(lv_event_t* e);
 
