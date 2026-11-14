@@ -576,7 +576,14 @@
       "console_log": "Registo da consola",
       "console_log_desc": "As últimas respostas da impressora; toque para abrir a consola",
       "category_console": "Consola",
-      "category_commands": "Comandos"
+      "category_commands": "Comandos",
+      "om_value": "Valor do modelo de objetos",
+      "om_value_desc": "Qualquer valor da impressora, pelo seu caminho no modelo de objetos, p. ex. heat.heaters[1].current",
+      "setting_path": "Caminho",
+      "setting_unit": "Unidade",
+      "current_tool": "Ferramenta atual",
+      "current_tool_desc": "A ferramenta em uso, com as temperaturas dos seus aquecedores",
+      "no_tool": "Nenhuma ferramenta selecionada"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

@@ -15,9 +15,9 @@
 
 #include "ObjectModel/Tree/Path.h"
 #include "UI/Xml/Binding/List.h"
-#include "UI/Xml/Binding/Resolver.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "OmField.h"
+#include "OmItemNames.h"
 
 namespace OM
 {
@@ -29,7 +29,7 @@ namespace UI::Xml
 	class OmBindings;
 
 	/** One item of an object model array */
-	class OmRow : public Row, public Resolver
+	class OmRow : public Row
 	{
 	  public:
 		/** Declare `value` and `exists`, and that the other names come from the item */
@@ -42,25 +42,11 @@ namespace UI::Xml
 		 */
 		void show(OmBindings& bindings, const OM::Path& path, const OM::Node& node);
 
-		/** A field of the item: its own, or with `last`, any name that could be one (see Resolver.h) */
-		Subject* findSubject(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last) override;
-
-		/** An array of the item: as findSubject() */
-		ListBase* findList(const lv_xml_subject_ctx_t* origin, std::string_view name, bool last) override;
-
 		StringSubject<OmField::TEXT_SIZE> value; // The item as text, if it isn't an object
 		IntSubject exists;						 // 1 unless the item is null
 
 	  private:
-		/**
-		 * The path a name relative to the item stands for, or nothing if it isn't one
-		 * @param relative The name's path, e.g. "model.pid.p"
-		 * @param last Whether any field will do; otherwise the item must have the field
-		 */
-		std::optional<OM::Path> resolve(std::string_view relative, bool last) const;
-
-		OmBindings* m_bindings = nullptr; // Where names come from; nullptr until shown
-		OM::Path m_path;				  // The item
+		OmItemNames m_names; // The names relative to the item
 	};
 
 	/** An object model array */

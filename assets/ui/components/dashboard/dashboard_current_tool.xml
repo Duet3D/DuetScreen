@@ -1,0 +1,20 @@
+<!--
+  The tool in use, with its heaters: the `current_tool` widget (widgets/temperature/current_tool.json). Says so when
+  there is none.
+
+  Data:     the object model: state.currentTool, and that tool (dashboard_current_tool_card.xml)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<lv_label name="no_tool" translation_tag="widget.no_tool">
+			<style name="widget_detail"/>
+			<bind_flag_if cond="om.state.currentTool|exists eq 1 and om.state.currentTool|int ge 0" flag="hidden"/>
+		</lv_label>
+		<ds_scope name="tool" path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card" width="100%"
+				  height="content">
+			<style name="pad_zero"/>
+			<bind_flag_if cond="om.state.currentTool|exists eq 0 or om.state.currentTool|int lt 0" flag="hidden"/>
+		</ds_scope>
+	</view>
+</component>

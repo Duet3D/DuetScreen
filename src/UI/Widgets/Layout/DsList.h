@@ -57,7 +57,7 @@ namespace UI::Xml
 			   bool followEnd = false,
 			   std::optional<Key> key = std::nullopt);
 
-		/** Stop listening; runs while LVGL deletes the container, which deletes the rows' widgets next */
+		/** Delete the rows' widgets, then their scopes, and stop listening; runs while LVGL deletes the container */
 		~DsList() override;
 
 		/** Register `<ds_list>` with the XML engine */

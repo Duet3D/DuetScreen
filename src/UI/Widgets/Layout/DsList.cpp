@@ -58,6 +58,20 @@ namespace UI::Xml
 
 	DsList::~DsList()
 	{
+		// LVGL deletes the container's children only after this, its delete event, but a row's scope may keep
+		// subjects its widgets are bound to (see Scope::keep()). So the rows' widgets go first, while their scopes
+		// still exist, and nothing of ours runs while they go.
+		lv_obj_remove_event_cb_with_user_data(m_container, windowEventCb, this);
+		lv_obj_remove_event_cb_with_user_data(m_container, followEndEventCb, this);
+		for (auto& entry : m_entries)
+		{
+			deleteRow(entry);
+		}
+		for (auto& [index, entry] : m_shown)
+		{
+			deleteRow(entry);
+		}
+
 		if (m_list)
 		{
 			m_list->removeListener(this);

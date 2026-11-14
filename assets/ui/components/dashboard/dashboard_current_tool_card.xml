@@ -1,0 +1,22 @@
+<!--
+  One tool from the object model, by name, with a row per heater (dashboard_current_tool_heater.xml). Built by a
+  <ds_scope> on the tool, so its names are the tool's fields.
+
+  Fields:   an object model tool (om.tools[…]): number, name, heaters
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+		<style name="pad_zero"/>
+		<lv_obj name="header" width="100%" height="content" flex_flow="row" style_flex_cross_place="center">
+			<style name="pad_zero"/>
+			<lv_label name="number" bind_text="number|int" bind_text-fmt="T%d">
+				<style name="widget_title"/>
+			</lv_label>
+			<lv_label name="name" bind_text="name" flex_grow="1" long_mode="dots">
+				<style name="widget_title"/>
+			</lv_label>
+		</lv_obj>
+		<ds_list name="heaters" list="heaters" item="dashboard_current_tool_heater" width="100%" height="content"
+				 flex_flow="column" style_pad_all="0"/>
+	</view>
+</component>

@@ -1602,6 +1602,23 @@ Also takes every `lv_obj` attribute.
 | `bind_x2` | Follow an int subject for `x2` |
 | `bind_y2` | Follow an int subject for `y2` |
 
+### ds_scope
+
+Builds one component in a scope where names are relative to an object model element, as in a row of an object model list: `current`, `model.pid.p`, `heaters` as a list. When an index of the path is a subject's value, the names follow the element it points at, without rebuilding.
+
+Also takes every `lv_obj` attribute.
+
+```xml
+<ds_scope path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card"/>
+```
+
+![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_scope.png)
+
+| Attribute | Description |
+| --- | --- |
+| `path` | The element (required): an `om.` path, whose indices may be `{name}`, a subject's value |
+| `item` | The component built (required) |
+
 ### ds_slider
 
 A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send="change"` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also raises `value_changed` as it is dragged.
@@ -1866,6 +1883,18 @@ At its smallest, 272×136 px:
 
 ![console_log at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_log_smallest.png)
 
+#### current_tool
+
+**Current tool**: The tool in use, with its heaters' temperatures
+
+In Temperatures; placed in `dashboard`; component `dashboard_current_tool` ([current_tool.json](../assets/ui/widgets/temperature/current_tool.json)). In a free layout it is 458×184 px, and at least 272×89 px.
+
+![current_tool](../tests/ref_imgs/xml_ui_api/widgets/current_tool.png)
+
+At its smallest, 272×89 px:
+
+![current_tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/current_tool_smallest.png)
+
 #### estop
 
 **E-stop**: Drag across to stop the printer at once
@@ -2058,6 +2087,24 @@ In Jobs; placed in `dashboard`; component `object_cancel` ([object_cancel.json](
 At its smallest, 458×278 px:
 
 ![object_cancel at its smallest](../tests/ref_imgs/xml_ui_api/widgets/object_cancel_smallest.png)
+
+#### om_value
+
+**Object model value**: Any value the printer reports, by its object model path, e.g. heat.heaters[1].current
+
+In Gauges; placed in `dashboard`; component `gauge_om_value` ([om_value.json](../assets/ui/widgets/gauges/om_value.json)). In a free layout it is 180×89 px, and at least 134×89 px.
+
+![om_value](../tests/ref_imgs/xml_ui_api/widgets/om_value.png)
+
+At its smallest, 134×89 px:
+
+![om_value at its smallest](../tests/ref_imgs/xml_ui_api/widgets/om_value_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `path` | Path | text, up to 120 bytes | `state.upTime|duration` |
+| `label` | Label | text, up to 40 bytes | `Up time` |
+| `unit` | Unit | text, up to 12 bytes | `` |
 
 #### page_console
 
@@ -2264,6 +2311,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_axes` |  |  | `axes` | [dashboard_axes.xml](../assets/ui/components/dashboard/dashboard_axes.xml) |
 | `dashboard_axis` |  |  | `dashboard_axes`, `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
+| `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
+| `dashboard_current_tool_card` |  |  | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
+| `dashboard_current_tool_heater` |  |  | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
 | `dashboard_fan` | `fans` | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
 | `dashboard_gcode_button` |  | `label`, `gcode` | `gcode_button` | [dashboard_gcode_button.xml](../assets/ui/components/dashboard/dashboard_gcode_button.xml) |
@@ -2294,6 +2344,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_arc_face` |  |  | `gauge_arc` | [gauge_arc_face.xml](../assets/ui/components/gauge/gauge_arc_face.xml) |
 | `gauge_bar` |  | `source` | `bar_gauge` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_bar_face` |  |  | `gauge_bar` | [gauge_bar_face.xml](../assets/ui/components/gauge/gauge_bar_face.xml) |
+| `gauge_om_value` |  | `path`, `label`, `unit` | `om_value` | [gauge_om_value.xml](../assets/ui/components/gauge/gauge_om_value.xml) |
 | `gauge_reading` |  |  | `gauge_arc_face`, `gauge_bar_face`, `gauge_value_face` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
 | `gauge_value` |  | `source` | `value_gauge` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | `gauge_value_face` |  |  | `gauge_value` | [gauge_value_face.xml](../assets/ui/components/gauge/gauge_value_face.xml) |

@@ -5,8 +5,10 @@
 #include "OmBindings.h"
 #include "Debug.h"
 #include "ObjectModel/Tree/Tree.h"
+#include "OmForward.h"
 #include "OmName.h"
 #include "UI/Core/Model.h"
+#include "UI/Xml/Binding/Scope.h"
 
 namespace UI::Xml
 {
@@ -111,35 +113,116 @@ namespace UI::Xml
 		}
 	}
 
-	Subject* OmBindings::findSubject(const lv_xml_subject_ctx_t* /* origin */, std::string_view name, bool /* last */)
+	Subject* OmBindings::subjectFor(const OmBoundPath& path,
+									std::string_view converterName,
+									std::string_view argument,
+									const lv_xml_subject_ctx_t* origin,
+									std::string_view key)
+	{
+		if (!path.indirect())
+		{
+			return subject(*path.resolve(), converterName, argument);
+		}
+		Scope* owner = Scope::owner(origin);
+		if (Subject* kept = owner ? owner->keptSubject(key) : nullptr)
+		{
+			return kept;
+		}
+		if (auto it = m_forwards.find(key); owner == nullptr && it != m_forwards.end())
+		{
+			return it->second.get();
+		}
+		const Converter* converter = findConverter(converterName);
+		if (converter == nullptr)
+		{
+			LOG_WARN("Object model name '{:s}': there is no converter '{:s}'", key, converterName);
+			return nullptr;
+		}
+		auto forward = std::make_unique<OmForward>(*this, path, *converter, std::string(argument));
+		if (owner)
+		{
+			return &owner->keep(std::string(key), std::move(forward));
+		}
+		return (m_forwards[std::string(key)] = std::move(forward)).get();
+	}
+
+	ListBase* OmBindings::listFor(const OmBoundPath& path, const lv_xml_subject_ctx_t* origin, std::string_view key)
+	{
+		if (!path.indirect())
+		{
+			return list(*path.resolve());
+		}
+		Scope* owner = Scope::owner(origin);
+		if (ListBase* kept = owner ? owner->keptList(key) : nullptr)
+		{
+			return kept;
+		}
+		if (auto it = m_forwardLists.find(key); owner == nullptr && it != m_forwardLists.end())
+		{
+			return it->second.get();
+		}
+		auto forward = std::make_unique<OmForwardList>(*this, path);
+		if (owner)
+		{
+			return &owner->keep(std::string(key), std::move(forward));
+		}
+		return (m_forwardLists[std::string(key)] = std::move(forward)).get();
+	}
+
+	namespace
+	{
+		OmBindings* s_current = nullptr; // The running UI's bindings
+	} // namespace
+
+	OmBindings* OmBindings::current()
+	{
+		return s_current;
+	}
+
+	void OmBindings::setCurrent(OmBindings* bindings)
+	{
+		s_current = bindings;
+	}
+
+	std::optional<OmBoundPath> OmBindings::bindAbsolute(const lv_xml_subject_ctx_t* origin,
+														std::string_view name,
+														std::string_view path) const
+	{
+		const auto parsed = OmTemplate::parse(path);
+		if (!parsed)
+		{
+			LOG_WARN("Object model name '{:s}': '{:s}' isn't a path", name, path);
+			return std::nullopt;
+		}
+		std::string missing;
+		auto bound = OmBoundPath::bind(
+			*parsed, [origin](std::string_view index) { return lookupSubject(origin, index); }, missing);
+		if (!bound)
+		{
+			LOG_WARN("Object model name '{:s}': no subject '{:s}' for its index", name, missing);
+		}
+		return bound;
+	}
+
+	Subject* OmBindings::findSubject(const lv_xml_subject_ctx_t* origin, std::string_view name, bool /* last */)
 	{
 		const auto parsed = OmName::parse(name);
 		if (!parsed || !parsed->absolute)
 		{
 			return nullptr;
 		}
-		const auto path = OM::Path::parse(parsed->path);
-		if (!path)
-		{
-			LOG_WARN("Object model name '{:s}': '{:s}' isn't a path", name, parsed->path);
-			return nullptr;
-		}
-		return subject(*path, parsed->converter, parsed->argument);
+		const auto path = bindAbsolute(origin, name, parsed->path);
+		return path ? subjectFor(*path, parsed->converter, parsed->argument, origin, name) : nullptr;
 	}
 
-	ListBase* OmBindings::findList(const lv_xml_subject_ctx_t* /* origin */, std::string_view name, bool /* last */)
+	ListBase* OmBindings::findList(const lv_xml_subject_ctx_t* origin, std::string_view name, bool /* last */)
 	{
 		const auto parsed = OmName::parse(name);
 		if (!parsed || !parsed->absolute || !parsed->converter.empty())
 		{
 			return nullptr;
 		}
-		const auto path = OM::Path::parse(parsed->path);
-		if (!path)
-		{
-			LOG_WARN("Object model list '{:s}': '{:s}' isn't a path", name, parsed->path);
-			return nullptr;
-		}
-		return list(*path);
+		const auto path = bindAbsolute(origin, name, parsed->path);
+		return path ? listFor(*path, origin, name) : nullptr;
 	}
 } // namespace UI::Xml

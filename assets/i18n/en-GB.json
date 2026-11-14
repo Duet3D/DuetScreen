@@ -577,7 +577,14 @@
       "console_log": "Console log",
       "console_log_desc": "The printer's latest replies; tap to open the console",
       "category_console": "Console",
-      "category_commands": "Commands"
+      "category_commands": "Commands",
+      "om_value": "Object model value",
+      "om_value_desc": "Any value the printer reports, by its object model path, e.g. heat.heaters[1].current",
+      "setting_path": "Path",
+      "setting_unit": "Unit",
+      "current_tool": "Current tool",
+      "current_tool_desc": "The tool in use, with its heaters' temperatures",
+      "no_tool": "No tool selected"
     },
     "gcodes": { /* G-code descriptions */
       "gcode_G0_desc": "Rapid move",

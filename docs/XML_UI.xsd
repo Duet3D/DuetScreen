@@ -730,6 +730,9 @@
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
+			<xs:enumeration value="dashboard_current_tool"/>
+			<xs:enumeration value="dashboard_current_tool_card"/>
+			<xs:enumeration value="dashboard_current_tool_heater"/>
 			<xs:enumeration value="dashboard_fan"/>
 			<xs:enumeration value="dashboard_files"/>
 			<xs:enumeration value="dashboard_gcode_button"/>
@@ -760,6 +763,7 @@
 			<xs:enumeration value="gauge_arc_face"/>
 			<xs:enumeration value="gauge_bar"/>
 			<xs:enumeration value="gauge_bar_face"/>
+			<xs:enumeration value="gauge_om_value"/>
 			<xs:enumeration value="gauge_reading"/>
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="gauge_value_face"/>
@@ -845,6 +849,9 @@
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
+			<xs:enumeration value="dashboard_current_tool"/>
+			<xs:enumeration value="dashboard_current_tool_card"/>
+			<xs:enumeration value="dashboard_current_tool_heater"/>
 			<xs:enumeration value="dashboard_fan"/>
 			<xs:enumeration value="dashboard_files"/>
 			<xs:enumeration value="dashboard_gcode_button"/>
@@ -875,6 +882,7 @@
 			<xs:enumeration value="gauge_arc_face"/>
 			<xs:enumeration value="gauge_bar"/>
 			<xs:enumeration value="gauge_bar_face"/>
+			<xs:enumeration value="gauge_om_value"/>
 			<xs:enumeration value="gauge_reading"/>
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="gauge_value_face"/>
@@ -960,6 +968,9 @@
 			<xs:enumeration value="dashboard_axes"/>
 			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
+			<xs:enumeration value="dashboard_current_tool"/>
+			<xs:enumeration value="dashboard_current_tool_card"/>
+			<xs:enumeration value="dashboard_current_tool_heater"/>
 			<xs:enumeration value="dashboard_fan"/>
 			<xs:enumeration value="dashboard_files"/>
 			<xs:enumeration value="dashboard_gcode_button"/>
@@ -994,6 +1005,7 @@
 			<xs:enumeration value="ds_plot"/>
 			<xs:enumeration value="ds_plot_layer"/>
 			<xs:enumeration value="ds_plot_rect"/>
+			<xs:enumeration value="ds_scope"/>
 			<xs:enumeration value="ds_slider"/>
 			<xs:enumeration value="ds_tabs"/>
 			<xs:enumeration value="ds_tabs-tab"/>
@@ -1016,6 +1028,7 @@
 			<xs:enumeration value="gauge_arc_face"/>
 			<xs:enumeration value="gauge_bar"/>
 			<xs:enumeration value="gauge_bar_face"/>
+			<xs:enumeration value="gauge_om_value"/>
 			<xs:enumeration value="gauge_reading"/>
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="gauge_value_face"/>
@@ -1959,6 +1972,8 @@
 			<xs:enumeration value="widget.console_desc"/>
 			<xs:enumeration value="widget.console_log"/>
 			<xs:enumeration value="widget.console_log_desc"/>
+			<xs:enumeration value="widget.current_tool"/>
+			<xs:enumeration value="widget.current_tool_desc"/>
 			<xs:enumeration value="widget.estop"/>
 			<xs:enumeration value="widget.estop_desc"/>
 			<xs:enumeration value="widget.extrude"/>
@@ -1987,7 +2002,10 @@
 			<xs:enumeration value="widget.jog_z_desc"/>
 			<xs:enumeration value="widget.macros_desc"/>
 			<xs:enumeration value="widget.move_desc"/>
+			<xs:enumeration value="widget.no_tool"/>
 			<xs:enumeration value="widget.object_cancel_desc"/>
+			<xs:enumeration value="widget.om_value"/>
+			<xs:enumeration value="widget.om_value_desc"/>
 			<xs:enumeration value="widget.page_console_desc"/>
 			<xs:enumeration value="widget.page_control_desc"/>
 			<xs:enumeration value="widget.page_files_desc"/>
@@ -2000,10 +2018,12 @@
 			<xs:enumeration value="widget.setting_gcode"/>
 			<xs:enumeration value="widget.setting_icon"/>
 			<xs:enumeration value="widget.setting_label"/>
+			<xs:enumeration value="widget.setting_path"/>
 			<xs:enumeration value="widget.setting_size"/>
 			<xs:enumeration value="widget.setting_source"/>
 			<xs:enumeration value="widget.setting_text"/>
 			<xs:enumeration value="widget.setting_tool"/>
+			<xs:enumeration value="widget.setting_unit"/>
 			<xs:enumeration value="widget.sidebar_gcode_desc"/>
 			<xs:enumeration value="widget.size_bold"/>
 			<xs:enumeration value="widget.size_heading"/>
@@ -3068,6 +3088,14 @@
 			<xs:annotation><xs:documentation>Follow an int subject for `y2`</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_scope.attributes">
+		<xs:attribute name="path" type="subject">
+			<xs:annotation><xs:documentation>The element (required): an `om.` path, whose indices may be `{name}`, a subject's value</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="item" type="component">
+			<xs:annotation><xs:documentation>The component built (required)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_slider.attributes">
 		<xs:attribute name="min" type="xs:string">
 			<xs:annotation><xs:documentation>Bottom of the range, may have a fraction (default 0)</xs:documentation></xs:annotation>
@@ -3229,6 +3257,17 @@
 	<xs:attributeGroup name="gauge_bar.attributes">
 		<xs:attribute name="source" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `source` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_om_value.attributes">
+		<xs:attribute name="path" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `path` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="label" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="gauge_value.attributes">
@@ -6033,6 +6072,15 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="ds_scope">
+		<xs:annotation><xs:documentation>Builds one component in a scope where names are relative to an object model element, as in a row of an object model list: `current`, `model.pid.p`, `heaters` as a list. When an index of the path is a subject's value, the names follow the element it points at, without rebuilding. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_scope.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="ds_slider">
 		<xs:annotation><xs:documentation>A slider with a label, its value and -/+ buttons, and optionally a number pad. Raises `value_confirmed` with the value when the user finishes an edit (releases it, presses -/+ or types a value), or with `send=&quot;change&quot;` on every movement. Values written by `bind_value` are not edits and raise nothing, so a view can show live data and send changes without echoing the data back to the printer. Also raises `value_changed` as it is dragged. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -7456,6 +7504,30 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="dashboard_current_tool">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_current_tool_card">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool_card.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_current_tool_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_current_tool_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="dashboard_fan">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_fan.xml, with presenter fans.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -8215,6 +8287,15 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_bar_face.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_om_value">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_om_value.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_om_value.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

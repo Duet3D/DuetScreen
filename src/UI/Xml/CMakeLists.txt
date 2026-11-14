@@ -42,8 +42,11 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/Converters.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmBindings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmField.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmForward.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmItemNames.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmList.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmName.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmPath.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/HotReload.cpp

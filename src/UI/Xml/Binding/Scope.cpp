@@ -4,6 +4,7 @@
 
 #include "Scope.h"
 #include "Globals.h"
+#include "List.h"
 #include "Resolver.h"
 #include "Subjects.h"
 
@@ -37,6 +38,44 @@ namespace UI::Xml
 	{
 		m_resolver = resolver;
 		lv_xml_subject_ctx_set_resolver(m_ctx, resolver ? resolveCb : nullptr, this);
+	}
+
+	Subject& Scope::keep(std::string key, std::unique_ptr<Subject> subject)
+	{
+		auto& kept = m_keptSubjects[std::move(key)];
+		kept = std::move(subject);
+		return *kept;
+	}
+
+	ListBase& Scope::keep(std::string key, std::unique_ptr<ListBase> list)
+	{
+		auto& kept = m_keptLists[std::move(key)];
+		kept = std::move(list);
+		return *kept;
+	}
+
+	Subject* Scope::keptSubject(std::string_view key) const
+	{
+		const auto it = m_keptSubjects.find(key);
+		return it == m_keptSubjects.end() ? nullptr : it->second.get();
+	}
+
+	ListBase* Scope::keptList(std::string_view key) const
+	{
+		const auto it = m_keptLists.find(key);
+		return it == m_keptLists.end() ? nullptr : it->second.get();
+	}
+
+	Scope* Scope::owner(const lv_xml_subject_ctx_t* ctx)
+	{
+		for (; ctx != nullptr; ctx = lv_xml_subject_ctx_get_parent(ctx))
+		{
+			if (auto* scope = static_cast<Scope*>(lv_xml_subject_ctx_get_user_data(ctx)))
+			{
+				return scope;
+			}
+		}
+		return nullptr;
 	}
 
 	ListBase* Scope::findList(const lv_xml_subject_ctx_t* from, std::string_view name)

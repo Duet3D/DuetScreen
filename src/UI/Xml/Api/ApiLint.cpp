@@ -3,6 +3,9 @@
  */
 
 #include "ApiLint.h"
+#include "UI/Xml/Om/Converters.h"
+#include "UI/Xml/Om/OmName.h"
+#include "UI/Xml/Om/OmPath.h"
 #include "XmlTree.h"
 #include "helix_xml.h"
 #include "src/xml/lv_xml_widget.h"
@@ -42,6 +45,8 @@ namespace UI::Xml::Api
 			std::vector<const std::vector<Field>*> fields{}; // Innermost first: list rows, then the view's presenter
 			std::vector<const Presenter*> handlers{};		 // Presenters actions go to, innermost view first
 			std::string where{};							 // Path of components to here, for messages
+			bool omItem = false; // Inside an object model item (a row of an `om.` list, or a <ds_scope>), whose
+								 // fields have names relative to it
 		};
 
 		/** One use of a component: where it is, and its props */
@@ -517,10 +522,24 @@ namespace UI::Xml::Api
 					{
 						checkKey(*key, *field, element, context);
 					}
-					if (field && component != m_components.end())
+					if (component != m_components.end() && (field || (list && isOmName(*list, context, false))))
+					{
+						// An object model list's rows have names relative to their item besides their fields
+						Scope scope = context.scope;
+						scope.fields.insert(scope.fields.begin(), field ? &field->rowFields : &m_reference.omRowFields);
+						scope.omItem = field == nullptr;
+						const std::map<std::string, std::string> noProps;
+						instance(component->second, scope, noProps);
+					}
+				}
+				else if (widget == "ds_scope")
+				{
+					auto item = valueOf(element, "item", context);
+					auto component = item ? m_components.find(*item) : m_components.end();
+					if (component != m_components.end())
 					{
 						Scope scope = context.scope;
-						scope.fields.insert(scope.fields.begin(), &field->rowFields);
+						scope.omItem = true;
 						const std::map<std::string, std::string> noProps;
 						instance(component->second, scope, noProps);
 					}
@@ -560,7 +579,7 @@ namespace UI::Xml::Api
 				case AttributeKind::List:
 					if (const Field* field = findField(value, context); !field || field->rowFields.empty())
 					{
-						if (!isLocalSubject(value, context))
+						if (!isLocalSubject(value, context) && !isOmName(value, context, false))
 						{
 							issue(context, element, fmt::format("no list `{:s}`", value));
 						}
@@ -636,10 +655,101 @@ namespace UI::Xml::Api
 			/** Report a subject `name` that can't be found */
 			void checkSubject(const std::string& name, const Element& element, const Context& context)
 			{
-				if (!findField(name, context) && !isLocalSubject(name, context))
+				if (findField(name, context) || isLocalSubject(name, context))
+				{
+					return;
+				}
+				if (!isOmName(name, context, true))
 				{
 					issue(context, element, fmt::format("no subject `{:s}`", name));
+					return;
 				}
+				// An object model name: its converter must exist, and the names of its `{…}` indices too
+				const auto parsed = OmName::parse(name);
+				if (!findConverter(parsed->converter))
+				{
+					issue(context, element, fmt::format("`{:s}`: no converter `{:s}`", name, parsed->converter));
+				}
+				for (const auto& segment : OmTemplate::parse(parsed->path)->segments())
+				{
+					if (const auto* ref = std::get_if<OmTemplate::Ref>(&segment))
+					{
+						checkSubject(ref->name, element, context);
+					}
+				}
+			}
+
+			/**
+			 * Whether `name` is an object model name: an `om.` path, or inside an object model item, a path relative to
+			 * it, either with a converter if `subject` (see Om/OmName.h)
+			 */
+			static bool isOmName(const std::string& name, const Context& context, bool subject)
+			{
+				const auto parsed = OmName::parse(name);
+				if (!parsed || (!parsed->absolute && !context.scope.omItem) || (!subject && !parsed->converter.empty()))
+				{
+					return false;
+				}
+				// `value|int` in an item converts the item itself
+				return OmTemplate::parse(parsed->path).has_value() || (!parsed->absolute && parsed->path == "value");
+			}
+
+			/**
+			 * The end of the expression name starting at `start`, as the engine reads one (helix-xml's lv_xml_expr.c):
+			 * letters, digits, `_` and `.`, brackets and braces with what is inside them, `|` before a word and `:`
+			 * before an argument
+			 */
+			static size_t nameEnd(const std::string& expression, size_t start)
+			{
+				size_t i = start;
+				const auto isNameChar = [](char c)
+				{ return std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '.'; };
+				while (i < expression.size())
+				{
+					const char c = expression[i];
+					if (isNameChar(c))
+					{
+						i++;
+					}
+					else if (c == '[' || c == '{')
+					{
+						int depth = 0;
+						size_t j = i;
+						for (; j < expression.size(); j++)
+						{
+							if (expression[j] == '[' || expression[j] == '{')
+							{
+								depth++;
+							}
+							else if ((expression[j] == ']' || expression[j] == '}') && --depth == 0)
+							{
+								break;
+							}
+						}
+						if (j == expression.size())
+						{
+							break;
+						}
+						i = j + 1;
+					}
+					else if (c == '|' && i + 1 < expression.size() &&
+							 (std::isalpha(static_cast<unsigned char>(expression[i + 1])) || expression[i + 1] == '_'))
+					{
+						i++;
+					}
+					else if (c == ':' && i + 1 < expression.size() &&
+							 (isNameChar(expression[i + 1]) ||
+							  (expression[i + 1] == '-' && i + 2 < expression.size() &&
+							   std::isdigit(static_cast<unsigned char>(expression[i + 2])))))
+					{
+						i += expression[i + 1] == '-' ? 2 : 1;
+					}
+					else
+					{
+						break;
+					}
+				}
+				return i;
 			}
 
 			/** Report a `<ds_list key="…">` that isn't a field of the rows of `list`, or is one of their lists */
@@ -666,12 +776,7 @@ namespace UI::Xml::Api
 					const char c = expression[i];
 					if (std::isalpha(static_cast<unsigned char>(c)) || c == '_')
 					{
-						size_t end = i;
-						while (end < expression.size() && (std::isalnum(static_cast<unsigned char>(expression[end])) ||
-														   expression[end] == '_' || expression[end] == '.'))
-						{
-							end++;
-						}
+						const size_t end = nameEnd(expression, i);
 						const std::string operand = expression.substr(i, end - i);
 						if (!EXPRESSION_WORDS.contains(operand))
 						{

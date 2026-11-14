@@ -576,7 +576,14 @@
       "console_log": "Konsolenprotokoll",
       "console_log_desc": "Die neuesten Antworten des Druckers; tippen öffnet die Konsole",
       "category_console": "Konsole",
-      "category_commands": "Befehle"
+      "category_commands": "Befehle",
+      "om_value": "Objektmodell-Wert",
+      "om_value_desc": "Ein beliebiger Wert des Druckers, über seinen Objektmodell-Pfad, z. B. heat.heaters[1].current",
+      "setting_path": "Pfad",
+      "setting_unit": "Einheit",
+      "current_tool": "Aktuelles Werkzeug",
+      "current_tool_desc": "Das verwendete Werkzeug mit den Temperaturen seiner Heizungen",
+      "no_tool": "Kein Werkzeug ausgewählt"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

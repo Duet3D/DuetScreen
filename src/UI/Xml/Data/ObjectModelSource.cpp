@@ -13,6 +13,7 @@ namespace UI::Xml
 		: DataSource("om")
 	{
 		Globals::setResolver(&m_bindings);
+		OmBindings::setCurrent(&m_bindings);
 		// Called on the decoder's thread: the flush happens on the UI's, through the event
 		m_treeListener = OM::Tree::get().addListener([] { Model::get().post<EventType::ObjectModelChanged>(); });
 	}
@@ -20,6 +21,7 @@ namespace UI::Xml
 	ObjectModelSource::~ObjectModelSource()
 	{
 		OM::Tree::get().removeListener(m_treeListener);
+		OmBindings::setCurrent(nullptr);
 		Globals::setResolver(nullptr);
 	}
 

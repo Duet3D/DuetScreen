@@ -289,3 +289,185 @@ TEST_F(TestOmBindings, AnUnknownConverterBindsNothing)
 	receive(HEAT);
 	EXPECT_EQ(text(view, "bad"), "unchanged");
 }
+
+namespace
+{
+	// The example from the design: tools list their heaters by number
+	constexpr std::string_view JOIN_HEAT =
+		R"({"key":"heat","flags":"v","result":{"heaters":[{"current":0,"active":200,"standby":100},null,{"current":40,"active":210,"standby":110},{"current":50,"active":220,"standby":120}]}})";
+	constexpr std::string_view JOIN_TOOLS =
+		R"({"key":"tools","flags":"v","result":[{"heaters":[0,2]},{"heaters":[3]}]})";
+} // namespace
+
+class TestOmJoins : public TestOmBindings
+{
+  protected:
+	/** Register the tool card and its heater row, which reads `om.heat.heaters[{value}]` */
+	static void registerToolCards()
+	{
+		lv_xml_register_component_from_data("join_heater", R"(
+			<component>
+				<view extends="lv_obj" width="100%" height="content" flex_flow="row">
+					<lv_label name="number" bind_text="value"/>
+					<lv_label name="current" bind_text="om.heat.heaters[{value}].current"/>
+					<lv_label name="active" bind_text="om.heat.heaters[{value}].active"/>
+					<lv_label name="standby" bind_text="om.heat.heaters[{value}].standby"/>
+				</view>
+			</component>)");
+		lv_xml_register_component_from_data("join_tool", R"(
+			<component>
+				<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+					<lv_label name="title" bind_text="index" bind_text-fmt="T%d"/>
+					<ds_list name="heaters" list="heaters" item="join_heater" width="100%" height="content"/>
+				</view>
+			</component>)");
+	}
+
+	/** The heater row `row` of tool card `tool` */
+	static lv_obj_t* heaterRow(UI::LvObj& view, uint32_t tool, uint32_t row)
+	{
+		lv_obj_t* card = lv_obj_get_child(list(view, "tools"), static_cast<int32_t>(tool));
+		return lv_obj_get_child(lv_obj_find_by_name(card, "heaters"), static_cast<int32_t>(row));
+	}
+
+	/** "current / active / standby" of a heater row */
+	static std::string temperatures(lv_obj_t* row)
+	{
+		return text(row, "current") + " / " + text(row, "active") + " / " + text(row, "standby");
+	}
+};
+
+TEST_F(TestOmJoins, ToolsShowTheirHeatersThroughTheirNumbers)
+{
+	registerToolCards();
+	receive(JOIN_HEAT);
+	receive(JOIN_TOOLS);
+	auto& view = show("join_tools", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_list name="tools" list="om.tools" item="join_tool" width="100%" height="content" flex_flow="column"/>
+			</view>
+		</component>)");
+
+	ASSERT_EQ(lv_obj_get_child_count(list(view, "tools")), 2u);
+	EXPECT_EQ(temperatures(heaterRow(view, 0, 0)), "0 / 200 / 100");
+	EXPECT_EQ(temperatures(heaterRow(view, 0, 1)), "40 / 210 / 110");
+	EXPECT_EQ(temperatures(heaterRow(view, 1, 0)), "50 / 220 / 120");
+
+	// A temperature changes: the row reading that heater follows
+	receive(
+		R"({"key":"","flags":"d99f","result":{"heat":{"heaters":[{"current":0},null,{"current":41},{"current":50}]}}})");
+	EXPECT_EQ(text(heaterRow(view, 0, 1), "current"), "41");
+
+	// T0's second heater becomes heater 3: the same widgets now read heater 3
+	lv_obj_t* label = lv_obj_find_by_name(heaterRow(view, 0, 1), "current");
+	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[0,3]},{"heaters":[3]}]})");
+	EXPECT_EQ(lv_obj_find_by_name(heaterRow(view, 0, 1), "current"), label) << "nothing was rebuilt";
+	EXPECT_EQ(temperatures(heaterRow(view, 0, 1)), "50 / 220 / 120");
+
+	// A tool loses a heater, then the view goes: the forwarders go with their rows, before what they observe
+	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[0]},{"heaters":[3]}]})");
+	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(lv_obj_get_child(list(view, "tools"), 0), "heaters")), 1u);
+	m_views.clear();
+	receive(JOIN_TOOLS);
+}
+
+TEST_F(TestOmJoins, ARowsIndexReadsAParallelArrayOfItsParent)
+{
+	// In RepRapFirmware a tool's own temperatures run parallel to its heaters
+	lv_xml_register_component_from_data("parallel_heater", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="active" bind_text="active[{index}]"/>
+			</view>
+		</component>)");
+	lv_xml_register_component_from_data("parallel_tool", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<ds_list name="heaters" list="heaters" item="parallel_heater" width="100%" height="content"/>
+			</view>
+		</component>)");
+	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[1,2],"active":[205,60]}]})");
+	auto& view = show("parallel_tools", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_list name="tools" list="om.tools" item="parallel_tool" width="100%" height="content"/>
+			</view>
+		</component>)");
+
+	lv_obj_t* heaters = lv_obj_find_by_name(lv_obj_get_child(list(view, "tools"), 0), "heaters");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 0), "active"), "205");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "active"), "60");
+}
+
+TEST_F(TestOmJoins, TheCurrentTool)
+{
+	lv_xml_register_component_from_data("current_heater", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="heater" bind_text="value"/>
+			</view>
+		</component>)");
+	receive(R"({"key":"tools","flags":"v","result":[{"name":"Left","heaters":[1]},{"name":"Right","heaters":[2,3]}]})");
+	receive(R"({"key":"state","flags":"vn","result":{"currentTool":-1}})");
+	auto& view = show("current_tool", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+				<lv_label name="name" bind_text="om.tools[{om.state.currentTool}].name"/>
+				<ds_list name="heaters" list="om.tools[{om.state.currentTool}].heaters" item="current_heater"
+						 width="100%" height="content"/>
+			</view>
+		</component>)");
+
+	EXPECT_EQ(text(view, "name"), "") << "no current tool";
+	EXPECT_EQ(lv_obj_get_child_count(list(view, "heaters")), 0u);
+
+	receive(R"({"key":"state","flags":"vn","result":{"currentTool":1}})");
+	EXPECT_EQ(text(view, "name"), "Right");
+	ASSERT_EQ(lv_obj_get_child_count(list(view, "heaters")), 2u);
+	EXPECT_EQ(text(lv_obj_get_child(list(view, "heaters"), 1), "heater"), "3");
+
+	receive(R"({"key":"state","flags":"vn","result":{"currentTool":0}})");
+	EXPECT_EQ(text(view, "name"), "Left");
+	ASSERT_EQ(lv_obj_get_child_count(list(view, "heaters")), 1u);
+	EXPECT_EQ(text(lv_obj_get_child(list(view, "heaters"), 0), "heater"), "1");
+}
+
+TEST_F(TestOmJoins, AScopeNamesOneElement)
+{
+	lv_xml_register_component_from_data("scope_detail", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<lv_label name="current" bind_text="current"/>
+				<lv_label name="active" bind_text="active|int" bind_text-fmt="%d°C"/>
+			</view>
+		</component>)");
+	lv_xml_register_component_from_data("scope_heater", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<ds_scope name="detail" path="om.heat.heaters[{value}]" item="scope_detail" width="100%" height="content"/>
+			</view>
+		</component>)");
+	lv_xml_register_component_from_data("scope_tool", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="content">
+				<ds_list name="heaters" list="heaters" item="scope_heater" width="100%" height="content"/>
+			</view>
+		</component>)");
+	receive(JOIN_HEAT);
+	receive(JOIN_TOOLS);
+	auto& view = show("scope_tools", R"(
+		<component>
+			<view extends="lv_obj" width="100%" height="100%">
+				<ds_list name="tools" list="om.tools" item="scope_tool" width="100%" height="content"/>
+			</view>
+		</component>)");
+
+	lv_obj_t* heaters = lv_obj_find_by_name(lv_obj_get_child(list(view, "tools"), 0), "heaters");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "current"), "40");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "active"), "210°C");
+
+	receive(R"({"key":"tools","flags":"v","result":[{"heaters":[0,3]},{"heaters":[3]}]})");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "current"), "50");
+	EXPECT_EQ(text(lv_obj_get_child(heaters, 1), "active"), "220°C");
+}

@@ -21,6 +21,7 @@
 
 #include "helix_xml.h"
 #include <map>
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -58,6 +59,25 @@ namespace UI::Xml
 		 * scope. */
 		void setResolver(Resolver* resolver);
 
+		/**
+		 * Keep `subject`, made for widgets built in this scope (e.g. by a resolver), for as long as the scope, which
+		 * outlives them; keptSubject(`key`) finds it again
+		 * @return the subject
+		 */
+		Subject& keep(std::string key, std::unique_ptr<Subject> subject);
+
+		/** As keep(), for a list */
+		ListBase& keep(std::string key, std::unique_ptr<ListBase> list);
+
+		/** The subject kept as `key`, or nullptr */
+		Subject* keptSubject(std::string_view key) const;
+
+		/** The list kept as `key`, or nullptr */
+		ListBase* keptList(std::string_view key) const;
+
+		/** The Scope owning `ctx`, or if it has none, the nearest of its parents that has one; nullptr if none has */
+		static Scope* owner(const lv_xml_subject_ctx_t* ctx);
+
 		/** The engine's subject context for this scope, for `lv_xml_create_with_ctx()` */
 		lv_xml_subject_ctx_t* context() const { return m_ctx; }
 
@@ -86,5 +106,7 @@ namespace UI::Xml
 		lv_xml_subject_ctx_t* m_ctx;						  // Engine context; holds the subjects and the parent link
 		std::map<std::string, ListBase*, std::less<>> m_lists; // Lists added to this scope
 		Resolver* m_resolver = nullptr;						   // Gives names on demand, or nullptr
+		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_keptSubjects; // Made for this scope
+		std::map<std::string, std::unique_ptr<ListBase>, std::less<>> m_keptLists;	 // Made for this scope
 	};
 } // namespace UI::Xml

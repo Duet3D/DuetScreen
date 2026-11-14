@@ -576,7 +576,14 @@
       "console_log": "Consolelogboek",
       "console_log_desc": "De laatste antwoorden van de printer; tik om de console te openen",
       "category_console": "Console",
-      "category_commands": "Opdrachten sturen"
+      "category_commands": "Opdrachten sturen",
+      "om_value": "Objectmodelwaarde",
+      "om_value_desc": "Elke waarde van de printer, via het pad in het objectmodel, bijv. heat.heaters[1].current",
+      "setting_path": "Pad",
+      "setting_unit": "Eenheid",
+      "current_tool": "Huidig gereedschap",
+      "current_tool_desc": "Het gereedschap in gebruik, met de temperaturen van zijn verwarmers",
+      "no_tool": "Geen gereedschap gekozen"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",

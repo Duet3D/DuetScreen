@@ -576,7 +576,14 @@
       "console_log": "Journal de la console",
       "console_log_desc": "Les dernières réponses de l'imprimante ; touchez pour ouvrir la console",
       "category_console": "Console",
-      "category_commands": "Commandes"
+      "category_commands": "Commandes",
+      "om_value": "Valeur du modèle objet",
+      "om_value_desc": "N'importe quelle valeur de l'imprimante, par son chemin dans le modèle objet, p. ex. heat.heaters[1].current",
+      "setting_path": "Chemin",
+      "setting_unit": "Unité",
+      "current_tool": "Outil actuel",
+      "current_tool_desc": "L'outil utilisé, avec les températures de ses chauffages",
+      "no_tool": "Aucun outil sélectionné"
     },
     "gcodes": {
       "gcode_G0_desc": "Rapid move",
