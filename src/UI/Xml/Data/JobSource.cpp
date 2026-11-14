@@ -7,6 +7,7 @@
 #include "Comm/Thumbnail.h"
 #include "Debug.h"
 #include "ObjectModel/Job.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
@@ -49,12 +50,8 @@ namespace UI::Xml
 
 	void JobSource::onInit()
 	{
-		registerEventListener<EventType::JobFileName>(this, &JobSource::fileChanged);
-		registerEventListener<EventType::JobLastFileName>(this, &JobSource::lastFileChanged);
+		m_watch = OmWatch({"job"}, [this] { jobChanged(); });
 		registerEventListener<EventType::ThumbnailData>(this, &JobSource::thumbnailReceived);
-		registerEventListener<EventType::JobDuration>([this]() { showProgress(); });
-		registerEventListener<EventType::JobFileProgress>([this]() { showProgress(); });
-		registerEventListener<EventType::JobTimeLeft>([this]() { showRemaining(); });
 		registerEventListener<EventType::Status>(this, &JobSource::showControls);
 	}
 
@@ -65,15 +62,41 @@ namespace UI::Xml
 		std::string last;
 		{
 			MODEL_LOCK();
-			file = OM::GetJobName();
-			last = OM::GetLastJobName();
+			file = std::string(job()["file"]["fileName"].text());
+			last = std::string(job()["lastFileName"].text());
 		}
-		// As the events would: the last job, if there is one, is the latest over the current one
+		// As if both had just changed: the last job, if there is one, is the latest over the current one
+		m_seenFile = file;
+		m_seenLast = last;
 		fileChanged(file);
 		lastFileChanged(last);
 		showProgress();
 		showRemaining();
 		showControls(OM::GetStatus());
+	}
+
+	void JobSource::jobChanged()
+	{
+		std::string file;
+		std::string last;
+		{
+			MODEL_LOCK();
+			file = std::string(job()["file"]["fileName"].text());
+			last = std::string(job()["lastFileName"].text());
+		}
+		// A job starting or ending changes one name; the latest job is the one that changed last
+		if (file != m_seenFile)
+		{
+			m_seenFile = file;
+			fileChanged(file);
+		}
+		if (last != m_seenLast)
+		{
+			m_seenLast = last;
+			lastFileChanged(last);
+		}
+		showProgress();
+		showRemaining();
 	}
 
 	void JobSource::clear()
@@ -91,20 +114,49 @@ namespace UI::Xml
 		m_printAgain.set(static_cast<int32_t>(Control::Hidden));
 	}
 
+	const OM::Node& JobSource::job()
+	{
+		return OM::Tree::get().root()["job"];
+	}
+
 	int32_t JobSource::progress()
 	{
 		MODEL_LOCK();
+		const OM::Node& node = job();
 		if (StorageHelper::getData(ID_JOB_PROGRESS_SOURCE) == OM::JobProgressSource::FILE)
 		{
-			const uint32_t size = OM::GetFileSize();
-			return size == 0 ? 0 : static_cast<int32_t>(std::min<uint32_t>(100 * OM::GetFilePosition() / size, 100));
+			const int64_t size = node["file"]["size"].integer(0);
+			return size <= 0 ? 0
+							 : static_cast<int32_t>(
+								   std::clamp<int64_t>(100 * node["filePosition"].integer(0) / size, 0, 100));
 		}
-		const uint32_t elapsed = OM::GetPrintDuration();
-		const uint32_t warmUp = OM::GetWarmUpDuration();
-		const uint32_t total = std::max<uint32_t>(OM::GetPrintTime(), OM::GetSimulatedTime());
-		return total == 0 ? 0
+		const int64_t elapsed = node["duration"].integer(0);
+		const int64_t warmUp = node["warmUpDuration"].integer(0);
+		const int64_t total = std::max(node["file"]["printTime"].integer(0), node["file"]["simulatedTime"].integer(0));
+		return total <= 0 ? 0
 						  : static_cast<int32_t>(
-								std::min<uint32_t>(100 * (elapsed > warmUp ? elapsed - warmUp : 0) / total, 100));
+								std::clamp<int64_t>(100 * std::max<int64_t>(elapsed - warmUp, 0) / total, 0, 100));
+	}
+
+	uint32_t JobSource::remaining()
+	{
+		MODEL_LOCK();
+		const OM::Node& node = job();
+		// A simulated job's time is the most exact; then the slicer's estimate, the filament's, the file's
+		if (const int64_t simulated = node["file"]["simulatedTime"].integer(0); simulated > 0)
+		{
+			const int64_t printed = node["duration"].integer(0) - node["warmUpDuration"].integer(0);
+			return static_cast<uint32_t>(std::max<int64_t>(simulated - printed, 0));
+		}
+		const OM::Node& timesLeft = node["timesLeft"];
+		for (const char* estimate : {"slicer", "filament"})
+		{
+			if (const int64_t left = timesLeft[estimate].integer(0); left > 0)
+			{
+				return static_cast<uint32_t>(left);
+			}
+		}
+		return static_cast<uint32_t>(std::max<int64_t>(timesLeft["file"].integer(0), 0));
 	}
 
 	std::string JobSource::clock(uint32_t seconds)
@@ -135,13 +187,18 @@ namespace UI::Xml
 	void JobSource::showProgress()
 	{
 		m_progress.set(progress());
-		m_elapsed.set(clock(OM::GetPrintDuration()));
+		uint32_t duration = 0;
+		{
+			MODEL_LOCK();
+			duration = static_cast<uint32_t>(std::max<int64_t>(job()["duration"].integer(0), 0));
+		}
+		m_elapsed.set(clock(duration));
 		m_elapsedText.set(_("status.elapsed_time", m_elapsed.get()));
 	}
 
 	void JobSource::showRemaining()
 	{
-		m_remaining.set(clock(OM::GetPrintRemaining(OM::RemainingTimeType::AUTO)));
+		m_remaining.set(clock(remaining()));
 		m_remainingText.set(_("status.remaining_time", m_remaining.get()));
 	}
 

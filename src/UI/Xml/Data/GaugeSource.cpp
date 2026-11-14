@@ -144,9 +144,7 @@ namespace UI::Xml
 
 	void GaugeSource::onInit()
 	{
-		watchObjectModel({"fans", "tools", "heat", "sensors.analog", "state.currentTool"});
-		registerEventListener<EventType::JobDuration>(this, &GaugeSource::update);
-		registerEventListener<EventType::JobFileProgress>(this, &GaugeSource::update);
+		watchObjectModel({"fans", "tools", "heat", "sensors.analog", "state.currentTool", "job"});
 		registerEventListener<EventType::SpeedFactor>(this, &GaugeSource::update);
 		registerEventListener<EventType::ExtruderData>(this, &GaugeSource::update);
 	}

@@ -11,7 +11,9 @@
 
 #include "DataSource.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Node.h"
 #include "UI/Xml/Binding/Subjects.h"
+#include "UI/Xml/Om/OmWatch.h"
 #include <cstdint>
 #include <string>
 
@@ -46,14 +48,24 @@ namespace UI::Xml
 		 */
 		static int32_t progress();
 
+		/** The current job's time left, in seconds: from its simulation if it was simulated, else the slicer's,
+		 * filament's or file's estimate */
+		static uint32_t remaining();
+
 		/** `seconds` as hh:mm:ss */
 		static std::string clock(uint32_t seconds);
 
 	  protected:
-		/** Listen for jobs starting and ending, their progress, thumbnails and the printer's state */
+		/** Follow the job, thumbnails arriving and the printer's state */
 		void onInit() override;
 
 	  private:
+		/** The object model's job (the model lock held) */
+		static const OM::Node& job();
+
+		/** The job changed: a job started or ended, or its progress */
+		void jobChanged();
+
 		/** A job started (or none is running, if `file` is empty) */
 		void fileChanged(const std::string& file);
 
@@ -88,5 +100,8 @@ namespace UI::Xml
 		IntSubject m_resume;			 // A Control
 		IntSubject m_printAgain;		 // A Control
 		IntSubject m_cancel;			 // A Control
+		std::string m_seenFile;			 // The current job's file when last looked at
+		std::string m_seenLast;			 // The last job's file when last looked at
+		OmWatch m_watch;				 // Follows the job
 	};
 } // namespace UI::Xml
