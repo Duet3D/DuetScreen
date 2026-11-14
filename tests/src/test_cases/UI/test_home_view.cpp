@@ -373,6 +373,31 @@ TEST_F(TestHomeView, JobModalShowsDeleteButton)
 	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
+TEST_F(TestHomeView, TappingAFileAnywhereOnItOpensIt)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	const auto tapMiddle = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
+
+	// As a tile and as a row: the middle of a tile is its thumbnail's box
+	for (int layout = 0; layout < 2; layout++)
+	{
+		tapMiddle(fileItem(browser, "test.gcode"));
+		EXPECT_NE(openFileDialog(), nullptr) << (layout == 0 ? "a tile" : "a row");
+		UI::closeDialogs();
+		lv_obj_send_event(lv_obj_find_by_name(browser, "display_mode"), LV_EVENT_CLICKED, nullptr);
+		lv_obj_update_layout(lv_screen_active());
+		lv_timer_handler();
+	}
+	lv_test_mouse_release();
+}
+
 TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 {
 	openFilesTab(0);
