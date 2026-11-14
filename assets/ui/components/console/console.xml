@@ -1,34 +1,51 @@
 <!--
-  The console: what was sent and what came back, a G-code reference that narrows as you type
-  (console_command_list.xml), and a line to type G-code into (console_input.xml), with the console's own keyboard.
+  The console: what was sent and what came back, across the whole page; the commands sent lately, to send again; a
+  line to type G-code into (console_input.xml), with the home screen's keyboard, which makes room for itself under
+  the page (src/UI/Widgets/Inputs/KeyboardRoom.h); and a G-code reference that opens as a dialog, searched by code
+  or by what a G-code does.
 
-  The lines are the global source.console.lines (src/UI/Xml/Data/ConsoleSource.h), recorded even while the console isn't
-  showing. Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
+  The lines and recent commands are the global source.console.* (src/UI/Xml/Data/ConsoleSource.h), recorded even
+  while the console isn't showing. Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
 -->
 <component presenter="console">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
 		<style name="bg_dark"/>
 
-		<lv_obj name="top_cont" width="100%" flex_grow="1" flex_flow="row">
-			<style name="no_border"/>
+		<lv_obj name="log_card" width="100%" flex_grow="1" flex_flow="column" scrollable="false">
+			<style name="card"/>
 
-			<console_command_list name="command_list"/>
+			<ds_list name="output" list="source.console.lines" item="console_line" follow_end="true" width="100%"
+					 flex_grow="1" flex_flow="column" style_pad_row="2"/>
 
-			<ds_list name="output" list="source.console.lines" item="console_line" follow_end="true" height="100%"
-					 flex_grow="30" flex_flow="column" style_pad_row="0">
-				<style name="card"/>
-			</ds_list>
+			<!-- The commands sent lately, the reference, and in developer builds the shell -->
+			<lv_obj name="tools_row" width="100%" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="no_border"/>
+				<!-- More than fit scroll sideways -->
+				<ds_list name="recent" list="source.console.recent" item="console_recent" height="content"
+						 flex_grow="1" flex_flow="row" style_pad_all="0" style_pad_column="#pad" scroll_dir="hor"/>
+				<lv_checkbox name="shell_toggle" translation_tag="tr.console.shell">
+					<bind_flag_if_eq subject="presenter.shell_available" flag="hidden" ref_value="0"/>
+					<action trigger="value_changed" name="presenter.console.shell"/>
+				</lv_checkbox>
+				<ds_button name="reference" translation_tag="tr.console.reference" height="content"
+						   style_min_height="36">
+					<action trigger="clicked" name="presenter.console.open_reference"/>
+				</ds_button>
+			</lv_obj>
+
+			<console_input name="input_cont"/>
 		</lv_obj>
 
-		<console_input name="input_cont" keyboard="console_keyboard"/>
-
-		<!-- Developer builds can send to the shell instead -->
-		<lv_checkbox name="shell_toggle" translation_tag="tr.console.shell" ignore_layout="true" align="top_right"
-					 x="-30" y="20">
-			<bind_flag_if_eq subject="presenter.shell_available" flag="hidden" ref_value="0"/>
-			<action trigger="value_changed" name="presenter.console.shell"/>
-		</lv_checkbox>
-
-		<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="40%" hidden="true"/>
+		<ds_dialog name="reference_dialog" bind_open="presenter.reference_open" title_tag="tr.console.reference"
+				   width="70%" height="85%" flex_flow="column">
+			<action trigger="dismissed" name="presenter.console.close_reference"/>
+			<ds_textarea name="search" one_line="true" placeholder_tag="tr.console.search_placeholder" width="100%"
+						 style_text_align="left" bind_text="presenter.search" keyboard_mode="text_upper">
+				<action trigger="value_changed" name="presenter.console.search"/>
+			</ds_textarea>
+			<ds_list name="list" list="presenter.gcodes" item="console_gcode" windowed="true" item_height="44"
+					 width="100%" flex_grow="1"/>
+		</ds_dialog>
 	</view>
 </component>

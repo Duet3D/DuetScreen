@@ -291,6 +291,14 @@ namespace UI::Themes
 		Style file_crumb_current; // The open folder, last in the path: as tall as a file_crumb, so the path's height
 								  // doesn't change
 
+		/* Console */
+		Style console_line;			// A line of the console: its time, then its text, with room on the left for an edge
+		Style console_line_command; // A command sent from the screen: emphasised
+		Style console_line_success; // A success: edged in the success colour
+		Style console_line_warning; // A warning: edged and tinted in the warning colour
+		Style console_line_error;	// An error: edged and tinted in the error colour
+		Style console_time;			// When a line arrived: muted, ahead of its text
+
 		/* Move */
 		Style unhomed; // Unhomed axes in the move view
 

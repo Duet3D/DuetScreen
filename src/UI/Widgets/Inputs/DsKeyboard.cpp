@@ -57,7 +57,7 @@ namespace UI::Xml
 			 .description = "An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it up and "
 							"types into it, so it is usually written `hidden=\"true\"`; or, with `textarea`, it always "
 							"types into one box. Its OK key raises `ready`.",
-			 .example = R"(<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="200"/>)",
+			 .example = R"(<ds_keyboard name="serial_keyboard" mode="text_upper" width="100%" height="200"/>)",
 			 .attributes = {{"mode", "Key layout: `text` (default), `text_upper` or `number`"},
 							{"textarea",
 							 "Always type into the text box of this name: the nearest one around the keyboard, written "

@@ -93,7 +93,8 @@ namespace UI::Xml::KeyboardRoom
 		{
 			return;
 		}
-		// A keyboard laid out in the container (the console's) takes its room already; only one over it needs more
+		// A keyboard laid out in the container (the hardware test's) takes its room already; only one over it needs
+		// more
 		const bool laidOutInside = isInside(keyboard, container) && !lv_obj_has_flag(keyboard, LV_OBJ_FLAG_FLOATING);
 		lv_area_t area;
 		lv_obj_get_coords(container, &area);

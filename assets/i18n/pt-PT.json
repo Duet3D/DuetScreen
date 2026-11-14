@@ -60,6 +60,8 @@
     },
     "console": {
       "input_placeholder": "Introduzir comando G-code",
+      "reference": "Referência de G-code",
+      "search_placeholder": "Procurar por código ou pelo que faz",
       "shell": "Modo Shell"
     },
     "control": {

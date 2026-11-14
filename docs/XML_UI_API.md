@@ -84,15 +84,23 @@ From [ConsoleSource.cpp](../src/UI/Xml/Data/ConsoleSource.cpp).
 | Name | Type | Description |
 | --- | --- | --- |
 | `source.console.lines` | list | What the console shows, oldest first, at most MAX_RESPONSE_LINES |
+| `source.console.recent` | list | The commands sent from the console lately, newest first, each once, at most ConsoleSource::MAX_RECENT |
 
 Each row of `source.console.lines`:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
-| `row.time` | text | When it arrived, e.g. "[12:34:56]   " |
-| `row.command` | text | A command sent, e.g. "> M115"; empty for a response |
-| `row.text` | text | A response or log message; empty for a command |
+| `row.time` | text | When it arrived, e.g. "12:34:56" |
+| `row.kind` | int | What it is: 0 a response or message, 1 a command sent, 2 a success, 3 a warning, 4 an error |
+| `row.text` | text | The command sent, e.g. "M115", or the response or message |
+
+Each row of `source.console.recent`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.command` | text | The command, e.g. "G28" |
 
 ### customise
 
@@ -313,10 +321,11 @@ Used by `console`, `console_command_list`, `console_input`.
 | Name | Type | Description |
 | --- | --- | --- |
 | `presenter.input` | text | What is typed, kept equal to the text box so picking a G-code can replace it |
-| `presenter.commands_shown` | int | 1 when the G-code list is showing, 0 when it is folded away; remembered |
+| `presenter.search` | text | What the G-code reference is searched for |
+| `presenter.reference_open` | int | 1 while the G-code reference dialog is open |
 | `presenter.shell_available` | int | 1 if this build can run shell commands (ENABLE_CONSOLE_SHELL, e.g. developer builds) |
 | `presenter.shell` | int | 1 while what is sent goes to the shell instead of the Duet |
-| `presenter.gcodes` | list | The G-codes starting with the first word typed |
+| `presenter.gcodes` | list | The G-codes the search matches: their code starts with it, or their description contains it, ignoring case; every G-code while the search is empty |
 
 Each row of `presenter.gcodes`:
 
@@ -329,11 +338,14 @@ Each row of `presenter.gcodes`:
 | Action | Description |
 | --- | --- |
 | `presenter.console.clear` | Empty the text box |
-| `presenter.console.input` | What is typed changed to the text box's text (`value_changed` on it): narrow the G-code list to match |
-| `presenter.console.pick` | Put the G-code in the text box. From a row of `gcodes`. |
+| `presenter.console.close_reference` | Close the G-code reference (`dismissed` on its dialog) |
+| `presenter.console.input` | What is typed changed to the text box's text (`value_changed` on it) |
+| `presenter.console.open_reference` | Open the G-code reference, searched for the first word typed |
+| `presenter.console.pick` | Put the G-code in the text box and close the reference. From a row of `gcodes`. |
+| `presenter.console.recall` | Put a recent command in the text box, to send again. From a row of `source.console.recent`. |
+| `presenter.console.search` | Search the reference for the search box's text (`value_changed` on it) |
 | `presenter.console.send` | Send what is typed: to the shell while `shell` is 1, else to the printer as G-code |
 | `presenter.console.shell` | Send to the shell while the edited value is non-zero (`value_changed` on a checkbox), if `shell_available` |
-| `presenter.console.toggle_commands` | Show or fold away the G-code list, and remember which |
 
 ### customise
 
@@ -1429,7 +1441,7 @@ An on-screen keyboard with DuetScreen's key layouts. A `<ds_textarea>` brings it
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_keyboard name="console_keyboard" mode="text_upper" width="100%" height="200"/>
+<ds_keyboard name="serial_keyboard" mode="text_upper" width="100%" height="200"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_keyboard.png)
@@ -2027,7 +2039,7 @@ At its smallest, 458×278 px:
 
 #### console_command_list
 
-**GCode command list**: Every G-code with what it does; tap one to put it in the console's input
+**G-code reference**: Every G-code with what it does; tap one to put it in the console's input
 
 In Console; placed in `dashboard`; component `console_command_list` ([console_command_list.json](../assets/ui/widgets/console/console_command_list.json)). In a free layout it is 458×278 px, and at least 272×136 px.
 
@@ -2891,11 +2903,12 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `babystep_dialog` | `babystep_dialog` |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `babystep_step` |  |  | `babystep` | [babystep_step.xml](../assets/ui/components/common/babystep_step.xml) |
 | [`console`](#console) | `console` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
-| `console_command_list` | `console` |  | `console`, `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
-| `console_gcode` |  |  | `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
+| `console_command_list` | `console` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
+| `console_gcode` |  |  | `console`, `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
 | `console_input` | `console` | `keyboard` | `console`, `console_input` | [console_input.xml](../assets/ui/components/console/console_input.xml) |
 | `console_line` |  |  | `console`, `console_log` | [console_line.xml](../assets/ui/components/console/console_line.xml) |
 | `console_log` |  |  | `console_log` | [console_log.xml](../assets/ui/components/console/console_log.xml) |
+| `console_recent` |  |  | `console` | [console_recent.xml](../assets/ui/components/console/console_recent.xml) |
 | [`control`](#control) |  |  | `home` | [control.xml](../assets/ui/components/control/control.xml) |
 | [`customise`](#home) | `customise` |  | `home` | [customise.xml](../assets/ui/components/customise/customise.xml) |
 | `customise_catalogue_category` |  |  | `customise` | [customise_catalogue_category.xml](../assets/ui/components/customise/customise_catalogue_category.xml) |
@@ -3256,6 +3269,12 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `folder_icon` | ![folder_icon](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/folder_icon.png) | recolor=#primary recolor_opa=100% |
 | `file_crumb` | ![file_crumb](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/file_crumb.png) | bg_color=#bg bg_opa=100% border_color=#primary border_width=#border_width border_opa=100% border_side=full pad_all=#pad |
 | `file_crumb_current` |  | pad_all=#pad border_width=#border_width border_opa=0 border_side=full |
+| `console_line` | ![console_line](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_line.png) | bg_opa=0 radius=0 border_side=left border_width=3 border_opa=0 shadow_width=0 outline_width=0 pad_left=5 pad_right=#pad pad_ver=#pad_small pad_column=#pad_large |
+| `console_line_command` | ![console_line_command](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_line_command.png) | text_font=font_emphasis |
+| `console_line_success` | ![console_line_success](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_line_success.png) | border_side=left border_width=3 border_color=#success border_opa=100% |
+| `console_line_warning` | ![console_line_warning](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_line_warning.png) | border_side=left border_width=3 border_color=#warning border_opa=100% bg_color=#warning bg_opa=12% |
+| `console_line_error` | ![console_line_error](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_line_error.png) | border_side=left border_width=3 border_color=#error border_opa=100% bg_color=#error bg_opa=15% |
+| `console_time` | ![console_time](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/console_time.png) | text_color=#text_muted text_font=font_subdued pad_top=1 |
 | `unhomed` |  | bg_color=#secondary border_color=#secondary |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |

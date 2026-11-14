@@ -162,8 +162,6 @@ extern const StorageKey<std::chrono::milliseconds> ID_NOTIFICATION_TIMEOUT;
 extern const StorageKey<ResponseType> ID_NOTIFICATION_LEVEL;
 extern const StorageKey<bool> ID_NOTIFICATION_AUTO_CLOSE_ERROR;
 
-extern const StorageKey<bool> ID_UI_CONSOLE_COMMAND_LIST_COLLAPSED;
-
 extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_BABYSTEP_AMOUNT;
 extern const StorageKey<std::vector<float>, std::vector<float> (*)()> ID_MOVE_DISTANCES;
 extern const StorageKey<std::vector<uint32_t>, std::vector<uint32_t> (*)()> ID_MOVE_FEEDRATES;

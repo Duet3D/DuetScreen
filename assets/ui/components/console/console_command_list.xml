@@ -1,30 +1,13 @@
 <!--
-  The console's G-code reference: a list that narrows as the user types, and a button that folds it away to just
-  itself, or opens it again. Inside console.xml it shares the console's presenter, so the list follows what is typed
-  there; placed on its own (the `console_command_list` widget) it has a console presenter of its own.
+  The G-code reference as a list: every G-code and what it does. It is the `console_command_list` widget, with a
+  console presenter of its own; the console page shows the same rows in its reference dialog (console.xml).
 
   Fields and actions: src/UI/Presenters/Console/ConsolePresenter.h
 -->
 <component presenter="console">
-	<styles>
-		<style name="commands_open" flex_grow="10"/>
-		<!-- Folded away, the list is as narrow as its button -->
-		<style name="commands_folded" flex_grow="1" min_width="content"/>
-	</styles>
-
-	<!-- Its width comes from the styles above: a flex_grow attribute where it is used would override them -->
-	<view extends="lv_obj" height="100%" flex_flow="column">
-		<bind_style name="commands_open" subject="presenter.commands_shown" ref_value="1"/>
-		<bind_style name="commands_folded" subject="presenter.commands_shown" ref_value="0"/>
-		<ds_list name="list" list="presenter.gcodes" item="console_gcode" windowed="true" item_height="30"
-				 item_width="content" width="100%" height="100%" flex_grow="1" scroll_dir="all">
-			<bind_flag_if_eq subject="presenter.commands_shown" flag="hidden" ref_value="0"/>
-		</ds_list>
-		<!-- Over the list's corner while it shows; on its own while it is folded away -->
-		<ds_button name="command_visibility" text="&#xF00B;" align="top_right">
-			<bind_state_if_eq subject="presenter.commands_shown" state="checked" ref_value="1"/>
-			<bind_flag_if_eq subject="presenter.commands_shown" flag="floating" ref_value="1"/>
-			<action trigger="clicked" name="presenter.console.toggle_commands"/>
-		</ds_button>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<ds_list name="list" list="presenter.gcodes" item="console_gcode" windowed="true" item_height="44"
+				 width="100%" flex_grow="1"/>
 	</view>
 </component>

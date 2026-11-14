@@ -8,7 +8,7 @@
  *    (DialogHost::makeRoom());
  *  - on a page, the nearest scrolling container around the box that a keyboard floating over it covers gets that
  *    much more padding at its bottom, and the box is scrolled into view; a keyboard laid out in the container (the
- *    console's) takes its room already.
+ *    hardware test's) takes its room already.
  *
  * Nothing in XML asks for it. When the keyboard goes, the room is given back.
  */

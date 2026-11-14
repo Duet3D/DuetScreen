@@ -45,7 +45,6 @@
 			<xs:enumeration value="presenter.chroma"/>
 			<xs:enumeration value="presenter.colour"/>
 			<xs:enumeration value="presenter.colour_shown"/>
-			<xs:enumeration value="presenter.commands_shown"/>
 			<xs:enumeration value="presenter.confirmations"/>
 			<xs:enumeration value="presenter.connected"/>
 			<xs:enumeration value="presenter.connected_message"/>
@@ -147,6 +146,7 @@
 			<xs:enumeration value="presenter.primary_hue"/>
 			<xs:enumeration value="presenter.progress_source"/>
 			<xs:enumeration value="presenter.progress_sources"/>
+			<xs:enumeration value="presenter.reference_open"/>
 			<xs:enumeration value="presenter.reset_text"/>
 			<xs:enumeration value="presenter.response.open"/>
 			<xs:enumeration value="presenter.response.progress"/>
@@ -161,6 +161,7 @@
 			<xs:enumeration value="presenter.save_problem"/>
 			<xs:enumeration value="presenter.saved"/>
 			<xs:enumeration value="presenter.screensaver_timeout"/>
+			<xs:enumeration value="presenter.search"/>
 			<xs:enumeration value="presenter.second_usb_channel"/>
 			<xs:enumeration value="presenter.secondary.chroma"/>
 			<xs:enumeration value="presenter.secondary.lightness"/>
@@ -292,6 +293,7 @@
 			<xs:enumeration value="row.y1"/>
 			<xs:enumeration value="row.y2"/>
 			<xs:enumeration value="source.console.lines"/>
+			<xs:enumeration value="source.console.recent"/>
 			<xs:enumeration value="source.customise.can_configure"/>
 			<xs:enumeration value="source.customise.can_remove"/>
 			<xs:enumeration value="source.customise.can_undo"/>
@@ -371,6 +373,7 @@
 			<xs:enumeration value="presenter.tools"/>
 			<xs:enumeration value="row.widgets"/>
 			<xs:enumeration value="source.console.lines"/>
+			<xs:enumeration value="source.console.recent"/>
 			<xs:enumeration value="source.jog.distances"/>
 			<xs:enumeration value="source.jog.feedrates"/>
 			<xs:enumeration value="source.temperature.temperatures"/>
@@ -424,11 +427,14 @@
 			<xs:enumeration value="presenter.babystep.up"/>
 			<xs:enumeration value="presenter.choice.choose"/>
 			<xs:enumeration value="presenter.console.clear"/>
+			<xs:enumeration value="presenter.console.close_reference"/>
 			<xs:enumeration value="presenter.console.input"/>
+			<xs:enumeration value="presenter.console.open_reference"/>
 			<xs:enumeration value="presenter.console.pick"/>
+			<xs:enumeration value="presenter.console.recall"/>
+			<xs:enumeration value="presenter.console.search"/>
 			<xs:enumeration value="presenter.console.send"/>
 			<xs:enumeration value="presenter.console.shell"/>
-			<xs:enumeration value="presenter.console.toggle_commands"/>
 			<xs:enumeration value="presenter.customise.add"/>
 			<xs:enumeration value="presenter.customise.ask_delete"/>
 			<xs:enumeration value="presenter.customise.cancel"/>
@@ -683,6 +689,7 @@
 			<xs:enumeration value="console_input"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="console_log"/>
+			<xs:enumeration value="console_recent"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
@@ -816,6 +823,7 @@
 			<xs:enumeration value="console_input"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="console_log"/>
+			<xs:enumeration value="console_recent"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
@@ -949,6 +957,7 @@
 			<xs:enumeration value="console_input"/>
 			<xs:enumeration value="console_line"/>
 			<xs:enumeration value="console_log"/>
+			<xs:enumeration value="console_recent"/>
 			<xs:enumeration value="control"/>
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
@@ -1180,6 +1189,12 @@
 			<xs:enumeration value="circle"/>
 			<xs:enumeration value="clip_corner"/>
 			<xs:enumeration value="console_btn_anim"/>
+			<xs:enumeration value="console_line"/>
+			<xs:enumeration value="console_line_command"/>
+			<xs:enumeration value="console_line_error"/>
+			<xs:enumeration value="console_line_success"/>
+			<xs:enumeration value="console_line_warning"/>
+			<xs:enumeration value="console_time"/>
 			<xs:enumeration value="customise_frame"/>
 			<xs:enumeration value="customise_frame_selected"/>
 			<xs:enumeration value="customise_guide"/>
@@ -1380,6 +1395,8 @@
 			<xs:enumeration value="tr.connection_method.unknown"/>
 			<xs:enumeration value="tr.connection_method.usb"/>
 			<xs:enumeration value="tr.console.input_placeholder"/>
+			<xs:enumeration value="tr.console.reference"/>
+			<xs:enumeration value="tr.console.search_placeholder"/>
 			<xs:enumeration value="tr.console.shell"/>
 			<xs:enumeration value="tr.control.fan_tab"/>
 			<xs:enumeration value="tr.control.heightmap_tab"/>
@@ -8656,13 +8673,20 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_line.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="lv_spangroup.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="console_log">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_log.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="console_recent">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/console/console_recent.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

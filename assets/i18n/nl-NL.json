@@ -60,6 +60,8 @@
     },
     "console": {
       "input_placeholder": "Voer G-code commando in",
+      "reference": "G-code-overzicht",
+      "search_placeholder": "Zoek op code of op wat hij doet",
       "shell": "Shell-modus"
     },
     "control": {

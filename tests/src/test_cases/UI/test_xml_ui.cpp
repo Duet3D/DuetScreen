@@ -6,6 +6,8 @@
  * covered by test_home_view.cpp (control_view/fan.png), these tests check behaviour and structure.
  */
 
+#include "Subscribers/ResponseSubscribers.h"
+#include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Styles/Theme.h"
@@ -504,6 +506,39 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 	deliverModelEvents();
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 1)).getValue(), 80.0f);
 	EXPECT_FLOAT_EQ(slider(fanCard(view, 2)).getValue(), 0.0f);
+}
+
+TEST_F(TestXmlUi, ConsoleLogWidgetScrollsWhenDragged)
+{
+	auto& view = makeView("console_log");
+	for (int i = 0; i < 40; i++)
+	{
+		Model::get().post<EventType::Response>(ResponseType::INFO, fmt::format("response {:d}", i));
+	}
+	deliverModelEvents();
+	lv_obj_t* output = find(view, "output");
+	ASSERT_NE(output, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	const int32_t before = lv_obj_get_scroll_y(output);
+	ASSERT_GT(before, 0) << "it follows the newest line";
+
+	// Dragged down, it shows earlier lines
+	lv_indev_t* mouse = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	lv_area_t area;
+	lv_obj_get_coords(output, &area);
+	const lv_point_t from{(area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2};
+	lv_test_mouse_move_to(from.x, from.y);
+	lv_test_mouse_press();
+	lv_indev_read(mouse);
+	for (int step = 1; step <= 10; step++)
+	{
+		lv_test_mouse_move_to(from.x, from.y + 15 * step);
+		lv_indev_read(mouse);
+	}
+	lv_test_mouse_release();
+	lv_indev_read(mouse);
+	lv_timer_handler();
+	EXPECT_LT(lv_obj_get_scroll_y(output), before);
 }
 
 TEST_F(TestXmlUi, TwoViewsShareOneModel)
