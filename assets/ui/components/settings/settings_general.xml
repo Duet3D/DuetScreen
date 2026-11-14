@@ -44,6 +44,21 @@
 				</ds_toggle>
 			</ds_setting>
 			<!-- One of a few: the chosen one is checked -->
+			<ds_setting name="units" title_tag="tr.settings.units" hint_tag="tr.settings.hints.units">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<ds_button name="mm" translation_tag="tr.settings.units_options.mm">
+						<style name="setting_option"/>
+						<bind_state_if_eq subject="source.settings.units" state="checked" ref_value="0"/>
+						<action trigger="clicked" name="actions.settings.set" arg="units=0"/>
+					</ds_button>
+					<ds_button name="inches" translation_tag="tr.settings.units_options.inches">
+						<style name="setting_option"/>
+						<bind_state_if_eq subject="source.settings.units" state="checked" ref_value="1"/>
+						<action trigger="clicked" name="actions.settings.set" arg="units=1"/>
+					</ds_button>
+				</lv_obj>
+			</ds_setting>
 			<ds_setting name="job_progress_source" title_tag="tr.settings.job_progress_source"
 						hint_tag="tr.settings.hints.job_progress">
 				<lv_obj name="options">

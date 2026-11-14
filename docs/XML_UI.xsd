@@ -316,6 +316,7 @@
 			<xs:enumeration value="source.settings.system_monitor"/>
 			<xs:enumeration value="source.settings.theme"/>
 			<xs:enumeration value="source.settings.theme_options"/>
+			<xs:enumeration value="source.settings.units"/>
 			<xs:enumeration value="source.settings.usb_mode"/>
 			<xs:enumeration value="source.settings.usb_mode_options"/>
 			<xs:enumeration value="source.system.build_tools_shown"/>
@@ -1878,6 +1879,7 @@
 			<xs:enumeration value="tr.settings.hints.restart"/>
 			<xs:enumeration value="tr.settings.hints.screensaver"/>
 			<xs:enumeration value="tr.settings.hints.system_logging"/>
+			<xs:enumeration value="tr.settings.hints.units"/>
 			<xs:enumeration value="tr.settings.hints.upgrade"/>
 			<xs:enumeration value="tr.settings.icons"/>
 			<xs:enumeration value="tr.settings.job_progress_source"/>
@@ -1979,6 +1981,9 @@
 			<xs:enumeration value="tr.settings.tabs.notifications"/>
 			<xs:enumeration value="tr.settings.tabs.system"/>
 			<xs:enumeration value="tr.settings.theme"/>
+			<xs:enumeration value="tr.settings.units"/>
+			<xs:enumeration value="tr.settings.units_options.inches"/>
+			<xs:enumeration value="tr.settings.units_options.mm"/>
 			<xs:enumeration value="tr.settings.update"/>
 			<xs:enumeration value="tr.settings.upgrade_from_github"/>
 			<xs:enumeration value="tr.settings.upgrade_from_github_failed"/>

@@ -340,6 +340,11 @@
       "screensaver_timeout": "Salvapantallas tras",
       "show_confirmation_dialogs": "Confirmar antes de actuar",
       "move_machine_position_mode": "Movimientos absolutos en coordenadas de máquina",
+      "units": "Unidades",
+      "units_options": {
+        "mm": "mm",
+        "inches": "pulgadas"
+      },
       "job_progress_source": "Progreso del trabajo según",
       "job_progress_source_options": {
         "duration": "Duración",
@@ -427,6 +432,7 @@
         "language": "DuetScreen se reinicia para cambiar de idioma",
         "confirmations": "Preguntar antes de las acciones que cambian la máquina",
         "machine_coordinates": "Envía G53, por lo que se ignoran los desfases de trabajo",
+        "units": "Cómo muestra la pantalla distancias y velocidades. Los movimientos se convierten a las unidades del Duet (G20/G21)",
         "job_progress": "Lo que mide la barra de progreso",
         "screensaver": "Segundos sin tocar antes de que la pantalla se atenúe; 0 para nunca",
         "colours": "Tonos de acento y croma",

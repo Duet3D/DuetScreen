@@ -12,6 +12,7 @@
 #include "UI/Xml/Dialogs/Prompts.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
+#include "utils/UnitSystem.h"
 #include <array>
 #include <iterator>
 #include <string>
@@ -157,11 +158,31 @@ namespace UI::GeneralSettings
 			 .description = "1 if actions on the machine are confirmed first",
 			 .read = [] { return StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS) ? 1 : 0; },
 			 .write = [](int32_t on) { StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, on != 0); }});
-		Xml::Settings::add(
-			{.name = "machine_position_mode",
-			 .description = "1 if absolute moves use machine coordinates (G53)",
-			 .read = [] { return StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE) ? 1 : 0; },
-			 .write = [](int32_t on) { StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, on != 0); }});
+		Xml::Settings::add({.name = "machine_position_mode",
+							.description = "1 if absolute moves use machine coordinates (G53)",
+							.read = [] { return StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE) ? 1 : 0; },
+							.write =
+								[](int32_t on)
+							{
+								StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, on != 0);
+								Xml::DataSources::updateAll(); // The positions shown change
+							}});
+		Xml::Settings::add({.name = "units",
+							.description =
+								"The unit the screen shows distances and speeds in: 0 millimetres, 1 inches. "
+								"The Duet's own (G20/G21) is unaffected: moves are converted to it",
+							.read = [] { return static_cast<int32_t>(StorageHelper::getData(ID_UNIT_SYSTEM)); },
+							.write =
+								[](int32_t index)
+							{
+								if (index == static_cast<int32_t>(Units::UnitSystem::Metric) ||
+									index == static_cast<int32_t>(Units::UnitSystem::Imperial))
+								{
+									StorageHelper::setData(ID_UNIT_SYSTEM, Units::UnitSystem(index));
+									// Every position, distance and speed shown changes unit
+									Xml::DataSources::updateAll();
+								}
+							}});
 		Xml::Settings::add({.name = "progress_source",
 							.description = "Index of how a job's progress is worked out",
 							.read = [] { return static_cast<int32_t>(StorageHelper::getData(ID_JOB_PROGRESS_SOURCE)); },

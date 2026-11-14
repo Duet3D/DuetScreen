@@ -340,6 +340,11 @@
       "screensaver_timeout": "Bildschirmschoner nach",
       "show_confirmation_dialogs": "Vor Aktionen nachfragen",
       "move_machine_position_mode": "Absolute Bewegungen in Maschinenkoordinaten",
+      "units": "Einheiten",
+      "units_options": {
+        "mm": "mm",
+        "inches": "Zoll"
+      },
       "job_progress_source": "Auftragsfortschritt nach",
       "job_progress_source_options": {
         "duration": "Dauer",
@@ -427,6 +432,7 @@
         "language": "DuetScreen startet neu, um die Sprache zu wechseln",
         "confirmations": "Vor Aktionen, die die Maschine verändern, zuerst nachfragen",
         "machine_coordinates": "Sendet G53, sodass Werkstück-Nullpunkte ignoriert werden",
+        "units": "Wie der Bildschirm Wege und Geschwindigkeiten zeigt. Bewegungen werden in die Einheiten des Duet umgerechnet (G20/G21)",
         "job_progress": "Was der Fortschrittsbalken misst",
         "screensaver": "Sekunden ohne Berührung, bis der Bildschirm dunkler wird; 0 für nie",
         "colours": "Akzentfarbtöne und Chroma",

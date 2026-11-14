@@ -1230,6 +1230,43 @@ TEST_F(TestHomeViewWithData, MoveTabSetsWorkZeroOnACnc)
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
+TEST_F(TestHomeViewWithData, TheScreenShowsItsOwnUnitsWhateverTheDuetUses)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"move":{"axes":[{"userPosition":25.4,"machinePosition":25.4,"babystep":0.254}]}}})"
+		"\n");
+	deliverModelEvents();
+	const auto firstTile = [&]
+	{
+		lv_obj_t* tiles = lv_obj_find_by_name(lv_obj_find_by_name(move, "positions"), "list");
+		return std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(tiles, 0), "position")));
+	};
+	EXPECT_EQ(firstTile(), "25.40");
+
+	// Shown in inches, while the Duet stays in millimetres (G21): positions and the jog step are in inches
+	auto* settings = UI::Xml::DataSources::find<UI::Xml::SettingsSource>();
+	ASSERT_NE(settings, nullptr);
+	ASSERT_TRUE(settings->set("units", 1.0f));
+	deliverModelEvents();
+	EXPECT_EQ(firstTile(), "1.00");
+	EXPECT_NE(std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(move, "distance"), "title")))
+				  .find(_("units.inches")),
+			  std::string::npos)
+		<< "the step's title says inches";
+
+	// A jog of 10 inches goes to the Duet in its millimetres
+	lv_obj_send_event(lv_obj_find_by_name(move, "x_increment"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_NE(sent.back().find("X254"), std::string::npos) << sent.back();
+
+	ASSERT_TRUE(settings->set("units", 0.0f));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
 TEST_F(TestHomeViewWithData, MacroView)
 {
 	openFilesTab(0);

@@ -340,6 +340,11 @@
       "screensaver_timeout": "Schermbeveiliging na",
       "show_confirmation_dialogs": "Bevestigen voor handelingen",
       "move_machine_position_mode": "Absolute bewegingen in machinecoördinaten",
+      "units": "Eenheden",
+      "units_options": {
+        "mm": "mm",
+        "inches": "inch"
+      },
       "job_progress_source": "Voortgang van de taak volgens",
       "job_progress_source_options": {
         "duration": "Duur",
@@ -427,6 +432,7 @@
         "language": "DuetScreen herstart om van taal te wisselen",
         "confirmations": "Eerst vragen bij handelingen die de machine veranderen",
         "machine_coordinates": "Stuurt G53, zodat werkstuk-offsets genegeerd worden",
+        "units": "Hoe het scherm afstanden en snelheden toont. Bewegingen worden omgerekend naar de eenheden van de Duet (G20/G21)",
         "job_progress": "Wat de voortgangsbalk meet",
         "screensaver": "Seconden zonder aanraking voordat het scherm dimt; 0 voor nooit",
         "colours": "Accenttinten en chroma",

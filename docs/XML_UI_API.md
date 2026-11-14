@@ -360,6 +360,7 @@ From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
 | `source.settings.keyboard_layout_options` | text | What `source.settings.keyboard_layout` can be, one per line, translated |
 | `source.settings.confirmations` | int | 1 if actions on the machine are confirmed first (actions.settings.set) |
 | `source.settings.machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) (actions.settings.set) |
+| `source.settings.units` | int | The unit the screen shows distances and speeds in: 0 millimetres, 1 inches. The Duet's own (G20/G21) is unaffected: moves are converted to it (actions.settings.set) |
 | `source.settings.progress_source` | int | Index of how a job's progress is worked out (actions.settings.set) |
 | `source.settings.progress_source_options` | text | What `source.settings.progress_source` can be, one per line, translated |
 | `source.settings.theme` | int | Index of the theme in use (actions.settings.set) |
