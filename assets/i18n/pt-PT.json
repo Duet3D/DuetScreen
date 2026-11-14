@@ -362,7 +362,9 @@
         "error": "Erro"
       },
       "customise": "Painel",
-      "customise_start": "Personalizar"
+      "customise_start": "Personalizar",
+      "colours": "Cores",
+      "colours_open": "Alterar"
     },
     "side_bar": {
       "back": "Voltar",

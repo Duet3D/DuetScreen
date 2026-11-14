@@ -1066,6 +1066,15 @@ TEST_F(TestHomeViewWithData, SettingsView)
 	settings.setActiveTab(2);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display.png")
 
+	// The colours are a page of their own, opened from Display; the back key goes back to Display
+	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
+	lv_obj_send_event(lv_obj_find_by_name(display, "colours"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/colours.png")
+	UI::back();
+	runTimers();
+	EXPECT_TRUE(UI::findView("settings_display")->isShownOnScreen());
+
 	settings.setActiveTab(3);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
 }

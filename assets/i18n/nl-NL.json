@@ -362,7 +362,9 @@
         "error": "Fout"
       },
       "customise": "Dashboard",
-      "customise_start": "Aanpassen"
+      "customise_start": "Aanpassen",
+      "colours": "Kleuren",
+      "colours_open": "Wijzigen"
     },
     "side_bar": {
       "back": "Terug",

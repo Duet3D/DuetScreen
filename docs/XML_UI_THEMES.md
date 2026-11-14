@@ -68,6 +68,7 @@ In dark mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/3d/widgets/ds_scope.png) |
@@ -111,6 +112,7 @@ In light mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_scope.png) |
@@ -158,6 +160,7 @@ In light mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/flat/widgets/ds_scope.png) |
@@ -201,6 +204,7 @@ Consts: `#data_colours=grey`
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/grey/widgets/ds_scope.png) |
@@ -252,6 +256,7 @@ In dark mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/industrial/widgets/ds_scope.png) |
@@ -299,6 +304,7 @@ In light mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/neon/widgets/ds_scope.png) |
@@ -350,6 +356,7 @@ In dark mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/retro/widgets/ds_scope.png) |
@@ -401,6 +408,7 @@ In dark mode:
 | [`ds_keyboard`](XML_UI_API.md#ds_keyboard) | ![ds_keyboard](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_keyboard.png) |
 | [`ds_layout`](XML_UI_API.md#ds_layout) | ![ds_layout](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_layout.png) |
 | [`ds_move_handle`](XML_UI_API.md#ds_move_handle) | ![ds_move_handle](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_move_handle.png) |
+| [`ds_pages`](XML_UI_API.md#ds_pages) | ![ds_pages](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_pages.png) |
 | [`ds_password_toggle`](XML_UI_API.md#ds_password_toggle) | ![ds_password_toggle](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_password_toggle.png) |
 | [`ds_plot`](XML_UI_API.md#ds_plot) | ![ds_plot](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_plot.png) |
 | [`ds_scope`](XML_UI_API.md#ds_scope) | ![ds_scope](../tests/ref_imgs/xml_ui_api/themes/soft/widgets/ds_scope.png) |

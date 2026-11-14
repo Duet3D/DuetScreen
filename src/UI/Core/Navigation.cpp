@@ -15,6 +15,7 @@ namespace UI
 	static ViewList_t s_returnableScreens;
 	static std::map<std::string, LvObjPtr, std::less<>> s_namedViews; // Views by name
 	static DialogLayer* s_dialogs = nullptr;						  // The dialog surface, if there is one
+	static ViewList_t s_backLayers;									  // See addBackLayer(), the latest last
 
 	static bool inVector(ViewList_t& vec, LvObjPtr item)
 	{
@@ -61,13 +62,16 @@ namespace UI
 	 *
 	 * 1. Logs the back button press event.
 	 *
-	 * 2. Retrieves the current screen. If there is no current screen, logs a warning and returns.
+	 * 2. Goes back a step of the open dialog, or else of the latest back layer on screen (addBackLayer()), if either
+	 * can.
 	 *
-	 * 3. If the current screen handles the back action, returns.
+	 * 3. Retrieves the current screen. If there is no current screen, logs a warning and returns.
 	 *
-	 * 4. If there are open screens, closes the last open screen.
+	 * 4. If the current screen handles the back action, returns.
 	 *
-	 * 5. If there are returnable screens, opens the last returnable screen.
+	 * 5. If there are open screens, closes the last open screen.
+	 *
+	 * 6. If there are returnable screens, opens the last returnable screen.
 	 */
 	void back()
 	{
@@ -78,6 +82,13 @@ namespace UI
 		if (s_dialogs != nullptr && s_dialogs->back())
 		{
 			return;
+		}
+		for (auto it = s_backLayers.rbegin(); it != s_backLayers.rend(); ++it)
+		{
+			if ((*it)->isShownOnScreen() && (*it)->back())
+			{
+				return;
+			}
 		}
 
 		LvObjPtr currentScreen = getCurrentScreen();
@@ -353,6 +364,19 @@ namespace UI
 			return removed;
 		}
 	} // namespace detail
+
+	void addBackLayer(LvObj* layer)
+	{
+		UI_LOCK();
+		removeFromVector(s_backLayers, layer);
+		s_backLayers.push_back(layer);
+	}
+
+	void removeBackLayer(LvObj* layer)
+	{
+		UI_LOCK();
+		removeFromVector(s_backLayers, layer);
+	}
 
 	void setDialogLayer(DialogLayer* layer)
 	{

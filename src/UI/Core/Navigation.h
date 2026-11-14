@@ -34,6 +34,16 @@ namespace UI
 		virtual bool isOpen() const = 0;
 	};
 
+	/**
+	 * Widgets with steps of their own that the back key goes back through while they are on screen, such as a stack of
+	 * pages (<ds_pages>). The back key goes back a dialog step first; then asks the most recently added of these that
+	 * is on screen to go back (LvObj::back(), true if it did); then goes back a screen.
+	 */
+	void addBackLayer(LvObj* layer);
+
+	/** Forget `layer` (see addBackLayer()). Call before destroying it. */
+	void removeBackLayer(LvObj* layer);
+
 	/** Make `layer` the dialogs navigation goes through (nullptr for none) */
 	void setDialogLayer(DialogLayer* layer);
 

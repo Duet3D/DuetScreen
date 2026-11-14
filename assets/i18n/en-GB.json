@@ -363,7 +363,9 @@
         "error": "Error"
       },
       "customise": "Dashboard",
-      "customise_start": "Customise"
+      "customise_start": "Customise",
+      "colours": "Colours",
+      "colours_open": "Change"
     },
     "side_bar": { /* Side bar buttons */
       "back": "Back",

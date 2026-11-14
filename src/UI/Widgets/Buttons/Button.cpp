@@ -178,6 +178,34 @@ namespace UI
 		m_icon.setVisible(icon_loaded);
 	}
 
+	void Button::setIconBeforeText(bool before, lv_coord_t iconSize)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (before)
+		{
+			setFlexFlow(LV_FLEX_FLOW_ROW);
+			setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			m_icon.setFlexGrow(0);
+			m_icon.setSize(iconSize, iconSize);
+			// The text takes the room the icon leaves, but never less than it needs, so a button sized to its
+			// content fits both
+			m_label.setFlexGrow(1);
+			m_label.setMinWidth(LV_SIZE_CONTENT);
+			m_label.setStyleTextAlign(LV_TEXT_ALIGN_LEFT);
+		}
+		else
+		{
+			setFlexFlow(LV_FLEX_FLOW_COLUMN);
+			setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			m_icon.setFlexGrow(1);
+			m_icon.setSize(LV_PCT(100), LV_SIZE_CONTENT);
+			m_label.setFlexGrow(0);
+			m_label.setMinWidth(0);
+			m_label.setStyleTextAlign(LV_TEXT_ALIGN_CENTER);
+		}
+	}
+
 	void Button::setCheckable(bool checkable)
 	{
 		ZoneScoped;

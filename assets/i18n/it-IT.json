@@ -362,7 +362,9 @@
         "error": "Errore"
       },
       "customise": "Dashboard",
-      "customise_start": "Personalizza"
+      "customise_start": "Personalizza",
+      "colours": "Colori",
+      "colours_open": "Modifica"
     },
     "side_bar": {
       "back": "Indietro",

@@ -1,7 +1,7 @@
 <!--
-  The Display settings tab: the theme, font and icons, a preview of the theme (settings_theme_preview.xml), animations and the
-  screen's rotation. Each is applied as soon as it is changed. First, a button to customise the home screen (the global
-  action customise.start, src/UI/Presenters/Customise/CustomisePresenter.h).
+  The Display settings tab: the theme, font and icons, the way to the theme's colours (settings_theme_preview.xml, a page
+  of its own), animations and the screen's rotation. Each is applied as soon as it is changed. First, a button to
+  customise the home screen (the global action customise.start, src/UI/Presenters/Customise/CustomisePresenter.h).
 
   Fields and actions: src/UI/Presenters/Settings/DisplaySettingsPresenter.h
 -->
@@ -39,9 +39,14 @@
 						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						  style_grid_cell_row_pos="3" style_grid_cell_y_align="center"/>
 
-		<ds_view name="theme_preview" view="settings_theme_preview" shown="true" height="content"
-				 style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-				 style_grid_cell_row_pos="4" style_grid_cell_y_align="center"/>
+		<lv_label name="row_label_4" translation_tag="tr.settings.colours"
+				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"
+				  style_grid_cell_row_pos="4" style_grid_cell_y_align="center"/>
+		<ds_button name="colours" translation_tag="tr.settings.colours_open"
+				   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+				   style_grid_cell_row_pos="4" style_grid_cell_y_align="center">
+			<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
+		</ds_button>
 
 		<lv_label name="row_label_5" translation_tag="tr.settings.enable_animations"
 				  style_grid_cell_column_pos="0" style_grid_cell_x_align="end"

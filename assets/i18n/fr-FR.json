@@ -362,7 +362,9 @@
         "error": "Erreur"
       },
       "customise": "Tableau de bord",
-      "customise_start": "Personnaliser"
+      "customise_start": "Personnaliser",
+      "colours": "Couleurs",
+      "colours_open": "Modifier"
     },
     "side_bar": {
       "back": "Retour",

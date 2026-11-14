@@ -26,6 +26,7 @@
 #include "UI/Widgets/Layout/DsLayout.h"
 #include "UI/Widgets/Layout/DsList.h"
 #include "UI/Widgets/Layout/DsMoveHandle.h"
+#include "UI/Widgets/Layout/DsPages.h"
 #include "UI/Widgets/Layout/DsScope.h"
 #include "UI/Widgets/Layout/DsTabs.h"
 #include "UI/Widgets/Layout/DsView.h"
@@ -78,6 +79,7 @@ namespace UI::Xml::Widgets
 		DsLayout::registerXml();
 		DsList::registerXml();
 		DsMoveHandle::registerXml();
+		DsPages::registerXml();
 		DsPasswordToggle::registerXml();
 		DsPlot::registerXml();
 		DsPlotLayer::registerXml();

@@ -390,6 +390,7 @@
 			<xs:enumeration value="actions.navigation.back"/>
 			<xs:enumeration value="actions.navigation.home"/>
 			<xs:enumeration value="actions.navigation.open"/>
+			<xs:enumeration value="actions.navigation.open_page"/>
 			<xs:enumeration value="actions.tool.toggle"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
 			<xs:enumeration value="presenter.alert.choose"/>
@@ -987,6 +988,8 @@
 			<xs:enumeration value="ds_layout"/>
 			<xs:enumeration value="ds_list"/>
 			<xs:enumeration value="ds_move_handle"/>
+			<xs:enumeration value="ds_pages"/>
+			<xs:enumeration value="ds_pages-page"/>
 			<xs:enumeration value="ds_password_toggle"/>
 			<xs:enumeration value="ds_plot"/>
 			<xs:enumeration value="ds_plot_layer"/>
@@ -1767,6 +1770,8 @@
 			<xs:enumeration value="tr.settings.build_time"/>
 			<xs:enumeration value="tr.settings.buildroot_version"/>
 			<xs:enumeration value="tr.settings.clear_duetscreen_cache"/>
+			<xs:enumeration value="tr.settings.colours"/>
+			<xs:enumeration value="tr.settings.colours_open"/>
 			<xs:enumeration value="tr.settings.connectivity_header"/>
 			<xs:enumeration value="tr.settings.customise"/>
 			<xs:enumeration value="tr.settings.customise_start"/>
@@ -3226,6 +3231,14 @@
 		</xs:attribute>
 		<xs:attribute name="value" type="xs:string">
 			<xs:annotation><xs:documentation>With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `&lt;ds_list list=&quot;om.fans&quot; key=&quot;row.index&quot; value=&quot;2&quot; item=&quot;…&quot;/&gt;` shows fan 2</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_pages-page.attributes">
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>The page's title, shown over it, if there is no `title_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="title_tag" type="translation">
+			<xs:annotation><xs:documentation>Translation key for the page's title; follows language changes</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_password_toggle.attributes">
@@ -7140,6 +7153,23 @@
 		<xs:annotation><xs:documentation>A grip that moves the widget it is in around that widget's parent when dragged, e.g. a floating toolbar's. The first drag takes the widget out of its parent's layout; it is kept inside its parent. What the grip looks like is the XML inside it. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_pages">
+		<xs:annotation><xs:documentation>Pages that share one place, the first shown to start with. Each is a `&lt;ds_pages-page&gt;` inside it. `actions.navigation.open_page` from inside the stack slides the page it names in, under a header with the page's title and a button back to the page it came from; that button, or the back key while the stack is on screen, slides back. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ds_pages-page">
+		<xs:annotation><xs:documentation>One page of a `&lt;ds_pages&gt;`, written inside it, opened by its `name`. Its content is the page; the lv_obj attributes apply to the page. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_pages-page.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

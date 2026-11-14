@@ -193,29 +193,20 @@ namespace UI
 	void TabView::styleTabButton(TabButton& button)
 	{
 		const lv_style_t* edge = Themes::getLvglStyles().tab_btn;
-		Icon& icon = button.getIcon();
 		if (m_barSide == LV_DIR_LEFT || m_barSide == LV_DIR_RIGHT)
 		{
 			button.removeStyle(edge, LV_STATE_CHECKED);
-			button.setFlexFlow(LV_FLEX_FLOW_ROW);
-			button.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			button.setIconBeforeText(true, SIDE_TAB_ICON_SIZE);
 			button.setFlexGrow(0);
 			button.setSize(LV_PCT(100), LV_SIZE_CONTENT);
-			button.getLabel().setStyleTextAlign(LV_TEXT_ALIGN_LEFT);
-			icon.setFlexGrow(0);
-			icon.setSize(SIDE_TAB_ICON_SIZE, SIDE_TAB_ICON_SIZE);
 			button.setMinHeight(SIDE_TAB_MIN_HEIGHT);
 		}
 		else
 		{
 			button.addStyle(edge, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
-			button.setFlexFlow(LV_FLEX_FLOW_COLUMN);
-			button.setFlexAlign(LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+			button.setIconBeforeText(false);
 			button.setFlexGrow(1);
 			button.setSize(LV_PCT(100), LV_PCT(100));
-			button.getLabel().setStyleTextAlign(LV_TEXT_ALIGN_CENTER);
-			icon.setFlexGrow(1);
-			icon.setSize(LV_PCT(100), LV_SIZE_CONTENT);
 			button.setMinHeight(LV_SIZE_CONTENT);
 		}
 		button.setMinWidth(LV_SIZE_CONTENT);
