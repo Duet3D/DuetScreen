@@ -41,6 +41,15 @@ namespace UI::Xml::Api
 		std::vector<Field> fields; // What it publishes
 	};
 
+	/** A converter for object model names, written after '|' (see Om/Converters.h) */
+	struct OmConverter
+	{
+		std::string name;		 // e.g. "fixed"; empty for the default
+		std::string type;		 // What its subject holds: "int" or "text"
+		std::string argument;	 // What its argument is; empty if it takes none
+		std::string description; // What it gives
+	};
+
 	/** A presenter a component can name with `<component presenter="…">` */
 	struct Presenter
 	{
@@ -122,6 +131,8 @@ namespace UI::Xml::Api
 	struct Reference
 	{
 		std::string apiVersion;					  // UI API version, "major.minor"
+		std::vector<OmConverter> omConverters;	  // Converters for object model names, the default first
+		std::vector<Field> omRowFields;			  // Fields every row of an object model list has
 		std::vector<Source> sources;			  // Global data, by data source
 		std::vector<std::string> triggers;		  // What `<action trigger="…">` accepts
 		std::vector<Action> globalActions;		  // Actions every view can raise

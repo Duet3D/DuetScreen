@@ -154,6 +154,12 @@ namespace i18n
 		s_languageChangedCallback = std::move(callback);
 	}
 
+	const std::string* find(std::string_view tag)
+	{
+		const auto it = s_translationTable.find(tag);
+		return it == s_translationTable.end() ? nullptr : &it->second;
+	}
+
 	const std::string& translate(std::string_view tag)
 	{
 		ZoneScoped;

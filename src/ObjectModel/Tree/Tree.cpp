@@ -215,16 +215,18 @@ namespace OM
 		return changes;
 	}
 
-	void Tree::addListener(Listener listener)
+	size_t Tree::addListener(Listener listener)
 	{
 		std::lock_guard lock(m_listenersMutex);
-		m_listeners.push_back(std::move(listener));
+		const size_t id = m_nextListenerId++;
+		m_listeners.emplace_back(id, std::move(listener));
+		return id;
 	}
 
-	void Tree::clearListeners()
+	void Tree::removeListener(size_t id)
 	{
 		std::lock_guard lock(m_listenersMutex);
-		m_listeners.clear();
+		std::erase_if(m_listeners, [id](const auto& entry) { return entry.first == id; });
 	}
 
 	void Tree::notify()
@@ -239,7 +241,7 @@ namespace OM
 		}
 		// Called without the model lock, so a listener may take its own locks in any order
 		std::lock_guard lock(m_listenersMutex);
-		for (const auto& listener : m_listeners)
+		for (const auto& [id, listener] : m_listeners)
 		{
 			listener();
 		}

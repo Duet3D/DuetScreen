@@ -2,17 +2,23 @@
  * Globals.h
  *
  * Names every view can use, whatever scope it is built in: the printer data published by the data sources (see
- * Data/DataSource.h), e.g. the `fans` list or the `machine.status` subject. They are searched after every scope.
+ * Data/DataSource.h), e.g. the `jog.distance` subject. They are searched after every scope.
+ *
+ * The globals can also have a resolver (see Resolver.h), asked after the global names, which gives names on demand:
+ * the object model's `om.*` names. After that comes the last chance for a name nobody has: the scopes' resolvers are
+ * asked again, innermost first.
  */
 
 #pragma once
 
+#include "helix_xml.h"
 #include <string>
 #include <string_view>
 
 namespace UI::Xml
 {
 	class ListBase;
+	class Resolver;
 	class Subject;
 
 	namespace Globals
@@ -26,10 +32,20 @@ namespace UI::Xml
 		/** Remove a global subject or list. Widgets already bound to it keep their binding. */
 		void remove(const std::string& name);
 
-		/** @return the global list called `name`, or nullptr */
-		ListBase* findList(std::string_view name);
+		/**
+		 * The global list called `name`, else the global resolver's (see the file comment), or nullptr
+		 * @param from The context the lookup started in, for the resolver; may be nullptr
+		 */
+		ListBase* findList(const lv_xml_subject_ctx_t* from, std::string_view name);
 
-		/** Remove every global name (when the XML engine shuts down) */
+		/** Ask `resolver` for names nobody else has (see the file comment); nullptr for none. It must stay alive until
+		 * replaced. */
+		void setResolver(Resolver* resolver);
+
+		/** Start answering the engine's lookups of names nobody has (after lv_xml_init()) */
+		void init();
+
+		/** Remove every global name and the resolver (when the XML engine shuts down) */
 		void clear();
 	} // namespace Globals
 } // namespace UI::Xml

@@ -22,6 +22,7 @@
 namespace UI::Xml
 {
 	class ListBase;
+	class Resolver;
 	class Subject;
 
 	/** Receives the fields something declares. See the file comment. */
@@ -35,6 +36,10 @@ namespace UI::Xml
 
 		/** A list called `name`, shown with `<ds_list list="name">` */
 		virtual void list(std::string_view name, ListBase& list, std::string_view description) = 0;
+
+		/** Names given on demand by `resolver` (see Resolver.h), besides the fields declared. Ignored unless the
+		 * visitor binds names to a scope. */
+		virtual void resolver(Resolver& /* resolver */) {}
 	};
 
 	/** Something that declares fields */
@@ -68,6 +73,9 @@ namespace UI::Xml
 		{
 			m_scope.add(std::string(name), list);
 		}
+
+		/** Ask the resolver for the scope's other names */
+		void resolver(Resolver& resolver) override { m_scope.setResolver(&resolver); }
 
 	  private:
 		Scope& m_scope; // Scope the fields are added to

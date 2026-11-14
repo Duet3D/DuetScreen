@@ -252,7 +252,7 @@ namespace UI::Xml
 			return options;
 		}
 		std::vector<SettingOption> rows;
-		ListBase* rowList = kind == SettingKind::Row ? Globals::findList(list) : nullptr;
+		ListBase* rowList = kind == SettingKind::Row ? Globals::findList(nullptr, list) : nullptr;
 		for (size_t i = 0; rowList != nullptr && i < rowList->size(); i++)
 		{
 			FieldFinder keyField(key);

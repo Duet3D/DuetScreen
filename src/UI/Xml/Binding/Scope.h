@@ -9,6 +9,9 @@
  * then outwards, then in the globals (see Globals.h). So in a heater row inside a tool row, `name` is the heater's
  * name, `number` is the tool's number if heaters have no `number`, and `fans` is the global fan list.
  *
+ * A scope can also have a resolver (see Resolver.h), which gives names on demand, e.g. a row of an object model list
+ * has a name for every field of its element.
+ *
  * Bindings resolve their subject once, when a widget is created, so a scope only has to be *active* while a view is
  * being built. The engine side is helix-xml's subject context (libraries/helix-xml/src/xml/lv_xml_subject_ctx.h); a
  * Scope is the C++ owner of one and adds lists to it.
@@ -24,6 +27,7 @@
 namespace UI::Xml
 {
 	class ListBase;
+	class Resolver;
 	class Subject;
 
 	class Scope
@@ -50,21 +54,37 @@ namespace UI::Xml
 		/** Make `list` available as `name`. It must outlive every `<ds_list>` showing it. */
 		void add(const std::string& name, ListBase& list);
 
+		/** Ask `resolver` for names this scope doesn't hold (see Resolver.h); nullptr for none. It must outlive the
+		 * scope. */
+		void setResolver(Resolver* resolver);
+
 		/** The engine's subject context for this scope, for `lv_xml_create_with_ctx()` */
 		lv_xml_subject_ctx_t* context() const { return m_ctx; }
 
 		/**
-		 * Find a list by name: in the scope owning `from`, then its parents, then the globals
+		 * Find a list by name: in the scope owning `from`, then its parents, then the globals, then (the last chance,
+		 * see Resolver.h) the scopes' resolvers again
 		 * @param from A context, normally the engine's active one while a view is being built; may be nullptr
 		 * @return the list or nullptr
 		 */
 		static ListBase* findList(const lv_xml_subject_ctx_t* from, std::string_view name);
 
+		/**
+		 * The last chance for a subject nobody has (see Resolver.h): the resolvers of the scope owning `from` and its
+		 * parents, innermost first
+		 * @return the subject or nullptr
+		 */
+		static Subject* lastChanceSubject(const lv_xml_subject_ctx_t* from, std::string_view name);
+
 	  private:
 		/** The Scope that owns `ctx`, or nullptr if it has gone or the context isn't a Scope's */
 		static const Scope* fromContext(const lv_xml_subject_ctx_t* ctx);
 
+		/** The engine's resolver callback: asks the Scope's resolver (`userData`) for `name` */
+		static lv_subject_t* resolveCb(const lv_xml_subject_ctx_t* origin, const char* name, void* userData);
+
 		lv_xml_subject_ctx_t* m_ctx;						  // Engine context; holds the subjects and the parent link
 		std::map<std::string, ListBase*, std::less<>> m_lists; // Lists added to this scope
+		Resolver* m_resolver = nullptr;						   // Gives names on demand, or nullptr
 	};
 } // namespace UI::Xml

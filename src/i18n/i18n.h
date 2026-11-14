@@ -29,6 +29,10 @@ namespace i18n
 
 	const std::string& translate(std::string_view tag);
 
+	/** The translation of `tag` in the current language, or nullptr if there is none (unlike translate(), which
+	 * warns and gives the tag) */
+	const std::string* find(std::string_view tag);
+
 	/** Visit every key/value of the current language's translation table */
 	void forEachTranslation(const std::function<void(std::string_view key, std::string_view value)>& func);
 

@@ -141,6 +141,45 @@ namespace UI::Xml::Api
 			out += "\n";
 		}
 
+		/** The object model section */
+		void writeObjectModel(std::string& out, const Reference& reference)
+		{
+			out += "## Object model\n\n"
+				   "Every field of the printer's object model has a name, written as RepRapFirmware writes its path "
+				   "after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The "
+				   "names need no code: a field a newer firmware adds can be used as soon as the printer sends it. See "
+				   "[ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).\n\n"
+				   "- A name binds before the printer has sent the field, and follows it: while the field isn't there "
+				   "(or is null) its subject holds empty text, or 0.\n"
+				   "- An array is a list: `<ds_list list=\"om.heat.heaters\" item=\"…\">` makes a row per item, nulls "
+				   "included, so a row's `index` is the item's index (the heater number). Inside a row, the item's "
+				   "fields have names relative to it, `current` or `model.pid.p`, found before any other name, and its "
+				   "arrays are lists: `<ds_list list=\"heaters\">` in a row of `om.tools`.\n"
+				   "- The name sets what the subject holds: the value as text, or after `|` what a converter makes of "
+				   "it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.\n\n";
+			out += "Each row of an object model list:\n\n| Name | Type | Description |\n| --- | --- | --- |\n";
+			for (const auto& field : reference.omRowFields)
+			{
+				fmt::format_to(std::back_inserter(out),
+							   "| {:s} | {:s} | {:s} |\n",
+							   code(field.name),
+							   field.type,
+							   cell(field.description));
+			}
+			out += "| *a field of the item* | text | e.g. `current`; converters apply, as in `current\\|fixed:1` |\n\n";
+			out += "### Converters\n\n| Converter | Gives | Argument | Description |\n| --- | --- | --- | --- |\n";
+			for (const auto& converter : reference.omConverters)
+			{
+				fmt::format_to(std::back_inserter(out),
+							   "| {:s} | {:s} | {:s} | {:s} |\n",
+							   converter.name.empty() ? "*none*" : cell(code("|" + std::string(converter.name))),
+							   converter.type,
+							   converter.argument.empty() ? "" : cell(converter.argument),
+							   cell(converter.description));
+			}
+			out += "\n";
+		}
+
 		/** The global data section */
 		void writeSources(std::string& out, const Reference& reference)
 		{
@@ -150,6 +189,10 @@ namespace UI::Xml::Api
 				   "are found first.\n\n";
 			for (const auto& source : reference.sources)
 			{
+				if (source.fields.empty())
+				{
+					continue; // e.g. the object model's, whose names are given on demand
+				}
 				fmt::format_to(std::back_inserter(out), "### {:s}\n\n", source.name);
 				writeFields(out, source.fields);
 			}
@@ -562,6 +605,7 @@ namespace UI::Xml::Api
 			"Every name the firmware provides to XML, for UI API version {:s}. How to write XML with them is "
 			"in [XML_UI.md](XML_UI.md). Translation keys, for `translation_tag`, are those in "
 			"[en-GB.json](../assets/i18n/en-GB.json).\n\n"
+			"- [Object model](#object-model)\n"
 			"- [Global data](#global-data)\n"
 			"- [Global actions](#global-actions)\n"
 			"- [Presenters](#presenters)\n"
@@ -570,6 +614,7 @@ namespace UI::Xml::Api
 			"- [Components](#components)\n"
 			"- [Theme](#theme)\n\n",
 			reference.apiVersion);
+		writeObjectModel(out, reference);
 		writeSources(out, reference);
 		writeGlobalActions(out, reference);
 		writePresenters(out, reference);

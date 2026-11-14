@@ -15,6 +15,7 @@
 #include "MachineSource.h"
 #include "MoveSource.h"
 #include "NavigationSource.h"
+#include "ObjectModelSource.h"
 #include "ResponseSource.h"
 #include "TemperatureSource.h"
 #include "ToolSource.h"
@@ -87,6 +88,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<MachineSource>(),
 			std::make_shared<MoveSource>(),
 			std::make_shared<NavigationSource>(),
+			std::make_shared<ObjectModelSource>(),
 			std::make_shared<ResponseSource>(),
 			std::make_shared<TemperatureSource>(),
 			std::make_shared<WidgetSource>(),

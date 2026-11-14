@@ -28,6 +28,7 @@
 #include "Patch.h"
 #include <functional>
 #include <mutex>
+#include <utility>
 #include <vector>
 
 namespace OM
@@ -56,11 +57,14 @@ namespace OM
 		/** The paths changed since the last call, emptied */
 		ChangeSet takeChanges();
 
-		/** Tell `listener` whenever the tree changes. Listeners are called on the thread that changed the tree. */
-		void addListener(Listener listener);
+		/**
+		 * Tell `listener` whenever the tree changes. Listeners are called on the thread that changed the tree.
+		 * @return what removeListener() takes
+		 */
+		size_t addListener(Listener listener);
 
-		/** Stop telling every listener (e.g. when the UI stops) */
-		void clearListeners();
+		/** Stop telling the listener addListener() returned `id` for */
+		void removeListener(size_t id);
 
 	  private:
 		/** Tell the listeners, if there are changes they haven't been told about */
@@ -69,7 +73,8 @@ namespace OM
 		Node m_root;					 // The object model
 		ChangeSet m_changes;			 // Changed since the last takeChanges()
 		bool m_notified = false;		 // Whether listeners have been told about m_changes
-		std::vector<Listener> m_listeners; // Told about changes
+		std::vector<std::pair<size_t, Listener>> m_listeners; // Told about changes, with their ids
+		size_t m_nextListenerId = 1;						   // Id of the next listener added
 		std::mutex m_listenersMutex;	 // Guards m_listeners
 	};
 } // namespace OM

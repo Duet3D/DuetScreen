@@ -26,6 +26,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MoveSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/NavigationSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/ObjectModelSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/WidgetSource.cpp
@@ -38,6 +39,11 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/PlacementScope.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Snap.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/WidgetCatalogue.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/Converters.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmBindings.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmField.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Om/OmName.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/Bundles.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/GlobalActions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Runtime/HotReload.cpp

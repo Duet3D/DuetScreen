@@ -10,6 +10,8 @@
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Layout/LayoutStore.h"
 #include "UI/Xml/Layout/PlacementScope.h"
+#include "UI/Xml/Om/Converters.h"
+#include "UI/Xml/Om/OmList.h"
 #include "UI/Xml/Runtime/XmlUi.h"
 #include "UI/Xml/Theme/ThemeStyles.h"
 #include "UI/Xml/View/Actions.h"
@@ -392,6 +394,19 @@ namespace UI::Xml::Api
 	{
 		Reference reference;
 		reference.apiVersion = fmt::format("{}.{}", UI_API_VERSION_MAJOR, UI_API_VERSION_MINOR);
+		for (const auto& converter : allConverters())
+		{
+			reference.omConverters.push_back(
+				{.name = std::string(converter.name),
+				 .type = converter.type == UI::Xml::Converter::Type::integer ? "int" : "text",
+				 .argument = std::string(converter.argument),
+				 .description = std::string(converter.description)});
+		}
+		{
+			OmRow row;
+			FieldCollector collector(reference.omRowFields);
+			row.allFields(collector);
+		}
 		reference.sources = sources();
 		reference.triggers = Actions::triggers();
 		reference.globalActions = actionsOf(Actions::globals());

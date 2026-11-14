@@ -3,6 +3,8 @@
  */
 
 #include "Globals.h"
+#include "Resolver.h"
+#include "Scope.h"
 #include "Subjects.h"
 #include "helix_xml.h"
 #include <map>
@@ -49,14 +51,51 @@ namespace UI::Xml::Globals
 		}
 	}
 
-	ListBase* findList(std::string_view name)
+	/** The resolver asked after the global names, or nullptr */
+	static Resolver*& resolver()
+	{
+		static Resolver* s_resolver = nullptr;
+		return s_resolver;
+	}
+
+	/** The engine's global resolver callback: the global resolver, then the last chance (see Globals.h) */
+	static lv_subject_t* resolveCb(const lv_xml_subject_ctx_t* origin, const char* name, void* /* userData */)
+	{
+		if (resolver() != nullptr)
+		{
+			if (Subject* subject = resolver()->findSubject(origin, name, false))
+			{
+				return subject->raw();
+			}
+		}
+		Subject* subject = Scope::lastChanceSubject(origin, name);
+		return subject ? subject->raw() : nullptr;
+	}
+
+	ListBase* findList(const lv_xml_subject_ctx_t* from, std::string_view name)
 	{
 		auto it = lists().find(name);
-		return it == lists().end() ? nullptr : it->second;
+		if (it != lists().end())
+		{
+			return it->second;
+		}
+		return resolver() ? resolver()->findList(from, name, false) : nullptr;
+	}
+
+	void setResolver(Resolver* newResolver)
+	{
+		resolver() = newResolver;
+	}
+
+	void init()
+	{
+		lv_xml_set_subject_resolver(resolveCb, nullptr);
 	}
 
 	void clear()
 	{
+		lv_xml_set_subject_resolver(nullptr, nullptr);
+		resolver() = nullptr;
 		for (const auto& name : subjectNames())
 		{
 			lv_xml_unregister_subject(nullptr, name.c_str());

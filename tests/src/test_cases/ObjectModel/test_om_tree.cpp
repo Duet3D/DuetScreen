@@ -268,7 +268,7 @@ TEST_F(TestOmTree, ListenersAreToldOnceUntilTheChangesAreTaken)
 {
 	Tree tree;
 	int told = 0;
-	tree.addListener([&] { told++; });
+	const size_t id = tree.addListener([&] { told++; });
 
 	OM::Patch patch;
 	patch.setKey("a");
@@ -292,4 +292,8 @@ TEST_F(TestOmTree, ListenersAreToldOnceUntilTheChangesAreTaken)
 	EXPECT_TRUE(tree.root().isObject());
 	EXPECT_EQ(tree.root().size(), 0u);
 	EXPECT_TRUE(tree.takeChanges().touches("a.b"));
+
+	tree.removeListener(id);
+	tree.apply(patch);
+	EXPECT_EQ(told, 3) << "a removed listener isn't told";
 }

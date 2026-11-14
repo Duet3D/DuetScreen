@@ -4,6 +4,7 @@
 
 Every name the firmware provides to XML, for UI API version 1.0. How to write XML with them is in [XML_UI.md](XML_UI.md). Translation keys, for `translation_tag`, are those in [en-GB.json](../assets/i18n/en-GB.json).
 
+- [Object model](#object-model)
 - [Global data](#global-data)
 - [Global actions](#global-actions)
 - [Presenters](#presenters)
@@ -11,6 +12,39 @@ Every name the firmware provides to XML, for UI API version 1.0. How to write XM
 - [Layouts](#layouts)
 - [Components](#components)
 - [Theme](#theme)
+
+## Object model
+
+Every field of the printer's object model has a name, written as RepRapFirmware writes its path after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The names need no code: a field a newer firmware adds can be used as soon as the printer sends it. See [ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).
+
+- A name binds before the printer has sent the field, and follows it: while the field isn't there (or is null) its subject holds empty text, or 0.
+- An array is a list: `<ds_list list="om.heat.heaters" item="…">` makes a row per item, nulls included, so a row's `index` is the item's index (the heater number). Inside a row, the item's fields have names relative to it, `current` or `model.pid.p`, found before any other name, and its arrays are lists: `<ds_list list="heaters">` in a row of `om.tools`.
+- The name sets what the subject holds: the value as text, or after `|` what a converter makes of it: `om.fans[0].actualValue|percent`. A converter's argument follows `:`, as in `|fixed:1`.
+
+Each row of an object model list:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `index` | int | Position in the list, from 0 |
+| `value` | text | The item as text, if it isn't an object (e.g. a heater number); `value\|int` etc. convert it (see Converters) |
+| `exists` | int | 1 unless the item is null, so `<bind_flag_if_eq subject="exists" ref_value="0" flag="hidden"/>` hides the gaps |
+| *a field of the item* | text | e.g. `current`; converters apply, as in `current\|fixed:1` |
+
+### Converters
+
+| Converter | Gives | Argument | Description |
+| --- | --- | --- | --- |
+| *none* | text |  | The value as text, as the printer sent it; empty for null, an object or an array |
+| `\|int` | int |  | The value rounded to a whole number: a bool is 1 or 0, anything else not a number is 0 |
+| `\|percent` | int |  | The value × 100, rounded, for a fraction such as a fan's speed (0-1) |
+| `\|scale` | int | The factor | The value × the argument, rounded, e.g. `scale:10` for tenths |
+| `\|fixed` | text | Decimals, 0-9 | A number with the argument's number of decimals, e.g. `fixed:1` gives 61.2; empty for anything not a number |
+| `\|count` | int |  | The number of items of an array; 0 for anything else |
+| `\|exists` | int |  | 1 if the field is there and not null, else 0 |
+| `\|eq` | int | The value compared with | 1 if the value is the argument, else 0, e.g. `state\|eq:fault` |
+| `\|duration` | text |  | Seconds as h:mm:ss, or m:ss under an hour |
+| `\|bytes` | text |  | A number of bytes as B, KB, MB or GB |
+| `\|tr` | text | The translation key the value is added to | The translation of `<argument>.<value>`, or the value if there is none, e.g. `state\|tr:heater.state` |
 
 ## Global data
 
