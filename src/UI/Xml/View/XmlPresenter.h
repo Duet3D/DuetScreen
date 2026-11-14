@@ -47,9 +47,9 @@ namespace UI::Xml
 		/** The actions this presenter handles */
 		const ActionHandlerSet& getActions() const { return m_actions; }
 
-	  protected:
 		/**
-		 * Handle `<action name="presenter.…">` raised in the view. Call from the constructor.
+		 * Handle `<action name="presenter.…">` raised in the view. Call from the constructor, the presenter's or that
+		 * of a part of it with actions of its own (e.g. a NumberPad).
 		 * @param description What the action does and what it takes (`arg`, the edited value, the row it is in), for
 		 * the UI API reference
 		 */

@@ -45,7 +45,7 @@ src/UI/
                Translations, GlobalActions
     Dialogs/   DialogHost (the dialog surface, one step at a time), DsDialog (<ds_dialog>), DsDialogFooter
                (<ds_dialog_footer>), Prompts (asking a number, a choice or a question from code), PromptStep and
-               PromptPresenters
+               PromptPresenters, NumberPad (a number pad's keys and what they type, for numpad.xml)
     Binding/   Subjects, Scope, Globals, Constants, Fields (declaring names), List and Row, History, Surface
     View/      XmlView, XmlPresenter (and the presenter registry), Actions, ValueSelector
     Api/       ApiReference (everything XML can use, gathered from the running UI), ApiMarkdown (docs/XML_UI_API.md),

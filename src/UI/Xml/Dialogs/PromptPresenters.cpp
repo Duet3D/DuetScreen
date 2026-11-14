@@ -13,82 +13,12 @@
 
 namespace UI::Xml
 {
-	namespace
-	{
-		/** The most characters a number pad shows */
-		constexpr size_t MAX_TYPED = 20;
-
-		/** The most decimals a number shows: a float holds no more that a user means */
-		constexpr int DECIMALS = 3;
-
-		/** `value` as the user reads it, e.g. "0.1" for 0.1f rather than "0.100000001" */
-		std::string shown(float value)
-		{
-			return utils::formatFloat(value, DECIMALS);
-		}
-
-		/** Beyond this, a limit is none: anything can be typed that way (a slider that may go past its end) */
-		constexpr float NO_LIMIT = 1e9f;
-
-		/** The numbers that can be typed between `min` and `max`, e.g. "0 to 280" or "0 or more"; empty for any */
-		std::string rangeOf(float min, float max)
-		{
-			const bool hasMin = min > -NO_LIMIT;
-			const bool hasMax = max < NO_LIMIT;
-			if (hasMin && hasMax)
-			{
-				return _("dialogs.range", shown(min), shown(max));
-			}
-			if (hasMin)
-			{
-				return _("dialogs.at_least", shown(min));
-			}
-			return hasMax ? _("dialogs.at_most", shown(max)) : std::string();
-		}
-
-		/** `text` as a number, as typed: empty is 0, and it is kept within what a float holds */
-		float parse(std::string_view text)
-		{
-			const double value = std::strtod(std::string(text).c_str(), nullptr);
-			return static_cast<float>(std::clamp(value,
-												 static_cast<double>(std::numeric_limits<float>::lowest()),
-												 static_cast<double>(std::numeric_limits<float>::max())));
-		}
-	} // namespace
-
 	/* ---------- NumberPrompt ---------- */
 
 	NumberPrompt::NumberPrompt()
 		: XmlPresenter("dialog_number")
+		, m_pad(*this, "number")
 	{
-		action("number.key",
-			   "Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with.",
-			   [this](const ActionArgs& args)
-			   {
-				   if (args.arg.size() == 1)
-				   {
-					   type(args.arg[0]);
-				   }
-			   });
-		action("number.backspace",
-			   "Remove the last character shown, whether typed or the value the pad starts with",
-			   [this](const ActionArgs&)
-			   {
-				   const std::string typed(m_typed.get());
-				   setText(typed.empty() ? std::string() : typed.substr(0, typed.size() - 1));
-			   });
-		action("number.sign",
-			   "Make the number negative, or positive again, if it may be negative",
-			   [this](const ActionArgs&)
-			   {
-				   if (m_signed.get() == 0)
-				   {
-					   return;
-				   }
-				   const std::string typed(m_typed.get());
-				   setText(typed.starts_with('-') ? typed.substr(1) : "-" + typed);
-			   });
-		action("number.clear", "Empty what is typed", [this](const ActionArgs&) { setText(""); });
 		action("number.confirm",
 			   "Hand back what is typed, if it can be, and go back",
 			   [this](const ActionArgs&) { confirm(); });
@@ -105,86 +35,35 @@ namespace UI::Xml
 
 	void NumberPrompt::fields(FieldVisitor& f)
 	{
-		f.field("text", m_typed, "What has been typed");
-		f.field("range", m_range, "The numbers that can be typed, e.g. \"0 to 280\"; empty for digits and dots");
-		f.field("confirmable",
-				m_confirmable,
-				"1 if what has been typed can be confirmed: a number within the limits, or any text");
-		f.field("signed", m_signed, "1 if the number may be negative, so the +/- key works");
+		m_pad.fields(f);
 	}
 
 	void NumberPrompt::ask(Prompts::NumberRequest request, PromptStep& step)
 	{
 		m_step = &step;
 		m_text.reset();
-		m_signed.set(request.min < 0.0f ? 1 : 0);
-		m_range.set(rangeOf(request.min, request.max));
-		const std::optional<float> start = request.value;
+		m_pad.askNumber(request.min, request.max, request.value);
 		m_number = std::move(request);
-		setText(start ? shown(*start) : std::string());
-		m_fresh = start.has_value();
 	}
 
 	void NumberPrompt::ask(Prompts::TextRequest request, PromptStep& step)
 	{
 		m_step = &step;
 		m_number.reset();
-		m_signed.set(0);
-		m_range.set("");
-		const std::string start = request.text;
+		m_pad.askText(request.text);
 		m_text = std::move(request);
-		setText(start);
-		m_fresh = !start.empty();
-	}
-
-	void NumberPrompt::type(char key)
-	{
-		if (!std::isdigit(static_cast<unsigned char>(key)) && key != '.')
-		{
-			return;
-		}
-		std::string typed = m_fresh ? std::string() : std::string(m_typed.get());
-		// A number has one dot at most; an address any number of them
-		if (key == '.' && m_number && typed.find('.') != std::string::npos)
-		{
-			return;
-		}
-		if (typed.size() < MAX_TYPED)
-		{
-			typed += key;
-		}
-		setText(typed);
-	}
-
-	void NumberPrompt::setText(std::string_view text)
-	{
-		m_fresh = false;
-		m_typed.set(text);
-		m_confirmable.set(confirmable() ? 1 : 0);
-	}
-
-	bool NumberPrompt::confirmable() const
-	{
-		if (m_number)
-		{
-			// Nothing typed (or only a sign or a dot) is 0, as it reads
-			const float value = parse(m_typed.get());
-			return value >= m_number->min && value <= m_number->max;
-		}
-		return m_text.has_value();
 	}
 
 	void NumberPrompt::confirm()
 	{
-		if (m_step == nullptr || !confirmable())
+		if (m_step == nullptr || !m_pad.confirmable())
 		{
 			return;
 		}
-		const std::string typed(m_typed.get());
 		if (m_number)
 		{
 			m_step->finish(
-				[onConfirm = m_number->onConfirm, value = parse(typed)]()
+				[onConfirm = m_number->onConfirm, value = m_pad.value()]()
 				{
 					if (onConfirm)
 					{
@@ -195,7 +74,7 @@ namespace UI::Xml
 		else if (m_text)
 		{
 			m_step->finish(
-				[onConfirm = m_text->onConfirm, typed]()
+				[onConfirm = m_text->onConfirm, typed = std::string(m_pad.text())]()
 				{
 					if (onConfirm)
 					{

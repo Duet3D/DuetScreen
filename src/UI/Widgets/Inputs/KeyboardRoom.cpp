@@ -29,6 +29,19 @@ namespace UI::Xml::KeyboardRoom
 			s_room.padded = nullptr;
 		}
 
+		/** Whether `obj` is `ancestor` or inside it */
+		bool isInside(lv_obj_t* obj, lv_obj_t* ancestor)
+		{
+			for (; obj != nullptr; obj = lv_obj_get_parent(obj))
+			{
+				if (obj == ancestor)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		/** The nearest container around `obj` that scrolls vertically, or nullptr */
 		lv_obj_t* scrollingAround(lv_obj_t* obj)
 		{
@@ -80,9 +93,11 @@ namespace UI::Xml::KeyboardRoom
 		{
 			return;
 		}
+		// A keyboard laid out in the container (the console's) takes its room already; only one over it needs more
+		const bool laidOutInside = isInside(keyboard, container) && !lv_obj_has_flag(keyboard, LV_OBJ_FLAG_FLOATING);
 		lv_area_t area;
 		lv_obj_get_coords(container, &area);
-		const int32_t covered = std::min(area.y2, keys.y2) - keys.y1 + 1;
+		const int32_t covered = laidOutInside ? 0 : std::min(area.y2, keys.y2) - keys.y1 + 1;
 		if (covered > 0)
 		{
 			s_room.padded = container;

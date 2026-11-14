@@ -4,7 +4,7 @@
  * The presenters of the prompts code asks for (Prompts.h), one per prompt shown, each behind an XML component in
  * assets/ui/components/dialogs/:
  *
- *  - dialog_number:   a number pad, for a number within limits or for digits and dots (NumberPrompt)
+ *  - dialog_number:   a number pad (NumberPad.h), for a number within limits or for digits and dots (NumberPrompt)
  *  - dialog_choice:   a list of values, the chosen one marked (ChoicePrompt)
  *  - dialog_question: a question, with buttons to agree or not (QuestionPrompt)
  *
@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "NumberPad.h"
 #include "Prompts.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
@@ -26,10 +27,7 @@ namespace UI::Xml
 {
 	class PromptStep;
 
-	/**
-	 * Behind dialog_number.xml: a number pad's keys type into what it shows, the first key replacing the value it
-	 * starts with, as a calculator's do; OK hands it back once it can be
-	 */
+	/** Behind dialog_number.xml: a number pad (NumberPad.h, its id `number`), whose OK hands the number back */
 	class NumberPrompt : public XmlPresenter
 	{
 	  public:
@@ -46,27 +44,13 @@ namespace UI::Xml
 		void ask(Prompts::TextRequest request, PromptStep& step);
 
 	  private:
-		/** Type `key`: a digit or a dot */
-		void type(char key);
-
-		/** Show `text` as typed, and whether it can be confirmed */
-		void setText(std::string_view text);
-
-		/** Whether what is typed can be confirmed: a number within the limits (nothing typed is 0), or any text */
-		bool confirmable() const;
-
-		/** Confirm what is typed, if it can be */
+		/** Hand back what is typed, if it can be */
 		void confirm();
 
+		NumberPad m_pad;								// The keys, and what they have typed
 		PromptStep* m_step = nullptr;				   // Where the answer goes
 		std::optional<Prompts::NumberRequest> m_number; // The number asked for, if it is one
 		std::optional<Prompts::TextRequest> m_text;	   // The text asked for, if it is text
-		bool m_fresh = false;						   // Showing the value it started with: a key replaces it
-
-		StringSubject<32> m_typed;	  // `text`
-		StringSubject<64> m_range;	  // `range`
-		IntSubject m_confirmable;	  // `confirmable`
-		IntSubject m_signed;		  // `signed`: 1 if the number may be negative
 	};
 
 	/** One value of a ChoicePrompt */

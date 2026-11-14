@@ -11,40 +11,32 @@
 
 		<!-- M291 alert: it must be answered (or closes itself), so it is blocking -->
 		<ds_dialog name="alert" alert="true" blocking="true" bind_open="presenter.alert.open"
-				   bind_title="presenter.alert.title" flex_flow="column" style_pad_row="#pad">
+				   bind_title="presenter.alert.title" flex_flow="column" style_pad_row="#pad"
+				   style_flex_cross_place="center">
 			<action trigger="dismissed" name="presenter.alert.dismissed"/>
 
 			<lv_label name="text" bind_text="presenter.alert.text" width="100%" style_text_align="center">
 				<bind_flag_if_eq subject="presenter.alert.text" flag="hidden" ref_value=""/>
 			</lv_label>
 
-			<!-- A value to type, with its limits and what is wrong with it -->
-			<lv_obj name="input_cont" width="100%" height="content" style_layout="grid"
-					style_grid_column_dsc_array="fr(1) fr(3) fr(1)" style_grid_row_dsc_array="content content">
+			<!-- A number to type, on the pad -->
+			<numpad name="pad" pad="alert.pad">
+				<bind_flag_if_eq subject="presenter.alert.pad_shown" flag="hidden" ref_value="0"/>
+			</numpad>
+
+			<!-- Text to type, on the keyboard, with why it can't be sent -->
+			<lv_obj name="text_input" width="100%" height="content" flex_flow="column" scrollable="false"
+					style_flex_cross_place="center">
 				<style name="pad_zero"/>
-				<bind_flag_if_eq subject="presenter.alert.input_shown" flag="hidden" ref_value="0"/>
-				<lv_label name="warning_text" bind_text="presenter.alert.warning" style_text_align="center"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="0" style_grid_cell_y_align="center">
-					<bind_flag_if_eq subject="presenter.alert.warning" flag="hidden" ref_value=""/>
-				</lv_label>
-				<lv_label name="min_text" bind_text="presenter.alert.min" style_text_align="center"
-						  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<bind_flag_if_eq subject="presenter.alert.min" flag="hidden" ref_value=""/>
-				</lv_label>
-				<lv_label name="max_text" bind_text="presenter.alert.max" style_text_align="center"
-						  style_grid_cell_column_pos="2" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<bind_flag_if_eq subject="presenter.alert.max" flag="hidden" ref_value=""/>
-				</lv_label>
-				<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input"
-							 bind_accepted_chars="presenter.alert.accepted_chars" bind_keyboard_mode="presenter.alert.keyboard_mode"
-							 style_text_align="center"
-							 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-							 style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
+				<bind_flag_if_eq subject="presenter.alert.text_shown" flag="hidden" ref_value="0"/>
+				<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" width="75%"
+							 style_text_align="center">
 					<action trigger="value_changed" name="presenter.alert.input"/>
 				</ds_textarea>
+				<lv_label name="warning_text" bind_text="presenter.alert.warning" style_text_align="center">
+					<style name="text_warning"/>
+					<bind_flag_if_eq subject="presenter.alert.warning" flag="hidden" ref_value=""/>
+				</lv_label>
 			</lv_obj>
 
 			<ds_list name="axes" list="presenter.alert.axes" item="notifications_alert_axis" width="100%" height="content"

@@ -20,6 +20,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DialogHostPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DsDialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/DsDialogFooter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/NumberPad.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/PromptPresenters.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/PromptStep.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Dialogs/Prompts.cpp

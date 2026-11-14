@@ -238,7 +238,7 @@ class TestHomeView : public UiTestSuite
 		EXPECT_NE(TestDialogs::text("text"), "");
 	}
 
-	/** The M291 alert's text box */
+	/** The M291 alert's text box, for text (S7) */
 	static UI::LvTextarea& alertInput()
 	{
 		lv_obj_t* input = notificationPart("input");
@@ -644,21 +644,18 @@ TEST_F(TestHomeView, AlertS5)
 	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits.png");
 
-	auto& input = alertInput();
-	input.sendEvent(LV_EVENT_FOCUSED);
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_input.png");
-
-	input.setText("-1");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_min.png");
-
-	input.setText("11");
+	// A whole number from 0 to 10, typed on the alert's own pad: no sign, no dot
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("sign"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("key_dot"), LV_STATE_DISABLED));
+	TestDialogs::typeOnPad("11");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_max.png");
 
-	input.setText("10");
+	TestDialogs::tap("backspace");
+	TestDialogs::typeOnPad("0");
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_ok.png");
-
-	input.setText("5.5");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_float.png");
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, AlertS6)
@@ -675,21 +672,16 @@ TEST_F(TestHomeView, AlertS6)
 	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits.png");
 
-	auto& input = alertInput();
-	input.sendEvent(LV_EVENT_FOCUSED);
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_input.png");
-
-	input.setText("-0.1");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_min.png");
-
-	input.setText("10.1");
+	// A number from 0 to 10, with a fraction, typed on the alert's own pad
+	TestDialogs::typeOnPad("10.1");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_max.png");
 
-	input.setText("10");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_ok.png");
-
-	input.setText("5.5");
+	TestDialogs::tap("clear");
+	TestDialogs::typeOnPad("5.5");
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_float.png");
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, AlertS7)
@@ -1227,7 +1219,7 @@ TEST_F(TestHomeView, TappingOutsideATextBoxPutsTheKeyboardAway)
 	lv_indev_set_group(pointer, group);
 	UI::Xml::reload();
 
-	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
+	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
 	notifications().newAlertData(alertInObjectModel());
 	lv_obj_t* input = notificationPart("input");
 	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
@@ -1292,9 +1284,10 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	sent.clear();
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
 	notifications().newAlertData(alertInObjectModel());
-	alertInput().setText("11");
+	TestDialogs::typeOnPad("11");
 	EXPECT_TRUE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
-	alertInput().setText("7");
+	TestDialogs::tap("clear");
+	TestDialogs::typeOnPad("7");
 	EXPECT_FALSE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
 	click("ok");
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", alertInObjectModel().seq)}));

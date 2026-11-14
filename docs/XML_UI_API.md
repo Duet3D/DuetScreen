@@ -511,10 +511,11 @@ Used by `dialog_number`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `presenter.text` | text | What has been typed |
-| `presenter.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for digits and dots |
-| `presenter.confirmable` | int | 1 if what has been typed can be confirmed: a number within the limits, or any text |
-| `presenter.signed` | int | 1 if the number may be negative, so the +/- key works |
+| `presenter.number.text` | text | What has been typed |
+| `presenter.number.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for any |
+| `presenter.number.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
+| `presenter.number.signed` | int | 1 if the number may be negative, so the sign key works |
+| `presenter.number.decimal` | int | 1 if the number may have a fraction, so the dot key works |
 
 | Action | Description |
 | --- | --- |
@@ -746,13 +747,15 @@ Used by `notifications`.
 | `presenter.alert.choices_shown` | int | 1 if choices are offered |
 | `presenter.alert.axes` | list | The axes the user may jog, each with `label` and `homed` |
 | `presenter.alert.axes_shown` | int | 1 if there are axes to jog |
-| `presenter.alert.input_shown` | int | 1 if a value is asked for |
-| `presenter.alert.input` | text | The value to start with |
-| `presenter.alert.accepted_chars` | text | Characters the value may contain; empty for any |
-| `presenter.alert.keyboard_mode` | text | "number" or "text" |
-| `presenter.alert.min` | text | Lower limit shown beside the value; empty if none |
-| `presenter.alert.max` | text | Upper limit shown beside the value; empty if none |
-| `presenter.alert.warning` | text | Why the value isn't valid; empty if it is |
+| `presenter.alert.text_shown` | int | 1 if text is asked for, typed on the keyboard |
+| `presenter.alert.input` | text | The text to start with |
+| `presenter.alert.pad_shown` | int | 1 if a number is asked for, typed on the pad (`alert.pad`) |
+| `presenter.alert.pad.text` | text | What has been typed |
+| `presenter.alert.pad.range` | text | The numbers that can be typed, e.g. "0 to 280"; empty for any |
+| `presenter.alert.pad.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
+| `presenter.alert.pad.signed` | int | 1 if the number may be negative, so the sign key works |
+| `presenter.alert.pad.decimal` | int | 1 if the number may have a fraction, so the dot key works |
+| `presenter.alert.warning` | text | Why the text can't be sent; empty if it can |
 | `presenter.alert.progress` | int | Time left before the alert closes itself, 0-100 |
 | `presenter.alert.progress_shown` | int | 1 if the alert closes itself |
 
@@ -776,9 +779,13 @@ Each row of `presenter.alert.axes`:
 | `presenter.alert.cancel` | Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it |
 | `presenter.alert.choose` | Answer the alert with the choice, and close it. From a row of `alert.choices`. |
 | `presenter.alert.dismissed` | Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>` |
-| `presenter.alert.input` | Check the text edited (`value_changed` on the value's text box), setting `alert.warning` and `alert.ok` |
+| `presenter.alert.input` | Check the text edited (`value_changed` on its text box), setting `alert.warning` and `alert.ok` |
 | `presenter.alert.jog` | Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`. |
 | `presenter.alert.ok` | Answer the alert with OK (M292), with the value typed if one was asked for, and close it |
+| `presenter.alert.pad.backspace` | Remove the last character shown, whether typed or the value the pad starts with |
+| `presenter.alert.pad.clear` | Empty what is typed |
+| `presenter.alert.pad.key` | Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with. |
+| `presenter.alert.pad.sign` | Make the number negative, or positive again, if it may be negative |
 | `presenter.response.close` | Close the response showing and show the next |
 | `presenter.response.open_console` | Forget every response and open the console |
 | `presenter.update.close` | Close the update prompt without installing |
@@ -2806,7 +2813,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
-| `numpad_key` |  | `key`, `column`, `row` | `dialog_number` | [numpad_key.xml](../assets/ui/components/dialogs/numpad_key.xml) |
+| `numpad` |  | `pad` | `dialog_number`, `notifications` | [numpad.xml](../assets/ui/components/dialogs/numpad.xml) |
+| `numpad_key` |  | `key`, `column`, `row`, `pad` | `numpad` | [numpad_key.xml](../assets/ui/components/dialogs/numpad_key.xml) |
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control`, `object_cancel` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |

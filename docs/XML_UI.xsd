@@ -5,7 +5,6 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="presenter.adb"/>
 			<xs:enumeration value="presenter.advanced_settings"/>
-			<xs:enumeration value="presenter.alert.accepted_chars"/>
 			<xs:enumeration value="presenter.alert.axes"/>
 			<xs:enumeration value="presenter.alert.axes_shown"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
@@ -13,16 +12,19 @@
 			<xs:enumeration value="presenter.alert.choices_shown"/>
 			<xs:enumeration value="presenter.alert.footer_shown"/>
 			<xs:enumeration value="presenter.alert.input"/>
-			<xs:enumeration value="presenter.alert.input_shown"/>
-			<xs:enumeration value="presenter.alert.keyboard_mode"/>
-			<xs:enumeration value="presenter.alert.max"/>
-			<xs:enumeration value="presenter.alert.min"/>
 			<xs:enumeration value="presenter.alert.ok"/>
 			<xs:enumeration value="presenter.alert.ok_text"/>
 			<xs:enumeration value="presenter.alert.open"/>
+			<xs:enumeration value="presenter.alert.pad.confirmable"/>
+			<xs:enumeration value="presenter.alert.pad.decimal"/>
+			<xs:enumeration value="presenter.alert.pad.range"/>
+			<xs:enumeration value="presenter.alert.pad.signed"/>
+			<xs:enumeration value="presenter.alert.pad.text"/>
+			<xs:enumeration value="presenter.alert.pad_shown"/>
 			<xs:enumeration value="presenter.alert.progress"/>
 			<xs:enumeration value="presenter.alert.progress_shown"/>
 			<xs:enumeration value="presenter.alert.text"/>
+			<xs:enumeration value="presenter.alert.text_shown"/>
 			<xs:enumeration value="presenter.alert.title"/>
 			<xs:enumeration value="presenter.alert.warning"/>
 			<xs:enumeration value="presenter.animations"/>
@@ -41,7 +43,6 @@
 			<xs:enumeration value="presenter.colour"/>
 			<xs:enumeration value="presenter.colour_shown"/>
 			<xs:enumeration value="presenter.commands_shown"/>
-			<xs:enumeration value="presenter.confirmable"/>
 			<xs:enumeration value="presenter.confirmations"/>
 			<xs:enumeration value="presenter.connected"/>
 			<xs:enumeration value="presenter.connected_message"/>
@@ -116,6 +117,11 @@
 			<xs:enumeration value="presenter.notification_level"/>
 			<xs:enumeration value="presenter.notification_levels"/>
 			<xs:enumeration value="presenter.notification_timeout"/>
+			<xs:enumeration value="presenter.number.confirmable"/>
+			<xs:enumeration value="presenter.number.decimal"/>
+			<xs:enumeration value="presenter.number.range"/>
+			<xs:enumeration value="presenter.number.signed"/>
+			<xs:enumeration value="presenter.number.text"/>
 			<xs:enumeration value="presenter.objects"/>
 			<xs:enumeration value="presenter.open"/>
 			<xs:enumeration value="presenter.output"/>
@@ -129,7 +135,6 @@
 			<xs:enumeration value="presenter.primary_hue"/>
 			<xs:enumeration value="presenter.progress_source"/>
 			<xs:enumeration value="presenter.progress_sources"/>
-			<xs:enumeration value="presenter.range"/>
 			<xs:enumeration value="presenter.reset_text"/>
 			<xs:enumeration value="presenter.response.open"/>
 			<xs:enumeration value="presenter.response.progress"/>
@@ -155,7 +160,6 @@
 			<xs:enumeration value="presenter.settings_open"/>
 			<xs:enumeration value="presenter.shell"/>
 			<xs:enumeration value="presenter.shell_available"/>
-			<xs:enumeration value="presenter.signed"/>
 			<xs:enumeration value="presenter.sort"/>
 			<xs:enumeration value="presenter.sort_date"/>
 			<xs:enumeration value="presenter.sort_name"/>
@@ -390,6 +394,10 @@
 			<xs:enumeration value="presenter.alert.input"/>
 			<xs:enumeration value="presenter.alert.jog"/>
 			<xs:enumeration value="presenter.alert.ok"/>
+			<xs:enumeration value="presenter.alert.pad.backspace"/>
+			<xs:enumeration value="presenter.alert.pad.clear"/>
+			<xs:enumeration value="presenter.alert.pad.key"/>
+			<xs:enumeration value="presenter.alert.pad.sign"/>
 			<xs:enumeration value="presenter.babystep.close"/>
 			<xs:enumeration value="presenter.babystep.down"/>
 			<xs:enumeration value="presenter.babystep.edit"/>
@@ -735,6 +743,7 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="numpad"/>
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="object_cancel_outline"/>
@@ -866,6 +875,7 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="numpad"/>
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="object_cancel_outline"/>
@@ -1051,6 +1061,7 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="numpad"/>
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="object_cancel_outline"/>
@@ -5241,6 +5252,11 @@
 			<xs:annotation><xs:documentation>Set cursor position (0-based)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="numpad.attributes">
+		<xs:attribute name="pad" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="numpad_key.attributes">
 		<xs:attribute name="key" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
@@ -5250,6 +5266,9 @@
 		</xs:attribute>
 		<xs:attribute name="row" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `row` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="pad" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `pad` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="responsive_grid.attributes">
@@ -12494,6 +12513,15 @@
 			<xs:attribute name="moves_machine" type="bool">
 				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="numpad">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dialogs/numpad.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="numpad.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
