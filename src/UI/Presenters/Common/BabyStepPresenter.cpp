@@ -98,7 +98,7 @@ namespace UI
 	{
 		MODEL_LOCK();
 		const OM::Node& z = Xml::PrinterModel::axis('Z');
-		m_usable.set(z.exists() && OM::IsConnected() ? 1 : 0);
+		m_usable.set(z.exists() && z["homed"].boolean() && OM::IsConnected() ? 1 : 0);
 		m_resetText.set(_("babystep.reset", static_cast<float>(z["babystep"].number())));
 	}
 
