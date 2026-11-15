@@ -118,6 +118,7 @@
       "confirm_unload_text": "{:s} ontlaadt {:s}."
     },
     "file": {
+      "time_and_filament": "{:s} · {:.1f} m",
       "macros": "Macro's",
       "jobs": "Opdrachten",
       "file": "Bestand",
@@ -513,7 +514,21 @@
       "speed": "Snelheid",
       "extrusion": "Extrusie",
       "z_offset": "Z-offset",
-      "cancel": "Annuleren…"
+      "cancel": "Annuleren…",
+      "ended_finished": "Klaar",
+      "ended_cancelled": "Geannuleerd",
+      "ended_stopped": "Gestopt",
+      "ended_simulated": "Gesimuleerd",
+      "ended_at": "{:s} om {:s}",
+      "ended_took": "{:s} · duurde {:s}",
+      "duration_minutes": "{:d} min",
+      "duration_hours": "{:d} u {:d} min",
+      "ready_print": "Klaar om te printen",
+      "ready": "Klaar",
+      "all_files": "Alle bestanden",
+      "last_job": "Laatste taak",
+      "recent": "Nieuwste",
+      "macros": "Macro's"
     },
     "status": {
       "print_cancel_message": "Weet u zeker dat u de print wilt annuleren?",
@@ -665,6 +680,8 @@
       "jobs_desc": "De opdrachten op de printer, om er een te starten",
       "macros_desc": "De macro's van de printer, om er een uit te voeren",
       "job_status_desc": "De voortgang, tijden en bediening van de opdracht",
+      "job": "Taak",
+      "job_desc": "De lopende taak; anders de laatste taak, de nieuwste taken en de macro's",
       "fan": "Ventilator",
       "fan_desc": "De snelheid van één ventilator, om te wijzigen",
       "tool": "Gereedschap",

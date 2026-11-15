@@ -68,6 +68,10 @@ namespace UI::Xml
 		f.field("finish_at",
 				m_finishAt,
 				"The time of day the job should finish, e.g. \"14:32\"; empty while it isn't running or can't be told");
+		f.field("last_detail",
+				m_lastDetail,
+				"How the last job ended and how long it took, e.g. \"Finished at 13:02 · took 1 h 13 min\" (the time "
+				"of day only if the screen saw it end); empty if there was no last job");
 		f.field("thumbnail", m_thumbnail, "The latest job's thumbnail path, or empty until it arrives");
 		f.field("progress",
 				m_progress,
@@ -114,6 +118,7 @@ namespace UI::Xml
 		showProgress();
 		showRemaining();
 		showLayer();
+		showLastDetail();
 		showControls(OM::GetStatus());
 	}
 
@@ -129,6 +134,11 @@ namespace UI::Xml
 		// A job starting or ending changes one name; the latest job is the one that changed last
 		if (file != m_seenFile)
 		{
+			// A job ended, now
+			if (file.empty())
+			{
+				m_endedAt = timeOfDayIn(0);
+			}
 			m_seenFile = file;
 			fileChanged(file);
 		}
@@ -140,6 +150,7 @@ namespace UI::Xml
 		showProgress();
 		showRemaining();
 		showLayer();
+		showLastDetail();
 	}
 
 	void JobSource::clear()
@@ -157,6 +168,8 @@ namespace UI::Xml
 		m_state.set("");
 		m_layer.set("");
 		m_finishAt.set("");
+		m_lastDetail.set("");
+		m_endedAt.clear();
 		showControls(OM::PrinterStatus::disconnected);
 		m_printAgain.set(static_cast<int32_t>(Control::Hidden));
 	}
@@ -209,6 +222,44 @@ namespace UI::Xml
 	std::string JobSource::clock(uint32_t seconds)
 	{
 		return fmt::format("{:02d}:{:02d}:{:02d}", seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+	}
+
+	std::string JobSource::duration(uint32_t seconds)
+	{
+		const uint32_t minutes = (seconds + 30) / 60;
+		return minutes < 60 ? _("job.duration_minutes", minutes) : _("job.duration_hours", minutes / 60, minutes % 60);
+	}
+
+	void JobSource::showLastDetail()
+	{
+		std::string file;
+		const char* ended = "job.ended_finished";
+		uint32_t took = 0;
+		{
+			MODEL_LOCK();
+			const OM::Node& node = job();
+			file = std::string(node["lastFileName"].text());
+			if (node["lastFileSimulated"].boolean(false))
+			{
+				ended = "job.ended_simulated";
+			}
+			else if (node["lastFileCancelled"].boolean(false))
+			{
+				ended = "job.ended_cancelled";
+			}
+			else if (node["lastFileAborted"].boolean(false))
+			{
+				ended = "job.ended_stopped";
+			}
+			took = static_cast<uint32_t>(std::max<int64_t>(node["lastDuration"].integer(0), 0));
+		}
+		if (file.empty())
+		{
+			m_lastDetail.set("");
+			return;
+		}
+		const std::string how = m_endedAt.empty() ? _(ended) : _("job.ended_at", _(ended), m_endedAt);
+		m_lastDetail.set(took > 0 ? _("job.ended_took", how, duration(took)) : how);
 	}
 
 	void JobSource::fileChanged(const std::string& file)

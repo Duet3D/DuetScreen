@@ -48,6 +48,7 @@ namespace UI
 	XX(UsbDrive, std::string, bool)                                                                                    \
 	XX(ObjectModelChanged)                                                                                             \
 	XX(ThumbnailData, std::string)                                                                                     \
+	XX(FileInfo, std::string)                                                                                          \
 	XX(Response, ResponseType, std::string)                                                                            \
 	XX(ConsoleCommand, std::string)                                                                                    \
 	XX(LogMessage, Log::DebugLevel, Log::log_time_t, std::string)                                                      \

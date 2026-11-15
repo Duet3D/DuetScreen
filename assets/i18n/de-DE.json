@@ -118,6 +118,7 @@
       "confirm_unload_text": "{:s} entlädt {:s}."
     },
     "file": {
+      "time_and_filament": "{:s} · {:.1f} m",
       "macros": "Makros",
       "jobs": "Aufträge",
       "file": "Datei",
@@ -513,7 +514,21 @@
       "speed": "Geschwindigkeit",
       "extrusion": "Extrusion",
       "z_offset": "Z-Versatz",
-      "cancel": "Abbrechen…"
+      "cancel": "Abbrechen…",
+      "ended_finished": "Fertig",
+      "ended_cancelled": "Abgebrochen",
+      "ended_stopped": "Gestoppt",
+      "ended_simulated": "Simuliert",
+      "ended_at": "{:s} um {:s}",
+      "ended_took": "{:s} · Dauer {:s}",
+      "duration_minutes": "{:d} min",
+      "duration_hours": "{:d} h {:d} min",
+      "ready_print": "Bereit zum Drucken",
+      "ready": "Bereit",
+      "all_files": "Alle Dateien",
+      "last_job": "Letzter Auftrag",
+      "recent": "Neueste",
+      "macros": "Makros"
     },
     "status": {
       "print_cancel_message": "Möchten Sie den Druck wirklich abbrechen?",
@@ -665,6 +680,8 @@
       "jobs_desc": "Die Aufträge auf dem Drucker, um einen zu starten",
       "macros_desc": "Die Makros des Druckers, um eines auszuführen",
       "job_status_desc": "Fortschritt, Zeiten und Steuerung des Auftrags",
+      "job": "Auftrag",
+      "job_desc": "Der laufende Auftrag; sonst der letzte Auftrag, die neuesten Aufträge und die Makros",
       "fan": "Lüfter",
       "fan_desc": "Die Drehzahl eines Lüfters, zum Ändern",
       "tool": "Werkzeug",

@@ -32,6 +32,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/DataSources.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ExtruderSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/FactorsSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/FilesSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JogSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/JobSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/MachineSource.cpp

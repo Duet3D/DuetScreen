@@ -119,6 +119,7 @@
       "confirm_unload_text": "{:s} unloads {:s}."
     },
     "file": { /* File screen */
+      "time_and_filament": "{:s} · {:.1f} m",
       "macros": "Macros",
       "jobs": "Jobs",
       "file": "File",
@@ -514,7 +515,21 @@
       "speed": "Speed",
       "extrusion": "Extrusion",
       "z_offset": "Z offset",
-      "cancel": "Cancel…"
+      "cancel": "Cancel…",
+      "ended_finished": "Finished",
+      "ended_cancelled": "Cancelled",
+      "ended_stopped": "Stopped",
+      "ended_simulated": "Simulated",
+      "ended_at": "{:s} at {:s}",
+      "ended_took": "{:s} · took {:s}",
+      "duration_minutes": "{:d} min",
+      "duration_hours": "{:d} h {:d} min",
+      "ready_print": "Ready to print",
+      "ready": "Ready",
+      "all_files": "All files",
+      "last_job": "Last job",
+      "recent": "Recent",
+      "macros": "Macros"
     },
     "status": { /* Status screen */
       "print_cancel_message": "Are you sure you want to cancel the print?",
@@ -666,6 +681,8 @@
       "jobs_desc": "The jobs on the printer, to start one",
       "macros_desc": "The printer's macros, to run one",
       "job_status_desc": "The job's progress, times and controls",
+      "job": "Job",
+      "job_desc": "The job while it runs; else the last job, the newest jobs and the macros",
       "fan": "Fan",
       "fan_desc": "One fan's speed, to change it",
       "tool": "Tool",

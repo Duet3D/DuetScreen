@@ -7,7 +7,7 @@
  * registerXml(). When the user closes it, it empties its subject (0, or empty text), so the code that opens it need
  * not close it, then raises `dismissed`.
  *
- *     <ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
+ *     <ds_dialog name="file_dialog" bind_open="source.files.dialog" bind_title="source.files.dialog_title">
  *         …the content…
  *     </ds_dialog>
  *

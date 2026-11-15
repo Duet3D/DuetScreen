@@ -202,8 +202,8 @@ class TestHomeView : public UiTestSuite
 		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
 	}
 
-	/** The file dialog, if it is the step shown (each file browser has one), or nullptr */
-	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_browser_dialog"); }
+	/** The shared file dialog, if it is the step shown, or nullptr */
+	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_dialog"); }
 
 	static std::string_view labelText(lv_obj_t* parent, const char* name)
 	{
@@ -1528,7 +1528,9 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 		lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
 		ASSERT_NE(openFileDialog(), nullptr);
 		UI::Xml::reload();
-		EXPECT_EQ(openFileDialog(), nullptr) << "the dialog goes with its browser";
+		lv_timer_handler();
+		EXPECT_NE(openFileDialog(), nullptr) << "the shared dialog, still asking, opens again once rebuilt";
+		UI::closeDialogs();
 
 		UI::home();
 		dashboardTabs().setActiveTab(STATUS_TAB);

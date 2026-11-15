@@ -56,6 +56,9 @@ namespace UI::Xml
 		/** `seconds` as hh:mm:ss */
 		static std::string clock(uint32_t seconds);
 
+		/** `seconds` as a length of time to read, translated, e.g. "1 h 13 min" or "48 min" */
+		static std::string duration(uint32_t seconds);
+
 	  protected:
 		/** Follow the job, thumbnails arriving and the printer's state */
 		void onInit() override;
@@ -72,6 +75,9 @@ namespace UI::Xml
 
 		/** The last job's file changed */
 		void lastFileChanged(const std::string& file);
+
+		/** Show how the last job ended and how long it took, e.g. "Finished at 13:02 · took 1 h 13 min" */
+		void showLastDetail();
 
 		/** Show the progress and elapsed time */
 		void showProgress();
@@ -104,6 +110,8 @@ namespace UI::Xml
 		StringSubject<32> m_state;		 // "Printing", "Paused", "Finished", …
 		StringSubject<32> m_layer;		 // e.g. "51 of 120", or empty
 		StringSubject<16> m_finishAt;	 // The time of day it should finish, e.g. "14:32", or empty
+		StringSubject<64> m_lastDetail;	 // How the last job ended and how long it took
+		std::string m_endedAt;			 // The time of day a job was seen to end, e.g. "13:02"; empty if not seen
 		IntSubject m_pause;				 // A Control
 		IntSubject m_resume;			 // A Control
 		IntSubject m_printAgain;		 // A Control

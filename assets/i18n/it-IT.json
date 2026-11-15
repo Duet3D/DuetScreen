@@ -118,6 +118,7 @@
       "confirm_unload_text": "{:s} scarica {:s}."
     },
     "file": {
+      "time_and_filament": "{:s} · {:.1f} m",
       "macros": "Macro",
       "jobs": "Lavori",
       "file": "File",
@@ -514,7 +515,21 @@
       "speed": "Velocità",
       "extrusion": "Estrusione",
       "z_offset": "Offset Z",
-      "cancel": "Annulla…"
+      "cancel": "Annulla…",
+      "ended_finished": "Terminato",
+      "ended_cancelled": "Annullato",
+      "ended_stopped": "Interrotto",
+      "ended_simulated": "Simulato",
+      "ended_at": "{:s} alle {:s}",
+      "ended_took": "{:s} · durata {:s}",
+      "duration_minutes": "{:d} min",
+      "duration_hours": "{:d} h {:d} min",
+      "ready_print": "Pronto a stampare",
+      "ready": "Pronto",
+      "all_files": "Tutti i file",
+      "last_job": "Ultimo lavoro",
+      "recent": "Recenti",
+      "macros": "Macro"
     },
     "status": {
       "print_cancel_message": "Sei sicuro di voler annullare la stampa?",
@@ -666,6 +681,8 @@
       "jobs_desc": "I lavori sulla stampante, per avviarne uno",
       "macros_desc": "Le macro della stampante, per eseguirne una",
       "job_status_desc": "Avanzamento, tempi e controlli del lavoro",
+      "job": "Lavoro",
+      "job_desc": "Il lavoro in corso; altrimenti l'ultimo lavoro, i lavori più recenti e le macro",
       "fan": "Ventola",
       "fan_desc": "La velocità di una ventola, per cambiarla",
       "tool": "Utensile",

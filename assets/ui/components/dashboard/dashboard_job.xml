@@ -1,0 +1,16 @@
+<!--
+  The job, in a card: the `job` widget (widgets/jobs/job.json). While a job runs, its status (dashboard_job_status.xml);
+  else what is ready to start (job_ready.xml): the last job, the newest jobs and the macros. In a plain container
+  because a placed widget's root can't be a DuetScreen widget (see XmlView.h).
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="card"/>
+		<ds_view name="dashboard_job_status" view="dashboard_job_status" shown="true" width="100%" height="100%">
+			<bind_flag_if_eq subject="source.job.running" flag="hidden" ref_value="0"/>
+		</ds_view>
+		<ds_view name="job_ready" view="job_ready" shown="true" width="100%" height="100%">
+			<bind_flag_if_eq subject="source.job.running" flag="hidden" ref_value="1"/>
+		</ds_view>
+	</view>
+</component>

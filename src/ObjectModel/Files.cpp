@@ -68,11 +68,14 @@ namespace OM::FileSystem
 
 	FileListRequest::FileListRequest(const std::string& path, request_files_cb_t callback, bool run_every_time)
 		: m_path(path)
-		, m_callback(callback)
 		, m_runEveryTime(run_every_time)
 		, m_requestTime(TimeHelper::getRunningTime())
 	{
 		ZoneScoped;
+		if (callback)
+		{
+			m_callbacks.push_back({std::move(callback), run_every_time});
+		}
 	}
 
 	FileListRequest::~FileListRequest()
@@ -143,15 +146,33 @@ namespace OM::FileSystem
 	void FileListRequest::RunCallback()
 	{
 		ZoneScoped;
-		if (m_next > 0 && !m_runEveryTime)
+		std::vector<Callback> callbacks;
 		{
-			return;
+			std::lock_guard<LockableBase(std::mutex)> lk(m_mutex);
+			callbacks = m_callbacks;
+			m_done = m_next == 0;
 		}
-		if (m_callback)
+		for (const auto& [callback, everyTime] : callbacks)
 		{
+			if (m_next > 0 && !everyTime)
+			{
+				continue;
+			}
 			LOG_DBG("Running callback for file list request {:s} with {:d} items", m_path, m_items.size());
-			m_callback(m_items);
+			callback(m_items);
 		}
+	}
+
+	bool FileListRequest::IsPending() const
+	{
+		std::lock_guard<LockableBase(std::mutex)> lk(m_mutex);
+		return !m_done;
+	}
+
+	void FileListRequest::TakeCallbacksFrom(const FileListRequest& pending)
+	{
+		std::scoped_lock lk(m_mutex, pending.m_mutex);
+		m_callbacks.insert(m_callbacks.begin(), pending.m_callbacks.begin(), pending.m_callbacks.end());
 	}
 
 	bool FileListRequest::IsRequestExpired() const
@@ -359,6 +380,11 @@ namespace OM::FileSystem
 			}
 
 			reqPtr = std::make_shared<FileListRequest>(full_path, callback, runEveryTime);
+			// Another requester may be waiting for this folder too: this request answers it as well
+			if (cached && cached->IsPending())
+			{
+				reqPtr->TakeCallbacksFrom(*cached);
+			}
 			s_fileListRequests[full_path] = reqPtr;
 		}
 

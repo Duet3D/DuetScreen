@@ -3,20 +3,17 @@
  */
 
 #include "FileBrowserPresenter.h"
-#include "Comm/FileInfo.h"
 #include "Comm/Thumbnail.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Xml/Dialogs/Prompts.h"
+#include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Data/FilesSource.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
-#include "utils/UnitSystem.h"
 #include <algorithm>
-#include <cctype>
 
 namespace UI
 {
@@ -106,20 +103,7 @@ namespace UI
 			   "Show tiles instead of a list, or the other way round. Remembered.",
 			   [this](const Xml::ActionArgs&)
 			   { setDisplayMode(m_tiles.get() != 0 ? DisplayMode::List : DisplayMode::Tile); });
-		action("files.refresh",
-			   "Close the dialog and read the folder again",
-			   [this](const Xml::ActionArgs&)
-			   {
-				   closeDialog();
-				   requestFiles();
-			   });
-		action("files.confirm",
-			   "Do what the dialog asks (start the job or run the macro), and close it",
-			   [this](const Xml::ActionArgs&) { confirm(); });
-		action("files.ask_delete",
-			   "Ask whether to delete the file the dialog is about, as the dialog's next step; deleting it closes the "
-			   "dialog",
-			   [this](const Xml::ActionArgs& args) { askDelete(args.target); });
+		action("files.refresh", "Read the folder again", [this](const Xml::ActionArgs&) { requestFiles(); });
 	}
 
 	void FileBrowserPresenter::fields(Xml::FieldVisitor& f)
@@ -134,41 +118,6 @@ namespace UI
 		f.field("sort_size", m_sortSize, "As `sort_name`, for the size order");
 		f.field("tiles", m_tiles, "1 when files are shown as tiles, 0 as a list");
 		f.field("mode_icon", m_modeIcon, "Symbol for the other way of showing files");
-		f.field("dialog", m_dialog, "What the dialog asks: \"start_print\" or \"run_macro\"; empty when it is closed");
-		f.field("dialog_title", m_dialogTitle, "Dialog title");
-		f.field("dialog_text", m_dialogText, "Dialog message");
-		f.field("dialog_image", m_dialogImage, "Thumbnail shown in the dialog, or empty");
-		f.field("dialog_has_image", m_dialogHasImage, "1 if there is a thumbnail, else 0");
-		f.field("dialog_can_delete",
-				m_dialogCanDelete,
-				"1 if the dialog offers to delete the file (starting a job does), else 0");
-		f.field("info_shown", m_infoShown, "1 if the job's details (the info_* fields) are known, else 0");
-		f.field("info_date", m_infoDate, "Job modification date");
-		f.field("info_size", m_infoSize, "Job size");
-		f.field("info_generated_by", m_infoGeneratedBy, "Slicer");
-		f.field("info_print_time", m_infoPrintTime, "Estimated print time");
-		f.field("info_height", m_infoHeight, "Object height");
-		f.field("info_layer_height", m_infoLayerHeight, "Layer height");
-	}
-
-	std::string_view FileBrowserPresenter::getDisplayName(std::string_view name, BaseFolder folder)
-	{
-		if (folder != BaseFolder::MACROS)
-		{
-			return name;
-		}
-
-		// "12_Preheat.g" is shown as "Preheat.g"
-		size_t digits = 0;
-		while (digits < name.size() && std::isdigit(static_cast<unsigned char>(name[digits])))
-		{
-			digits++;
-		}
-		if (digits == 0 || digits + 1 >= name.size() || name[digits] != '_')
-		{
-			return name;
-		}
-		return name.substr(digits + 1);
 	}
 
 	void FileBrowserPresenter::onInit()
@@ -183,6 +132,15 @@ namespace UI
 											  m_baseFolder = baseFolderPath();
 											  showCrumbs();
 										  });
+		// The printer counts each volume's changes to its files: an upload or a deletion lists the folder again
+		m_filesWatch = Xml::OmWatch({"seqs.volChanges"},
+									[this]
+									{
+										if (isActive())
+										{
+											requestFiles();
+										}
+									});
 
 		m_sortBy = StorageHelper::getData(m_settings.sortBy);
 		m_sortDescending = StorageHelper::getData(m_settings.sortDescending);
@@ -196,11 +154,6 @@ namespace UI
 		{
 			requestFiles();
 		}
-	}
-
-	void FileBrowserPresenter::onDeactivate()
-	{
-		closeDialog();
 	}
 
 	void FileBrowserPresenter::onDisconnect()
@@ -264,7 +217,8 @@ namespace UI
 					 {
 						 const auto& item = *m_items[i];
 						 const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
-						 row.name.set(getDisplayName(item.GetName(), m_settings.folder));
+						 row.name.set(
+							 Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
 						 row.date.set(shownDate(item.GetDate()));
 						 row.isFolder.set(isFolder ? 1 : 0);
 						 row.thumbnail.set(!isFolder && IsThumbnailCached(item.GetPath())
@@ -331,7 +285,6 @@ namespace UI
 		const auto& item = *m_items[index];
 		if (item.GetType() == OM::FileSystem::FileSystemItemType::folder)
 		{
-			closeDialog();
 			// The folder's path below the base folder
 			std::string path = item.GetPath();
 			const std::string base = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
@@ -339,97 +292,20 @@ namespace UI
 			return;
 		}
 
-		m_selected = item.GetPath();
-		m_selectedName = item.GetName();
+		auto* files = Xml::DataSources::find<Xml::FilesSource>();
+		if (files == nullptr)
+		{
+			LOG_WARN("The files source isn't running");
+			return;
+		}
 		if (m_settings.folder == BaseFolder::MACROS)
 		{
-			askRunMacro(item);
+			files->askRun(item);
 		}
 		else
 		{
-			askStartPrint(item);
+			files->askStart(item);
 		}
-	}
-
-	void FileBrowserPresenter::askStartPrint(const OM::FileSystem::FileSystemItem& item)
-	{
-		const std::string path = item.GetPath();
-		FILEINFO_CACHE->QueueLargeThumbnailRequest(path);
-
-		m_infoDate.set(shownDate(item.GetDate()));
-		m_infoSize.set(item.GetReadableSize());
-		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(path);
-		m_infoShown.set(info ? 1 : 0);
-		if (info)
-		{
-			const auto& printTime = info->GetPrintTime();
-			m_infoGeneratedBy.set(info->generatedBy.c_str());
-			m_infoPrintTime.set(
-				fmt::format("{:02d}:{:02d}:{:02d}", printTime.tm_hour, printTime.tm_min, printTime.tm_sec));
-			m_infoHeight.set(fmt::format("{:g} {:s}", info->height, Units::getDisplayedDistanceUnit()));
-			m_infoLayerHeight.set(fmt::format("{:g} {:s}", info->layerHeight, Units::getDisplayedDistanceUnit()));
-		}
-
-		const bool hasImage = IsThumbnailCached(path);
-		m_dialogImage.set(hasImage ? GetThumbnailPath(path).string() : std::string());
-		m_dialogHasImage.set(hasImage ? 1 : 0);
-		m_dialogTitle.set(_("file.start_print_title"));
-		m_dialogText.set(_("file.start_print.file", item.GetName()));
-		m_dialogCanDelete.set(1);
-		m_dialog.set("start_print");
-	}
-
-	void FileBrowserPresenter::askRunMacro(const OM::FileSystem::FileSystemItem& item)
-	{
-		m_infoShown.set(0);
-		m_dialogImage.set("");
-		m_dialogHasImage.set(0);
-		m_dialogTitle.set(_("file.run_macro_title"));
-		m_dialogText.set(_("file.run_macro_message", getDisplayName(item.GetName(), m_settings.folder)));
-		m_dialogCanDelete.set(0);
-		m_dialog.set("run_macro");
-	}
-
-	void FileBrowserPresenter::askDelete(lv_obj_t* asker)
-	{
-		// The question goes with the dialog's button, and so with this
-		Xml::Prompts::askQuestion({.title = _("file.delete_title"),
-								   .text = _("file.delete_message", m_selectedName),
-								   .onYes =
-									   [this, path = m_selected]
-								   {
-									   closeDialog();
-									   if (Comm::DUET.DeleteFile(path))
-									   {
-										   requestFiles();
-									   }
-									   else
-									   {
-										   LOG_WARN("Failed to delete file {:s}", path);
-									   }
-								   },
-								   .asker = asker});
-	}
-
-	void FileBrowserPresenter::confirm()
-	{
-		ZoneScoped;
-		const std::string asked(m_dialog.get());
-		closeDialog();
-		if (asked == "start_print")
-		{
-			OM::FileSystem::StartPrint(m_selected);
-			home();
-		}
-		else if (asked == "run_macro")
-		{
-			OM::FileSystem::RunMacro(m_selected);
-		}
-	}
-
-	void FileBrowserPresenter::closeDialog()
-	{
-		m_dialog.set("");
 	}
 
 	void FileBrowserPresenter::thumbnailReceived(const std::string& path)
@@ -443,12 +319,6 @@ namespace UI
 				m_files[i].thumbnail.set(GetThumbnailPath(path).string());
 				break;
 			}
-		}
-
-		if (m_dialog.get() == "start_print" && path == m_selected)
-		{
-			m_dialogImage.set(GetThumbnailPath(path).string());
-			m_dialogHasImage.set(1);
 		}
 	}
 

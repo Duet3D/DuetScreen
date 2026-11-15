@@ -118,6 +118,7 @@
       "confirm_unload_text": "{:s} décharge {:s}."
     },
     "file": {
+      "time_and_filament": "{:s} · {:.1f} m",
       "macros": "Macros",
       "jobs": "Travaux",
       "file": "Fichier",
@@ -513,7 +514,21 @@
       "speed": "Vitesse",
       "extrusion": "Extrusion",
       "z_offset": "Décalage Z",
-      "cancel": "Annuler…"
+      "cancel": "Annuler…",
+      "ended_finished": "Terminé",
+      "ended_cancelled": "Annulé",
+      "ended_stopped": "Arrêté",
+      "ended_simulated": "Simulé",
+      "ended_at": "{:s} à {:s}",
+      "ended_took": "{:s} · durée {:s}",
+      "duration_minutes": "{:d} min",
+      "duration_hours": "{:d} h {:d} min",
+      "ready_print": "Prêt à imprimer",
+      "ready": "Prêt",
+      "all_files": "Tous les fichiers",
+      "last_job": "Dernier travail",
+      "recent": "Récents",
+      "macros": "Macros"
     },
     "status": {
       "print_cancel_message": "Voulez-vous vraiment annuler l'impression ?",
@@ -665,6 +680,8 @@
       "jobs_desc": "Les travaux de l'imprimante, pour en lancer un",
       "macros_desc": "Les macros de l'imprimante, pour en exécuter une",
       "job_status_desc": "La progression, les durées et les commandes du travail",
+      "job": "Travail",
+      "job_desc": "Le travail en cours ; sinon le dernier travail, les travaux les plus récents et les macros",
       "fan": "Ventilateur",
       "fan_desc": "La vitesse d'un ventilateur, pour la modifier",
       "tool": "Outil",

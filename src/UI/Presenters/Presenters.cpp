@@ -21,6 +21,7 @@
 #include "Dashboard/JobActions.h"
 #include "Dashboard/JobStatusPresenter.h"
 #include "FileBrowser/FileBrowserPresenter.h"
+#include "FileBrowser/FilesActions.h"
 #include "HardwareTest/HardwareTestPresenter.h"
 #include "Modals/FactorsActions.h"
 #include "Notifications/NotificationsPresenter.h"
@@ -66,6 +67,7 @@ namespace UI
 		SystemActions::registerAll();
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
+		FilesActions::registerAll();
 		EStopActions::registerAll();
 		JobActions::registerAll();
 		BabystepActions::registerAll();
