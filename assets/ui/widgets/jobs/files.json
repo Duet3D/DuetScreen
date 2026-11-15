@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.files",
   "description_tag": "tr.widget.files_desc",
   "category_tag": "tr.widget.category_jobs",
-  "icon": "macros.png",
+  "icon": "files.png",
   "slots": [
     "dashboard"
   ],

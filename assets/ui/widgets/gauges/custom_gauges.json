@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.custom_gauges",
   "description_tag": "tr.widget.custom_gauges_desc",
   "category_tag": "tr.widget.category_gauges",
-  "icon": "status.png",
+  "icon": "data.png",
   "slots": [
     "dashboard"
   ],

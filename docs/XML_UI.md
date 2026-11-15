@@ -390,7 +390,7 @@ A widget is a component and a widget file, `widgets/<purpose>/<id>.json` (the wi
   "title_tag": "tr.widget.fan",
   "description_tag": "tr.widget.fan_desc",
   "category_tag": "tr.widget.category_fans",
-  "icon": "fine_tune.png",
+  "icon": "fan.png",
   "slots": ["dashboard"],
   "size": {"default": [458, 89], "min": [365, 89]},
   "props": {},

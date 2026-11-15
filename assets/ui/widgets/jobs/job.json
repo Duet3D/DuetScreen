@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.job",
   "description_tag": "tr.widget.job_desc",
   "category_tag": "tr.widget.category_jobs",
-  "icon": "status.png",
+  "icon": "job.png",
   "slots": [
     "dashboard"
   ],

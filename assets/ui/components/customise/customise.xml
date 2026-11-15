@@ -40,34 +40,34 @@
 				<bind_state_if_eq subject="source.customise.can_configure" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.configure"/>
 			</ds_button>
-			<ds_button name="remove" translation_tag="tr.customise.remove" icon="clear.png">
+			<ds_button name="remove" translation_tag="tr.customise.remove" icon="delete.png">
 				<bind_state_if_eq subject="source.customise.can_remove" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.remove"/>
 			</ds_button>
 			<!-- Checked while dragged widgets snap to the edges near them -->
-			<ds_button name="snap" translation_tag="tr.customise.snap" icon="apps.png">
+			<ds_button name="snap" translation_tag="tr.customise.snap" icon="snap.png">
 				<bind_flag_if_eq subject="source.customise.is_free" flag="hidden" ref_value="0"/>
 				<bind_state_if_eq subject="source.customise.snap" state="checked" ref_value="1"/>
 				<action trigger="clicked" name="presenter.customise.snap"/>
 			</ds_button>
-			<ds_button name="undo" translation_tag="tr.customise.undo" icon="back.png">
+			<ds_button name="undo" translation_tag="tr.customise.undo" icon="undo.png">
 				<bind_state_if_eq subject="source.customise.can_undo" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.undo"/>
 			</ds_button>
-			<ds_button name="reset" translation_tag="tr.customise.reset" icon="print_again.png">
+			<ds_button name="reset" translation_tag="tr.customise.reset" icon="reset.png">
 				<action trigger="clicked" name="presenter.customise.reset"/>
 			</ds_button>
 			<ds_button name="save" translation_tag="tr.customise.save" icon="save.png">
 				<bind_state_if_eq subject="presenter.can_save" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="presenter.customise.save"/>
 			</ds_button>
-			<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
+			<ds_button name="load" translation_tag="tr.customise.load" icon="open.png">
 				<action trigger="clicked" name="presenter.customise.load"/>
 			</ds_button>
 			<ds_button name="cancel" translation_tag="tr.common.cancel" icon="close.png">
 				<action trigger="clicked" name="presenter.customise.cancel"/>
 			</ds_button>
-			<ds_button name="done" translation_tag="tr.customise.done" icon="send.png">
+			<ds_button name="done" translation_tag="tr.customise.done" icon="done.png">
 				<style name="action_btn"/>
 				<action trigger="clicked" name="presenter.customise.done"/>
 			</ds_button>

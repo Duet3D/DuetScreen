@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.status_speed",
   "description_tag": "tr.widget.status_speed_desc",
   "category_tag": "tr.widget.category_motion",
-  "icon": "fine_tune.png",
+  "icon": "speed.png",
   "slots": [
     "status_bar"
   ],

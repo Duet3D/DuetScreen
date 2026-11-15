@@ -30,7 +30,7 @@
         },
         {
           "value": "home_axis.png",
-          "title": "home axis"
+          "title": "home axes"
         },
         {
           "value": "macros.png",
@@ -53,12 +53,20 @@
           "title": "temperature"
         },
         {
-          "value": "fine_tune.png",
-          "title": "fine tune"
+          "value": "bed.png",
+          "title": "bed"
+        },
+        {
+          "value": "tools.png",
+          "title": "tools"
+        },
+        {
+          "value": "fan.png",
+          "title": "fan"
         },
         {
           "value": "heightmap.png",
-          "title": "heightmap"
+          "title": "bed mesh"
         },
         {
           "value": "babystep.png",
@@ -66,7 +74,7 @@
         },
         {
           "value": "disable_motors.png",
-          "title": "disable motors"
+          "title": "motors off"
         },
         {
           "value": "pause.png",
@@ -85,8 +93,8 @@
           "title": "print again"
         },
         {
-          "value": "status.png",
-          "title": "status"
+          "value": "info.png",
+          "title": "info"
         }
       ]
     },

@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.text",
   "description_tag": "tr.widget.text_desc",
   "category_tag": "tr.widget.category_text",
-  "icon": "apps.png",
+  "icon": "text.png",
   "slots": [
     "dashboard"
   ],

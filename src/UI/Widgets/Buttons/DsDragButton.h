@@ -1,8 +1,8 @@
 /*
  * DsDragButton.h
  *
- * <ds_drag_button>: a button that must be dragged, not just tapped, to act, such as the E-stop. Its attributes are in
- * registerXml().
+ * <ds_drag_button>: a button that must be dragged, not just tapped, to act, such as the E-stop: its icon in the middle,
+ * its hint written round its edge. Its attributes are in registerXml().
  */
 
 #pragma once
@@ -32,6 +32,8 @@ namespace UI::Xml
 
 		/** Hide the hint while the button is held, and show it again when let go */
 		static void pressCb(lv_event_t* e);
+
+		static constexpr int32_t ICON_SIZE_PERCENT = 40; // The icon's size, of the button's, clear of the hint
 
 		LvArclabel m_hint{"hint", getRoot()}; // Curved around the edge: how to use it
 		bool m_hasHint = false;				  // Whether there is a hint to show

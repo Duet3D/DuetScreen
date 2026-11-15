@@ -8,11 +8,11 @@
 		  scrollable="false">
 		<style name="dialog_row"/>
 		<lv_label name="name" bind_text="row.name" flex_grow="1" long_mode="dots"/>
-		<ds_button name="load" translation_tag="tr.customise.load" icon="folder.png">
+		<ds_button name="load" translation_tag="tr.customise.load" icon="open.png">
 			<style name="action_btn"/>
 			<action trigger="clicked" name="presenter.customise.load_saved"/>
 		</ds_button>
-		<ds_button name="delete" translation_tag="tr.customise.delete" icon="clear.png">
+		<ds_button name="delete" translation_tag="tr.customise.delete" icon="delete.png">
 			<action trigger="clicked" name="presenter.customise.ask_delete"/>
 		</ds_button>
 	</view>

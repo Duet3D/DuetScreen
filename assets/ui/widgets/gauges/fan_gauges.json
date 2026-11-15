@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.fan_gauges",
   "description_tag": "tr.widget.fan_gauges_desc",
   "category_tag": "tr.widget.category_fans",
-  "icon": "fine_tune.png",
+  "icon": "fan.png",
   "slots": [
     "dashboard"
   ],

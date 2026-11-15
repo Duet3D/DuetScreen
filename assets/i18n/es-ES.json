@@ -76,7 +76,6 @@
       "fan_tab": "Ventiladores"
     },
     "estop": {
-      "label": "",
       "prompt": "¡Deslizar para parada de emergencia!",
       "message": "Parada de emergencia enviada...",
       "reset_message": "La impresora se ha detenido. Enviando M999 para reiniciar. Por favor espere..."

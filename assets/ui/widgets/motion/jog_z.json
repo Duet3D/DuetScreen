@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.jog_z",
   "description_tag": "tr.widget.jog_z_desc",
   "category_tag": "tr.widget.category_motion",
-  "icon": "home_axis.png",
+  "icon": "move.png",
   "slots": [
     "dashboard"
   ],

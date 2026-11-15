@@ -76,7 +76,6 @@
       "fan_tab": "Lüfter"
     },
     "estop": {
-      "label": "",
       "prompt": "Zum Not-Stopp ziehen!",
       "message": "Not-Stopp gesendet...",
       "reset_message": "Drucker ist angehalten. Sende M999 zum Zurücksetzen. Bitte warten..."

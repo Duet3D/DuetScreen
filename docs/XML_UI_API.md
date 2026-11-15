@@ -1391,7 +1391,7 @@ A button that must be dragged, not just tapped, to act, such as the E-stop. When
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_drag_button name="estop" translation_tag="tr.estop.label" icon="estop.png"
+<ds_drag_button name="estop" icon="estop.png"
 				 hint_tag="tr.estop.prompt" width="80" height="80">
 	<style name="estop"/>
 	<action trigger="value_confirmed" name="actions.estop.dragged"/>
@@ -2750,7 +2750,7 @@ In Commands; placed in `sidebar`; component `sidebar_button` ([sidebar_button.js
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `Babystep` |
-| `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `fine_tune.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `status.png` | `babystep.png` |
+| `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `bed.png`, `tools.png`, `fan.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `info.png` | `babystep.png` |
 | `tap_action` | On tap | an action offered to users, or none | `actions.babystep.open` |
 | `tap_arg` | On tap: argument | text, up to 120 bytes | `` |
 | `hold_action` | On hold | an action offered to users, or none | `` |
@@ -2767,7 +2767,7 @@ In Commands; placed in `sidebar`; component `sidebar_button` ([sidebar_gcode.jso
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `label` | Label | text, up to 32 bytes | `Home` |
-| `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `fine_tune.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `status.png` | `send.png` |
+| `icon` | Icon | one of `send.png`, `home_axis.png`, `macros.png`, `move.png`, `extrude.png`, `retract.png`, `temperature.png`, `bed.png`, `tools.png`, `fan.png`, `heightmap.png`, `babystep.png`, `disable_motors.png`, `pause.png`, `resume.png`, `cancel.png`, `print_again.png`, `info.png` | `send.png` |
 | `tap_arg` | G-code | text, up to 120 bytes | `G28` |
 
 #### speed_arc

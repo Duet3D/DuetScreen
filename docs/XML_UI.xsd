@@ -1584,7 +1584,6 @@
 			<xs:enumeration value="tr.dialogs.at_least"/>
 			<xs:enumeration value="tr.dialogs.at_most"/>
 			<xs:enumeration value="tr.dialogs.range"/>
-			<xs:enumeration value="tr.estop.label"/>
 			<xs:enumeration value="tr.estop.message"/>
 			<xs:enumeration value="tr.estop.prompt"/>
 			<xs:enumeration value="tr.estop.reset_message"/>

@@ -76,7 +76,6 @@
       "fan_tab": "Ventilatoren"
     },
     "estop": {
-      "label": "",
       "prompt": "Sleep voor noodstop!",
       "message": "Noodstop verzonden...",
       "reset_message": "Printer is gestopt. Stuur M999 voor reset. Wacht alstublieft..."

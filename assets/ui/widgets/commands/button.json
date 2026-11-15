@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.button",
   "description_tag": "tr.widget.button_desc",
   "category_tag": "tr.widget.category_commands",
-  "icon": "apps.png",
+  "icon": "button.png",
   "slots": [
     "dashboard"
   ],

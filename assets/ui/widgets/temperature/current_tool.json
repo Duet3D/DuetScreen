@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.current_tool",
   "description_tag": "tr.widget.current_tool_desc",
   "category_tag": "tr.widget.category_temperature",
-  "icon": "temperature.png",
+  "icon": "tools.png",
   "slots": [
     "dashboard"
   ],

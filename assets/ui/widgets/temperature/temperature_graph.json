@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.temperature_graph",
   "description_tag": "tr.widget.temperature_graph_desc",
   "category_tag": "tr.widget.category_temperature",
-  "icon": "control.png",
+  "icon": "graph.png",
   "slots": [
     "dashboard"
   ],

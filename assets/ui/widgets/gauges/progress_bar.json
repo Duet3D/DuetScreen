@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.progress_bar",
   "description_tag": "tr.widget.progress_gauge_desc",
   "category_tag": "tr.widget.category_jobs",
-  "icon": "status.png",
+  "icon": "progress.png",
   "slots": [
     "dashboard"
   ],

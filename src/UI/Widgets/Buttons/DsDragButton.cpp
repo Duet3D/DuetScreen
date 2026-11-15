@@ -23,6 +23,9 @@ namespace UI::Xml
 		m_hint.setFlag(LV_OBJ_FLAG_IGNORE_LAYOUT, true);
 		m_hint.setAlign(LV_ALIGN_CENTER, 0, 0);
 		m_hint.hide();
+		// The icon in the middle, inside the circle the hint is written round
+		getIcon().setFlexGrow(0);
+		getIcon().setSize(LV_PCT(ICON_SIZE_PERCENT), LV_PCT(ICON_SIZE_PERCENT));
 
 		lv_obj_add_event_cb(getRootPtr(), pressCb, LV_EVENT_PRESSED, this);
 		lv_obj_add_event_cb(getRootPtr(), pressCb, LV_EVENT_RELEASED, this);
@@ -43,7 +46,7 @@ namespace UI::Xml
 			 .description = "A button that must be dragged, not just tapped, to act, such as the E-stop. When let go "
 							"it raises `value_confirmed` with how far it was dragged, from 0 (a tap) to 1 (all the "
 							"way, when it shows its `user_1` state).",
-			 .example = R"(<ds_drag_button name="estop" translation_tag="tr.estop.label" icon="estop.png"
+			 .example = R"(<ds_drag_button name="estop" icon="estop.png"
 				 hint_tag="tr.estop.prompt" width="80" height="80">
 	<style name="estop"/>
 	<action trigger="value_confirmed" name="actions.estop.dragged"/>

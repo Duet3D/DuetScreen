@@ -5,21 +5,22 @@
 <component>
 	<view extends="lv_obj" width="100%" height="100%" style_pad_all="0">
 		<style name="bg_dark"/>
-		<ds_tabs name="tabs" side="left" tab_max_width="100" width="100%" height="100%">
-			<ds_tabs-tab name="move" title_tag="tr.control.move_tab">
+		<ds_tabs name="tabs" side="left" tab_max_width="140" width="100%" height="100%">
+			<ds_tabs-tab name="move" icon="move.png" title_tag="tr.control.move_tab">
 				<ds_view name="move" view="move" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="tools" title_tag="tr.control.tools_tab" bind_shown="om.tools|count">
+			<ds_tabs-tab name="tools" icon="tools.png" title_tag="tr.control.tools_tab" bind_shown="om.tools|count">
 				<ds_view name="tools" view="tools" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="heightmap" title_tag="tr.control.heightmap_tab" bind_shown="om.sensors.probes|count">
+			<ds_tabs-tab name="heightmap" icon="heightmap.png" title_tag="tr.control.heightmap_tab"
+						 bind_shown="om.sensors.probes|count">
 				<ds_view name="heightmap" view="heightmap" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="object_cancel" title_tag="tr.control.object_cancel_tab"
+			<ds_tabs-tab name="object_cancel" icon="objects.png" title_tag="tr.control.object_cancel_tab"
 						 bind_shown="om.job.build.objects|count">
 				<ds_view name="object_cancel" view="object_cancel" shown="true" style_pad_all="0"/>
 			</ds_tabs-tab>
-			<ds_tabs-tab name="fans" title_tag="tr.control.fan_tab" bind_shown="om.fans|count">
+			<ds_tabs-tab name="fans" icon="fan.png" title_tag="tr.control.fan_tab" bind_shown="om.fans|count">
 				<ds_view name="fans" view="fans" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>

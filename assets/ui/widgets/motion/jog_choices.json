@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.jog_choices",
   "description_tag": "tr.widget.jog_choices_desc",
   "category_tag": "tr.widget.category_motion",
-  "icon": "fine_tune.png",
+  "icon": "distance.png",
   "slots": [
     "dashboard"
   ],

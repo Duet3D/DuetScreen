@@ -3,7 +3,7 @@
   "title_tag": "tr.side_bar.files",
   "description_tag": "tr.widget.page_files_desc",
   "category_tag": "tr.widget.category_navigation",
-  "icon": "macros.png",
+  "icon": "files.png",
   "slots": [
     "sidebar"
   ],
@@ -11,6 +11,6 @@
     "page": "files",
     "action": "actions.navigation.open",
     "label_tag": "tr.side_bar.files",
-    "icon": "macros.png"
+    "icon": "files.png"
   }
 }

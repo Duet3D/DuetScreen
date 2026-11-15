@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.bed_bar",
   "description_tag": "tr.widget.bed_gauge_desc",
   "category_tag": "tr.widget.category_temperature",
-  "icon": "temperature.png",
+  "icon": "bed.png",
   "slots": [
     "dashboard"
   ],

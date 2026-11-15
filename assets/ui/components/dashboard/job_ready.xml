@@ -34,8 +34,8 @@
 				<style name="text_header"/>
 				<bind_flag_if cond="om.state.machineMode|eq:CNC eq 0 and om.state.machineMode|eq:Laser eq 0" flag="hidden"/>
 			</lv_label>
-			<ds_button name="refresh" text="&#xF021;" width="content" height="content" style_pad_hor="12"
-					   style_pad_ver="8" style_margin_right="8">
+			<ds_button name="refresh" icon="refresh.png" width="40" height="38" style_pad_all="6"
+					   style_margin_right="8">
 				<action trigger="clicked" name="actions.files.refresh"/>
 			</ds_button>
 			<lv_obj name="all_files" width="content" height="content" flex_flow="row" scrollable="false"

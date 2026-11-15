@@ -77,7 +77,6 @@
       "fan_tab": "Fans"
     },
     "estop": { /* Estop widget */
-      "label": "\uF071", /* Warning symbol */
       "prompt": "Drag to E-Stop!",
       "message": "Emergency stop sent...",
       "reset_message": "Printer is halted. Sending M999 to reset. Please wait..."

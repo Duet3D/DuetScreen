@@ -317,16 +317,19 @@ Where:
 Running `python scripts/manage_translations.py` will check for missing translation keys in the language files and prompt the user to enter translations for any missing keys. This can be used to easily keep the language files up to date with the code.
 Use `python scripts/manage_translations.py --help` for more information on how to use the script.
 
-### Adding a new icon set
-- Icon sets are located in the `assets/icons/` directory.
-- Each icon set is a subdirectory in the `assets/icons/` directory.
-- To add a new icon set, create a new subdirectory in the `assets/icons/` directory and add the icons to it.
-- Icons should be PNG format with transparent backgrounds
-- Icon colour does not matter as the icons are recoloured at runtime to match the current theme.
-- The icon set can be selected in the GUI settings under `Settings > Display > Icons`
-- The filenames of the icons should match the filenames used in the code. If in doubt look at the existing icon sets for reference.
-- A translation key is used to provide a human readable name for the icon set in the GUI. This key should be added to the `i18n` language files under the `theme.icon_sets.{icon_set_folder_name}` key. For example, for an icon set called `example`, the translation key would be `theme.icon_sets.example`.
-- https://fonts.google.com/icons is a good source for icons.
+### Icons and icon sets
+- Icon sets are the subdirectories of `assets/icons/` (other than `examples/` and `hardware_test/`). The user chooses one
+  under `Settings > Display > Icons`.
+- Every set has the same icons, under the same names, each a white 90x90 PNG whose shape is its alpha channel. The
+  colour doesn't matter: icons are recoloured at runtime to match the theme.
+- An icon is named for what it means where it is used (`fan.png`, `estop.png`, `heightmap.png`), not for its picture.
+- The sets are made by `scripts/generate_icons.py`, from icon fonts it downloads at pinned versions (Material Symbols,
+  Phosphor), plus a few pictures it draws itself for what no font has (a nozzle, extruding, a heated bed, a bed mesh).
+  To change or add an icon, change `ICONS` in the script and run it; it writes every set. `--sheet <png>` also writes
+  a contact sheet of every icon in every set to look over.
+- To add a set, add it to `SETS` in the script, and a human readable name for it in the `i18n` language files under
+  `theme.icon_sets.{icon_set_folder_name}` (e.g. `theme.icon_sets.example` for a set called `example`).
+- The tests check that every icon the UI names exists, in every set.
 
 ### Adding a new font
 - Fonts are located in the `assets/fonts/` directory.

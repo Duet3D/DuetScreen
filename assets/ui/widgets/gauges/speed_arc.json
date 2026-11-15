@@ -3,7 +3,7 @@
   "title_tag": "tr.widget.speed_arc",
   "description_tag": "tr.widget.speed_gauge_desc",
   "category_tag": "tr.widget.category_motion",
-  "icon": "move.png",
+  "icon": "speed.png",
   "slots": [
     "dashboard"
   ],

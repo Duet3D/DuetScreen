@@ -3,7 +3,7 @@
   "title_tag": "tr.app_drawer.status",
   "description_tag": "tr.widget.job_status_desc",
   "category_tag": "tr.widget.category_jobs",
-  "icon": "home.png",
+  "icon": "job.png",
   "slots": [
     "dashboard"
   ],

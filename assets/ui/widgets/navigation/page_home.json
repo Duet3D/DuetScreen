@@ -3,7 +3,7 @@
   "title_tag": "tr.side_bar.home",
   "description_tag": "tr.widget.page_home_desc",
   "category_tag": "tr.widget.category_navigation",
-  "icon": "home.png",
+  "icon": "dashboard.png",
   "slots": [
     "sidebar"
   ],
@@ -11,6 +11,6 @@
     "page": "",
     "action": "actions.navigation.home",
     "label_tag": "tr.side_bar.home",
-    "icon": "home.png"
+    "icon": "dashboard.png"
   }
 }
