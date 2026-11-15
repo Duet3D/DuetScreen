@@ -499,6 +499,22 @@
     "slider": {
       "reset": "Resetten"
     },
+    "job": { /* The dashboard's job widget */
+      "printing": "Bezig met printen",
+      "running": "Bezig",
+      "simulating": "Simuleren",
+      "paused": "Gepauzeerd",
+      "finished": "Klaar",
+      "layer_of": "{:d} van {:d}",
+      "layer": "Laag",
+      "elapsed": "Verstreken",
+      "left": "Resterend",
+      "done_at": "Klaar om",
+      "speed": "Snelheid",
+      "extrusion": "Extrusie",
+      "z_offset": "Z-offset",
+      "cancel": "Annuleren…"
+    },
     "status": {
       "print_cancel_message": "Weet u zeker dat u de print wilt annuleren?",
       "print_cancel_title": "Print annuleren",

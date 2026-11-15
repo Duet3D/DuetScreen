@@ -79,8 +79,11 @@ namespace UI::Xml
 		/** Show the time left */
 		void showRemaining();
 
-		/** Show which controls `status` allows */
+		/** Show which controls `status` allows, and what the job is doing */
 		void showControls(OM::PrinterStatus status);
+
+		/** Show the layer being printed, e.g. "51 of 120"; nothing if the job has no layers */
+		void showLayer();
 
 		/** Show `file`'s thumbnail, asking the printer for it if it isn't here yet; nothing if `file` is empty */
 		void showThumbnail(const std::string& file);
@@ -96,6 +99,11 @@ namespace UI::Xml
 		StringSubject<16> m_remaining;	 // hh:mm:ss
 		StringSubject<48> m_elapsedText;	 // e.g. "Elapsed: 00:03:43", translated
 		StringSubject<48> m_remainingText; // e.g. "Remaining: 00:45:03", translated
+		IntSubject m_running;			 // 1 while a job's file is open
+		StringSubject<128> m_name;		 // The latest job's file, without its folder
+		StringSubject<32> m_state;		 // "Printing", "Paused", "Finished", …
+		StringSubject<32> m_layer;		 // e.g. "51 of 120", or empty
+		StringSubject<16> m_finishAt;	 // The time of day it should finish, e.g. "14:32", or empty
 		IntSubject m_pause;				 // A Control
 		IntSubject m_resume;			 // A Control
 		IntSubject m_printAgain;		 // A Control

@@ -267,14 +267,19 @@
 			<xs:enumeration value="source.job.cancel_control"/>
 			<xs:enumeration value="source.job.elapsed"/>
 			<xs:enumeration value="source.job.elapsed_text"/>
+			<xs:enumeration value="source.job.finish_at"/>
 			<xs:enumeration value="source.job.finished"/>
 			<xs:enumeration value="source.job.latest_file"/>
+			<xs:enumeration value="source.job.layer"/>
+			<xs:enumeration value="source.job.name"/>
 			<xs:enumeration value="source.job.pause_control"/>
 			<xs:enumeration value="source.job.print_again_control"/>
 			<xs:enumeration value="source.job.progress"/>
 			<xs:enumeration value="source.job.remaining"/>
 			<xs:enumeration value="source.job.remaining_text"/>
 			<xs:enumeration value="source.job.resume_control"/>
+			<xs:enumeration value="source.job.running"/>
+			<xs:enumeration value="source.job.state"/>
 			<xs:enumeration value="source.job.thumbnail"/>
 			<xs:enumeration value="source.jog.distance.choices"/>
 			<xs:enumeration value="source.jog.distance.title"/>
@@ -699,7 +704,6 @@
 			<xs:enumeration value="customise_saved_layout"/>
 			<xs:enumeration value="customise_setting"/>
 			<xs:enumeration value="dashboard"/>
-			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
 			<xs:enumeration value="dashboard_button"/>
 			<xs:enumeration value="dashboard_current_tool"/>
@@ -754,6 +758,8 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_detail"/>
+			<xs:enumeration value="job_override"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
@@ -845,7 +851,6 @@
 			<xs:enumeration value="customise_saved_layout"/>
 			<xs:enumeration value="customise_setting"/>
 			<xs:enumeration value="dashboard"/>
-			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
 			<xs:enumeration value="dashboard_button"/>
 			<xs:enumeration value="dashboard_current_tool"/>
@@ -900,6 +905,8 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_detail"/>
+			<xs:enumeration value="job_override"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
@@ -991,7 +998,6 @@
 			<xs:enumeration value="customise_saved_layout"/>
 			<xs:enumeration value="customise_setting"/>
 			<xs:enumeration value="dashboard"/>
-			<xs:enumeration value="dashboard_axis"/>
 			<xs:enumeration value="dashboard_babystep"/>
 			<xs:enumeration value="dashboard_button"/>
 			<xs:enumeration value="dashboard_current_tool"/>
@@ -1081,6 +1087,8 @@
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_detail"/>
+			<xs:enumeration value="job_override"/>
 			<xs:enumeration value="lv_arc"/>
 			<xs:enumeration value="lv_bar"/>
 			<xs:enumeration value="lv_button"/>
@@ -1359,6 +1367,7 @@
 			<xs:enumeration value="setting_options"/>
 			<xs:enumeration value="setting_page"/>
 			<xs:enumeration value="setting_row"/>
+			<xs:enumeration value="setting_row_compact"/>
 			<xs:enumeration value="setting_section"/>
 			<xs:enumeration value="setting_title"/>
 			<xs:enumeration value="setting_value"/>
@@ -1863,6 +1872,20 @@
 			<xs:enumeration value="tr.heightmap.shown"/>
 			<xs:enumeration value="tr.heightmap.std_dev"/>
 			<xs:enumeration value="tr.heightmap.unload"/>
+			<xs:enumeration value="tr.job.cancel"/>
+			<xs:enumeration value="tr.job.done_at"/>
+			<xs:enumeration value="tr.job.elapsed"/>
+			<xs:enumeration value="tr.job.extrusion"/>
+			<xs:enumeration value="tr.job.finished"/>
+			<xs:enumeration value="tr.job.layer"/>
+			<xs:enumeration value="tr.job.layer_of"/>
+			<xs:enumeration value="tr.job.left"/>
+			<xs:enumeration value="tr.job.paused"/>
+			<xs:enumeration value="tr.job.printing"/>
+			<xs:enumeration value="tr.job.running"/>
+			<xs:enumeration value="tr.job.simulating"/>
+			<xs:enumeration value="tr.job.speed"/>
+			<xs:enumeration value="tr.job.z_offset"/>
 			<xs:enumeration value="tr.message.connected"/>
 			<xs:enumeration value="tr.message.disconnected"/>
 			<xs:enumeration value="tr.message.update_available"/>
@@ -4157,6 +4180,31 @@
 		<xs:attribute name="standby" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="compact" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="job_detail.attributes">
+		<xs:attribute name="title_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="job_override.attributes">
+		<xs:attribute name="title_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="tap_action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="shown" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_arc.attributes">
 		<xs:attribute name="start_angle" type="xs:string">
@@ -6150,12 +6198,32 @@
 			<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="tools_bed_heater.attributes">
+		<xs:attribute name="compact" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="tools_beds.attributes">
+		<xs:attribute name="compact" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="tools_chamber_heater.attributes">
+		<xs:attribute name="compact" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="tools_list.attributes">
 		<xs:attribute name="compact" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="tools_tool.attributes">
+		<xs:attribute name="compact" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="tools_tool_heater.attributes">
 		<xs:attribute name="compact" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -8440,14 +8508,6 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_layout.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="dashboard_axis">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_axis.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -11300,6 +11360,24 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/home/home_main_window.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="job_detail">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_detail.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="job_detail.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="job_override">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_override.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="job_override.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -14819,7 +14897,16 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_bed_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="heater_row.attributes"/>
+			<xs:attributeGroup ref="tools_bed_heater.attributes"/>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="active" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="standby" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -14828,6 +14915,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_beds.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="tools_beds.attributes"/>
 			<xs:attributeGroup ref="ds_setting_group.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
@@ -14837,7 +14925,16 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_chamber_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="heater_row.attributes"/>
+			<xs:attributeGroup ref="tools_chamber_heater.attributes"/>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="active" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="standby" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -15401,7 +15498,16 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_tool_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="heater_row.attributes"/>
+			<xs:attributeGroup ref="tools_tool_heater.attributes"/>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="active" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="standby" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

@@ -500,6 +500,22 @@
     "slider": {
       "reset": "Resetta"
     },
+    "job": { /* The dashboard's job widget */
+      "printing": "In stampa",
+      "running": "In esecuzione",
+      "simulating": "Simulazione",
+      "paused": "In pausa",
+      "finished": "Finito",
+      "layer_of": "{:d} di {:d}",
+      "layer": "Strato",
+      "elapsed": "Trascorso",
+      "left": "Rimanente",
+      "done_at": "Fine alle",
+      "speed": "Velocità",
+      "extrusion": "Estrusione",
+      "z_offset": "Offset Z",
+      "cancel": "Annulla…"
+    },
     "status": {
       "print_cancel_message": "Sei sicuro di voler annullare la stampa?",
       "print_cancel_title": "Annulla stampa",

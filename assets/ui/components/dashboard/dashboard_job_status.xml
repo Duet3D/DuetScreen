@@ -1,178 +1,105 @@
 <!--
-  The job status panel: the current (or last) job with its progress and thumbnail; the tool position, speed, flow,
-  babystepping and times; and pause, resume, print again and cancel.
+  The job, as it runs (or as it last ran): its thumbnail, name and what it is doing; while it runs, its progress,
+  large, over a bar, and its layer, times and when it should be done; the overrides, each tapped to change it in its shared dialog (speed,
+  and on a printer extrusion and Z offset); and pause, resume or print again, and Cancel, which asks first.
 
-  Tapping the speed or flow value opens the shared dialog to change it (factors.xml); tapping babystepping opens the
-  shared babystepping dialog (babystep_dialog.xml).
-
-  Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the latest job, its progress, thumbnail and controls; source.move.*
-            (src/UI/Xml/Data/MoveSource.h): positions, overrides, babystep, speeds and flow
-  Actions:  job.pause, job.resume, job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h) and
-            job.ask_cancel and babystep.open (global: the shared dialogs, src/UI/Presenters/Modals/)
+  Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the latest job, its progress, times, thumbnail and controls;
+            source.move.* (src/UI/Xml/Data/MoveSource.h): the overrides and babystep
+  Actions:  job.pause, job.resume, job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h), job.ask_cancel,
+            factors.speed, factors.extrusion and babystep.open (global: the shared dialogs, src/UI/Presenters/Modals/)
   It has no presenter: everything it shows and does is global.
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
 		<style name="pad_zero"/>
 		<style name="pad_gap"/>
 		<style name="bg_dark"/>
 
-		<!-- The job: name, progress and thumbnail -->
-		<lv_obj name="header" width="100%" height="content" style_max_height="30%" style_layout="grid"
-				style_grid_column_dsc_array="fr(5) content" style_grid_row_dsc_array="content content fr(1) content">
+		<lv_obj name="job" width="100%" height="content" flex_flow="column" scrollable="false">
 			<style name="card"/>
-			<ds_bar name="progress" min="0" max="100" label_format="{}%" bind_value="source.job.progress" height="content"
-					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-					style_grid_cell_row_pos="3" style_grid_cell_y_align="end"/>
-			<lv_label name="printed_tag" translation_tag="tr.status.print_finished" width="100%" height="content"
-					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-					  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
-				<bind_flag_if_eq subject="source.job.finished" flag="hidden" ref_value="0"/>
-			</lv_label>
-			<lv_label name="filename" bind_text="source.job.latest_file" width="100%" height="content"
-					  style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-					  style_grid_cell_row_pos="1" style_grid_cell_y_align="start"/>
-			<ds_thumbnail name="thumbnail" bind_src="source.job.thumbnail" inner_align="contain" height="100%" width="50"
-						  style_min_height="50" style_max_width="30%"
-						  style_grid_cell_column_pos="1" style_grid_cell_x_align="end"
-						  style_grid_cell_row_pos="0" style_grid_cell_row_span="4" style_grid_cell_y_align="start"/>
-		</lv_obj>
-
-		<lv_obj name="print_info" width="100%" height="100%" flex_grow="5" style_layout="grid"
-				style_grid_column_dsc_array="fr(3) content"
-				style_grid_row_dsc_array="content content content content">
-			<style name="card"/>
-
-			<lv_obj name="positions" width="100%" height="content" flex_flow="column"
-					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-					style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
-				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-					<style name="bg_color_header"/>
-					<style name="list_header"/>
-					<lv_label name="title" translation_tag="tr.status.positions" width="content" height="content">
-						<style name="list_title"/>
+			<bind_flag_if_eq subject="source.job.name" flag="hidden" ref_value=""/>
+			<style name="pad_gap"/>
+			<!-- What it is -->
+			<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
+					style_pad_column="12">
+				<ds_thumbnail name="thumbnail" bind_src="source.job.thumbnail" inner_align="contain" width="64"
+							  height="64"/>
+				<lv_obj name="titles" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+						style_pad_all="0">
+					<lv_label name="filename" bind_text="source.job.name" width="100%" long_mode="dots">
+						<style name="text_emphasis"/>
+					</lv_label>
+					<lv_label name="state" bind_text="source.job.state" width="100%">
+						<style name="text_muted"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="list" list="om.move.axes" item="dashboard_axis" width="100%" height="content"
-						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="start"
-						 style_flex_track_place="start"/>
 			</lv_obj>
-
-			<lv_obj name="speed_cont" height="content" scrollable="false" style_layout="grid"
-					style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content"
-					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-					style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
-				<lv_label name="speed_header" translation_tag="tr.status.speed_header"
-						  style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
-					<style name="bg_color_header"/>
-					<style name="pad_normal"/>
-					<style name="text_emphasis"/>
+			<!-- How far it has got, while it runs: a finished job has only its name and Print again, no job nothing -->
+			<lv_obj name="progress_line" width="100%" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="end" style_flex_track_place="end" style_pad_all="0" style_pad_column="4">
+				<bind_flag_if_eq subject="source.job.running" flag="hidden" ref_value="0"/>
+				<lv_label name="percent" bind_text="source.job.progress" bind_text-fmt="%d">
+					<style name="reading_large"/>
 				</lv_label>
-				<ds_button name="speed_multiplier" bind_text="source.move.speed_factor" width="content" height="content"
-						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
-						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<action trigger="clicked" name="actions.factors.speed"/>
-				</ds_button>
-				<lv_bar name="requested_speed" max_value="1000" bind_value="source.move.speed_requested" height="content"
-						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-					<style name="bg_color_primary_muted" selector="indicator"/>
-					<style name="anim_fast"/>
-				</lv_bar>
-				<lv_bar name="current_speed" max_value="1000" bind_value="source.move.speed_top" height="content"
-						style_bg_opa="0"
-						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-					<lv_label name="speed_label" bind_text="source.move.speed_text" align="left_mid" x="10">
-						<style name="bar_label_bg"/>
-						<style name="bar_label"/>
-					</lv_label>
-				</lv_bar>
-			</lv_obj>
-
-			<lv_obj name="flow_cont" height="content" scrollable="false" style_layout="grid"
-					style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content content"
-					style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
-					style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
-				<lv_label name="flow_header" translation_tag="tr.status.flow_header"
-						  style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-						  style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
-					<style name="bg_color_header"/>
-					<style name="pad_normal"/>
-					<style name="text_emphasis"/>
+				<lv_label name="unit" text="%">
+					<style name="text_muted"/>
 				</lv_label>
-				<ds_button name="flow_multiplier" bind_text="source.move.extrusion_factor" width="content" height="content"
-						   style_grid_cell_column_pos="0" style_grid_cell_x_align="center"
-						   style_grid_cell_row_pos="1" style_grid_cell_y_align="center">
-					<action trigger="clicked" name="actions.factors.extrusion"/>
-				</ds_button>
-				<lv_bar name="extruder_feedrate" max_value="1000" bind_value="source.move.flow" height="content"
-						style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-						style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
-					<lv_label name="extruder_feedrate_label" bind_text="source.move.flow_text" align="left_mid" x="10">
-						<style name="bar_label_bg"/>
-						<style name="bar_label"/>
-					</lv_label>
-				</lv_bar>
 			</lv_obj>
+			<ds_bar name="progress" min="0" max="100" label_format="" bind_value="source.job.progress" width="100%"
+					height="8">
+				<bind_flag_if_eq subject="source.job.running" flag="hidden" ref_value="0"/>
+				<style name="gauge_bar"/>
+				<style name="gauge_bar_indic" selector="indicator"/>
+			</ds_bar>
+			<!-- Its layer and times, each shown while it is known -->
+			<lv_obj name="details" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
+					style_pad_all="0" style_pad_column="16" style_pad_row="8">
+				<bind_flag_if_eq subject="source.job.running" flag="hidden" ref_value="0"/>
+				<job_detail name="layer" title_tag="tr.job.layer" value="source.job.layer"/>
+				<job_detail name="elapsed" title_tag="tr.job.elapsed" value="source.job.elapsed"/>
+				<job_detail name="left" title_tag="tr.job.left" value="source.job.remaining"/>
+				<job_detail name="done_at" title_tag="tr.job.done_at" value="source.job.finish_at"/>
+			</lv_obj>
+		</lv_obj>
 
-			<lv_obj name="time_cont" height="content" flex_flow="column"
-					style_grid_cell_column_pos="0" style_grid_cell_column_span="2" style_grid_cell_x_align="stretch"
-					style_grid_cell_row_pos="3" style_grid_cell_y_align="end">
-				<lv_label name="time_header" translation_tag="tr.status.time_header" width="100%" height="content"
-						  style_min_width="content">
-					<style name="bg_color_header"/>
-					<style name="pad_normal"/>
-					<style name="text_emphasis"/>
-				</lv_label>
-				<lv_label name="elapsed_time" bind_text="source.job.elapsed_text"/>
-				<lv_label name="remaining_time" bind_text="source.job.remaining_text"/>
-			</lv_obj>
-
-			<lv_obj name="babystep_cont" width="content" height="content" flex_flow="column"
-					style_grid_cell_column_pos="1" style_grid_cell_x_align="end"
-					style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
-				<lv_label name="babystep_header" translation_tag="tr.status.babystep_header" width="100%"
-						  height="content" style_min_width="content">
-					<style name="bg_color_header"/>
-					<style name="pad_normal"/>
-					<style name="text_emphasis"/>
-				</lv_label>
-				<ds_button name="babystep_button" bind_text="source.move.babystep" width="100%" height="content"
-						   style_min_width="content">
-					<action trigger="clicked" name="actions.babystep.open"/>
-				</ds_button>
-			</lv_obj>
+		<!-- The overrides, each tapped to change it; extrusion and Z offset only on a printer -->
+		<lv_obj name="overrides" width="100%" height="content" flex_flow="row" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<job_override name="speed_multiplier" title_tag="tr.job.speed" value="source.move.speed_factor"
+						  tap_action="actions.factors.speed"/>
+			<job_override name="flow_multiplier" title_tag="tr.job.extrusion" value="source.move.extrusion_factor"
+						  tap_action="actions.factors.extrusion" shown="om.state.machineMode|eq:FFF"/>
+			<job_override name="babystep_button" title_tag="tr.job.z_offset" value="source.move.babystep"
+						  tap_action="actions.babystep.open" shown="om.state.machineMode|eq:FFF"/>
 		</lv_obj>
 
 		<!-- Job controls: each is hidden (0), disabled (1) or usable (2) -->
-		<lv_obj name="footer" width="100%" height="15%" style_min_height="content" flex_flow="row">
-			<style name="card"/>
-			<ds_button name="pause" translation_tag="tr.status.pause" icon="pause.png" height="100%"
-					   style_min_height="content" flex_grow="1">
+		<lv_obj name="footer" width="100%" height="content" flex_flow="row" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<ds_button name="pause" translation_tag="tr.status.pause" icon="pause.png" height="56" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="source.job.pause_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="source.job.pause_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="actions.job.pause"/>
 			</ds_button>
-			<ds_button name="resume" translation_tag="tr.status.resume" icon="resume.png" height="100%"
-					   style_min_height="content" flex_grow="1">
+			<ds_button name="resume" translation_tag="tr.status.resume" icon="resume.png" height="56" flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="source.job.resume_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="source.job.resume_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="actions.job.resume"/>
 			</ds_button>
-			<ds_button name="print_again" translation_tag="tr.status.print_again" icon="print_again.png" height="100%"
-					   style_min_height="content" flex_grow="1">
+			<ds_button name="print_again" translation_tag="tr.status.print_again" icon="print_again.png" height="56"
+					   flex_grow="1">
 				<style name="action_btn"/>
 				<bind_flag_if_eq subject="source.job.print_again_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="source.job.print_again_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="actions.job.print_again"/>
 			</ds_button>
-			<ds_button name="cancel" translation_tag="tr.status.cancel" icon="cancel.png" height="100%"
-					   style_min_height="content" flex_grow="1">
+			<ds_button name="cancel" translation_tag="tr.job.cancel" height="56" flex_grow="1">
+				<style name="danger_outline_btn"/>
 				<bind_flag_if_eq subject="source.job.cancel_control" flag="hidden" ref_value="0"/>
 				<bind_state_if_not_eq subject="source.job.cancel_control" state="disabled" ref_value="2"/>
 				<action trigger="clicked" name="actions.job.ask_cancel"/>

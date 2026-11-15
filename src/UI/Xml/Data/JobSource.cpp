@@ -12,10 +12,41 @@
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
+#include <ctime>
 #include <fmt/format.h>
 
 namespace UI::Xml
 {
+	namespace
+	{
+		/** The time of day `seconds` from now, e.g. "14:32"; from noon in tests, so pictures don't change */
+		std::string timeOfDayIn(uint32_t seconds)
+		{
+#if USE_FIXED_TEST_STRINGS
+			constexpr uint32_t NOON = 12 * 3600;
+			const uint32_t at = (NOON + seconds) % (24 * 3600);
+			return fmt::format("{:02d}:{:02d}", at / 3600, (at % 3600) / 60);
+#else
+			const std::time_t at = std::time(nullptr) + static_cast<std::time_t>(seconds);
+			std::tm local{};
+			localtime_r(&at, &local);
+			return fmt::format("{:02d}:{:02d}", local.tm_hour, local.tm_min);
+#endif
+		}
+	} // namespace
+
+	void JobSource::showLayer()
+	{
+		int64_t layer = 0;
+		int64_t layers = 0;
+		{
+			MODEL_LOCK();
+			layer = job()["layer"].integer(0);
+			layers = job()["file"]["numLayers"].integer(0);
+		}
+		m_layer.set(layer > 0 && layers > 0 ? _("job.layer_of", layer, layers) : std::string());
+	}
+
 	JobSource::JobSource()
 		: DataSource("job")
 	{
@@ -27,6 +58,16 @@ namespace UI::Xml
 				m_latest,
 				"The latest job's file: the current job's, or the last job's when it has finished");
 		f.field("finished", m_finished, "1 when the latest job is the last one, finished, else 0");
+		f.field("running", m_running, "1 while a job's file is open (printing, paused or simulating), else 0");
+		f.field("name", m_name, "The latest job's file, without its folder, e.g. \"benchy.gcode\"");
+		f.field("state",
+				m_state,
+				"What the job is doing, in the machine's words: \"Printing\" (\"Running\" on a CNC or laser machine), "
+				"\"Paused\", \"Finished\"; empty for no job");
+		f.field("layer", m_layer, "The layer being printed, e.g. \"51 of 120\"; empty if the job has no layers");
+		f.field("finish_at",
+				m_finishAt,
+				"The time of day the job should finish, e.g. \"14:32\"; empty while it isn't running or can't be told");
 		f.field("thumbnail", m_thumbnail, "The latest job's thumbnail path, or empty until it arrives");
 		f.field("progress",
 				m_progress,
@@ -72,6 +113,7 @@ namespace UI::Xml
 		lastFileChanged(last);
 		showProgress();
 		showRemaining();
+		showLayer();
 		showControls(OM::GetStatus());
 	}
 
@@ -97,6 +139,7 @@ namespace UI::Xml
 		}
 		showProgress();
 		showRemaining();
+		showLayer();
 	}
 
 	void JobSource::clear()
@@ -109,6 +152,11 @@ namespace UI::Xml
 		m_remaining.set(clock(0));
 		m_elapsedText.set(_("status.elapsed_time", clock(0)));
 		m_remainingText.set(_("status.remaining_time", clock(0)));
+		m_name.set("");
+		m_running.set(0);
+		m_state.set("");
+		m_layer.set("");
+		m_finishAt.set("");
 		showControls(OM::PrinterStatus::disconnected);
 		m_printAgain.set(static_cast<int32_t>(Control::Hidden));
 	}
@@ -166,6 +214,8 @@ namespace UI::Xml
 	void JobSource::fileChanged(const std::string& file)
 	{
 		m_latest.set(file);
+		m_name.set(file.substr(file.find_last_of('/') + 1));
+		m_running.set(file.empty() ? 0 : 1);
 		m_finished.set(0);
 		showThumbnail(file);
 	}
@@ -178,6 +228,7 @@ namespace UI::Xml
 			return;
 		}
 		m_latest.set(file);
+		m_name.set(file.substr(file.find_last_of('/') + 1));
 		m_finished.set(1);
 		showThumbnail(file);
 	}
@@ -196,8 +247,21 @@ namespace UI::Xml
 
 	void JobSource::showRemaining()
 	{
-		m_remaining.set(clock(remaining()));
+		const uint32_t left = remaining();
+		m_remaining.set(clock(left));
 		m_remainingText.set(_("status.remaining_time", m_remaining.get()));
+		// The time of day it should finish, while it runs and the time left is known
+		bool running = false;
+		{
+			MODEL_LOCK();
+			running = !job()["file"]["fileName"].text().empty();
+		}
+		if (!running || left == 0)
+		{
+			m_finishAt.set("");
+			return;
+		}
+		m_finishAt.set(timeOfDayIn(left));
 	}
 
 	void JobSource::showControls(OM::PrinterStatus status)
@@ -230,6 +294,31 @@ namespace UI::Xml
 			set(m_resume, Control::Hidden);
 			set(m_pause, Control::Hidden);
 			set(m_cancel, Control::Disabled);
+			break;
+		}
+
+		// What the job is doing, in the machine's words: a CNC or laser machine runs a job rather than printing it
+		bool printer = true;
+		{
+			MODEL_LOCK();
+			const std::string_view mode = OM::Tree::get().root()["state"]["machineMode"].text();
+			printer = mode.empty() || mode == "FFF";
+		}
+		switch (status)
+		{
+		case OM::PrinterStatus::processing:
+		case OM::PrinterStatus::resuming:
+			m_state.set(_(printer ? "job.printing" : "job.running"));
+			break;
+		case OM::PrinterStatus::simulating:
+			m_state.set(_("job.simulating"));
+			break;
+		case OM::PrinterStatus::paused:
+		case OM::PrinterStatus::pausing:
+			m_state.set(_("job.paused"));
+			break;
+		default:
+			m_state.set(m_finished.get() != 0 ? _("job.finished") : std::string());
 			break;
 		}
 	}

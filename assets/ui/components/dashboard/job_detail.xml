@@ -1,0 +1,22 @@
+<!--
+  One fact about the running job, as the job status shows them (dashboard_job_status.xml): what it is, muted, over its
+  value; hidden while the value is empty (not known).
+
+  Props:    title_tag  the translation key of what it is, e.g. `tr.job.layer`
+            value      the name of its value, e.g. `source.job.layer`
+-->
+<component>
+	<api>
+		<prop name="title_tag" type="string"/>
+		<prop name="value" type="string"/>
+	</api>
+	<view extends="lv_obj" width="content" height="content" flex_flow="column" scrollable="false"
+		  style_min_width="72">
+		<style name="pad_zero"/>
+		<bind_flag_if_eq subject="$value" flag="hidden" ref_value=""/>
+		<lv_label name="title" translation_tag="$title_tag">
+			<style name="text_muted"/>
+		</lv_label>
+		<lv_label name="value" bind_text="$value"/>
+	</view>
+</component>

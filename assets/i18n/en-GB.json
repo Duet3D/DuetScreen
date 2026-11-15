@@ -500,6 +500,22 @@
     "slider": {
       "reset": "Reset"
     },
+    "job": { /* The dashboard's job widget */
+      "printing": "Printing",
+      "running": "Running",
+      "simulating": "Simulating",
+      "paused": "Paused",
+      "finished": "Finished",
+      "layer_of": "{:d} of {:d}",
+      "layer": "Layer",
+      "elapsed": "Elapsed",
+      "left": "Left",
+      "done_at": "Done at",
+      "speed": "Speed",
+      "extrusion": "Extrusion",
+      "z_offset": "Z offset",
+      "cancel": "Cancel…"
+    },
     "status": { /* Status screen */
       "print_cancel_message": "Are you sure you want to cancel the print?",
       "print_cancel_title": "Cancel Print",

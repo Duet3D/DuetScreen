@@ -499,6 +499,22 @@
     "slider": {
       "reset": "Zurücksetzen"
     },
+    "job": { /* The dashboard's job widget */
+      "printing": "Druckt",
+      "running": "Läuft",
+      "simulating": "Simuliert",
+      "paused": "Pausiert",
+      "finished": "Fertig",
+      "layer_of": "{:d} von {:d}",
+      "layer": "Schicht",
+      "elapsed": "Vergangen",
+      "left": "Verbleibend",
+      "done_at": "Fertig um",
+      "speed": "Geschwindigkeit",
+      "extrusion": "Extrusion",
+      "z_offset": "Z-Versatz",
+      "cancel": "Abbrechen…"
+    },
     "status": {
       "print_cancel_message": "Möchten Sie den Druck wirklich abbrechen?",
       "print_cancel_title": "Druck abbrechen",
