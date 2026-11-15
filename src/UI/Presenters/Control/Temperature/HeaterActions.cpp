@@ -250,10 +250,10 @@ namespace UI::HeaterActions
 	/** The usual materials, with common temperatures */
 	static constexpr Material MATERIALS[] = {
 		{"PLA", 210, 160, 60, 0},
+		{"TPU", 225, 170, 50, 0},
 		{"PETG", 240, 190, 80, 0},
 		{"ABS", 250, 200, 100, 50},
 		{"ASA", 260, 200, 100, 50},
-		{"TPU", 225, 170, 50, 0},
 		{"Nylon", 260, 200, 80, 50},
 		{"PC", 270, 220, 110, 60},
 	};
