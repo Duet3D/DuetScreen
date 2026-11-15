@@ -97,7 +97,7 @@
       "max": "Max",
       "automatic": "Démarre au-dessus de {:d} °C",
       "automatic_group": "Automatiques",
-      "automatic_note": "Le firmware les règle selon la température",
+      "automatic_note": "Ventilateurs contrôlés par thermostat",
       "controllable": "Ventilateurs pilotables"
     },
     "filament": {
@@ -178,11 +178,11 @@
       "saved": "Maillages enregistrés",
       "colours": "Couleurs",
       "last_probe": "Dernier palpage",
-      "probe_bed": "Palper le plateau",
+      "probe_bed": "Compensation du plateau par maillage",
       "probe_bed_hint": "Le mesure et utilise le nouveau maillage (G29)",
       "probe": "Palper",
-      "level_bed": "Niveler le plateau",
-      "level_bed_hint": "L'aligne avec ses moteurs (G32)",
+      "level_bed": "Nivellement réel du plateau",
+      "level_bed_hint": "Exécute bed.g (G32)",
       "level": "Niveler",
       "no_maps": "Aucun maillage enregistré : palpez le plateau pour en créer un",
       "mesh": "Maillage :",
@@ -272,7 +272,7 @@
       "overrides": "Réglages en cours",
       "speed_factor": "Facteur de vitesse",
       "feed_override": "Correction d'avance",
-      "override_hint": "Chaque mouvement, déplacements manuels compris",
+      "override_hint": "Définit le pourcentage du facteur de vitesse.",
       "zero_confirm": {
         "title": "Définir le zéro pièce",
         "text": "La position actuelle devient 0 pour {:s} dans le repère de travail utilisé."
@@ -576,7 +576,7 @@
       "speed": "Vitesse",
       "extrusion_factor": "Facteur d'extrusion",
       "no_tool": "Aucun outil utilisé",
-      "no_tool_hint": "Choisissez un outil pour extruder ou faire tourner sa broche ici",
+      "no_tool_hint": "Choisissez un outil à contrôler",
       "no_extruder": "Cet outil n'a ni extrudeur ni broche",
       "spindle": "Broche",
       "active": "Actif",
