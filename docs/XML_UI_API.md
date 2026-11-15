@@ -282,6 +282,46 @@ Each row of `source.factors.extrusion.factors` › `row.presets`:
 | `row.text` | text | The quick value, e.g. "100%" (actions.factors.preset) |
 | `row.chosen` | int | 1 if it is the factor's value |
 
+### files
+
+From [FilesSource.cpp](../src/UI/Xml/Data/FilesSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.files.recent` | list | The newest jobs in the jobs folder (not in its folders), newest first, at most five. Tap one to ask whether to start it (actions.files.ask_start). |
+| `source.files.recent_count` | int | How many jobs `recent` lists |
+| `source.files.macros` | list | The macros in the macros folder (not in its folders), in the folder's order. Tap one to ask whether to run it (actions.files.ask_run). |
+| `source.files.macro_count` | int | How many macros `macros` lists |
+| `source.files.dialog` | text | What the shared file dialog asks: "start_print" or "run_macro"; empty when it is closed |
+| `source.files.dialog_title` | text | The file dialog's title |
+| `source.files.dialog_text` | text | The file dialog's message |
+| `source.files.dialog_image` | text | The job's thumbnail, shown in the dialog, or empty |
+| `source.files.dialog_has_image` | int | 1 if the dialog shows a thumbnail, else 0 |
+| `source.files.dialog_can_delete` | int | 1 if the dialog offers to delete the file (starting a job does), else 0 |
+| `source.files.info_shown` | int | 1 if the job's details (the info_* fields) are known, else 0 |
+| `source.files.info_date` | text | The job's modification date |
+| `source.files.info_size` | text | The job's size |
+| `source.files.info_generated_by` | text | The slicer that made the job |
+| `source.files.info_print_time` | text | The job's estimated print time |
+| `source.files.info_height` | text | The object's height |
+| `source.files.info_layer_height` | text | The job's layer height |
+
+Each row of `source.files.recent`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The job's file name, e.g. "benchy.gcode" |
+| `row.detail` | text | How long it should take and the filament it uses, e.g. "2 h 40 min · 12.4 m", once the printer has said; until then, its date |
+| `row.thumbnail` | text | Thumbnail image path, or empty if there is none (yet) |
+
+Each row of `source.files.macros`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.name` | text | The macro's name, without its "12_" ordering prefix or ".g", e.g. "Preheat PLA" |
+
 ### tool
 
 From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
@@ -322,6 +362,7 @@ From [JobSource.cpp](../src/UI/Xml/Data/JobSource.cpp).
 | `source.job.state` | text | What the job is doing, in the machine's words: "Printing" ("Running" on a CNC or laser machine), "Paused", "Finished"; empty for no job |
 | `source.job.layer` | text | The layer being printed, e.g. "51 of 120"; empty if the job has no layers |
 | `source.job.finish_at` | text | The time of day the job should finish, e.g. "14:32"; empty while it isn't running or can't be told |
+| `source.job.last_detail` | text | How the last job ended and how long it took, e.g. "Finished at 13:02 · took 1 h 13 min" (the time of day only if the screen saw it end); empty if there was no last job |
 | `source.job.thumbnail` | text | The latest job's thumbnail path, or empty until it arrives |
 | `source.job.progress` | int | The current job's progress, percent 0-100, through the file or the expected time as set in the settings |
 | `source.job.elapsed` | text | How long the current job has been running, e.g. "00:03:43" |
@@ -557,6 +598,10 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.fan.set_speed` | Set a fan's speed in percent. In a row of `om.fans` the fan is the row's, and the speed the edited value (`value_confirmed`), else `arg` (e.g. 0 or 100 for off and full). Elsewhere `arg` is the fan's number, and the speed the edited value. Without a speed it is asked for on the number pad. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
 | `actions.filament.choose` | Ask which of the printer's filaments to load into the tool numbered `arg`, and load it, unloading any loaded first (M701, M702, M703), asking first if confirmations are on | [FilamentActions.cpp](../src/UI/Presenters/Control/Temperature/FilamentActions.cpp) |
 | `actions.filament.unload` | Unload the filament of the tool numbered `arg` (M702), if it has any loaded, asking first if confirmations are on | [FilamentActions.cpp](../src/UI/Presenters/Control/Temperature/FilamentActions.cpp) |
+| `actions.files.ask_delete` | Ask whether to delete the job the file dialog is about, as the dialog's next step; deleting it closes the dialog | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
+| `actions.files.ask_run` | Ask whether to run the macro. From a row of source.files.macros. | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
+| `actions.files.ask_start` | Ask whether to start the job, with its details and thumbnail. From a row of source.files.recent. | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
+| `actions.files.confirm` | Do what the file dialog asks (start the job, and show the dashboard, or run the macro), and close it | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
@@ -695,19 +740,6 @@ Each row of `presenter.saved`:
 | `presenter.sort_size` | text | As `sort_name`, for the size order |
 | `presenter.tiles` | int | 1 when files are shown as tiles, 0 as a list |
 | `presenter.mode_icon` | text | Symbol for the other way of showing files |
-| `presenter.dialog` | text | What the dialog asks: "start_print" or "run_macro"; empty when it is closed |
-| `presenter.dialog_title` | text | Dialog title |
-| `presenter.dialog_text` | text | Dialog message |
-| `presenter.dialog_image` | text | Thumbnail shown in the dialog, or empty |
-| `presenter.dialog_has_image` | int | 1 if there is a thumbnail, else 0 |
-| `presenter.dialog_can_delete` | int | 1 if the dialog offers to delete the file (starting a job does), else 0 |
-| `presenter.info_shown` | int | 1 if the job's details (the info_* fields) are known, else 0 |
-| `presenter.info_date` | text | Job modification date |
-| `presenter.info_size` | text | Job size |
-| `presenter.info_generated_by` | text | Slicer |
-| `presenter.info_print_time` | text | Estimated print time |
-| `presenter.info_height` | text | Object height |
-| `presenter.info_layer_height` | text | Layer height |
 
 Each row of `presenter.files`:
 
@@ -729,11 +761,9 @@ Each row of `presenter.crumbs`:
 
 | Action | Description |
 | --- | --- |
-| `presenter.files.ask_delete` | Ask whether to delete the file the dialog is about, as the dialog's next step; deleting it closes the dialog |
-| `presenter.files.confirm` | Do what the dialog asks (start the job or run the macro), and close it |
 | `presenter.files.crumb` | Open that folder. From a row of `crumbs`. |
 | `presenter.files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
-| `presenter.files.refresh` | Close the dialog and read the folder again |
+| `presenter.files.refresh` | Read the folder again |
 | `presenter.files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
 | `presenter.files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
 
@@ -1298,7 +1328,7 @@ A dialog, shown by the dialog surface (`<ds_dialog_host>`) while its subject say
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
+<ds_dialog name="file_dialog" bind_open="source.files.dialog" bind_title="source.files.dialog_title">
 	…the dialog's content…
 </ds_dialog>
 ```
@@ -1330,7 +1360,7 @@ Also takes every `lv_obj` attribute.
 	<ds_button name="ok" translation_tag="tr.common.ok">
 		<style name="dialog_button"/>
 		<style name="action_btn"/>
-		<action trigger="clicked" name="presenter.files.confirm"/>
+		<action trigger="clicked" name="actions.files.confirm"/>
 	</ds_button>
 </ds_dialog_footer>
 ```
@@ -2434,6 +2464,18 @@ At its smallest, 550×372 px:
 
 ![heightmap at its smallest](../tests/ref_imgs/xml_ui_api/widgets/heightmap_smallest.png)
 
+#### job
+
+**Job**: The job while it runs; else the last job, the newest jobs and the macros
+
+In Jobs; placed in `dashboard`; component `dashboard_job` ([job.json](../assets/ui/widgets/jobs/job.json)). In a free layout it is 365×561 px, and at least 272×278 px.
+
+![job](../tests/ref_imgs/xml_ui_api/widgets/job.png)
+
+At its smallest, 272×278 px:
+
+![job at its smallest](../tests/ref_imgs/xml_ui_api/widgets/job_smallest.png)
+
 #### job_progress
 
 **Job progress**: The job's file, progress, time taken and time left
@@ -2951,8 +2993,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
+| `dashboard_job` |  |  | `job` | [dashboard_job.xml](../assets/ui/components/dashboard/dashboard_job.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
-| [`dashboard_job_status`](#dashboard_job_status) | `job_status` |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| [`dashboard_job_status`](#dashboard_job_status) | `job_status` |  | `dashboard_files`, `dashboard_job`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
 | `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
@@ -2976,11 +3019,11 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
-| `file_browser_dialog` |  |  | `file_browser` | [file_browser_dialog.xml](../assets/ui/components/file_browser/file_browser_dialog.xml) |
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
+| `file_dialog` |  |  | `home` | [file_dialog.xml](../assets/ui/components/modals/file_dialog.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
-| `flex_pad` |  |  | `dashboard_job_status` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
+| `flex_pad` |  | `grow` | `dashboard_job_status`, `move` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
 | `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
 | `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |
@@ -3001,7 +3044,10 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | `job_detail` |  | `title_tag`, `value` | `dashboard_job_status` | [job_detail.xml](../assets/ui/components/dashboard/job_detail.xml) |
+| `job_macro` |  |  | `job_ready` | [job_macro.xml](../assets/ui/components/dashboard/job_macro.xml) |
 | `job_override` |  | `title_tag`, `value`, `tap_action`, `shown` | `dashboard_job_status` | [job_override.xml](../assets/ui/components/dashboard/job_override.xml) |
+| [`job_ready`](#job_ready) |  |  | `dashboard_job` | [job_ready.xml](../assets/ui/components/dashboard/job_ready.xml) |
+| `job_recent_row` |  |  | `job_ready` | [job_recent_row.xml](../assets/ui/components/dashboard/job_recent_row.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_axis_choice` |  |  | `move` | [move_axis_choice.xml](../assets/ui/components/control/move/move_axis_choice.xml) |
@@ -3040,6 +3086,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `sidebar_button` |  | `label`, `icon`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `sidebar_button`, `sidebar_gcode` | [sidebar_button.xml](../assets/ui/components/sidebar/sidebar_button.xml) |
 | `sidebar_estop` |  |  | `estop` | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
 | `sidebar_page_button` |  | `page`, `action`, `label_tag`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
+| `spacer` |  |  | `move` | [spacer.xml](../assets/ui/components/common/spacer.xml) |
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `status_button`, `status_gcode` | [status_bar_button.xml](../assets/ui/components/status_bar/status_bar_button.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
@@ -3135,6 +3182,10 @@ Also shows `file_browser`.
 Also shows `customise`, `dashboard`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
+
+#### job_ready
+
+![job_ready](../tests/ref_imgs/xml_ui_api/views/job_ready.png)
 
 #### object_cancel
 

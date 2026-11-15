@@ -24,13 +24,12 @@
 			<bind_state_if_eq subject="source.axes.x.jog_usable" state="disabled" ref_value="0"/>
 			<action trigger="clicked" name="actions.move.jog" arg="X-"/>
 		</ds_button>
-		<lv_obj name="step" flex_flow="column" scrollable="false" clickable="false"
+		<lv_obj name="axis" flex_flow="column" scrollable="false" clickable="false"
 				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
 				style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 				style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch">
 			<style name="jog_step"/>
-			<lv_label name="title" translation_tag="tr.move.step"/>
-			<lv_label name="value" bind_text="source.jog.distance.value">
+			<lv_label name="value" text="XY">
 				<style name="reading"/>
 			</lv_label>
 		</lv_obj>

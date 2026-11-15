@@ -23,15 +23,18 @@
 					style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="pad_zero"/>
 				<style name="pad_gap"/>
-				<lv_obj name="start_spacer" width="0" height="1" flex_grow="1" clickable="false">
-					<style name="pad_zero"/>
-				</lv_obj>
-				<!-- As tall as there is room for, at most 240 -->
-				<move_xy name="xy_control" width="240" height="100%" style_max_height="240"/>
+				
+				<flex_pad grow="2"/>
+				
+				<!-- As tall as there is room for, at most 300 -->
+				<move_xy name="xy_control" width="300" height="100%" style_max_height="300"/>
 				<move_axis name="z_control" letter="'Z'" usable="source.axes.z.jog_usable" plus="Z+" minus="Z-"
-						   style_max_height="240"/>
+						   style_max_height="300"/>
+				<flex_pad>
+					<bind_flag_if flag="hidden" subject="source.axes.others_shown" ref_value="0"/>
+				</flex_pad>
 				<!-- Any other axes: the one chosen beside it is jogged, so there is never more than one more column -->
-				<lv_obj name="others" width="content" height="100%" style_max_height="240" flex_flow="row"
+				<lv_obj name="others" width="content" height="100%" style_max_height="300" flex_flow="row"
 						scrollable="false">
 					<style name="pad_zero"/>
 					<style name="pad_gap"/>
@@ -39,12 +42,12 @@
 					<ds_list name="choices" list="source.axes.others" item="move_axis_choice" width="content"
 							 height="100%" flex_flow="column_wrap" style_pad_all="0" style_pad_row="#pad"
 							 style_pad_column="#pad" scrollable="false"/>
+					<spacer/>
 					<move_axis name="other_control" letter="source.axes.other.letter"
 							   usable="source.axes.other.jog_usable" plus="other+" minus="other-"/>
 				</lv_obj>
-				<lv_obj name="end_spacer" width="0" height="1" flex_grow="1" clickable="false">
-					<style name="pad_zero"/>
-				</lv_obj>
+				
+				<flex_pad grow="2"/>
 			</lv_obj>
 
 			<move_jog_choices name="jog_choices" width="100%"/>
