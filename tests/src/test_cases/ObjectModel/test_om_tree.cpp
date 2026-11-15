@@ -376,3 +376,32 @@ TEST_F(TestOmTree, TheSchemaListsEveryFieldOfTheRecordedResponses)
 	walk(Tree::get().root(), Path(), "");
 	EXPECT_EQ(missing, unlisted);
 }
+
+TEST_F(TestOmTree, BedAndChamberHeatersComeFromTheMappingsOfNewerFirmware)
+{
+	// RepRapFirmware 3.7 maps each bed to a list of heaters
+	load_model_data(R"({"key":"heat","flags":"vo","result":{"bedHeaterMapping":[[0],[],[4,5]],)"
+					R"("chamberHeaterMapping":[[3]],"bedHeaters":[-1,-1,-1,-1],"chamberHeaters":[-1,-1]}})"
+					"\n");
+	changes();
+	EXPECT_EQ(at("heat.bedHeaters").size(), 3u);
+	EXPECT_EQ(at("heat.bedHeaters[0]").integer(), 0) << "bed 0's heater";
+	EXPECT_EQ(at("heat.bedHeaters[1]").integer(), -1) << "bed 1 has none";
+	EXPECT_EQ(at("heat.bedHeaters[2]").integer(), 4) << "bed 2's first heater";
+	EXPECT_EQ(at("heat.chamberHeaters").size(), 1u);
+	EXPECT_EQ(at("heat.chamberHeaters[0]").integer(), 3);
+
+	// A mapping that changes changes the list, and says so
+	load_model_data(R"({"key":"heat","flags":"vo","result":{"bedHeaterMapping":[[1]],"chamberHeaterMapping":[[3]],)"
+					R"("bedHeaters":[-1],"chamberHeaters":[-1]}})"
+					"\n");
+	const auto changed = changes();
+	EXPECT_TRUE(std::ranges::find(changed, std::string("heat.bedHeaters")) != changed.end());
+	EXPECT_EQ(at("heat.bedHeaters[0]").integer(), 1);
+
+	// Older firmware sends no mapping: its own lists stand
+	load_model_data(R"({"key":"heat","flags":"v","result":{"bedHeaters":[2,-1],"chamberHeaters":[-1]}})"
+					"\n");
+	EXPECT_EQ(at("heat.bedHeaters[0]").integer(), 2);
+	EXPECT_EQ(at("heat.bedHeaters").size(), 2u);
+}

@@ -5,7 +5,9 @@
 #include "Tree.h"
 #include "LockWrapper.h"
 #include <algorithm>
+#include <fmt/format.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace OM
@@ -189,10 +191,51 @@ namespace OM
 			{
 				merger.assign(target, patch.result(), patch.root(), false);
 			}
+			deriveHeaterLists(changes);
 			m_changes.merge(changes);
 		}
 		notify();
 		tellWatchers(changes);
+	}
+
+	void Tree::deriveHeaterLists(ChangeSet& changes)
+	{
+		static constexpr std::pair<std::string_view, std::string_view> LISTS[] = {
+			{"bedHeaterMapping", "bedHeaters"},
+			{"chamberHeaterMapping", "chamberHeaters"},
+		};
+		for (const auto& [mappingName, listName] : LISTS)
+		{
+			const Node& mapping = m_root["heat"][mappingName];
+			if (!mapping.isArray())
+			{
+				continue;
+			}
+			// Each bed's or chamber's first heater, or -1 for none
+			std::vector<int64_t> heaters;
+			for (size_t i = 0; i < mapping.size(); ++i)
+			{
+				heaters.push_back(mapping[i].size() > 0 ? mapping[i][0].integer(-1) : -1);
+			}
+			const Node& list = m_root["heat"][listName];
+			bool same = list.isArray() && list.size() == heaters.size();
+			for (size_t i = 0; same && i < heaters.size(); ++i)
+			{
+				same = list[i].integer(-2) == heaters[i];
+			}
+			if (same)
+			{
+				continue;
+			}
+			Node& filled = m_root.field("heat").field(listName);
+			filled.makeArray();
+			filled.resize(heaters.size());
+			for (size_t i = 0; i < heaters.size(); ++i)
+			{
+				filled.item(i).setValue(Node::Kind::number, std::to_string(heaters[i]));
+			}
+			changes.add(fmt::format("heat.{:s}", listName));
+		}
 	}
 
 	void Tree::clear()

@@ -17,6 +17,13 @@
  *   - a live response ('f') only updates what it sends; arrays take the length sent
  *   - a partial array result ('a' flag, or `next` > 0) replaces only the elements sent; the last part sets the length
  *
+ * One field is filled in by the screen: RepRapFirmware 3.7 replaced heat.bedHeaters and heat.chamberHeaters (a heater
+ * per bed or chamber) with heat.bedHeaterMapping and heat.chamberHeaterMapping (a list of heaters per bed or
+ * chamber). It still sends the old fields when asked for obsolete ones, but not reliably: at times they are all -1
+ * while the mapping names the bed's heater. Where the firmware sends a mapping, apply() fills the old field from it,
+ * each bed's or chamber's first heater, so everything that reads it (views, and user bundles, as om.* is the UI's API)
+ * works with 3.7 as with 3.6 and earlier, which send no mapping and whose own lists stand.
+ *
  * Threads: the decoder applies patches on its own thread, and the UI reads from another, so reading the tree (root(),
  * and every Node it leads to) needs the model lock (MODEL_LOCK) held for as long as the nodes are used.
  */
@@ -82,6 +89,10 @@ namespace OM
 	  private:
 		/** Tell the listeners, if there are changes they haven't been told about */
 		void notify();
+
+		/** Fill heat.bedHeaters and heat.chamberHeaters from the firmware's mappings, if it sends them, noting any
+		 * change in `changes` (see the file comment; the model lock held) */
+		void deriveHeaterLists(ChangeSet& changes);
 
 		/** Call the watchers of anything in `changes` */
 		void tellWatchers(const ChangeSet& changes);
