@@ -10,7 +10,7 @@
   The reference: src/UI/Presenters/Console/GcodeReferencePresenter.h
 -->
 <component presenter="gcode_reference">
-	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" style_pad_all="0">
 		<style name="bg_dark"/>
 
 		<lv_obj name="log_card" width="100%" flex_grow="1" flex_flow="column" scrollable="false">
