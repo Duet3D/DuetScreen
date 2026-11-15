@@ -538,7 +538,8 @@
       "stop": "Ferma",
       "active": "Attivo",
       "standby": "Standby",
-      "deselect": "Deseleziona"
+      "deselect": "Deseleziona",
+      "now": "Ora"
     },
     "spindle": {
       "speed": "Velocità del mandrino"

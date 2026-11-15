@@ -234,10 +234,56 @@ namespace UI::HeaterActions
 		return std::max(0.0f, static_cast<float>(heater["min"].number()));
 	}
 
+	/** What − and + beside a target's number take off or add, °C */
+	static constexpr float TEMPERATURE_STEP = 5.0f;
+
+	/** A material and what its heaters are set to, °C: a nozzle active and on standby, the bed, the chamber */
+	struct Material
+	{
+		const char* name; // As written on the spool, e.g. "PLA"
+		float nozzle;	  // A tool's heater, active
+		float standby;	  // A tool's heater, on standby
+		float bed;		  // The bed
+		float chamber;	  // The chamber; 0 for none
+	};
+
+	/** The usual materials, with common temperatures */
+	static constexpr Material MATERIALS[] = {
+		{"PLA", 210, 160, 60, 0},
+		{"PETG", 240, 190, 80, 0},
+		{"ABS", 250, 200, 100, 50},
+		{"ASA", 260, 200, 100, 50},
+		{"TPU", 225, 170, 50, 0},
+		{"Nylon", 260, 200, 80, 50},
+		{"PC", 270, 220, 110, 60},
+	};
+
+	/**
+	 * The presets offered when setting a target: Off, then each material's temperature for that heater, those the
+	 * heater can reach (`max`), and for a chamber only those that heat one
+	 */
+	static std::vector<Xml::Prompts::NumberPreset> materialPresets(Heated what, bool active, float max)
+	{
+		std::vector<Xml::Prompts::NumberPreset> presets{{.title = _("temperature.status.off"), .value = 0}};
+		for (const Material& material : MATERIALS)
+		{
+			const float value = what == Heated::Bed		  ? material.bed
+								: what == Heated::Chamber ? material.chamber
+								: active				  ? material.nozzle
+														  : material.standby;
+			if (value > 0 && value <= max)
+			{
+				presets.push_back({.title = material.name, .value = value});
+			}
+		}
+		return presets;
+	}
+
 	void setTemperature(Heated what, size_t number, size_t slot, bool active, std::optional<float> value)
 	{
 		ZoneScoped;
 		Xml::Prompts::NumberRequest request;
+		float target = 0.0f; // The target set now
 		{
 			MODEL_LOCK();
 			switch (what)
@@ -252,6 +298,9 @@ namespace UI::HeaterActions
 				request.header = _("temperature.numpad_header_tool_heater", number, slot, modeText(active));
 				request.min = settableMin(Xml::PrinterModel::heater(*heater));
 				request.max = static_cast<float>(Xml::PrinterModel::heater(*heater)["max"].number());
+				request.heater = static_cast<int32_t>(*heater);
+				target =
+					static_cast<float>(Xml::PrinterModel::tool(number)[active ? "active" : "standby"][slot].number());
 				request.onConfirm = [number, slot, active](float v)
 				{
 					// M568 sets every heater of the tool: the others keep their targets
@@ -294,6 +343,9 @@ namespace UI::HeaterActions
 								   modeText(active));
 				request.min = settableMin(Xml::PrinterModel::heater(place->heater));
 				request.max = static_cast<float>(Xml::PrinterModel::heater(place->heater)["max"].number());
+				request.heater = static_cast<int32_t>(place->heater);
+				target = static_cast<float>(
+					Xml::PrinterModel::heater(place->heater)[active ? "active" : "standby"].number());
 				request.onConfirm = [bed, number, active](float v)
 				{
 					Xml::Services::sendGcode(fmt::format("{:s} P{:d} {:s}{:d}\n",
@@ -312,7 +364,14 @@ namespace UI::HeaterActions
 			request.onConfirm(*value);
 			return;
 		}
+		// The pad starts at the target set now, if it is one that could be set
+		if (target >= request.min && target <= request.max)
+		{
+			request.value = target;
+		}
 		request.unit = "°C";
+		request.presets = materialPresets(what, active, request.max);
+		request.step = TEMPERATURE_STEP;
 		Xml::Prompts::askNumber(std::move(request));
 	}
 

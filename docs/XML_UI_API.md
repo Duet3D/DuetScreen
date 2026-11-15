@@ -708,6 +708,19 @@ Used by `dialog_number`.
 | `presenter.number.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
 | `presenter.number.signed` | int | 1 if the number may be negative, so the sign key works |
 | `presenter.number.decimal` | int | 1 if the number may have a fraction, so the dot key works |
+| `presenter.number.steppable` | int | 1 if − and + step the number (`number.step`) |
+| `presenter.presets` | list | Values offered beside the pad, e.g. materials' temperatures |
+| `presenter.has_presets` | int | 1 if there are presets to show |
+| `presenter.heater` | int | The number of the heater whose target is asked for, its temperature shown above the pad; -1 for none |
+
+Each row of `presenter.presets`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is for, e.g. "PLA" |
+| `row.value` | text | The value with its unit, e.g. "210 °C" |
+| `row.chosen` | int | 1 while the pad holds its value |
 
 | Action | Description |
 | --- | --- |
@@ -716,7 +729,9 @@ Used by `dialog_number`.
 | `presenter.number.clear` | Empty what is typed |
 | `presenter.number.confirm` | Hand back what is typed, if it can be, and go back |
 | `presenter.number.key` | Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with. |
+| `presenter.number.preset` | Type a preset's value into the pad. From a row of `presets`. |
 | `presenter.number.sign` | Make the number negative, or positive again, if it may be negative |
+| `presenter.number.step` | Take the step off the number (`arg` -1) or add it (1), within the limits, if it has a step |
 
 ### dialog_question
 
@@ -883,6 +898,7 @@ Used by `notifications`.
 | `presenter.alert.pad.confirmable` | int | 1 if what has been typed can be used: a number within the limits (nothing typed is 0), or any digits and dots |
 | `presenter.alert.pad.signed` | int | 1 if the number may be negative, so the sign key works |
 | `presenter.alert.pad.decimal` | int | 1 if the number may have a fraction, so the dot key works |
+| `presenter.alert.pad.steppable` | int | 1 if − and + step the number (`alert.pad.step`) |
 | `presenter.alert.warning` | text | The length the text must be, while it isn't; empty once it is |
 | `presenter.alert.progress` | int | Time left before the alert closes itself, 0-100 |
 | `presenter.alert.progress_shown` | int | 1 if the alert closes itself |
@@ -914,6 +930,7 @@ Each row of `presenter.alert.axes`:
 | `presenter.alert.pad.clear` | Empty what is typed |
 | `presenter.alert.pad.key` | Type the key `arg`: a digit or a dot. The first key replaces the value the pad starts with. |
 | `presenter.alert.pad.sign` | Make the number negative, or positive again, if it may be negative |
+| `presenter.alert.pad.step` | Take the step off the number (`arg` -1) or add it (1), within the limits, if it has a step |
 | `presenter.response.close` | Close the response showing and show the next |
 | `presenter.response.open_console` | Forget every response and open the console |
 | `presenter.update.confirm` | Install the update offered (nothing when a result is showing), and close |
@@ -2871,6 +2888,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dialog_choice_row` |  |  | `dialog_choice` | [dialog_choice_row.xml](../assets/ui/components/dialogs/dialog_choice_row.xml) |
 | [`dialog_host`](#dialog_host) | `dialog_host` |  |  | [dialog_host.xml](../assets/ui/components/dialogs/dialog_host.xml) |
 | [`dialog_number`](#dialog_number) | `dialog_number` |  |  | [dialog_number.xml](../assets/ui/components/dialogs/dialog_number.xml) |
+| `dialog_number_preset` |  |  | `dialog_number` | [dialog_number_preset.xml](../assets/ui/components/dialogs/dialog_number_preset.xml) |
 | [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
 | `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
@@ -2897,6 +2915,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
+| `heater_bar` |  | `heater` | `dialog_number`, `heater_row` | [heater_bar.xml](../assets/ui/components/common/heater_bar.xml) |
 | `heater_row` |  | `label`, `active`, `standby` | `tools_bed_heater`, `tools_chamber_heater`, `tools_tool_heater` | [heater_row.xml](../assets/ui/components/common/heater_row.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |

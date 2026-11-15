@@ -1,14 +1,44 @@
 <!--
   A number pad prompt: a number pad (numpad.xml) whose footer cancels or hands the number back. Code asks it with
   Prompts::askNumber() or askText() (src/UI/Xml/Dialogs/Prompts.h); a slider with numberpad="true" asks it when its
-  value is tapped. What is asked for is the step's title.
+  value is tapped. What is asked for is the step's title. Presets, if it is given any (a material's temperature, say),
+  are listed beside the pad: tapping one types its value, which can still be changed before OK.
 
   Fields and actions: src/UI/Xml/Dialogs/PromptPresenters.h (NumberPrompt), its pad's under `number`
 -->
 <component presenter="dialog_number">
-	<view extends="lv_obj" width="420" height="content" flex_flow="column" scrollable="false">
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false">
 		<style name="pad_zero"/>
-		<numpad name="pad" pad="number" width="100%"/>
+		<!-- Setting a heater's target: its temperature now, and its bar (heater_bar.xml) -->
+		<lv_obj name="heater" width="100%" height="content" flex_flow="row" scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
+				style_pad_column="12" style_margin_bottom="12">
+			<bind_flag_if cond="presenter.heater lt 0" flag="hidden"/>
+			<lv_label name="now" translation_tag="tr.tools.now">
+				<style name="text_muted"/>
+			</lv_label>
+			<lv_label name="current" bind_text="om.heat.heaters[{presenter.heater}].current|fixed:1"/>
+			<heater_bar name="bar" heater="presenter.heater" width="1" flex_grow="1"/>
+		</lv_obj>
+
+		<!-- The presets (when there are any) in a column beside the pad, the pad in the rest. No gap between the
+			 columns, which would stay without presets -->
+		<lv_obj name="body" width="100%" height="content" scrollable="false" style_pad_all="0" style_pad_column="0" style_layout="grid"
+				style_grid_column_dsc_array="content fr(1)" style_grid_row_dsc_array="content">
+			<!-- The gap after the presets is this column's padding, which goes with them (a grid item's margin
+				 doesn't count) -->
+			<lv_obj name="presets_column" width="content" height="content" scrollable="false" style_pad_all="0"
+					style_pad_right="16" style_grid_cell_column_pos="0" style_grid_cell_row_pos="0"
+					style_grid_cell_y_align="start">
+				<bind_flag_if_eq subject="presenter.has_presets" flag="hidden" ref_value="0"/>
+				<ds_list name="presets" list="presenter.presets" item="dialog_number_preset" width="200"
+						 height="content" flex_flow="column" style_pad_row="0">
+					<style name="setting_group"/>
+				</ds_list>
+			</lv_obj>
+			<numpad name="pad" pad="number" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+					style_grid_cell_row_pos="0" style_grid_cell_y_align="start"/>
+		</lv_obj>
 
 		<ds_dialog_footer name="footer">
 			<ds_button name="cancel" translation_tag="tr.common.cancel">

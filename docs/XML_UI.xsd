@@ -17,6 +17,7 @@
 			<xs:enumeration value="presenter.alert.pad.decimal"/>
 			<xs:enumeration value="presenter.alert.pad.range"/>
 			<xs:enumeration value="presenter.alert.pad.signed"/>
+			<xs:enumeration value="presenter.alert.pad.steppable"/>
 			<xs:enumeration value="presenter.alert.pad.text"/>
 			<xs:enumeration value="presenter.alert.pad.unit"/>
 			<xs:enumeration value="presenter.alert.pad_shown"/>
@@ -55,8 +56,10 @@
 			<xs:enumeration value="presenter.from"/>
 			<xs:enumeration value="presenter.gcodes"/>
 			<xs:enumeration value="presenter.has_maps"/>
+			<xs:enumeration value="presenter.has_presets"/>
 			<xs:enumeration value="presenter.has_saved"/>
 			<xs:enumeration value="presenter.header_shown"/>
+			<xs:enumeration value="presenter.heater"/>
 			<xs:enumeration value="presenter.info_date"/>
 			<xs:enumeration value="presenter.info_generated_by"/>
 			<xs:enumeration value="presenter.info_height"/>
@@ -85,12 +88,14 @@
 			<xs:enumeration value="presenter.number.decimal"/>
 			<xs:enumeration value="presenter.number.range"/>
 			<xs:enumeration value="presenter.number.signed"/>
+			<xs:enumeration value="presenter.number.steppable"/>
 			<xs:enumeration value="presenter.number.text"/>
 			<xs:enumeration value="presenter.number.unit"/>
 			<xs:enumeration value="presenter.objects"/>
 			<xs:enumeration value="presenter.open"/>
 			<xs:enumeration value="presenter.output"/>
 			<xs:enumeration value="presenter.passed"/>
+			<xs:enumeration value="presenter.presets"/>
 			<xs:enumeration value="presenter.primary.chroma"/>
 			<xs:enumeration value="presenter.primary.lightness"/>
 			<xs:enumeration value="presenter.primary_hue"/>
@@ -369,6 +374,7 @@
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.objects"/>
 			<xs:enumeration value="presenter.passed"/>
+			<xs:enumeration value="presenter.presets"/>
 			<xs:enumeration value="presenter.saved"/>
 			<xs:enumeration value="presenter.settings"/>
 			<xs:enumeration value="presenter.swatches"/>
@@ -464,6 +470,7 @@
 			<xs:enumeration value="presenter.alert.pad.clear"/>
 			<xs:enumeration value="presenter.alert.pad.key"/>
 			<xs:enumeration value="presenter.alert.pad.sign"/>
+			<xs:enumeration value="presenter.alert.pad.step"/>
 			<xs:enumeration value="presenter.choice.choose"/>
 			<xs:enumeration value="presenter.customise.add"/>
 			<xs:enumeration value="presenter.customise.ask_delete"/>
@@ -511,7 +518,9 @@
 			<xs:enumeration value="presenter.number.clear"/>
 			<xs:enumeration value="presenter.number.confirm"/>
 			<xs:enumeration value="presenter.number.key"/>
+			<xs:enumeration value="presenter.number.preset"/>
 			<xs:enumeration value="presenter.number.sign"/>
+			<xs:enumeration value="presenter.number.step"/>
 			<xs:enumeration value="presenter.object_cancel.cancel"/>
 			<xs:enumeration value="presenter.object_cancel.choose"/>
 			<xs:enumeration value="presenter.object_cancel.resume"/>
@@ -688,6 +697,7 @@
 			<xs:enumeration value="dialog_choice_row"/>
 			<xs:enumeration value="dialog_host"/>
 			<xs:enumeration value="dialog_number"/>
+			<xs:enumeration value="dialog_number_preset"/>
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
@@ -714,6 +724,7 @@
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
+			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
@@ -833,6 +844,7 @@
 			<xs:enumeration value="dialog_choice_row"/>
 			<xs:enumeration value="dialog_host"/>
 			<xs:enumeration value="dialog_number"/>
+			<xs:enumeration value="dialog_number_preset"/>
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="factors"/>
 			<xs:enumeration value="factors_dialog"/>
@@ -859,6 +871,7 @@
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
+			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
@@ -978,6 +991,7 @@
 			<xs:enumeration value="dialog_choice_row"/>
 			<xs:enumeration value="dialog_host"/>
 			<xs:enumeration value="dialog_number"/>
+			<xs:enumeration value="dialog_number_preset"/>
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="ds_arc"/>
 			<xs:enumeration value="ds_bar"/>
@@ -1039,6 +1053,7 @@
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="hardware_test_result"/>
+			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="heightmap_file"/>
@@ -2165,6 +2180,7 @@
 			<xs:enumeration value="tr.tools.no_extruder"/>
 			<xs:enumeration value="tr.tools.no_tool"/>
 			<xs:enumeration value="tr.tools.no_tool_hint"/>
+			<xs:enumeration value="tr.tools.now"/>
 			<xs:enumeration value="tr.tools.reverse"/>
 			<xs:enumeration value="tr.tools.select"/>
 			<xs:enumeration value="tr.tools.speed"/>
@@ -4099,6 +4115,11 @@
 		</xs:attribute>
 		<xs:attribute name="hold_arg" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="heater_bar.attributes">
+		<xs:attribute name="heater" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `heater` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="heater_row.attributes">
@@ -9146,6 +9167,14 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="dialog_number_preset">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dialogs/dialog_number_preset.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="dialog_question">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dialogs/dialog_question.xml, with presenter dialog_question.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -10737,6 +10766,15 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/hardware_test/hardware_test_result.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="heater_bar">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/heater_bar.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="heater_bar.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

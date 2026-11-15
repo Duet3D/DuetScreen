@@ -538,7 +538,8 @@
       "stop": "Stop",
       "active": "Active",
       "standby": "Standby",
-      "deselect": "Deselect"
+      "deselect": "Deselect",
+      "now": "Now"
     },
     "spindle": {
       "speed": "Spindle speed"

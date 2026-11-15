@@ -537,7 +537,8 @@
       "stop": "Parar",
       "active": "Activo",
       "standby": "En espera",
-      "deselect": "Deseleccionar"
+      "deselect": "Deseleccionar",
+      "now": "Ahora"
     },
     "spindle": {
       "speed": "Velocidad del husillo"

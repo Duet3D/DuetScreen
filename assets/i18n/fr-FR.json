@@ -537,7 +537,8 @@
       "stop": "Arrêt",
       "active": "Actif",
       "standby": "En attente",
-      "deselect": "Désélectionner"
+      "deselect": "Désélectionner",
+      "now": "Actuelle"
     },
     "spindle": {
       "speed": "Vitesse de broche"

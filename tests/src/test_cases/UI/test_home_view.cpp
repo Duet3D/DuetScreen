@@ -1719,6 +1719,64 @@ namespace
 	}
 } // namespace
 
+TEST_F(TestHomeViewWithData, AHeaterTargetOffersMaterials)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	// The first tool's heater is set to 215 °C
+	load_model_data(R"({"key":"","flags":"d99f","result":{"tools":[{"active":[215]}]}})"
+					"\n");
+	deliverModelEvents();
+	openControlTab(1);
+	ASSERT_TRUE(tapShowsNumberPad("tools", nullptr, "active")) << "a heater's active target";
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "215") << "starts at the target";
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heater_target_presets.png");
+
+	// Off first, then the materials: tapping PLA types its nozzle temperature, which OK sets
+	lv_obj_t* presets = lv_obj_find_by_name(openNumberPad(), "presets");
+	ASSERT_NE(presets, nullptr);
+	ASSERT_GE(lv_obj_get_child_count(presets), 2u);
+	lv_obj_t* pla = lv_obj_get_child(presets, 1);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(pla, "title")), "PLA");
+	lv_obj_send_event(pla, LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_state(pla, LV_STATE_CHECKED));
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "210");
+
+	// − and + step it by 5 °C
+	lv_obj_send_event(lv_obj_find_by_name(openNumberPad(), "step_up"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "215");
+	EXPECT_FALSE(lv_obj_has_state(pla, LV_STATE_CHECKED));
+	lv_obj_send_event(lv_obj_find_by_name(openNumberPad(), "step_down"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "210");
+	TestDialogs::tap("ok");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_NE(sent.back().find("S210"), std::string::npos) << sent.back();
+
+	// Presets tapped one after another, a key typed over one, then left without setting anything
+	ASSERT_TRUE(tapShowsNumberPad("tools", nullptr, "active"));
+	presets = lv_obj_find_by_name(openNumberPad(), "presets");
+	const uint32_t count = lv_obj_get_child_count(presets);
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		lv_obj_send_event(lv_obj_get_child(presets, static_cast<int32_t>(i)), LV_EVENT_PRESSED, nullptr);
+		lv_obj_send_event(lv_obj_get_child(presets, static_cast<int32_t>(i)), LV_EVENT_RELEASED, nullptr);
+		lv_obj_send_event(lv_obj_get_child(presets, static_cast<int32_t>(i)), LV_EVENT_CLICKED, nullptr);
+	}
+	TestDialogs::typeOnPad("1");
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_get_child(presets, 1), LV_STATE_CHECKED));
+	TestDialogs::tap("cancel");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	UI::closeDialogs();
+
+	// A bed's target, its own materials
+	ASSERT_TRUE(tapShowsNumberPad("tools", "bed_chamber", "active"));
+	presets = lv_obj_find_by_name(openNumberPad(), "presets");
+	lv_obj_send_event(lv_obj_get_child(presets, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "60");
+	UI::closeDialogs();
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
 TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 {
 	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);

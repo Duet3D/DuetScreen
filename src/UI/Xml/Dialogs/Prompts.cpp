@@ -46,9 +46,11 @@ namespace UI::Xml::Prompts
 	{
 		const std::string title = request.header;
 		lv_obj_t* asker = request.asker;
+		// Presets go beside the pad
+		const char* width = request.presets.empty() ? "460" : "680";
 		return open<NumberPrompt>("dialog_number",
 								  title,
-								  {.width = "460", .height = "content"},
+								  {.width = width, .height = "content"},
 								  asker,
 								  nullptr,
 								  [&request](NumberPrompt& prompt, PromptStep& step)

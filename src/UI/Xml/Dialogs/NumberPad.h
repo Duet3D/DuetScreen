@@ -12,8 +12,9 @@
  *
  *     <numpad pad="pad"/>
  *
- * Its fields are `<id>.text`, `<id>.range`, `<id>.confirmable`, `<id>.signed` and `<id>.decimal`; its actions
- * `<id>.key`, `<id>.backspace`, `<id>.sign` and `<id>.clear`. Both are listed in the UI API reference
+ * Its fields are `<id>.text`, `<id>.range`, `<id>.confirmable`, `<id>.signed`, `<id>.decimal` and `<id>.steppable`;
+ * its actions `<id>.key`, `<id>.backspace`, `<id>.sign`, `<id>.clear` and `<id>.step` (− and + beside the readout,
+ * given a step with setStep()). Both are listed in the UI API reference
  * (docs/XML_UI_API.md). The number prompt (PromptPresenters.h) and the printer's alerts asking for a number use one.
  */
 
@@ -46,6 +47,12 @@ namespace UI::Xml
 
 		/** Ask for digits and dots, e.g. an IP address, starting with `start` */
 		void askText(std::string_view start);
+
+		/** Let − and + take `step` off the number or add it, within the limits; 0 for no − and + */
+		void setStep(float step);
+
+		/** Show `value`, as a value started with is: the next key typed replaces it, e.g. a preset tapped */
+		void put(float value);
 
 		/** Call `callback` whenever what is typed changes */
 		void setOnChange(std::function<void()> callback) { m_onChange = std::move(callback); }
@@ -80,6 +87,7 @@ namespace UI::Xml
 		float m_min = 0.0f;					// The least number that can be typed
 		float m_max = 0.0f;					// The most number that can be typed
 		bool m_fresh = false;				// Showing the value it started with: a key replaces it
+		float m_step = 0.0f;				// What − and + take off or add; 0 for none
 		std::function<void()> m_onChange;	// Told when what is typed changes
 
 		StringSubject<32> m_typed;	// `<id>.text`
@@ -88,5 +96,6 @@ namespace UI::Xml
 		IntSubject m_confirmable;	// `<id>.confirmable`
 		IntSubject m_signed;		// `<id>.signed`: 1 if the number may be negative
 		IntSubject m_decimal{1};	// `<id>.decimal`: 1 if the number may have a fraction
+		IntSubject m_steppable;		// `<id>.steppable`: 1 if − and + step the number
 	};
 } // namespace UI::Xml

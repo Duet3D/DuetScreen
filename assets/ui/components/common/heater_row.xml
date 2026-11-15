@@ -1,9 +1,8 @@
 <!--
   One heater as a row: its colour key on the temperature graph (tap to show or hide its line), its name, its state
   (tap to cycle active, standby and off; coloured as the gauges colour it; not while printing), its temperature, and
-  its active and standby targets (tap to set one). Under them, a thin bar from 0 to the heater's maximum: its
-  temperature over what it heats to, muted, coloured by its state as a bar gauge is. A row whose heater doesn't exist
-  isn't shown.
+  its active and standby targets (tap to set one). Under them, its temperature as a thin bar (heater_bar.xml). A row
+  whose heater doesn't exist isn't shown.
 
       <heater_row label="…" active="…|format:tr.units.degrees" standby="…|format:tr.units.degrees"/>
 
@@ -67,27 +66,6 @@
 				<lv_label name="value" bind_text="$standby" clickable="false"/>
 			</lv_obj>
 		</lv_obj>
-		<!-- The target, muted, with the temperature over it -->
-		<lv_obj name="bar" width="100%" height="4" scrollable="false" clickable="false" style_pad_all="0">
-			<ds_bar name="target" bind_value="om.heat.heaters[{row.value}]|heater_target"
-					bind_max="om.heat.heaters[{row.value}].max|int" label_format="" width="100%" height="100%">
-				<style name="gauge_bar"/>
-				<style name="gauge_bar_indic" selector="indicator"/>
-				<style name="gauge_bar_target" selector="indicator"/>
-				<bind_style_if_eq name="gauge_standby_target" subject="om.heat.heaters[{row.value}].state"
-								  ref_value="standby" selector="indicator"/>
-			</ds_bar>
-			<ds_bar name="value" bind_value="om.heat.heaters[{row.value}].current|int"
-					bind_max="om.heat.heaters[{row.value}].max|int" label_format="" width="100%" height="100%"
-					style_bg_opa="0">
-				<style name="gauge_bar_indic" selector="indicator"/>
-				<bind_style_if_eq name="gauge_standby" subject="om.heat.heaters[{row.value}].state" ref_value="standby"
-								  selector="indicator"/>
-				<bind_style_if_eq name="gauge_off" subject="om.heat.heaters[{row.value}].state" ref_value="off"
-								  selector="indicator"/>
-				<bind_style_if_eq name="gauge_fault" subject="om.heat.heaters[{row.value}].state" ref_value="fault"
-								  selector="indicator"/>
-			</ds_bar>
-		</lv_obj>
+		<heater_bar name="bar" heater="row.value"/>
 	</view>
 </component>

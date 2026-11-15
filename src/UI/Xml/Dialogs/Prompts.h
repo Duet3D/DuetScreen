@@ -25,6 +25,13 @@
 
 namespace UI::Xml::Prompts
 {
+	/** A value offered beside the number pad, e.g. a material's temperature */
+	struct NumberPreset
+	{
+		std::string title{}; // What it is for, e.g. "PLA"
+		float value = 0.0f;	 // The value it puts in the pad
+	};
+
 	/** A number to ask for */
 	struct NumberRequest
 	{
@@ -33,6 +40,9 @@ namespace UI::Xml::Prompts
 		float max = 0.0f;						  // Largest value accepted
 		std::optional<float> value{};				  // Shown to start with; the box starts empty if not set
 		std::string unit{};							  // Shown after the number and its limits, e.g. "s"; empty for none
+		std::vector<NumberPreset> presets{};		  // Offered beside the pad: tapping one types its value; none if empty
+		float step = 0.0f;							  // What − and + beside the number take off or add; none if 0
+		int32_t heater = -1;						  // A heater whose temperature shows above the pad, for its targets
 		std::function<void(float)> onConfirm{};	  // Called with the value the user confirms
 		lv_obj_t* asker = nullptr;				  // The widget asking, which the prompt goes with
 	};

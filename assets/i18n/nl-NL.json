@@ -537,7 +537,8 @@
       "stop": "Stop",
       "active": "Actief",
       "standby": "Stand-by",
-      "deselect": "Deselecteren"
+      "deselect": "Deselecteren",
+      "now": "Nu"
     },
     "spindle": {
       "speed": "Spindeltoerental"

@@ -27,6 +27,18 @@ namespace UI::Xml
 {
 	class PromptStep;
 
+	/** One value offered beside a NumberPrompt's pad */
+	class NumberPresetRow : public Row
+	{
+	  public:
+		/** Declare the row's fields */
+		void fields(FieldVisitor& f) override;
+
+		StringSubject<64> title; // What it is for, e.g. "PLA"
+		StringSubject<32> value; // The value with its unit, e.g. "210 °C"
+		IntSubject chosen;		 // 1 while the pad holds its value
+	};
+
 	/** Behind dialog_number.xml: a number pad (NumberPad.h, its id `number`), whose OK hands the number back */
 	class NumberPrompt : public XmlPresenter
 	{
@@ -47,10 +59,16 @@ namespace UI::Xml
 		/** Hand back what is typed, if it can be */
 		void confirm();
 
+		/** Show the presets asked for, if any, marking the one the pad holds */
+		void showPresets();
+
 		NumberPad m_pad;								// The keys, and what they have typed
 		PromptStep* m_step = nullptr;				   // Where the answer goes
 		std::optional<Prompts::NumberRequest> m_number; // The number asked for, if it is one
 		std::optional<Prompts::TextRequest> m_text;	   // The text asked for, if it is text
+		List<NumberPresetRow> m_presets;			   // `presets`: offered beside the pad
+		IntSubject m_hasPresets;					   // `has_presets`
+		IntSubject m_heater{-1};					   // `heater`: shown above the pad, or -1
 	};
 
 	/** One value of a ChoicePrompt */

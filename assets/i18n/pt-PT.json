@@ -537,7 +537,8 @@
       "stop": "Parar",
       "active": "Ativo",
       "standby": "Em espera",
-      "deselect": "Desselecionar"
+      "deselect": "Desselecionar",
+      "now": "Agora"
     },
     "spindle": {
       "speed": "Velocidade do fuso"

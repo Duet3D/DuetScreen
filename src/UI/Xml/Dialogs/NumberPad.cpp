@@ -66,6 +66,17 @@ namespace UI::Xml
 						 setText(typed.starts_with('-') ? typed.substr(1) : "-" + typed);
 					 });
 		owner.action(m_id + ".clear", "Empty what is typed", [this](const ActionArgs&) { setText(""); });
+		owner.action(m_id + ".step",
+					 "Take the step off the number (`arg` -1) or add it (1), within the limits, if it has a step",
+					 [this](const ActionArgs& args)
+					 {
+						 const auto direction = args.argInt();
+						 if (m_step <= 0.0f || !m_number || !direction)
+						 {
+							 return;
+						 }
+						 put(std::clamp(value() + static_cast<float>(*direction) * m_step, m_min, m_max));
+					 });
 	}
 
 	void NumberPad::fields(FieldVisitor& f)
@@ -79,6 +90,7 @@ namespace UI::Xml
 				"and dots");
 		f.field(m_id + ".signed", m_signed, "1 if the number may be negative, so the sign key works");
 		f.field(m_id + ".decimal", m_decimal, "1 if the number may have a fraction, so the dot key works");
+		f.field(m_id + ".steppable", m_steppable, "1 if − and + step the number (`" + m_id + ".step`)");
 	}
 
 	void NumberPad::askNumber(float min, float max, std::optional<float> start, bool whole, std::string_view unit)
@@ -90,6 +102,7 @@ namespace UI::Xml
 		m_decimal.set(whole ? 0 : 1);
 		m_unit.set(unit);
 		m_range.set(rangeOf(min, max, unit));
+		setStep(0.0f);
 		setText(start ? shown(*start) : std::string());
 		m_fresh = start.has_value();
 	}
@@ -101,6 +114,7 @@ namespace UI::Xml
 		m_decimal.set(1);
 		m_unit.set("");
 		m_range.set("");
+		setStep(0.0f);
 		setText(start);
 		m_fresh = !start.empty();
 	}
@@ -160,6 +174,18 @@ namespace UI::Xml
 			typed += key;
 		}
 		setText(typed);
+	}
+
+	void NumberPad::setStep(float step)
+	{
+		m_step = step;
+		m_steppable.set(step > 0.0f ? 1 : 0);
+	}
+
+	void NumberPad::put(float value)
+	{
+		setText(shown(value));
+		m_fresh = true;
 	}
 
 	void NumberPad::setText(std::string_view text)
