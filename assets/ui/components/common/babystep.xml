@@ -47,10 +47,8 @@
 				style_flex_cross_place="center" style_flex_track_place="center">
 			<style name="pad_zero"/>
 			<style name="pad_gap"/>
-			<ds_list name="value_list" list="source.babystep.step.choices" item="value_selector_choice" height="content"
-					 flex_grow="1" style_min_width="content" flex_flow="row">
-				<style name="setting_options"/>
-			</ds_list>
+			<value_selector_presets name="value_list" choices="source.babystep.step.choices" flex_grow="1"
+									style_min_width="content"/>
 			<ds_button name="reset" translation_tag="tr.babystep.reset" height="content" style_min_height="40">
 				<bind_state_if_eq subject="source.babystep.usable" state="disabled" ref_value="0"/>
 				<action trigger="clicked" name="actions.babystep.reset"/>

@@ -10,16 +10,12 @@
 	<view extends="lv_obj" width="100%" height="content">
 		<style name="setting_group"/>
 		<ds_setting name="distance" title_tag="tr.move.step" bind_hint="source.jog.distance.unit">
-			<ds_list name="distances" list="source.jog.distance.choices" item="value_selector_choice" width="content"
-					 style_max_width="100%" flex_flow="row" scroll_dir="hor">
-				<style name="setting_options"/>
-			</ds_list>
+			<value_selector_presets name="distances" choices="source.jog.distance.choices" style_max_width="100%"
+									scroll_dir="hor"/>
 		</ds_setting>
 		<ds_setting name="feedrate" title_tag="tr.move.speed" bind_hint="source.jog.feedrate.unit">
-			<ds_list name="feedrates" list="source.jog.feedrate.choices" item="value_selector_choice" width="content"
-					 style_max_width="100%" flex_flow="row" scroll_dir="hor">
-				<style name="setting_options"/>
-			</ds_list>
+			<value_selector_presets name="feedrates" choices="source.jog.feedrate.choices" style_max_width="100%"
+									scroll_dir="hor"/>
 		</ds_setting>
 	</view>
 </component>

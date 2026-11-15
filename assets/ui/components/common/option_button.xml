@@ -1,0 +1,29 @@
+<!--
+  One of a few options, joined side by side in a box styled setting_options: checked while what it chooses is chosen.
+  Tap it to choose it. The settings' choices (settings_option.xml), the bed mesh's colours and a spindle's direction
+  are rows of them; a preset of a value (value_selector_choice.xml) or a factor (factors_preset.xml) is one in a list.
+
+      <lv_obj name="options">
+          <style name="setting_options"/>
+          <option_button name="fixed" translation_tag="tr.heightmap.fixed" subject="presenter.mode" value="0"
+                         action="presenter.heightmap.mode" arg="fixed"/>
+          …
+      </lv_obj>
+
+  Props:    subject  the name of what is chosen (or a constant)
+            value    the subject's value while this option is the one chosen (default 1)
+            action, arg  the action run when it is tapped, and its arg (none while empty)
+-->
+<component>
+	<api>
+		<prop name="subject" type="string" default="0"/>
+		<prop name="value" type="string" default="1"/>
+		<prop name="action" type="string" default=""/>
+		<prop name="arg" type="string" default=""/>
+	</api>
+	<view extends="ds_button">
+		<style name="setting_option"/>
+		<bind_state_if_eq subject="$subject" state="checked" ref_value="$value"/>
+		<action trigger="clicked" name="$action" arg="$arg"/>
+	</view>
+</component>

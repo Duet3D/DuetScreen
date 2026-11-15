@@ -18,21 +18,12 @@
 			<ds_setting name="connection_method" title_tag="tr.settings.duet_connection_method">
 				<lv_obj name="options">
 					<style name="setting_options"/>
-					<ds_button name="usb" translation_tag="tr.connection_method.usb">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.connection_method" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="actions.settings.set" arg="connection_method=0"/>
-					</ds_button>
-					<ds_button name="network" translation_tag="tr.connection_method.network">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.connection_method" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="actions.settings.set" arg="connection_method=1"/>
-					</ds_button>
-					<ds_button name="uart" translation_tag="tr.connection_method.uart">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.connection_method" state="checked" ref_value="2"/>
-						<action trigger="clicked" name="actions.settings.set" arg="connection_method=2"/>
-					</ds_button>
+					<settings_option name="usb" translation_tag="tr.connection_method.usb"
+									 setting="connection_method" value="0"/>
+					<settings_option name="network" translation_tag="tr.connection_method.network"
+									 setting="connection_method" value="1"/>
+					<settings_option name="uart" translation_tag="tr.connection_method.uart"
+									 setting="connection_method" value="2"/>
 				</lv_obj>
 			</ds_setting>
 

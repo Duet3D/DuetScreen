@@ -1,0 +1,17 @@
+<!--
+  One of a few values of a setting, an option_button (option_button.xml) in a box styled setting_options: checked
+  while the setting has its value, and tapped to give it that value (actions.settings.set, `<setting>=<value>`).
+
+      <settings_option name="mm" translation_tag="tr.settings.units_options.mm" setting="units" value="0"/>
+
+  Props:    setting  the setting's name in source.settings (src/UI/Xml/Data/SettingsSource.h)
+            value    its value while this option is chosen
+-->
+<component>
+	<api>
+		<prop name="setting" type="string"/>
+		<prop name="value" type="string" default="0"/>
+	</api>
+	<view extends="option_button" subject="source.settings.${setting}" value="$value" action="actions.settings.set"
+		  arg="${setting}=${value}"/>
+</component>

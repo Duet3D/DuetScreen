@@ -3088,12 +3088,14 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control`, `object_cancel` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
+| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `heightmap`, `settings_option`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
 | [`settings_connection`](#settings_connection) |  |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) |  |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
 | [`settings_display`](#settings_display) |  |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
 | [`settings_general`](#settings) |  |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
 | [`settings_notifications`](#settings_notifications) |  |  | `settings` | [settings_notifications.xml](../assets/ui/components/settings/settings_notifications.xml) |
+| `settings_option` |  | `setting`, `value` | `settings_connection`, `settings_display`, `settings_general`, `settings_notifications` | [settings_option.xml](../assets/ui/components/settings/settings_option.xml) |
 | [`settings_system`](#settings_system) |  |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
 | [`settings_theme_preview`](#settings_theme_preview) | `settings_theme_preview` |  | `settings` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |
@@ -3128,7 +3130,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `tools_tool` |  | `compact` | `dashboard_current_tool`, `dashboard_tool_card`, `dashboard_tools`, `tools_list` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  | `compact` | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
-| `value_selector_choice` |  | `format` | `babystep`, `move_jog_choices`, `tools_current`, `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
+| `value_selector_choice` |  | `format` | `value_selector_presets` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
+| `value_selector_presets` |  | `choices` | `babystep`, `move_jog_choices`, `tools_current`, `value_selector` | [value_selector_presets.xml](../assets/ui/components/common/value_selector_presets.xml) |
 
 ### Views
 

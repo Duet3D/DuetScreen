@@ -47,32 +47,20 @@
 			<ds_setting name="units" title_tag="tr.settings.units" hint_tag="tr.settings.hints.units">
 				<lv_obj name="options">
 					<style name="setting_options"/>
-					<ds_button name="mm" translation_tag="tr.settings.units_options.mm">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.units" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="actions.settings.set" arg="units=0"/>
-					</ds_button>
-					<ds_button name="inches" translation_tag="tr.settings.units_options.inches">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.units" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="actions.settings.set" arg="units=1"/>
-					</ds_button>
+					<settings_option name="mm" translation_tag="tr.settings.units_options.mm"
+									 setting="units" value="0"/>
+					<settings_option name="inches" translation_tag="tr.settings.units_options.inches"
+									 setting="units" value="1"/>
 				</lv_obj>
 			</ds_setting>
 			<ds_setting name="job_progress_source" title_tag="tr.settings.job_progress_source"
 						hint_tag="tr.settings.hints.job_progress">
 				<lv_obj name="options">
 					<style name="setting_options"/>
-					<ds_button name="duration" translation_tag="tr.settings.job_progress_source_options.duration">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.progress_source" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="actions.settings.set" arg="progress_source=0"/>
-					</ds_button>
-					<ds_button name="file" translation_tag="tr.settings.job_progress_source_options.file">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.progress_source" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="actions.settings.set" arg="progress_source=1"/>
-					</ds_button>
+					<settings_option name="duration" translation_tag="tr.settings.job_progress_source_options.duration"
+									 setting="progress_source" value="0"/>
+					<settings_option name="file" translation_tag="tr.settings.job_progress_source_options.file"
+									 setting="progress_source" value="1"/>
 				</lv_obj>
 			</ds_setting>
 		</ds_setting_group>

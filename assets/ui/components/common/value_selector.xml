@@ -39,10 +39,7 @@
 		</lv_obj>
 
 		<lv_obj name="values" width="100%" flex_grow="1" style_min_height="content" flex_flow="column">
-			<ds_list name="list" list="$choices" item="value_selector_choice" width="100%" height="content"
-					 flex_flow="row">
-				<style name="setting_options"/>
-			</ds_list>
+			<value_selector_presets name="list" choices="$choices" width="100%"/>
 		</lv_obj>
 	</view>
 </component>

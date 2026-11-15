@@ -41,10 +41,7 @@
 						<style name="setting_hint"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="amounts" list="source.extruder.distance.choices" item="value_selector_choice" width="100%" height="content"
-						 flex_flow="row">
-					<style name="setting_options"/>
-				</ds_list>
+				<value_selector_presets name="amounts" choices="source.extruder.distance.choices" width="100%"/>
 			</lv_obj>
 			<!-- Its title over its presets, which have the panel's width -->
 			<lv_obj name="speed" height="content" flex_flow="column" scrollable="false">
@@ -60,10 +57,7 @@
 						<style name="setting_hint"/>
 					</lv_label>
 				</lv_obj>
-				<ds_list name="speeds" list="source.extruder.feedrate.choices" item="value_selector_choice" width="100%" height="content"
-						 flex_flow="row">
-					<style name="setting_options"/>
-				</ds_list>
+				<value_selector_presets name="speeds" choices="source.extruder.feedrate.choices" width="100%"/>
 			</lv_obj>
 			<lv_obj name="buttons" height="content" flex_flow="row" scrollable="false">
 				<style name="setting_row"/>
@@ -126,16 +120,12 @@
 				<bind_flag_if_eq subject="source.spindle.can_reverse" flag="hidden" ref_value="0"/>
 				<lv_obj name="options" width="100%">
 					<style name="setting_options"/>
-					<ds_button name="forward" translation_tag="tr.spindle.forward" flex_grow="1">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.spindle.reverse" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="actions.spindle.direction" arg="forward"/>
-					</ds_button>
-					<ds_button name="reverse" translation_tag="tr.spindle.reverse" flex_grow="1">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.spindle.reverse" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="actions.spindle.direction" arg="reverse"/>
-					</ds_button>
+					<option_button name="forward" translation_tag="tr.spindle.forward" flex_grow="1"
+								   subject="source.spindle.reverse" value="0" action="actions.spindle.direction"
+								   arg="forward"/>
+					<option_button name="reverse" translation_tag="tr.spindle.reverse" flex_grow="1"
+								   subject="source.spindle.reverse" value="1" action="actions.spindle.direction"
+								   arg="reverse"/>
 				</lv_obj>
 			</ds_setting>
 			<lv_obj name="buttons" height="content" scrollable="false">

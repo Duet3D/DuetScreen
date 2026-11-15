@@ -8,8 +8,8 @@
 
   Props:    open, title, factors: the names of its fields, published by FactorsSource
             (src/UI/Xml/Data/FactorsSource.h, src/UI/Xml/View/FactorDialog.h)
-            all, all_shown: expressions: it shows every extruder; it can show every extruder or only the tool's
-            (default 0: no choice)
+            all: the name of whether it shows every extruder (1) or only the tool's (0)
+            all_shown: an expression: it can show every extruder or only the tool's (default 0: no choice)
   Actions:  actions.factors.extrusion_all (src/UI/Presenters/Modals/FactorsActions.h)
 
   Closed by the user, it empties its `open` subject itself.
@@ -28,16 +28,10 @@
 		<lv_obj name="scope" width="100%" height="content">
 			<style name="setting_options"/>
 			<bind_flag_if cond="not (${all_shown})" flag="hidden"/>
-			<ds_button name="tool" translation_tag="tr.fine_tune.this_tool" height="content" flex_grow="1">
-				<style name="setting_option"/>
-				<bind_style_if name="btn_checked" cond="not (${all})"/>
-				<action trigger="clicked" name="actions.factors.extrusion_all" arg="0"/>
-			</ds_button>
-			<ds_button name="all" translation_tag="tr.fine_tune.all_extruders" height="content" flex_grow="1">
-				<style name="setting_option"/>
-				<bind_style_if name="btn_checked" cond="${all}"/>
-				<action trigger="clicked" name="actions.factors.extrusion_all" arg="1"/>
-			</ds_button>
+			<option_button name="tool" translation_tag="tr.fine_tune.this_tool" height="content" flex_grow="1"
+						   subject="$all" value="0" action="actions.factors.extrusion_all" arg="0"/>
+			<option_button name="all" translation_tag="tr.fine_tune.all_extruders" height="content" flex_grow="1"
+						   subject="$all" value="1" action="actions.factors.extrusion_all" arg="1"/>
 		</lv_obj>
 		<ds_list name="list" list="$factors" item="factors_row" width="100%" height="content" flex_flow="column"
 				 style_pad_row="24"/>

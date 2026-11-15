@@ -88,6 +88,8 @@ namespace UI::Xml
 			}
 		}
 
+		// Also here, not only when created: a component's root is created with the component's own attributes, and
+		// given those of the element using it (`<option_button translation_tag="…"/>`) only here
 		if (tag != nullptr)
 		{
 			if (button->m_translationTag.empty())
@@ -95,6 +97,7 @@ namespace UI::Xml
 				lv_obj_add_event_cb(root, languageChangedCb, LV_EVENT_TRANSLATION_LANGUAGE_CHANGED, button);
 			}
 			button->m_translationTag = tag;
+			button->setText(Xml::Translations::translate(tag));
 		}
 
 		if (lv_subject_t* subject = findSubject(state, attrs, "flash_on"))

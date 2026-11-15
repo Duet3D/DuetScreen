@@ -35,16 +35,10 @@
 			<ds_setting name="screen_rotation" title_tag="tr.settings.screen_rotation">
 				<lv_obj name="options">
 					<style name="setting_options"/>
-					<ds_button name="rotation_0" translation_tag="tr.settings.screen_rotation_options.rotation_0">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.rotation" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="actions.settings.set" arg="rotation=0"/>
-					</ds_button>
-					<ds_button name="rotation_180" translation_tag="tr.settings.screen_rotation_options.rotation_180">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.rotation" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="actions.settings.set" arg="rotation=1"/>
-					</ds_button>
+					<settings_option name="rotation_0" translation_tag="tr.settings.screen_rotation_options.rotation_0"
+									 setting="rotation" value="0"/>
+					<settings_option name="rotation_180" translation_tag="tr.settings.screen_rotation_options.rotation_180"
+									 setting="rotation" value="1"/>
 				</lv_obj>
 			</ds_setting>
 			<ds_setting name="enable_animations" title_tag="tr.settings.enable_animations">

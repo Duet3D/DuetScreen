@@ -66,16 +66,10 @@
 					<style name="setting_row"/>
 					<lv_obj name="options" width="100%">
 						<style name="setting_options"/>
-						<ds_button name="heightmap_fixed" translation_tag="tr.heightmap.fixed" flex_grow="1">
-							<style name="setting_option"/>
-							<bind_state_if_eq subject="presenter.mode" state="checked" ref_value="0"/>
-							<action trigger="clicked" name="presenter.heightmap.mode" arg="fixed"/>
-						</ds_button>
-						<ds_button name="heightmap_auto" translation_tag="tr.heightmap.auto" flex_grow="1">
-							<style name="setting_option"/>
-							<bind_state_if_eq subject="presenter.mode" state="checked" ref_value="1"/>
-							<action trigger="clicked" name="presenter.heightmap.mode" arg="auto"/>
-						</ds_button>
+						<option_button name="heightmap_fixed" translation_tag="tr.heightmap.fixed" flex_grow="1"
+									   subject="presenter.mode" value="0" action="presenter.heightmap.mode" arg="fixed"/>
+						<option_button name="heightmap_auto" translation_tag="tr.heightmap.auto" flex_grow="1"
+									   subject="presenter.mode" value="1" action="presenter.heightmap.mode" arg="auto"/>
 					</lv_obj>
 				</lv_obj>
 			</ds_setting_group>

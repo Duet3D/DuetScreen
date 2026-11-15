@@ -1,0 +1,18 @@
+<!--
+  A value selector's presets (value_selector_choice.xml), joined side by side in a box: the one in use checked. Tap one
+  to use it; hold it to change it. The jog step and speed, the extruder's amount and speed and the babystep size each
+  show theirs.
+
+      <value_selector_presets name="distances" choices="source.jog.distance.choices" width="100%"/>
+
+  Props:    choices  the name of the selector's presets, e.g. `source.jog.distance.choices`
+                     (src/UI/Xml/View/ValueSelector.h)
+-->
+<component>
+	<api>
+		<prop name="choices" type="string"/>
+	</api>
+	<view extends="ds_list" list="$choices" item="value_selector_choice" height="content" flex_flow="row">
+		<style name="setting_options"/>
+	</view>
+</component>

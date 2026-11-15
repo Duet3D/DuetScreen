@@ -23,26 +23,14 @@
 						hint_tag="tr.settings.hints.notification_level">
 				<lv_obj name="options">
 					<style name="setting_options"/>
-					<ds_button name="info" translation_tag="tr.settings.severity.info">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="actions.settings.set" arg="notification_level=0"/>
-					</ds_button>
-					<ds_button name="success" translation_tag="tr.settings.severity.success">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="actions.settings.set" arg="notification_level=1"/>
-					</ds_button>
-					<ds_button name="warn" translation_tag="tr.settings.severity.warn">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="2"/>
-						<action trigger="clicked" name="actions.settings.set" arg="notification_level=2"/>
-					</ds_button>
-					<ds_button name="error" translation_tag="tr.settings.severity.error">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="source.settings.notification_level" state="checked" ref_value="3"/>
-						<action trigger="clicked" name="actions.settings.set" arg="notification_level=3"/>
-					</ds_button>
+					<settings_option name="info" translation_tag="tr.settings.severity.info"
+									 setting="notification_level" value="0"/>
+					<settings_option name="success" translation_tag="tr.settings.severity.success"
+									 setting="notification_level" value="1"/>
+					<settings_option name="warn" translation_tag="tr.settings.severity.warn"
+									 setting="notification_level" value="2"/>
+					<settings_option name="error" translation_tag="tr.settings.severity.error"
+									 setting="notification_level" value="3"/>
 				</lv_obj>
 			</ds_setting>
 			<ds_setting name="notification_timeout" title_tag="tr.settings.notification_timeout">
