@@ -3090,6 +3090,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
 | `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `heightmap`, `settings_option`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
+| `settings_button` |  | `label_tag`, `action`, `danger` | `settings_developer`, `settings_display`, `settings_system`, `settings_wifi` | [settings_button.xml](../assets/ui/components/settings/settings_button.xml) |
+| `settings_choice` |  | `title_tag`, `setting` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_choice.xml](../assets/ui/components/settings/settings_choice.xml) |
 | [`settings_connection`](#settings_connection) |  |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) |  |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
 | [`settings_display`](#settings_display) |  |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
@@ -3099,6 +3101,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_system`](#settings_system) |  |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
 | [`settings_theme_preview`](#settings_theme_preview) | `settings_theme_preview` |  | `settings` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |
+| `settings_toggle` |  | `setting` | `settings_developer`, `settings_display`, `settings_general`, `settings_notifications` | [settings_toggle.xml](../assets/ui/components/settings/settings_toggle.xml) |
+| `settings_value` |  | `value` | `settings_system`, `settings_wifi` | [settings_value.xml](../assets/ui/components/settings/settings_value.xml) |
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
 | `settings_wifi_network` |  |  | `settings_wifi` | [settings_wifi_network.xml](../assets/ui/components/settings/settings_wifi_network.xml) |
 | [`sidebar`](#home) |  |  | `home` | [sidebar.xml](../assets/ui/components/sidebar/sidebar.xml) |

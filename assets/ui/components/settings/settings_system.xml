@@ -12,71 +12,38 @@
 		<style name="setting_page"/>
 
 		<ds_setting_group name="about" title_tag="tr.settings.groups.about">
-			<ds_setting name="firmware" title_tag="tr.settings.firmware_version">
-				<lv_label name="value" bind_text="source.system.firmware">
-					<style name="text_muted"/>
-				</lv_label>
-			</ds_setting>
-			<ds_setting name="buildroot" title_tag="tr.settings.buildroot_version">
-				<lv_label name="value" bind_text="source.system.buildroot">
-					<style name="text_muted"/>
-				</lv_label>
-			</ds_setting>
-			<ds_setting name="storage" title_tag="tr.settings.storage_info">
-				<lv_label name="value" bind_text="source.system.storage_info">
-					<style name="text_muted"/>
-				</lv_label>
-			</ds_setting>
-			<ds_setting name="cache" title_tag="tr.settings.duetscreen_cache_size" hint_tag="tr.settings.hints.cache">
-				<lv_label name="value" bind_text="source.system.cache_size">
-					<style name="text_muted"/>
-				</lv_label>
+			<settings_value name="firmware" title_tag="tr.settings.firmware_version" value="source.system.firmware"/>
+			<settings_value name="buildroot" title_tag="tr.settings.buildroot_version" value="source.system.buildroot"/>
+			<settings_value name="storage" title_tag="tr.settings.storage_info" value="source.system.storage_info"/>
+			<settings_value name="cache" title_tag="tr.settings.duetscreen_cache_size"
+							hint_tag="tr.settings.hints.cache" value="source.system.cache_size">
 				<ds_button name="clear" translation_tag="tr.settings.clear_duetscreen_cache">
 					<style name="setting_control"/>
 					<action trigger="clicked" name="actions.system.clear_cache"/>
 				</ds_button>
-			</ds_setting>
+			</settings_value>
 		</ds_setting_group>
 
 		<ds_setting_group name="update_backup" title_tag="tr.settings.groups.update_backup">
-			<ds_setting name="upgrade" title_tag="tr.settings.upgrade_from_github" hint_tag="tr.settings.hints.upgrade">
-				<ds_button name="update" translation_tag="tr.settings.update">
-					<style name="setting_control"/>
-					<action trigger="clicked" name="actions.system.upgrade_from_github"/>
-				</ds_button>
-			</ds_setting>
-			<ds_setting name="backup" title_tag="tr.settings.send_config_to_duet" hint_tag="tr.settings.hints.backup">
-				<ds_button name="back_up" translation_tag="tr.settings.back_up">
-					<style name="setting_control"/>
-					<action trigger="clicked" name="actions.system.send_config"/>
-				</ds_button>
-			</ds_setting>
+			<settings_button name="upgrade" title_tag="tr.settings.upgrade_from_github"
+							 hint_tag="tr.settings.hints.upgrade" label_tag="tr.settings.update"
+							 action="actions.system.upgrade_from_github"/>
+			<settings_button name="backup" title_tag="tr.settings.send_config_to_duet"
+							 hint_tag="tr.settings.hints.backup" label_tag="tr.settings.back_up"
+							 action="actions.system.send_config"/>
 		</ds_setting_group>
 
 		<ds_setting_group name="restarting" title_tag="tr.settings.groups.restart">
-			<ds_setting name="restart" title_tag="tr.settings.restart_title" hint_tag="tr.settings.hints.restart">
-				<ds_button name="button" translation_tag="tr.settings.restart">
-					<style name="setting_control"/>
-					<action trigger="clicked" name="actions.system.restart"/>
-				</ds_button>
-			</ds_setting>
-			<ds_setting name="reboot" title_tag="tr.settings.reboot_title" hint_tag="tr.settings.hints.reboot">
-				<ds_button name="button" translation_tag="tr.settings.reboot">
-					<style name="setting_control"/>
-					<action trigger="clicked" name="actions.system.reboot"/>
-				</ds_button>
-			</ds_setting>
+			<settings_button name="restart" title_tag="tr.settings.restart_title" hint_tag="tr.settings.hints.restart"
+							 label_tag="tr.settings.restart" action="actions.system.restart"/>
+			<settings_button name="reboot" title_tag="tr.settings.reboot_title" hint_tag="tr.settings.hints.reboot"
+							 label_tag="tr.settings.reboot" action="actions.system.reboot"/>
 		</ds_setting_group>
 
 		<!-- Can't be undone: asks first -->
 		<ds_setting_group name="erasing" title_tag="tr.settings.groups.erase" danger="true">
-			<ds_setting name="erase" title_tag="tr.settings.erase_title" hint_tag="tr.settings.hints.erase">
-				<ds_button name="button" translation_tag="tr.settings.erase">
-					<style name="setting_control"/>
-					<style name="danger_btn"/>
-					<action trigger="clicked" name="actions.system.erase_and_restart"/>
-				</ds_button>
-			</ds_setting>
+			<settings_button name="erase" title_tag="tr.settings.erase_title" hint_tag="tr.settings.hints.erase"
+							 label_tag="tr.settings.erase" action="actions.system.erase_and_restart" danger="1"/>
 		</ds_setting_group>
 	</view>
 </component>

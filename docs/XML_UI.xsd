@@ -807,6 +807,8 @@
 			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="option_button"/>
 			<xs:enumeration value="settings"/>
+			<xs:enumeration value="settings_button"/>
+			<xs:enumeration value="settings_choice"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
@@ -816,6 +818,8 @@
 			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_theme_swatch"/>
+			<xs:enumeration value="settings_toggle"/>
+			<xs:enumeration value="settings_value"/>
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
@@ -965,6 +969,8 @@
 			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="option_button"/>
 			<xs:enumeration value="settings"/>
+			<xs:enumeration value="settings_button"/>
+			<xs:enumeration value="settings_choice"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
@@ -974,6 +980,8 @@
 			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_theme_swatch"/>
+			<xs:enumeration value="settings_toggle"/>
+			<xs:enumeration value="settings_value"/>
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
@@ -1184,6 +1192,8 @@
 			<xs:enumeration value="option_button"/>
 			<xs:enumeration value="responsive_grid"/>
 			<xs:enumeration value="settings"/>
+			<xs:enumeration value="settings_button"/>
+			<xs:enumeration value="settings_choice"/>
 			<xs:enumeration value="settings_connection"/>
 			<xs:enumeration value="settings_developer"/>
 			<xs:enumeration value="settings_display"/>
@@ -1193,6 +1203,8 @@
 			<xs:enumeration value="settings_system"/>
 			<xs:enumeration value="settings_theme_preview"/>
 			<xs:enumeration value="settings_theme_swatch"/>
+			<xs:enumeration value="settings_toggle"/>
+			<xs:enumeration value="settings_value"/>
 			<xs:enumeration value="settings_wifi"/>
 			<xs:enumeration value="settings_wifi_network"/>
 			<xs:enumeration value="sidebar"/>
@@ -5866,10 +5878,39 @@
 			<xs:annotation><xs:documentation>true: no more columns than visible children</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="settings_button.attributes">
+		<xs:attribute name="label_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="danger" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `danger` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="settings_choice.attributes">
+		<xs:attribute name="title_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="setting" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `setting` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="settings_option.attributes">
 		<xs:attribute name="setting" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `setting` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="settings_toggle.attributes">
+		<xs:attribute name="setting" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `setting` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="settings_value.attributes">
 		<xs:attribute name="value" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -15385,6 +15426,46 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="settings_button">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_button.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="settings_button.attributes"/>
+			<xs:attributeGroup ref="ds_setting.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_choice">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_choice.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="settings_choice.attributes"/>
+			<xs:attribute name="title" type="xs:string">
+				<xs:annotation><xs:documentation>The setting's title, if there is no `title_tag` or `bind_title`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_title" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the title</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hint" type="xs:string">
+				<xs:annotation><xs:documentation>A line under the title saying more about the setting, if there is no `hint_tag` or `bind_hint`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hint_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the hint; follows language changes</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="badge" type="xs:string">
+				<xs:annotation><xs:documentation>A word after the title saying what sort of setting it is, e.g. &quot;Advanced&quot;, if there is no `badge_tag`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="badge_tag" type="translation">
+				<xs:annotation><xs:documentation>Translation key for the badge; follows language changes</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_hint" type="subject">
+				<xs:annotation><xs:documentation>Follow a text subject for the hint, e.g. how something went; no hint while it is empty</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="settings_connection">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_connection.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -15976,6 +16057,26 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_theme_swatch.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_toggle">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_toggle.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="settings_toggle.attributes"/>
+			<xs:attributeGroup ref="ds_setting.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="settings_value">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/settings/settings_value.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="settings_value.attributes"/>
+			<xs:attributeGroup ref="ds_setting.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

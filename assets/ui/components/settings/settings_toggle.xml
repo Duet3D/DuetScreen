@@ -1,0 +1,19 @@
+<!--
+  A setting that is on or off: a row (ds_setting) with a switch, which stores source.settings.<setting> with
+  actions.settings.set as soon as it is switched. Its title, hint and badge are the row's.
+
+      <settings_toggle name="enable_animations" title_tag="tr.settings.enable_animations" setting="animations"/>
+
+  Props:    setting  the setting's name in source.settings (src/UI/Xml/Data/SettingsSource.h)
+-->
+<component>
+	<api>
+		<prop name="setting" type="string"/>
+	</api>
+	<view extends="ds_setting">
+		<ds_toggle name="switch">
+			<bind_state_if_eq subject="source.settings.${setting}" state="checked" ref_value="1"/>
+			<action trigger="value_changed" name="actions.settings.set" arg="$setting"/>
+		</ds_toggle>
+	</view>
+</component>

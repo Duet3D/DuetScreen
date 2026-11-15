@@ -12,12 +12,8 @@
 		<style name="setting_page"/>
 
 		<ds_setting_group name="messages" title_tag="tr.settings.groups.messages">
-			<ds_setting name="display_connected_message" title_tag="tr.settings.display_connected_message">
-				<ds_toggle name="switch">
-					<bind_state_if_eq subject="source.settings.connected_message" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="actions.settings.set" arg="connected_message"/>
-				</ds_toggle>
-			</ds_setting>
+			<settings_toggle name="display_connected_message" title_tag="tr.settings.display_connected_message"
+							 setting="connected_message"/>
 			<!-- One of a few, in the order of `notification_levels`: the chosen one is checked -->
 			<ds_setting name="notification_level" title_tag="tr.settings.notification_level"
 						hint_tag="tr.settings.hints.notification_level">
@@ -41,12 +37,8 @@
 					<action trigger="value_confirmed" name="actions.settings.set" arg="notification_timeout"/>
 				</ds_slider>
 			</ds_setting>
-			<ds_setting name="notification_auto_close_error" title_tag="tr.settings.notification_auto_close_error">
-				<ds_toggle name="switch">
-					<bind_state_if_eq subject="source.settings.error_notifications_stay" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="actions.settings.set" arg="error_notifications_stay"/>
-				</ds_toggle>
-			</ds_setting>
+			<settings_toggle name="notification_auto_close_error"
+							 title_tag="tr.settings.notification_auto_close_error" setting="error_notifications_stay"/>
 		</ds_setting_group>
 	</view>
 </component>

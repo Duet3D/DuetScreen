@@ -11,17 +11,11 @@
 	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false" style_pad_all="0">
 		<style name="setting_page"/>
 		<ds_setting_group name="screen" title_tag="tr.settings.groups.wifi">
-			<ds_setting name="ip_address" title_tag="tr.settings.network.ip_title" bind_hint="presenter.status">
-				<lv_label name="value" bind_text="presenter.ip">
-					<style name="text_muted"/>
-				</lv_label>
-			</ds_setting>
-			<ds_setting name="scan" title_tag="tr.settings.network.scan_title" hint_tag="tr.settings.network.scan_hint">
-				<ds_button name="refresh" translation_tag="tr.settings.network.refresh">
-					<style name="setting_control"/>
-					<action trigger="clicked" name="presenter.wifi.refresh"/>
-				</ds_button>
-			</ds_setting>
+			<settings_value name="ip_address" title_tag="tr.settings.network.ip_title" bind_hint="presenter.status"
+							value="presenter.ip"/>
+			<settings_button name="scan" title_tag="tr.settings.network.scan_title"
+							 hint_tag="tr.settings.network.scan_hint" label_tag="tr.settings.network.refresh"
+							 action="presenter.wifi.refresh"/>
 		</ds_setting_group>
 
 		<ds_setting_group name="networks" title_tag="tr.settings.network.available_wifi">
@@ -46,14 +40,13 @@
 				<ds_password_toggle name="show_password" textarea="password_input" height="content"/>
 			</ds_setting>
 
-			<ds_setting name="signal" title_tag="tr.settings.network.signal">
+			<settings_value name="signal" title_tag="tr.settings.network.signal" value="presenter.network.signal">
 				<style name="dialog_row"/>
-				<lv_label name="value" bind_text="presenter.network.signal"/>
-			</ds_setting>
-			<ds_setting name="security" title_tag="tr.settings.network.security">
+			</settings_value>
+			<settings_value name="security" title_tag="tr.settings.network.security"
+							value="presenter.network.security">
 				<style name="dialog_row"/>
-				<lv_label name="value" bind_text="presenter.network.security"/>
-			</ds_setting>
+			</settings_value>
 
 			<ds_dialog_footer name="footer">
 				<ds_button name="forget" translation_tag="tr.settings.network.forget">

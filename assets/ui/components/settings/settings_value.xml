@@ -1,0 +1,18 @@
+<!--
+  A fact the settings show: a row (ds_setting) with a value, muted, at its end, e.g. a version. Anything given to it,
+  such as a button, goes after the value.
+
+      <settings_value name="firmware" title_tag="tr.settings.firmware_version" value="source.system.firmware"/>
+
+  Props:    value  the name of the value shown
+-->
+<component>
+	<api>
+		<prop name="value" type="string"/>
+	</api>
+	<view extends="ds_setting">
+		<lv_label name="value" bind_text="$value">
+			<style name="text_muted"/>
+		</lv_label>
+	</view>
+</component>

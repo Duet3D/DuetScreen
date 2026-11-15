@@ -1,0 +1,25 @@
+<!--
+  Something to do from the settings: a row (ds_setting) with a button, `button`, that runs `action` when tapped. Its
+  title, hint and badge are the row's.
+
+      <settings_button name="restart" title_tag="tr.settings.restart_title" hint_tag="tr.settings.hints.restart"
+                       label_tag="tr.settings.restart" action="actions.system.restart"/>
+
+  Props:    label_tag  the translation key of the button's text
+            action     the action run when it is tapped
+            danger     an expression: whether what it does can't be undone, marking the button as dangerous
+-->
+<component>
+	<api>
+		<prop name="label_tag" type="string"/>
+		<prop name="action" type="string"/>
+		<prop name="danger" type="string" default="0"/>
+	</api>
+	<view extends="ds_setting">
+		<ds_button name="button" translation_tag="$label_tag">
+			<style name="setting_control"/>
+			<bind_style_if name="danger_btn" cond="$danger"/>
+			<action trigger="clicked" name="$action"/>
+		</ds_button>
+	</view>
+</component>

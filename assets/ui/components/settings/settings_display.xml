@@ -41,30 +41,15 @@
 									 setting="rotation" value="1"/>
 				</lv_obj>
 			</ds_setting>
-			<ds_setting name="enable_animations" title_tag="tr.settings.enable_animations">
-				<ds_toggle name="switch">
-					<bind_state_if_eq subject="source.settings.animations" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="actions.settings.set" arg="animations"/>
-				</ds_toggle>
-			</ds_setting>
+			<settings_toggle name="enable_animations" title_tag="tr.settings.enable_animations" setting="animations"/>
 		</ds_setting_group>
 
 		<ds_setting_group name="appearance" title_tag="tr.settings.groups.appearance">
-			<ds_setting name="theme" title_tag="tr.settings.theme">
-				<ds_choice name="choice" title_tag="tr.settings.theme" bind_options="source.settings.theme_options"
-						   bind_selected="source.settings.theme">
-					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="actions.settings.set" arg="theme"/>
-				</ds_choice>
-			</ds_setting>
+			<settings_choice name="theme" title_tag="tr.settings.theme" setting="theme"/>
 			<!-- For a theme whose palette can be changed -->
-			<ds_setting name="dark_mode" title_tag="tr.theme.dark_mode">
+			<settings_toggle name="dark_mode" title_tag="tr.theme.dark_mode" setting="dark">
 				<bind_flag_if_eq subject="source.theme.customisable" flag="hidden" ref_value="0"/>
-				<ds_toggle name="switch">
-					<bind_state_if_eq subject="source.settings.dark" state="checked" ref_value="1"/>
-					<action trigger="value_changed" name="actions.settings.set" arg="dark"/>
-				</ds_toggle>
-			</ds_setting>
+			</settings_toggle>
 			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
 				<!-- The theme's accents -->
 				<lv_obj name="swatches" width="content" height="content" flex_flow="row" clickable="false"
@@ -82,29 +67,13 @@
 					<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
 				</chevron_button>
 			</ds_setting>
-			<ds_setting name="font" title_tag="tr.settings.font">
-				<ds_choice name="choice" title_tag="tr.settings.font" bind_options="source.settings.font_options"
-						   bind_selected="source.settings.font">
-					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="actions.settings.set" arg="font"/>
-				</ds_choice>
-			</ds_setting>
-			<ds_setting name="icons" title_tag="tr.settings.icons">
-				<ds_choice name="choice" title_tag="tr.settings.icons" bind_options="source.settings.icon_set_options"
-						   bind_selected="source.settings.icon_set">
-					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="actions.settings.set" arg="icon_set"/>
-				</ds_choice>
-			</ds_setting>
+			<settings_choice name="font" title_tag="tr.settings.font" setting="font"/>
+			<settings_choice name="icons" title_tag="tr.settings.icons" setting="icon_set"/>
 		</ds_setting_group>
 
 		<ds_setting_group name="home" title_tag="tr.settings.groups.home">
-			<ds_setting name="customise" title_tag="tr.settings.customise" hint_tag="tr.settings.hints.customise">
-				<ds_button name="start" translation_tag="tr.settings.customise_start">
-					<style name="setting_control"/>
-					<action trigger="clicked" name="actions.customise.start"/>
-				</ds_button>
-			</ds_setting>
+			<settings_button name="customise" title_tag="tr.settings.customise" hint_tag="tr.settings.hints.customise"
+							 label_tag="tr.settings.customise_start" action="actions.customise.start"/>
 		</ds_setting_group>
 	</view>
 </component>

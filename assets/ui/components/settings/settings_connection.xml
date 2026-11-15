@@ -44,14 +44,10 @@
 			</ds_setting>
 
 			<!-- With advanced settings shown -->
-			<ds_setting name="usb_mode" title_tag="tr.settings.usb_mode" badge_tag="tr.settings.advanced">
+			<settings_choice name="usb_mode" title_tag="tr.settings.usb_mode" badge_tag="tr.settings.advanced"
+							 setting="usb_mode">
 				<bind_flag_if_eq subject="source.settings.advanced_settings" flag="hidden" ref_value="0"/>
-				<ds_choice name="choice" title_tag="tr.settings.usb_mode" bind_options="source.settings.usb_mode_options"
-						   bind_selected="source.settings.usb_mode">
-					<style name="setting_value"/>
-					<action trigger="value_confirmed" name="actions.settings.set" arg="usb_mode"/>
-				</ds_choice>
-			</ds_setting>
+			</settings_choice>
 			<ds_setting name="poll_interval" title_tag="tr.settings.duet_poll_interval"
 						hint_tag="tr.settings.hints.poll_interval" badge_tag="tr.settings.advanced">
 				<bind_flag_if_eq subject="source.settings.advanced_settings" flag="hidden" ref_value="0"/>
