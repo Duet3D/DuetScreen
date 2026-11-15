@@ -3400,9 +3400,10 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `heater_standby` |  | bg_color=#secondary border_color=#secondary |
 | `heater_off` | ![heater_off](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/heater_off.png) | bg_color=#bg_light border_color=#border_muted text_color=#text |
 | `heater_fault` |  | bg_color=#error border_color=#error |
-| `tab_button` |  | *(not set)* |
+| `tab_button` | ![tab_button](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_button.png) | merge=tab_btn |
 | `tab_bar_side` | ![tab_bar_side](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_bar_side.png) | bg_color=#bg bg_opa=100% radius=#radius pad_all=8 pad_row=4 border_color=#border_muted border_width=#border_width border_opa=100% |
-| `tab_button_side` | ![tab_button_side](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_button_side.png) | min_height=52 pad_hor=12 pad_ver=8 pad_column=12 bg_opa=0 border_width=0 shadow_width=0 text_color=#text text_font=font_title |
+| `tab_button_side` | ![tab_button_side](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_button_side.png) | width=100% height=content min_width=content min_height=52 pad_hor=12 pad_ver=8 pad_column=12 bg_opa=0 border_width=0 shadow_width=0 text_color=#text text_font=font_title |
+| `tab_button_top` | ![tab_button_top](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tab_button_top.png) | merge=text_header width=15% height=100% min_width=content min_height=content |
 | `slider_buttons` |  | width=40 height=40 |
 | `list_header` |  | *(not set)* |
 | `list_title` | ![list_title](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/list_title.png) | merge=text_emphasis |

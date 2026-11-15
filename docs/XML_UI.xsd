@@ -1413,6 +1413,7 @@
 			<xs:enumeration value="tab_btn"/>
 			<xs:enumeration value="tab_button"/>
 			<xs:enumeration value="tab_button_side"/>
+			<xs:enumeration value="tab_button_top"/>
 			<xs:enumeration value="tab_card"/>
 			<xs:enumeration value="table"/>
 			<xs:enumeration value="table_cell"/>

@@ -309,10 +309,12 @@
 		<!-- Tabs: the selected one (as a checked button, tinted) is underlined in the accent, instead of edged -->
 		<style name="tab_btn" border_color="#primary" border_width="3" border_side="bottom" outline_width="0"/>
 		<!-- Tabs down a side (ds_tabs side="left"): a panel of their own; each flat until it is the one selected, which
-			 is checked (btn_checked) -->
+		is checked (btn_checked) -->
+		<style name="tab_button" merge="tab_btn"/>
 		<style name="tab_bar_side" bg_color="#bg" bg_opa="100%" radius="#radius" pad_all="8" pad_row="4"
 			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
-		<style name="tab_button_side" min_height="52" pad_hor="12" pad_ver="8" pad_column="12" bg_opa="0"
+		<style name="tab_button_top" merge="text_header" width="15%" height="100%" min_width="content" min_height="content"/>
+		<style name="tab_button_side" width="100%" height="content" min_width="content" min_height="52" pad_hor="12" pad_ver="8" pad_column="12" bg_opa="0"
 			   border_width="0" shadow_width="0" text_color="#text" text_font="font_title"/>
 		<style name="tab_bg_focus" outline_pad="-#border_width"/>
 

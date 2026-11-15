@@ -340,6 +340,7 @@ namespace UI::Themes
 		{"tab_button", &ComponentStyles::tab_button},
 		{"tab_bar_side", &ComponentStyles::tab_bar_side},
 		{"tab_button_side", &ComponentStyles::tab_button_side},
+		{"tab_button_top", &ComponentStyles::tab_button_top},
 		{"slider_buttons", &ComponentStyles::slider_buttons},
 		{"list_header", &ComponentStyles::list_header},
 		{"list_title", &ComponentStyles::list_title},

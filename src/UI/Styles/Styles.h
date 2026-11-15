@@ -336,6 +336,7 @@ namespace UI::Themes
 		Style tab_button;			 // Used in tabview tabs
 		Style tab_bar_side;			 // The panel of tabs down a side
 		Style tab_button_side;		 // A tab down a side, flat until it is the one selected
+		Style tab_button_top;		 // A tab at the top, flat until it is the one selected
 
 		/* Slider */
 		Style slider_buttons;		 // Slider increment/decrement buttons
