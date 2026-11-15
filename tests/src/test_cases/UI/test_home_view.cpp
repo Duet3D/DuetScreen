@@ -888,42 +888,43 @@ TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
 	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
 }
 
-TEST_F(TestHomeViewWithData, GraphKeysAreTheToolListsSetting)
+TEST_F(TestHomeViewWithData, ToolsWidgetShowsToolsInTheStyleChosen)
 {
 	deliverModelEvents();
-	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
-	ASSERT_NE(temperatures, nullptr);
-	temperatures->sample();
+	const auto hidden = [](lv_obj_t* widget, const char* name)
+	{ return lv_obj_has_flag(lv_obj_find_by_name(widget, name), LV_OBJ_FLAG_HIDDEN); };
 
-	// Every heater's key follows the setting; the widget is rebuilt with it at once
-	auto keysShown = []
-	{
-		std::vector<bool> shown;
-		lv_obj_tree_walk(
-			dashboardToolList(),
-			[](lv_obj_t* obj, void* user) -> lv_obj_tree_walk_res_t
-			{
-				const char* name = lv_obj_get_name(obj);
-				if (name != nullptr && std::string_view(name) == "graph_key")
-				{
-					static_cast<std::vector<bool>*>(user)->push_back(!lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN));
-				}
-				return LV_OBJ_TREE_WALK_NEXT;
-			},
-			&shown);
-		return shown;
-	};
-	const auto before = keysShown();
-	ASSERT_GE(before.size(), 3u); // At least the first tool's, the dual drive's two
-	EXPECT_TRUE(std::ranges::all_of(before, [](bool shown) { return shown; }));
+	// Automatic: a tool here has a spindle, so one tool is shown, the rest summarised as tiles
+	lv_obj_t* widget = dashboardToolList();
+	EXPECT_TRUE(hidden(widget, "equal"));
+	EXPECT_FALSE(hidden(widget, "summary"));
+	lv_obj_t* tiles = lv_obj_find_by_name(widget, "tiles");
+	lv_obj_t* shown = lv_obj_find_by_name(widget, "shown");
+	ASSERT_EQ(lv_obj_get_child_count(tiles), 4u) << "a tile per tool";
+	ASSERT_EQ(lv_obj_get_child_count(shown), 1u) << "the tool in use, in detail";
+	EXPECT_TRUE(hidden(widget, "follow"));
+	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary.png");
 
+	// Tapping a tile shows that tool without selecting it; Follow tool in use goes back
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	lv_obj_send_event(lv_obj_get_child(tiles, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(sent.empty()) << "looking isn't selecting";
+	ASSERT_EQ(lv_obj_get_child_count(shown), 1u);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Dual drive");
+	EXPECT_FALSE(hidden(widget, "follow"));
+	lv_obj_send_event(lv_obj_find_by_name(widget, "follow"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Tool 0");
+	UI::Xml::Services::setGcodeSender(nullptr);
+
+	// All equally, the widget's setting: every tool's card
 	auto& editor = UI::Xml::LayoutEditor::get();
 	editor.begin();
 	editor.select("dashboard", "tools");
-	ASSERT_TRUE(editor.setSetting("graph_key", false));
-	const auto after = keysShown();
-	EXPECT_EQ(after.size(), before.size());
-	EXPECT_TRUE(std::ranges::none_of(after, [](bool shown) { return shown; }));
+	ASSERT_TRUE(editor.setSetting("style", 1));
+	widget = dashboardToolList();
+	EXPECT_FALSE(hidden(widget, "equal"));
+	EXPECT_TRUE(hidden(widget, "summary"));
 	editor.cancel();
 }
 
@@ -934,20 +935,20 @@ TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 	lv_obj_t* toolList = dashboardToolList();
 	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
 	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
-	ASSERT_NE(lv_obj_find_by_name(tools, "status"), nullptr);
-	ASSERT_NE(lv_obj_find_by_name(beds, "status"), nullptr);
+	ASSERT_NE(lv_obj_find_by_name(tools, "state"), nullptr);
+	ASSERT_NE(lv_obj_find_by_name(beds, "state"), nullptr);
 
 	// Printing: nothing that would change the job can be pressed
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "tool_name"), LV_STATE_DISABLED));
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "deselect"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "state"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(beds, "state"), LV_STATE_DISABLED));
 	// Temperatures can still be set
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "active"), LV_STATE_DISABLED));
 
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
 	deliverModelEvents();
-	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
-	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "state"), LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "state"), LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
@@ -1540,9 +1541,10 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 	// Rebuilt from scratch, showing the printer as before
 	UI::home();
 	ASSERT_EQ(dashboardTabs().getTabCount(), 3u);
+	// The list of every tool's card (tools_list.xml)
 	lv_obj_t* tools = lv_obj_find_by_name(dashboardToolList(), "tools");
-	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 5u)
-		<< "the test bench's four tools, and the gap where T1 isn't";
+	ASSERT_NE(tools, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(tools), 5u) << "the test bench's four tools, and the gap where T1 isn't";
 }
 
 TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)

@@ -546,7 +546,8 @@
       "spindle": "Spindle",
       "active": "Active",
       "standby": "Standby",
-      "deselect": "Deselect"
+      "deselect": "Deselect",
+      "follow": "Follow tool in use"
     },
     "spindle": {
       "speed": "Spindle speed",
@@ -810,7 +811,11 @@
       "button": "Button",
       "button_desc": "A button that does what you choose when tapped or held",
       "sidebar_button_desc": "A sidebar button that does what you choose when tapped or held",
-      "status_button_desc": "A small button that does what you choose when tapped or held"
+      "status_button_desc": "A small button that does what you choose when tapped or held",
+      "tools_style": "Style",
+      "tools_style_auto": "Automatic",
+      "tools_style_equal": "All equally",
+      "tools_style_summary": "One, with the rest summarised"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nothing",

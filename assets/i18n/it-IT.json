@@ -546,7 +546,8 @@
       "spindle": "Mandrino",
       "active": "Attivo",
       "standby": "Standby",
-      "deselect": "Deseleziona"
+      "deselect": "Deseleziona",
+      "follow": "Segui l'utensile in uso"
     },
     "spindle": {
       "speed": "Velocità del mandrino",
@@ -810,7 +811,11 @@
       "button": "Pulsante",
       "button_desc": "Un pulsante che fa ciò che scegli al tocco o alla pressione prolungata",
       "sidebar_button_desc": "Un pulsante della barra laterale che fa ciò che scegli al tocco o alla pressione prolungata",
-      "status_button_desc": "Un piccolo pulsante che fa ciò che scegli al tocco o alla pressione prolungata"
+      "status_button_desc": "Un piccolo pulsante che fa ciò che scegli al tocco o alla pressione prolungata",
+      "tools_style": "Stile",
+      "tools_style_auto": "Automatico",
+      "tools_style_equal": "Tutti allo stesso modo",
+      "tools_style_summary": "Uno, con gli altri riassunti"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Niente",

@@ -1,37 +1,45 @@
 <!--
-  The tools, beds and chambers, with their heaters' states and temperatures.
+  The dashboard's tools widget (widgets/temperature/tools.json): the tools, beds and chambers, in the style its
+  setting picks:
 
-  Data:     the object model's om.tools, om.heat.bedHeaters and om.heat.chamberHeaters
-  Actions:  actions.tool.toggle, actions.heater.toggle, actions.heater.set_active, actions.heater.set_standby
-            (src/UI/Presenters/Control/Temperature/ToolActions.h, HeaterActions.h)
+    - all equally (1): every tool's card, compact, then the beds' and chambers' heaters (tools_list.xml)
+    - one, with the rest summarised (2): a tile per tool (dashboard_tool_tile.xml), then the card of the tool shown in
+      detail, the tool in use until a tile is tapped (Follow tool in use goes back), then the beds and chambers
+    - automatic (0): all equally while every tool is a print head and they have four heater rows or fewer, else one
+      with the rest summarised (source.tool.summary_auto)
 
-  Temperatures are typed on the shared number pad. `graph_key` (the widget's setting) shows each heater's colour key
-  on the temperature graph.
+  Tapping a tile shows a tool; Select, on its card, makes it the tool in use.
 
-  It is the dashboard's `tools` widget (widgets/temperature/tools.json), a card that fills the place it is given.
+  Props:    style: 0 automatic, 1 all equally, 2 one with the rest summarised
+  Data:     source.tool.* (src/UI/Xml/Data/ToolSource.h); om.tools
+  Actions:  actions.tool.show (src/UI/Presenters/Control/Temperature/ToolActions.h); the cards'
 -->
 <component>
 	<api>
-		<prop name="graph_key" type="bool" default="true"/>
+		<prop name="style" type="int" default="0"/>
 	</api>
 
-	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
-		<style name="pad_zero"/>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
 		<style name="card"/>
+		<style name="pad_gap"/>
 
-		<lv_obj name="tools" width="100%" height="content" flex_flow="column" style_pad_all="0">
-			<ds_list name="list" list="om.tools" item="dashboard_tool" item.graph_key="$graph_key" width="100%" height="content" flex_flow="column"
-					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
-		</lv_obj>
+		<tools_list name="equal" compact="1">
+			<bind_flag_if cond="${style} eq 2 or (${style} eq 0 and source.tool.summary_auto eq 1)" flag="hidden"/>
+		</tools_list>
 
-		<lv_obj name="beds" width="100%" height="content" flex_flow="column" style_pad_all="0">
-			<ds_list name="list" list="om.heat.bedHeaters" item="dashboard_bed" item.graph_key="$graph_key" width="100%" height="content" flex_flow="column"
-					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
-		</lv_obj>
-
-		<lv_obj name="chambers" width="100%" height="content" flex_flow="column" style_pad_all="0">
-			<ds_list name="list" list="om.heat.chamberHeaters" item="dashboard_chamber" item.graph_key="$graph_key" width="100%" height="content" flex_flow="column"
-					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		<lv_obj name="summary" width="100%" height="content" flex_flow="column" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<bind_flag_if cond="${style} eq 1 or (${style} eq 0 and source.tool.summary_auto eq 0)" flag="hidden"/>
+			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="100%" height="content"
+					 flex_flow="row_wrap" style_pad_all="0" style_pad_row="8" style_pad_column="8" scrollable="false"/>
+			<ds_button name="follow" translation_tag="tr.tools.follow" height="content" style_min_height="36">
+				<bind_flag_if_eq subject="source.tool.following" flag="hidden" ref_value="1"/>
+				<action trigger="clicked" name="actions.tool.show" arg="auto"/>
+			</ds_button>
+			<ds_list name="shown" list="om.tools" key="row.index" bind_value="source.tool.shown" item="tools_tool"
+					 item.compact="1" width="100%" height="content" style_pad_all="0" scrollable="false"/>
+			<tools_beds name="bed_chamber"/>
 		</lv_obj>
 	</view>
 </component>

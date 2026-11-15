@@ -545,7 +545,8 @@
       "spindle": "Spindel",
       "active": "Actief",
       "standby": "Stand-by",
-      "deselect": "Deselecteren"
+      "deselect": "Deselecteren",
+      "follow": "Gereedschap in gebruik volgen"
     },
     "spindle": {
       "speed": "Spindeltoerental",
@@ -809,7 +810,11 @@
       "button": "Knop",
       "button_desc": "Een knop die doet wat u kiest bij tikken of vasthouden",
       "sidebar_button_desc": "Een zijbalkknop die doet wat u kiest bij tikken of vasthouden",
-      "status_button_desc": "Een kleine knop die doet wat u kiest bij tikken of vasthouden"
+      "status_button_desc": "Een kleine knop die doet wat u kiest bij tikken of vasthouden",
+      "tools_style": "Stijl",
+      "tools_style_auto": "Automatisch",
+      "tools_style_equal": "Allemaal gelijk",
+      "tools_style_summary": "Eén, de rest samengevat"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Niets",

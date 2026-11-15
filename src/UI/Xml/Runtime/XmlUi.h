@@ -56,6 +56,13 @@ namespace UI::Xml
 	void reload();
 
 	/**
+	 * Focus the first shown widget of the default input group (a keyboard's or a mouse wheel's), if nothing is
+	 * focused. LVGL focuses only the first widget added to a group, so a UI whose first is hidden at first, such as a
+	 * button shown later, would otherwise leave nothing focused. Called once the UI is built, and after reload().
+	 */
+	void focusFirstShown();
+
+	/**
 	 * Delete the layouts made or saved on the screen: the user bundle folder's local bundle (Layouts::LOCAL_BUNDLE)
 	 * and saved layouts, as erasing every setting does. Bundles copied there by hand stay. Works whether or not the UI
 	 * has started (then the default folder is used); the layouts in use stay until DuetScreen restarts.

@@ -545,7 +545,8 @@
       "spindle": "Husillo",
       "active": "Activo",
       "standby": "En espera",
-      "deselect": "Deseleccionar"
+      "deselect": "Deseleccionar",
+      "follow": "Seguir la herramienta en uso"
     },
     "spindle": {
       "speed": "Velocidad del husillo",
@@ -809,7 +810,11 @@
       "button": "Botón",
       "button_desc": "Un botón que hace lo que elija al tocarlo o mantenerlo",
       "sidebar_button_desc": "Un botón de la barra lateral que hace lo que elija al tocarlo o mantenerlo",
-      "status_button_desc": "Un botón pequeño que hace lo que elija al tocarlo o mantenerlo"
+      "status_button_desc": "Un botón pequeño que hace lo que elija al tocarlo o mantenerlo",
+      "tools_style": "Estilo",
+      "tools_style_auto": "Automático",
+      "tools_style_equal": "Todas por igual",
+      "tools_style_summary": "Una, con el resto resumido"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nada",

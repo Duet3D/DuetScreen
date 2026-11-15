@@ -241,6 +241,18 @@ namespace UI::Xml
 			view->buildAgain();
 		}
 		where.restore();
+		focusFirstShown();
+	}
+
+	void focusFirstShown()
+	{
+		lv_group_t* group = lv_group_get_default();
+		if (group == nullptr || lv_group_get_focused(group) != nullptr || lv_group_get_obj_count(group) == 0)
+		{
+			return;
+		}
+		// With nothing focused, the next is the first, skipping any hidden
+		lv_group_focus_next(group);
 	}
 
 	const std::vector<LoadIssue>& getIssues()

@@ -545,7 +545,8 @@
       "spindle": "Fuso",
       "active": "Ativo",
       "standby": "Em espera",
-      "deselect": "Desselecionar"
+      "deselect": "Desselecionar",
+      "follow": "Seguir a ferramenta em uso"
     },
     "spindle": {
       "speed": "Velocidade do fuso",
@@ -809,7 +810,11 @@
       "button": "Botão",
       "button_desc": "Um botão que faz o que escolher ao tocar ou manter",
       "sidebar_button_desc": "Um botão da barra lateral que faz o que escolher ao tocar ou manter",
-      "status_button_desc": "Um botão pequeno que faz o que escolher ao tocar ou manter"
+      "status_button_desc": "Um botão pequeno que faz o que escolher ao tocar ou manter",
+      "tools_style": "Estilo",
+      "tools_style_auto": "Automático",
+      "tools_style_equal": "Todas por igual",
+      "tools_style_summary": "Uma, com as restantes resumidas"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nada",

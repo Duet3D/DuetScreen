@@ -313,6 +313,10 @@ namespace UI::Themes
 		Style jog_step;				// The jog step in the middle of the XY pad
 
 		/* Tools */
+		Style tool_tile;		 // A tool as a tile of the dashboard's tools widget: a small card, its state on its edge
+		Style tool_tile_active;	 // The edge of an active tool's tile, in the accent
+		Style tool_tile_standby; // The edge of a tool on standby, in the secondary accent
+		Style tool_tile_fault;	 // The edge of a tool at fault, in the error colour
 
 		/* Temperature */
 		Style temperature_bar; // Temperature bar

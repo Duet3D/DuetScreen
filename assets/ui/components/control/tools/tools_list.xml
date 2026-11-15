@@ -1,0 +1,20 @@
+<!--
+  The tools and the heaters beside them: a card for every tool (tools_tool.xml), then the beds' and chambers' heaters
+  (tools_beds.xml). The Control page's Tools tab lists them; so does the dashboard's tools widget, compact, when it
+  shows every tool equally (dashboard_tools.xml).
+
+  Props:    compact  an expression: while it is true, a tool's card leaves out its filament and spindle rows
+  Data:     om.tools
+-->
+<component>
+	<api>
+		<prop name="compact" type="string" default="0"/>
+	</api>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<ds_list name="tools" list="om.tools" item="tools_tool" item.compact="$compact" width="100%" height="content"
+				 flex_flow="column" style_pad_all="0" style_pad_row="10" scrollable="false"/>
+		<tools_beds name="bed_chamber"/>
+	</view>
+</component>

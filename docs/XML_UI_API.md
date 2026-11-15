@@ -60,6 +60,7 @@ Each row of an object model list:
 | `\|count` | int |  | The number of items of an array; 0 for anything else |
 | `\|count_having` | int | The field, a dotted path from an item, e.g. `thermostatic.lowTemperature` | How many items of an array have a field (there and not null), e.g. `om.fans\|count_having:thermostatic.lowTemperature` for the fans the firmware runs |
 | `\|count_lacking` | int | The field, a dotted path from an item, e.g. `thermostatic.lowTemperature` | How many items of an array lack a field (missing or null), e.g. `om.fans\|count_lacking:thermostatic.lowTemperature` for the fans you set |
+| `\|count_at_least` | int | The least, e.g. 0 | How many items of an array are numbers of at least the argument, e.g. `om.heat.bedHeaters\|count_at_least:0` for the beds there are (-1 is none) |
 | `\|tools_using` | text | The tools' list, e.g. `fans` or `extruders` | Of an item of a list, e.g. `fans[1]`: the names of the tools whose list (the argument) holds its number, e.g. `om.fans[1]\|tools_using:fans` gives "Revo, Tool 2"; empty if none |
 | `\|exists` | int |  | 1 if the field is there and not null, else 0 |
 | `\|eq` | int | The value compared with | 1 if the value is the argument, else 0, e.g. `state\|eq:fault` |
@@ -291,6 +292,23 @@ From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
 | `source.tool.current.label` | text | The current tool, e.g. "T0:", or empty if it has no heaters |
 | `source.tool.current.heaters` | text | The current tool's heaters' current and target temperatures, e.g. " 210°C/215°C 60°C/60°C" |
 | `source.tool.current.fault` | int | 1 if any of the current tool's heaters has a fault, else 0 |
+| `source.tool.shown` | int | The tool the dashboard's tools widget shows in detail: the one picked (actions.tool.show), else the tool in use, else the first; -1 for none |
+| `source.tool.following` | int | 1 while the tool shown follows the tool in use, 0 once one is picked |
+| `source.tool.summary_auto` | int | 1 if the tools widget's automatic style shows one tool with the rest summarised: unless every tool is a print head (no spindle) and they have four heater rows or fewer, which it shows equally |
+| `source.tool.tiles` | list | A tile per tool, for the tools widget's summary (actions.tool.show) |
+
+Each row of `source.tool.tiles`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.number` | int | The tool's number (actions.tool.show) |
+| `row.label` | text | E.g. "T0" |
+| `row.name` | text | Its name, else e.g. "Tool 0" |
+| `row.reading` | text | Its first two heaters' temperatures and targets, e.g. "209.6/210° 60/60°", "+1" for each more; empty if it has none |
+| `row.state` | text | "active", "standby", "off" or "fault": its heaters' state, any fault marking it |
+| `row.in_use` | int | 1 if it is the tool in use |
+| `row.shown` | int | 1 if it is the tool shown in detail |
 
 ### job
 
@@ -577,6 +595,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.system.restart` | Restart the DuetScreen program. Offered to users for their widgets' action settings, as `tr.actions.system_restart`. | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.send_config` | Back the screen's settings up to the Duet, as duetscreen.json in its system folder, and say whether it worked | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
+| `actions.tool.show` | Show the tool numbered `arg` in detail in the dashboard's tools widget, without selecting it; `auto` to follow the tool in use again | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 | `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
@@ -1488,6 +1507,7 @@ Also takes every `lv_obj` attribute.
 | `follow_end` | "true" to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false) |
 | `key` | A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. Empty for every row, so a component can leave it to a prop. |
 | `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="om.fans" key="row.index" value="2" item="…"/>` shows fan 2 |
+| `bind_value` | With `key`, instead of `value`: follow a subject for the value shown rows have, e.g. `bind_value="om.state.currentTool"` with `key="row.index"` shows the tool in use |
 | `item.<attribute>` | Given to every item as if written where it is used: a prop of the item component, e.g. `item.title="row.name"`, or an attribute of its root, e.g. `item.flex_grow="1"`. Its names are looked up in the item's row. |
 
 ### ds_move_handle
@@ -1626,7 +1646,7 @@ Builds one component in a scope where names are relative to an object model elem
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_scope path="om.tools[{om.state.currentTool}]" item="dashboard_current_tool_card" width="300"/>
+<ds_scope path="om.tools[{om.state.currentTool}]" item="tools_current" width="300"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_scope.png)
@@ -2080,17 +2100,9 @@ At its smallest, 272×136 px:
 
 **Current tool**: The tool in use, with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_current_tool` ([current_tool.json](../assets/ui/widgets/temperature/current_tool.json)). In a free layout it is 458×184 px, and at least 272×89 px.
+In Temperatures; placed in `dashboard`; component `dashboard_current_tool` ([current_tool.json](../assets/ui/widgets/temperature/current_tool.json)). In a free layout it is 458×184 px, and at least 458×184 px.
 
 ![current_tool](../tests/ref_imgs/xml_ui_api/widgets/current_tool.png)
-
-At its smallest, 272×89 px:
-
-![current_tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/current_tool_smallest.png)
-
-| Setting | Shown as | Takes | Default |
-| --- | --- | --- | --- |
-| `graph_key` | Graph colour keys | on or off | `true` |
 
 #### custom_arc
 
@@ -2812,18 +2824,17 @@ At its smallest, 88×42 px:
 
 **Tool**: One tool with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 458×100 px.
+In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 458×184 px.
 
 ![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
 
-At its smallest, 458×100 px:
+At its smallest, 458×184 px:
 
 ![tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
 | `tool` | Tool | a row of `om.tools`, by its `index`, shown by its `name\|default:tr.temperature.default_tool_name` | `0` |
-| `graph_key` | Graph colour keys | on or off | `true` |
 
 #### tool_arc
 
@@ -2880,17 +2891,17 @@ At its smallest, 134×89 px:
 
 **Tools and heaters**: Every tool, bed and chamber with its temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 272×100 px.
+In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 458×184 px.
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
 
-At its smallest, 272×100 px:
+At its smallest, 458×184 px:
 
 ![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `graph_key` | Graph colour keys | on or off | `true` |
+| `style` | Style | one of `0`, `1`, `2` | `0` |
 
 ## Components
 
@@ -2921,16 +2932,10 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
 | `dashboard_axis` |  |  | `dashboard_job_status` | [dashboard_axis.xml](../assets/ui/components/dashboard/dashboard_axis.xml) |
 | `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
-| `dashboard_bed` |  | `graph_key` | `dashboard_tools` | [dashboard_bed.xml](../assets/ui/components/dashboard/dashboard_bed.xml) |
 | `dashboard_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `button`, `gcode_button` | [dashboard_button.xml](../assets/ui/components/dashboard/dashboard_button.xml) |
-| `dashboard_chamber` |  | `graph_key` | `dashboard_tools` | [dashboard_chamber.xml](../assets/ui/components/dashboard/dashboard_chamber.xml) |
-| `dashboard_current_tool` |  | `graph_key` | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
-| `dashboard_current_tool_card` |  | `graph_key` | `dashboard_current_tool` | [dashboard_current_tool_card.xml](../assets/ui/components/dashboard/dashboard_current_tool_card.xml) |
-| `dashboard_current_tool_heater` |  | `graph_key` | `dashboard_current_tool_card` | [dashboard_current_tool_heater.xml](../assets/ui/components/dashboard/dashboard_current_tool_heater.xml) |
+| `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
-| `dashboard_heater` |  | `label`, `active`, `standby`, `graph_key` | `dashboard_heater_card`, `dashboard_tool_heater` | [dashboard_heater.xml](../assets/ui/components/dashboard/dashboard_heater.xml) |
-| `dashboard_heater_card` |  | `label_tag`, `graph_key` | `dashboard_bed`, `dashboard_chamber` | [dashboard_heater_card.xml](../assets/ui/components/dashboard/dashboard_heater_card.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
 | [`dashboard_job_status`](#dashboard_job_status) |  |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
@@ -2938,10 +2943,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
 | `dashboard_temperature_graph` |  | `seconds`, `legend` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
 | `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
-| `dashboard_tool` |  | `graph_key` | `dashboard_tool_card`, `dashboard_tools` | [dashboard_tool.xml](../assets/ui/components/dashboard/dashboard_tool.xml) |
-| `dashboard_tool_card` |  | `tool`, `graph_key` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
-| `dashboard_tool_heater` |  | `graph_key` | `dashboard_tool` | [dashboard_tool_heater.xml](../assets/ui/components/dashboard/dashboard_tool_heater.xml) |
-| `dashboard_tools` |  | `graph_key` | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
+| `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
+| `dashboard_tool_tile` |  |  | `dashboard_tools` | [dashboard_tool_tile.xml](../assets/ui/components/dashboard/dashboard_tool_tile.xml) |
+| `dashboard_tools` |  | `style` | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
 | `dialog_choice` | `dialog_choice` |  |  | [dialog_choice.xml](../assets/ui/components/dialogs/dialog_choice.xml) |
 | `dialog_choice_row` |  |  | `dialog_choice` | [dialog_choice_row.xml](../assets/ui/components/dialogs/dialog_choice_row.xml) |
 | [`dialog_host`](#dialog_host) | `dialog_host` |  |  | [dialog_host.xml](../assets/ui/components/dialogs/dialog_host.xml) |
@@ -3032,12 +3036,14 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
 | `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
 | [`tools`](#tools) |  |  | `control` | [tools.xml](../assets/ui/components/control/tools/tools.xml) |
-| `tools_bed_heater` |  |  | `tools` | [tools_bed_heater.xml](../assets/ui/components/control/tools/tools_bed_heater.xml) |
-| `tools_chamber_heater` |  |  | `tools` | [tools_chamber_heater.xml](../assets/ui/components/control/tools/tools_chamber_heater.xml) |
+| `tools_bed_heater` |  |  | `tools_beds` | [tools_bed_heater.xml](../assets/ui/components/control/tools/tools_bed_heater.xml) |
+| `tools_beds` |  |  | `dashboard_tools`, `tools_list` | [tools_beds.xml](../assets/ui/components/control/tools/tools_beds.xml) |
+| `tools_chamber_heater` |  |  | `tools_beds` | [tools_chamber_heater.xml](../assets/ui/components/control/tools/tools_chamber_heater.xml) |
 | `tools_current` |  |  | `tools` | [tools_current.xml](../assets/ui/components/control/tools/tools_current.xml) |
 | `tools_extrusion_factor` |  |  | `tools_current` | [tools_extrusion_factor.xml](../assets/ui/components/control/tools/tools_extrusion_factor.xml) |
+| `tools_list` |  | `compact` | `dashboard_tools`, `tools` | [tools_list.xml](../assets/ui/components/control/tools/tools_list.xml) |
 | `tools_spindle_preset` |  |  | `tools_current` | [tools_spindle_preset.xml](../assets/ui/components/control/tools/tools_spindle_preset.xml) |
-| `tools_tool` |  |  | `tools` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
+| `tools_tool` |  | `compact` | `dashboard_current_tool`, `dashboard_tool_card`, `dashboard_tools`, `tools_list` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  |  | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  | `format` | `babystep`, `move_jog_choices`, `tools_current`, `value_selector` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
@@ -3303,6 +3309,10 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `axis_tile_letter` | ![axis_tile_letter](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_letter.png) | text_color=#text_muted text_font=font_emphasis |
 | `axis_tile_not_homed` | ![axis_tile_not_homed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_not_homed.png) | text_color=#secondary text_font=font_small |
 | `jog_step` | ![jog_step](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/jog_step.png) | bg_opa=0 border_color=#border_muted border_width=#border_width border_opa=100% radius=#radius text_color=#text_muted text_font=font_subdued |
+| `tool_tile` | ![tool_tile](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/tool_tile.png) | bg_color=#bg_light bg_opa=100% radius=#radius pad_all=#pad pad_row=2 border_width=4 border_side=left border_color=#border_muted border_opa=100% |
+| `tool_tile_active` |  | border_color=#primary |
+| `tool_tile_standby` |  | border_color=#secondary |
+| `tool_tile_fault` |  | border_color=#error |
 | `reading` | ![reading](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/reading.png) | text_color=#text text_font=font_large |
 | `reading_large` | ![reading_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/reading_large.png) | text_color=#text text_font=font_xlarge |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |

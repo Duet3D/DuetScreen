@@ -1,0 +1,37 @@
+<!--
+  One tool as a tile of the dashboard's tools widget (dashboard_tools.xml): its number, "In use" if it is, its first
+  heaters' temperatures, and its name; its state on its edge (any fault marks it). Tinted while it is the tool shown in
+  detail. Tap it to show it, without selecting it.
+
+  Fields:   a row of source.tool.tiles: row.number, row.label, row.name, row.reading, row.state, row.in_use,
+            row.shown (src/UI/Xml/Data/ToolSource.h)
+  Actions:  actions.tool.show (src/UI/Presenters/Control/Temperature/ToolActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+		  style_min_width="96">
+		<style name="tool_tile"/>
+		<style name="pressed" selector="pressed"/>
+		<bind_style_if_eq name="tool_tile_active" subject="row.state" ref_value="active"/>
+		<bind_style_if_eq name="tool_tile_standby" subject="row.state" ref_value="standby"/>
+		<bind_style_if_eq name="tool_tile_fault" subject="row.state" ref_value="fault"/>
+		<bind_style name="btn_checked" subject="row.shown" ref_value="1"/>
+		<action trigger="clicked" name="actions.tool.show" arg="{row.number}"/>
+
+		<lv_obj name="line" width="100%" height="content" flex_flow="row" scrollable="false" clickable="false"
+				style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0">
+			<lv_label name="label" bind_text="row.label" flex_grow="1">
+				<style name="text_emphasis"/>
+			</lv_label>
+			<lv_label name="in_use" translation_tag="tr.tools.in_use">
+				<style name="chip"/>
+				<style name="chip_accent"/>
+				<bind_flag_if_eq subject="row.in_use" flag="hidden" ref_value="0"/>
+			</lv_label>
+		</lv_obj>
+		<lv_label name="reading" bind_text="row.reading" width="100%" long_mode="dots"/>
+		<lv_label name="name" bind_text="row.name" width="100%" long_mode="dots">
+			<style name="setting_hint"/>
+		</lv_label>
+	</view>
+</component>

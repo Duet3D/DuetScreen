@@ -545,7 +545,8 @@
       "spindle": "Spindel",
       "active": "Aktiv",
       "standby": "Standby",
-      "deselect": "Abwählen"
+      "deselect": "Abwählen",
+      "follow": "Aktivem Werkzeug folgen"
     },
     "spindle": {
       "speed": "Spindeldrehzahl",
@@ -809,7 +810,11 @@
       "button": "Schaltfläche",
       "button_desc": "Eine Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen",
       "sidebar_button_desc": "Eine Seitenleisten-Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen",
-      "status_button_desc": "Eine kleine Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen"
+      "status_button_desc": "Eine kleine Schaltfläche, die beim Tippen oder Halten tut, was Sie wählen",
+      "tools_style": "Darstellung",
+      "tools_style_auto": "Automatisch",
+      "tools_style_equal": "Alle gleich",
+      "tools_style_summary": "Eines, die übrigen zusammengefasst"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Nichts",

@@ -21,49 +21,57 @@
 	<view extends="lv_obj" height="content" flex_flow="column" scrollable="false" style_pad_row="8">
 		<style name="setting_row"/>
 		<bind_flag_if cond="row.value|int lt 0" flag="hidden"/>
-		<lv_obj name="line" width="100%" height="content" flex_flow="row" scrollable="false"
+		<!-- Where there isn't room for the name beside the controls, they go on a line under it -->
+		<lv_obj name="line" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
 				style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
-				style_pad_column="16">
+				style_pad_column="16" style_pad_row="8">
 			<!-- The graph's series are its heaters' sensors (source.temperature.temperatures) -->
 			<ds_graph_key name="graph_key" history="source.temperature.temperatures"
 						  bind_key="om.heat.heaters[{row.value}].sensor|int"/>
-			<lv_label name="label" bind_text="$label" flex_grow="1" long_mode="dots">
+			<lv_label name="label" bind_text="$label" width="1" flex_grow="1" long_mode="dots" style_min_width="140">
 				<style name="setting_title"/>
 			</lv_label>
-			<ds_button name="state" bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status" width="96"
-					   height="content" style_min_height="36">
-				<style name="action_btn"/>
-				<bind_style_if_eq name="heater_standby" subject="om.heat.heaters[{row.value}].state" ref_value="standby"/>
-				<bind_style_if_eq name="heater_off" subject="om.heat.heaters[{row.value}].state" ref_value="off"/>
-				<bind_style_if_eq name="heater_fault" subject="om.heat.heaters[{row.value}].state" ref_value="fault"/>
-				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
-				<action trigger="clicked" name="actions.heater.toggle"/>
-			</ds_button>
-			<lv_label name="current" bind_text="om.heat.heaters[{row.value}].current|fixed:1" width="content"
-					  style_min_width="76" long_mode="clip"
-					  style_text_align="right">
-				<style name="reading"/>
-			</lv_label>
-			<!-- Each target: what it is over its value, tap to set it -->
-			<lv_obj name="active" width="84" height="content" flex_flow="column" scrollable="false"
-					style_flex_cross_place="center" style_flex_track_place="center">
-				<style name="btn"/>
-				<style name="pressed" selector="pressed"/>
-				<action trigger="clicked" name="actions.heater.set_active"/>
-				<lv_label name="title" translation_tag="tr.tools.active" clickable="false">
-					<style name="text_muted"/>
+			<!-- Its state, temperature and targets, together: they go under the name as one when narrow -->
+			<lv_obj name="controls" width="content" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
+					style_pad_column="16">
+				<ds_button name="state" bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status"
+						   width="96" height="content" style_min_height="36">
+					<style name="action_btn"/>
+					<bind_style_if_eq name="heater_standby" subject="om.heat.heaters[{row.value}].state"
+									  ref_value="standby"/>
+					<bind_style_if_eq name="heater_off" subject="om.heat.heaters[{row.value}].state" ref_value="off"/>
+					<bind_style_if_eq name="heater_fault" subject="om.heat.heaters[{row.value}].state"
+									  ref_value="fault"/>
+					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="actions.heater.toggle"/>
+				</ds_button>
+				<lv_label name="current" bind_text="om.heat.heaters[{row.value}].current|fixed:1" width="content"
+						  style_min_width="76" long_mode="clip"
+						  style_text_align="right">
+					<style name="reading"/>
 				</lv_label>
-				<lv_label name="value" bind_text="$active" clickable="false"/>
-			</lv_obj>
-			<lv_obj name="standby" width="84" height="content" flex_flow="column" scrollable="false"
-					style_flex_cross_place="center" style_flex_track_place="center">
-				<style name="btn"/>
-				<style name="pressed" selector="pressed"/>
-				<action trigger="clicked" name="actions.heater.set_standby"/>
-				<lv_label name="title" translation_tag="tr.tools.standby" clickable="false">
-					<style name="text_muted"/>
-				</lv_label>
-				<lv_label name="value" bind_text="$standby" clickable="false"/>
+				<!-- Each target: what it is over its value, tap to set it -->
+				<lv_obj name="active" width="84" height="content" flex_flow="column" scrollable="false"
+						style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="btn"/>
+					<style name="pressed" selector="pressed"/>
+					<action trigger="clicked" name="actions.heater.set_active"/>
+					<lv_label name="title" translation_tag="tr.tools.active" clickable="false">
+						<style name="text_muted"/>
+					</lv_label>
+					<lv_label name="value" bind_text="$active" clickable="false"/>
+				</lv_obj>
+				<lv_obj name="standby" width="84" height="content" flex_flow="column" scrollable="false"
+						style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="btn"/>
+					<style name="pressed" selector="pressed"/>
+					<action trigger="clicked" name="actions.heater.set_standby"/>
+					<lv_label name="title" translation_tag="tr.tools.standby" clickable="false">
+						<style name="text_muted"/>
+					</lv_label>
+					<lv_label name="value" bind_text="$standby" clickable="false"/>
+				</lv_obj>
 			</lv_obj>
 		</lv_obj>
 		<heater_bar name="bar" heater="row.value"/>

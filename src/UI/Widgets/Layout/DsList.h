@@ -104,6 +104,12 @@ namespace UI::Xml
 		/** Keyed: a row's key changed; show or remove its item */
 		static void keyObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
+		/** Keyed with `bind_value`: the value the rows' keys must have changed; show the rows that have it now */
+		static void valueObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** A subject's value as XML writes one: an int's digits, a text's text */
+		static std::string valueText(lv_subject_t* subject);
+
 		/** A windowed list scrolled or changed size: show the items now on screen */
 		static void windowEventCb(lv_event_t* e);
 

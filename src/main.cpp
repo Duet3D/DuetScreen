@@ -151,6 +151,7 @@ int main(int argc, char** argv)
 	lv_enable_style_refresh(true);
 	lv_obj_refresh_style(home.getRootPtr(), LV_PART_ANY, LV_STYLE_PROP_ANY);
 	home.show();
+	UI::Xml::focusFirstShown();
 
 #if HARDWARE_TEST
 	// The factory hardware test, over the home screen, from start-up: assets/ui/components/hardware_test/

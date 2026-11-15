@@ -545,7 +545,8 @@
       "spindle": "Broche",
       "active": "Actif",
       "standby": "En attente",
-      "deselect": "Désélectionner"
+      "deselect": "Désélectionner",
+      "follow": "Suivre l'outil utilisé"
     },
     "spindle": {
       "speed": "Vitesse de broche",
@@ -809,7 +810,11 @@
       "button": "Bouton",
       "button_desc": "Un bouton qui fait ce que vous choisissez au toucher ou à l'appui long",
       "sidebar_button_desc": "Un bouton de la barre latérale qui fait ce que vous choisissez au toucher ou à l'appui long",
-      "status_button_desc": "Un petit bouton qui fait ce que vous choisissez au toucher ou à l'appui long"
+      "status_button_desc": "Un petit bouton qui fait ce que vous choisissez au toucher ou à l'appui long",
+      "tools_style": "Style",
+      "tools_style_auto": "Automatique",
+      "tools_style_equal": "Tous à égalité",
+      "tools_style_summary": "Un, les autres résumés"
     },
     "actions": { /* Actions a user may choose for a widget */
       "none": "Rien",
