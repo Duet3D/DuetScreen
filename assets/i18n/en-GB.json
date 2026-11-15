@@ -141,7 +141,9 @@
       "extruder_header": "Extrusion Factor",
       "fan": "Fan {:d}",
       "fan_header": "Fans",
-      "speed_factor": "Speed Factor"
+      "speed_factor": "Speed Factor",
+      "this_tool": "This tool",
+      "all_extruders": "All extruders"
     },
     "heightmap": { /* Heightmap screen */
       "area": "{:g} {:s}²",
@@ -538,8 +540,7 @@
       "stop": "Stop",
       "active": "Active",
       "standby": "Standby",
-      "deselect": "Deselect",
-      "now": "Now"
+      "deselect": "Deselect"
     },
     "spindle": {
       "speed": "Spindle speed"

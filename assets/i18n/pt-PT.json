@@ -140,7 +140,9 @@
       "extruder_header": "Fator de extrusão",
       "fan": "Ventoinha {:d}",
       "fan_header": "Ventoinhas",
-      "speed_factor": "Fator de velocidade"
+      "speed_factor": "Fator de velocidade",
+      "this_tool": "Esta ferramenta",
+      "all_extruders": "Todos os extrusores"
     },
     "heightmap": {
       "area": "{:g} {:s}²",
@@ -537,8 +539,7 @@
       "stop": "Parar",
       "active": "Ativo",
       "standby": "Em espera",
-      "deselect": "Desselecionar",
-      "now": "Agora"
+      "deselect": "Desselecionar"
     },
     "spindle": {
       "speed": "Velocidade do fuso"

@@ -153,8 +153,14 @@ namespace UI
 	{
 		ZoneScoped;
 		UI_LOCK();
-		m_label.setFlag(LV_OBJ_FLAG_HIDDEN, text.empty());
+		m_label.setFlag(LV_OBJ_FLAG_HIDDEN, text.empty() || !m_labelShown);
 		m_label.setText(text);
+	}
+
+	void Slider::setLabelShown(bool shown)
+	{
+		m_labelShown = shown;
+		m_label.setFlag(LV_OBJ_FLAG_HIDDEN, getLabelText().empty() || !m_labelShown);
 	}
 
 	void Slider::setIncrementValue(float value)

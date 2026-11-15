@@ -16,6 +16,7 @@
 #include "UI/Xml/View/FactorDialog.h"
 #include <cstddef>
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace UI::Xml
@@ -42,6 +43,9 @@ namespace UI::Xml
 		/** Open the extrusion factor dialog for the extruders of the tool numbered `tool`, or every extruder if none */
 		void openExtrusion(std::optional<size_t> tool);
 
+		/** Show every extruder in the extrusion dialog, or only those of the tool it was opened for */
+		void showAllExtruders(bool all);
+
 	  protected:
 		/** Follow the speed and extrusion factors */
 		void onInit() override;
@@ -53,11 +57,20 @@ namespace UI::Xml
 		/** Show the extrusion factors of the extruders the dialog is for */
 		void showExtrusion();
 
-		/** The extruders the extrusion dialog is for, by number: the tool's, or every extruder (the model lock held) */
+		/** The extruders the extrusion dialog shows, by number: the tool's, or every extruder (the model lock held) */
 		std::vector<size_t> extruders() const;
+
+		/** Every extruder, by number, if `every`, else those of the tool the dialog is for if any (the model lock
+		 * held) */
+		std::vector<size_t> extruders(bool every) const;
+
+		/** The names of the tools that use extruder `extruder`, e.g. "Revo, Tool 2" (the model lock held) */
+		static std::string toolsUsing(size_t extruder);
 
 		std::optional<size_t> m_tool; // Number of the tool the extrusion dialog is for; none for every extruder
 		FactorDialog m_speed;		  // `speed.*`
 		FactorDialog m_extrusion;	  // `extrusion.*`
+		IntSubject m_all;			  // `extrusion_all`: the extrusion dialog shows every extruder
+		IntSubject m_allShown;		  // `extrusion_all_shown`: it was opened for a tool that doesn't use them all
 	};
 } // namespace UI::Xml

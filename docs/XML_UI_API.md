@@ -233,26 +233,50 @@ From [FactorsSource.cpp](../src/UI/Xml/Data/FactorsSource.cpp).
 | `source.factors.extrusion.open` | int | 1 while the dialog is open |
 | `source.factors.extrusion.title` | text | Above the sliders, e.g. "Speed Factor" |
 | `source.factors.extrusion.factors` | list | The percentages, each with `label`, `value`, `min` and `max` (actions.factors.set) |
+| `source.factors.extrusion_all` | int | 1 while the extrusion dialog shows every extruder, 0 while only the tool's it was opened for (actions.factors.extrusion_all) |
+| `source.factors.extrusion_all_shown` | int | 1 if the extrusion dialog can show every extruder or only the tool's: it was opened for a tool that doesn't use them all |
 
 Each row of `source.factors.speed.factors`:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
-| `row.label` | text | What it is, e.g. "Extruder 0" |
+| `row.label` | text | What it is, e.g. "Extruder 0"; empty if the dialog's title says it |
+| `row.detail` | text | More about it, e.g. the tools that use the extruder; empty for nothing |
 | `row.value` | int | The percentage, e.g. 100 |
+| `row.text` | text | The percentage as shown, e.g. "100%" |
 | `row.min` | int | The bottom of its slider |
 | `row.max` | int | The top of its slider |
+| `row.presets` | list | Quick values, each with `text` and `chosen` (actions.factors.preset) |
+
+Each row of `source.factors.speed.factors` › `row.presets`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The quick value, e.g. "100%" (actions.factors.preset) |
+| `row.chosen` | int | 1 if it is the factor's value |
 
 Each row of `source.factors.extrusion.factors`:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
-| `row.label` | text | What it is, e.g. "Extruder 0" |
+| `row.label` | text | What it is, e.g. "Extruder 0"; empty if the dialog's title says it |
+| `row.detail` | text | More about it, e.g. the tools that use the extruder; empty for nothing |
 | `row.value` | int | The percentage, e.g. 100 |
+| `row.text` | text | The percentage as shown, e.g. "100%" |
 | `row.min` | int | The bottom of its slider |
 | `row.max` | int | The top of its slider |
+| `row.presets` | list | Quick values, each with `text` and `chosen` (actions.factors.preset) |
+
+Each row of `source.factors.extrusion.factors` › `row.presets`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The quick value, e.g. "100%" (actions.factors.preset) |
+| `row.chosen` | int | 1 if it is the factor's value |
 
 ### tool
 
@@ -476,6 +500,8 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.extruder.extrude` | Extrude the chosen distance (`source.extruder.distance`) at the chosen feed rate with the current tool. Offered to users for their widgets' action settings, as `tr.actions.extruder_extrude`. | [ExtruderActions.cpp](../src/UI/Presenters/Control/Temperature/ExtruderActions.cpp) |
 | `actions.extruder.retract` | Retract the chosen distance at the chosen feed rate with the current tool. Offered to users for their widgets' action settings, as `tr.actions.extruder_retract`. | [ExtruderActions.cpp](../src/UI/Presenters/Control/Temperature/ExtruderActions.cpp) |
 | `actions.factors.extrusion` | Open the dialog to change extrusion factors: those of the tool numbered `arg`, if given, else every extruder's. Offered to users for their widgets' action settings, as `tr.actions.factors_extrusion`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.extrusion_all` | Show every extruder's extrusion factor in its dialog (`arg` 1), or only the tool's it was opened for (0) | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
+| `actions.factors.preset` | Use a quick value for its factor. From a row of a factor's `presets`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.set` | Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its factor. From a row of a dialog's `factors`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.factors.speed` | Open the dialog to change the speed factor. Offered to users for their widgets' action settings, as `tr.actions.factors_speed`. | [FactorsActions.cpp](../src/UI/Presenters/Modals/FactorsActions.cpp) |
 | `actions.fan.set_speed` | Set a fan's speed in percent. In a row of `om.fans` the fan is the row's, and the speed the edited value (`value_confirmed`), else `arg` (e.g. 0 or 100 for off and full). Elsewhere `arg` is the fan's number, and the speed the edited value. Without a speed it is asked for on the number pad. Does nothing for a thermostatic fan, which follows its sensors. Offered to users for their widgets' action settings, as `tr.actions.fan_set_speed`. | [FanActions.cpp](../src/UI/Presenters/Control/Fans/FanActions.cpp) |
@@ -2891,8 +2917,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dialog_number_preset` |  |  | `dialog_number` | [dialog_number_preset.xml](../assets/ui/components/dialogs/dialog_number_preset.xml) |
 | [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
 | `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
-| `factors_dialog` |  | `open`, `title`, `factors` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
-| `factors_slider` |  |  | `factors_dialog` | [factors_slider.xml](../assets/ui/components/modals/factors_slider.xml) |
+| `factors_dialog` |  | `open`, `title`, `factors`, `all`, `all_shown` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
+| `factors_preset` |  |  | `factors_row` | [factors_preset.xml](../assets/ui/components/modals/factors_preset.xml) |
+| `factors_row` |  |  | `factors_dialog` | [factors_row.xml](../assets/ui/components/modals/factors_row.xml) |
 | `fan_row` |  |  | `dashboard_fan`, `fans` | [fan_row.xml](../assets/ui/components/control/fans/fan_row.xml) |
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
@@ -2976,6 +3003,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `tools_bed_heater` |  |  | `tools` | [tools_bed_heater.xml](../assets/ui/components/control/tools/tools_bed_heater.xml) |
 | `tools_chamber_heater` |  |  | `tools` | [tools_chamber_heater.xml](../assets/ui/components/control/tools/tools_chamber_heater.xml) |
 | `tools_current` |  |  | `tools` | [tools_current.xml](../assets/ui/components/control/tools/tools_current.xml) |
+| `tools_extrusion_factor` |  |  | `tools_current` | [tools_extrusion_factor.xml](../assets/ui/components/control/tools/tools_extrusion_factor.xml) |
 | `tools_tool` |  |  | `tools` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  |  | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |

@@ -171,7 +171,7 @@ namespace UI::Xml
 		}
 		if (!lv_xml_to_bool(attrOr(attrs, "label_shown", "true")))
 		{
-			slider.getLabel().hide(); // Still the number pad's header
+			slider.setLabelShown(false); // Still the number pad's header, even if bound
 		}
 		if (lv_streq(attrOr(attrs, "send", "confirmed"), "change"))
 		{

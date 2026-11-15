@@ -1851,11 +1851,25 @@ TEST_F(TestHomeViewWithData, ToolsTabSelectsToolsAndTurnsAPrintersSpindle)
 	lv_obj_send_event(deselect, LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(sent.back(), "T-1\n");
 
-	// The extrusion factor opens its shared dialog
-	lv_obj_t* factor = lv_obj_find_by_name(lv_obj_find_by_name(tools, "extrusion_factor"), "value");
-	ASSERT_NE(factor, nullptr);
-	lv_obj_send_event(factor, LV_EVENT_CLICKED, nullptr);
+	// An extruder's factor opens the shared dialog for the tool's extruders, which can show every extruder
+	lv_obj_t* factors = lv_obj_find_by_name(lv_obj_find_by_name(tools, "extrusion_factors"), "list");
+	ASSERT_NE(factors, nullptr);
+	ASSERT_EQ(lv_obj_get_child_count(factors), 1u) << "tool 0 uses one extruder";
+	lv_obj_send_event(lv_obj_get_child(factors, 0), LV_EVENT_CLICKED, nullptr);
+	lv_obj_t* dialog = TestDialogs::shownNamed("extrusion_dialog");
+	ASSERT_NE(dialog, nullptr);
+	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
+	EXPECT_EQ(lv_obj_get_child_count(rows), 1u);
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(dialog, "scope"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(dialog, "scope"), "all"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(rows), 2u) << "every extruder";
+
+	// A quick value sets the factor
+	lv_obj_t* quick = lv_obj_find_by_name(lv_obj_get_child(rows, 0), "presets");
+	ASSERT_NE(quick, nullptr);
+	lv_obj_send_event(lv_obj_get_child(quick, 3), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M221 D0 S105\n") << "105%";
 	UI::closeDialogs();
 
 	// A printer's tool with a spindle (Hybrid, T4): its card sets the speed, and in use it can be turned
@@ -1947,12 +1961,13 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 	// Tap the second extruder's value: a number pad for it, the dialog's next step
 	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
 	ASSERT_EQ(lv_obj_get_child_count(rows), 2u);
-	auto& second = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(rows, 1)));
+	auto& second =
+		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_find_by_name(lv_obj_get_child(rows, 1), "slider")));
 	lv_obj_send_event(second.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
 	lv_obj_t* pad = TestDialogs::shownNamed("dialog_number");
 	ASSERT_NE(pad, nullptr);
 	EXPECT_EQ(TestDialogs::title(), "Extruder 1");
-	EXPECT_EQ(TestDialogs::text("range"), "1 or more");
+	EXPECT_EQ(TestDialogs::text("range"), "1 % or more");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
 
 	// Type 95 and confirm: sent, and back to the factors
@@ -2029,19 +2044,19 @@ TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
 					  nullptr);
 	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");
 	ASSERT_NE(dialog, nullptr);
-	auto& speed =
-		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0)));
+	lv_obj_t* row = lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0);
+	auto& speed = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_find_by_name(row, "slider")));
 	ASSERT_EQ(speed.getValue(), 200.0f);
 	EXPECT_EQ(speed.getMin(), 150.0f);
 
 	// The number pad takes anything from 1%
 	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
 	ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
-	EXPECT_EQ(TestDialogs::text("range"), "1 or more");
+	EXPECT_EQ(TestDialogs::text("range"), "1 % or more");
 	TestDialogs::tapHeader("back");
 
-	// Reset goes back to 100%, below the window
-	lv_obj_send_event(lv_obj_find_by_name(speed.getRootPtr(), "reset"), LV_EVENT_CLICKED, nullptr);
+	// The 100% quick value goes back to 100%, below the window
+	lv_obj_send_event(lv_obj_get_child(lv_obj_find_by_name(row, "presets"), 2), LV_EVENT_CLICKED, nullptr);
 	ASSERT_EQ(sent.size(), 1u);
 	EXPECT_EQ(sent[0], "M220 S100\n");
 	EXPECT_EQ(speed.getValue(), 100.0f);

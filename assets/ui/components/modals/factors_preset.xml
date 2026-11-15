@@ -1,0 +1,14 @@
+<!--
+  A quick value of a factor in a factors_dialog (factors_row.xml), checked while it is the factor's value. Tap it to
+  use it.
+
+  Fields:   a presets row: row.text, row.chosen (src/UI/Xml/View/FactorDialog.h)
+  Actions:  actions.factors.preset (src/UI/Presenters/Modals/FactorsActions.h)
+-->
+<component>
+	<view extends="ds_button" bind_text="row.text" height="content" flex_grow="1" style_min_width="content">
+		<style name="setting_option"/>
+		<bind_state_if_eq subject="row.chosen" state="checked" ref_value="1"/>
+		<action trigger="clicked" name="actions.factors.preset"/>
+	</view>
+</component>

@@ -140,7 +140,9 @@
       "extruder_header": "Extrusionsfaktor",
       "fan": "Lüfter {:d}",
       "fan_header": "Lüfter",
-      "speed_factor": "Geschwindigkeitsfaktor"
+      "speed_factor": "Geschwindigkeitsfaktor",
+      "this_tool": "Dieses Werkzeug",
+      "all_extruders": "Alle Extruder"
     },
     "heightmap": {
       "area": "{:g} {:s}²",
@@ -537,8 +539,7 @@
       "stop": "Stopp",
       "active": "Aktiv",
       "standby": "Standby",
-      "deselect": "Abwählen",
-      "now": "Jetzt"
+      "deselect": "Abwählen"
     },
     "spindle": {
       "speed": "Spindeldrehzahl"

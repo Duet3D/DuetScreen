@@ -140,7 +140,9 @@
       "extruder_header": "Fattore di estrusione",
       "fan": "Ventola {:d}",
       "fan_header": "Ventole",
-      "speed_factor": "Fattore di velocità"
+      "speed_factor": "Fattore di velocità",
+      "this_tool": "Questo utensile",
+      "all_extruders": "Tutti gli estrusori"
     },
     "heightmap": {
       "area": "{:g} {:s}²",
@@ -538,8 +540,7 @@
       "stop": "Ferma",
       "active": "Attivo",
       "standby": "Standby",
-      "deselect": "Deseleziona",
-      "now": "Ora"
+      "deselect": "Deseleziona"
     },
     "spindle": {
       "speed": "Velocità del mandrino"

@@ -5,7 +5,7 @@
 
   Fields:   the tool in use, om.tools[{om.state.currentTool}], in a ds_scope: row.extruders, row.spindle,
             row.spindleRpm; its number is om.state.currentTool, -1 while there is none
-  Data:     source.extruder.* (the amount and speed), source.move.extrusion_factor
+  Data:     source.extruder.* (the amount and speed); each extruder's factor, om.move.extruders[…].factor
   Actions:  actions.extruder.*, actions.factors.extrusion, actions.spindle.*
 -->
 <component>
@@ -78,11 +78,14 @@
 					<action trigger="clicked" name="actions.extruder.extrude"/>
 				</ds_button>
 			</lv_obj>
-			<ds_setting name="extrusion_factor" title_tag="tr.tools.extrusion_factor">
-				<ds_button name="value" bind_text="source.move.extrusion_factor">
-					<action trigger="clicked" name="actions.factors.extrusion" arg="{om.state.currentTool}"/>
-				</ds_button>
-			</ds_setting>
+		</ds_setting_group>
+
+		<!-- Each of the tool's extruders' factor, as a value and a thin bar; tap one to change them -->
+		<ds_setting_group name="extrusion_factors" title_tag="tr.tools.extrusion_factor" width="100%">
+			<bind_flag_if cond="row.extruders|count lt 1" flag="hidden"/>
+			<ds_list name="list" list="row.extruders" item="tools_extrusion_factor">
+				<style name="setting_list"/>
+			</ds_list>
 		</ds_setting_group>
 
 		<ds_setting_group name="spindle" title_tag="tr.tools.spindle" width="100%">

@@ -140,7 +140,9 @@
       "extruder_header": "Facteur d'extrusion",
       "fan": "Ventilateur {:d}",
       "fan_header": "Ventilateurs",
-      "speed_factor": "Facteur de vitesse"
+      "speed_factor": "Facteur de vitesse",
+      "this_tool": "Cet outil",
+      "all_extruders": "Tous les extrudeurs"
     },
     "heightmap": {
       "area": "{:g} {:s}²",
@@ -537,8 +539,7 @@
       "stop": "Arrêt",
       "active": "Actif",
       "standby": "En attente",
-      "deselect": "Désélectionner",
-      "now": "Actuelle"
+      "deselect": "Désélectionner"
     },
     "spindle": {
       "speed": "Vitesse de broche"

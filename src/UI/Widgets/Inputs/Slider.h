@@ -53,7 +53,11 @@ namespace UI
 		 * (a window either side of it) keeps the value's true limits here.
 		 */
 		void setLimits(std::optional<float> lowest, std::optional<float> highest);
+		/** Show `text` above the slider (unless the label is kept hidden), and as the number pad's header */
 		void setLabel(std::string_view text);
+
+		/** Keep the label hidden, whatever it says (`false`), or show it while it says something (`true`) */
+		void setLabelShown(bool shown);
 		void setIncrementValue(float value);
 		void setRange(float min, float max);
 		void setValue(float value);
@@ -120,6 +124,7 @@ namespace UI
 		float m_defaultValue = std::numeric_limits<float>::quiet_NaN();
 		int m_displayDecimals = 2;
 		bool m_focused = false;
+		bool m_labelShown = true; // The label shows while it says something; false keeps it hidden
 		bool m_longPressEnabled = true;
 		SendMode m_sendMode = SendMode::VALUE_CONFIRMED;
 		std::optional<float> m_lowest;	// The least the value may be, if not the bottom of the range

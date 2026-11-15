@@ -14,10 +14,8 @@
 				style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
 				style_pad_column="12" style_margin_bottom="12">
 			<bind_flag_if cond="presenter.heater lt 0" flag="hidden"/>
-			<lv_label name="now" translation_tag="tr.tools.now">
-				<style name="text_muted"/>
-			</lv_label>
-			<lv_label name="current" bind_text="om.heat.heaters[{presenter.heater}].current|fixed:1"/>
+			<lv_label name="current" bind_text="om.heat.heaters[{presenter.heater}].current|fixed:1"
+					  bind_text-fmt="%s °C"/>
 			<heater_bar name="bar" heater="presenter.heater" width="1" flex_grow="1"/>
 		</lv_obj>
 

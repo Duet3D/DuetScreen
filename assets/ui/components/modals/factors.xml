@@ -11,6 +11,7 @@
 		<factors_dialog name="speed_dialog" open="source.factors.speed.open"
 						title="source.factors.speed.title" factors="source.factors.speed.factors"/>
 		<factors_dialog name="extrusion_dialog" open="source.factors.extrusion.open"
-						title="source.factors.extrusion.title" factors="source.factors.extrusion.factors"/>
+						title="source.factors.extrusion.title" factors="source.factors.extrusion.factors"
+						all="source.factors.extrusion_all" all_shown="source.factors.extrusion_all_shown"/>
 	</view>
 </component>

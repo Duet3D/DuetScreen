@@ -51,6 +51,30 @@ namespace UI::FactorsActions
 															 : std::nullopt);
 				}
 			});
+		Xml::Actions::addGlobal("factors.preset",
+								"Use a quick value for its factor. From a row of a factor's `presets`.",
+								[](const Xml::ActionArgs& args)
+								{
+									const auto* preset = args.row<Xml::FactorPresetRow>();
+									if (preset == nullptr || preset->factor == nullptr ||
+										preset->factor->owner == nullptr)
+									{
+										LOG_WARN("actions.factors.preset must come from a row of a factor's `presets`");
+										return;
+									}
+									preset->factor->owner->set(static_cast<size_t>(preset->factor->index.get()),
+															   static_cast<float>(preset->percent));
+								});
+		Xml::Actions::addGlobal(
+			"factors.extrusion_all",
+			"Show every extruder's extrusion factor in its dialog (`arg` 1), or only the tool's it was opened for (0)",
+			[](const Xml::ActionArgs& args)
+			{
+				if (auto* source = factors())
+				{
+					source->showAllExtruders(args.argInt().value_or(0) != 0);
+				}
+			});
 		Xml::Actions::addGlobal("factors.set",
 								"Use the slider's edited percentage (`value_confirmed`, dragged or typed) for its "
 								"factor. From a row of a dialog's `factors`.",

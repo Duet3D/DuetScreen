@@ -29,6 +29,7 @@ namespace UI::Xml
 				   .sliderMin = 1,
 				   .sliderMax = 150,
 				   .rangeFollowsValue = true,
+				   .presets = {50, 75, 100, 125, 150},
 				   .onSet =
 					   [](size_t, float percent)
 				   {
@@ -41,6 +42,7 @@ namespace UI::Xml
 					   .title = _("fine_tune.extruder_header"),
 					   .sliderMin = 1,
 					   .sliderMax = 200,
+					   .presets = {90, 95, 100, 105, 110},
 					   .onSet = [this](size_t index, float percent)
 					   {
 						   std::optional<size_t> extruder;
@@ -67,11 +69,25 @@ namespace UI::Xml
 	{
 		m_speed.fields(f);
 		m_extrusion.fields(f);
+		f.field("extrusion_all",
+				m_all,
+				"1 while the extrusion dialog shows every extruder, 0 while only the tool's it was opened for "
+				"(actions.factors.extrusion_all)");
+		f.field("extrusion_all_shown",
+				m_allShown,
+				"1 if the extrusion dialog can show every extruder or only the tool's: it was opened for a tool that "
+				"doesn't use them all");
+	}
+
+	void FactorsSource::showAllExtruders(bool all)
+	{
+		m_all.set(all ? 1 : 0);
+		showExtrusion();
 	}
 
 	void FactorsSource::onInit()
 	{
-		watchObjectModel({"move.speedFactor", "move.extruders", "tools"});
+		watchObjectModel({"move.speedFactor", "move.extruders", "tools", "state.machineMode"});
 	}
 
 	void FactorsSource::update()
@@ -97,6 +113,7 @@ namespace UI::Xml
 	void FactorsSource::openExtrusion(std::optional<size_t> tool)
 	{
 		m_tool = tool;
+		m_all.set(0);
 		showExtrusion();
 		m_extrusion.open();
 	}
@@ -104,7 +121,18 @@ namespace UI::Xml
 	void FactorsSource::showSpeed()
 	{
 		const float percent = 100 * MoveSource::speedFactor();
-		m_speed.show(1, [](size_t) { return std::string(); }, [percent](size_t) { return percent; });
+		bool cnc = false;
+		{
+			MODEL_LOCK();
+			cnc = PrinterModel::root()["state"]["machineMode"].text() == "CNC";
+		}
+		// A CNC machine calls it the feed override
+		m_speed.setTitle(cnc ? _("move.feed_override") : _("move.speed_factor"));
+		m_speed.show(
+			1,
+			[](size_t) { return std::string(); },
+			[percent](size_t) { return percent; },
+			[](size_t) { return _("move.override_hint"); });
 	}
 
 	void FactorsSource::showExtrusion()
@@ -112,17 +140,46 @@ namespace UI::Xml
 		MODEL_LOCK();
 		const auto numbers = extruders();
 		const OM::Node& all = PrinterModel::root()["move"]["extruders"];
+		m_allShown.set(m_tool && extruders(true).size() > extruders(false).size() ? 1 : 0);
 		m_extrusion.show(
 			numbers.size(),
 			[&numbers](size_t i) { return _("fine_tune.extruder", numbers[i]); },
-			[&](size_t i) { return 100.0f * static_cast<float>(all[numbers[i]]["factor"].number()); });
+			[&](size_t i) { return 100.0f * static_cast<float>(all[numbers[i]]["factor"].number()); },
+			[&numbers](size_t i) { return toolsUsing(numbers[i]); });
+	}
+
+	std::string FactorsSource::toolsUsing(size_t extruder)
+	{
+		std::string names;
+		const OM::Node& tools = PrinterModel::root()["tools"];
+		for (size_t number = 0; number < tools.size(); ++number)
+		{
+			const OM::Node& tool = tools[number];
+			const OM::Node& toolExtruders = tool["extruders"];
+			for (size_t i = 0; i < toolExtruders.size(); ++i)
+			{
+				if (toolExtruders[i].integer(-1) == static_cast<int64_t>(extruder))
+				{
+					const std::string_view name = tool["name"].text();
+					names += names.empty() ? "" : ", ";
+					names += name.empty() ? _("temperature.default_tool_name", number) : std::string(name);
+					break;
+				}
+			}
+		}
+		return names;
 	}
 
 	std::vector<size_t> FactorsSource::extruders() const
 	{
+		return extruders(m_all.get() != 0);
+	}
+
+	std::vector<size_t> FactorsSource::extruders(bool every) const
+	{
 		std::vector<size_t> numbers;
 		const OM::Node& all = PrinterModel::root()["move"]["extruders"];
-		if (!m_tool)
+		if (!m_tool || every)
 		{
 			for (size_t number = 0; number < all.size(); ++number)
 			{
