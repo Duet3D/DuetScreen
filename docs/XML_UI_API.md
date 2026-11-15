@@ -1827,6 +1827,7 @@ Also takes every `lv_obj` attribute.
 | Attribute | Description |
 | --- | --- |
 | `side` | Where the tab buttons are: top (the default), bottom, left or right. Down a side, each tab is a row as wide as the column, its icon before its title |
+| `tab_max_width` | The widest a tab may be, in pixels; a title too long for it ends in "…". Down a side, the column is as wide as its widest tab, so no wider than this |
 
 ### ds_tabs-tab
 

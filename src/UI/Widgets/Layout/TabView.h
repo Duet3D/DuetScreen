@@ -45,6 +45,18 @@ namespace UI
 		/** Put the tab bar on side `dir` (LV_DIR_TOP, _BOTTOM, _LEFT or _RIGHT) of the content, styling its buttons to suit */
 		void setTabBarPosition(lv_dir_t dir);
 
+		/**
+		 * Make each tab's button at most `width` wide (LV_COORD_MAX, as a tab view starts, for no limit). A title too
+		 * long for it is cut short with "…"; a bar down a side is as wide as its widest tab, so no wider than this.
+		 */
+		void setTabMaxWidth(lv_coord_t width);
+
+		/**
+		 * Show `icon`, a file from the icon set, on tab `index`'s button
+		 * @return false if there is no such tab
+		 */
+		bool setTabIcon(size_t index, std::string_view icon);
+
 		bool disableTab(size_t index, bool disable);
 
 		/**
@@ -77,12 +89,19 @@ namespace UI
 		 */
 		void styleTabButton(TabButton& button);
 
+		/**
+		 * Hold `button` to m_tabMaxWidth. Its title gets the room the button's padding leaves, less its icon's when the
+		 * icon is shown beside it, so the title is what is cut short, never the icon.
+		 */
+		void fitTabTitle(TabButton& button);
+
 		List<TabButton> m_tabButtons{"tab_buttons", getRoot()};
 		LvContainer m_tabContent{"tab_content", getRoot()};
 
 		std::vector<std::unique_ptr<LvContainer>> m_tabs;
 		size_t m_currentTabIndex = -1;
 		lv_dir_t m_barSide = LV_DIR_TOP;			 // The side of the content the tab bar is on
+		lv_coord_t m_tabMaxWidth = LV_COORD_MAX;	 // The widest a tab's button may be (setTabMaxWidth())
 		std::unique_ptr<LvContainer> m_endSpacer; // Before the first tab pinned to the end (pinToEnd()), if any
 	};
 } // namespace UI

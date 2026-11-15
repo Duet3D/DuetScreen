@@ -64,37 +64,8 @@ namespace UI
 		m_icon.setMinHeight(25);
 		m_icon.setMinWidth(25);
 
-		addEventCallback(
-			[this](lv_event_t*)
-			{
-				ZoneScopedN("Button label resize callback");
-				// Update the label width
-
-				const int32_t width = lv_obj_get_style_width(getRootPtr(), LV_PART_MAIN);
-				const int32_t min_width = lv_obj_get_style_min_width(getRootPtr(), LV_PART_MAIN);
-				const bool w_layout = lv_obj_is_width_layout_positioned(getRootPtr());
-
-				// if (lv_obj_is_style_any_width_content(getRootPtr()))
-				if ((width == LV_SIZE_CONTENT && !w_layout) || min_width == LV_SIZE_CONTENT)
-				{
-					m_label.setWidth(LV_SIZE_CONTENT);
-				}
-				else
-				{
-					m_label.setWidth(LV_PCT(100));
-				}
-
-				if (lv_obj_is_style_any_height_content(getRootPtr()) &&
-					!lv_obj_is_height_layout_positioned(getRootPtr()))
-				{
-					m_label.setMaxHeight(LV_SIZE_CONTENT);
-				}
-				else
-				{
-					m_label.setMaxHeight(LV_PCT(100));
-				}
-			},
-			static_cast<lv_event_code_t>(LV_EVENT_STYLE_CHANGED | LV_EVENT_SIZE_CHANGED));
+		addEventCallback([this](lv_event_t*) { fitLabel(); },
+						 static_cast<lv_event_code_t>(LV_EVENT_STYLE_CHANGED | LV_EVENT_SIZE_CHANGED));
 
 		addEventCallback(
 			[this](lv_event_t*)
@@ -203,6 +174,46 @@ namespace UI
 			m_label.setFlexGrow(0);
 			m_label.setMinWidth(0);
 			m_label.setStyleTextAlign(LV_TEXT_ALIGN_CENTER);
+		}
+	}
+
+	void Button::setOneLine(bool oneLine)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		m_oneLine = oneLine;
+		fitLabel();
+	}
+
+	void Button::fitLabel()
+	{
+		ZoneScoped;
+		const int32_t width = lv_obj_get_style_width(getRootPtr(), LV_PART_MAIN);
+		const int32_t min_width = lv_obj_get_style_min_width(getRootPtr(), LV_PART_MAIN);
+		const bool w_layout = lv_obj_is_width_layout_positioned(getRootPtr());
+
+		if ((width == LV_SIZE_CONTENT && !w_layout) || min_width == LV_SIZE_CONTENT)
+		{
+			m_label.setWidth(LV_SIZE_CONTENT);
+		}
+		else
+		{
+			m_label.setWidth(LV_PCT(100));
+		}
+
+		if (m_oneLine)
+		{
+			// The label ends its text in "…" (DOTS) only when the text is taller than it
+			const lv_font_t* font = lv_obj_get_style_text_font(m_label.getRootPtr(), LV_PART_MAIN);
+			m_label.setMaxHeight(lv_font_get_line_height(font));
+		}
+		else if (lv_obj_is_style_any_height_content(getRootPtr()) && !lv_obj_is_height_layout_positioned(getRootPtr()))
+		{
+			m_label.setMaxHeight(LV_SIZE_CONTENT);
+		}
+		else
+		{
+			m_label.setMaxHeight(LV_PCT(100));
 		}
 	}
 

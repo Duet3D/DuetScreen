@@ -3745,6 +3745,9 @@
 		<xs:attribute name="side" type="xs:string">
 			<xs:annotation><xs:documentation>Where the tab buttons are: top (the default), bottom, left or right. Down a side, each tab is a row as wide as the column, its icon before its title</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="tab_max_width" type="xs:string">
+			<xs:annotation><xs:documentation>The widest a tab may be, in pixels; a title too long for it ends in &quot;…&quot;. Down a side, the column is as wide as its widest tab, so no wider than this</xs:documentation></xs:annotation>
+		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_tabs-tab.attributes">
 		<xs:attribute name="title" type="xs:string">

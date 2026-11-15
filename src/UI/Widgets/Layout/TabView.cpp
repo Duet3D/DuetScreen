@@ -216,6 +216,55 @@ namespace UI
 			button.addStyle(base, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
 			button.setIconBeforeText(false);
 		}
+		fitTabTitle(button);
+	}
+
+	void TabView::fitTabTitle(TabButton& button)
+	{
+		if (m_tabMaxWidth == LV_COORD_MAX)
+		{
+			button.removeLocalStyleProp(LV_STYLE_MAX_WIDTH);
+			button.getLabel().removeLocalStyleProp(LV_STYLE_MAX_WIDTH);
+			button.setOneLine(false);
+			return;
+		}
+		button.setMaxWidth(m_tabMaxWidth);
+		button.setOneLine(true);
+
+		// The label is as wide as its text up to its max width, beyond which, on its one line, it ends in "…"; the
+		// button, and a bar down a side, are only as wide as they need to be for it
+		lv_obj_t* obj = button.getRootPtr();
+		lv_coord_t room = m_tabMaxWidth - lv_obj_get_style_space_left(obj, LV_PART_MAIN) -
+						  lv_obj_get_style_space_right(obj, LV_PART_MAIN);
+		const bool side = m_barSide == LV_DIR_LEFT || m_barSide == LV_DIR_RIGHT;
+		if (side && !button.getIcon().hasFlag(LV_OBJ_FLAG_HIDDEN))
+		{
+			room -= SIDE_TAB_ICON_SIZE + lv_obj_get_style_pad_column(obj, LV_PART_MAIN);
+		}
+		button.getLabel().setMaxWidth(std::max<lv_coord_t>(room, 0));
+	}
+
+	void TabView::setTabMaxWidth(lv_coord_t width)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		m_tabMaxWidth = width;
+		m_tabButtons.iterateListItems([this](size_t, TabButton& button) { fitTabTitle(button); });
+	}
+
+	bool TabView::setTabIcon(size_t index, std::string_view icon)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		TabButton* button = m_tabButtons.getItem(index);
+		if (button == nullptr)
+		{
+			LOG_ERROR("Tab index {} out of range", index);
+			return false;
+		}
+		button->setIcon(icon);
+		fitTabTitle(*button); // The icon, if shown beside the title, takes some of its room
+		return true;
 	}
 
 	void TabView::pinToEnd(size_t index)

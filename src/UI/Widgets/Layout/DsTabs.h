@@ -34,7 +34,7 @@ namespace UI::Xml
 		/** `<ds_tabs>` create callback: create the C++ tab view, deleted with its widget */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_tabs>` apply callback: lv_obj attributes, then `side` */
+		/** `<ds_tabs>` apply callback: lv_obj attributes, then `side` and `tab_max_width` */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** `<ds_tabs-tab>` create callback: add a tab, whose content area its children are built in */
