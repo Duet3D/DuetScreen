@@ -6,6 +6,7 @@
  */
 
 #include "TestSuite.h"
+#include "Comm/Communication.h"
 #include "Comm/JsonDecoder.h"
 #include "Configuration.h"
 #include "DeadlockDetector.h"
@@ -18,6 +19,9 @@
 #include <fmt/format.h>
 #include <fstream>
 #include <unistd.h>
+#if DUET_SIMULATOR
+#  include "Simulator/Simulator.h"
+#endif
 
 TestSuite::TestSuite()
 {
@@ -32,6 +36,13 @@ TestSuite::TestSuite()
 
 	DeadlockDetector::getInstance().allowThreadToTakeMultipleLocks(Log::GetThreadId(), true);
 
+#if DUET_SIMULATOR
+	// As the default preset, whatever an earlier test in the same process kept
+	Sim::Simulator::get().reset();
+	Sim::Simulator::get().setManual(true);
+	Sim::Simulator::get().setConfig(Sim::defaultConfig());
+#endif
+
 	OM::RemoveAll();
 
 	std::filesystem::remove_all("/tmp/thumbnails");
@@ -42,6 +53,13 @@ TestSuite::~TestSuite()
 {
 	ZoneScoped;
 	/* Run at end of each test */
+#if DUET_SIMULATOR
+	if (Comm::DUET.GetCommunicationType() == Comm::CommunicationType::simulator)
+	{
+		Comm::DUET.Disconnect();
+	}
+	Sim::Simulator::get().reset();
+#endif
 	OM::RemoveAll();
 	std::filesystem::remove_all("/tmp/thumbnails");
 	std::filesystem::remove(configFile());
@@ -72,3 +90,45 @@ bool TestSuite::load_model_data(std::string_view data)
 	decoder.CheckInput(reinterpret_cast<const unsigned char*>(data.data()), static_cast<unsigned int>(data.size()));
 	return true;
 }
+#if DUET_SIMULATOR
+void TestSuite::connectSimulator(const Sim::Config& config)
+{
+	Sim::Simulator& simulator = Sim::Simulator::get();
+	simulator.setManual(true);
+	simulator.setConfig(config);
+	Sim::Behaviour behaviour = simulator.behaviour();
+	behaviour.noise = 0.0f;
+	simulator.setBehaviour(behaviour);
+	if (Comm::DUET.GetCommunicationType() == Comm::CommunicationType::simulator)
+	{
+		Comm::DUET.Connect();
+	}
+	else
+	{
+		Comm::DUET.SetCommunicationType(Comm::CommunicationType::simulator);
+	}
+	ASSERT_TRUE(Comm::DUET.IsConnected());
+	simulator.process(); // the replies to connecting
+}
+
+void TestSuite::pollSimulator(int rounds)
+{
+	for (int i = 0; i < rounds; i++)
+	{
+		Comm::sendNext();
+		Sim::Simulator::get().process();
+	}
+}
+
+void TestSuite::sendToSimulator(std::string_view gcode)
+{
+	Comm::DUET.SendGcode(gcode);
+	Sim::Simulator::get().process();
+}
+
+void TestSuite::simulate(std::chrono::milliseconds time)
+{
+	Sim::Simulator::get().advance(time);
+	pollSimulator();
+}
+#endif

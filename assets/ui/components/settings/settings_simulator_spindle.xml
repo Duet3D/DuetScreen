@@ -1,0 +1,25 @@
+<!--
+  A spindle of the simulated Duet, a row (ds_setting) of its page: its highest speed (asked for on the number pad),
+  whether it can turn in reverse, and a button to remove it.
+
+  Fields:   a row of source.simulator.spindles (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<value_button name="max" title_tag="tr.simulator.fields.max" value="row.max" width="120">
+				<action trigger="clicked" name="actions.simulator.set" arg="max"/>
+			</value_button>
+			<lv_obj name="flags">
+				<style name="setting_options"/>
+				<option_button name="reverse" translation_tag="tr.simulator.fields.reverse" subject="row.reverse"
+							   action="actions.simulator.set" arg="reverse"/>
+			</lv_obj>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

@@ -250,6 +250,17 @@ TEST_F(TestConnectionSettings, TheUsbPortAndPollIntervalShowOnlyWithAdvancedSett
 	StorageHelper::setData(ID_ENABLE_ADVANCED_SETTINGS, original);
 }
 
+#if DUET_SIMULATOR
+TEST_F(TestConnectionSettings, TheSimulatedDuetsPageIsReachedOnlyWhileConnectedToIt)
+{
+	show(false);
+	setSetting("connection_method", 0); // USB
+	EXPECT_TRUE(hidden("simulator"));
+	setSetting("connection_method", 3);
+	EXPECT_FALSE(hidden("simulator"));
+}
+#endif
+
 class TestSystemSettings : public UiTestSuite
 {
   protected:

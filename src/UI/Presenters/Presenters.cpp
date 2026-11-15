@@ -31,6 +31,8 @@
 #include "Settings/GeneralSettings.h"
 #include "Settings/NotificationSettings.h"
 #include "Settings/SettingsActions.h"
+#include "Settings/SimulatorActions.h"
+#include "Settings/SimulatorSettings.h"
 #include "Settings/SystemActions.h"
 #include "Settings/ThemePreviewPresenter.h"
 #include "Settings/WifiPresenter.h"
@@ -54,6 +56,7 @@ namespace UI
 		NotificationSettings::registerAll();
 		ConnectionSettings::registerAll();
 		DeveloperSettings::registerAll();
+		SimulatorSettings::registerAll();
 
 		/* Actions every view can raise */
 		HeaterActions::registerAll();
@@ -65,6 +68,7 @@ namespace UI
 		MoveActions::registerAll();
 		SettingsActions::registerAll();
 		SystemActions::registerAll();
+		SimulatorActions::registerAll();
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
 		FilesActions::registerAll();

@@ -233,6 +233,7 @@ namespace Comm
 			s_seqs[i].lastSeq = 0;
 			s_seqs[i].state = SeqStateInit;
 		}
+		s_freqSeq.state = SeqStateInit; // else a live request left unanswered holds up the next
 		g_currentReqSeq = nullptr;
 		s_sendFreqNext = true;
 	}

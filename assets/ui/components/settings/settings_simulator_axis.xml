@@ -1,0 +1,28 @@
+<!--
+  An axis of the simulated Duet, a row (ds_setting) of its page: its letter (choosing another axis's swaps them), its
+  lowest and highest positions, asked for on the number pad, and a button to remove it.
+
+  Fields:   a row of source.simulator.axes (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<ds_choice name="letter" title_tag="tr.simulator.fields.letter" bind_options="source.simulator.axis_letters"
+					   bind_selected="row.letter">
+				<style name="setting_value"/>
+				<action trigger="value_confirmed" name="actions.simulator.set" arg="letter"/>
+			</ds_choice>
+			<value_button name="min" title_tag="tr.simulator.fields.min" value="row.min" width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="min"/>
+			</value_button>
+			<value_button name="max" title_tag="tr.simulator.fields.max" value="row.max" width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="max"/>
+			</value_button>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

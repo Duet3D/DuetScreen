@@ -850,6 +850,54 @@ class TestHomeViewWithData : public TestHomeView
 	}
 };
 
+#if DUET_SIMULATOR
+/** The home screen connected to the simulated Duet, polled as a Duet is: its whole object model, as a Duet sends it */
+class TestHomeViewWithSimulator : public TestHomeView
+{
+  protected:
+	TestHomeViewWithSimulator()
+	{
+		setSetting("connected_message", 0); // So nothing covers the screen
+		connectSimulator();
+		pollSimulator();
+		deliverModelEvents();
+	}
+};
+
+TEST_F(TestHomeViewWithSimulator, DashboardFollowsAJob)
+{
+	sendToSimulator("M32 \"benchy.gcode\"");
+	showJobStatus();
+	simulate(std::chrono::seconds(300)); // warm
+	simulate(std::chrono::seconds(600)); // printing
+	deliverModelEvents();
+	runTimers();
+	EXPECT_EQ(UI::Xml::PrinterModel::root().at("state.status").text(), "processing");
+	EXPECT_GT(UI::Xml::PrinterModel::root().at("job.layer").integer(), 1);
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/dashboard_printing.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, BedMeshProbedIsShown)
+{
+	sendToSimulator("G28\nG29");
+	simulate(std::chrono::seconds(5));
+	deliverModelEvents();
+	openControlTab(0);
+	openControlTab(2);
+	// The tab asks for the saved meshes, then for the one in use's file: each answered as the screen polls
+	for (int i = 0; i < 5; i++)
+	{
+		pollSimulator();
+		deliverModelEvents();
+	}
+	runTimers();
+	lv_obj_t* page = UI::findView("heightmap")->getRootPtr();
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "detail")), "heightmap.csv");
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(page, "points"), "value")), "121");
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/heightmap.png")
+}
+#endif
+
 TEST_F(TestHomeViewWithData, Dashboard)
 {
 	ZoneScoped;
@@ -1527,6 +1575,18 @@ TEST_F(TestHomeViewWithData, SettingsView)
 	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
 	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
+#if DUET_SIMULATOR
+	// The simulated Duet is a page of its own, opened from Connection (its row shows only while connected to it, but
+	// this screen's data comes from a recorded Duet, so the row is tapped hidden); the back key goes back to Connection
+	lv_obj_t* connection = UI::findView("settings_connection")->getRootPtr();
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(connection, "simulator"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/simulator.png")
+	UI::back();
+	runTimers();
+	EXPECT_TRUE(UI::findView("settings_connection")->isShownOnScreen());
+#endif
 	scrollToEnd("settings_connection");
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection_end.png")
 

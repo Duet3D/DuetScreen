@@ -7,19 +7,21 @@
 
   Props:    label_tag  the translation key of the button's text
             action     the action run when it is tapped
+            arg        the action's arg (none if not given)
             danger     an expression: whether what it does can't be undone, marking the button as dangerous
 -->
 <component>
 	<api>
 		<prop name="label_tag" type="string"/>
 		<prop name="action" type="string"/>
+		<prop name="arg" type="string" default=""/>
 		<prop name="danger" type="string" default="0"/>
 	</api>
 	<view extends="ds_setting">
 		<ds_button name="button" translation_tag="$label_tag">
 			<style name="setting_control"/>
 			<bind_style_if name="danger_btn" cond="$danger"/>
-			<action trigger="clicked" name="$action"/>
+			<action trigger="clicked" name="$action" arg="$arg"/>
 		</ds_button>
 	</view>
 </component>

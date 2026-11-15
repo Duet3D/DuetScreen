@@ -495,6 +495,7 @@ From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
 | `source.settings.connection_method` | int | Index of how the screen connects to the Duet (USB, UART or network); choosing one sets the USB-C port's mode to suit (actions.settings.set) |
 | `source.settings.connection_method_options` | text | What `source.settings.connection_method` can be, one per line, translated |
 | `source.settings.network_shown` | int | 1 if the Duet is reached over the network, so its IP address and password apply |
+| `source.settings.simulator_in_use` | int | 1 if the Duet connected to is the simulated one, so its page applies |
 | `source.settings.usb_mode` | int | Index of the USB-C port's mode (actions.settings.set) |
 | `source.settings.usb_mode_options` | text | What `source.settings.usb_mode` can be, one per line, translated |
 | `source.settings.poll_interval` | int | ms between polls of the Duet (actions.settings.set) |
@@ -507,9 +508,149 @@ From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
 | `source.settings.ssh` | int | 1 if ssh is on (developer mode builds) (actions.settings.set) |
 | `source.settings.adb` | int | 1 if adb is on (developer mode builds) (actions.settings.set) |
 | `source.settings.system_monitor` | int | 1 if the system monitor is shown (actions.settings.set) |
+| `source.settings.simulator_preset` | int | Index of the preset the simulated Duet started from; choosing one makes it that machine, replacing its parts (actions.settings.set) |
+| `source.settings.simulator_preset_options` | text | What `source.settings.simulator_preset` can be, one per line, translated |
+| `source.settings.simulator_mode` | int | Index of the simulated Duet's mode: FFF, CNC or laser (actions.settings.set) |
+| `source.settings.simulator_mode_options` | text | What `source.settings.simulator_mode` can be, one per line, translated |
+| `source.settings.simulator_status` | int | Index of the status the simulated Duet reports whatever it is doing; 0 for what it is doing (actions.settings.set) |
+| `source.settings.simulator_status_options` | text | What `source.settings.simulator_status` can be, one per line, translated |
+| `source.settings.simulator_responding` | int | 1 if the simulated Duet answers requests; if not, the screen times out and reconnects (actions.settings.set) |
+| `source.settings.simulator_plugged_in` | int | 1 if the simulated Duet can be connected to; unplugged, it answers nothing (actions.settings.set) |
+| `source.settings.simulator_reply_delay` | int | ms the simulated Duet takes to answer each request (actions.settings.set) |
+| `source.settings.simulator_noise` | int | Noise on the simulated Duet's temperatures, tenths of °C (edited in °C) (actions.settings.set) |
 | `source.settings.machine_position_mode` | int | 1 if positions are shown in, and moves to a position use, machine coordinates (G53), ignoring the workplace's offsets (actions.settings.set) |
 | `source.settings.duet_ip` | text | The Duet's IP address (actions.settings.set, actions.settings.ask) |
 | `source.settings.duet_password` | text | The Duet's password (actions.settings.set) |
+| `source.settings.simulator_name` | text | The simulated Duet's name (network.name) (actions.settings.set) |
+
+### simulator
+
+From [SimulatorSource.cpp](../src/UI/Xml/Data/SimulatorSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.simulator.axis_letters` | text | The letters an axis can have, one per line |
+| `source.simulator.heater_roles` | text | What a heater can heat, one per line, translated |
+| `source.simulator.sensor_kinds` | text | What a sensor can be, one per line, translated |
+| `source.simulator.spindle_options` | text | The spindles a tool can have, one per line: none, then each |
+| `source.simulator.heater_count` | int | How many heaters it has |
+| `source.simulator.extruder_count` | int | How many extruders it has |
+| `source.simulator.fan_count` | int | How many fans it has |
+| `source.simulator.axes` | list | Its axes, in order: the first three are X, Y and Z |
+| `source.simulator.heaters` | list | Its heaters, by number, each with a sensor of its own |
+| `source.simulator.extruders` | list | Its extruders, by number |
+| `source.simulator.tools` | list | Its tools, by number |
+| `source.simulator.fans` | list | Its fans, by number |
+| `source.simulator.sensors` | list | Its sensors besides its heaters' |
+| `source.simulator.spindles` | list | Its spindles, by number |
+| `source.simulator.files` | list | The jobs on its SD card, in 0:/gcodes |
+
+Each row of `source.simulator.axes`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.letter` | int | Index of its letter in source.simulator.axis_letters; choosing another axis's swaps them (actions.simulator.set arg="letter") |
+| `row.min` | text | Its lowest position, e.g. "0 mm" (actions.simulator.set arg="min") |
+| `row.max` | text | Its highest position, e.g. "300 mm" (actions.simulator.set arg="max") |
+
+Each row of `source.simulator.heaters`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.name` | text | Its sensor's name (actions.simulator.set arg="name") |
+| `row.role` | int | Index of what it heats in source.simulator.heater_roles: a tool, the bed, the chamber or something else (actions.simulator.set arg="role") |
+| `row.max` | text | The highest temperature it may be set to, e.g. "285 °C" (actions.simulator.set) |
+| `row.heating_rate` | text | How fast it heats at full power, e.g. "10 °C/s" (actions.simulator.set) |
+| `row.cooling_rate` | text | How fast it cools at most, e.g. "4 °C/s" (actions.simulator.set) |
+| `row.fault` | int | 1 if it is in fault: it reads, but can't heat (actions.simulator.set) |
+
+Each row of `source.simulator.extruders`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.filament` | text | The filament loaded when the machine starts, e.g. "PLA"; empty for none (actions.simulator.set arg="filament") |
+
+Each row of `source.simulator.tools`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.name` | text | Its name (actions.simulator.set arg="name") |
+| `row.spindle` | int | Index of its spindle in source.simulator.spindle_options; 0 for none (actions.simulator.set arg="spindle") |
+| `row.heaters` | list | Every heater, chosen if the tool has it |
+| `row.extruders` | list | Every extruder, chosen if the tool has it; its first is the one its filament is loaded into |
+| `row.fans` | list | Every fan, chosen if the tool has it |
+
+Each row of `source.simulator.tools` › `row.heaters`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | Which heater ("H1"), extruder ("E0") or fan ("F0") it is |
+| `row.chosen` | int | 1 if the tool has it (actions.simulator.toggle) |
+
+Each row of `source.simulator.tools` › `row.extruders`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | Which heater ("H1"), extruder ("E0") or fan ("F0") it is |
+| `row.chosen` | int | 1 if the tool has it (actions.simulator.toggle) |
+
+Each row of `source.simulator.tools` › `row.fans`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | Which heater ("H1"), extruder ("E0") or fan ("F0") it is |
+| `row.chosen` | int | 1 if the tool has it (actions.simulator.toggle) |
+
+Each row of `source.simulator.fans`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.name` | text | Its name (actions.simulator.set arg="name") |
+| `row.tacho` | int | 1 if it reports its rpm (actions.simulator.set) |
+| `row.thermostatic` | int | 1 if it turns itself on while the first tool's heater is hot (actions.simulator.set) |
+
+Each row of `source.simulator.sensors`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.kind` | int | Index of what it is in source.simulator.sensor_kinds: a temperature sensor, a filament monitor, a probe or an input (actions.simulator.set arg="kind") |
+| `row.name` | text | Its name (actions.simulator.set arg="name") |
+| `row.value` | text | Its reading: °C, 1 if filament is present, the probe's value or the input's state (actions.simulator.set arg="value") |
+
+Each row of `source.simulator.spindles`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.max` | text | Its highest speed, e.g. "24 000 rpm" (actions.simulator.set arg="max") |
+| `row.reverse` | int | 1 if it can turn in reverse (actions.simulator.set) |
+
+Each row of `source.simulator.files`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.title` | text | What it is and its number, e.g. "Heater 1" |
+| `row.name` | text | Its file name, in 0:/gcodes (actions.simulator.set arg="name") |
+| `row.print_time` | text | How long it takes, e.g. "60 min" (actions.simulator.set) |
+| `row.layers` | text | How many layers it has (actions.simulator.set) |
+| `row.thumbnail` | int | 1 if it has thumbnails, as a slicer embeds them (actions.simulator.set) |
 
 ### spindle
 
@@ -550,6 +691,7 @@ From [SystemSource.cpp](../src/UI/Xml/Data/SystemSource.cpp).
 | `source.system.developer_mode` | int | 1 in developer mode builds (SSH, ADB, setup) |
 | `source.system.system_monitor_shown` | int | 1 if the build has the system monitor |
 | `source.system.build_tools_shown` | int | 1 if the build has any of debug borders, developer mode or the system monitor |
+| `source.system.simulator_shown` | int | 1 if the build has the simulated Duet (a connection method, and its page in the settings) |
 
 ### temperature
 
@@ -640,6 +782,11 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.selector.pick` | Use the preset. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.settings.ask` | Ask for the text setting `arg` names on the number keys, e.g. the Duet's IP address | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
 | `actions.settings.set` | Change the setting `arg` names (source.settings.<name>) to the edited value: a switch's 0 or 1, a choice's index, a slider's value, or a text area's text. `arg="<name>=<value>"` sets it to that value instead, e.g. from a row of buttons. | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
+| `actions.simulator.add` | Add a part to the simulated Duet, with values to start from: `arg` names its list in source.simulator, e.g. `heaters` | [SimulatorActions.cpp](../src/UI/Presenters/Settings/SimulatorActions.cpp) |
+| `actions.simulator.message` | Make the simulated Duet show a message box of mode `arg`, 0-7, as M291 would | [SimulatorActions.cpp](../src/UI/Presenters/Settings/SimulatorActions.cpp) |
+| `actions.simulator.remove` | Remove a part of the simulated Duet; tools that used it no longer do. From a row of source.simulator's parts. | [SimulatorActions.cpp](../src/UI/Presenters/Settings/SimulatorActions.cpp) |
+| `actions.simulator.set` | Change the field `arg` names of a part of the simulated Duet, from its row of source.simulator's parts: a name to the text typed, a choice to the option picked; an on/off field is turned over, and a number asked for on the number pad | [SimulatorActions.cpp](../src/UI/Presenters/Settings/SimulatorActions.cpp) |
+| `actions.simulator.toggle` | Give the tool the heater or fan, or take it away. From a row of a tool's `heaters` or `fans` in source.simulator.tools. | [SimulatorActions.cpp](../src/UI/Presenters/Settings/SimulatorActions.cpp) |
 | `actions.spindle.direction` | Choose the direction the tool in use's spindle starts in, `arg` `forward` or `reverse`; while it turns, turn it that way now | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
 | `actions.spindle.faster` | Turn the spindle of the tool numbered `arg` 1000 rpm faster from now on (M568 F) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
 | `actions.spindle.preset` | Start the tool in use's spindle at a quick speed from now on (M568 F). From a row of source.spindle.presets. | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
@@ -2996,7 +3143,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `card_view` |  | `view`, `presenter` | `babystep`, `extrude`, `job_status`, `jobs`, `macros` | [card_view.xml](../assets/ui/components/common/card_view.xml) |
 | `chevron` |  |  | `customise_setting`, `file_browser_crumb`, `file_browser_row`, `job_ready`, `job_recent_row` | [chevron.xml](../assets/ui/components/common/chevron.xml) |
-| `chevron_button` |  |  | `settings_display`, `settings_wifi_network` | [chevron_button.xml](../assets/ui/components/common/chevron_button.xml) |
+| `chevron_button` |  |  | `settings_connection`, `settings_display`, `settings_wifi_network` | [chevron_button.xml](../assets/ui/components/common/chevron_button.xml) |
 | [`console`](#console) | `gcode_reference` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `gcode_reference` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
 | `console_gcode` |  |  | `console`, `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
@@ -3108,20 +3255,30 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `object_cancel_key` |  | `title_tag`, `current`, `cancelled` | `object_cancel` | [object_cancel_key.xml](../assets/ui/components/control/object_cancel/object_cancel_key.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
-| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `file_browser`, `heightmap`, `settings_option`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
+| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `file_browser`, `heightmap`, `settings_option`, `settings_simulator`, `settings_simulator_choice`, `settings_simulator_fan`, `settings_simulator_file`, `settings_simulator_heater`, `settings_simulator_spindle`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
-| `settings_button` |  | `label_tag`, `action`, `danger` | `settings_developer`, `settings_display`, `settings_system`, `settings_wifi` | [settings_button.xml](../assets/ui/components/settings/settings_button.xml) |
-| `settings_choice` |  | `title_tag`, `setting` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_choice.xml](../assets/ui/components/settings/settings_choice.xml) |
+| `settings_button` |  | `label_tag`, `action`, `arg`, `danger` | `settings_developer`, `settings_display`, `settings_simulator`, `settings_system`, `settings_wifi` | [settings_button.xml](../assets/ui/components/settings/settings_button.xml) |
+| `settings_choice` |  | `title_tag`, `setting` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general`, `settings_simulator` | [settings_choice.xml](../assets/ui/components/settings/settings_choice.xml) |
 | [`settings_connection`](#settings_connection) |  |  | `settings` | [settings_connection.xml](../assets/ui/components/settings/settings_connection.xml) |
 | [`settings_developer`](#settings_developer) |  |  | `settings` | [settings_developer.xml](../assets/ui/components/settings/settings_developer.xml) |
 | [`settings_display`](#settings_display) |  |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
 | [`settings_general`](#settings) |  |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
 | [`settings_notifications`](#settings_notifications) |  |  | `settings` | [settings_notifications.xml](../assets/ui/components/settings/settings_notifications.xml) |
-| `settings_option` |  | `setting`, `value` | `move_coordinates`, `settings_connection`, `settings_display`, `settings_general`, `settings_notifications` | [settings_option.xml](../assets/ui/components/settings/settings_option.xml) |
+| `settings_option` |  | `setting`, `value` | `move_coordinates`, `settings_connection`, `settings_display`, `settings_general`, `settings_notifications`, `settings_simulator` | [settings_option.xml](../assets/ui/components/settings/settings_option.xml) |
+| [`settings_simulator`](#settings_simulator) |  |  | `settings` | [settings_simulator.xml](../assets/ui/components/settings/settings_simulator.xml) |
+| `settings_simulator_axis` |  |  | `settings_simulator` | [settings_simulator_axis.xml](../assets/ui/components/settings/settings_simulator_axis.xml) |
+| `settings_simulator_choice` |  |  | `settings_simulator_tool` | [settings_simulator_choice.xml](../assets/ui/components/settings/settings_simulator_choice.xml) |
+| `settings_simulator_extruder` |  |  | `settings_simulator` | [settings_simulator_extruder.xml](../assets/ui/components/settings/settings_simulator_extruder.xml) |
+| `settings_simulator_fan` |  |  | `settings_simulator` | [settings_simulator_fan.xml](../assets/ui/components/settings/settings_simulator_fan.xml) |
+| `settings_simulator_file` |  |  | `settings_simulator` | [settings_simulator_file.xml](../assets/ui/components/settings/settings_simulator_file.xml) |
+| `settings_simulator_heater` |  |  | `settings_simulator` | [settings_simulator_heater.xml](../assets/ui/components/settings/settings_simulator_heater.xml) |
+| `settings_simulator_sensor` |  |  | `settings_simulator` | [settings_simulator_sensor.xml](../assets/ui/components/settings/settings_simulator_sensor.xml) |
+| `settings_simulator_spindle` |  |  | `settings_simulator` | [settings_simulator_spindle.xml](../assets/ui/components/settings/settings_simulator_spindle.xml) |
+| `settings_simulator_tool` |  |  | `settings_simulator` | [settings_simulator_tool.xml](../assets/ui/components/settings/settings_simulator_tool.xml) |
 | [`settings_system`](#settings_system) |  |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
 | [`settings_theme_preview`](#settings_theme_preview) | `settings_theme_preview` |  | `settings` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |
-| `settings_toggle` |  | `setting` | `settings_developer`, `settings_display`, `settings_general`, `settings_notifications` | [settings_toggle.xml](../assets/ui/components/settings/settings_toggle.xml) |
+| `settings_toggle` |  | `setting` | `settings_developer`, `settings_display`, `settings_general`, `settings_notifications`, `settings_simulator` | [settings_toggle.xml](../assets/ui/components/settings/settings_toggle.xml) |
 | `settings_value` |  | `value` | `settings_system`, `settings_wifi` | [settings_value.xml](../assets/ui/components/settings/settings_value.xml) |
 | [`settings_wifi`](#settings_connection) | `settings_wifi` |  | `settings_connection` | [settings_wifi.xml](../assets/ui/components/settings/settings_wifi.xml) |
 | `settings_wifi_network` |  |  | `settings_wifi` | [settings_wifi_network.xml](../assets/ui/components/settings/settings_wifi_network.xml) |
@@ -3149,7 +3306,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `tools_spindle_preset` |  |  | `tools_current` | [tools_spindle_preset.xml](../assets/ui/components/control/tools/tools_spindle_preset.xml) |
 | `tools_tool` |  | `compact` | `dashboard_current_tool`, `dashboard_tool_card`, `dashboard_tools`, `tools_list` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  | `compact` | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
-| `value_button` |  | `title_tag`, `value`, `value_style` | `dashboard_job_status`, `heater_row` | [value_button.xml](../assets/ui/components/common/value_button.xml) |
+| `value_button` |  | `title_tag`, `value`, `value_style` | `dashboard_job_status`, `heater_row`, `settings_simulator_axis`, `settings_simulator_file`, `settings_simulator_heater`, `settings_simulator_sensor`, `settings_simulator_spindle` | [value_button.xml](../assets/ui/components/common/value_button.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  | `format` | `value_selector_presets` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 | `value_selector_presets` |  | `choices` | `babystep`, `move_jog_choices`, `tools_current`, `value_selector` | [value_selector_presets.xml](../assets/ui/components/common/value_selector_presets.xml) |
@@ -3251,6 +3408,10 @@ Also shows `settings_wifi`.
 #### settings_notifications
 
 ![settings_notifications](../tests/ref_imgs/xml_ui_api/views/settings_notifications.png)
+
+#### settings_simulator
+
+![settings_simulator](../tests/ref_imgs/xml_ui_api/views/settings_simulator.png)
 
 #### settings_system
 
@@ -3479,6 +3640,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `chip_accent` | ![chip_accent](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/chip_accent.png) | text_color=#text bg_color=#primary_muted bg_opa=100% border_width=0 outline_color=#primary outline_width=1 outline_opa=100% outline_pad=-1 |
 | `setting_control` |  | min_height=40 min_width=64 pad_hor=12 |
 | `setting_value` | ![setting_value](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_value.png) | min_height=40 pad_hor=4 pad_column=8 bg_opa=0 border_width=0 shadow_width=0 outline_width=0 text_color=#text_muted |
+| `setting_controls` | ![setting_controls](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_controls.png) | width=70% height=content layout=flex flex_flow=row_wrap flex_main_place=end flex_cross_place=center flex_track_place=end pad_all=0 pad_row=8 pad_column=8 bg_opa=0 border_width=0 |
 | `setting_options` | ![setting_options](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/setting_options.png) | width=content height=content layout=flex flex_flow=row pad_all=0 pad_column=#border_width bg_color=#border_muted bg_opa=100% radius=#radius clip_corner=true border_color=#border_muted border_width=#border_width border_opa=100% |
 | `setting_option` |  | min_height=40 min_width=64 pad_hor=14 radius=0 border_width=0 shadow_width=0 |
 | `numpad` |  | pad_row=8 pad_column=8 |

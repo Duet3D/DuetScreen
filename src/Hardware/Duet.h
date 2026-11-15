@@ -22,8 +22,10 @@
 
 namespace Comm
 {
-	constexpr std::string_view const duetCommunicationTypeNames[] = {
-		"connection_method.usb", "connection_method.network", "connection_method.uart"};
+	constexpr std::string_view const duetCommunicationTypeNames[] = {"connection_method.usb",
+																	 "connection_method.network",
+																	 "connection_method.uart",
+																	 "connection_method.simulator"};
 
 	typedef struct
 	{
@@ -51,6 +53,7 @@ namespace Comm
 		usb,
 		network,
 		uart,
+		simulator, // The simulated Duet (src/Simulator); only builds with DUET_SIMULATOR can choose it
 	};
 
 	static_assert(magic_enum::enum_count<CommunicationType>() == std::size(duetCommunicationTypeNames),

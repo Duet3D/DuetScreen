@@ -56,6 +56,10 @@ namespace UI::ConnectionSettings
 			 .description = "1 if the Duet is reached over the network, so its IP address and password "
 							"apply",
 			 .read = [] { return Comm::DUET.GetCommunicationType() == Comm::CommunicationType::network ? 1 : 0; }});
+		Xml::Settings::add(
+			{.name = "simulator_in_use",
+			 .description = "1 if the Duet connected to is the simulated one, so its page applies",
+			 .read = [] { return Comm::DUET.GetCommunicationType() == Comm::CommunicationType::simulator ? 1 : 0; }});
 		Xml::Settings::add({.name = "usb_mode",
 							.description = "Index of the USB-C port's mode",
 							.read = [] { return static_cast<int32_t>(Comm::getUsbMode()); },

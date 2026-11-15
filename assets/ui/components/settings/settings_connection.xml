@@ -1,6 +1,6 @@
 <!--
   The Connection settings page: how the screen reaches the Duet (and, over the network, the Duet's address and
-  password), then, with advanced settings shown (Developer), the USB-C port's mode and how often the Duet is polled;
+  password; while connected to the simulated Duet, the way to its own page, settings_simulator.xml), then, with advanced settings shown (Developer), the USB-C port's mode and how often the Duet is polled;
   and the screen's own WiFi (settings_wifi.xml). Each setting is a row (ds_setting), applied as soon as it is changed.
 
   Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
@@ -24,7 +24,19 @@
 									 setting="connection_method" value="1"/>
 					<settings_option name="uart" translation_tag="tr.connection_method.uart"
 									 setting="connection_method" value="2"/>
+					<!-- In builds with the simulated Duet -->
+					<settings_option name="simulator" translation_tag="tr.connection_method.simulator"
+									 setting="connection_method" value="3">
+						<bind_flag_if_eq subject="source.system.simulator_shown" flag="hidden" ref_value="0"/>
+					</settings_option>
 				</lv_obj>
+			</ds_setting>
+			<!-- The simulated Duet's own page, while it is the Duet connected to -->
+			<ds_setting name="simulator" title_tag="tr.simulator.title" hint_tag="tr.simulator.hints.page">
+				<bind_flag_if_eq subject="source.settings.simulator_in_use" flag="hidden" ref_value="0"/>
+				<chevron_button name="open">
+					<action trigger="clicked" name="actions.navigation.open_page" arg="simulator"/>
+				</chevron_button>
 			</ds_setting>
 
 			<!-- Over the network only -->

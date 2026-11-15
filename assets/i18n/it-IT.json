@@ -31,6 +31,7 @@
       "network": "Rete",
       "usb": "USB",
       "uart": "UART (legacy)",
+      "simulator": "Simulatore (sviluppo)",
       "unknown": "Sconosciuto"
     },
     "units": {
@@ -493,6 +494,107 @@
         "hardware_test": "Controlla display, cicalino, unità e altro, passo dopo passo"
       },
       "advanced": "Avanzata"
+    },
+    "simulator": { /* The simulated Duet, in development builds: its page in the settings */
+      "title": "Duet simulata",
+      "add": "Aggiungi",
+      "as_it_is": "Quello che sta facendo",
+      "no_spindle": "Nessun mandrino",
+      "preset": "Parti da",
+      "name": "Nome",
+      "mode": "Modalità",
+      "status": "Stato",
+      "responding": "Risponde alle richieste",
+      "plugged_in": "Collegata",
+      "reply_delay": "Ritardo di risposta",
+      "noise": "Rumore di temperatura",
+      "message_box": "Mostra una finestra di messaggio",
+      "add_axis": "Aggiungi un asse",
+      "add_heater": "Aggiungi un riscaldatore",
+      "add_extruder": "Aggiungi un estrusore",
+      "add_tool": "Aggiungi un utensile",
+      "add_fan": "Aggiungi una ventola",
+      "add_sensor": "Aggiungi un sensore",
+      "add_spindle": "Aggiungi un mandrino",
+      "add_file": "Aggiungi un lavoro",
+      "hints": {
+        "page": "I suoi assi, riscaldatori, utensili e altro, e come si comporta",
+        "preset": "Sceglierne uno sostituisce tutto ciò che segue",
+        "status": "Riportato qualunque cosa stia facendo",
+        "responding": "Disattivato, lo schermo va in timeout e si ricollega",
+        "plugged_in": "Scollegata, non ci si può connettere",
+        "message_box": "Di ogni modalità, come la mostra M291 da S0 a S7"
+      },
+      "groups": {
+        "machine": "Macchina",
+        "connection": "Connessione",
+        "messages": "Messaggi",
+        "axes": "Assi",
+        "heaters": "Riscaldatori",
+        "extruders": "Estrusori",
+        "tools": "Utensili",
+        "fans": "Ventole",
+        "sensors": "Altri sensori",
+        "spindles": "Mandrini",
+        "files": "Lavori sulla sua scheda SD"
+      },
+      "modes": {
+        "fff": "FFF",
+        "cnc": "CNC",
+        "laser": "Laser"
+      },
+      "presets": {
+        "single_tool": "Stampante a un utensile",
+        "idex": "Stampante IDEX",
+        "tool_changer": "Cambio utensile",
+        "cnc": "Fresatrice CNC",
+        "laser": "Taglierina laser"
+      },
+      "roles": {
+        "tool": "Utensile",
+        "bed": "Piano",
+        "chamber": "Camera",
+        "other": "Altro"
+      },
+      "kinds": {
+        "temperature": "Temperatura",
+        "filament_monitor": "Sensore filamento",
+        "probe": "Sonda",
+        "input": "Ingresso"
+      },
+      "titles": {
+        "axis": "Asse {:d}",
+        "heater": "Riscaldatore {:d}",
+        "extruder": "Estrusore {:d}",
+        "tool": "Utensile {:d}",
+        "fan": "Ventola {:d}",
+        "sensor": "Sensore {:d}",
+        "spindle": "Mandrino {:d}",
+        "file": "Lavoro {:d}"
+      },
+      "fields": {
+        "letter": "Lettera",
+        "min": "Min",
+        "max": "Max",
+        "heating_rate": "Scalda a",
+        "cooling_rate": "Raffredda a",
+        "fault": "Guasto",
+        "role": "Scalda",
+        "extruders": "Estrusori",
+        "spindle": "Mandrino",
+        "heaters": "Riscaldatori",
+        "fans": "Ventole",
+        "tacho": "Tachimetro",
+        "thermostatic": "Termostatica",
+        "kind": "Tipo",
+        "value": "Lettura",
+        "reverse": "Inversione",
+        "print_time": "Dura",
+        "layers": "Strati",
+        "name": "Nome",
+        "filament": "Filamento",
+        "thumbnail": "Miniatura"
+      }
     },
     "side_bar": {
       "back": "Indietro",

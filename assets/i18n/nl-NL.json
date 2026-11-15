@@ -31,6 +31,7 @@
       "network": "Netwerk",
       "usb": "USB",
       "uart": "UART (legacy)",
+      "simulator": "Simulator (ontwikkeling)",
       "unknown": "Onbekend"
     },
     "units": {
@@ -492,6 +493,107 @@
         "hardware_test": "Controleert het scherm, de zoemer, de schijven en meer, stap voor stap"
       },
       "advanced": "Geavanceerd"
+    },
+    "simulator": { /* The simulated Duet, in development builds: its page in the settings */
+      "title": "Gesimuleerde Duet",
+      "add": "Toevoegen",
+      "as_it_is": "Wat hij ook doet",
+      "no_spindle": "Geen spindel",
+      "preset": "Uitgaan van",
+      "name": "Naam",
+      "mode": "Modus",
+      "status": "Status",
+      "responding": "Beantwoordt verzoeken",
+      "plugged_in": "Aangesloten",
+      "reply_delay": "Antwoordvertraging",
+      "noise": "Temperatuurruis",
+      "message_box": "Een berichtvenster tonen",
+      "add_axis": "As toevoegen",
+      "add_heater": "Verwarming toevoegen",
+      "add_extruder": "Extruder toevoegen",
+      "add_tool": "Gereedschap toevoegen",
+      "add_fan": "Ventilator toevoegen",
+      "add_sensor": "Sensor toevoegen",
+      "add_spindle": "Spindel toevoegen",
+      "add_file": "Taak toevoegen",
+      "hints": {
+        "page": "Zijn assen, verwarmingen, gereedschappen en meer, en hoe hij zich gedraagt",
+        "preset": "Een keuze vervangt alles hieronder",
+        "status": "Gemeld, wat hij ook doet",
+        "responding": "Uit: het scherm wacht tevergeefs en verbindt opnieuw",
+        "plugged_in": "Losgekoppeld is geen verbinding mogelijk",
+        "message_box": "Van elke modus, zoals M291 S0 tot S7 die toont"
+      },
+      "groups": {
+        "machine": "Machine",
+        "connection": "Verbinding",
+        "messages": "Berichten",
+        "axes": "Assen",
+        "heaters": "Verwarmingen",
+        "extruders": "Extruders",
+        "tools": "Gereedschappen",
+        "fans": "Ventilatoren",
+        "sensors": "Andere sensoren",
+        "spindles": "Spindels",
+        "files": "Taken op zijn SD-kaart"
+      },
+      "modes": {
+        "fff": "FFF",
+        "cnc": "CNC",
+        "laser": "Laser"
+      },
+      "presets": {
+        "single_tool": "Printer met één gereedschap",
+        "idex": "IDEX-printer",
+        "tool_changer": "Gereedschapswisselaar",
+        "cnc": "CNC-frees",
+        "laser": "Lasersnijder"
+      },
+      "roles": {
+        "tool": "Gereedschap",
+        "bed": "Bed",
+        "chamber": "Kamer",
+        "other": "Overig"
+      },
+      "kinds": {
+        "temperature": "Temperatuur",
+        "filament_monitor": "Filamentsensor",
+        "probe": "Sonde",
+        "input": "Ingang"
+      },
+      "titles": {
+        "axis": "As {:d}",
+        "heater": "Verwarming {:d}",
+        "extruder": "Extruder {:d}",
+        "tool": "Gereedschap {:d}",
+        "fan": "Ventilator {:d}",
+        "sensor": "Sensor {:d}",
+        "spindle": "Spindel {:d}",
+        "file": "Taak {:d}"
+      },
+      "fields": {
+        "letter": "Letter",
+        "min": "Min",
+        "max": "Max",
+        "heating_rate": "Verwarmt met",
+        "cooling_rate": "Koelt met",
+        "fault": "Storing",
+        "role": "Verwarmt",
+        "extruders": "Extruders",
+        "spindle": "Spindel",
+        "heaters": "Verwarmingen",
+        "fans": "Ventilatoren",
+        "tacho": "Toerenteller",
+        "thermostatic": "Thermostatisch",
+        "kind": "Soort",
+        "value": "Meetwaarde",
+        "reverse": "Achteruit",
+        "print_time": "Duurt",
+        "layers": "Lagen",
+        "name": "Naam",
+        "filament": "Filament",
+        "thumbnail": "Miniatuur"
+      }
     },
     "side_bar": {
       "back": "Terug",

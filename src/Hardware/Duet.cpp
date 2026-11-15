@@ -19,6 +19,9 @@
 #include "ObjectModel/Utils.h"
 #include "Storage.h"
 #include "UI/Core/Model.h"
+#if DUET_SIMULATOR
+#  include "Simulator/Simulator.h"
+#endif
 #include "nameof.hpp"
 #include "utils/StorageHelper.h"
 #include "utils/TimeHelper.h"
@@ -86,6 +89,13 @@ namespace Comm
 		ZoneScoped;
 		if (type == m_config.communicationType)
 			return;
+#if !DUET_SIMULATOR
+		if (type == CommunicationType::simulator)
+		{
+			LOG_WARN("This build has no simulated Duet");
+			return;
+		}
+#endif
 		LOG_INFO("Setting communication type to {:s}", nameof::nameof_enum(type));
 		Disconnect();
 
@@ -445,6 +455,11 @@ namespace Comm
 			}
 			break;
 		}
+		case CommunicationType::simulator:
+#if DUET_SIMULATOR
+			Sim::Simulator::get().send(gcode);
+#endif
+			break;
 		case CommunicationType::network:
 		{
 			hv::QueryParams query;
@@ -481,6 +496,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 		{
 			/* UART is too slow to support uploading files */
 			if (m_config.communicationType == CommunicationType::uart && contents.size() > MAX_UART_UPLOAD_SIZE)
@@ -603,6 +619,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 			SendGcodef("M30 \"{:s}\"\n", filename);
 			break;
 		case CommunicationType::network:
@@ -645,6 +662,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 			SendGcodef("M409 F\"{:s}\"\n", flags);
 			break;
 		case CommunicationType::network:
@@ -696,6 +714,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 			SendGcodef("M409 K\"{:s}\" F\"{:s}\"\n", key, flags);
 			break;
 		case CommunicationType::network:
@@ -755,6 +774,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 			SendGcodef("M20 S3 P\"{:s}\" R{:d}\n", dir, first);
 			break;
 		case CommunicationType::network:
@@ -799,6 +819,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 			SendGcodef("M36 \"{:s}\"\n", filename);
 			break;
 		case CommunicationType::network:
@@ -957,6 +978,7 @@ namespace Comm
 		{
 		case CommunicationType::uart:
 		case CommunicationType::usb:
+		case CommunicationType::simulator:
 			SendGcodef("M36.1 P\"{:s}\" S{:d}\n", filename, offset);
 			break;
 		case CommunicationType::network:
@@ -1149,6 +1171,22 @@ namespace Comm
 
 			break;
 		}
+		case CommunicationType::simulator:
+		{
+#if DUET_SIMULATOR
+			ret = Sim::Simulator::get().connect(
+				[](std::string_view reply)
+				{
+					static JsonDecoder decoder;
+					decoder.CheckInput(reinterpret_cast<const unsigned char*>(reply.data()), reply.size());
+				});
+			if (ret)
+			{
+				m_connectionState = ConnectionState::CONNECTED;
+			}
+#endif
+			break;
+		}
 		case CommunicationType::usb:
 		{
 			LOG_DBG("Attempting to connect to Duet via USB");
@@ -1180,7 +1218,7 @@ namespace Comm
 			return ret;
 		}
 
-		/* Only for USB, UART & network is async */
+		/* Only for USB and the simulator, UART & network is async */
 		if (IsConnected())
 		{
 			Model::get().post<EventType::Connected>();
@@ -1236,6 +1274,12 @@ namespace Comm
 			ret = true;
 			break;
 		}
+		case CommunicationType::simulator:
+#if DUET_SIMULATOR
+			Sim::Simulator::get().disconnect();
+#endif
+			ret = true;
+			break;
 		}
 
 		Reset();

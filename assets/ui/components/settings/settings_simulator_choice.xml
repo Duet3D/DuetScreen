@@ -1,0 +1,10 @@
+<!--
+  A heater, extruder or fan a tool of the simulated Duet may have, an option_button in the tool's row: checked while the tool has
+  it; tapping it gives it to the tool or takes it away.
+
+  Fields:   a row of a tool's heaters, extruders or fans in source.simulator.tools (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.toggle
+-->
+<component>
+	<view extends="option_button" subject="row.chosen" action="actions.simulator.toggle" bind_text="row.text"/>
+</component>

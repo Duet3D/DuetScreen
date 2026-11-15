@@ -27,6 +27,7 @@ namespace UI::Xml
 		m_developerMode.set(DEVELOPER_MODE ? 1 : 0);
 		m_systemMonitorShown.set(LV_USE_SYSMON ? 1 : 0);
 		m_buildToolsShown.set(DEBUG_BORDERS || DEVELOPER_MODE || LV_USE_SYSMON ? 1 : 0);
+		m_simulatorShown.set(DUET_SIMULATOR ? 1 : 0);
 	}
 
 	void SystemSource::fields(FieldVisitor& f)
@@ -41,6 +42,9 @@ namespace UI::Xml
 		f.field("build_tools_shown",
 				m_buildToolsShown,
 				"1 if the build has any of debug borders, developer mode or the system monitor");
+		f.field("simulator_shown",
+				m_simulatorShown,
+				"1 if the build has the simulated Duet (a connection method, and its page in the settings)");
 	}
 
 	void SystemSource::update()

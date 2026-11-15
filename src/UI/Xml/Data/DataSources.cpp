@@ -20,6 +20,7 @@
 #include "ObjectModelSource.h"
 #include "ResponseSource.h"
 #include "SettingsSource.h"
+#include "SimulatorSource.h"
 #include "SpindleSource.h"
 #include "SystemSource.h"
 #include "TemperatureSource.h"
@@ -100,16 +101,17 @@ namespace UI::Xml::DataSources
 
 		// The printer data available to XML
 		s_sources = {
-			std::make_shared<AxesSource>(),		   std::make_shared<BabystepSource>(),
-			std::make_shared<ConsoleSource>(),	   std::make_shared<CustomiseSource>(),
-			std::make_shared<ExtruderSource>(),	   std::make_shared<FactorsSource>(),
-			std::make_shared<FilesSource>(),	   std::make_shared<ToolSource>(),
-			std::make_shared<JobSource>(),		   std::make_shared<JogSource>(),
-			std::make_shared<MachineSource>(),	   std::make_shared<MoveSource>(),
-			std::make_shared<NavigationSource>(),  std::make_shared<ObjectModelSource>(),
-			std::make_shared<ResponseSource>(),	   std::make_shared<SettingsSource>(),
-			std::make_shared<SpindleSource>(),	   std::make_shared<SystemSource>(),
-			std::make_shared<TemperatureSource>(), std::make_shared<ThemeSource>(),
+			std::make_shared<AxesSource>(),		  std::make_shared<BabystepSource>(),
+			std::make_shared<ConsoleSource>(),	  std::make_shared<CustomiseSource>(),
+			std::make_shared<ExtruderSource>(),	  std::make_shared<FactorsSource>(),
+			std::make_shared<FilesSource>(),	  std::make_shared<ToolSource>(),
+			std::make_shared<JobSource>(),		  std::make_shared<JogSource>(),
+			std::make_shared<MachineSource>(),	  std::make_shared<MoveSource>(),
+			std::make_shared<NavigationSource>(), std::make_shared<ObjectModelSource>(),
+			std::make_shared<ResponseSource>(),	  std::make_shared<SettingsSource>(),
+			std::make_shared<SimulatorSource>(),  std::make_shared<SpindleSource>(),
+			std::make_shared<SystemSource>(),	  std::make_shared<TemperatureSource>(),
+			std::make_shared<ThemeSource>(),
 		};
 
 		for (auto& source : s_sources)

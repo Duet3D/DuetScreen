@@ -166,6 +166,14 @@ If you are intentionally building outside the devcontainer, install the native d
 ./scripts/install_gcc15.sh
 ```
 
+### The simulated Duet
+
+Without a Duet to hand, connect to the simulated one: **Settings > Connection > Connect by > Simulator**. It answers the screen as a Duet does (the object model with its seqs, file lists and information, G-code replies), and behaves like a machine: heaters trend towards their targets at their heating and cooling rates (their readings a little noisy once there), axes travel at the feed rate, G28 homes and M18 unhomes, a job warms up, prints its layers, pauses, resumes and is cancelled, tools change, M291 shows message boxes, M112 halts it until M999. Its SD card holds its jobs, with thumbnails (unless a job is set without), a few macros and filaments, and example heightmaps made for its bed (tilted, warped, one probed only in a circle); G29 probes a new heightmap.csv and uses it, G29 S1/S2 use one or stop.
+
+While connected to it, **Settings > Connection > Simulated Duet** opens its page, where you choose what it is: a preset to start from (single tool printer, IDEX, tool changer, CNC mill, laser cutter), then each axis, heater, extruder, tool (its heaters, extruders and fans), fan, sensor, spindle and job on its SD card, to edit, add or remove. It can also misbehave, to see how the screen copes: stop answering, be unplugged, answer late, report a status it isn't in (halted, off, …), or show a message box of any mode. What it is is kept with the settings (`simulator` in the settings file); how it behaves starts afresh each time.
+
+It is built only with the `DUETSCREEN_DUET_SIMULATOR` CMake option, which is on by default in simulation, developer mode and test builds, and off in a release build for the screen; without it, its connection method and page are hidden. Its code is in [src/Simulator](../src/Simulator) (`Config` what it is, `Machine` the machine, `Simulator` the connection); the page is [settings_simulator.xml](../assets/ui/components/settings/settings_simulator.xml), with `source.simulator.*`, `source.settings.simulator_*` and `actions.simulator.*` (see [XML_UI_API.md](XML_UI_API.md)).
+
 ## Building for the Duet3D screen
 1. Clone the [buildroot-duetscreen](https://github.com/Duet3D/buildroot-duetscreen) project next to this repository.
 2. Checkout the `master` branch.
@@ -434,6 +442,19 @@ To answer in the terminal instead, for example over SSH or from an agent, pass `
 - If tests fail to run, check that `DuetScreen.tests` exists in `out/build/<preset>/tests/` and that `ctest` is available in PATH.
 - If no browser opens, open the address the script prints. Over SSH, forward the port first (fix it with `--review-port`), or use `--compare-mode cli`.
 
+
+### Tests with the simulated Duet
+
+A test can connect to the simulated Duet (see above) instead of feeding it recorded object models, when what matters is how the screen and a Duet work together. It runs only when the test says, so tests are repeatable: `TestSuite` ([TestSuite.h](../tests/src/test_utils/TestSuite.h)) has `connectSimulator(config)` (a preset, or a `Sim::Config` of the test's own), `pollSimulator()` (poll it as the screen does, every key read), `sendToSimulator(gcode)` and `simulate(time)` (let time pass, then poll). Every test starts disconnected from it, as the default preset.
+
+```cpp
+connectSimulator();
+sendToSimulator("G28\nM140 S60");
+simulate(std::chrono::seconds(300));
+EXPECT_NEAR(OM::Tree::get().root().at("heat.heaters[0].current").number(), 60.0, 0.5);
+```
+
+Recorded object models in `tests/object_model/` remain the way to test against a real Duet's exact replies. The simulator's own tests are in [test_simulator.cpp](../tests/src/test_cases/Simulator/test_simulator.cpp), its page's in [test_simulator_settings.cpp](../tests/src/test_cases/UI/test_simulator_settings.cpp).
 
 ### Hardware Testing
 

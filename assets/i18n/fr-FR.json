@@ -31,6 +31,7 @@
       "network": "Réseau",
       "usb": "USB",
       "uart": "UART (ancien)",
+      "simulator": "Simulateur (développement)",
       "unknown": "Inconnu"
     },
     "units": {
@@ -492,6 +493,107 @@
         "hardware_test": "Vérifie l'affichage, le buzzer, les lecteurs et plus, étape par étape"
       },
       "advanced": "Avancé"
+    },
+    "simulator": { /* The simulated Duet, in development builds: its page in the settings */
+      "title": "Duet simulé",
+      "add": "Ajouter",
+      "as_it_is": "Ce qu'il fait",
+      "no_spindle": "Pas de broche",
+      "preset": "Partir de",
+      "name": "Nom",
+      "mode": "Mode",
+      "status": "État",
+      "responding": "Répond aux requêtes",
+      "plugged_in": "Branché",
+      "reply_delay": "Délai de réponse",
+      "noise": "Bruit de température",
+      "message_box": "Afficher une boîte de message",
+      "add_axis": "Ajouter un axe",
+      "add_heater": "Ajouter une chauffe",
+      "add_extruder": "Ajouter un extrudeur",
+      "add_tool": "Ajouter un outil",
+      "add_fan": "Ajouter un ventilateur",
+      "add_sensor": "Ajouter un capteur",
+      "add_spindle": "Ajouter une broche",
+      "add_file": "Ajouter une tâche",
+      "hints": {
+        "page": "Ses axes, chauffes, outils et plus, et son comportement",
+        "preset": "En choisir un remplace tout ce qui suit",
+        "status": "Annoncé quoi qu'il fasse",
+        "responding": "Désactivé, l'écran expire et se reconnecte",
+        "plugged_in": "Débranché, impossible de s'y connecter",
+        "message_box": "De chaque mode, comme M291 S0 à S7 l'affiche"
+      },
+      "groups": {
+        "machine": "Machine",
+        "connection": "Connexion",
+        "messages": "Messages",
+        "axes": "Axes",
+        "heaters": "Chauffes",
+        "extruders": "Extrudeurs",
+        "tools": "Outils",
+        "fans": "Ventilateurs",
+        "sensors": "Autres capteurs",
+        "spindles": "Broches",
+        "files": "Tâches sur sa carte SD"
+      },
+      "modes": {
+        "fff": "FFF",
+        "cnc": "CNC",
+        "laser": "Laser"
+      },
+      "presets": {
+        "single_tool": "Imprimante à un outil",
+        "idex": "Imprimante IDEX",
+        "tool_changer": "Changeur d'outils",
+        "cnc": "Fraiseuse CNC",
+        "laser": "Découpeuse laser"
+      },
+      "roles": {
+        "tool": "Outil",
+        "bed": "Plateau",
+        "chamber": "Caisson",
+        "other": "Autre"
+      },
+      "kinds": {
+        "temperature": "Température",
+        "filament_monitor": "Capteur de filament",
+        "probe": "Sonde",
+        "input": "Entrée"
+      },
+      "titles": {
+        "axis": "Axe {:d}",
+        "heater": "Chauffe {:d}",
+        "extruder": "Extrudeur {:d}",
+        "tool": "Outil {:d}",
+        "fan": "Ventilateur {:d}",
+        "sensor": "Capteur {:d}",
+        "spindle": "Broche {:d}",
+        "file": "Tâche {:d}"
+      },
+      "fields": {
+        "letter": "Lettre",
+        "min": "Min",
+        "max": "Max",
+        "heating_rate": "Chauffe à",
+        "cooling_rate": "Refroidit à",
+        "fault": "Défaut",
+        "role": "Chauffe",
+        "extruders": "Extrudeurs",
+        "spindle": "Broche",
+        "heaters": "Chauffes",
+        "fans": "Ventilateurs",
+        "tacho": "Tachymètre",
+        "thermostatic": "Thermostatique",
+        "kind": "Type",
+        "value": "Mesure",
+        "reverse": "Inverse",
+        "print_time": "Durée",
+        "layers": "Couches",
+        "name": "Nom",
+        "filament": "Filament",
+        "thumbnail": "Miniature"
+      }
     },
     "side_bar": {
       "back": "Retour",

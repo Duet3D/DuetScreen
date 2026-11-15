@@ -387,6 +387,7 @@ namespace UI::Themes
 		{"chip_accent", &ComponentStyles::chip_accent},
 		{"setting_control", &ComponentStyles::setting_control},
 		{"setting_value", &ComponentStyles::setting_value},
+		{"setting_controls", &ComponentStyles::setting_controls},
 		{"setting_options", &ComponentStyles::setting_options},
 		{"setting_option", &ComponentStyles::setting_option},
 		{"numpad", &ComponentStyles::numpad},

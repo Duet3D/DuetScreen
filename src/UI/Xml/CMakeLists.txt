@@ -42,6 +42,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/PrinterModel.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ResponseSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/SettingsSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/SimulatorSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/SystemSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/TemperatureSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ThemeSource.cpp

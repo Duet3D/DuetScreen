@@ -127,6 +127,11 @@
 			 which is tapped to open it -->
 		<style name="setting_value" min_height="40" pad_hor="4" pad_column="8" bg_opa="0" border_width="0"
 			   shadow_width="0" outline_width="0" text_color="#text_muted"/>
+		<!-- A row's several controls, side by side at its end, onto more lines when short of room: e.g. a row of a list
+			 that edits its item. Taps on the row between them do nothing. -->
+		<style name="setting_controls" width="70%" height="content" layout="flex" flex_flow="row_wrap"
+			   flex_main_place="end" flex_cross_place="center" flex_track_place="end" pad_all="0" pad_row="8"
+			   pad_column="8" bg_opa="0" border_width="0"/>
 		<!-- One of a few options: buttons joined in a box, the chosen one checked -->
 		<style name="setting_options" width="content" height="content" layout="flex" flex_flow="row" pad_all="0"
 			   pad_column="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"

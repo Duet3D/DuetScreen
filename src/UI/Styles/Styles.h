@@ -396,6 +396,7 @@ namespace UI::Themes
 		Style chip_accent;		   // A chip for the state that matters now, e.g. "In use": tinted in the accent
 		Style setting_control;	   // A row's button: big enough to tap
 		Style setting_value;	   // A row's choice, or its way into more: the value and a chevron, plain on the row
+		Style setting_controls;	   // A row's several controls, side by side at its end, wrapping when short of room
 		Style setting_options;	   // One of a few options: the box the buttons are joined in
 		Style setting_option;	   // One of those buttons
 

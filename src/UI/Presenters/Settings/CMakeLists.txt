@@ -7,6 +7,8 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/GeneralSettings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/NotificationSettings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SettingsActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SimulatorActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SimulatorSettings.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/SystemActions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ThemePreviewPresenter.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/WifiPresenter.cpp

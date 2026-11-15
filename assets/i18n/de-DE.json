@@ -31,6 +31,7 @@
       "network": "Netzwerk",
       "usb": "USB",
       "uart": "UART (Legacy)",
+      "simulator": "Simulator (Entwicklung)",
       "unknown": "Unbekannt"
     },
     "units": {
@@ -492,6 +493,107 @@
         "hardware_test": "Prüft Anzeige, Summer, Laufwerke und mehr, Schritt für Schritt"
       },
       "advanced": "Erweitert"
+    },
+    "simulator": { /* The simulated Duet, in development builds: its page in the settings */
+      "title": "Simulierter Duet",
+      "add": "Hinzufügen",
+      "as_it_is": "Was er gerade tut",
+      "no_spindle": "Keine Spindel",
+      "preset": "Ausgehend von",
+      "name": "Name",
+      "mode": "Modus",
+      "status": "Status",
+      "responding": "Beantwortet Anfragen",
+      "plugged_in": "Angeschlossen",
+      "reply_delay": "Antwortverzögerung",
+      "noise": "Temperaturrauschen",
+      "message_box": "Meldungsfenster zeigen",
+      "add_axis": "Achse hinzufügen",
+      "add_heater": "Heizung hinzufügen",
+      "add_extruder": "Extruder hinzufügen",
+      "add_tool": "Werkzeug hinzufügen",
+      "add_fan": "Lüfter hinzufügen",
+      "add_sensor": "Sensor hinzufügen",
+      "add_spindle": "Spindel hinzufügen",
+      "add_file": "Auftrag hinzufügen",
+      "hints": {
+        "page": "Achsen, Heizungen, Werkzeuge und mehr, und sein Verhalten",
+        "preset": "Eine Auswahl ersetzt alles darunter",
+        "status": "Wird gemeldet, egal was er tut",
+        "responding": "Aus: der Bildschirm wartet vergeblich und verbindet neu",
+        "plugged_in": "Ausgesteckt ist keine Verbindung möglich",
+        "message_box": "Jeden Modus, wie M291 S0 bis S7 ihn zeigt"
+      },
+      "groups": {
+        "machine": "Maschine",
+        "connection": "Verbindung",
+        "messages": "Meldungen",
+        "axes": "Achsen",
+        "heaters": "Heizungen",
+        "extruders": "Extruder",
+        "tools": "Werkzeuge",
+        "fans": "Lüfter",
+        "sensors": "Weitere Sensoren",
+        "spindles": "Spindeln",
+        "files": "Aufträge auf der SD-Karte"
+      },
+      "modes": {
+        "fff": "FFF",
+        "cnc": "CNC",
+        "laser": "Laser"
+      },
+      "presets": {
+        "single_tool": "Drucker mit einem Werkzeug",
+        "idex": "IDEX-Drucker",
+        "tool_changer": "Werkzeugwechsler",
+        "cnc": "CNC-Fräse",
+        "laser": "Laserschneider"
+      },
+      "roles": {
+        "tool": "Werkzeug",
+        "bed": "Bett",
+        "chamber": "Kammer",
+        "other": "Sonstiges"
+      },
+      "kinds": {
+        "temperature": "Temperatur",
+        "filament_monitor": "Filamentsensor",
+        "probe": "Sonde",
+        "input": "Eingang"
+      },
+      "titles": {
+        "axis": "Achse {:d}",
+        "heater": "Heizung {:d}",
+        "extruder": "Extruder {:d}",
+        "tool": "Werkzeug {:d}",
+        "fan": "Lüfter {:d}",
+        "sensor": "Sensor {:d}",
+        "spindle": "Spindel {:d}",
+        "file": "Auftrag {:d}"
+      },
+      "fields": {
+        "letter": "Buchstabe",
+        "min": "Min",
+        "max": "Max",
+        "heating_rate": "Heizrate",
+        "cooling_rate": "Kühlrate",
+        "fault": "Fehler",
+        "role": "Heizt",
+        "extruders": "Extruder",
+        "spindle": "Spindel",
+        "heaters": "Heizungen",
+        "fans": "Lüfter",
+        "tacho": "Tacho",
+        "thermostatic": "Thermostatisch",
+        "kind": "Art",
+        "value": "Messwert",
+        "reverse": "Rückwärts",
+        "print_time": "Dauer",
+        "layers": "Schichten",
+        "name": "Name",
+        "filament": "Filament",
+        "thumbnail": "Vorschaubild"
+      }
     },
     "side_bar": {
       "back": "Zurück",

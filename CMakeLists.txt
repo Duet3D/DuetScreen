@@ -140,6 +140,14 @@ if (DUETSCREEN_DEVELOPER_MODE)
   set(DUETSCREEN_ENABLE_CONSOLE_SHELL ON CACHE BOOL "Enable sending shell commands via the GUI console" FORCE)
 endif()
 
+# The simulated Duet (src/Simulator): a connection method that answers like a Duet, for development and the unit
+# tests. On by default in simulation and developer mode builds, never in a release build for the screen.
+set(_duet_simulator_default OFF)
+if(PROCESSOR STREQUAL "Simulation" OR DUETSCREEN_DEVELOPER_MODE OR BUILD_TESTING)
+  set(_duet_simulator_default ON)
+endif()
+option(DUETSCREEN_DUET_SIMULATOR "Build the simulated Duet connection method (development only)" ${_duet_simulator_default})
+
 # Hardware test requires developer mode to enable ADB
 if (DUETSCREEN_HARDWARE_TEST)
   set(DUETSCREEN_DEVELOPER_MODE ON CACHE BOOL "Enable developer mode features" FORCE)

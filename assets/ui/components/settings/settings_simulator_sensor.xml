@@ -1,0 +1,28 @@
+<!--
+  A sensor of the simulated Duet that isn't a heater's, a row (ds_setting) of its page: what it is, its name, its
+  reading (asked for on the number pad), and a button to remove it.
+
+  Fields:   a row of source.simulator.sensors (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<ds_choice name="kind" title_tag="tr.simulator.fields.kind" bind_options="source.simulator.sensor_kinds"
+					   bind_selected="row.kind">
+				<style name="setting_value"/>
+				<action trigger="value_confirmed" name="actions.simulator.set" arg="kind"/>
+			</ds_choice>
+			<ds_textarea name="name" bind_text="row.name" one_line="true" width="150" height="content">
+				<action trigger="ready" name="actions.simulator.set" arg="name"/>
+			</ds_textarea>
+			<value_button name="value" title_tag="tr.simulator.fields.value" value="row.value" width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="value"/>
+			</value_button>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

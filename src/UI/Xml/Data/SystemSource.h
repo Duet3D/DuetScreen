@@ -40,5 +40,6 @@ namespace UI::Xml
 		IntSubject m_developerMode;		  // `developer_mode`
 		IntSubject m_systemMonitorShown;  // `system_monitor_shown`
 		IntSubject m_buildToolsShown;	  // `build_tools_shown`
+		IntSubject m_simulatorShown;	  // `simulator_shown`
 	};
 } // namespace UI::Xml

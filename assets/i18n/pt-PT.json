@@ -31,6 +31,7 @@
       "network": "Rede",
       "usb": "USB",
       "uart": "UART (legacy)",
+      "simulator": "Simulador (desenvolvimento)",
       "unknown": "Desconhecido"
     },
     "units": {
@@ -492,6 +493,107 @@
         "hardware_test": "Verifica o ecrã, o besouro, as unidades e mais, passo a passo"
       },
       "advanced": "Avançado"
+    },
+    "simulator": { /* The simulated Duet, in development builds: its page in the settings */
+      "title": "Duet simulada",
+      "add": "Adicionar",
+      "as_it_is": "O que estiver a fazer",
+      "no_spindle": "Sem fuso",
+      "preset": "Partir de",
+      "name": "Nome",
+      "mode": "Modo",
+      "status": "Estado",
+      "responding": "Responde a pedidos",
+      "plugged_in": "Ligada",
+      "reply_delay": "Atraso de resposta",
+      "noise": "Ruído de temperatura",
+      "message_box": "Mostrar uma caixa de mensagem",
+      "add_axis": "Adicionar um eixo",
+      "add_heater": "Adicionar um aquecedor",
+      "add_extruder": "Adicionar um extrusor",
+      "add_tool": "Adicionar uma ferramenta",
+      "add_fan": "Adicionar uma ventoinha",
+      "add_sensor": "Adicionar um sensor",
+      "add_spindle": "Adicionar um fuso",
+      "add_file": "Adicionar um trabalho",
+      "hints": {
+        "page": "Os seus eixos, aquecedores, ferramentas e mais, e como se comporta",
+        "preset": "Escolher um substitui tudo o que está abaixo",
+        "status": "Comunicado faça o que fizer",
+        "responding": "Desligado, o ecrã esgota o tempo e volta a ligar",
+        "plugged_in": "Desligada, não é possível ligar-se a ela",
+        "message_box": "De cada modo, como M291 S0 a S7 a mostra"
+      },
+      "groups": {
+        "machine": "Máquina",
+        "connection": "Ligação",
+        "messages": "Mensagens",
+        "axes": "Eixos",
+        "heaters": "Aquecedores",
+        "extruders": "Extrusores",
+        "tools": "Ferramentas",
+        "fans": "Ventoinhas",
+        "sensors": "Outros sensores",
+        "spindles": "Fusos",
+        "files": "Trabalhos no seu cartão SD"
+      },
+      "modes": {
+        "fff": "FFF",
+        "cnc": "CNC",
+        "laser": "Laser"
+      },
+      "presets": {
+        "single_tool": "Impressora de uma ferramenta",
+        "idex": "Impressora IDEX",
+        "tool_changer": "Trocador de ferramentas",
+        "cnc": "Fresadora CNC",
+        "laser": "Cortadora laser"
+      },
+      "roles": {
+        "tool": "Ferramenta",
+        "bed": "Base",
+        "chamber": "Câmara",
+        "other": "Outro"
+      },
+      "kinds": {
+        "temperature": "Temperatura",
+        "filament_monitor": "Sensor de filamento",
+        "probe": "Sonda",
+        "input": "Entrada"
+      },
+      "titles": {
+        "axis": "Eixo {:d}",
+        "heater": "Aquecedor {:d}",
+        "extruder": "Extrusor {:d}",
+        "tool": "Ferramenta {:d}",
+        "fan": "Ventoinha {:d}",
+        "sensor": "Sensor {:d}",
+        "spindle": "Fuso {:d}",
+        "file": "Trabalho {:d}"
+      },
+      "fields": {
+        "letter": "Letra",
+        "min": "Mín",
+        "max": "Máx",
+        "heating_rate": "Aquece a",
+        "cooling_rate": "Arrefece a",
+        "fault": "Falha",
+        "role": "Aquece",
+        "extruders": "Extrusores",
+        "spindle": "Fuso",
+        "heaters": "Aquecedores",
+        "fans": "Ventoinhas",
+        "tacho": "Tacómetro",
+        "thermostatic": "Termostática",
+        "kind": "Tipo",
+        "value": "Leitura",
+        "reverse": "Inverso",
+        "print_time": "Demora",
+        "layers": "Camadas",
+        "name": "Nome",
+        "filament": "Filamento",
+        "thumbnail": "Miniatura"
+      }
     },
     "side_bar": {
       "back": "Voltar",
