@@ -28,14 +28,15 @@
 			<bind_flag_if cond="${style} eq 2 or (${style} eq 0 and source.tool.summary_auto eq 1)" flag="hidden"/>
 		</tools_list>
 
-		<!-- The tiles in a column of their own, scrolling apart from the tool shown beside them -->
+		<!-- The tiles in a column of their own, scrolling apart from the tool shown beside them; its scrollbar runs in
+			 the padding on its right, clear of the tiles -->
 		<lv_obj name="summary" width="100%" height="100%" flex_flow="row" scrollable="false">
 			<style name="pad_zero"/>
 			<style name="pad_gap"/>
 			<bind_flag_if cond="${style} eq 1 or (${style} eq 0 and source.tool.summary_auto eq 0)" flag="hidden"/>
-			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="30%" height="100%"
-					 flex_flow="column" scroll_dir="ver" style_min_width="120" style_max_width="150" style_pad_all="0"
-					 style_pad_row="8"/>
+			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="22%" height="100%"
+					 flex_flow="column" scroll_dir="ver" style_min_width="104" style_max_width="128" style_pad_all="0"
+					 style_pad_right="8" style_pad_row="8"/>
 			<lv_obj name="detail" height="100%" flex_grow="1" flex_flow="column" scroll_dir="ver">
 				<style name="pad_zero"/>
 				<style name="pad_gap"/>

@@ -1,8 +1,8 @@
 <!--
   One tool as a tile of the dashboard's tools widget (dashboard_tools.xml): its number, "In use" if it is, each of its
-  heaters' temperature and target over a thin bar (dashboard_tool_tile_heater.xml), and its name; its state on its
-  edge (any fault marks it). Tinted while it is the tool shown in detail. Tap it to show it, without selecting it;
-  tapping the tool in use's follows the tool in use again.
+  heaters' temperature and target over a thin bar (dashboard_tool_tile_heater.xml), and its name; its state
+  on its edge (any fault marks it). Tinted while it is the tool shown in detail. Tap it to show it, without selecting
+  it; tapping the tool in use's follows the tool in use again.
 
   Fields:   a row of source.tool.tiles: row.number, row.label, row.name, row.state, row.in_use, row.shown
             (src/UI/Xml/Data/ToolSource.h); its heaters, om.tools[{row.number}].heaters
