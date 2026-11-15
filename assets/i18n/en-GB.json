@@ -72,7 +72,7 @@
     "control": {
       "move_tab": "Move",
       "tools_tab": "Tools",
-      "heightmap_tab": "Bed mesh",
+      "heightmap_tab": "Bed",
       "object_cancel_tab": "Objects",
       "fan_tab": "Fans"
     },

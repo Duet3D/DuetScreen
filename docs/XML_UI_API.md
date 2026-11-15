@@ -2464,7 +2464,7 @@ At its smallest, 180×136 px:
 
 #### heightmap
 
-**Bed mesh**: The bed's height map, levelling and probing
+**Bed**: The bed's height map, levelling and probing
 
 In Motion; placed in `dashboard`; component `heightmap` ([heightmap.json](../assets/ui/widgets/motion/heightmap.json)). In a free layout it is 642×467 px, and at least 550×372 px.
 
