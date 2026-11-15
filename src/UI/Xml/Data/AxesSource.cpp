@@ -119,6 +119,9 @@ namespace UI::Xml
 		f.field("disable_motors_usable", m_disableMotorsUsable, "1 if the motors can be disabled");
 		f.list("others", m_others, "The axes the user sees other than X, Y and Z: one is chosen to be jogged");
 		f.field("others_shown", m_othersShown, "1 if there are axes other than X, Y and Z");
+		f.field("others_choice_shown",
+				m_othersChoiceShown,
+				"1 if there are two or more axes other than X, Y and Z, so one is chosen to be jogged");
 		f.field("other.letter", m_otherLetter, "The letter of the axis chosen from `others`, e.g. \"U\"");
 		namedFields(f, "other", m_other);
 	}
@@ -210,6 +213,7 @@ namespace UI::Xml
 						  row.chosen.set(letterOf(others[i]) == m_chosen ? 1 : 0);
 					  });
 		m_othersShown.set(others.empty() ? 0 : 1);
+		m_othersChoiceShown.set(others.size() > 1 ? 1 : 0);
 		m_otherLetter.set(m_chosen != '\0' ? std::string(1, m_chosen) : std::string());
 		m_other.show(PrinterModel::axis(m_chosen), connected); // Doesn't exist while none is chosen
 		m_allHomed.set(!all.empty() &&

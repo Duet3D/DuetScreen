@@ -877,6 +877,70 @@ TEST_F(TestHomeViewWithSimulator, DashboardFollowsAJob)
 	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/dashboard_printing.png")
 }
 
+TEST_F(TestHomeViewWithSimulator, TheJobPanelLeadsBackToTheJob)
+{
+	sendToSimulator("M32 \"benchy.gcode\"");
+	simulate(std::chrono::seconds(300));
+	deliverModelEvents();
+	dashboardJobPages().open("ready"); // back to the jobs: the job running leads back to its status
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/job_panel.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, ToolInUseIsDeselectedAfterACancelledJob)
+{
+	sendToSimulator("M32 \"benchy.gcode\"");
+	simulate(std::chrono::seconds(300));
+	sendToSimulator("M25");
+	simulate(std::chrono::seconds(2));
+	sendToSimulator("M0"); // the heaters go off; the tool stays in use
+	simulate(std::chrono::seconds(2));
+	ASSERT_EQ(UI::Xml::PrinterModel::currentTool(), 0u);
+
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("dashboard").getRootPtr(), "actions.tool.toggle", "0");
+	simulate(std::chrono::seconds(1));
+	EXPECT_FALSE(UI::Xml::PrinterModel::currentTool().has_value());
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("dashboard").getRootPtr(), "actions.tool.toggle", "0");
+	simulate(std::chrono::seconds(1));
+	EXPECT_EQ(UI::Xml::PrinterModel::currentTool(), 0u);
+}
+
+TEST_F(TestHomeViewWithSimulator, FansTheFirmwareRunsAreNotSetByHand)
+{
+	openControlTab(4);
+	deliverModelEvents();
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/fans.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, MoveTabWithOneMoreAxis)
+{
+	connectSimulator(Sim::presets()[2].make()); // the tool changer: X, Y, Z and C
+	pollSimulator();
+	sendToSimulator("G28");
+	simulate(std::chrono::seconds(2));
+	openControlTab(0);
+	deliverModelEvents();
+	runTimers();
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(move, "choices"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(lv_obj_get_scroll_right(lv_obj_find_by_name(move, "jog")), 0) << "every column fits";
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/move_one_more_axis.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, BedMeshNotChosenAsksForOne)
+{
+	openControlTab(0);
+	openControlTab(2);
+	for (int i = 0; i < 3; i++) // the saved meshes, asked for as the tab opens
+	{
+		pollSimulator();
+		deliverModelEvents();
+	}
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/heightmap_none_chosen.png")
+}
+
 TEST_F(TestHomeViewWithSimulator, BedMeshProbedIsShown)
 {
 	sendToSimulator("G28\nG29");
@@ -1322,6 +1386,8 @@ TEST_F(TestHomeViewWithData, ControlView)
 
 	load_model_data_from_file("tests/object_model/test_bench/model_10_axes.json");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
+	EXPECT_EQ(lv_obj_get_scroll_right(lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "jog")), 0)
+		<< "every column fits";
 	{
 		// Hold the second babystep size to change it
 		lv_obj_t* steps = lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "presets");

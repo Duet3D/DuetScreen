@@ -186,7 +186,7 @@
       "no_maps": "Nog geen opgeslagen meshes: meet het bed om er een te maken",
       "mesh": "Mesh:",
       "no_mesh": "Geen",
-      "shown": "Getoonde mesh"
+      "select_mesh": "Kies een mesh"
     },
     "object_cancel": {
       "title": "Object annuleren",

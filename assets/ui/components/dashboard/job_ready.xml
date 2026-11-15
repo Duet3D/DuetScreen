@@ -1,6 +1,6 @@
 <!--
-  What is ready to start, the `job` widget's first page (dashboard_job.xml): while a job runs, it, tapped to see its
-  status; else the last job, to print again; every job, newest first, in a list that fills the room left and scrolls,
+  What is ready to start, the `job` widget's first page (dashboard_job.xml): while a job runs, it, highlighted, tapped
+  to see its status; else the last job, to print again; every job, newest first, in a list that fills the room left and scrolls,
   each tapped to ask whether to start it (the dialog says
   why not while a job runs); and the macros, each tapped to ask whether to run it. All files opens the Files page's jobs; the refresh
   button lists the files again (they are also listed again on coming back to the dashboard and when a job ends).
@@ -49,12 +49,14 @@
 			</lv_obj>
 		</lv_obj>
 
-		<!-- The job, while it runs: tapped, its status -->
+		<!-- The job, while it runs: tapped, its status. Tinted and edged in the accent, as what is chosen is, so it
+			 stands out as the way back to it -->
 		<ds_setting_group name="now" title_tag="tr.job.current_job" width="100%">
 			<bind_flag_if_eq subject="source.machine.job_active" flag="hidden" ref_value="0"/>
 			<lv_obj name="current" height="content" flex_flow="row" scrollable="false" style_flex_cross_place="center"
 					style_flex_track_place="center">
 				<style name="setting_row"/>
+				<style name="btn_checked"/>
 				<style name="pressed" selector="pressed"/>
 				<action trigger="clicked" name="actions.navigation.open_page" arg="status"/>
 				<thumbnail_box name="picture" src="source.job.thumbnail" width="40" height="40"/>

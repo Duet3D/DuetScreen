@@ -186,7 +186,7 @@
       "no_maps": "Nessuna mesh salvata: tasta il piano per crearne una",
       "mesh": "Mesh:",
       "no_mesh": "Nessuna",
-      "shown": "Mesh mostrata"
+      "select_mesh": "Scegli una mesh"
     },
     "object_cancel": {
       "title": "Annulla oggetto",

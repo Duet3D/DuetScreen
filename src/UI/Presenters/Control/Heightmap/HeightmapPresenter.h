@@ -104,6 +104,7 @@ namespace UI
 		Xml::StringSubject<96> m_file;				// The mesh shown's file, or "None"
 		Xml::StringSubject<2048> m_mapOptions;		// `map_options`: the files, one per line
 		Xml::IntSubject m_shownIndex{-1};			// `shown_index`: the shown map's line, or -1
+		Xml::StringSubject<128> m_choiceText;		// `choice_text`: the shown map's file, or a prompt to pick one
 		Xml::IntSubject m_shownLoaded;				// `shown_loaded`: 1 if the printer uses the map shown
 		Xml::StringSubject<16> m_shownLoadText;		// `shown_load_text`: "Load" or "Unload"
 		Xml::IntSubject m_hasMaps;					// `has_maps`

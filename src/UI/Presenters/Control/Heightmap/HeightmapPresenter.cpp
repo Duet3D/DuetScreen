@@ -66,6 +66,9 @@ namespace UI
 		f.field("file", m_file, "The file of the mesh shown, e.g. \"heightmap.csv\", or \"None\"");
 		f.field("map_options", m_mapOptions, "The saved meshes' files, one per line, for a <ds_choice>");
 		f.field("shown_index", m_shownIndex, "The line of `map_options` shown, or -1 if none is");
+		f.field("choice_text",
+				m_choiceText,
+				"The file of the mesh shown, e.g. \"heightmap.csv\", or, while none is, \"Select a mesh\"");
 		f.field("shown_loaded", m_shownLoaded, "1 if the printer uses the mesh shown");
 		f.field("shown_load_text", m_shownLoadText, "\"Load\", or \"Unload\" if the printer uses the mesh shown");
 		f.field("has_maps", m_hasMaps, "1 if there are height map files, else 0");
@@ -270,6 +273,7 @@ namespace UI
 		const bool loaded = !m_shownName.empty() && m_shownName == m_current;
 		m_mapOptions.set(options);
 		m_shownIndex.set(shown);
+		m_choiceText.set(shown >= 0 ? m_shownName : _("heightmap.select_mesh"));
 		m_shownLoaded.set(loaded ? 1 : 0);
 		m_shownLoadText.set(loaded ? _("heightmap.unload") : _("heightmap.load"));
 		m_hasMaps.set(m_files.empty() ? 0 : 1);

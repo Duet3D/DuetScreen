@@ -25,13 +25,15 @@ namespace UI::ToolActions
 			LOG_WARN("actions.tool.toggle needs the tool's number as its arg, e.g. arg=\"{{row.index}}\"");
 			return;
 		}
+		// Selected is the tool in use (state.currentTool), as every view shows it: a tool's own state may say
+		// otherwise, e.g. "off" after a job was cancelled with it in use
 		const auto number = static_cast<size_t>(*tool);
-		bool active = false;
+		bool inUse = false;
 		{
 			MODEL_LOCK();
-			active = Xml::PrinterModel::tool(number)["state"].text() == "active";
+			inUse = Xml::PrinterModel::currentTool() == number;
 		}
-		Xml::Services::sendGcode(active ? std::string("T-1\n") : fmt::format("T{:d}\n", number));
+		Xml::Services::sendGcode(inUse ? std::string("T-1\n") : fmt::format("T{:d}\n", number));
 	}
 
 	/** `actions.tool.show`: show the tool numbered `arg` in the tools widget, or follow the tool in use (`auto`) */

@@ -321,10 +321,18 @@ namespace Sim
 		for (size_t i = 0; i < m_fans.size(); i++)
 		{
 			const Fan& fan = m_config.fans[i];
-			Json sensors = Json::array();
-			if (fan.thermostatic && !m_config.tools.empty() && !m_config.tools.front().heaters.empty())
+			// As RepRapFirmware reports one: a fan the firmware runs (thermostatic) has the temperatures it runs
+			// between; one set by hand only an empty list of sensors
+			Json thermostatic = Json{{"sensors", Json::array()}};
+			if (fan.thermostatic)
 			{
-				sensors.push_back(m_config.tools.front().heaters.front());
+				Json sensors = Json::array();
+				if (!m_config.tools.empty() && !m_config.tools.front().heaters.empty())
+				{
+					sensors.push_back(m_config.tools.front().heaters.front());
+				}
+				thermostatic = Json{
+					{"highTemperature", THERMOSTATIC_ON}, {"lowTemperature", THERMOSTATIC_ON}, {"sensors", sensors}};
 			}
 			fans.push_back(Json{{"actualValue", rounded(m_fans[i].actual)},
 								{"blip", 0.1},
@@ -335,7 +343,7 @@ namespace Sim
 								{"requestedValue", rounded(m_fans[i].requested)},
 								{"rpm", fan.tacho ? std::lround(m_fans[i].actual * 6000.0f) : -1},
 								{"tachoPpr", 2.0},
-								{"thermostatic", Json{{"sensors", sensors}}}});
+								{"thermostatic", thermostatic}});
 		}
 
 		// heat

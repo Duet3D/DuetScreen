@@ -196,6 +196,9 @@ namespace Sim
 		void setHeaterTemperature(size_t heater, std::optional<float> active, std::optional<float> standby,
 								  std::string& reply);
 
+		/** The heater of bed (`bed`) or chamber number `index`, as M140 P and M141 P number them, or nothing */
+		std::optional<size_t> bedOrChamberHeater(bool bed, int32_t index) const;
+
 		/** Make `tool` the tool in use (-1 for none), its heaters active and the previous tool's on standby */
 		void selectTool(int32_t tool);
 
@@ -205,7 +208,8 @@ namespace Sim
 		/** End the job: it finished, or was cancelled */
 		void endJob();
 
-		/** Turn every heater off and stop every spindle and fan (M112, M0 after cancel) */
+		/** Turn every heater off and stop every spindle, fan and move; the tool in use stays in use (M112, M0 after
+		 * pausing) */
 		void stopEverything();
 
 		// MachineModel.cpp
@@ -318,6 +322,9 @@ namespace Sim
 
 		/** The temperature heaters cool down to, °C */
 		static constexpr float AMBIENT = 21.0f;
+
+		/** A thermostatic fan's heater turns it on above this, °C */
+		static constexpr float THERMOSTATIC_ON = 45.0f;
 
 		/** Seconds a pause, a resume, a cancel or a tool change takes */
 		static constexpr double TRANSITION_TIME = 1.0;

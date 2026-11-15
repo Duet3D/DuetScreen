@@ -151,6 +151,50 @@ TEST_F(TestSimulatedMachine, ReadingsAreSmoothWhileHeatingOrCooling)
 	EXPECT_GT(holding.size(), 5u); // noisy once there
 }
 
+TEST_F(TestSimulatedMachine, HeaterStatesChangeAsTheScreenAsks)
+{
+	// A tool's heaters, as the screen's heater buttons cycle them (M568 A)
+	run("M568 P0 S200 R150 A2");
+	EXPECT_EQ(model("heat/heaters/1/state"), "active");
+	run("M568 P0 A1");
+	EXPECT_EQ(model("heat/heaters/1/state"), "standby");
+	run("M568 P0 A0");
+	EXPECT_EQ(model("heat/heaters/1/state"), "off");
+
+	// The bed: active, standby (M144), off
+	run("M140 P0 S60");
+	EXPECT_EQ(model("heat/heaters/0/state"), "active");
+	run("M144 P0");
+	EXPECT_EQ(model("heat/heaters/0/state"), "standby");
+	run("M144 P0 S1");
+	EXPECT_EQ(model("heat/heaters/0/state"), "active");
+	run("M140 P0 S-273.15");
+	EXPECT_EQ(model("heat/heaters/0/state"), "off");
+}
+
+TEST_F(TestSimulatedMachine, AFaultyHeaterFaultsAgainOnceReset)
+{
+	Sim::Config config = machine.config();
+	config.heaters[0].fault = true;
+	machine.reconfigure(config);
+	EXPECT_EQ(model("heat/heaters/0/state"), "fault");
+	machine.reconfigure(machine.config()); // another change: still in fault, not again
+	EXPECT_EQ(model("heat/heaters/0/state"), "fault");
+
+	run("M562 P0");
+	EXPECT_EQ(model("heat/heaters/0/state"), "off");
+	run("M140 S60");
+	machine.advance(0.1);
+	EXPECT_EQ(model("heat/heaters/0/state"), "fault"); // still faulty: it can't heat
+
+	config.heaters[0].fault = false;
+	machine.reconfigure(config);
+	EXPECT_EQ(model("heat/heaters/0/state"), "off");
+	run("M140 S60");
+	machine.advance(0.1);
+	EXPECT_EQ(model("heat/heaters/0/state"), "active");
+}
+
 TEST_F(TestSimulatedMachine, TemperaturesAboveTheLimitAreRefused)
 {
 	EXPECT_NE(run("M104 S400").find("Error"), std::string::npos);
@@ -275,6 +319,8 @@ TEST_F(TestSimulatedMachine, AJobPrintsPausesAndIsCancelled)
 	EXPECT_EQ(model("state/status"), "idle");
 	EXPECT_EQ(model("job/lastFileName"), "0:/gcodes/benchy.gcode");
 	EXPECT_EQ(model("heat/heaters/1/state"), "off");
+	EXPECT_EQ(model("state/currentTool"), 0); // the tool stays in use, its heaters off
+	EXPECT_EQ(model("tools/0/state"), "active");
 }
 
 TEST_F(TestSimulatedMachine, AJobFinishes)
@@ -351,6 +397,10 @@ TEST_F(TestSimulatedMachine, FactorsFansAndSpindles)
 	EXPECT_EQ(model("move/extruders/0/factor"), 0.9);
 	EXPECT_EQ(model("fans/0/requestedValue"), 0.5);
 	EXPECT_EQ(model("fans/1/requestedValue"), 0.0); // thermostatic: follows the hotend, still cold
+	// As RepRapFirmware reports them: a thermostatic fan has the temperatures it runs between, the others none
+	EXPECT_EQ(model("fans/1/thermostatic/lowTemperature"), 45.0);
+	EXPECT_EQ(model("fans/1/thermostatic/sensors"), Json::array({1}));
+	EXPECT_FALSE(model("fans/0/thermostatic").contains("lowTemperature"));
 	machine.advance(0.1);
 	EXPECT_EQ(model("fans/1/actualValue"), 0.0);
 

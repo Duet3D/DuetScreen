@@ -187,7 +187,7 @@
       "no_maps": "No saved meshes yet: probe the bed to make one",
       "mesh": "Mesh:",
       "no_mesh": "None",
-      "shown": "Mesh shown"
+      "select_mesh": "Select a mesh"
     },
     "object_cancel": { /* Object Cancel screen */
       "title": "Object Cancel",

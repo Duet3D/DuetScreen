@@ -186,7 +186,7 @@
       "no_maps": "Noch keine gespeicherten Netze: Bett abtasten, um eins zu erstellen",
       "mesh": "Netz:",
       "no_mesh": "Keines",
-      "shown": "Angezeigtes Netz"
+      "select_mesh": "Netz auswählen"
     },
     "object_cancel": {
       "title": "Objekt abbrechen",

@@ -94,6 +94,7 @@ namespace UI::Xml
 		IntSubject m_disableMotorsUsable; // `disable_motors_usable`
 		List<AxisRow> m_others;			  // `others`
 		IntSubject m_othersShown;		  // `others_shown`
+		IntSubject m_othersChoiceShown;	  // `others_choice_shown`
 		char m_chosen = '\0';			  // The axis chosen from `others`; the first while it isn't one of them
 		StringSubject<4> m_otherLetter;	  // `other.letter`
 		NamedAxis m_other;				  // `other.*`: the axis chosen from `others`

@@ -715,6 +715,32 @@ namespace Sim
 		case 122:
 			reply += "=== Diagnostics ===\nThe simulated Duet has nothing to report\n";
 			break;
+		case 144:
+		{
+			// A bed on standby (S0, or none), or active again (S1)
+			const auto bed = bedOrChamberHeater(true, command.integer('P').value_or(0));
+			if (!bed)
+			{
+				reply += "Error: M144: no such bed heater\n";
+				break;
+			}
+			if (m_heaters[*bed].state != "fault")
+			{
+				m_heaters[*bed].state = command.integer('S').value_or(0) == 1 ? "active" : "standby";
+			}
+			break;
+		}
+		case 562:
+			// Reset a heater's fault (all of them without P): it is off, until it faults again
+			for (size_t h = 0; h < m_heaters.size(); h++)
+			{
+				if ((!command.has('P') || command.integer('P') == static_cast<int32_t>(h)) &&
+					m_heaters[h].state == "fault")
+				{
+					m_heaters[h].state = "off";
+				}
+			}
+			break;
 		case 140:
 		case 141:
 		case 190:
@@ -722,23 +748,15 @@ namespace Sim
 		{
 			const bool bed = command.code == 140 || command.code == 190;
 			const int32_t index = command.integer('P').value_or(0);
-			int32_t found = -1;
-			int32_t count = 0;
-			for (size_t h = 0; h < m_config.heaters.size(); h++)
-			{
-				if (m_config.heaters[h].role == (bed ? HeaterRole::bed : HeaterRole::chamber) && count++ == index)
-				{
-					found = static_cast<int32_t>(h);
-					break;
-				}
-			}
-			if (found < 0)
+			const auto heaterNumber = bedOrChamberHeater(bed, index);
+			if (!heaterNumber)
 			{
 				reply +=
 					fmt::format("Error: M{:d}: no {:s} heater {:d}\n", command.code, bed ? "bed" : "chamber", index);
 				break;
 			}
-			HeaterState& heater = m_heaters[static_cast<size_t>(found)];
+			const size_t found = *heaterNumber;
+			HeaterState& heater = m_heaters[found];
 			if (command.number('S') && *command.number('S') < 0.0f)
 			{
 				if (heater.state != "fault")
@@ -747,7 +765,7 @@ namespace Sim
 				}
 				break;
 			}
-			setHeaterTemperature(static_cast<size_t>(found), command.number('S'), command.number('R'), reply);
+			setHeaterTemperature(found, command.number('S'), command.number('R'), reply);
 			if (heater.state == "off" && command.has('S'))
 			{
 				heater.state = "active";
@@ -877,8 +895,18 @@ namespace Sim
 			}
 			if (const auto state = command.integer('A'))
 			{
+				// The tool's heaters, as the tool: off, standby or active
 				static constexpr const char* states[] = {"off", "standby", "active"};
-				m_tools[static_cast<size_t>(tool)].state = states[std::clamp(*state, 0, 2)];
+				const char* chosen = states[std::clamp(*state, 0, 2)];
+				m_tools[static_cast<size_t>(tool)].state = chosen;
+				for (const int heater : heaters)
+				{
+					if (heater >= 0 && static_cast<size_t>(heater) < m_heaters.size() &&
+						m_heaters[static_cast<size_t>(heater)].state != "fault")
+					{
+						m_heaters[static_cast<size_t>(heater)].state = chosen;
+					}
+				}
 			}
 			break;
 		}
@@ -992,6 +1020,19 @@ namespace Sim
 		}
 		m_transition =
 			Transition{.status = "busy", .remaining = command.code == 30 ? PROBE_TIME / 4 : PROBE_TIME, .then = ""};
+	}
+
+	std::optional<size_t> Machine::bedOrChamberHeater(bool bed, int32_t index) const
+	{
+		int32_t count = 0;
+		for (size_t h = 0; h < m_config.heaters.size(); h++)
+		{
+			if (m_config.heaters[h].role == (bed ? HeaterRole::bed : HeaterRole::chamber) && count++ == index)
+			{
+				return h;
+			}
+		}
+		return std::nullopt;
 	}
 
 	void Machine::setHeaterTemperature(size_t heater,

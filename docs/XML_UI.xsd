@@ -32,6 +32,7 @@
 			<xs:enumeration value="presenter.can_save"/>
 			<xs:enumeration value="presenter.catalogue"/>
 			<xs:enumeration value="presenter.catalogue_open"/>
+			<xs:enumeration value="presenter.choice_text"/>
 			<xs:enumeration value="presenter.choices"/>
 			<xs:enumeration value="presenter.chosen.cancel_text"/>
 			<xs:enumeration value="presenter.chosen.cancelled"/>
@@ -224,6 +225,7 @@
 			<xs:enumeration value="source.axes.other.minus_usable"/>
 			<xs:enumeration value="source.axes.other.plus_usable"/>
 			<xs:enumeration value="source.axes.others"/>
+			<xs:enumeration value="source.axes.others_choice_shown"/>
 			<xs:enumeration value="source.axes.others_shown"/>
 			<xs:enumeration value="source.axes.x.homed"/>
 			<xs:enumeration value="source.axes.x.jog_usable"/>
@@ -2050,7 +2052,7 @@
 			<xs:enumeration value="tr.heightmap.probe_group"/>
 			<xs:enumeration value="tr.heightmap.rms"/>
 			<xs:enumeration value="tr.heightmap.saved"/>
-			<xs:enumeration value="tr.heightmap.shown"/>
+			<xs:enumeration value="tr.heightmap.select_mesh"/>
 			<xs:enumeration value="tr.heightmap.std_dev"/>
 			<xs:enumeration value="tr.heightmap.unload"/>
 			<xs:enumeration value="tr.job.all_files"/>

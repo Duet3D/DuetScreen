@@ -32,8 +32,6 @@ namespace Sim
 		/** Within this of its target a heater is holding its temperature, and its readings noisy, °C */
 		constexpr float SETTLING = 2.0f;
 
-		/** The thermostatic fans' heater turns them on above this, °C */
-		constexpr float THERMOSTATIC_ON = 45.0f;
 	} // namespace
 
 	Machine::Machine(const Config& config)
@@ -43,6 +41,7 @@ namespace Sim
 
 	void Machine::reconfigure(const Config& config)
 	{
+		const Config old = m_config;
 		m_config = config;
 
 		m_heaters.resize(m_config.heaters.size());
@@ -53,11 +52,14 @@ namespace Sim
 			{
 				heater.current = heater.reading = AMBIENT;
 			}
-			if (m_config.heaters[i].fault)
+			// Made faulty, it faults now; made sound, its fault goes. A faulty heater set going again (M562) faults
+			// again as soon as it heats (advance())
+			const bool wasFaulty = i < old.heaters.size() && old.heaters[i].fault;
+			if (m_config.heaters[i].fault && !wasFaulty)
 			{
 				heater.state = "fault";
 			}
-			else if (heater.state == "fault")
+			else if (!m_config.heaters[i].fault && heater.state == "fault")
 			{
 				heater.state = "off";
 			}
@@ -180,6 +182,10 @@ namespace Sim
 			{
 				HeaterState& heater = m_heaters[i];
 				const Heater& config = m_config.heaters[i];
+				if (config.fault && (heater.state == "active" || heater.state == "standby"))
+				{
+					heater.state = "fault"; // a faulty heater can't heat
+				}
 				float target = AMBIENT;
 				if (heater.state == "active")
 				{
@@ -365,10 +371,7 @@ namespace Sim
 				heater.state = "off";
 			}
 		}
-		for (ToolState& tool : m_tools)
-		{
-			tool.state = "off";
-		}
+		// The tool in use stays in use, as RepRapFirmware keeps it: only its heaters go off
 		for (FanState& fan : m_fans)
 		{
 			fan.requested = 0.0f;

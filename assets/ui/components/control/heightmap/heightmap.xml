@@ -35,11 +35,15 @@
 			</ds_setting_group>
 
 			<ds_setting_group name="saved" title_tag="tr.heightmap.saved" width="100%">
-				<!-- The mesh shown (tap to pick another of those saved), and whether the printer uses it -->
-				<ds_setting name="shown" title_tag="tr.heightmap.shown">
+				<!-- The mesh shown (tap to pick another of those saved; until one is, a prompt to), and whether the
+					 printer uses it. The group's title says what it is -->
+				<lv_obj name="shown" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="setting_row"/>
 					<bind_flag_if_eq subject="presenter.has_maps" flag="hidden" ref_value="0"/>
 					<ds_choice name="choice" title_tag="tr.heightmap.saved" bind_options="presenter.map_options"
-							   bind_selected="presenter.shown_index">
+							   bind_selected="presenter.shown_index" bind_text="presenter.choice_text" width="1"
+							   flex_grow="1">
 						<action trigger="value_confirmed" name="presenter.heightmap.show"/>
 					</ds_choice>
 					<ds_button name="load" bind_text="presenter.shown_load_text" height="content"
@@ -50,7 +54,7 @@
 						<bind_state_if_eq subject="presenter.levelling_usable" state="disabled" ref_value="0"/>
 						<action trigger="clicked" name="presenter.heightmap.toggle"/>
 					</ds_button>
-				</ds_setting>
+				</lv_obj>
 				<lv_obj name="no_maps" height="content" scrollable="false">
 					<style name="setting_row"/>
 					<bind_flag_if_eq subject="presenter.has_maps" flag="hidden" ref_value="1"/>

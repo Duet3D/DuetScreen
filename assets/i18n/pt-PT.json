@@ -186,7 +186,7 @@
       "no_maps": "Ainda não há malhas guardadas: sonde a mesa para criar uma",
       "mesh": "Malha:",
       "no_mesh": "Nenhuma",
-      "shown": "Malha mostrada"
+      "select_mesh": "Escolha uma malha"
     },
     "object_cancel": {
       "title": "Cancelar objeto",

@@ -186,7 +186,7 @@
       "no_maps": "Aún no hay mallas guardadas: sondea la cama para crear una",
       "mesh": "Malla:",
       "no_mesh": "Ninguna",
-      "shown": "Malla mostrada"
+      "select_mesh": "Elige una malla"
     },
     "object_cancel": {
       "title": "Cancelar objeto",

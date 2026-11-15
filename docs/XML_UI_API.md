@@ -105,6 +105,7 @@ From [AxesSource.cpp](../src/UI/Xml/Data/AxesSource.cpp).
 | `source.axes.disable_motors_usable` | int | 1 if the motors can be disabled |
 | `source.axes.others` | list | The axes the user sees other than X, Y and Z: one is chosen to be jogged |
 | `source.axes.others_shown` | int | 1 if there are axes other than X, Y and Z |
+| `source.axes.others_choice_shown` | int | 1 if there are two or more axes other than X, Y and Z, so one is chosen to be jogged |
 | `source.axes.other.letter` | text | The letter of the axis chosen from `others`, e.g. "U" |
 | `source.axes.other.homed` | int | 1 when homed |
 | `source.axes.other.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
@@ -1109,6 +1110,7 @@ Used by `heightmap`.
 | `presenter.file` | text | The file of the mesh shown, e.g. "heightmap.csv", or "None" |
 | `presenter.map_options` | text | The saved meshes' files, one per line, for a <ds_choice> |
 | `presenter.shown_index` | int | The line of `map_options` shown, or -1 if none is |
+| `presenter.choice_text` | text | The file of the mesh shown, e.g. "heightmap.csv", or, while none is, "Select a mesh" |
 | `presenter.shown_loaded` | int | 1 if the printer uses the mesh shown |
 | `presenter.shown_load_text` | text | "Load", or "Unload" if the printer uses the mesh shown |
 | `presenter.has_maps` | int | 1 if there are height map files, else 0 |
