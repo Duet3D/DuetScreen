@@ -181,8 +181,6 @@
       "level_bed": "Level the bed",
       "level_bed_hint": "Lines it up with its motors (G32)",
       "level": "Level",
-      "scale": "Colour scale",
-      "scale_hint": "Fixed: ±0.25 mm. Auto: the mesh's own range",
       "no_maps": "No saved meshes yet: probe the bed to make one",
       "mesh": "Mesh:",
       "no_mesh": "None"

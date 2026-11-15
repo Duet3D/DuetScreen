@@ -180,8 +180,6 @@
       "level_bed": "Bed uitlijnen",
       "level_bed_hint": "Lijnt het uit met zijn motoren (G32)",
       "level": "Uitlijnen",
-      "scale": "Kleurschaal",
-      "scale_hint": "Vast: ±0,25 mm. Auto: het bereik van de mesh",
       "no_maps": "Nog geen opgeslagen meshes: meet het bed om er een te maken",
       "mesh": "Mesh:",
       "no_mesh": "Geen"

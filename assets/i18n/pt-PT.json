@@ -180,8 +180,6 @@
       "level_bed": "Nivelar a mesa",
       "level_bed_hint": "Alinha-a com os seus motores (G32)",
       "level": "Nivelar",
-      "scale": "Escala de cores",
-      "scale_hint": "Fixa: ±0,25 mm. Auto: o intervalo da própria malha",
       "no_maps": "Ainda não há malhas guardadas: sonde a mesa para criar uma",
       "mesh": "Malha:",
       "no_mesh": "Nenhuma"

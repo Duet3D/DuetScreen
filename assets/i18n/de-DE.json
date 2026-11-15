@@ -180,8 +180,6 @@
       "level_bed": "Bett ausrichten",
       "level_bed_hint": "Richtet es mit seinen Motoren aus (G32)",
       "level": "Ausrichten",
-      "scale": "Farbskala",
-      "scale_hint": "Fest: ±0,25 mm. Auto: der eigene Bereich des Netzes",
       "no_maps": "Noch keine gespeicherten Netze: Bett abtasten, um eins zu erstellen",
       "mesh": "Netz:",
       "no_mesh": "Keines"

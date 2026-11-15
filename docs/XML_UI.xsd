@@ -733,6 +733,7 @@
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="flex_pad"/>
 			<xs:enumeration value="gauge_arc"/>
 			<xs:enumeration value="gauge_bar"/>
 			<xs:enumeration value="gauge_beds"/>
@@ -883,6 +884,7 @@
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="flex_pad"/>
 			<xs:enumeration value="gauge_arc"/>
 			<xs:enumeration value="gauge_bar"/>
 			<xs:enumeration value="gauge_beds"/>
@@ -1068,6 +1070,7 @@
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="files"/>
+			<xs:enumeration value="flex_pad"/>
 			<xs:enumeration value="gauge_arc"/>
 			<xs:enumeration value="gauge_bar"/>
 			<xs:enumeration value="gauge_beds"/>
@@ -1861,8 +1864,6 @@
 			<xs:enumeration value="tr.heightmap.probe_group"/>
 			<xs:enumeration value="tr.heightmap.rms"/>
 			<xs:enumeration value="tr.heightmap.saved"/>
-			<xs:enumeration value="tr.heightmap.scale"/>
-			<xs:enumeration value="tr.heightmap.scale_hint"/>
 			<xs:enumeration value="tr.heightmap.std_dev"/>
 			<xs:enumeration value="tr.heightmap.unload"/>
 			<xs:enumeration value="tr.message.connected"/>
@@ -10911,6 +10912,14 @@
 	</xs:element>
 	<xs:element name="files">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/files/files.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="flex_pad">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/flex_pad.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

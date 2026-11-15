@@ -180,8 +180,6 @@
       "level_bed": "Livella il piano",
       "level_bed_hint": "Lo allinea con i suoi motori (G32)",
       "level": "Livella",
-      "scale": "Scala colori",
-      "scale_hint": "Fissa: ±0,25 mm. Auto: l'intervallo della mesh",
       "no_maps": "Nessuna mesh salvata: tasta il piano per crearne una",
       "mesh": "Mesh:",
       "no_mesh": "Nessuna"

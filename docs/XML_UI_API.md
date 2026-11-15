@@ -2966,6 +2966,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
+| `flex_pad` |  |  |  | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
 | `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
 | `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |

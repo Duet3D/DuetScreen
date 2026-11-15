@@ -1,48 +1,20 @@
 <!--
-  The Bed mesh tab, and the `heightmap` widget, laid out as the Objects tab is (object_cancel.xml). On the left, a card:
-  the mesh shown, named above it, with its colour scale, and under it how values are coloured. On the right: probing
-  the bed (G29) and levelling it (G32); the meshes saved on the printer (tap one to show it, Load to use it); and the
-  shown mesh's statistics, in the displayed unit.
+  The Bed mesh tab, and the `heightmap` widget. On the left, the mesh shown, named above it as the Objects tab names
+  the object being printed, with its colour scale. On the right, wide enough that nothing wraps: probing the bed (G29)
+  and levelling it (G32); the meshes saved on the printer (tap one to show it, Load to use it); how values are
+  coloured, fixed or the mesh's own range; and the shown mesh's statistics, in the displayed unit.
 
   Fields and actions: src/UI/Presenters/Control/Heightmap/HeightmapPresenter.h
 -->
 <component presenter="heightmap">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="row" scrollable="false">
 		<style name="bg_dark"/>
-		<lv_obj name="mesh" height="100%" flex_grow="1" flex_flow="column" scrollable="false">
+		<ds_heatmap name="heightmap" bind_surface="presenter.surface" title_tag="tr.heightmap.mesh"
+					title_style="text_emphasis" bind_detail="presenter.file" height="100%" flex_grow="1">
 			<style name="card"/>
-			<style name="pad_base"/>
-			<ds_heatmap name="heightmap" bind_surface="presenter.surface" title_tag="tr.heightmap.mesh"
-						title_style="text_emphasis" bind_detail="presenter.file" width="100%" flex_grow="1"
-						style_pad_all="0"/>
-			<!-- How values are coloured: under the mesh, as the Objects tab's key is under the bed -->
-			<lv_obj name="colours" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
-					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
-					style_pad_column="12" style_pad_row="4">
-				<lv_label name="title" translation_tag="tr.heightmap.scale">
-					<style name="text_muted"/>
-				</lv_label>
-				<lv_obj name="options" width="content">
-					<style name="setting_options"/>
-					<ds_button name="heightmap_fixed" translation_tag="tr.heightmap.fixed" style_min_width="80">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.mode" state="checked" ref_value="0"/>
-						<action trigger="clicked" name="presenter.heightmap.mode" arg="fixed"/>
-					</ds_button>
-					<ds_button name="heightmap_auto" translation_tag="tr.heightmap.auto" style_min_width="80">
-						<style name="setting_option"/>
-						<bind_state_if_eq subject="presenter.mode" state="checked" ref_value="1"/>
-						<action trigger="clicked" name="presenter.heightmap.mode" arg="auto"/>
-					</ds_button>
-				</lv_obj>
-				<lv_label name="hint" translation_tag="tr.heightmap.scale_hint" flex_grow="1" long_mode="wrap"
-						  style_min_width="200">
-					<style name="text_muted"/>
-				</lv_label>
-			</lv_obj>
-		</lv_obj>
+		</ds_heatmap>
 
-		<lv_obj name="side" width="34%" height="100%" flex_flow="column" scroll_dir="ver" style_min_width="220">
+		<lv_obj name="side" width="38%" height="100%" flex_flow="column" scroll_dir="ver" style_min_width="260">
 			<style name="card"/>
 			<style name="pad_gap"/>
 			<ds_setting_group name="probe" title_tag="tr.heightmap.probe_group" width="100%">
@@ -71,6 +43,26 @@
 					<lv_label name="text" translation_tag="tr.heightmap.no_maps" width="100%">
 						<style name="setting_hint"/>
 					</lv_label>
+				</lv_obj>
+			</ds_setting_group>
+
+			<ds_setting_group name="colours" title_tag="tr.heightmap.colours" width="100%">
+				<!-- Just the choice: the group's title says what it is -->
+				<lv_obj name="scale" height="content" scrollable="false">
+					<style name="setting_row"/>
+					<lv_obj name="options" width="100%">
+						<style name="setting_options"/>
+						<ds_button name="heightmap_fixed" translation_tag="tr.heightmap.fixed" flex_grow="1">
+							<style name="setting_option"/>
+							<bind_state_if_eq subject="presenter.mode" state="checked" ref_value="0"/>
+							<action trigger="clicked" name="presenter.heightmap.mode" arg="fixed"/>
+						</ds_button>
+						<ds_button name="heightmap_auto" translation_tag="tr.heightmap.auto" flex_grow="1">
+							<style name="setting_option"/>
+							<bind_state_if_eq subject="presenter.mode" state="checked" ref_value="1"/>
+							<action trigger="clicked" name="presenter.heightmap.mode" arg="auto"/>
+						</ds_button>
+					</lv_obj>
 				</lv_obj>
 			</ds_setting_group>
 
