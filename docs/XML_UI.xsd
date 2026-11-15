@@ -206,14 +206,22 @@
 			<xs:enumeration value="source.axes.other.homed"/>
 			<xs:enumeration value="source.axes.other.jog_usable"/>
 			<xs:enumeration value="source.axes.other.letter"/>
+			<xs:enumeration value="source.axes.other.minus_usable"/>
+			<xs:enumeration value="source.axes.other.plus_usable"/>
 			<xs:enumeration value="source.axes.others"/>
 			<xs:enumeration value="source.axes.others_shown"/>
 			<xs:enumeration value="source.axes.x.homed"/>
 			<xs:enumeration value="source.axes.x.jog_usable"/>
+			<xs:enumeration value="source.axes.x.minus_usable"/>
+			<xs:enumeration value="source.axes.x.plus_usable"/>
 			<xs:enumeration value="source.axes.y.homed"/>
 			<xs:enumeration value="source.axes.y.jog_usable"/>
+			<xs:enumeration value="source.axes.y.minus_usable"/>
+			<xs:enumeration value="source.axes.y.plus_usable"/>
 			<xs:enumeration value="source.axes.z.homed"/>
 			<xs:enumeration value="source.axes.z.jog_usable"/>
+			<xs:enumeration value="source.axes.z.minus_usable"/>
+			<xs:enumeration value="source.axes.z.plus_usable"/>
 			<xs:enumeration value="source.babystep.dialog_open"/>
 			<xs:enumeration value="source.babystep.step.choices"/>
 			<xs:enumeration value="source.babystep.step.title"/>
@@ -5909,8 +5917,8 @@
 		<xs:attribute name="letter" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `letter` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
-		<xs:attribute name="usable" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `usable` (string)</xs:documentation></xs:annotation>
+		<xs:attribute name="axis" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `axis` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="plus" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `plus` (string)</xs:documentation></xs:annotation>

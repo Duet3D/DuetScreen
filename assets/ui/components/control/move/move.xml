@@ -29,7 +29,7 @@
 
 				<!-- As tall as there is room for, at most 300 -->
 				<move_xy name="xy_control" width="300" height="100%" style_max_height="300"/>
-				<move_axis name="z_control" letter="'Z'" usable="source.axes.z.jog_usable" plus="Z+" minus="Z-"
+				<move_axis name="z_control" letter="'Z'" axis="source.axes.z" plus="Z+" minus="Z-"
 						   style_max_height="300"/>
 				<flex_pad>
 					<bind_flag_if flag="hidden" subject="source.axes.others_shown" ref_value="0"/>
@@ -46,7 +46,7 @@
 					<!-- A gap twice the usual between the choices and the column they jog -->
 					<flex_pad grow="0"/>
 					<move_axis name="other_control" letter="source.axes.other.letter"
-							   usable="source.axes.other.jog_usable" plus="other+" minus="other-"/>
+							   axis="source.axes.other" plus="other+" minus="other-"/>
 				</lv_obj>
 
 				<flex_pad grow="2"/>

@@ -93,4 +93,8 @@ namespace UI::Xml::PrinterModel
 
 	/** Whether the printer refuses to move an axis that isn't homed */
 	bool noMovesBeforeHoming();
+
+	/** Whether the printer keeps a homed axis between its limits (M564 S1). False if the printer doesn't say, so a
+	 * control is never disabled for a limit the printer may not apply. */
+	bool limitAxes();
 } // namespace UI::Xml::PrinterModel

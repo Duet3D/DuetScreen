@@ -1,6 +1,6 @@
 <!--
   X and Y on a pad: an arrow each way, and the jog step in the middle. Homing is on its own (move_homing.xml), so a
-  tap here only ever jogs.
+  tap here only ever jogs. An arrow is disabled while its axis can't be jogged that way, e.g. at a limit.
 
   Data:     source.axes.x.*, y.* (src/UI/Xml/Data/AxesSource.h); source.jog.distance.* (src/UI/Xml/Data/JogSource.h)
   Actions:  actions.move.jog (src/UI/Presenters/Control/Move/MoveActions.h)
@@ -10,10 +10,10 @@
 		  style_grid_row_dsc_array="fr(1) fr(1) fr(1)" scrollable="false">
 		<style name="pad_zero"/>
 		<style name="pad_gap"/>
-		<move_jog_button name="y_increment" icon="arrow_up.png" text="Y+" usable="source.axes.y.jog_usable" jog="Y+"
+		<move_jog_button name="y_increment" icon="arrow_up.png" text="Y+" usable="source.axes.y.plus_usable" jog="Y+"
 						 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						 style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch"/>
-		<move_jog_button name="x_decrement" icon="arrow_left.png" text="X−" usable="source.axes.x.jog_usable" jog="X-"
+		<move_jog_button name="x_decrement" icon="arrow_left.png" text="X−" usable="source.axes.x.minus_usable" jog="X-"
 						 style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
 						 style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch"/>
 		<lv_obj name="axis" flex_flow="column" scrollable="false" clickable="false"
@@ -25,10 +25,10 @@
 				<style name="reading"/>
 			</lv_label>
 		</lv_obj>
-		<move_jog_button name="x_increment" icon="arrow_right.png" text="X+" usable="source.axes.x.jog_usable" jog="X+"
+		<move_jog_button name="x_increment" icon="arrow_right.png" text="X+" usable="source.axes.x.plus_usable" jog="X+"
 						 style_grid_cell_column_pos="2" style_grid_cell_x_align="stretch"
 						 style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch"/>
-		<move_jog_button name="y_decrement" icon="arrow_down.png" text="Y−" usable="source.axes.y.jog_usable" jog="Y-"
+		<move_jog_button name="y_decrement" icon="arrow_down.png" text="Y−" usable="source.axes.y.minus_usable" jog="Y-"
 						 style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
 						 style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch"/>
 	</view>

@@ -1388,6 +1388,48 @@ TEST_F(TestHomeViewWithData, MoveTabChoosesWorkplaceOrMachineCoordinates)
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
+TEST_F(TestHomeViewWithData, MoveTabDoesNotJogPastALimit)
+{
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	lv_obj_t* z = lv_obj_find_by_name(move, "z_control");
+	const auto disabled = [&](lv_obj_t* parent, const char* name)
+	{ return lv_obj_has_state(lv_obj_find_by_name(parent, name), LV_STATE_DISABLED); };
+	// X at its maximum and Z at its minimum (machine positions; the workplace's differ), both homed
+	const auto axes = [](const char* limitAxes, const char* homed)
+	{
+		load_model_data(fmt::format(R"({{"key":"","flags":"d99f","result":{{"move":{{"limitAxes":{},)"
+									R"("noMovesBeforeHoming":false,"axes":[)"
+									R"({{"homed":{},"min":0,"max":200,"machinePosition":200,"userPosition":150}},)"
+									R"({{"homed":true,"min":0,"max":200,"machinePosition":100,"userPosition":100}},)"
+									R"({{"homed":{},"min":0,"max":180,"machinePosition":0,"userPosition":5}}]}}}}}})",
+									limitAxes,
+									homed,
+									homed) +
+						"\n");
+		deliverModelEvents();
+	};
+
+	// Kept within the limits: X can't go further forwards, nor Z backwards; each can go the other way, as can Y
+	axes("true", "true");
+	EXPECT_TRUE(disabled(move, "x_increment"));
+	EXPECT_FALSE(disabled(move, "x_decrement"));
+	EXPECT_FALSE(disabled(move, "y_increment"));
+	EXPECT_FALSE(disabled(move, "y_decrement"));
+	EXPECT_FALSE(disabled(z, "increment"));
+	EXPECT_TRUE(disabled(z, "decrement"));
+
+	// Limits off (M564 S0): every way
+	axes("false", "true");
+	EXPECT_FALSE(disabled(move, "x_increment"));
+	EXPECT_FALSE(disabled(z, "decrement"));
+
+	// Limits apply only once an axis is homed
+	axes("true", "false");
+	EXPECT_FALSE(disabled(move, "x_increment"));
+	EXPECT_FALSE(disabled(z, "decrement"));
+}
+
 TEST_F(TestHomeViewWithData, MacroView)
 {
 	openFilesTab(0);

@@ -5,10 +5,10 @@
  * Move tab, its pieces placed as widgets, and the axes widget. Every axis the user sees is a row of `all`, with its
  * position in the displayed unit (degrees for a rotary axis), whether it is homed and what can be done with it now,
  * allowing for the printer being disconnected or busy, so a view only binds. X, Y and Z also have names of their own,
- * for the XY pad and the Z column. Every other axis is a row of `others`, and one of them is chosen (`other.*`) to be
- * jogged in a single column, so a machine with many axes still shows only one more column. The chosen axis is shared
- * by every view, and lasts until the screen restarts. The global actions `actions.move.*` act on them
- * (src/UI/Presenters/Control/Move/MoveActions.h).
+ * for the XY pad and the Z column, saying too which way each can be jogged: not past a limit the printer keeps to.
+ * Every other axis is a row of `others`, and one of them is chosen (`other.*`) to be jogged in a single column, so a
+ * machine with many axes still shows only one more column. The chosen axis is shared by every view, and lasts until
+ * the screen restarts. The global actions `actions.move.*` act on them (src/UI/Presenters/Control/Move/MoveActions.h).
  *
  * The names it publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -19,6 +19,11 @@
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include <optional>
+
+namespace OM
+{
+	class Node;
+} // namespace OM
 
 namespace UI::Xml
 {
@@ -64,12 +69,21 @@ namespace UI::Xml
 		void onInit() override;
 
 	  private:
-		/** What can be done with X, Y or Z, for the XY pad and the Z column */
+		/** What can be done with X, Y, Z or the axis chosen from the others, for the XY pad and the columns */
 		struct NamedAxis
 		{
-			IntSubject homed;	  // 1 when homed
-			IntSubject jogUsable; // 1 if it can be jogged
+			IntSubject homed;		// 1 when homed
+			IntSubject jogUsable;	// 1 if it can be jogged
+			IntSubject plusUsable;	// 1 if it can be jogged forwards: as jogUsable, unless at its maximum
+			IntSubject minusUsable; // 1 if it can be jogged backwards: as jogUsable, unless at its minimum
+
+			/** Show what can be done with `axis`, which may not exist; `connected` if the printer is (model lock held)
+			 */
+			void show(const OM::Node& axis, bool connected);
 		};
+
+		/** Declare the fields of `axis`, named `<prefix>.homed`, `.jog_usable`, `.plus_usable` and `.minus_usable` */
+		static void namedFields(FieldVisitor& f, const char* prefix, NamedAxis& axis);
 
 		NamedAxis m_x;					  // `x.*`
 		NamedAxis m_y;					  // `y.*`
@@ -82,7 +96,6 @@ namespace UI::Xml
 		IntSubject m_othersShown;		  // `others_shown`
 		char m_chosen = '\0';			  // The axis chosen from `others`; the first while it isn't one of them
 		StringSubject<4> m_otherLetter;	  // `other.letter`
-		IntSubject m_otherHomed;		  // `other.homed`
-		IntSubject m_otherJogUsable;	  // `other.jog_usable`
+		NamedAxis m_other;				  // `other.*`: the axis chosen from `others`
 	};
 } // namespace UI::Xml

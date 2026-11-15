@@ -89,10 +89,16 @@ From [AxesSource.cpp](../src/UI/Xml/Data/AxesSource.cpp).
 | --- | --- | --- |
 | `source.axes.x.homed` | int | 1 when homed |
 | `source.axes.x.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.x.plus_usable` | int | 1 if the axis can be jogged forwards: as jog_usable, but 0 at its maximum while the printer keeps axes within their limits (M564 S1) |
+| `source.axes.x.minus_usable` | int | 1 if the axis can be jogged backwards: as jog_usable, but 0 at its minimum while the printer keeps axes within their limits (M564 S1) |
 | `source.axes.y.homed` | int | 1 when homed |
 | `source.axes.y.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.y.plus_usable` | int | 1 if the axis can be jogged forwards: as jog_usable, but 0 at its maximum while the printer keeps axes within their limits (M564 S1) |
+| `source.axes.y.minus_usable` | int | 1 if the axis can be jogged backwards: as jog_usable, but 0 at its minimum while the printer keeps axes within their limits (M564 S1) |
 | `source.axes.z.homed` | int | 1 when homed |
 | `source.axes.z.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.z.plus_usable` | int | 1 if the axis can be jogged forwards: as jog_usable, but 0 at its maximum while the printer keeps axes within their limits (M564 S1) |
+| `source.axes.z.minus_usable` | int | 1 if the axis can be jogged backwards: as jog_usable, but 0 at its minimum while the printer keeps axes within their limits (M564 S1) |
 | `source.axes.all` | list | Every axis the user sees, in the printer's order |
 | `source.axes.all_homed` | int | 1 when every axis the user sees is homed |
 | `source.axes.home_all_usable` | int | 1 if all axes can be homed |
@@ -100,8 +106,10 @@ From [AxesSource.cpp](../src/UI/Xml/Data/AxesSource.cpp).
 | `source.axes.others` | list | The axes the user sees other than X, Y and Z: one is chosen to be jogged |
 | `source.axes.others_shown` | int | 1 if there are axes other than X, Y and Z |
 | `source.axes.other.letter` | text | The letter of the axis chosen from `others`, e.g. "U" |
-| `source.axes.other.homed` | int | 1 when the chosen axis is homed |
-| `source.axes.other.jog_usable` | int | 1 if the chosen axis can be jogged |
+| `source.axes.other.homed` | int | 1 when homed |
+| `source.axes.other.jog_usable` | int | 1 if the axis can be jogged or set (homed, or moves before homing allowed) |
+| `source.axes.other.plus_usable` | int | 1 if the axis can be jogged forwards: as jog_usable, but 0 at its maximum while the printer keeps axes within their limits (M564 S1) |
+| `source.axes.other.minus_usable` | int | 1 if the axis can be jogged backwards: as jog_usable, but 0 at its minimum while the printer keeps axes within their limits (M564 S1) |
 
 Each row of `source.axes.all`:
 
@@ -3069,7 +3077,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `job_recent_row` |  |  | `job_ready` | [job_recent_row.xml](../assets/ui/components/dashboard/job_recent_row.xml) |
 | `list_header` |  | `title` | `temperature`, `value_selector` | [list_header.xml](../assets/ui/components/common/list_header.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
-| `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
+| `move_axis` |  | `letter`, `axis`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_axis_choice` |  |  | `move` | [move_axis_choice.xml](../assets/ui/components/control/move/move_axis_choice.xml) |
 | `move_coordinates` |  |  | `move` | [move_coordinates.xml](../assets/ui/components/control/move/move_coordinates.xml) |
 | `move_home_axis` |  |  | `move_homing` | [move_home_axis.xml](../assets/ui/components/control/move/move_home_axis.xml) |

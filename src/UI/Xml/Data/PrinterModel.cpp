@@ -208,4 +208,9 @@ namespace UI::Xml::PrinterModel
 	{
 		return root()["move"]["noMovesBeforeHoming"].boolean(false);
 	}
+
+	bool limitAxes()
+	{
+		return root()["move"]["limitAxes"].boolean(false);
+	}
 } // namespace UI::Xml::PrinterModel

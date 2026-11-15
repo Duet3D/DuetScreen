@@ -43,6 +43,21 @@ namespace UI::Xml
 			return (axis["homed"].boolean() || !PrinterModel::noMovesBeforeHoming()) && canHome();
 		}
 
+		/** Whether `axis` is at its end the `forward` (else backward) way, and the printer keeps it there: limits are
+		 * on (M564 S1), it is homed (they apply only then) and its machine position is at its maximum (or minimum).
+		 * Model lock held. */
+		bool atLimit(const OM::Node& axis, bool forward)
+		{
+			if (!PrinterModel::limitAxes() || !axis["homed"].boolean())
+			{
+				return false;
+			}
+			constexpr double TOLERANCE = 0.001; // Positions are reported to a thousandth
+			const double position = axis["machinePosition"].number();
+			return forward ? position >= axis["max"].number() - TOLERANCE
+						   : position <= axis["min"].number() + TOLERANCE;
+		}
+
 		/** `axis`' position: machine or user, as the user chose */
 		float positionOf(const OM::Node& axis, bool machine)
 		{
@@ -76,6 +91,16 @@ namespace UI::Xml
 		f.field("chosen", chosen, "In `source.axes.others`: 1 for the axis chosen to be jogged, else 0");
 	}
 
+	void AxesSource::NamedAxis::show(const OM::Node& axis, bool connected)
+	{
+		const bool exists = axis.exists();
+		const bool usable = connected && exists && canMove(axis);
+		homed.set(exists && axis["homed"].boolean() ? 1 : 0);
+		jogUsable.set(usable ? 1 : 0);
+		plusUsable.set(usable && !atLimit(axis, true) ? 1 : 0);
+		minusUsable.set(usable && !atLimit(axis, false) ? 1 : 0);
+	}
+
 	AxesSource::AxesSource()
 		: DataSource("axes")
 	{
@@ -86,10 +111,7 @@ namespace UI::Xml
 		const std::pair<const char*, NamedAxis*> named[] = {{"x", &m_x}, {"y", &m_y}, {"z", &m_z}};
 		for (const auto& [prefix, axis] : named)
 		{
-			f.field(fmt::format("{}.homed", prefix), axis->homed, "1 when homed");
-			f.field(fmt::format("{}.jog_usable", prefix),
-					axis->jogUsable,
-					"1 if the axis can be jogged or set (homed, or moves before homing allowed)");
+			namedFields(f, prefix, *axis);
 		}
 		f.list("all", m_all, "Every axis the user sees, in the printer's order");
 		f.field("all_homed", m_allHomed, "1 when every axis the user sees is homed");
@@ -98,8 +120,23 @@ namespace UI::Xml
 		f.list("others", m_others, "The axes the user sees other than X, Y and Z: one is chosen to be jogged");
 		f.field("others_shown", m_othersShown, "1 if there are axes other than X, Y and Z");
 		f.field("other.letter", m_otherLetter, "The letter of the axis chosen from `others`, e.g. \"U\"");
-		f.field("other.homed", m_otherHomed, "1 when the chosen axis is homed");
-		f.field("other.jog_usable", m_otherJogUsable, "1 if the chosen axis can be jogged");
+		namedFields(f, "other", m_other);
+	}
+
+	void AxesSource::namedFields(FieldVisitor& f, const char* prefix, NamedAxis& axis)
+	{
+		f.field(fmt::format("{}.homed", prefix), axis.homed, "1 when homed");
+		f.field(fmt::format("{}.jog_usable", prefix),
+				axis.jogUsable,
+				"1 if the axis can be jogged or set (homed, or moves before homing allowed)");
+		f.field(fmt::format("{}.plus_usable", prefix),
+				axis.plusUsable,
+				"1 if the axis can be jogged forwards: as jog_usable, but 0 at its maximum while the printer keeps "
+				"axes within their limits (M564 S1)");
+		f.field(fmt::format("{}.minus_usable", prefix),
+				axis.minusUsable,
+				"1 if the axis can be jogged backwards: as jog_usable, but 0 at its minimum while the printer keeps "
+				"axes within their limits (M564 S1)");
 	}
 
 	void AxesSource::onInit()
@@ -123,10 +160,7 @@ namespace UI::Xml
 		const char letters[] = {'X', 'Y', 'Z'};
 		for (size_t i = 0; i < 3; i++)
 		{
-			const OM::Node& axis = PrinterModel::axis(letters[i]);
-			const bool exists = axis.exists();
-			named[i]->homed.set(exists && axis["homed"].boolean() ? 1 : 0);
-			named[i]->jogUsable.set(connected && exists && canMove(axis) ? 1 : 0);
+			named[i]->show(PrinterModel::axis(letters[i]), connected);
 		}
 
 		// Every axis the user sees, and those other than X, Y and Z
@@ -176,10 +210,8 @@ namespace UI::Xml
 						  row.chosen.set(letterOf(others[i]) == m_chosen ? 1 : 0);
 					  });
 		m_othersShown.set(others.empty() ? 0 : 1);
-		const OM::Node& other = PrinterModel::axis(m_chosen); // Doesn't exist while none is chosen
 		m_otherLetter.set(m_chosen != '\0' ? std::string(1, m_chosen) : std::string());
-		m_otherHomed.set(other.exists() && other["homed"].boolean() ? 1 : 0);
-		m_otherJogUsable.set(other.exists() && canMove(other) ? 1 : 0);
+		m_other.show(PrinterModel::axis(m_chosen), connected); // Doesn't exist while none is chosen
 		m_allHomed.set(!all.empty() &&
 							   std::all_of(all.begin(),
 										   all.end(),
