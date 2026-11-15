@@ -82,41 +82,14 @@
 
 			<!-- A label and its value a line each, so the statistics take little room -->
 			<ds_setting_group name="statistics" title_tag="tr.heightmap.last_probe" width="100%">
-				<lv_obj name="table" height="content" scrollable="false" style_layout="grid"
-						style_grid_column_dsc_array="fr(1) content"
-						style_grid_row_dsc_array="content content content content content content"
-						style_pad_row="4">
+				<lv_obj name="table" height="content" flex_flow="column" scrollable="false" style_pad_row="4">
 					<style name="setting_row"/>
-					<lv_label name="num_points_title" translation_tag="tr.heightmap.points" style_grid_cell_column_pos="0" style_grid_cell_row_pos="0">
-						<style name="setting_hint"/>
-					</lv_label>
-					<lv_label name="num_points" bind_text="presenter.stats.points" style_grid_cell_column_pos="1" style_grid_cell_row_pos="0"
-							  style_grid_cell_x_align="end"/>
-					<lv_label name="area_title" translation_tag="tr.heightmap.area_title" style_grid_cell_column_pos="0" style_grid_cell_row_pos="1">
-						<style name="setting_hint"/>
-					</lv_label>
-					<lv_label name="area" bind_text="presenter.stats.area" style_grid_cell_column_pos="1" style_grid_cell_row_pos="1"
-							  style_grid_cell_x_align="end"/>
-					<lv_label name="min_error_title" translation_tag="tr.heightmap.lowest" style_grid_cell_column_pos="0" style_grid_cell_row_pos="2">
-						<style name="setting_hint"/>
-					</lv_label>
-					<lv_label name="min_error" bind_text="presenter.stats.min" style_grid_cell_column_pos="1" style_grid_cell_row_pos="2"
-							  style_grid_cell_x_align="end"/>
-					<lv_label name="max_error_title" translation_tag="tr.heightmap.highest" style_grid_cell_column_pos="0" style_grid_cell_row_pos="3">
-						<style name="setting_hint"/>
-					</lv_label>
-					<lv_label name="max_error" bind_text="presenter.stats.max" style_grid_cell_column_pos="1" style_grid_cell_row_pos="3"
-							  style_grid_cell_x_align="end"/>
-					<lv_label name="mean_error_title" translation_tag="tr.heightmap.mean" style_grid_cell_column_pos="0" style_grid_cell_row_pos="4">
-						<style name="setting_hint"/>
-					</lv_label>
-					<lv_label name="mean_error" bind_text="presenter.stats.mean" style_grid_cell_column_pos="1" style_grid_cell_row_pos="4"
-							  style_grid_cell_x_align="end"/>
-					<lv_label name="std_dev_title" translation_tag="tr.heightmap.rms" style_grid_cell_column_pos="0" style_grid_cell_row_pos="5">
-						<style name="setting_hint"/>
-					</lv_label>
-					<lv_label name="std_dev" bind_text="presenter.stats.rms" style_grid_cell_column_pos="1" style_grid_cell_row_pos="5"
-							  style_grid_cell_x_align="end"/>
+					<fact_row name="points" title_tag="tr.heightmap.points" value="presenter.stats.points"/>
+					<fact_row name="area" title_tag="tr.heightmap.area_title" value="presenter.stats.area"/>
+					<fact_row name="lowest" title_tag="tr.heightmap.lowest" value="presenter.stats.min"/>
+					<fact_row name="highest" title_tag="tr.heightmap.highest" value="presenter.stats.max"/>
+					<fact_row name="mean" title_tag="tr.heightmap.mean" value="presenter.stats.mean"/>
+					<fact_row name="rms" title_tag="tr.heightmap.rms" value="presenter.stats.rms"/>
 				</lv_obj>
 			</ds_setting_group>
 		</lv_obj>

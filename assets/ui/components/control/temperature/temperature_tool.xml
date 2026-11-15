@@ -24,7 +24,7 @@
 				<action trigger="clicked" name="actions.tool.toggle" arg="{row.number}"/>
 			</ds_button>
 			<lv_label name="tool_state" bind_text="om.tools[{row.number}].state|translate:tr.temperature.status" width="content" height="content"/>
-			<lv_obj name="tool_info_spacer" height="0" flex_grow="1"/>
+			<flex_pad name="spacer"/>
 
 			<lv_obj name="extrusion_factors" width="content" height="content" style_pad_all="0" flex_flow="column">
 				<ds_list name="list" list="om.tools[{row.number}].extruders" item="temperature_extruder" width="content" height="content"

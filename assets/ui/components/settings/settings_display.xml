@@ -84,10 +84,9 @@
 						<bind_style_prop prop="bg_color" subject="source.theme.secondary"/>
 					</lv_obj>
 				</lv_obj>
-				<ds_button name="open" text="&#xF054;">
-					<style name="setting_value"/>
+				<chevron_button name="open">
 					<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
-				</ds_button>
+				</chevron_button>
 			</ds_setting>
 			<ds_setting name="font" title_tag="tr.settings.font">
 				<ds_choice name="choice" title_tag="tr.settings.font" bind_options="source.settings.font_options"

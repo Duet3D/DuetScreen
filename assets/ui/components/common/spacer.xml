@@ -1,5 +1,0 @@
-<component>
-    <view extends="lv_obj" width="0" height="0" clickable="false">
-        <style name="pad_zero" />
-    </view>
-</component>

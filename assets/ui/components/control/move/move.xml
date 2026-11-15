@@ -23,9 +23,9 @@
 					style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="pad_zero"/>
 				<style name="pad_gap"/>
-				
+
 				<flex_pad grow="2"/>
-				
+
 				<!-- As tall as there is room for, at most 300 -->
 				<move_xy name="xy_control" width="300" height="100%" style_max_height="300"/>
 				<move_axis name="z_control" letter="'Z'" usable="source.axes.z.jog_usable" plus="Z+" minus="Z-"
@@ -42,11 +42,12 @@
 					<ds_list name="choices" list="source.axes.others" item="move_axis_choice" width="content"
 							 height="100%" flex_flow="column_wrap" style_pad_all="0" style_pad_row="#pad"
 							 style_pad_column="#pad" scrollable="false"/>
-					<spacer/>
+					<!-- A gap twice the usual between the choices and the column they jog -->
+					<flex_pad grow="0"/>
 					<move_axis name="other_control" letter="source.axes.other.letter"
 							   usable="source.axes.other.jog_usable" plus="other+" minus="other-"/>
 				</lv_obj>
-				
+
 				<flex_pad grow="2"/>
 			</lv_obj>
 

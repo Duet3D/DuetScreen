@@ -27,55 +27,17 @@
 						<lv_label name="text" bind_text="source.files.dialog_text" width="100%"/>
 
 						<!-- The job's details -->
-						<lv_obj name="file_info_cont" width="100%" height="content" style_layout="grid"
-								style_grid_column_dsc_array="content fr(1)"
-								style_grid_row_dsc_array="content content content content content content">
+						<lv_obj name="details" width="100%" height="content" flex_flow="column" scrollable="false">
 							<bind_flag_if_eq subject="source.files.info_shown" flag="hidden" ref_value="0"/>
-
-							<lv_label translation_tag="tr.file.start_print.date" style_grid_cell_column_pos="0"
-									  style_grid_cell_x_align="start" style_grid_cell_row_pos="0" style_grid_cell_y_align="start">
-								<style name="text_muted"/>
-							</lv_label>
-							<lv_label bind_text="source.files.info_date" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-									  style_grid_cell_row_pos="0" style_grid_cell_y_align="start"/>
-
-							<lv_label translation_tag="tr.file.start_print.size" style_grid_cell_column_pos="0"
-									  style_grid_cell_x_align="start" style_grid_cell_row_pos="1" style_grid_cell_y_align="start">
-								<style name="text_muted"/>
-							</lv_label>
-							<lv_label bind_text="source.files.info_size" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-									  style_grid_cell_row_pos="1" style_grid_cell_y_align="start"/>
-
-							<lv_label translation_tag="tr.file.start_print.generated_by" style_grid_cell_column_pos="0"
-									  style_grid_cell_x_align="start" style_grid_cell_row_pos="2" style_grid_cell_y_align="start">
-								<style name="text_muted"/>
-							</lv_label>
-							<lv_label bind_text="source.files.info_generated_by" style_grid_cell_column_pos="1"
-									  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="2"
-									  style_grid_cell_y_align="start"/>
-
-							<lv_label translation_tag="tr.file.start_print.print_time" style_grid_cell_column_pos="0"
-									  style_grid_cell_x_align="start" style_grid_cell_row_pos="3" style_grid_cell_y_align="start">
-								<style name="text_muted"/>
-							</lv_label>
-							<lv_label bind_text="source.files.info_print_time" style_grid_cell_column_pos="1"
-									  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="3"
-									  style_grid_cell_y_align="start"/>
-
-							<lv_label translation_tag="tr.file.start_print.height" style_grid_cell_column_pos="0"
-									  style_grid_cell_x_align="start" style_grid_cell_row_pos="4" style_grid_cell_y_align="start">
-								<style name="text_muted"/>
-							</lv_label>
-							<lv_label bind_text="source.files.info_height" style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
-									  style_grid_cell_row_pos="4" style_grid_cell_y_align="start"/>
-
-							<lv_label translation_tag="tr.file.start_print.layer_height" style_grid_cell_column_pos="0"
-									  style_grid_cell_x_align="start" style_grid_cell_row_pos="5" style_grid_cell_y_align="start">
-								<style name="text_muted"/>
-							</lv_label>
-							<lv_label bind_text="source.files.info_layer_height" style_grid_cell_column_pos="1"
-									  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="5"
-									  style_grid_cell_y_align="start"/>
+							<fact_row name="date" title_tag="tr.file.start_print.date" value="source.files.info_date"/>
+							<fact_row name="size" title_tag="tr.file.start_print.size" value="source.files.info_size"/>
+							<fact_row name="generated_by" title_tag="tr.file.start_print.generated_by"
+									  value="source.files.info_generated_by"/>
+							<fact_row name="print_time" title_tag="tr.file.start_print.print_time"
+									  value="source.files.info_print_time"/>
+							<fact_row name="height" title_tag="tr.file.start_print.height" value="source.files.info_height"/>
+							<fact_row name="layer_height" title_tag="tr.file.start_print.layer_height"
+									  value="source.files.info_layer_height"/>
 						</lv_obj>
 					</lv_obj>
 
@@ -101,9 +63,9 @@
 					<action trigger="clicked" name="actions.files.ask_delete"/>
 				</ds_button>
 				<!-- Pushes the delete button left; it goes with it, so the buttons on the right keep to the edge -->
-				<lv_obj name="spacer" height="1" flex_grow="1" clickable="false" style_bg_opa="0" style_border_width="0">
+				<flex_pad name="spacer">
 					<bind_flag_if_eq subject="source.files.dialog_delete" flag="hidden" ref_value="0"/>
-				</lv_obj>
+				</flex_pad>
 				<ds_button name="cancel" translation_tag="tr.common.cancel">
 					<style name="dialog_button"/>
 					<action trigger="clicked" name="actions.dialog.close"/>

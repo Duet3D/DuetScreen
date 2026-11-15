@@ -117,7 +117,7 @@
 				</lv_obj>
 			</lv_obj>
 
-			<lv_obj name="pad" width="100%" flex_grow="1"/>
+			<flex_pad name="pad"/>
 
 			<lv_obj name="footer" width="100%" height="content" flex_flow="row">
 				<ds_button name="cancel" translation_tag="tr.common.close" height="content" flex_grow="1">

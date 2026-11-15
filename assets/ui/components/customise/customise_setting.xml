@@ -18,10 +18,9 @@
 			<action trigger="defocused" name="presenter.customise.set_text"/>
 		</ds_textarea>
 		<!-- A value that opens a step -->
-		<lv_label name="chevron" text="&#xF054;">
-			<style name="text_muted"/>
+		<chevron name="chevron">
 			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="button"/>
-		</lv_label>
+		</chevron>
 		<ds_toggle name="toggle">
 			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="switch"/>
 			<bind_state_if_eq subject="row.on" state="checked" ref_value="1"/>

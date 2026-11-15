@@ -1,8 +1,17 @@
+<!--
+  An empty item of a flex row or column that takes up the room the rest leave, `grow` shares of it, so what is around
+  it is pushed apart or centred (two of them, one either side). Hide it to take it out. With `grow` 0 it takes no room
+  but the flex gaps either side of it, a gap twice the usual between its neighbours.
+
+      <flex_pad name="spacer"/>
+
+  Props:    grow  its share of the room left (default 1)
+-->
 <component>
-    <api>
-        <prop name="grow" type="int" default="1"/>
-    </api>
-    <view extends="lv_obj" flex_grow="$grow" width="0" height="0" clickable="false">
-        <style name="pad_zero" />
-    </view>
+	<api>
+		<prop name="grow" type="int" default="1"/>
+	</api>
+	<view extends="lv_obj" flex_grow="$grow" width="0" height="0" clickable="false">
+		<style name="pad_zero"/>
+	</view>
 </component>

@@ -10,9 +10,8 @@
 			<bind_flag_if_eq subject="row.secured" flag="hidden" ref_value="0"/>
 		</ds_icon>
 		<ds_icon name="signal" bind_icon="row.signal_icon" width="28" height="28"/>
-		<ds_button name="open" text="&#xF054;">
-			<style name="setting_value"/>
+		<chevron_button name="open">
 			<action trigger="clicked" name="presenter.wifi.open"/>
-		</ds_button>
+		</chevron_button>
 	</view>
 </component>

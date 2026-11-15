@@ -1209,7 +1209,7 @@ TEST_F(TestHomeViewWithData, BedMeshListsSavedMeshesShowsOneAndColoursIt)
 	ASSERT_NE(lv_obj_find_by_name(page, "detail"), nullptr);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "detail")), "textured.csv")
 		<< "the mesh shown is named above it";
-	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "num_points")), "9");
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(page, "points"), "value")), "9");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_fixed.png");
 
 	// Coloured by a fixed scale, or by the mesh's own range

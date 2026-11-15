@@ -14,14 +14,9 @@
 		<action trigger="clicked" name="actions.files.ask_start"/>
 
 		<!-- No larger than 40 x 40; the room it keeps when there is no thumbnail lines the names up -->
-		<lv_obj name="picture" width="40" height="40" flex_flow="row" scrollable="false" clickable="false"
-				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
-				style_pad_all="0" style_bg_opa="0" style_border_width="0">
-			<ds_thumbnail name="thumbnail" bind_src="row.thumbnail" inner_align="contain" height="100%"
-						  style_max_width="100%"/>
-		</lv_obj>
+		<thumbnail_box name="picture" src="row.thumbnail" width="40" height="40"/>
 		<lv_obj name="about" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
-				clickable="false" style_pad_all="0" style_bg_opa="0" style_border_width="0">
+				clickable="false" style_pad_all="0">
 			<lv_label name="name" bind_text="row.name" width="100%" long_mode="dots">
 				<style name="setting_title"/>
 			</lv_label>
@@ -29,8 +24,6 @@
 				<style name="setting_hint"/>
 			</lv_label>
 		</lv_obj>
-		<lv_label name="chevron" text="&#xF054;">
-			<style name="text_muted"/>
-		</lv_label>
+		<chevron name="chevron"/>
 	</view>
 </component>

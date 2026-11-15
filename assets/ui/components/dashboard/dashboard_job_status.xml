@@ -33,24 +33,16 @@
 			</flex_pad>
 			<!-- Its thumbnail above, where there is room for it at least as large as beside the name: it takes the
 				 room the rest leaves, centred, as tall as that room and no wider (scaled to fit) -->
-			<lv_obj name="picture" width="100%" height="1" flex_grow="1" flex_flow="row" scrollable="false"
-					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
-					style_pad_all="0">
+			<thumbnail_box name="picture" src="source.job.thumbnail" width="100%" height="1" flex_grow="1">
 				<bind_flag_if_not_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="1"/>
-				<ds_thumbnail name="thumbnail" bind_src="source.job.thumbnail" inner_align="contain" height="100%"
-							  style_max_width="100%"/>
-			</lv_obj>
+			</thumbnail_box>
 			<!-- What it is, with the thumbnail beside it where there isn't room above -->
 			<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
 					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0">
 				<!-- No larger than 56 x 56, so it never makes the row taller than its two lines -->
-				<lv_obj name="beside" width="56" height="56" flex_flow="row" scrollable="false"
-						style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
-						style_pad_all="0" style_margin_right="12">
+				<thumbnail_box name="beside" src="source.job.thumbnail" width="56" height="56" style_margin_right="12">
 					<bind_flag_if_not_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="2"/>
-					<ds_thumbnail name="small_thumbnail" bind_src="source.job.thumbnail" inner_align="contain"
-								  height="100%" style_max_width="100%"/>
-				</lv_obj>
+				</thumbnail_box>
 				<lv_obj name="titles" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
 						style_pad_all="0">
 					<lv_label name="filename" bind_text="source.job.name" width="100%" long_mode="dots">

@@ -2983,6 +2983,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | --- | --- | --- | --- | --- |
 | [`babystep`](#babystep) |  | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
+| `chevron` |  |  | `customise_setting`, `job_ready`, `job_recent_row` | [chevron.xml](../assets/ui/components/common/chevron.xml) |
+| `chevron_button` |  |  | `settings_display`, `settings_wifi_network` | [chevron_button.xml](../assets/ui/components/common/chevron_button.xml) |
 | [`console`](#console) | `gcode_reference` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `gcode_reference` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
 | `console_gcode` |  |  | `console`, `console_command_list` | [console_gcode.xml](../assets/ui/components/console/console_gcode.xml) |
@@ -3025,6 +3027,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`dialog_number`](#dialog_number) | `dialog_number` |  |  | [dialog_number.xml](../assets/ui/components/dialogs/dialog_number.xml) |
 | `dialog_number_preset` |  |  | `dialog_number` | [dialog_number_preset.xml](../assets/ui/components/dialogs/dialog_number_preset.xml) |
 | [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
+| `fact_row` |  | `title_tag`, `value` | `file_dialog`, `heightmap` | [fact_row.xml](../assets/ui/components/common/fact_row.xml) |
 | `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `open`, `title`, `factors`, `all`, `all_shown` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_preset` |  |  | `factors_row` | [factors_preset.xml](../assets/ui/components/modals/factors_preset.xml) |
@@ -3037,7 +3040,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | `file_dialog` |  |  | `home` | [file_dialog.xml](../assets/ui/components/modals/file_dialog.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
-| `flex_pad` |  | `grow` | `dashboard_job_status`, `move` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
+| `flex_pad` |  | `grow` | `dashboard_job_status`, `file_browser`, `file_dialog`, `hardware_test`, `move`, `notifications`, `temperature_tool` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
 | `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
 | `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |
@@ -3100,7 +3103,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `sidebar_button` |  | `label`, `icon`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `sidebar_button`, `sidebar_gcode` | [sidebar_button.xml](../assets/ui/components/sidebar/sidebar_button.xml) |
 | `sidebar_estop` |  |  | `estop` | [sidebar_estop.xml](../assets/ui/components/sidebar/sidebar_estop.xml) |
 | `sidebar_page_button` |  | `page`, `action`, `label_tag`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
-| `spacer` |  |  | `move` | [spacer.xml](../assets/ui/components/common/spacer.xml) |
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `status_button`, `status_gcode` | [status_bar_button.xml](../assets/ui/components/status_bar/status_bar_button.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
@@ -3114,6 +3116,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `temperature_heater_card` |  | `label_tag` | `temperature_bed`, `temperature_chamber` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
 | `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
+| `thumbnail_box` |  | `src` | `dashboard_job_status`, `job_ready`, `job_recent_row` | [thumbnail_box.xml](../assets/ui/components/common/thumbnail_box.xml) |
 | [`tools`](#tools) |  |  | `control` | [tools.xml](../assets/ui/components/control/tools/tools.xml) |
 | `tools_bed_heater` |  | `compact` | `tools_beds` | [tools_bed_heater.xml](../assets/ui/components/control/tools/tools_bed_heater.xml) |
 | `tools_beds` |  | `compact` | `dashboard_tools`, `tools_list` | [tools_beds.xml](../assets/ui/components/control/tools/tools_beds.xml) |

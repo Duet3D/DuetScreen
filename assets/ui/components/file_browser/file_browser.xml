@@ -28,7 +28,7 @@
 				<bind_state_if_eq subject="presenter.sort" state="checked" ref_value="2"/>
 				<action trigger="clicked" name="presenter.files.sort" arg="size"/>
 			</ds_button>
-			<lv_obj name="pad" width="content" height="content" flex_grow="1"/>
+			<flex_pad name="pad"/>
 			<ds_button name="display_mode" bind_text="presenter.mode_icon" width="content" height="content">
 				<bind_state_if_eq subject="presenter.tiles" state="checked" ref_value="1"/>
 				<action trigger="clicked" name="presenter.files.toggle_mode"/>
