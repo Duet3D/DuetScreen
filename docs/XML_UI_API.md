@@ -295,7 +295,7 @@ From [ToolSource.cpp](../src/UI/Xml/Data/ToolSource.cpp).
 | `source.tool.shown` | int | The tool the dashboard's tools widget shows in detail: the one picked (actions.tool.show), else the tool in use, else the first; -1 for none |
 | `source.tool.following` | int | 1 while the tool shown follows the tool in use, 0 once one is picked |
 | `source.tool.summary_auto` | int | 1 if the tools widget's automatic style shows one tool with the rest summarised: unless every tool is a print head (no spindle) and they have four heater rows or fewer, which it shows equally |
-| `source.tool.tiles` | list | A tile per tool, for the tools widget's summary (actions.tool.show) |
+| `source.tool.tiles` | list | A tile per tool, for the tools widget's summary (actions.tool.show); a tile's heaters are its tool's, om.tools[{row.number}].heaters |
 
 Each row of `source.tool.tiles`:
 
@@ -305,7 +305,6 @@ Each row of `source.tool.tiles`:
 | `row.number` | int | The tool's number (actions.tool.show) |
 | `row.label` | text | E.g. "T0" |
 | `row.name` | text | Its name, else e.g. "Tool 0" |
-| `row.reading` | text | Its first two heaters' temperatures and targets, e.g. "209.6/210° 60/60°", "+1" for each more; empty if it has none |
 | `row.state` | text | "active", "standby", "off" or "fault": its heaters' state, any fault marking it |
 | `row.in_use` | int | 1 if it is the tool in use |
 | `row.shown` | int | 1 if it is the tool shown in detail |
@@ -595,7 +594,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.system.restart` | Restart the DuetScreen program. Offered to users for their widgets' action settings, as `tr.actions.system_restart`. | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.send_config` | Back the screen's settings up to the Duet, as duetscreen.json in its system folder, and say whether it worked | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
-| `actions.tool.show` | Show the tool numbered `arg` in detail in the dashboard's tools widget, without selecting it; `auto` to follow the tool in use again | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
+| `actions.tool.show` | Show the tool numbered `arg` in detail in the dashboard's tools widget, without selecting it; the tool in use, or `auto`, follows the tool in use again | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 | `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
@@ -2945,6 +2944,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
 | `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
 | `dashboard_tool_tile` |  |  | `dashboard_tools` | [dashboard_tool_tile.xml](../assets/ui/components/dashboard/dashboard_tool_tile.xml) |
+| `dashboard_tool_tile_heater` |  |  | `dashboard_tool_tile` | [dashboard_tool_tile_heater.xml](../assets/ui/components/dashboard/dashboard_tool_tile_heater.xml) |
 | `dashboard_tools` |  | `style` | `tools` | [dashboard_tools.xml](../assets/ui/components/dashboard/dashboard_tools.xml) |
 | `dialog_choice` | `dialog_choice` |  |  | [dialog_choice.xml](../assets/ui/components/dialogs/dialog_choice.xml) |
 | `dialog_choice_row` |  |  | `dialog_choice` | [dialog_choice_row.xml](../assets/ui/components/dialogs/dialog_choice_row.xml) |
@@ -2979,7 +2979,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
-| `heater_bar` |  | `heater` | `dialog_number`, `heater_row` | [heater_bar.xml](../assets/ui/components/common/heater_bar.xml) |
+| `heater_bar` |  | `heater` | `dashboard_tool_tile_heater`, `dialog_number`, `heater_row` | [heater_bar.xml](../assets/ui/components/common/heater_bar.xml) |
 | `heater_row` |  | `label`, `active`, `standby` | `tools_bed_heater`, `tools_chamber_heater`, `tools_tool_heater` | [heater_row.xml](../assets/ui/components/common/heater_row.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |

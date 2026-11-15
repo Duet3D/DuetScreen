@@ -545,8 +545,7 @@
       "spindle": "Spindel",
       "active": "Actief",
       "standby": "Stand-by",
-      "deselect": "Deselecteren",
-      "follow": "Gereedschap in gebruik volgen"
+      "deselect": "Deselecteren"
     },
     "spindle": {
       "speed": "Spindeltoerental",

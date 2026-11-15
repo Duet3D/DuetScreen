@@ -545,8 +545,7 @@
       "spindle": "Broche",
       "active": "Actif",
       "standby": "En attente",
-      "deselect": "Désélectionner",
-      "follow": "Suivre l'outil utilisé"
+      "deselect": "Désélectionner"
     },
     "spindle": {
       "speed": "Vitesse de broche",

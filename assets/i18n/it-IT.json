@@ -546,8 +546,7 @@
       "spindle": "Mandrino",
       "active": "Attivo",
       "standby": "Standby",
-      "deselect": "Deseleziona",
-      "follow": "Segui l'utensile in uso"
+      "deselect": "Deseleziona"
     },
     "spindle": {
       "speed": "Velocità del mandrino",

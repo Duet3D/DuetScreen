@@ -545,8 +545,7 @@
       "spindle": "Spindel",
       "active": "Aktiv",
       "standby": "Standby",
-      "deselect": "Abwählen",
-      "follow": "Aktivem Werkzeug folgen"
+      "deselect": "Abwählen"
     },
     "spindle": {
       "speed": "Spindeldrehzahl",

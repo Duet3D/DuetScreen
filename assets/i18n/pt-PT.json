@@ -545,8 +545,7 @@
       "spindle": "Fuso",
       "active": "Ativo",
       "standby": "Em espera",
-      "deselect": "Desselecionar",
-      "follow": "Seguir a ferramenta em uso"
+      "deselect": "Desselecionar"
     },
     "spindle": {
       "speed": "Velocidade do fuso",

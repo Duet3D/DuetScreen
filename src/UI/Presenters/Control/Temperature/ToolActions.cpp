@@ -51,7 +51,7 @@ namespace UI::ToolActions
 	{
 		Xml::Actions::addGlobal("tool.show",
 								"Show the tool numbered `arg` in detail in the dashboard's tools widget, without "
-								"selecting it; `auto` to follow the tool in use again",
+								"selecting it; the tool in use, or `auto`, follows the tool in use again",
 								showTool);
 		Xml::Actions::addGlobal(
 			"tool.toggle",

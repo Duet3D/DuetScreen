@@ -3,8 +3,9 @@
   setting picks:
 
     - all equally (1): every tool's card, compact, then the beds' and chambers' heaters (tools_list.xml)
-    - one, with the rest summarised (2): a tile per tool (dashboard_tool_tile.xml), then the card of the tool shown in
-      detail, the tool in use until a tile is tapped (Follow tool in use goes back), then the beds and chambers
+    - one, with the rest summarised (2): a column of tiles, one per tool (dashboard_tool_tile.xml), beside the card of
+      the tool shown in detail, then the beds and chambers: the tool in use, until another's tile is tapped (tapping
+      the tool in use's goes back); each scrolls on its own
     - automatic (0): all equally while every tool is a print head and they have four heater rows or fewer, else one
       with the rest summarised (source.tool.summary_auto)
 
@@ -27,19 +28,21 @@
 			<bind_flag_if cond="${style} eq 2 or (${style} eq 0 and source.tool.summary_auto eq 1)" flag="hidden"/>
 		</tools_list>
 
-		<lv_obj name="summary" width="100%" height="content" flex_flow="column" scrollable="false">
+		<!-- The tiles in a column of their own, scrolling apart from the tool shown beside them -->
+		<lv_obj name="summary" width="100%" height="100%" flex_flow="row" scrollable="false">
 			<style name="pad_zero"/>
 			<style name="pad_gap"/>
 			<bind_flag_if cond="${style} eq 1 or (${style} eq 0 and source.tool.summary_auto eq 0)" flag="hidden"/>
-			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="100%" height="content"
-					 flex_flow="row_wrap" style_pad_all="0" style_pad_row="8" style_pad_column="8" scrollable="false"/>
-			<ds_button name="follow" translation_tag="tr.tools.follow" height="content" style_min_height="36">
-				<bind_flag_if_eq subject="source.tool.following" flag="hidden" ref_value="1"/>
-				<action trigger="clicked" name="actions.tool.show" arg="auto"/>
-			</ds_button>
-			<ds_list name="shown" list="om.tools" key="row.index" bind_value="source.tool.shown" item="tools_tool"
-					 item.compact="1" width="100%" height="content" style_pad_all="0" scrollable="false"/>
-			<tools_beds name="bed_chamber"/>
+			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="30%" height="100%"
+					 flex_flow="column" scroll_dir="ver" style_min_width="120" style_max_width="150" style_pad_all="0"
+					 style_pad_row="8"/>
+			<lv_obj name="detail" height="100%" flex_grow="1" flex_flow="column" scroll_dir="ver">
+				<style name="pad_zero"/>
+				<style name="pad_gap"/>
+				<ds_list name="shown" list="om.tools" key="row.index" bind_value="source.tool.shown" item="tools_tool"
+						 item.compact="1" width="100%" height="content" style_pad_all="0" scrollable="false"/>
+				<tools_beds name="bed_chamber"/>
+			</lv_obj>
 		</lv_obj>
 	</view>
 </component>

@@ -546,8 +546,7 @@
       "spindle": "Spindle",
       "active": "Active",
       "standby": "Standby",
-      "deselect": "Deselect",
-      "follow": "Follow tool in use"
+      "deselect": "Deselect"
     },
     "spindle": {
       "speed": "Spindle speed",

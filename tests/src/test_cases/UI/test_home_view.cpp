@@ -902,18 +902,17 @@ TEST_F(TestHomeViewWithData, ToolsWidgetShowsToolsInTheStyleChosen)
 	lv_obj_t* shown = lv_obj_find_by_name(widget, "shown");
 	ASSERT_EQ(lv_obj_get_child_count(tiles), 4u) << "a tile per tool";
 	ASSERT_EQ(lv_obj_get_child_count(shown), 1u) << "the tool in use, in detail";
-	EXPECT_TRUE(hidden(widget, "follow"));
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary.png");
 
-	// Tapping a tile shows that tool without selecting it; Follow tool in use goes back
+	// Tapping a tile shows that tool without selecting it; tapping the tool in use's follows the tool in use again
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	lv_obj_send_event(lv_obj_get_child(tiles, 1), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(sent.empty()) << "looking isn't selecting";
 	ASSERT_EQ(lv_obj_get_child_count(shown), 1u);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Dual drive");
-	EXPECT_FALSE(hidden(widget, "follow"));
-	lv_obj_send_event(lv_obj_find_by_name(widget, "follow"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary_other.png");
+	lv_obj_send_event(lv_obj_get_child(tiles, 0), LV_EVENT_CLICKED, nullptr);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Tool 0");
 	UI::Xml::Services::setGcodeSender(nullptr);
 

@@ -193,7 +193,6 @@
 			<xs:enumeration value="row.passed"/>
 			<xs:enumeration value="row.position"/>
 			<xs:enumeration value="row.presets"/>
-			<xs:enumeration value="row.reading"/>
 			<xs:enumeration value="row.secured"/>
 			<xs:enumeration value="row.selected"/>
 			<xs:enumeration value="row.shown"/>
@@ -715,6 +714,7 @@
 			<xs:enumeration value="dashboard_text"/>
 			<xs:enumeration value="dashboard_tool_card"/>
 			<xs:enumeration value="dashboard_tool_tile"/>
+			<xs:enumeration value="dashboard_tool_tile_heater"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="dialog_choice"/>
 			<xs:enumeration value="dialog_choice_row"/>
@@ -860,6 +860,7 @@
 			<xs:enumeration value="dashboard_text"/>
 			<xs:enumeration value="dashboard_tool_card"/>
 			<xs:enumeration value="dashboard_tool_tile"/>
+			<xs:enumeration value="dashboard_tool_tile_heater"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="dialog_choice"/>
 			<xs:enumeration value="dialog_choice_row"/>
@@ -1005,6 +1006,7 @@
 			<xs:enumeration value="dashboard_text"/>
 			<xs:enumeration value="dashboard_tool_card"/>
 			<xs:enumeration value="dashboard_tool_tile"/>
+			<xs:enumeration value="dashboard_tool_tile_heater"/>
 			<xs:enumeration value="dashboard_tools"/>
 			<xs:enumeration value="dialog_choice"/>
 			<xs:enumeration value="dialog_choice_row"/>
@@ -2226,7 +2228,6 @@
 			<xs:enumeration value="tr.tools.extrude"/>
 			<xs:enumeration value="tr.tools.extrusion_factor"/>
 			<xs:enumeration value="tr.tools.filament"/>
-			<xs:enumeration value="tr.tools.follow"/>
 			<xs:enumeration value="tr.tools.in_use"/>
 			<xs:enumeration value="tr.tools.no_extruder"/>
 			<xs:enumeration value="tr.tools.no_tool"/>
@@ -9074,6 +9075,14 @@
 	</xs:element>
 	<xs:element name="dashboard_tool_tile">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tool_tile.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="dashboard_tool_tile_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_tool_tile_heater.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

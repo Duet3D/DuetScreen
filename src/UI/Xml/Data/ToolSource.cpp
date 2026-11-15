@@ -15,11 +15,8 @@ namespace UI::Xml
 {
 	namespace
 	{
-		/** A tile shows this many of a tool's heaters; more are counted, "+1" */
-		constexpr size_t TILE_HEATERS = 2;
-
 		/** The automatic style shows every tool equally up to this many heater rows (a tool with none is one row) */
-		constexpr size_t EQUAL_ROWS = 4;
+		constexpr size_t EQUAL_ROWS = 3;
 	} // namespace
 
 	void ToolTileRow::fields(FieldVisitor& f)
@@ -27,10 +24,6 @@ namespace UI::Xml
 		f.field("number", number, "The tool's number (actions.tool.show)");
 		f.field("label", label, "E.g. \"T0\"");
 		f.field("name", name, "Its name, else e.g. \"Tool 0\"");
-		f.field("reading",
-				reading,
-				"Its first two heaters' temperatures and targets, e.g. \"209.6/210° 60/60°\", \"+1\" for each more; "
-				"empty if it has none");
 		f.field(
 			"state", state, "\"active\", \"standby\", \"off\" or \"fault\": its heaters' state, any fault marking it");
 		f.field("in_use", inUse, "1 if it is the tool in use");
@@ -59,7 +52,10 @@ namespace UI::Xml
 				m_summaryAuto,
 				"1 if the tools widget's automatic style shows one tool with the rest summarised: unless every tool is "
 				"a print head (no spindle) and they have four heater rows or fewer, which it shows equally");
-		f.list("tiles", m_tiles, "A tile per tool, for the tools widget's summary (actions.tool.show)");
+		f.list("tiles",
+			   m_tiles,
+			   "A tile per tool, for the tools widget's summary (actions.tool.show); a tile's heaters are its tool's, "
+			   "om.tools[{row.number}].heaters");
 	}
 
 	void ToolSource::onInit()
@@ -84,8 +80,9 @@ namespace UI::Xml
 
 	void ToolSource::show(std::optional<size_t> number)
 	{
-		m_picked = number;
 		MODEL_LOCK();
+		// Picking the tool in use is following it again
+		m_picked = number != PrinterModel::currentTool() ? number : std::nullopt;
 		showTools();
 	}
 
@@ -128,7 +125,6 @@ namespace UI::Xml
 						 row.number.set(static_cast<int32_t>(number));
 						 row.label.set(fmt::format("T{:d}", number));
 						 row.name.set(name.empty() ? _("temperature.default_tool_name", number) : std::string(name));
-						 row.reading.set(reading(number));
 						 row.inUse.set(current == number ? 1 : 0);
 						 row.shown.set(shown == number ? 1 : 0);
 						 // Any fault marks the tool; else its state, as its heaters follow it
@@ -144,27 +140,6 @@ namespace UI::Xml
 						 }
 						 row.state.set(state.empty() ? std::string("off") : state);
 					 });
-	}
-
-	std::string ToolSource::reading(size_t number)
-	{
-		std::string text;
-		const OM::Node& heaters = PrinterModel::tool(number)["heaters"];
-		for (size_t slot = 0; slot < heaters.size() && slot < TILE_HEATERS; ++slot)
-		{
-			if (const auto heater = PrinterModel::toolHeater(number, slot))
-			{
-				const auto current = static_cast<float>(PrinterModel::heater(*heater)["current"].number());
-				const int32_t target = PrinterModel::heaterTarget(*heater);
-				text += text.empty() ? "" : " ";
-				text += target > 0 ? fmt::format("{:.1f}/{:d}°", current, target) : fmt::format("{:.1f}°", current);
-			}
-		}
-		if (heaters.size() > TILE_HEATERS)
-		{
-			text += fmt::format(" +{:d}", heaters.size() - TILE_HEATERS);
-		}
-		return text;
 	}
 
 	void ToolSource::showCurrentTool()

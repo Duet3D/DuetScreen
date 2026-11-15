@@ -28,7 +28,6 @@ namespace UI::Xml
 		IntSubject number;			// The tool's number
 		StringSubject<16> label;	// E.g. "T0"
 		StringSubject<64> name;		// Its name, else "Tool 0"
-		StringSubject<48> reading;	// Its first two heaters', e.g. "209.6/210° 60/60°", "+1" for more; empty for none
 		StringSubject<16> state;	// "active", "standby", "off" or "fault": its heaters' (any fault marks it)
 		IntSubject inUse;			// 1 if it is the tool in use
 		IntSubject shown;			// 1 if it is the tool shown in detail
@@ -50,7 +49,7 @@ namespace UI::Xml
 		/** Show no current tool */
 		void clear() override;
 
-		/** Show tool `number` in detail, or (nullopt) follow the tool in use again */
+		/** Show tool `number` in detail; the tool in use, or nullopt, follows the tool in use again */
 		void show(std::optional<size_t> number);
 
 	  protected:
@@ -63,10 +62,6 @@ namespace UI::Xml
 
 		/** Show the tool shown in detail, the tiles, and which style the tools widget picks (the model lock held) */
 		void showTools();
-
-		/** Tool `number`'s first two heaters' temperatures, e.g. "209.6/210° 60/60°", and "+1" for each more (the model
-		 * lock held) */
-		static std::string reading(size_t number);
 
 		IntSubject m_currentShown;			 // 1 if there is a current tool with heaters
 		StringSubject<16> m_currentLabel;	 // e.g. "T0:"

@@ -545,8 +545,7 @@
       "spindle": "Husillo",
       "active": "Activo",
       "standby": "En espera",
-      "deselect": "Deseleccionar",
-      "follow": "Seguir la herramienta en uso"
+      "deselect": "Deseleccionar"
     },
     "spindle": {
       "speed": "Velocidad del husillo",
