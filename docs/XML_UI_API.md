@@ -936,6 +936,18 @@ Used by `heightmap`.
 | `presenter.heightmap.show` | Show the saved mesh picked in the choice of `map_options` (value_confirmed: its line) |
 | `presenter.heightmap.toggle` | Make the printer use the mesh shown (G29 S1), or stop using it (G29 S2) |
 
+### job_status
+
+Used by `dashboard_job_status`.
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `presenter.thumbnail_place` | int | Where the job's thumbnail goes: 0 nowhere (it has none), 1 above its name, 2 beside it (presenter.job_status.layout decides) |
+
+| Action | Description |
+| --- | --- |
+| `presenter.job_status.layout` | The job's card was laid out (`layout_changed`, on the card): place the thumbnail, whose path is `arg`, above the name if the room the card's growing child gets is at least as tall as the square beside it, else beside it; nowhere if `arg` is empty |
+
 ### notifications
 
 Used by `notifications`.
@@ -1824,7 +1836,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_thumbnail
 
-An image as tall as its parent's content and as wide as its aspect ratio needs, so a thumbnail beside some text is as large as it can be without making the row taller. With no image it takes no width.
+An image as tall as its parent's content and as wide as its aspect ratio needs, so a thumbnail beside some text is as large as it can be without making the row taller, and one alone in a box that grows fills its height. It hides while it has no image.
 
 Also takes every `lv_image` attribute.
 
@@ -2940,7 +2952,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
-| [`dashboard_job_status`](#dashboard_job_status) |  |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| [`dashboard_job_status`](#dashboard_job_status) | `job_status` |  | `dashboard_files`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
 | `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
@@ -2968,7 +2980,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
-| `flex_pad` |  |  |  | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
+| `flex_pad` |  |  | `dashboard_job_status` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
 | `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
 | `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |

@@ -1,31 +1,55 @@
 <!--
-  The job, as it runs (or as it last ran): its thumbnail, name and what it is doing; while it runs, its progress,
-  large, over a bar, and its layer, times and when it should be done; the overrides, each tapped to change it in its shared dialog (speed,
-  and on a printer extrusion and Z offset); and pause, resume or print again, and Cancel, which asks first.
+  The job, as it runs (or as it last ran): its thumbnail, as large as the room left lets it be, or beside its name where
+  that shows it larger; its name and what it is doing; while it runs, its progress, large, over a bar, and its layer,
+  times and when it should be done; the overrides, each tapped to change it in its shared dialog (speed, and on a
+  printer extrusion and Z offset); and pause, resume or print again, and Cancel, which asks first.
 
   Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the latest job, its progress, times, thumbnail and controls;
             source.move.* (src/UI/Xml/Data/MoveSource.h): the overrides and babystep
   Actions:  job.pause, job.resume, job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h), job.ask_cancel,
             factors.speed, factors.extrusion and babystep.open (global: the shared dialogs, src/UI/Presenters/Modals/)
-  It has no presenter: everything it shows and does is global.
+  Presenter: job_status (src/UI/Presenters/Dashboard/JobStatusPresenter.h): where the thumbnail goes, above or beside
+            the name, from the room the job's card leaves it
 -->
-<component>
+<component presenter="job_status">
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
 		<style name="pad_zero"/>
 		<style name="pad_gap"/>
 		<style name="bg_dark"/>
 
-		<lv_obj name="job" width="100%" height="content" flex_flow="column" scrollable="false">
+		<!-- The job fills the height the overrides and controls leave. Where that is too little, its rows start at the
+			 top and the details are cut off at the bottom: the overrides and controls always show. Each time it is
+			 laid out, the presenter measures the room it leaves its thumbnail, and so where the thumbnail goes -->
+		<lv_obj name="job" width="100%" height="1" flex_grow="1" flex_flow="column" scrollable="false">
 			<style name="card"/>
-			<bind_flag_if_eq subject="source.job.name" flag="hidden" ref_value=""/>
 			<style name="pad_gap"/>
-			<!-- What it is -->
+			<bind_flag_if_eq subject="source.job.name" flag="hidden" ref_value=""/>
+			<action trigger="layout_changed" name="presenter.job_status.layout" arg="{source.job.thumbnail}"/>
+			<!-- Without the thumbnail above, the room it would take, so the rows sit at the bottom as they do with it -->
+			<flex_pad name="spacer">
+				<bind_flag_if_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="1"/>
+			</flex_pad>
+			<!-- Its thumbnail above, where there is room for it at least as large as beside the name: it takes the
+				 room the rest leaves, centred, as tall as that room and no wider (scaled to fit) -->
+			<lv_obj name="picture" width="100%" height="1" flex_grow="1" flex_flow="row" scrollable="false"
+					style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+					style_pad_all="0">
+				<bind_flag_if_not_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="1"/>
+				<ds_thumbnail name="thumbnail" bind_src="source.job.thumbnail" inner_align="contain" height="100%"
+							  style_max_width="100%"/>
+			</lv_obj>
+			<!-- What it is, with the thumbnail beside it where there isn't room above -->
 			<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
-					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
-					style_pad_column="12">
-				<ds_thumbnail name="thumbnail" bind_src="source.job.thumbnail" inner_align="contain" width="64"
-							  height="64"/>
-				<lv_obj name="titles" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0">
+				<!-- No larger than 56 x 56, so it never makes the row taller than its two lines -->
+				<lv_obj name="beside" width="56" height="56" flex_flow="row" scrollable="false"
+						style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+						style_pad_all="0" style_margin_right="12">
+					<bind_flag_if_not_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="2"/>
+					<ds_thumbnail name="small_thumbnail" bind_src="source.job.thumbnail" inner_align="contain"
+								  height="100%" style_max_width="100%"/>
+				</lv_obj>
+				<lv_obj name="titles" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
 						style_pad_all="0">
 					<lv_label name="filename" bind_text="source.job.name" width="100%" long_mode="dots">
 						<style name="text_emphasis"/>
@@ -54,7 +78,7 @@
 			</ds_bar>
 			<!-- Its layer and times, each shown while it is known -->
 			<lv_obj name="details" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
-					style_pad_all="0" style_pad_column="16" style_pad_row="8">
+					style_pad_all="0" style_pad_column="16" style_pad_row="8" style_flex_main_place="space_between">
 				<bind_flag_if_eq subject="source.job.running" flag="hidden" ref_value="0"/>
 				<job_detail name="layer" title_tag="tr.job.layer" value="source.job.layer"/>
 				<job_detail name="elapsed" title_tag="tr.job.elapsed" value="source.job.elapsed"/>

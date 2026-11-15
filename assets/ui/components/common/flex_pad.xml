@@ -1,0 +1,3 @@
+<component>
+    <view extends="lv_obj" flex_grow="1"/>
+</component>

@@ -139,6 +139,7 @@
 			<xs:enumeration value="presenter.target_x"/>
 			<xs:enumeration value="presenter.target_y"/>
 			<xs:enumeration value="presenter.text"/>
+			<xs:enumeration value="presenter.thumbnail_place"/>
 			<xs:enumeration value="presenter.tiles"/>
 			<xs:enumeration value="presenter.title"/>
 			<xs:enumeration value="presenter.tools"/>
@@ -547,6 +548,7 @@
 			<xs:enumeration value="presenter.heightmap.mode"/>
 			<xs:enumeration value="presenter.heightmap.show"/>
 			<xs:enumeration value="presenter.heightmap.toggle"/>
+			<xs:enumeration value="presenter.job_status.layout"/>
 			<xs:enumeration value="presenter.number.backspace"/>
 			<xs:enumeration value="presenter.number.cancel"/>
 			<xs:enumeration value="presenter.number.clear"/>
@@ -671,6 +673,7 @@
 			<xs:enumeration value="gcode_reference"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
+			<xs:enumeration value="job_status"/>
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="object_cancel"/>
 			<xs:enumeration value="settings_theme_preview"/>
@@ -7662,7 +7665,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_thumbnail">
-		<xs:annotation><xs:documentation>An image as tall as its parent's content and as wide as its aspect ratio needs, so a thumbnail beside some text is as large as it can be without making the row taller. With no image it takes no width. Also takes every lv_image attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>An image as tall as its parent's content and as wide as its aspect ratio needs, so a thumbnail beside some text is as large as it can be without making the row taller, and one alone in a box that grows fills its height. It hides while it has no image. Also takes every lv_image attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_thumbnail.attributes"/>
@@ -8563,7 +8566,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="dashboard_job_status">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_job_status.xml.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_job_status.xml, with presenter job_status.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

@@ -35,8 +35,8 @@ namespace UI::Xml
 					  .extends = "lv_image",
 					  .description =
 						  "An image as tall as its parent's content and as wide as its aspect ratio needs, so a "
-						  "thumbnail beside some text is as large as it can be without making the row taller. With "
-						  "no image it takes no width.",
+						  "thumbnail beside some text is as large as it can be without making the row taller, and one "
+						  "alone in a box that grows fills its height. It hides while it has no image.",
 					  .example = R"(<ds_thumbnail bind_src="source.job.thumbnail" height="100%"/>)",
 					  .attributes = {{"bind_src",
 									  "Follow a text subject holding an image path; empty shows no image",
@@ -91,11 +91,13 @@ namespace UI::Xml
 		const int32_t srcHeight = getSrc() ? getSrcHeight() : 0;
 		if (srcWidth <= 0 || srcHeight <= 0)
 		{
-			setWidth(0);
+			setVisible(false);
 			return;
 		}
-		// The parent's content height, not this image's: that is only updated after this layout pass
-		const int32_t height = lv_obj_calc_content_height(m_parent);
+		// The parent's content height, not this image's: that is only updated after this layout pass. Its laid-out
+		// height rather than what its children span: a parent that grows (flex_grow) may hold only this image
+		const int32_t height = lv_obj_get_content_height(m_parent);
 		setWidth(height * (100 * srcWidth / srcHeight) / 100);
+		setVisible(true);
 	}
 } // namespace UI::Xml
