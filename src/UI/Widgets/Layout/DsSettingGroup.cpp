@@ -21,9 +21,17 @@ namespace UI::Xml
 		addStyle(Themes::getComponentStyles().setting_section);
 		setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
 
+		m_header.setSize(LV_PCT(100), LV_SIZE_CONTENT);
+		m_header.setStylePad(0);
+		m_header.setFlexFlow(LV_FLEX_FLOW_ROW);
+		m_header.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
+		m_header.setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
+
 		m_title.addStyle(Themes::getComponentStyles().setting_group_title);
-		m_title.setWidth(LV_PCT(100));
+		m_title.setFlexGrow(1);
+		m_note.addStyle(Themes::getComponentStyles().setting_hint);
 		setTitle("");
+		setNote("");
 
 		m_box.addStyle(Themes::getComponentStyles().setting_group);
 		m_box.setFlag(LV_OBJ_FLAG_SCROLLABLE, false);
@@ -38,8 +46,8 @@ namespace UI::Xml
 					  .extends = "lv_obj",
 					  .description =
 						  "A group of settings: its title, in capitals, over a box of the rows written inside it "
-						  "(`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style). Hiding the group "
-						  "hides its title too.",
+						  "(`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style), with a note at "
+						  "the end of the title's line if it has one. Hiding the group hides its title too.",
 					  .example = R"(<ds_setting_group title="Machine control">
 	<ds_setting title="Confirm before acting">
 		<ds_toggle/>
@@ -51,6 +59,11 @@ namespace UI::Xml
 					  .attributes = {{"title", "The group's title, if there is no `title_tag`"},
 									 {"title_tag",
 									  "Translation key for the title; follows language changes",
+									  AttributeKind::Translation},
+									 {"note", "A note at the end of the title's line, if there is no `note_tag`"},
+									 {"note_tag",
+									  "Translation key for the note, e.g. who sets the settings; follows language "
+									  "changes",
 									  AttributeKind::Translation},
 									 {"danger",
 									  "\"true\" for a group whose actions can't be undone, such as erasing every "
@@ -80,6 +93,15 @@ namespace UI::Xml
 		{
 			group->setTitle(title);
 		}
+		if (const char* tag = lv_xml_get_value_of(attrs, "note_tag"))
+		{
+			group->m_noteTag = tag;
+			group->setNote(Translations::translate(tag));
+		}
+		else if (const char* note = lv_xml_get_value_of(attrs, "note"))
+		{
+			group->setNote(note);
+		}
 		if (const char* danger = lv_xml_get_value_of(attrs, "danger"); danger != nullptr && lv_xml_to_bool(danger))
 		{
 			group->m_box.addStyle(Themes::getComponentStyles().setting_group_danger);
@@ -92,7 +114,7 @@ namespace UI::Xml
 		auto* group = static_cast<DsSettingGroup*>(lv_event_get_user_data(e));
 		auto* child = static_cast<lv_obj_t*>(lv_event_get_param(e));
 		if (child == nullptr || lv_obj_get_parent(child) != group->getRootPtr() ||
-			child == group->m_title.getRootPtr() || child == group->m_box.getRootPtr())
+			child == group->m_header.getRootPtr() || child == group->m_box.getRootPtr())
 		{
 			return;
 		}
@@ -106,11 +128,30 @@ namespace UI::Xml
 		{
 			group->setTitle(Translations::translate(group->m_titleTag));
 		}
+		if (!group->m_noteTag.empty())
+		{
+			group->setNote(Translations::translate(group->m_noteTag));
+		}
 	}
 
 	void DsSettingGroup::setTitle(std::string_view title)
 	{
 		m_title.setText(utils::toUpper(title));
 		m_title.setFlag(LV_OBJ_FLAG_HIDDEN, title.empty());
+		showHeader();
+	}
+
+	void DsSettingGroup::setNote(std::string_view note)
+	{
+		m_note.setText(note);
+		m_note.setFlag(LV_OBJ_FLAG_HIDDEN, note.empty());
+		showHeader();
+	}
+
+	void DsSettingGroup::showHeader()
+	{
+		m_header.setFlag(LV_OBJ_FLAG_HIDDEN,
+						 lv_obj_has_flag(m_title.getRootPtr(), LV_OBJ_FLAG_HIDDEN) &&
+							 lv_obj_has_flag(m_note.getRootPtr(), LV_OBJ_FLAG_HIDDEN));
 	}
 } // namespace UI::Xml

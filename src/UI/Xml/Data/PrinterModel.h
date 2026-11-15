@@ -67,6 +67,12 @@ namespace UI::Xml::PrinterModel
 	/** Whether tool `number` takes filament (it has a filament extruder) */
 	bool takesFilament(size_t number);
 
+	/**
+	 * The names of the tools whose list `list` (e.g. "fans", "extruders") holds `number`, e.g. "Revo, Tool 2": a tool's
+	 * name, else "Tool <number>"; empty if none does
+	 */
+	std::string toolsUsing(std::string_view list, size_t number);
+
 	/** The filament loaded in tool `number`'s filament extruder; empty if none */
 	std::string_view filament(size_t number);
 

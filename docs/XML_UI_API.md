@@ -58,6 +58,9 @@ Each row of an object model list:
 | `\|scale` | int | The factor | The value × the argument, rounded, e.g. `scale:10` for tenths |
 | `\|fixed` | text | Decimals, 0-9 | A number with the argument's number of decimals, e.g. `fixed:1` gives 61.2; empty for anything not a number |
 | `\|count` | int |  | The number of items of an array; 0 for anything else |
+| `\|count_having` | int | The field, a dotted path from an item, e.g. `thermostatic.lowTemperature` | How many items of an array have a field (there and not null), e.g. `om.fans\|count_having:thermostatic.lowTemperature` for the fans the firmware runs |
+| `\|count_lacking` | int | The field, a dotted path from an item, e.g. `thermostatic.lowTemperature` | How many items of an array lack a field (missing or null), e.g. `om.fans\|count_lacking:thermostatic.lowTemperature` for the fans you set |
+| `\|tools_using` | text | The tools' list, e.g. `fans` or `extruders` | Of an item of a list, e.g. `fans[1]`: the names of the tools whose list (the argument) holds its number, e.g. `om.fans[1]\|tools_using:fans` gives "Revo, Tool 2"; empty if none |
 | `\|exists` | int |  | 1 if the field is there and not null, else 0 |
 | `\|eq` | int | The value compared with | 1 if the value is the argument, else 0, e.g. `state\|eq:fault` |
 | `\|duration` | text |  | Seconds as h:mm:ss, or m:ss under an hour |
@@ -1666,7 +1669,7 @@ Also takes every `lv_obj` attribute.
 
 ### ds_setting_group
 
-A group of settings: its title, in capitals, over a box of the rows written inside it (`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style). Hiding the group hides its title too.
+A group of settings: its title, in capitals, over a box of the rows written inside it (`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style), with a note at the end of the title's line if it has one. Hiding the group hides its title too.
 
 Also takes every `lv_obj` attribute.
 
@@ -1687,6 +1690,8 @@ Also takes every `lv_obj` attribute.
 | --- | --- |
 | `title` | The group's title, if there is no `title_tag` |
 | `title_tag` | Translation key for the title; follows language changes |
+| `note` | A note at the end of the title's line, if there is no `note_tag` |
+| `note_tag` | Translation key for the note, e.g. who sets the settings; follows language changes |
 | `danger` | "true" for a group whose actions can't be undone, such as erasing every setting: the box is edged in the error colour (`setting_group_danger`) |
 
 ### ds_slider
@@ -2948,7 +2953,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `factors_dialog` |  | `open`, `title`, `factors`, `all`, `all_shown` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_preset` |  |  | `factors_row` | [factors_preset.xml](../assets/ui/components/modals/factors_preset.xml) |
 | `factors_row` |  |  | `factors_dialog` | [factors_row.xml](../assets/ui/components/modals/factors_row.xml) |
-| `fan_row` |  |  | `dashboard_fan`, `fans` | [fan_row.xml](../assets/ui/components/control/fans/fan_row.xml) |
+| `fan_row` |  | `automatic` | `dashboard_fan`, `fans` | [fan_row.xml](../assets/ui/components/control/fans/fan_row.xml) |
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |

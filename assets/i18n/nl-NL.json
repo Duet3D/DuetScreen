@@ -95,7 +95,10 @@
       "header": "Ventilator {:d}",
       "off": "Uit",
       "max": "Max",
-      "automatic": "Automatisch: aan boven {:d} °C"
+      "automatic": "Gaat aan boven {:d} °C",
+      "automatic_group": "Automatisch",
+      "automatic_note": "De firmware stelt deze in op temperatuur",
+      "controllable": "Bestuurbare ventilatoren"
     },
     "filament": {
       "management_header": "Huidig geladen filament",

@@ -114,12 +114,14 @@ namespace UI::Xml
 		case NumberPad::SHARED:
 			break;
 		}
-		// The request goes with the slider: a fan going while its number pad is open takes the slider with it
+		// The request goes with the slider: a fan going while its number pad is open takes the slider with it. The
+		// pad's − and + step as the slider's do.
 		return Prompts::askNumber({.header = std::string(getLabelText()),
 								   .min = lowest(),
 								   .max = highest(),
 								   .value = getValue(),
 								   .unit = std::string(getUnit()),
+								   .step = getIncrementValue(),
 								   .onConfirm = [this](float value) { setValue(value); },
 								   .asker = getRootPtr()});
 	}

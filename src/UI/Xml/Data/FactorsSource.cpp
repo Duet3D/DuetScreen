@@ -145,29 +145,7 @@ namespace UI::Xml
 			numbers.size(),
 			[&numbers](size_t i) { return _("fine_tune.extruder", numbers[i]); },
 			[&](size_t i) { return 100.0f * static_cast<float>(all[numbers[i]]["factor"].number()); },
-			[&numbers](size_t i) { return toolsUsing(numbers[i]); });
-	}
-
-	std::string FactorsSource::toolsUsing(size_t extruder)
-	{
-		std::string names;
-		const OM::Node& tools = PrinterModel::root()["tools"];
-		for (size_t number = 0; number < tools.size(); ++number)
-		{
-			const OM::Node& tool = tools[number];
-			const OM::Node& toolExtruders = tool["extruders"];
-			for (size_t i = 0; i < toolExtruders.size(); ++i)
-			{
-				if (toolExtruders[i].integer(-1) == static_cast<int64_t>(extruder))
-				{
-					const std::string_view name = tool["name"].text();
-					names += names.empty() ? "" : ", ";
-					names += name.empty() ? _("temperature.default_tool_name", number) : std::string(name);
-					break;
-				}
-			}
-		}
-		return names;
+			[&numbers](size_t i) { return PrinterModel::toolsUsing("extruders", numbers[i]); });
 	}
 
 	std::vector<size_t> FactorsSource::extruders() const

@@ -30,7 +30,7 @@ namespace UI::Xml
 		/** `<ds_setting_group>` create callback: create the C++ group, deleted with its widget */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_setting_group>` apply callback: lv_obj attributes, then the title and `danger` */
+		/** `<ds_setting_group>` apply callback: lv_obj attributes, then the title, the note and `danger` */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** A child was created: if it is the group's own (not its title, box or what is in them), move it into the box */
@@ -42,8 +42,17 @@ namespace UI::Xml
 		/** Show `title`, in capitals, over the box; no title if it is empty */
 		void setTitle(std::string_view title);
 
-		LvLabel m_title{"title", getRoot()};  // What the settings in the box are for
-		LvContainer m_box{"rows", getRoot()}; // The rows
-		std::string m_titleTag;				  // `title_tag`, or empty if the title isn't translated
+		/** Show `note` at the end of the title's line, e.g. who sets the settings; none if it is empty */
+		void setNote(std::string_view note);
+
+		/** Show the title's line only while it has a title or a note */
+		void showHeader();
+
+		LvContainer m_header{"header", getRoot()}; // The title and the note, on a line over the box
+		LvLabel m_title{"title", m_header};		   // What the settings in the box are for
+		LvLabel m_note{"note", m_header};		   // More about them, muted, at the end of the line
+		LvContainer m_box{"rows", getRoot()};	   // The rows
+		std::string m_titleTag;					   // `title_tag`, or empty if the title isn't translated
+		std::string m_noteTag;					   // `note_tag`, or empty if the note isn't translated
 	};
 } // namespace UI::Xml

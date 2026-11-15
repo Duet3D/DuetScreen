@@ -1503,6 +1503,9 @@
 			<xs:enumeration value="tr.extrude.retract"/>
 			<xs:enumeration value="tr.extrude.tool_select"/>
 			<xs:enumeration value="tr.fan.automatic"/>
+			<xs:enumeration value="tr.fan.automatic_group"/>
+			<xs:enumeration value="tr.fan.automatic_note"/>
+			<xs:enumeration value="tr.fan.controllable"/>
 			<xs:enumeration value="tr.fan.header"/>
 			<xs:enumeration value="tr.fan.max"/>
 			<xs:enumeration value="tr.fan.off"/>
@@ -3616,6 +3619,12 @@
 		<xs:attribute name="title_tag" type="translation">
 			<xs:annotation><xs:documentation>Translation key for the title; follows language changes</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="note" type="xs:string">
+			<xs:annotation><xs:documentation>A note at the end of the title's line, if there is no `note_tag`</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="note_tag" type="translation">
+			<xs:annotation><xs:documentation>Translation key for the note, e.g. who sets the settings; follows language changes</xs:documentation></xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="danger" type="xs:string">
 			<xs:annotation><xs:documentation>&quot;true&quot; for a group whose actions can't be undone, such as erasing every setting: the box is edged in the error colour (`setting_group_danger`)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -3779,6 +3788,11 @@
 		</xs:attribute>
 		<xs:attribute name="all_shown" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `all_shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="fan_row.attributes">
+		<xs:attribute name="automatic" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `automatic` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="gauge_arc.attributes">
@@ -7565,7 +7579,7 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="ds_setting_group">
-		<xs:annotation><xs:documentation>A group of settings: its title, in capitals, over a box of the rows written inside it (`&lt;ds_setting&gt;`, or a `&lt;ds_list&gt;` of them with the `setting_list` style). Hiding the group hides its title too. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
+		<xs:annotation><xs:documentation>A group of settings: its title, in capitals, over a box of the rows written inside it (`&lt;ds_setting&gt;`, or a `&lt;ds_list&gt;` of them with the `setting_list` style), with a note at the end of the title's line if it has one. Hiding the group hides its title too. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="ds_setting_group.attributes"/>
@@ -10317,6 +10331,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/fans/fan_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="fan_row.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

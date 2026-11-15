@@ -1804,6 +1804,10 @@ TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
 	EXPECT_TRUE(tapShowsNumberPad("tools", nullptr, "active")) << "a heater's active target";
 	openControlTab(4);
 	EXPECT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true)) << "fan slider";
+	// The first slider found is fan 0's (its row is hidden: this machine has no fan 0)
+	EXPECT_EQ(TestDialogs::title(), _("fan.header", 0)) << "the fan's name heads its pad";
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(openNumberPad(), "step_up"), LV_OBJ_FLAG_HIDDEN))
+		<< "− and + step as the slider does";
 
 	UI::openScreen(std::string_view("settings"), false);
 	settingsPage().setActiveTab(SETTINGS_DISPLAY);

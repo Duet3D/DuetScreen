@@ -3,6 +3,7 @@
  */
 
 #include "Converters.h"
+#include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Runtime/Translations.h"
 #include "i18n/i18n.h"
 #include <algorithm>
@@ -12,6 +13,7 @@
 #include <fmt/format.h>
 #include <limits>
 #include <optional>
+#include <variant>
 
 namespace UI::Xml
 {
@@ -96,6 +98,49 @@ namespace UI::Xml
 		int32_t exists(const OM::Node& node, const OM::Path&, std::string_view)
 		{
 			return node.exists() ? 1 : 0;
+		}
+
+		/** The field of `node` at the dotted path `field`, e.g. "thermostatic.lowTemperature" */
+		const OM::Node& fieldOf(const OM::Node& node, std::string_view field)
+		{
+			const OM::Node* at = &node;
+			while (!field.empty())
+			{
+				const size_t dot = field.find('.');
+				at = &(*at)[field.substr(0, dot)];
+				field = dot == std::string_view::npos ? std::string_view() : field.substr(dot + 1);
+			}
+			return *at;
+		}
+
+		/** How many items of an array have the field `field` (there and not null) */
+		int32_t countHaving(const OM::Node& node, const OM::Path&, std::string_view field)
+		{
+			int32_t having = 0;
+			for (size_t i = 0; node.isArray() && i < node.size(); ++i)
+			{
+				having += node[i].exists() && fieldOf(node[i], field).exists() ? 1 : 0;
+			}
+			return having;
+		}
+
+		/** How many items of an array lack the field `field` (missing or null); a null item counts as neither */
+		int32_t countLacking(const OM::Node& node, const OM::Path&, std::string_view field)
+		{
+			int32_t lacking = 0;
+			for (size_t i = 0; node.isArray() && i < node.size(); ++i)
+			{
+				lacking += node[i].exists() && !fieldOf(node[i], field).exists() ? 1 : 0;
+			}
+			return lacking;
+		}
+
+		/** The tools whose list `list` holds the number of the item at `path`, e.g. a fan's (`fans[1]`) */
+		std::string toolsUsing(const OM::Node&, const OM::Path& path, std::string_view list)
+		{
+			const auto& segments = path.segments();
+			const auto* number = segments.empty() ? nullptr : std::get_if<size_t>(&segments.back());
+			return number != nullptr ? PrinterModel::toolsUsing(list, *number) : std::string();
 		}
 
 		/** 1 if the value, as text, is the argument */
@@ -326,6 +371,29 @@ namespace UI::Xml
 					  .argument = "",
 					  .toInteger = count,
 					  .toText = nullptr},
+			Converter{.name = "count_having",
+					  .type = Converter::Type::integer,
+					  .description =
+						  "How many items of an array have a field (there and not null), e.g. "
+						  "`om.fans|count_having:thermostatic.lowTemperature` for the fans the firmware runs",
+					  .argument = "The field, a dotted path from an item, e.g. `thermostatic.lowTemperature`",
+					  .toInteger = countHaving,
+					  .toText = nullptr},
+			Converter{.name = "count_lacking",
+					  .type = Converter::Type::integer,
+					  .description = "How many items of an array lack a field (missing or null), e.g. "
+									 "`om.fans|count_lacking:thermostatic.lowTemperature` for the fans you set",
+					  .argument = "The field, a dotted path from an item, e.g. `thermostatic.lowTemperature`",
+					  .toInteger = countLacking,
+					  .toText = nullptr},
+			Converter{.name = "tools_using",
+					  .type = Converter::Type::text,
+					  .description = "Of an item of a list, e.g. `fans[1]`: the names of the tools whose list (the "
+									 "argument) holds its number, e.g. `om.fans[1]|tools_using:fans` gives "
+									 "\"Revo, Tool 2\"; empty if none",
+					  .argument = "The tools' list, e.g. `fans` or `extruders`",
+					  .toInteger = nullptr,
+					  .toText = toolsUsing},
 			Converter{.name = "exists",
 					  .type = Converter::Type::integer,
 					  .description = "1 if the field is there and not null, else 0",

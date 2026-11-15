@@ -127,6 +127,27 @@ namespace UI::Xml::PrinterModel
 		return tool(number)["filamentExtruder"].integer(-1) >= 0;
 	}
 
+	std::string toolsUsing(std::string_view list, size_t number)
+	{
+		std::string names;
+		const OM::Node& tools = root()["tools"];
+		for (size_t i = 0; i < tools.size(); ++i)
+		{
+			const OM::Node& used = tools[i][list];
+			for (size_t j = 0; j < used.size(); ++j)
+			{
+				if (used[j].integer(-1) == static_cast<int64_t>(number))
+				{
+					const std::string_view name = tools[i]["name"].text();
+					names += names.empty() ? "" : ", ";
+					names += name.empty() ? _("temperature.default_tool_name", i) : std::string(name);
+					break;
+				}
+			}
+		}
+		return names;
+	}
+
 	std::string_view filament(size_t number)
 	{
 		const int64_t extruder = tool(number)["filamentExtruder"].integer(-1);

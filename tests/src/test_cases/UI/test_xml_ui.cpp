@@ -333,8 +333,15 @@ class TestXmlUi : public UiTestSuite
 	static lv_obj_t* find(UI::LvObj& root, const char* name) { return lv_obj_find_by_name(root.getRootPtr(), name); }
 	static lv_obj_t* find(lv_obj_t* root, const char* name) { return lv_obj_find_by_name(root, name); }
 
+	/** The list of the fans you set (the fans tab lists every fan in each group, showing those it is for) */
 	static lv_obj_t* fanList(UI::LvObj& view) { return find(view, "list"); }
 	static lv_obj_t* fanCard(UI::LvObj& view, int32_t index) { return lv_obj_get_child(fanList(view), index); }
+
+	/** Fan `index`'s row in the group of the fans the firmware runs */
+	static lv_obj_t* automaticFanCard(UI::LvObj& view, int32_t index)
+	{
+		return lv_obj_get_child(lv_obj_find_by_name(find(view, "automatic"), "list"), index);
+	}
 
 	/** Install the tools screen as a user bundle and fill the model from the test bench */
 	UI::Xml::XmlView& makeToolsView()
@@ -477,7 +484,7 @@ TEST_F(TestXmlUi, ViewHasItsPresenterAndTranslatedText)
 	lv_obj_t* title = find(view, "title");
 	ASSERT_NE(title, nullptr);
 	// A group's title is in capitals (setting_group_title)
-	std::string expected = _("fan.title");
+	std::string expected = _("fan.controllable");
 	std::transform(expected.begin(), expected.end(), expected.begin(), [](unsigned char c) { return std::toupper(c); });
 	EXPECT_EQ(lv_label_get_text(title), expected);
 }
@@ -495,12 +502,17 @@ TEST_F(TestXmlUi, EachCardBindsToItsOwnFan)
 	EXPECT_EQ(lv_obj_get_style_flex_flow(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_FLOW_ROW_WRAP);
 	EXPECT_EQ(lv_obj_get_style_flex_cross_place(fanCard(view, 1), LV_PART_MAIN), LV_FLEX_ALIGN_CENTER);
 
-	// A thermostatic fan shows its speed, set by the firmware, instead of a slider: a binding in fan_row.xml, not C++
+	// A thermostatic fan is in the automatic group, showing its speed, set by the firmware, instead of a slider:
+	// bindings in fan_row.xml, not C++
 	const auto hidden = [&](int32_t fan, const char* name)
 	{ return lv_obj_has_flag(lv_obj_find_by_name(fanCard(view, fan), name), LV_OBJ_FLAG_HIDDEN); };
-	EXPECT_FALSE(lv_obj_has_flag(fanCard(view, 0), LV_OBJ_FLAG_HIDDEN));
-	EXPECT_TRUE(hidden(0, "controls"));
-	EXPECT_FALSE(hidden(0, "reading"));
+	EXPECT_TRUE(lv_obj_has_flag(fanCard(view, 0), LV_OBJ_FLAG_HIDDEN)) << "not one you set";
+	lv_obj_t* automatic = automaticFanCard(view, 0);
+	EXPECT_FALSE(lv_obj_has_flag(automatic, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(automatic, "controls"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(automatic, "reading"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(automaticFanCard(view, 1), LV_OBJ_FLAG_HIDDEN)) << "one you set";
+	EXPECT_EQUAL_SCREENSHOT("xml_ui/fans_in_groups.png");
 	EXPECT_FALSE(hidden(1, "controls"));
 	EXPECT_TRUE(hidden(1, "reading"));
 

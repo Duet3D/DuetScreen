@@ -95,7 +95,10 @@
       "header": "Lüfter {:d}",
       "off": "Aus",
       "max": "Max",
-      "automatic": "Automatisch: an über {:d} °C"
+      "automatic": "Läuft über {:d} °C",
+      "automatic_group": "Automatisch",
+      "automatic_note": "Die Firmware steuert diese nach Temperatur",
+      "controllable": "Steuerbare Lüfter"
     },
     "filament": {
       "management_header": "Aktuell geladenes Filament",

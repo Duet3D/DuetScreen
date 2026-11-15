@@ -39,6 +39,8 @@ namespace UI
 		LvLabel& getLabel() { return m_label; }
 		std::string_view getLabelText() const { return m_label.getText(); }
 		float getValue() const { return m_value; }
+		/** What the - and + buttons take off or add */
+		float getIncrementValue() const { return m_incrementValue; }
 		float getMin() const { return m_min; }
 		float getMax() const { return m_max; }
 		LvSlider& getLvSlider() { return m_slider; }

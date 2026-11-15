@@ -95,7 +95,10 @@
       "header": "Ventoinha {:d}",
       "off": "Desligado",
       "max": "Máx",
-      "automatic": "Automática: liga acima de {:d} °C"
+      "automatic": "Liga acima de {:d} °C",
+      "automatic_group": "Automáticas",
+      "automatic_note": "O firmware define-as pela temperatura",
+      "controllable": "Ventoinhas controláveis"
     },
     "filament": {
       "management_header": "Filamento atualmente carregado",

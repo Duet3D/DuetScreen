@@ -95,7 +95,10 @@
       "header": "Ventola {:d}",
       "off": "Spento",
       "max": "Max",
-      "automatic": "Automatica: accesa sopra {:d} °C"
+      "automatic": "Si accende sopra {:d} °C",
+      "automatic_group": "Automatiche",
+      "automatic_note": "Il firmware le regola in base alla temperatura",
+      "controllable": "Ventole controllabili"
     },
     "filament": {
       "management_header": "Filamento attualmente caricato",

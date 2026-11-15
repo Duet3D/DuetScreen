@@ -96,7 +96,10 @@
       "header": "Fan {:d}",
       "off": "Off",
       "max": "Max",
-      "automatic": "Automatic: on above {:d} °C"
+      "automatic": "Turns on above {:d} °C",
+      "automatic_group": "Automatic",
+      "automatic_note": "The firmware sets these by temperature",
+      "controllable": "Controllable fans"
     },
     "filament": { /* Filament management widgets */
       "management_header": "Currently Loaded Filament",

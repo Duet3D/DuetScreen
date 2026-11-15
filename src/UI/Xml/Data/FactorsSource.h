@@ -64,9 +64,6 @@ namespace UI::Xml
 		 * held) */
 		std::vector<size_t> extruders(bool every) const;
 
-		/** The names of the tools that use extruder `extruder`, e.g. "Revo, Tool 2" (the model lock held) */
-		static std::string toolsUsing(size_t extruder);
-
 		std::optional<size_t> m_tool; // Number of the tool the extrusion dialog is for; none for every extruder
 		FactorDialog m_speed;		  // `speed.*`
 		FactorDialog m_extrusion;	  // `extrusion.*`

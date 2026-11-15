@@ -95,7 +95,10 @@
       "header": "Ventilateur {:d}",
       "off": "Arrêt",
       "max": "Max",
-      "automatic": "Automatique : en marche au-dessus de {:d} °C"
+      "automatic": "Démarre au-dessus de {:d} °C",
+      "automatic_group": "Automatiques",
+      "automatic_note": "Le firmware les règle selon la température",
+      "controllable": "Ventilateurs pilotables"
     },
     "filament": {
       "management_header": "Filament actuellement chargé",

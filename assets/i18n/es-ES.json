@@ -95,7 +95,10 @@
       "header": "Ventilador {:d}",
       "off": "Apagado",
       "max": "Máx",
-      "automatic": "Automático: se enciende por encima de {:d} °C"
+      "automatic": "Se enciende por encima de {:d} °C",
+      "automatic_group": "Automáticos",
+      "automatic_note": "El firmware los ajusta según la temperatura",
+      "controllable": "Ventiladores controlables"
     },
     "filament": {
       "management_header": "Filamento cargado actualmente",
