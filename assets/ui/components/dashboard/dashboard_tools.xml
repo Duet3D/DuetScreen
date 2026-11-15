@@ -6,8 +6,8 @@
     - one, with the rest summarised (2): a column of tiles, one per tool (dashboard_tool_tile.xml), beside the card of
       the tool shown in detail, then the beds and chambers: the tool in use, until another's tile is tapped (tapping
       the tool in use's goes back); each scrolls on its own
-    - automatic (0): all equally while every tool is a print head and they have four heater rows or fewer, else one
-      with the rest summarised (source.tool.summary_auto)
+    - automatic (0): all equally while every tool is a print head and they, the beds and the chambers have few heater
+      rows (EQUAL_ROWS, src/UI/Xml/Data/ToolSource.cpp), else one with the rest summarised (source.tool.summary_auto)
 
   Tapping a tile shows a tool; Select, on its card, makes it the tool in use.
 
@@ -37,12 +37,14 @@
 			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="22%" height="100%"
 					 flex_flow="column" scroll_dir="ver" style_min_width="104" style_max_width="128" style_pad_all="0"
 					 style_pad_right="8" style_pad_row="8"/>
-			<lv_obj name="detail" height="100%" flex_grow="1" flex_flow="column" scroll_dir="ver">
+			<!-- The tool shown, and beside it where there is room (else under it) the beds and chambers -->
+			<lv_obj name="detail" height="100%" flex_grow="1" flex_flow="row_wrap" scroll_dir="ver">
 				<style name="pad_zero"/>
 				<style name="pad_gap"/>
 				<ds_list name="shown" list="om.tools" key="row.index" bind_value="source.tool.shown" item="tools_tool"
-						 item.compact="1" width="100%" height="content" style_pad_all="0" scrollable="false"/>
-				<tools_beds name="bed_chamber"/>
+						 item.compact="1" width="1" flex_grow="1" height="content" style_min_width="300"
+						 style_pad_all="0" scrollable="false"/>
+				<tools_beds name="bed_chamber" compact="1" width="1" flex_grow="1" style_min_width="260"/>
 			</lv_obj>
 		</lv_obj>
 	</view>

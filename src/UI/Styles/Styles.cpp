@@ -377,6 +377,7 @@ namespace UI::Themes
 		{"setting_group_danger", &ComponentStyles::setting_group_danger},
 		{"setting_list", &ComponentStyles::setting_list},
 		{"setting_row", &ComponentStyles::setting_row},
+		{"setting_row_compact", &ComponentStyles::setting_row_compact},
 		{"setting_title", &ComponentStyles::setting_title},
 		{"setting_hint", &ComponentStyles::setting_hint},
 		{"setting_badge", &ComponentStyles::setting_badge},

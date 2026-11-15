@@ -5,14 +5,18 @@
   Data:     om.heat.bedHeaters, om.heat.chamberHeaters
 -->
 <component>
+	<api>
+		<!-- An expression: lower and less padded rows, where room is short (heater_row.xml) -->
+		<prop name="compact" type="string" default="0"/>
+	</api>
 	<view extends="ds_setting_group" title_tag="tr.tools.bed_and_chamber" width="100%">
 		<!-- A heater number of -1 is none -->
 		<bind_flag_if cond="om.heat.bedHeaters|count_at_least:0 lt 1 and om.heat.chamberHeaters|count_at_least:0 lt 1"
 					  flag="hidden"/>
-		<ds_list name="beds" list="om.heat.bedHeaters" item="tools_bed_heater">
+		<ds_list name="beds" list="om.heat.bedHeaters" item="tools_bed_heater" item.compact="$compact">
 			<style name="setting_list"/>
 		</ds_list>
-		<ds_list name="chambers" list="om.heat.chamberHeaters" item="tools_chamber_heater">
+		<ds_list name="chambers" list="om.heat.chamberHeaters" item="tools_chamber_heater" item.compact="$compact">
 			<style name="setting_list"/>
 		</ds_list>
 	</view>

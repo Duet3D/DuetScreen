@@ -108,6 +108,8 @@
 			   pad_row="#border_width" bg_opa="0" border_width="0"/>
 		<style name="setting_row" width="100%" min_height="56" pad_hor="14" pad_ver="8" pad_column="16" radius="0"
 			   bg_color="lighten(#bg, 0.025)" bg_opa="100%" border_width="0"/>
+		<!-- A row where room is short, such as on the dashboard: lower and less padded -->
+		<style name="setting_row_compact" min_height="40" pad_hor="10" pad_ver="4"/>
 		<style name="setting_title" text_color="#text" text_font="font_title"/>
 		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
 		<!-- A word after a row's title saying what sort of setting it is, e.g. "Advanced": a small tag -->

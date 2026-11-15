@@ -387,6 +387,7 @@ namespace UI::Themes
 		Style setting_group_danger; // A group whose actions can't be undone, on top of setting_group
 		Style setting_list;		   // Rows listed in a group's box (a ds_list), ruled as the box's own rows are
 		Style setting_row;		   // A row (ds_setting): its title and hint, then its control
+		Style setting_row_compact; // A row where room is short, such as on the dashboard: lower, less padded
 		Style setting_title;	   // A row's title
 		Style setting_hint;		   // The line under a row's title that says more about it
 		Style setting_badge;	   // A word after a row's title saying what sort of setting it is, e.g. "Advanced"

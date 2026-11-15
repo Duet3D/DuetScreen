@@ -13,7 +13,7 @@
 -->
 <component>
 	<api>
-		<!-- An expression: leave out the filament and spindle rows, as the dashboard does -->
+		<!-- An expression: lower rows, without the filament and spindle rows, as the dashboard has -->
 		<prop name="compact" type="string" default="0"/>
 	</api>
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">
@@ -25,6 +25,7 @@
 		<lv_obj name="header" height="content" flex_flow="row" scrollable="false"
 				style_flex_cross_place="center" style_flex_track_place="center">
 			<style name="setting_row"/>
+			<bind_style_if name="setting_row_compact" cond="${compact}"/>
 			<lv_label name="name" bind_text="row.name|default:tr.temperature.default_tool_name:{row.index}"
 					  flex_grow="1" long_mode="dots">
 				<style name="text_header"/>
@@ -46,7 +47,7 @@
 			</ds_button>
 		</lv_obj>
 
-		<ds_list name="heaters" list="row.heaters" item="tools_tool_heater">
+		<ds_list name="heaters" list="row.heaters" item="tools_tool_heater" item.compact="$compact">
 			<style name="setting_list"/>
 		</ds_list>
 

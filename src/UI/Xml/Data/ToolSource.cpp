@@ -15,7 +15,8 @@ namespace UI::Xml
 {
 	namespace
 	{
-		/** The automatic style shows every tool equally up to this many heater rows (a tool with none is one row) */
+		/** The automatic style shows every tool equally up to this many heater rows: the tools' (a tool with none is
+		 * one row), the beds' and the chambers' */
 		constexpr size_t EQUAL_ROWS = 3;
 	} // namespace
 
@@ -50,8 +51,10 @@ namespace UI::Xml
 		f.field("following", m_following, "1 while the tool shown follows the tool in use, 0 once one is picked");
 		f.field("summary_auto",
 				m_summaryAuto,
-				"1 if the tools widget's automatic style shows one tool with the rest summarised: unless every tool is "
-				"a print head (no spindle) and they have four heater rows or fewer, which it shows equally");
+				fmt::format("1 if the tools widget's automatic style shows one tool with the rest summarised: unless "
+							"every tool is a print head (no spindle) and they, the beds and the chambers have {:d} "
+							"heater rows or fewer, which it shows equally",
+							EQUAL_ROWS));
 		f.list("tiles",
 			   m_tiles,
 			   "A tile per tool, for the tools widget's summary (actions.tool.show); a tile's heaters are its tool's, "
@@ -116,6 +119,7 @@ namespace UI::Xml
 		}
 		m_shown.set(shown ? static_cast<int32_t>(*shown) : -1);
 		m_following.set(m_picked ? 0 : 1);
+		rows += PrinterModel::beds().size() + PrinterModel::chambers().size();
 		m_summaryAuto.set(printHeads && rows <= EQUAL_ROWS ? 0 : 1);
 		m_tiles.sync(numbers.size(),
 					 [&](ToolTileRow& row, size_t i)

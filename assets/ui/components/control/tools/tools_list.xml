@@ -15,6 +15,6 @@
 		<style name="pad_gap"/>
 		<ds_list name="tools" list="om.tools" item="tools_tool" item.compact="$compact" width="100%" height="content"
 				 flex_flow="column" style_pad_all="0" style_pad_row="10" scrollable="false"/>
-		<tools_beds name="bed_chamber"/>
+		<tools_beds name="bed_chamber" compact="$compact"/>
 	</view>
 </component>
