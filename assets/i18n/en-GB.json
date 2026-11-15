@@ -535,15 +535,23 @@
       "no_tool_hint": "Select a tool to extrude, or to turn its spindle, here",
       "no_extruder": "This tool has no extruder or spindle",
       "spindle": "Spindle",
-      "forward": "Forward",
-      "reverse": "Reverse",
-      "stop": "Stop",
       "active": "Active",
       "standby": "Standby",
       "deselect": "Deselect"
     },
     "spindle": {
-      "speed": "Spindle speed"
+      "speed": "Spindle speed",
+      "title": "Spindle · T{:d}",
+      "rpm": "rpm",
+      "off": "Off",
+      "forward": "Forward",
+      "reverse": "Reverse",
+      "summary_forward": "Set {:s} rpm, forward",
+      "summary_reverse": "Set {:s} rpm, in reverse",
+      "direction": "Direction",
+      "start": "Start spindle",
+      "stop": "Stop spindle",
+      "speed_hint": "Used when the spindle starts"
     },
     "temperature": { /* Temperature widgets */
       "bed": "Bed",

@@ -435,6 +435,31 @@ From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
 | `source.settings.duet_ip` | text | The Duet's IP address (actions.settings.set, actions.settings.ask) |
 | `source.settings.duet_password` | text | The Duet's password (actions.settings.set) |
 
+### spindle
+
+From [SpindleSource.cpp](../src/UI/Xml/Data/SpindleSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.spindle.shown` | int | 1 if the tool in use has a spindle |
+| `source.spindle.title` | text | Which, e.g. "Spindle · T1" |
+| `source.spindle.running` | int | 1 while it turns |
+| `source.spindle.state` | text | "Off", "Forward" or "Reverse" |
+| `source.spindle.current` | text | How fast it turns, rpm, e.g. "12 000" |
+| `source.spindle.summary` | text | How it starts, e.g. "Set 12 000 rpm, forward" |
+| `source.spindle.reverse` | int | 1 if it starts in reverse (actions.spindle.direction); while it turns, 1 if it turns in reverse |
+| `source.spindle.can_reverse` | int | 1 if it can turn in reverse |
+| `source.spindle.presets` | list | Quick speeds, a quarter of its highest up to its highest |
+| `source.spindle.presets_shown` | int | 1 if there are quick speeds: its highest speed is known |
+
+Each row of `source.spindle.presets`:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `row.index` | int | Position in the list, from 0 |
+| `row.text` | text | The speed, e.g. "12 000" (actions.spindle.preset) |
+| `row.chosen` | int | 1 if the tool starts its spindle at it |
+
 ### system
 
 From [SystemSource.cpp](../src/UI/Xml/Data/SystemSource.cpp).
@@ -534,9 +559,12 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.selector.pick` | Use the preset. From a row of a selector's `choices`. | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.settings.ask` | Ask for the text setting `arg` names on the number keys, e.g. the Duet's IP address | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
 | `actions.settings.set` | Change the setting `arg` names (source.settings.<name>) to the edited value: a switch's 0 or 1, a choice's index, a slider's value, or a text area's text. `arg="<name>=<value>"` sets it to that value instead, e.g. from a row of buttons. | [SettingsActions.cpp](../src/UI/Presenters/Settings/SettingsActions.cpp) |
-| `actions.spindle.forward` | Turn the spindle of the tool numbered `arg` forwards at its speed (M3) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
-| `actions.spindle.reverse` | Turn the spindle of the tool numbered `arg` in reverse at its speed (M4) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.direction` | Choose the direction the tool in use's spindle starts in, `arg` `forward` or `reverse`; while it turns, turn it that way now | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.faster` | Turn the spindle of the tool numbered `arg` 1000 rpm faster from now on (M568 F) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.preset` | Start the tool in use's spindle at a quick speed from now on (M568 F). From a row of source.spindle.presets. | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
 | `actions.spindle.set_rpm` | Ask for the speed the tool numbered `arg` turns its spindle at, and set it (M568 F) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.slower` | Turn the spindle of the tool numbered `arg` 1000 rpm slower from now on (M568 F) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
+| `actions.spindle.start` | Start the tool in use's spindle at its speed, in the direction chosen (M3, or M4 in reverse) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
 | `actions.spindle.stop` | Stop the spindle of the tool numbered `arg` (M5) | [SpindleActions.cpp](../src/UI/Presenters/Control/Temperature/SpindleActions.cpp) |
 | `actions.system.buildroot_setup` | Restart the system's setup service (developer mode builds) | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.system.clear_cache` | Delete the cached settings and file information, show the storage used again, and say so | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
@@ -3004,6 +3032,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `tools_chamber_heater` |  |  | `tools` | [tools_chamber_heater.xml](../assets/ui/components/control/tools/tools_chamber_heater.xml) |
 | `tools_current` |  |  | `tools` | [tools_current.xml](../assets/ui/components/control/tools/tools_current.xml) |
 | `tools_extrusion_factor` |  |  | `tools_current` | [tools_extrusion_factor.xml](../assets/ui/components/control/tools/tools_extrusion_factor.xml) |
+| `tools_spindle_preset` |  |  | `tools_current` | [tools_spindle_preset.xml](../assets/ui/components/control/tools/tools_spindle_preset.xml) |
 | `tools_tool` |  |  | `tools` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  |  | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
@@ -3271,6 +3300,7 @@ The swatch is a box with some text, with the style added, in the `duetscreen` th
 | `axis_tile_not_homed` | ![axis_tile_not_homed](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/axis_tile_not_homed.png) | text_color=#secondary text_font=font_small |
 | `jog_step` | ![jog_step](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/jog_step.png) | bg_opa=0 border_color=#border_muted border_width=#border_width border_opa=100% radius=#radius text_color=#text_muted text_font=font_subdued |
 | `reading` | ![reading](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/reading.png) | text_color=#text text_font=font_large |
+| `reading_large` | ![reading_large](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/reading_large.png) | text_color=#text text_font=font_xlarge |
 | `temperature_bar` | ![temperature_bar](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar.png) | bg_opa=100% bg_color=0x2196f3 bg_grad_color=0xf44336 bg_grad_dir=hor |
 | `temperature_bar_indic` | ![temperature_bar_indic](../tests/ref_imgs/xml_ui_api/themes/duetscreen/styles/temperature_bar_indic.png) | bg_color=#border bg_opa=100% |
 | `tool_list` |  | *(not set)* |

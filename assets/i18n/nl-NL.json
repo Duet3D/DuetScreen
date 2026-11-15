@@ -534,15 +534,23 @@
       "no_tool_hint": "Kies een gereedschap om hier te extruderen of de spindel te draaien",
       "no_extruder": "Dit gereedschap heeft geen extruder of spindel",
       "spindle": "Spindel",
-      "forward": "Vooruit",
-      "reverse": "Achteruit",
-      "stop": "Stop",
       "active": "Actief",
       "standby": "Stand-by",
       "deselect": "Deselecteren"
     },
     "spindle": {
-      "speed": "Spindeltoerental"
+      "speed": "Spindeltoerental",
+      "title": "Spil · T{:d}",
+      "rpm": "tpm",
+      "off": "Uit",
+      "forward": "Vooruit",
+      "reverse": "Achteruit",
+      "summary_forward": "Ingesteld {:s} tpm, vooruit",
+      "summary_reverse": "Ingesteld {:s} tpm, achteruit",
+      "direction": "Richting",
+      "start": "Spil starten",
+      "stop": "Spil stoppen",
+      "speed_hint": "Gebruikt wanneer de spil start"
     },
     "temperature": {
       "bed": "Bed",

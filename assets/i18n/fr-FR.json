@@ -534,15 +534,23 @@
       "no_tool_hint": "Choisissez un outil pour extruder ou faire tourner sa broche ici",
       "no_extruder": "Cet outil n'a ni extrudeur ni broche",
       "spindle": "Broche",
-      "forward": "Avant",
-      "reverse": "Arrière",
-      "stop": "Arrêt",
       "active": "Actif",
       "standby": "En attente",
       "deselect": "Désélectionner"
     },
     "spindle": {
-      "speed": "Vitesse de broche"
+      "speed": "Vitesse de broche",
+      "title": "Broche · T{:d}",
+      "rpm": "tr/min",
+      "off": "Arrêtée",
+      "forward": "Avant",
+      "reverse": "Inverse",
+      "summary_forward": "Réglée à {:s} tr/min, avant",
+      "summary_reverse": "Réglée à {:s} tr/min, inverse",
+      "direction": "Sens",
+      "start": "Démarrer la broche",
+      "stop": "Arrêter la broche",
+      "speed_hint": "Utilisée au démarrage de la broche"
     },
     "temperature": {
       "bed": "Plateau",

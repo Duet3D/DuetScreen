@@ -323,6 +323,7 @@ namespace UI::Themes
 		{"axis_tile_not_homed", &ComponentStyles::axis_tile_not_homed},
 		{"jog_step", &ComponentStyles::jog_step},
 		{"reading", &ComponentStyles::reading},
+		{"reading_large", &ComponentStyles::reading_large},
 		{"temperature_bar", &ComponentStyles::temperature_bar},
 		{"temperature_bar_indic", &ComponentStyles::temperature_bar_indic},
 		{"tool_list", &ComponentStyles::tool_list},

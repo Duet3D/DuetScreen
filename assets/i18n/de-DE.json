@@ -534,15 +534,23 @@
       "no_tool_hint": "Wähle ein Werkzeug, um hier zu extrudieren oder seine Spindel zu drehen",
       "no_extruder": "Dieses Werkzeug hat keinen Extruder und keine Spindel",
       "spindle": "Spindel",
-      "forward": "Vorwärts",
-      "reverse": "Rückwärts",
-      "stop": "Stopp",
       "active": "Aktiv",
       "standby": "Standby",
       "deselect": "Abwählen"
     },
     "spindle": {
-      "speed": "Spindeldrehzahl"
+      "speed": "Spindeldrehzahl",
+      "title": "Spindel · T{:d}",
+      "rpm": "U/min",
+      "off": "Aus",
+      "forward": "Vorwärts",
+      "reverse": "Rückwärts",
+      "summary_forward": "Eingestellt {:s} U/min, vorwärts",
+      "summary_reverse": "Eingestellt {:s} U/min, rückwärts",
+      "direction": "Richtung",
+      "start": "Spindel starten",
+      "stop": "Spindel stoppen",
+      "speed_hint": "Gilt beim Start der Spindel"
     },
     "temperature": {
       "bed": "Bett",

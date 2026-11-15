@@ -2,7 +2,8 @@
  * SpindleActions.h
  *
  * The global actions that set and turn a tool's spindle, for any view: `actions.spindle.*`, given the tool's number as
- * their `arg`. They work whatever the machine's mode, so a printer's tool may have a spindle too. Each tool keeps its
+ * their `arg`, or, for the tool in use's (`start`, `direction`, `preset`), the spindle source
+ * (src/UI/Xml/Data/SpindleSource.h). They work whatever the machine's mode, so a printer's tool may have a spindle too. Each tool keeps its
  * own speed (tools[].spindleRpm). What they do is in their registration, and in the UI API reference
  * (docs/XML_UI_API.md).
  */

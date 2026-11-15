@@ -534,15 +534,23 @@
       "no_tool_hint": "Elige una herramienta para extruir o girar su husillo aquí",
       "no_extruder": "Esta herramienta no tiene extrusor ni husillo",
       "spindle": "Husillo",
-      "forward": "Adelante",
-      "reverse": "Atrás",
-      "stop": "Parar",
       "active": "Activo",
       "standby": "En espera",
       "deselect": "Deseleccionar"
     },
     "spindle": {
-      "speed": "Velocidad del husillo"
+      "speed": "Velocidad del husillo",
+      "title": "Husillo · T{:d}",
+      "rpm": "rpm",
+      "off": "Apagado",
+      "forward": "Adelante",
+      "reverse": "Inversa",
+      "summary_forward": "Ajustado {:s} rpm, adelante",
+      "summary_reverse": "Ajustado {:s} rpm, inversa",
+      "direction": "Dirección",
+      "start": "Arrancar husillo",
+      "stop": "Parar husillo",
+      "speed_hint": "Se usa al arrancar el husillo"
     },
     "temperature": {
       "bed": "Cama",

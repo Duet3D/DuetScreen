@@ -302,6 +302,7 @@ namespace UI::Themes
 
 		/* Readings */
 		Style reading;				// A value read at a glance, such as an axis' position or a heater's temperature: large
+		Style reading_large;		// The one value a panel is about, such as how fast a spindle turns: larger
 
 		/* Move */
 		Style unhomed;				// Unhomed axes in the move view

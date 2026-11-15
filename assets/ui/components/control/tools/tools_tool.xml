@@ -1,12 +1,12 @@
 <!--
-  One tool, as a card: its name, then "In use" and Deselect, or Select; a row per heater (tools_tool_heater.xml); its filament, if it
-  takes any (tap to choose one to load); and its spindle's speed, if it has one (tap to set it), on a printer's tool
-  too. Outlined while it is the tool in use. A gap in the tools (a null item) isn't shown. Nothing that would change
+  One tool, as a card: its name, then "In use" and Deselect, or Select; a row per heater (tools_tool_heater.xml); its
+  filament, if it takes any (tap to choose one to load); and the speed it starts its spindle at, if it has one (− and
+  + step it; tap it to type it), on a printer's tool too. Outlined while it is the tool in use. A gap in the tools (a null item) isn't shown. Nothing that would change
   the job can be pressed while printing.
 
   Fields:   a row of om.tools: row.index (the tool number), row.name, row.state, row.heaters, row.filamentExtruder,
             row.spindle, row.spindleRpm
-  Actions:  actions.tool.toggle, actions.filament.*, actions.spindle.set_rpm (src/UI/Presenters/Control/Temperature/)
+  Actions:  actions.tool.toggle, actions.filament.*, actions.spindle.set_rpm/slower/faster (src/UI/Presenters/Control/Temperature/)
 -->
 <component>
 	<view extends="lv_obj" width="100%" height="content" scrollable="false">
@@ -57,11 +57,18 @@
 			</ds_button>
 		</ds_setting>
 
-		<ds_setting name="spindle" title_tag="tr.tools.spindle">
+		<!-- The speed it starts its spindle at: − and + step it, tap it to type it -->
+		<ds_setting name="spindle" title_tag="tr.spindle.speed" hint_tag="tr.spindle.speed_hint">
 			<bind_flag_if cond="row.spindle|int lt 0" flag="hidden"/>
+			<ds_button name="slower" text="−" width="48" height="content" style_min_height="40">
+				<action trigger="clicked" name="actions.spindle.slower" arg="{row.index}"/>
+			</ds_button>
 			<ds_button name="speed" bind_text="row.spindleRpm|format:tr.units.rpm" height="content"
-					   style_min_height="36">
+					   style_min_height="40" style_min_width="110">
 				<action trigger="clicked" name="actions.spindle.set_rpm" arg="{row.index}"/>
+			</ds_button>
+			<ds_button name="faster" text="+" width="48" height="content" style_min_height="40">
+				<action trigger="clicked" name="actions.spindle.faster" arg="{row.index}"/>
 			</ds_button>
 		</ds_setting>
 	</view>

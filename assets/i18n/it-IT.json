@@ -535,15 +535,23 @@
       "no_tool_hint": "Scegli un utensile per estrudere o far girare il suo mandrino qui",
       "no_extruder": "Questo utensile non ha estrusore né mandrino",
       "spindle": "Mandrino",
-      "forward": "Avanti",
-      "reverse": "Indietro",
-      "stop": "Ferma",
       "active": "Attivo",
       "standby": "Standby",
       "deselect": "Deseleziona"
     },
     "spindle": {
-      "speed": "Velocità del mandrino"
+      "speed": "Velocità del mandrino",
+      "title": "Mandrino · T{:d}",
+      "rpm": "giri/min",
+      "off": "Spento",
+      "forward": "Avanti",
+      "reverse": "Inversa",
+      "summary_forward": "Impostato {:s} giri/min, avanti",
+      "summary_reverse": "Impostato {:s} giri/min, inversa",
+      "direction": "Direzione",
+      "start": "Avvia mandrino",
+      "stop": "Ferma mandrino",
+      "speed_hint": "Usata all'avvio del mandrino"
     },
     "temperature": {
       "bed": "Piano",

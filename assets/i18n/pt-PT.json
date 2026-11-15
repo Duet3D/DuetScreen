@@ -534,15 +534,23 @@
       "no_tool_hint": "Escolha uma ferramenta para extrudir ou rodar o seu fuso aqui",
       "no_extruder": "Esta ferramenta não tem extrusor nem fuso",
       "spindle": "Fuso",
-      "forward": "Para a frente",
-      "reverse": "Para trás",
-      "stop": "Parar",
       "active": "Ativo",
       "standby": "Em espera",
       "deselect": "Desselecionar"
     },
     "spindle": {
-      "speed": "Velocidade do fuso"
+      "speed": "Velocidade do fuso",
+      "title": "Fuso · T{:d}",
+      "rpm": "rpm",
+      "off": "Desligado",
+      "forward": "Para a frente",
+      "reverse": "Inversa",
+      "summary_forward": "Definido {:s} rpm, para a frente",
+      "summary_reverse": "Definido {:s} rpm, inversa",
+      "direction": "Direção",
+      "start": "Ligar fuso",
+      "stop": "Parar fuso",
+      "speed_hint": "Usada quando o fuso liga"
     },
     "temperature": {
       "bed": "Base",

@@ -378,6 +378,8 @@
 		<style name="axis_tile_not_homed" text_color="#secondary" text_font="font_small"/>
 		<!-- A value read at a glance, such as an axis' position or a heater's temperature -->
 		<style name="reading" text_color="#text" text_font="font_large"/>
+		<!-- The one value a panel is about, such as how fast a spindle turns -->
+		<style name="reading_large" text_color="#text" text_font="font_xlarge"/>
 		<!-- The jog step, in the middle of the XY pad -->
 		<style name="jog_step" bg_opa="0" border_color="#border_muted" border_width="#border_width"
 			   border_opa="100%" radius="#radius" text_color="#text_muted" text_font="font_subdued"/>

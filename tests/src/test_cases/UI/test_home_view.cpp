@@ -1876,17 +1876,41 @@ TEST_F(TestHomeViewWithData, ToolsTabSelectsToolsAndTurnsAPrintersSpindle)
 	load_model_data(
 		R"({"key":"","flags":"d99f","result":{"state":{"currentTool":4},"tools":[{"state":"standby"},null,{},{},{"state":"active","spindleRpm":5000}]}})"
 		"\n");
+	// Its spindle reaches 24 000 rpm and can turn in reverse
+	load_model_data(
+		R"({"key":"spindles","flags":"v","result":[{"canReverse":true,"current":0,"max":24000,"state":"stopped"}]})"
+		"\n");
 	deliverModelEvents();
+	lv_obj_scroll_to_view_recursive(card(4), LV_ANIM_OFF);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools_spindle.png");
 	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(card(4), "spindle"), "speed"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_NE(openNumberPad(), nullptr) << "the spindle's speed";
 	UI::closeDialogs();
-	// The panel for the tool in use (a ds_scope builds it beside itself, so it is found from the page)
-	lv_obj_t* forward = lv_obj_find_by_name(tools, "forward");
-	ASSERT_NE(forward, nullptr);
-	lv_obj_send_event(forward, LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(card(4), "spindle"), "faster"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M568 P4 F6000\n") << "1000 rpm faster";
+
+	// The panel for the tool in use (a ds_scope builds it beside itself, so it is found from the page): Start turns
+	// it the way chosen
+	lv_obj_t* start = lv_obj_find_by_name(tools, "start");
+	ASSERT_NE(start, nullptr);
+	lv_obj_send_event(start, LV_EVENT_CLICKED, nullptr);
 	ASSERT_FALSE(sent.empty());
 	EXPECT_EQ(sent.back(), "M3 P0 S5000\n");
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(tools, "direction"), "reverse"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(start, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M4 P0 S5000\n") << "in reverse";
+
+	// Turning, it shows how fast, and Stop stops it
+	load_model_data(
+		R"({"key":"spindles","flags":"v","result":[{"canReverse":true,"current":-4980,"max":24000,"state":"reverse"}]})"
+		"\n");
+	deliverModelEvents();
+	lv_obj_scroll_to_view_recursive(lv_obj_find_by_name(tools, "stop"), LV_ANIM_OFF);
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools_spindle_turning.png");
+	lv_obj_send_event(lv_obj_find_by_name(tools, "stop"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M5 P0\n");
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
