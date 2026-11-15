@@ -31,6 +31,12 @@ namespace UI::Xml
 			Usable = 2	  // Shown and usable
 		};
 
+		/** `page` while the job widget shows what is ready to start */
+		static constexpr const char* READY_PAGE = "ready";
+
+		/** `page` while the job widget shows the job's status */
+		static constexpr const char* STATUS_PAGE = "status";
+
 		/** Create the source. Nothing is published until DataSources::start(). */
 		JobSource();
 
@@ -56,6 +62,9 @@ namespace UI::Xml
 		/** `seconds` as hh:mm:ss */
 		static std::string clock(uint32_t seconds);
 
+		/** `seconds` as a length of time to read, translated, e.g. "1 h 13 min" or "48 min" */
+		static std::string duration(uint32_t seconds);
+
 	  protected:
 		/** Follow the job, thumbnails arriving and the printer's state */
 		void onInit() override;
@@ -73,14 +82,26 @@ namespace UI::Xml
 		/** The last job's file changed */
 		void lastFileChanged(const std::string& file);
 
+		/** Show how the last job ended and how long it took, e.g. "Finished at 13:02 · took 1 h 13 min" */
+		void showLastDetail();
+
+		/** The translation key of how the last job ended: finished, cancelled, stopped or simulated */
+		static const char* endedKey();
+
 		/** Show the progress and elapsed time */
 		void showProgress();
 
 		/** Show the time left */
 		void showRemaining();
 
-		/** Show which controls `status` allows */
+		/**
+		 * Show which controls `status` allows, what the job is doing or how it ended; a job starting shows its status
+		 * page
+		 */
 		void showControls(OM::PrinterStatus status);
+
+		/** Show the layer being printed, e.g. "51 of 120"; nothing if the job has no layers */
+		void showLayer();
 
 		/** Show `file`'s thumbnail, asking the printer for it if it isn't here yet; nothing if `file` is empty */
 		void showThumbnail(const std::string& file);
@@ -89,13 +110,21 @@ namespace UI::Xml
 		void thumbnailReceived(const std::string& file);
 
 		StringSubject<256> m_latest;	 // The current job's file, else the last job's
-		IntSubject m_finished;			 // 1 when the latest job is the last one, finished
+		IntSubject m_finished;			 // 1 once the latest job has ended and no other runs
 		StringSubject<256> m_thumbnail;	 // The latest job's thumbnail path, or empty
 		IntSubject m_progress;			 // 0-100
 		StringSubject<16> m_elapsed;	 // hh:mm:ss
 		StringSubject<16> m_remaining;	 // hh:mm:ss
 		StringSubject<48> m_elapsedText;	 // e.g. "Elapsed: 00:03:43", translated
 		StringSubject<48> m_remainingText; // e.g. "Remaining: 00:45:03", translated
+		StringSubject<16> m_page;		 // The job widget's page: READY_PAGE or STATUS_PAGE
+		bool m_wasActive = false;		 // A job ran when the printer's state was last shown
+		StringSubject<128> m_name;		 // The latest job's file, without its folder
+		StringSubject<32> m_state;		 // "Printing", "Paused", "Finished", …
+		StringSubject<32> m_layer;		 // e.g. "51 of 120", or empty
+		StringSubject<16> m_finishAt;	 // The time of day it should finish, e.g. "14:32", or empty
+		StringSubject<64> m_lastDetail;	 // How the last job ended and how long it took
+		std::string m_endedAt;			 // The time of day a job was seen to end, e.g. "13:02"; empty if not seen
 		IntSubject m_pause;				 // A Control
 		IntSubject m_resume;			 // A Control
 		IntSubject m_printAgain;		 // A Control

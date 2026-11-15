@@ -53,6 +53,7 @@ namespace UI::Xml
 		 * @param key Show only the rows whose field `key.field` is `key.value`; every row if not given. Not with
 		 *        `window`. The rows must have the field (see keyOf()).
 		 * @param pages Show one item at a time (see ListPages.h). Not with `window`.
+		 * @param limit Show only the first `limit` rows; every row if not given
 		 */
 		DsList(lv_obj_t* container,
 			   ListBase& list,
@@ -62,7 +63,8 @@ namespace UI::Xml
 			   std::optional<Window> window = std::nullopt,
 			   bool followEnd = false,
 			   std::optional<Key> key = std::nullopt,
-			   bool pages = false);
+			   bool pages = false,
+			   std::optional<size_t> limit = std::nullopt);
 
 		/** Delete the rows' widgets, then their scopes, and stop listening; runs while LVGL deletes the container */
 		~DsList() override;
@@ -103,6 +105,12 @@ namespace UI::Xml
 
 		/** Keyed: a row's key changed; show or remove its item */
 		static void keyObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** Keyed with `bind_value`: the value the rows' keys must have changed; show the rows that have it now */
+		static void valueObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** A subject's value as XML writes one: an int's digits, a text's text */
+		static std::string valueText(lv_subject_t* subject);
 
 		/** A windowed list scrolled or changed size: show the items now on screen */
 		static void windowEventCb(lv_event_t* e);
@@ -159,6 +167,9 @@ namespace UI::Xml
 		/** Windowed: items per line */
 		int32_t itemsPerLine() const;
 
+		/** How many of `rows` rows are shown: all of them, or the first `limit` */
+		size_t shownOf(size_t rows) const;
+
 		lv_obj_t* m_container;				   // The ds_list widget
 		ListBase* m_list;					   // The list shown, or nullptr once it is destroyed
 		std::string m_item;					   // Component built for each row
@@ -166,6 +177,7 @@ namespace UI::Xml
 		lv_xml_subject_ctx_t* m_parentContext; // Context the list was built in; holds a reference
 		std::vector<Entry> m_entries;		   // Eager: one per row
 		std::optional<Key> m_key;			   // Keyed: which rows are shown; nullopt shows every row
+		std::optional<size_t> m_limit;		   // Only the first rows are shown, this many; nullopt shows every row
 
 		std::optional<Window> m_window;	 // Windowed: how items are placed; nullopt if eager
 		std::map<size_t, Entry> m_shown; // Windowed: the items built, by row

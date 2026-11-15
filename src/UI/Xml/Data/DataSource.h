@@ -38,13 +38,15 @@
 #include "UI/Xml/Binding/Fields.h"
 #include "UI/Xml/Binding/Names.h"
 #include "UI/Xml/Om/OmWatch.h"
+#include <memory>
 #include <source_location>
 #include <string>
 #include <vector>
 
 namespace UI::Xml
 {
-	class DataSource : public BasePresenter, public FieldProvider
+	/** Shared, so a reply that arrives after the source has stopped can tell (weak_from_this()) */
+	class DataSource : public BasePresenter, public FieldProvider, public std::enable_shared_from_this<DataSource>
 	{
 	  public:
 		/**

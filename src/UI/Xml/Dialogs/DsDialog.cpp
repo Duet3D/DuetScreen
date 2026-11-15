@@ -69,7 +69,7 @@ namespace UI::Xml
 				 "it by its subject takes any steps opened "
 				 "from it too. The lv_obj attributes apply to its content.",
 			 .example =
-				 R"(<ds_dialog name="file_dialog" bind_open="presenter.dialog" bind_title="presenter.dialog_title">
+				 R"(<ds_dialog name="file_dialog" bind_open="source.files.dialog" bind_title="source.files.dialog_title">
 	…the dialog's content…
 </ds_dialog>)",
 			 .attributes =

@@ -7,7 +7,7 @@
 -->
 <component>
 	<!-- A set size, so a second column of them (more than fit in one) looks like the first -->
-	<view extends="ds_button" bind_text="row.letter" width="48" height="40">
+	<view extends="ds_button" bind_text="row.letter" width="48" height="40" flex_grow="1">
 		<bind_state_if_eq subject="row.chosen" state="checked" ref_value="1"/>
 		<action trigger="clicked" name="actions.move.choose_axis"/>
 	</view>

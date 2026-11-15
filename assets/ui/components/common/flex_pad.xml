@@ -1,0 +1,8 @@
+<component>
+    <api>
+        <prop name="grow" type="int" default="1"/>
+    </api>
+    <view extends="lv_obj" flex_grow="$grow" width="0" height="0" clickable="false">
+        <style name="pad_zero" />
+    </view>
+</component>

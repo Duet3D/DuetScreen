@@ -135,6 +135,19 @@ namespace UI::Xml
 			return lacking;
 		}
 
+		/** How many items of an array are numbers of at least the argument, e.g. heater numbers 0 or more, when -1 is
+		 * none */
+		int32_t countAtLeast(const OM::Node& node, const OM::Path&, std::string_view argument)
+		{
+			const double least = toDouble(argument, 0);
+			int32_t count = 0;
+			for (size_t i = 0; node.isArray() && i < node.size(); ++i)
+			{
+				count += isNumeric(node[i]) && node[i].number(0) >= least ? 1 : 0;
+			}
+			return count;
+		}
+
 		/** The tools whose list `list` holds the number of the item at `path`, e.g. a fan's (`fans[1]`) */
 		std::string toolsUsing(const OM::Node&, const OM::Path& path, std::string_view list)
 		{
@@ -385,6 +398,13 @@ namespace UI::Xml
 									 "`om.fans|count_lacking:thermostatic.lowTemperature` for the fans you set",
 					  .argument = "The field, a dotted path from an item, e.g. `thermostatic.lowTemperature`",
 					  .toInteger = countLacking,
+					  .toText = nullptr},
+			Converter{.name = "count_at_least",
+					  .type = Converter::Type::integer,
+					  .description = "How many items of an array are numbers of at least the argument, e.g. "
+									 "`om.heat.bedHeaters|count_at_least:0` for the beds there are (-1 is none)",
+					  .argument = "The least, e.g. 0",
+					  .toInteger = countAtLeast,
 					  .toText = nullptr},
 			Converter{.name = "tools_using",
 					  .type = Converter::Type::text,

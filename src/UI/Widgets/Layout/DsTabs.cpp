@@ -59,7 +59,10 @@ namespace UI::Xml
 </ds_tabs>)",
 					  .attributes = {{"side",
 									  "Where the tab buttons are: top (the default), bottom, left or right. Down a "
-									  "side, each tab is a row as wide as the column, its icon before its title"}}},
+									  "side, each tab is a row as wide as the column, its icon before its title"},
+									 {"tab_max_width",
+									  "The widest a tab may be, in pixels; a title too long for it ends in \"…\". Down "
+									  "a side, the column is as wide as its widest tab, so no wider than this"}}},
 					 xmlCreate,
 					 xmlApply);
 		Widgets::add(
@@ -126,6 +129,10 @@ namespace UI::Xml
 				LOG_WARN("<ds_tabs side=\"{:s}\">: not top, bottom, left or right", side);
 			}
 		}
+		if (const char* width = lv_xml_get_value_of(attrs, "tab_max_width"))
+		{
+			static_cast<DsTabs*>(LvObj::fromPtr(itemOf(state)))->setTabMaxWidth(lv_xml_atoi(width));
+		}
 	}
 
 	void* DsTabs::xmlCreateTab(lv_xml_parser_state_t* state, const char** attrs)
@@ -161,7 +168,7 @@ namespace UI::Xml
 		}
 		if (const char* icon = lv_xml_get_value_of(attrs, "icon"))
 		{
-			tabs->getTabButton(index)->setIcon(icon);
+			tabs->setTabIcon(index, icon);
 		}
 		if (const char* end = lv_xml_get_value_of(attrs, "end"); end != nullptr && lv_xml_to_bool(end))
 		{

@@ -833,18 +833,19 @@ TEST_F(TestXmlUi, BedsAndChambersAreNamedAndTheirActionsKnowWhichTheyAre)
 	auto& view = makeView("dashboard_tools");
 	deliverModelEvents();
 
-	lv_obj_t* beds = find(find(view, "beds"), "list");
+	// The beds' and chambers' rows (tools_beds.xml), heater rows as the Control page's
+	lv_obj_t* beds = find(view, "beds");
+	ASSERT_NE(beds, nullptr);
 	ASSERT_EQ(lv_obj_get_child_count(beds), 2u);
 	EXPECT_EQ(text(lv_obj_get_child(beds, 0), "label"), "Bed plate") << "its sensor's name";
 	EXPECT_TRUE(lv_obj_has_flag(lv_obj_get_child(beds, 1), LV_OBJ_FLAG_HIDDEN)) << "no heater, so no bed 1";
-	lv_obj_t* chamber = lv_obj_get_child(find(find(view, "chambers"), "list"), 0);
+	lv_obj_t* chamber = lv_obj_get_child(find(view, "chambers"), 0);
 	EXPECT_EQ(text(chamber, "label"), "Chamber 0") << "its sensor has no name: its number";
-	EXPECT_EQ(static_cast<UI::Button*>(UI::LvObj::fromPtr(find(chamber, "active")))->getText(), "40")
-		<< "the chamber's heater's own target";
+	EXPECT_EQ(text(find(chamber, "active"), "value"), "40°") << "the chamber's heater's own target";
 
 	// The heater actions tell a bed from a chamber, and which, by where their row's item is
-	lv_obj_send_event(find(lv_obj_get_child(beds, 0), "status"), LV_EVENT_CLICKED, nullptr);
-	lv_obj_send_event(find(chamber, "status"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(lv_obj_get_child(beds, 0), "state"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(find(chamber, "state"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(m_sent, (std::vector<std::string>{"M140 P0 S60\n", "M141 P0 S-273.15\n"}));
 }
 

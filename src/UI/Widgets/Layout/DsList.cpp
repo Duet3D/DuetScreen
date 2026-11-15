@@ -23,15 +23,17 @@ namespace UI::Xml
 				   std::optional<Window> window,
 				   bool followEnd,
 				   std::optional<Key> key,
-				   bool pages)
+				   bool pages,
+				   std::optional<size_t> limit)
 		: m_container(container)
 		, m_list(&list)
 		, m_item(std::move(item))
 		, m_itemAttributes(std::move(itemAttributes))
 		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
 		, m_key(std::move(key))
+		, m_limit(limit)
 		, m_window(window)
-		, m_count(list.size())
+		, m_count(shownOf(list.size()))
 		, m_followEnd(followEnd)
 	{
 		m_list->addListener(this);
@@ -48,7 +50,7 @@ namespace UI::Xml
 			{
 				m_pages = std::make_unique<ListPages>(m_container);
 			}
-			build(0, m_list->size());
+			build(0, shownOf(m_list->size()));
 			return;
 		}
 
@@ -138,6 +140,9 @@ namespace UI::Xml
 				   "it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed "
 				   "list "
 				   "takes `column` or `row_wrap`."},
+				  {"limit",
+				   "Show only the first this many rows, e.g. a widget's setting: `limit=\"$count\"`; every row if not "
+				   "given or below 0"},
 				  {"follow_end",
 				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
 				   "unless the user has scrolled back (default false)"},
@@ -147,6 +152,10 @@ namespace UI::Xml
 				  {"value",
 				   "With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, "
 				   "e.g. `<ds_list list=\"om.fans\" key=\"row.index\" value=\"2\" item=\"…\"/>` shows fan 2"},
+				  {"bind_value",
+				   "With `key`, instead of `value`: follow a subject for the value shown rows have, e.g. "
+				   "`bind_value=\"om.state.currentTool\"` with `key=\"row.index\"` shows the tool in use",
+				   AttributeKind::Subject},
 				  {"item.<attribute>",
 				   "Given to every item as if written where it is used: a prop of the item component, e.g. "
 				   "`item.title=\"row.name\"`, or an attribute of its root, e.g. `item.flex_grow=\"1\"`. Its names are "
@@ -156,13 +165,13 @@ namespace UI::Xml
 			xmlApply);
 	}
 
-	void DsList::onListResized(size_t oldSize, size_t newSize)
+	void DsList::onListResized(size_t /* oldSize */, size_t newSize)
 	{
 		if (m_window)
 		{
 			// Removed rows' widgets go now, before the rows do. The list still holds them until every listener has
 			// been told, so from here on only the first newSize rows are used.
-			m_count = newSize;
+			m_count = shownOf(newSize);
 			for (auto it = m_shown.lower_bound(newSize); it != m_shown.end();)
 			{
 				deleteRow(it->second);
@@ -170,14 +179,19 @@ namespace UI::Xml
 			}
 			updateWindow();
 		}
-		else if (newSize > oldSize)
+		else if (shownOf(newSize) > m_entries.size())
 		{
-			build(m_entries.size(), newSize);
+			build(m_entries.size(), shownOf(newSize));
 		}
 		else
 		{
-			truncate(newSize);
+			truncate(shownOf(newSize));
 		}
+	}
+
+	size_t DsList::shownOf(size_t rows) const
+	{
+		return m_limit ? std::min(rows, *m_limit) : rows;
 	}
 
 	void DsList::onListDestroyed()
@@ -243,6 +257,13 @@ namespace UI::Xml
 		std::optional<Key> key;
 		const char* keyField = lv_xml_get_value_of(attrs, "key");
 		const char* keyValue = lv_xml_get_value_of(attrs, "value");
+		// The value may follow a subject instead
+		lv_subject_t* valueSubject = findSubject(state, attrs, "bind_value");
+		const std::string boundValue = valueSubject != nullptr ? valueText(valueSubject) : std::string();
+		if (valueSubject != nullptr && keyValue == nullptr)
+		{
+			keyValue = boundValue.c_str();
+		}
 		// An empty key, which a prop may give, shows every row
 		if (keyField != nullptr && keyField[0] == '\0')
 		{
@@ -294,16 +315,55 @@ namespace UI::Xml
 			return;
 		}
 		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
-		deleteWith(container,
-				   new DsList(container,
-							  *list,
-							  item,
-							  context,
-							  ItemAttributes::from(attrs),
-							  window,
-							  followEnd,
-							  std::move(key),
-							  *pages));
+		const bool keyed = key.has_value();
+		// A negative limit, or none, shows every row
+		std::optional<size_t> limit;
+		if (const char* text = lv_xml_get_value_of(attrs, "limit"); text != nullptr && lv_xml_atoi(text) >= 0)
+		{
+			limit = static_cast<size_t>(lv_xml_atoi(text));
+		}
+		auto* built = new DsList(container,
+								 *list,
+								 item,
+								 context,
+								 ItemAttributes::from(attrs),
+								 window,
+								 followEnd,
+								 std::move(key),
+								 *pages,
+								 limit);
+		deleteWith(container, built);
+		if (keyed && valueSubject != nullptr)
+		{
+			lv_subject_add_observer_obj(valueSubject, valueObserverCb, container, built);
+		}
+	}
+
+	std::string DsList::valueText(lv_subject_t* subject)
+	{
+		if (subject->type == LV_SUBJECT_TYPE_INT)
+		{
+			return std::to_string(lv_subject_get_int(subject));
+		}
+		const char* text = lv_subject_get_string(subject);
+		return text != nullptr ? std::string(text) : std::string();
+	}
+
+	void DsList::valueObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* list = static_cast<DsList*>(lv_observer_get_user_data(observer));
+		if (!list->m_key)
+		{
+			return;
+		}
+		list->m_key->value = valueText(subject);
+		for (size_t i = 0; i < list->m_entries.size(); ++i)
+		{
+			if (list->m_entries[i].key != nullptr)
+			{
+				list->showIfMatches(i);
+			}
+		}
 	}
 
 	std::optional<bool> DsList::applyFlow(lv_obj_t* container, std::string_view flow, bool windowed)

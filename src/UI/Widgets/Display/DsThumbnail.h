@@ -1,8 +1,8 @@
 /*
  * DsThumbnail.h
  *
- * <ds_thumbnail>: an image as tall as its parent's content and as wide as its aspect ratio needs. Its attributes are in
- * registerXml().
+ * <ds_thumbnail>: an image as tall as its parent's content and as wide as its aspect ratio needs, hidden while it has
+ * no image. Its attributes are in registerXml().
  */
 
 #pragma once
@@ -44,7 +44,7 @@ namespace UI::Xml
 		/** The parent, or something in it, changed size or place: fit the parent's content height again */
 		static void parentChangedCb(lv_event_t* e);
 
-		/** Set the width for the parent's content height and the image's aspect ratio */
+		/** Set the width for the parent's content height and the image's aspect ratio; hide while there is no image */
 		void fit();
 
 		lv_obj_t* m_parent; // The parent, whose changes are followed

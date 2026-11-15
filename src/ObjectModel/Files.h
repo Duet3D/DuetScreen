@@ -130,14 +130,29 @@ namespace OM::FileSystem
 		size_t GetNext() const { return m_next; }
 		bool RunEveryTime() const { return m_runEveryTime; }
 
+		/** Hand the listing to each callback: after every page for those run every time, else after the last */
 		void RunCallback();
+
+		/** Whether the listing hasn't finished yet: its last page hasn't arrived */
+		bool IsPending() const;
+
+		/** Answer `pending`'s callbacks too, which were waiting for the same folder: a request replaces it */
+		void TakeCallbacksFrom(const FileListRequest& pending);
 
 		bool IsRequestExpired() const;
 
 	  private:
+		/** One requester's callback */
+		struct Callback
+		{
+			request_files_cb_t callback; // Handed the listing
+			bool everyTime;				 // Called after every page, not only the last
+		};
+
 		std::string m_path;
-		request_files_cb_t m_callback;
+		std::vector<Callback> m_callbacks; // Every requester waiting for this folder
 		bool m_runEveryTime;
+		bool m_done = false; // The last page has arrived
 		mutable TracyLockable(std::mutex, m_mutex);
 		ItemList m_items;
 		size_t m_first = 0;

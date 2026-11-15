@@ -1,0 +1,26 @@
+<!--
+  One of a tool's heaters on its tile (dashboard_tool_tile.xml): its temperature and, muted, what it heats to, on one
+  line over its thin bar (heater_bar.xml), as the heater rows show it.
+
+  Fields:   a row of a tool's om.tools[…].heaters: row.value (the heater number)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false" clickable="false"
+		  style_pad_row="2">
+		<style name="pad_zero"/>
+		<!-- A tool may list a heater that isn't there -->
+		<bind_flag_if cond="om.heat.heaters[{row.value}]|exists eq 0" flag="hidden"/>
+		<lv_obj name="line" width="100%" height="content" flex_flow="row" scrollable="false" clickable="false"
+				style_flex_cross_place="end" style_flex_track_place="end" style_pad_all="0" style_pad_column="2">
+			<lv_label name="current" bind_text="om.heat.heaters[{row.value}].current|fixed:1" bind_text-fmt="%s°"
+					  clickable="false"/>
+			<!-- What it heats to, while it heats to something -->
+			<lv_label name="target" bind_text="om.heat.heaters[{row.value}]|heater_target" bind_text-fmt="/%d°"
+					  clickable="false">
+				<style name="text_muted"/>
+				<bind_flag_if cond="om.heat.heaters[{row.value}]|heater_target lt 1" flag="hidden"/>
+			</lv_label>
+		</lv_obj>
+		<heater_bar name="bar" heater="row.value"/>
+	</view>
+</component>

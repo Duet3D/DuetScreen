@@ -13,16 +13,30 @@
       278
     ],
     "min": [
-      272,
-      100
+      458,
+      184
     ]
   },
   "settings": [
     {
-      "name": "graph_key",
-      "kind": "bool",
-      "title_tag": "tr.widget.setting_graph_key",
-      "default": true
+      "name": "style",
+      "kind": "choice",
+      "title_tag": "tr.widget.tools_style",
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "title_tag": "tr.widget.tools_style_auto"
+        },
+        {
+          "value": 1,
+          "title_tag": "tr.widget.tools_style_equal"
+        },
+        {
+          "value": 2,
+          "title_tag": "tr.widget.tools_style_summary"
+        }
+      ]
     }
   ]
 }

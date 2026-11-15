@@ -1,0 +1,30 @@
+{
+  "component": "dashboard_job",
+  "title_tag": "tr.widget.job",
+  "description_tag": "tr.widget.job_desc",
+  "category_tag": "tr.widget.category_jobs",
+  "icon": "status.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      365,
+      561
+    ],
+    "min": [
+      272,
+      278
+    ]
+  },
+  "settings": [
+    {
+      "name": "macros",
+      "kind": "int",
+      "title_tag": "tr.widget.job_macros",
+      "default": 4,
+      "min": 0,
+      "max": 20
+    }
+  ]
+}

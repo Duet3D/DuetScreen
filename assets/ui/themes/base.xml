@@ -108,6 +108,8 @@
 			   pad_row="#border_width" bg_opa="0" border_width="0"/>
 		<style name="setting_row" width="100%" min_height="56" pad_hor="14" pad_ver="8" pad_column="16" radius="0"
 			   bg_color="lighten(#bg, 0.025)" bg_opa="100%" border_width="0"/>
+		<!-- A row where room is short, such as on the dashboard: lower and less padded -->
+		<style name="setting_row_compact" min_height="40" pad_hor="10" pad_ver="4"/>
 		<style name="setting_title" text_color="#text" text_font="font_title"/>
 		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
 		<!-- A word after a row's title saying what sort of setting it is, e.g. "Advanced": a small tag -->
@@ -307,10 +309,12 @@
 		<!-- Tabs: the selected one (as a checked button, tinted) is underlined in the accent, instead of edged -->
 		<style name="tab_btn" border_color="#primary" border_width="3" border_side="bottom" outline_width="0"/>
 		<!-- Tabs down a side (ds_tabs side="left"): a panel of their own; each flat until it is the one selected, which
-			 is checked (btn_checked) -->
+		is checked (btn_checked) -->
+		<style name="tab_button" merge="tab_btn"/>
 		<style name="tab_bar_side" bg_color="#bg" bg_opa="100%" radius="#radius" pad_all="8" pad_row="4"
 			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
-		<style name="tab_button_side" min_height="52" pad_hor="12" pad_ver="8" pad_column="12" bg_opa="0"
+		<style name="tab_button_top" merge="text_header" width="15%" height="100%" min_width="content" min_height="content"/>
+		<style name="tab_button_side" width="100%" height="content" min_width="content" min_height="52" pad_hor="12" pad_ver="8" pad_column="12" bg_opa="0"
 			   border_width="0" shadow_width="0" text_color="#text" text_font="font_title"/>
 		<style name="tab_bg_focus" outline_pad="-#border_width"/>
 
@@ -390,6 +394,12 @@
 
 		<style name="tool_list_tool" copy="card"/>
 		<style name="tool_list_heater" pad_all="0"/>
+		<!-- A tool's tile on the dashboard: a small card whose left edge says its state, coloured as a heater's is -->
+		<style name="tool_tile" bg_color="#bg_light" bg_opa="100%" radius="#radius" pad_all="#pad" pad_row="2"
+			   border_width="4" border_side="left" border_color="#border_muted" border_opa="100%"/>
+		<style name="tool_tile_active" border_color="#primary"/>
+		<style name="tool_tile_standby" border_color="#secondary"/>
+		<style name="tool_tile_fault" border_color="#error"/>
 		<style name="tool_selected" border_color="#primary" outline_color="#primary" outline_opa="100%"
 			   outline_width="1" outline_pad="0"/>
 

@@ -605,6 +605,8 @@ namespace Comm
 		m_fileInfoRequestQueue.remove(request);
 
 		SaveCacheToFile(*request->GetData());
+		// What is shown of the file (its print time, filament) can be now
+		Model::get().post<EventType::FileInfo>(filepath);
 	}
 
 	bool FileInfoCache::FileInfoRequest::RequestDataInner()

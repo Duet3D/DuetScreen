@@ -1,6 +1,7 @@
 <!--
   Browse a folder of jobs or macros: sort buttons and display mode at the top, the folder's path, then its files as a
-  list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in file_browser_dialog.xml.
+  list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in the shared file dialog
+  (modals/file_dialog.xml).
 
   Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
   e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Presenters/Presenters.cpp).
@@ -59,7 +60,5 @@
 				<bind_flag_if_eq subject="presenter.tiles" flag="hidden" ref_value="0"/>
 			</ds_list>
 		</lv_obj>
-
-		<file_browser_dialog/>
 	</view>
 </component>

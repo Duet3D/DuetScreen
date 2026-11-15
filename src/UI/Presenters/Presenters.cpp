@@ -19,7 +19,9 @@
 #include "Customise/CustomiseActions.h"
 #include "Customise/CustomisePresenter.h"
 #include "Dashboard/JobActions.h"
+#include "Dashboard/JobStatusPresenter.h"
 #include "FileBrowser/FileBrowserPresenter.h"
+#include "FileBrowser/FilesActions.h"
 #include "HardwareTest/HardwareTestPresenter.h"
 #include "Modals/FactorsActions.h"
 #include "Notifications/NotificationsPresenter.h"
@@ -65,6 +67,7 @@ namespace UI
 		SystemActions::registerAll();
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
+		FilesActions::registerAll();
 		EStopActions::registerAll();
 		JobActions::registerAll();
 		BabystepActions::registerAll();
@@ -75,6 +78,7 @@ namespace UI
 		Xml::Presenters::add<NotificationsPresenter>("notifications");
 		Xml::Presenters::add<CustomisePresenter>("customise");
 		Xml::Presenters::add<GcodeReferencePresenter>("gcode_reference");
+		Xml::Presenters::add<JobStatusPresenter>("job_status");
 		Xml::Presenters::add<TemperaturePresenter>("temperature");
 		Xml::Presenters::add<HeightmapPresenter>("heightmap");
 		Xml::Presenters::add<ObjectCancelPresenter>("object_cancel");

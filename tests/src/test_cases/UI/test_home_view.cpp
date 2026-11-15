@@ -16,6 +16,7 @@
 #include "UI/Widgets/Buttons/Button.h"
 #include "UI/Widgets/Display/DsGraph.h"
 #include "UI/Widgets/Inputs/Slider.h"
+#include "UI/Widgets/Layout/DsPages.h"
 #include "UI/Widgets/Layout/TabView.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/PrinterModel.h"
@@ -90,18 +91,20 @@ class TestHomeView : public UiTestSuite
 		return *view;
 	}
 
-	/** The dashboard's tabs (jobs, macros, status), as dashboard.xml builds them */
-	static UI::TabView& dashboardTabs()
+	/** The pages of the dashboard's job widget (dashboard_job.xml): what is ready to start, and the job's status */
+	static UI::Xml::DsPages& dashboardJobPages()
 	{
-		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "tabs");
-		if (tabs == nullptr)
+		lv_obj_t* pages = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "pages");
+		auto* stack = pages != nullptr ? dynamic_cast<UI::Xml::DsPages*>(UI::LvObj::fromPtr(pages)) : nullptr;
+		if (stack == nullptr)
 		{
-			throw std::runtime_error("the dashboard has no tabs");
+			throw std::runtime_error("the dashboard has no job widget");
 		}
-		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+		return *stack;
 	}
 
-	static constexpr size_t STATUS_TAB = 2; // Index of the dashboard's Status tab
+	/** Show the job's status on the dashboard, as a job starting does */
+	static void showJobStatus() { dashboardJobPages().open("status"); }
 
 	/** The dashboard's tool list: the widget the dashboard's layout places as `tools` */
 	static lv_obj_t* dashboardToolList()
@@ -202,8 +205,8 @@ class TestHomeView : public UiTestSuite
 		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
 	}
 
-	/** The file dialog, if it is the step shown (each file browser has one), or nullptr */
-	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_browser_dialog"); }
+	/** The shared file dialog, if it is the step shown, or nullptr */
+	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_dialog"); }
 
 	static std::string_view labelText(lv_obj_t* parent, const char* name)
 	{
@@ -529,7 +532,7 @@ TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
 
 TEST_F(TestHomeView, BlankStatusView)
 {
-	dashboardTabs().setActiveTab(STATUS_TAB);
+	showJobStatus();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/blank.png")
 }
 
@@ -888,42 +891,42 @@ TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
 	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
 }
 
-TEST_F(TestHomeViewWithData, GraphKeysAreTheToolListsSetting)
+TEST_F(TestHomeViewWithData, ToolsWidgetShowsToolsInTheStyleChosen)
 {
 	deliverModelEvents();
-	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
-	ASSERT_NE(temperatures, nullptr);
-	temperatures->sample();
+	const auto hidden = [](lv_obj_t* widget, const char* name)
+	{ return lv_obj_has_flag(lv_obj_find_by_name(widget, name), LV_OBJ_FLAG_HIDDEN); };
 
-	// Every heater's key follows the setting; the widget is rebuilt with it at once
-	auto keysShown = []
-	{
-		std::vector<bool> shown;
-		lv_obj_tree_walk(
-			dashboardToolList(),
-			[](lv_obj_t* obj, void* user) -> lv_obj_tree_walk_res_t
-			{
-				const char* name = lv_obj_get_name(obj);
-				if (name != nullptr && std::string_view(name) == "graph_key")
-				{
-					static_cast<std::vector<bool>*>(user)->push_back(!lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN));
-				}
-				return LV_OBJ_TREE_WALK_NEXT;
-			},
-			&shown);
-		return shown;
-	};
-	const auto before = keysShown();
-	ASSERT_GE(before.size(), 3u); // At least the first tool's, the dual drive's two
-	EXPECT_TRUE(std::ranges::all_of(before, [](bool shown) { return shown; }));
+	// Automatic: a tool here has a spindle, so one tool is shown, the rest summarised as tiles
+	lv_obj_t* widget = dashboardToolList();
+	EXPECT_TRUE(hidden(widget, "equal"));
+	EXPECT_FALSE(hidden(widget, "summary"));
+	lv_obj_t* tiles = lv_obj_find_by_name(widget, "tiles");
+	lv_obj_t* shown = lv_obj_find_by_name(widget, "shown");
+	ASSERT_EQ(lv_obj_get_child_count(tiles), 4u) << "a tile per tool";
+	ASSERT_EQ(lv_obj_get_child_count(shown), 1u) << "the tool in use, in detail";
+	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary.png");
 
+	// Tapping a tile shows that tool without selecting it; tapping the tool in use's follows the tool in use again
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	lv_obj_send_event(lv_obj_get_child(tiles, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(sent.empty()) << "looking isn't selecting";
+	ASSERT_EQ(lv_obj_get_child_count(shown), 1u);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Dual drive");
+	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary_other.png");
+	lv_obj_send_event(lv_obj_get_child(tiles, 0), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Tool 0");
+	UI::Xml::Services::setGcodeSender(nullptr);
+
+	// All equally, the widget's setting: every tool's card
 	auto& editor = UI::Xml::LayoutEditor::get();
 	editor.begin();
 	editor.select("dashboard", "tools");
-	ASSERT_TRUE(editor.setSetting("graph_key", false));
-	const auto after = keysShown();
-	EXPECT_EQ(after.size(), before.size());
-	EXPECT_TRUE(std::ranges::none_of(after, [](bool shown) { return shown; }));
+	ASSERT_TRUE(editor.setSetting("style", 1));
+	widget = dashboardToolList();
+	EXPECT_FALSE(hidden(widget, "equal"));
+	EXPECT_TRUE(hidden(widget, "summary"));
 	editor.cancel();
 }
 
@@ -934,20 +937,20 @@ TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
 	lv_obj_t* toolList = dashboardToolList();
 	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
 	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
-	ASSERT_NE(lv_obj_find_by_name(tools, "status"), nullptr);
-	ASSERT_NE(lv_obj_find_by_name(beds, "status"), nullptr);
+	ASSERT_NE(lv_obj_find_by_name(tools, "state"), nullptr);
+	ASSERT_NE(lv_obj_find_by_name(beds, "state"), nullptr);
 
 	// Printing: nothing that would change the job can be pressed
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "tool_name"), LV_STATE_DISABLED));
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
-	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "deselect"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "state"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(beds, "state"), LV_STATE_DISABLED));
 	// Temperatures can still be set
 	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "active"), LV_STATE_DISABLED));
 
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
 	deliverModelEvents();
-	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "status"), LV_STATE_DISABLED));
-	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "status"), LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "state"), LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "state"), LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
@@ -1483,7 +1486,11 @@ TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
 
 TEST_F(TestHomeViewWithData, StatusView)
 {
-	dashboardTabs().setActiveTab(STATUS_TAB);
+	// The job prints
+	load_model_data(R"({"key":"","flags":"d99f","result":{"state":{"status":"processing"}}})"
+					"\n");
+	deliverModelEvents();
+	showJobStatus();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
 	lv_obj_t* status = page<UI::LvObj>("dashboard_job_status").getRootPtr();
@@ -1528,10 +1535,12 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 		lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
 		ASSERT_NE(openFileDialog(), nullptr);
 		UI::Xml::reload();
-		EXPECT_EQ(openFileDialog(), nullptr) << "the dialog goes with its browser";
+		lv_timer_handler();
+		EXPECT_NE(openFileDialog(), nullptr) << "the shared dialog, still asking, opens again once rebuilt";
+		UI::closeDialogs();
 
 		UI::home();
-		dashboardTabs().setActiveTab(STATUS_TAB);
+		showJobStatus();
 		deliverModelEvents();
 		UI::Xml::reload();
 		lv_refr_now(nullptr);
@@ -1539,17 +1548,18 @@ TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 
 	// Rebuilt from scratch, showing the printer as before
 	UI::home();
-	ASSERT_EQ(dashboardTabs().getTabCount(), 3u);
+	EXPECT_EQ(dashboardJobPages().shownPage(), "status");
+	// The list of every tool's card (tools_list.xml)
 	lv_obj_t* tools = lv_obj_find_by_name(dashboardToolList(), "tools");
-	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(tools, "list")), 5u)
-		<< "the test bench's four tools, and the gap where T1 isn't";
+	ASSERT_NE(tools, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(tools), 5u) << "the test bench's four tools, and the gap where T1 isn't";
 }
 
 TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)
 {
-	// On the Control page's Temperature tab, having come from the Display settings, with the dashboard underneath on
-	// its Status tab
-	dashboardTabs().setActiveTab(STATUS_TAB);
+	// On the Control page's Temperature tab, having come from the Display settings, with the dashboard underneath
+	// showing the job's status
+	showJobStatus();
 	UI::openScreen(std::string_view("settings"));
 	settingsPage().setActiveTab(2);
 	UI::openScreen(std::string_view("control"));
@@ -1570,7 +1580,7 @@ TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)
 	EXPECT_TRUE(page<UI::LvObj>("settings").isShownOnScreen());
 
 	UI::home();
-	EXPECT_EQ(dashboardTabs().getActiveTabIndex(), STATUS_TAB);
+	EXPECT_EQ(dashboardJobPages().shownPage(), "status");
 }
 
 TEST_F(TestHomeView, ReloadDoesNotMoveFocusThroughTheOldWidgets)
@@ -1593,16 +1603,14 @@ TEST_F(TestHomeView, ReloadDoesNotMoveFocusThroughTheOldWidgets)
 	lv_group_delete(group);
 }
 
-TEST_F(TestHomeViewWithData, TabsBuiltDuringAJobSelectAnEnabledTab)
+TEST_F(TestHomeViewWithData, AJobWidgetBuiltDuringAJobShowsItsStatus)
 {
-	// Built while a job runs, the dashboard's Jobs tab is disabled from the start
+	// Built while a job runs, the dashboard's job widget shows its status from the start
 	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
 	deliverModelEvents();
 	UI::Xml::reload();
 
-	auto& tabs = dashboardTabs();
-	EXPECT_TRUE(tabs.isTabDisabled(0));
-	EXPECT_EQ(tabs.getActiveTabIndex(), STATUS_TAB) << "the tab the job start selected, kept by the reload";
+	EXPECT_EQ(dashboardJobPages().shownPage(), "status") << "the page the job start opened, kept by the reload";
 }
 
 TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
@@ -2053,7 +2061,7 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 	std::vector<std::string> sent;
 	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
 	deliverModelEvents();
-	dashboardTabs().setActiveTab(STATUS_TAB);
+	showJobStatus();
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "flow_multiplier"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
@@ -2111,7 +2119,7 @@ TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
 {
 	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
 	deliverModelEvents();
-	dashboardTabs().setActiveTab(STATUS_TAB);
+	showJobStatus();
 	EXPECT_EQ(TestDialogs::shown(), nullptr);
 
 	// The job panel's Cancel button asks the question
@@ -2141,7 +2149,7 @@ TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
 	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"speedFactor":2}}})"
 					"\n");
 	deliverModelEvents();
-	dashboardTabs().setActiveTab(STATUS_TAB);
+	showJobStatus();
 	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
 					  LV_EVENT_CLICKED,
 					  nullptr);

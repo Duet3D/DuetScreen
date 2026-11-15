@@ -2,4 +2,5 @@ target_sources(
   DuetScreen.lib
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/JobActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/JobStatusPresenter.cpp
 )

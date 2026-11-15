@@ -1,24 +1,23 @@
 /*
  * test_file_browser.cpp
  *
- * The file browser's presenter (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h). Browsing on screen, and the
- * dialogs, are covered by test_home_view.cpp.
+ * The names the file browser shows (src/UI/Xml/Data/FilesSource.h). Browsing on screen, and the shared file dialog,
+ * are covered by test_home_view.cpp.
  *
  *  Created on: 2026-03-12
  *      Author: Andy Everitt
  */
 
-#include "UI/Presenters/FileBrowser/FileBrowserPresenter.h"
+#include "UI/Xml/Data/FilesSource.h"
 #include <gtest/gtest.h>
 
-using namespace UI;
+using UI::Xml::FilesSource;
 
 TEST(TestFileBrowserPresenter, MacroDisplayNameRemovesNumericPrefix)
 {
-	using Folder = FileBrowserPresenter::BaseFolder;
-	EXPECT_EQ(FileBrowserPresenter::getDisplayName("12_Preheat.g", Folder::MACROS), "Preheat.g");
-	EXPECT_EQ(FileBrowserPresenter::getDisplayName("001_Home All.g", Folder::MACROS), "Home All.g");
-	EXPECT_EQ(FileBrowserPresenter::getDisplayName("Preheat.g", Folder::MACROS), "Preheat.g");
-	EXPECT_EQ(FileBrowserPresenter::getDisplayName("12Preheat.g", Folder::MACROS), "12Preheat.g");
-	EXPECT_EQ(FileBrowserPresenter::getDisplayName("12_Preheat.g", Folder::GCODES), "12_Preheat.g");
+	EXPECT_EQ(FilesSource::shownName("12_Preheat.g", true), "Preheat.g");
+	EXPECT_EQ(FilesSource::shownName("001_Home All.g", true), "Home All.g");
+	EXPECT_EQ(FilesSource::shownName("Preheat.g", true), "Preheat.g");
+	EXPECT_EQ(FilesSource::shownName("12Preheat.g", true), "12Preheat.g");
+	EXPECT_EQ(FilesSource::shownName("12_Preheat.g", false), "12_Preheat.g");
 }

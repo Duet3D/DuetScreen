@@ -46,6 +46,7 @@
 		<!-- The shared dialogs, which open on the dialog surface -->
 		<ds_view name="factors" view="factors" shown="true"/>
 		<ds_view name="babystep_dialog" view="babystep_dialog" shown="true"/>
+		<ds_view name="file_dialog" view="file_dialog" shown="true"/>
 
 		<!-- Over everything: responses, alerts and update prompts, then the keyboard -->
 		<ds_view name="notifications" view="notifications" shown="true"/>

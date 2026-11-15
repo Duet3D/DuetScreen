@@ -42,6 +42,50 @@ TEST_F(TestStatus, Blank)
 	EXPECT_EQUAL_SCREENSHOT("status_view/blank.png")
 }
 
+TEST_F(TestStatus, ThumbnailGoesBesideTheNameWhereThereIsNoRoomAbove)
+{
+	std::filesystem::path thumbnailPath = GetThumbnailPath("test.gcode");
+	std::filesystem::create_directories(thumbnailPath.parent_path());
+	std::filesystem::remove(thumbnailPath);
+	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
+	// Printing
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
+	load_model_data(
+		R"({"key":"job","flags":"v","result":{"duration":50,"warmUpDuration":0,"file":{"fileName":"test.gcode","size":100,"printTime":100}}})");
+
+	// Short: less room above the name than the square beside it
+	view.setSize(LV_PCT(36), 340);
+	view.show();
+	view.updateLayout();
+	EXPECT_EQUAL_SCREENSHOT("status_view/thumbnail_beside.png");
+	lv_obj_t* root = view.getRootPtr();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "picture"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(root, "beside"), LV_OBJ_FLAG_HIDDEN));
+
+	// Tall: above the name, large
+	view.setSize(LV_PCT(36), LV_PCT(90));
+	view.updateLayout();
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(root, "picture"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "beside"), LV_OBJ_FLAG_HIDDEN));
+
+	// Short again: back beside it
+	view.setSize(LV_PCT(36), 340);
+	view.updateLayout();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "picture"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(root, "beside"), LV_OBJ_FLAG_HIDDEN));
+
+	// Shorter than it all: the job's rows start at the top of its card and its details are cut off at the bottom; the
+	// overrides and controls all show
+	view.setSize(LV_PCT(36), 184);
+	view.updateLayout();
+	lv_obj_t* card = lv_obj_find_by_name(root, "job");
+	EXPECT_GE(lv_obj_get_y(lv_obj_find_by_name(card, "header")), 0);
+	EXPECT_EQ(lv_obj_get_scroll_bottom(root), 0);
+	lv_obj_t* footer = lv_obj_find_by_name(root, "footer");
+	EXPECT_LE(lv_obj_get_y(footer) + lv_obj_get_height(footer), lv_obj_get_content_height(root));
+	EXPECT_EQUAL_SCREENSHOT("status_view/thumbnail_squeezed.png");
+}
+
 TEST_F(TestStatus, Header)
 {
 	// A job half way through (by time, the default progress source), with a thumbnail
@@ -49,6 +93,8 @@ TEST_F(TestStatus, Header)
 	std::filesystem::create_directories(thumbnailPath.parent_path());
 	std::filesystem::remove(thumbnailPath);
 	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
+	// Printing
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
 	load_model_data(
 		R"({"key":"job","flags":"v","result":{"duration":50,"warmUpDuration":0,"file":{"fileName":"test.gcode","size":100,"printTime":100}}})");
 

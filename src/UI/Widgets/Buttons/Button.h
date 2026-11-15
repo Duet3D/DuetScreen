@@ -28,6 +28,11 @@ namespace UI
 		 * wide as the button, both centred (false, as a button starts)
 		 */
 		void setIconBeforeText(bool before, lv_coord_t iconSize = 0);
+		/**
+		 * Keep the text to one line (true): text too wide for the button ends in "…" rather than wrapping onto the
+		 * next. False, as a button starts, lets it wrap.
+		 */
+		void setOneLine(bool oneLine);
 		void setCheckable(bool checkable);
 		void setChecked(const bool checked);
 		bool getChecked() const;
@@ -41,7 +46,14 @@ namespace UI
 		void init(std::string_view text);
 		void updateIconVisibility();
 
+		/**
+		 * Size the label to the button: as wide as its text if the button is sized to its content, else the button's
+		 * width; one line high if setOneLine(), else as tall as its text or the button allows
+		 */
+		void fitLabel();
+
 		Icon m_icon;
 		LvLabel m_label;
+		bool m_oneLine = false; // Whether the text is kept to one line (setOneLine())
 	};
 } // namespace UI

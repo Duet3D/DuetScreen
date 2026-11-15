@@ -68,7 +68,7 @@ namespace UI::Xml::DsDialogFooter
 	<ds_button name="ok" translation_tag="tr.common.ok">
 		<style name="dialog_button"/>
 		<style name="action_btn"/>
-		<action trigger="clicked" name="presenter.files.confirm"/>
+		<action trigger="clicked" name="actions.files.confirm"/>
 	</ds_button>
 </ds_dialog_footer>)"},
 			xmlCreate,
