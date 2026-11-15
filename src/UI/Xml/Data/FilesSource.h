@@ -52,8 +52,13 @@ namespace UI::Xml
 	class FilesSource : public DataSource
 	{
 	  public:
-		/** How many of the newest jobs are listed, at most; a view shows as many of them as it likes (ds_list limit) */
-		static constexpr size_t RECENT_JOBS = 20;
+		/** Whether the dialog offers something, as `dialog_confirm` and `dialog_delete` publish it */
+		enum class Control : int32_t
+		{
+			Hidden = 0,	  // Not offered
+			Disabled = 1, // Offered, but not now: `dialog_reason` says why
+			Usable = 2	  // Offered and usable
+		};
 
 		/** Create the source. Nothing is published until DataSources::start(). */
 		FilesSource();
@@ -114,10 +119,13 @@ namespace UI::Xml
 		/** A thumbnail arrived: show it on its job, and in the dialog if it is about that job */
 		void thumbnailReceived(const std::string& path);
 
+		/** Show what the dialog allows now: no job starts while another runs, nor the one running is deleted */
+		void showAllowed();
+
 		/** Close the dialog */
 		void closeDialog();
 
-		OM::FileSystem::ItemList m_jobs;   // The newest jobs, newest first, as `recent` shows them
+		OM::FileSystem::ItemList m_jobs;   // The jobs, newest first, as `recent` shows them
 		OM::FileSystem::ItemList m_macros; // The macros, as `macros` shows them
 		OmWatch m_watch;				   // Lists the files again as they or the folders change, or a job ends
 		bool m_home = true;				   // The home screens were showing when the screen last changed
@@ -133,7 +141,9 @@ namespace UI::Xml
 		StringSubject<256> m_dialogText;	 // `dialog_text`
 		StringSubject<256> m_dialogImage;	 // `dialog_image`: the job's thumbnail, or empty
 		IntSubject m_dialogHasImage;		 // `dialog_has_image`
-		IntSubject m_dialogCanDelete;		 // `dialog_can_delete`
+		IntSubject m_dialogConfirm;			 // `dialog_confirm`: a Control
+		IntSubject m_dialogDelete;			 // `dialog_delete`: a Control
+		StringSubject<96> m_dialogReason;	 // `dialog_reason`
 		IntSubject m_infoShown;				 // `info_shown`
 		StringSubject<32> m_infoDate;		 // `info_date`
 		StringSubject<32> m_infoSize;		 // `info_size`

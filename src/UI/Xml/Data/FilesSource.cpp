@@ -10,6 +10,7 @@
 #include "JobSource.h"
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/Dialogs/Prompts.h"
@@ -62,10 +63,11 @@ namespace UI::Xml
 
 	void FilesSource::fields(FieldVisitor& f)
 	{
-		f.list("recent",
-			   m_recent,
-			   "The newest jobs in the jobs folder (not in its folders), newest first, at most 20 (show fewer with "
-			   "<ds_list limit>). Tap one to ask whether to start it (actions.files.ask_start).");
+		f.list(
+			"recent",
+			m_recent,
+			"The jobs in the jobs folder (not in its folders), newest first: every one, so show it windowed. Tap one "
+			"to ask whether to start it (actions.files.ask_start).");
 		f.field("recent_count", m_recentCount, "How many jobs `recent` lists");
 		f.list("macros",
 			   m_macroRows,
@@ -79,9 +81,17 @@ namespace UI::Xml
 		f.field("dialog_text", m_dialogText, "The file dialog's message");
 		f.field("dialog_image", m_dialogImage, "The job's thumbnail, shown in the dialog, or empty");
 		f.field("dialog_has_image", m_dialogHasImage, "1 if the dialog shows a thumbnail, else 0");
-		f.field("dialog_can_delete",
-				m_dialogCanDelete,
-				"1 if the dialog offers to delete the file (starting a job does), else 0");
+		f.field("dialog_confirm",
+				m_dialogConfirm,
+				"Starting the job or running the macro (actions.files.confirm): 1 disabled (a job runs, see "
+				"`dialog_reason`), 2 usable");
+		f.field("dialog_delete",
+				m_dialogDelete,
+				"Deleting the file (actions.files.ask_delete): 0 hidden (a macro), 1 disabled (it is the job running), "
+				"2 usable");
+		f.field("dialog_reason",
+				m_dialogReason,
+				"Why the job can't be started or deleted now, e.g. \"Another job is running\"; empty if it can");
 		f.field("info_shown", m_infoShown, "1 if the job's details (the info_* fields) are known, else 0");
 		f.field("info_date", m_infoDate, "The job's modification date");
 		f.field("info_size", m_infoSize, "The job's size");
@@ -95,6 +105,8 @@ namespace UI::Xml
 	{
 		registerEventListener<EventType::ThumbnailData>(this, &FilesSource::thumbnailReceived);
 		registerEventListener<EventType::FileInfo>(this, &FilesSource::fileInfoReceived);
+		// A job starting or ending changes what the dialog allows
+		registerEventListener<EventType::Status>([this](OM::PrinterStatus) { showAllowed(); });
 		// A different printer has different files
 		registerEventListener<EventType::PrinterUniqueId>([this]() { requestFiles(); });
 		// Coming back to the home screens, where the files are offered, from another screen
@@ -189,10 +201,6 @@ namespace UI::Xml
 		UI_LOCK();
 		m_jobs = filesOf(std::move(items));
 		OM::FileSystem::SortFilesBy(m_jobs, OM::FileSystem::SortBy::DATE, true);
-		if (m_jobs.size() > RECENT_JOBS)
-		{
-			m_jobs.resize(RECENT_JOBS);
-		}
 		m_recent.sync(m_jobs.size(),
 					  [this](RecentJobRow& row, size_t i)
 					  {
@@ -269,8 +277,8 @@ namespace UI::Xml
 		m_dialogHasImage.set(hasImage ? 1 : 0);
 		m_dialogTitle.set(_("file.start_print_title"));
 		m_dialogText.set(_("file.start_print.file", item.GetName()));
-		m_dialogCanDelete.set(1);
 		m_dialog.set("start_print");
+		showAllowed();
 	}
 
 	void FilesSource::askRun(const OM::FileSystem::FileSystemItem& item)
@@ -282,8 +290,8 @@ namespace UI::Xml
 		m_dialogHasImage.set(0);
 		m_dialogTitle.set(_("file.run_macro_title"));
 		m_dialogText.set(_("file.run_macro_message", shownName(item.GetName(), true)));
-		m_dialogCanDelete.set(0);
 		m_dialog.set("run_macro");
+		showAllowed();
 	}
 
 	void FilesSource::askStart(const RecentJobRow& row)
@@ -315,7 +323,7 @@ namespace UI::Xml
 		ZoneScoped;
 		const std::string asked(m_dialog.get());
 		closeDialog();
-		if (asked == "start_print")
+		if (asked == "start_print" && m_dialogConfirm.get() == static_cast<int32_t>(Control::Usable))
 		{
 			OM::FileSystem::StartPrint(m_selected);
 			home();
@@ -328,6 +336,10 @@ namespace UI::Xml
 
 	void FilesSource::askDelete(lv_obj_t* asker)
 	{
+		if (m_dialogDelete.get() != static_cast<int32_t>(Control::Usable))
+		{
+			return;
+		}
 		// The question goes with the dialog's button, and so with the dialog. Deleting changes the volume's files,
 		// which lists them again everywhere (seqs.volChanges)
 		Prompts::askQuestion({.title = _("file.delete_title"),
@@ -342,6 +354,30 @@ namespace UI::Xml
 								  }
 							  },
 							  .asker = asker});
+	}
+
+	void FilesSource::showAllowed()
+	{
+		const auto set = [](IntSubject& subject, Control control) { subject.set(static_cast<int32_t>(control)); };
+		if (m_dialog.get() != "start_print")
+		{
+			// A macro runs whenever: during a job too, e.g. to change filament
+			set(m_dialogConfirm, Control::Usable);
+			set(m_dialogDelete, Control::Hidden);
+			m_dialogReason.set("");
+			return;
+		}
+
+		// A job can't start while another runs, nor the one running be deleted
+		const bool active = OM::IsPrintingStatus(OM::GetStatus());
+		bool running = false;
+		{
+			MODEL_LOCK();
+			running = active && OM::Tree::get().root().at("job.file.fileName").text() == m_selected;
+		}
+		set(m_dialogConfirm, active ? Control::Disabled : Control::Usable);
+		set(m_dialogDelete, running ? Control::Disabled : Control::Usable);
+		m_dialogReason.set(running ? _("file.running_this") : active ? _("file.running_another") : std::string());
 	}
 
 	void FilesSource::closeDialog()

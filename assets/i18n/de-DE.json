@@ -119,6 +119,9 @@
     },
     "file": {
       "time_and_filament": "{:s} · {:.1f} m",
+      "delete": "Löschen",
+      "running_another": "Ein anderer Auftrag läuft: dieser kann starten, sobald er beendet ist",
+      "running_this": "Dies ist der laufende Auftrag: er kann erst nach seinem Ende erneut gestartet oder gelöscht werden",
       "macros": "Makros",
       "jobs": "Aufträge",
       "file": "Datei",
@@ -684,7 +687,6 @@
       "job_status_desc": "Fortschritt, Zeiten und Steuerung des Auftrags",
       "job": "Auftrag",
       "job_desc": "Der Auftrag: was bereit zum Start ist (der letzte Auftrag, die neuesten Aufträge und die Makros) und sein Status, sobald einer startet",
-      "job_recent": "Angezeigte neueste Aufträge",
       "job_macros": "Angezeigte Makros",
       "fan": "Lüfter",
       "fan_desc": "Die Drehzahl eines Lüfters, zum Ändern",

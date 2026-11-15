@@ -253,9 +253,11 @@
 			<xs:enumeration value="source.factors.speed.open"/>
 			<xs:enumeration value="source.factors.speed.title"/>
 			<xs:enumeration value="source.files.dialog"/>
-			<xs:enumeration value="source.files.dialog_can_delete"/>
+			<xs:enumeration value="source.files.dialog_confirm"/>
+			<xs:enumeration value="source.files.dialog_delete"/>
 			<xs:enumeration value="source.files.dialog_has_image"/>
 			<xs:enumeration value="source.files.dialog_image"/>
+			<xs:enumeration value="source.files.dialog_reason"/>
 			<xs:enumeration value="source.files.dialog_text"/>
 			<xs:enumeration value="source.files.dialog_title"/>
 			<xs:enumeration value="source.files.info_date"/>
@@ -1564,6 +1566,7 @@
 			<xs:enumeration value="tr.filament.select_tool_list_header"/>
 			<xs:enumeration value="tr.filament.unload"/>
 			<xs:enumeration value="tr.file.crumb_separator"/>
+			<xs:enumeration value="tr.file.delete"/>
 			<xs:enumeration value="tr.file.delete_message"/>
 			<xs:enumeration value="tr.file.delete_title"/>
 			<xs:enumeration value="tr.file.file"/>
@@ -1574,6 +1577,8 @@
 			<xs:enumeration value="tr.file.refresh"/>
 			<xs:enumeration value="tr.file.run_macro_message"/>
 			<xs:enumeration value="tr.file.run_macro_title"/>
+			<xs:enumeration value="tr.file.running_another"/>
+			<xs:enumeration value="tr.file.running_this"/>
 			<xs:enumeration value="tr.file.sort_by_date"/>
 			<xs:enumeration value="tr.file.sort_by_name"/>
 			<xs:enumeration value="tr.file.sort_by_size"/>
@@ -2399,7 +2404,6 @@
 			<xs:enumeration value="tr.widget.job_macros"/>
 			<xs:enumeration value="tr.widget.job_progress"/>
 			<xs:enumeration value="tr.widget.job_progress_desc"/>
-			<xs:enumeration value="tr.widget.job_recent"/>
 			<xs:enumeration value="tr.widget.job_status_desc"/>
 			<xs:enumeration value="tr.widget.jobs_desc"/>
 			<xs:enumeration value="tr.widget.jog_choices"/>
@@ -3224,9 +3228,6 @@
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_job.attributes">
-		<xs:attribute name="recent" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `recent` (int)</xs:documentation></xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="macros" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `macros` (int)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -3676,6 +3677,9 @@
 		</xs:attribute>
 		<xs:attribute name="danger" type="xs:string">
 			<xs:annotation><xs:documentation>&quot;true&quot; for a group whose actions can't be undone, such as erasing every setting: the box is edged in the error colour (`setting_group_danger`)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="fill" type="xs:string">
+			<xs:annotation><xs:documentation>&quot;true&quot; for a box that fills the group's height rather than its rows' (give the group a height, or flex_grow), e.g. for a list that scrolls in it</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_slider.attributes">
@@ -4278,9 +4282,6 @@
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="job_ready.attributes">
-		<xs:attribute name="recent" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `recent` (int)</xs:documentation></xs:annotation>
-		</xs:attribute>
 		<xs:attribute name="macros" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `macros` (int)</xs:documentation></xs:annotation>
 		</xs:attribute>

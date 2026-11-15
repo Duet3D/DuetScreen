@@ -119,6 +119,9 @@
     },
     "file": {
       "time_and_filament": "{:s} · {:.1f} m",
+      "delete": "Verwijderen",
+      "running_another": "Er loopt een andere taak: deze kan starten zodra die klaar is",
+      "running_this": "Dit is de lopende taak: hij kan pas opnieuw gestart of verwijderd worden als hij klaar is",
       "macros": "Macro's",
       "jobs": "Opdrachten",
       "file": "Bestand",
@@ -684,7 +687,6 @@
       "job_status_desc": "De voortgang, tijden en bediening van de opdracht",
       "job": "Taak",
       "job_desc": "De taak: wat klaar is om te starten (de laatste taak, de nieuwste taken en de macro's), en de status zodra er een start",
-      "job_recent": "Getoonde nieuwste taken",
       "job_macros": "Getoonde macro's",
       "fan": "Ventilator",
       "fan_desc": "De snelheid van één ventilator, om te wijzigen",

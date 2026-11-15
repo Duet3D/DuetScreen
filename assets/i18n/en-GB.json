@@ -120,6 +120,9 @@
     },
     "file": { /* File screen */
       "time_and_filament": "{:s} · {:.1f} m",
+      "delete": "Delete",
+      "running_another": "Another job is running: this one can start once it has ended",
+      "running_this": "This is the job running: it can't be started again or deleted until it has ended",
       "macros": "Macros",
       "jobs": "Jobs",
       "file": "File",
@@ -685,7 +688,6 @@
       "job_status_desc": "The job's progress, times and controls",
       "job": "Job",
       "job_desc": "The job: what is ready to start (the last job, the newest jobs and the macros), and the job's status once one starts",
-      "job_recent": "Newest jobs shown",
       "job_macros": "Macros shown",
       "fan": "Fan",
       "fan_desc": "One fan's speed, to change it",

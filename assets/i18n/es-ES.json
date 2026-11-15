@@ -119,6 +119,9 @@
     },
     "file": {
       "time_and_filament": "{:s} · {:.1f} m",
+      "delete": "Eliminar",
+      "running_another": "Hay otro trabajo en curso: este podrá empezar cuando termine",
+      "running_this": "Este es el trabajo en curso: no se puede volver a empezar ni eliminar hasta que termine",
       "macros": "Macros",
       "jobs": "Trabajos",
       "file": "Archivo",
@@ -684,7 +687,6 @@
       "job_status_desc": "El progreso, los tiempos y los controles del trabajo",
       "job": "Trabajo",
       "job_desc": "El trabajo: lo que está listo para empezar (el último trabajo, los más nuevos y las macros) y su estado en cuanto empieza uno",
-      "job_recent": "Trabajos más nuevos mostrados",
       "job_macros": "Macros mostradas",
       "fan": "Ventilador",
       "fan_desc": "La velocidad de un ventilador, para cambiarla",

@@ -1,10 +1,11 @@
 <!--
   What is ready to start, the `job` widget's first page (dashboard_job.xml): while a job runs, it, tapped to see its
-  status; else the last job, to print again; the newest jobs, each tapped to ask whether to start it (not while a job
-  runs); and the macros, each tapped to ask whether to run it. All files opens the Files page's jobs; the refresh
+  status; else the last job, to print again; every job, newest first, in a list that fills the room left and scrolls,
+  each tapped to ask whether to start it (the dialog says
+  why not while a job runs); and the macros, each tapped to ask whether to run it. All files opens the Files page's jobs; the refresh
   button lists the files again (they are also listed again on coming back to the dashboard and when a job ends).
 
-  Props:    recent: how many of the newest jobs to show; macros: how many macros
+  Props:    macros: how many macros to show
   Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the job, how the last ended and its thumbnail;
             source.files.* (src/UI/Xml/Data/FilesSource.h): the newest jobs and the macros;
             source.machine.job_active (src/UI/Xml/Data/MachineSource.h): whether a job runs
@@ -14,7 +15,6 @@
 -->
 <component>
 	<api>
-		<prop name="recent" type="int" default="5"/>
 		<prop name="macros" type="int" default="4"/>
 	</api>
 
@@ -118,10 +118,13 @@
 			</lv_obj>
 		</ds_setting_group>
 
-		<!-- The newest jobs; none can start while a job runs -->
-		<ds_setting_group name="recent" title_tag="tr.job.recent" width="100%">
+		<!-- Every job, newest first, filling the room the rest leaves (at least two rows' worth), scrolling on its own;
+			 only the rows on screen are built -->
+		<ds_setting_group name="recent" title_tag="tr.job.recent" width="100%" height="1" flex_grow="1" fill="true"
+						  style_min_height="100">
 			<bind_flag_if_eq subject="source.files.recent_count" flag="hidden" ref_value="0"/>
-			<ds_list name="list" list="source.files.recent" item="job_recent_row" limit="$recent">
+			<ds_list name="list" list="source.files.recent" item="job_recent_row" windowed="true" item_height="58"
+					 width="100%" height="100%" scroll_dir="ver">
 				<style name="setting_list"/>
 			</ds_list>
 		</ds_setting_group>

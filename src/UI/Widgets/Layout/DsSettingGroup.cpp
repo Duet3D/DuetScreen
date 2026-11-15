@@ -42,13 +42,13 @@ namespace UI::Xml
 
 	void DsSettingGroup::registerXml()
 	{
-		Widgets::add({.name = "ds_setting_group",
-					  .extends = "lv_obj",
-					  .description =
-						  "A group of settings: its title, in capitals, over a box of the rows written inside it "
-						  "(`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style), with a note at "
-						  "the end of the title's line if it has one. Hiding the group hides its title too.",
-					  .example = R"(<ds_setting_group title="Machine control">
+		Widgets::add(
+			{.name = "ds_setting_group",
+			 .extends = "lv_obj",
+			 .description = "A group of settings: its title, in capitals, over a box of the rows written inside it "
+							"(`<ds_setting>`, or a `<ds_list>` of them with the `setting_list` style), with a note at "
+							"the end of the title's line if it has one. Hiding the group hides its title too.",
+			 .example = R"(<ds_setting_group title="Machine control">
 	<ds_setting title="Confirm before acting">
 		<ds_toggle/>
 	</ds_setting>
@@ -56,20 +56,23 @@ namespace UI::Xml
 		<ds_toggle/>
 	</ds_setting>
 </ds_setting_group>)",
-					  .attributes = {{"title", "The group's title, if there is no `title_tag`"},
-									 {"title_tag",
-									  "Translation key for the title; follows language changes",
-									  AttributeKind::Translation},
-									 {"note", "A note at the end of the title's line, if there is no `note_tag`"},
-									 {"note_tag",
-									  "Translation key for the note, e.g. who sets the settings; follows language "
-									  "changes",
-									  AttributeKind::Translation},
-									 {"danger",
-									  "\"true\" for a group whose actions can't be undone, such as erasing every "
-									  "setting: the box is edged in the error colour (`setting_group_danger`)"}}},
-					 xmlCreate,
-					 xmlApply);
+			 .attributes = {{"title", "The group's title, if there is no `title_tag`"},
+							{"title_tag",
+							 "Translation key for the title; follows language changes",
+							 AttributeKind::Translation},
+							{"note", "A note at the end of the title's line, if there is no `note_tag`"},
+							{"note_tag",
+							 "Translation key for the note, e.g. who sets the settings; follows language "
+							 "changes",
+							 AttributeKind::Translation},
+							{"danger",
+							 "\"true\" for a group whose actions can't be undone, such as erasing every "
+							 "setting: the box is edged in the error colour (`setting_group_danger`)"},
+							{"fill",
+							 "\"true\" for a box that fills the group's height rather than its rows' (give the "
+							 "group a height, or flex_grow), e.g. for a list that scrolls in it"}}},
+			xmlCreate,
+			xmlApply);
 	}
 
 	void* DsSettingGroup::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
@@ -105,6 +108,11 @@ namespace UI::Xml
 		if (const char* danger = lv_xml_get_value_of(attrs, "danger"); danger != nullptr && lv_xml_to_bool(danger))
 		{
 			group->m_box.addStyle(Themes::getComponentStyles().setting_group_danger);
+		}
+		if (const char* fill = lv_xml_get_value_of(attrs, "fill"); fill != nullptr && lv_xml_to_bool(fill))
+		{
+			group->m_box.setHeight(1);
+			group->m_box.setFlexGrow(1);
 		}
 	}
 

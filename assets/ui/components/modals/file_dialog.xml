@@ -1,6 +1,7 @@
 <!--
   The shared file dialog, hosted once by the home screen: start a job (with its details and thumbnail, and an offer to
-  delete it instead: a question, the next step), or run a macro. Open while source.files.dialog is set. The file
+  delete it instead: a question, the next step), or run a macro. While a job runs, another can't start, nor the one
+  running be deleted: OK or Delete is disabled, and a line says why. Open while source.files.dialog is set. The file
   browser opens it for the file tapped; any view opens it for a row of source.files.recent or source.files.macros with
   the global actions `actions.files.ask_start` and `actions.files.ask_run`.
 
@@ -83,17 +84,25 @@
 						<bind_flag_if_eq subject="source.files.dialog_has_image" flag="hidden" ref_value="0"/>
 					</lv_image>
 				</lv_obj>
+				<!-- Why it can't be started or deleted now, while that is so -->
+				<lv_label name="reason" bind_text="source.files.dialog_reason" width="100%" style_text_align="center">
+					<style name="text_warning"/>
+					<bind_flag_if_eq subject="source.files.dialog_reason" flag="hidden" ref_value=""/>
+				</lv_label>
 			</lv_obj>
 
 			<ds_dialog_footer name="footer">
 				<!-- Deleting, apart from what the dialog is for, on the left -->
-				<ds_button name="delete" text="&#xF2ED;" width="content">
-					<bind_flag_if_eq subject="source.files.dialog_can_delete" flag="hidden" ref_value="0"/>
+				<ds_button name="delete" translation_tag="tr.file.delete">
+					<style name="dialog_button"/>
+					<style name="danger_btn"/>
+					<bind_flag_if_eq subject="source.files.dialog_delete" flag="hidden" ref_value="0"/>
+					<bind_state_if_not_eq subject="source.files.dialog_delete" state="disabled" ref_value="2"/>
 					<action trigger="clicked" name="actions.files.ask_delete"/>
 				</ds_button>
 				<!-- Pushes the delete button left; it goes with it, so the buttons on the right keep to the edge -->
 				<lv_obj name="spacer" height="1" flex_grow="1" clickable="false" style_bg_opa="0" style_border_width="0">
-					<bind_flag_if_eq subject="source.files.dialog_can_delete" flag="hidden" ref_value="0"/>
+					<bind_flag_if_eq subject="source.files.dialog_delete" flag="hidden" ref_value="0"/>
 				</lv_obj>
 				<ds_button name="cancel" translation_tag="tr.common.cancel">
 					<style name="dialog_button"/>
@@ -102,6 +111,7 @@
 				<ds_button name="ok" translation_tag="tr.common.ok">
 					<style name="dialog_button"/>
 					<style name="action_btn"/>
+					<bind_state_if_not_eq subject="source.files.dialog_confirm" state="disabled" ref_value="2"/>
 					<action trigger="clicked" name="actions.files.confirm"/>
 				</ds_button>
 			</ds_dialog_footer>

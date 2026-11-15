@@ -12,10 +12,12 @@
 #include "UI/Xml/View/XmlView.h"
 #include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
+#include <algorithm>
 #include <filesystem>
 #include <fmt/format.h>
 #include <gtest/gtest.h>
 #include <thread>
+#include <vector>
 
 class TestJobWidget : public UiTestSuite
 {
@@ -55,6 +57,25 @@ class TestJobWidget : public UiTestSuite
 		load_model_data_from_file(jobs);
 		load_model_data_from_file(macros);
 	}
+
+	/** The rows built in the windowed list `list` (only those on screen are), top first */
+	static std::vector<lv_obj_t*> rowsOf(lv_obj_t* list)
+	{
+		std::vector<lv_obj_t*> rows;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+		{
+			lv_obj_t* child = lv_obj_get_child(list, static_cast<int32_t>(i));
+			if (lv_obj_find_by_name(child, "name") != nullptr)
+			{
+				rows.push_back(child);
+			}
+		}
+		std::sort(rows.begin(), rows.end(), [](lv_obj_t* a, lv_obj_t* b) { return lv_obj_get_y(a) < lv_obj_get_y(b); });
+		return rows;
+	}
+
+	/** The name row `row` shows */
+	static std::string nameOf(lv_obj_t* row) { return lv_label_get_text(lv_obj_find_by_name(row, "name")); }
 
 	/** A job, test.gcode, runs */
 	static void runJob()
@@ -147,23 +168,18 @@ TEST_F(TestJobWidget, ReadyShowsTheLastJobTheNewestJobsAndTheMacros)
 	view.updateLayout();
 	ASSERT_TRUE(shows("job_ready"));
 	EXPECT_EQUAL_SCREENSHOT("job_widget/ready.png");
-	// The macros, below
-	lv_obj_t* face = lv_obj_get_parent(lv_obj_find_by_name(view.getRootPtr(), "ready_print"));
-	face = lv_obj_get_parent(face); // The face, which scrolls, holds the header
-	lv_obj_scroll_to_y(face, LV_COORD_MAX, LV_ANIM_OFF);
-	view.updateLayout();
-	EXPECT_EQUAL_SCREENSHOT("job_widget/ready_macros.png");
-	lv_obj_scroll_to_y(face, 0, LV_ANIM_OFF);
 
 	lv_obj_t* root = view.getRootPtr();
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(root, "last"), "detail")),
 				 "Finished at 12:00 · took 1 h 13 min");
 
-	// The five newest jobs (the widget's default), newest first, without the folder
+	// Every job, newest first, without the folder: those on screen, the rest scrolled to
 	lv_obj_t* recent = listIn("recent");
-	ASSERT_EQ(lv_obj_get_child_count(recent), 5u);
-	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(recent, 0), "name")), "test.gcode");
-	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(recent, 4), "name")), "Calibration cube.gcode");
+	const auto rows = rowsOf(recent);
+	ASSERT_GE(rows.size(), 3u);
+	EXPECT_EQ(nameOf(rows[0]), "test.gcode");
+	EXPECT_EQ(nameOf(rows[2]), "Spool holder.gcode");
+	EXPECT_GT(lv_obj_get_scroll_bottom(recent), 0) << "six jobs: more than fit";
 
 	// The first four macros (the widget's default) in the folder's order, named without their ordering prefix or ".g"
 	lv_obj_t* macros = listIn("macros");
@@ -171,7 +187,7 @@ TEST_F(TestJobWidget, ReadyShowsTheLastJobTheNewestJobsAndTheMacros)
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(macros, 0), "label")), "Preheat PLA");
 
 	// Tapping a job asks whether to start it, in the shared dialog
-	lv_obj_send_event(lv_obj_get_child(recent, 1), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(rows[1], LV_EVENT_CLICKED, nullptr);
 	ASSERT_NE(TestDialogs::shownNamed("file_dialog"), nullptr);
 	EXPECT_EQ(TestDialogs::title(), "Start Print");
 	EXPECT_EQ(TestDialogs::text("text"), "File: Cable chain link x12.gcode");
@@ -184,14 +200,13 @@ TEST_F(TestJobWidget, ReadyShowsTheLastJobTheNewestJobsAndTheMacros)
 	UI::closeDialogs();
 }
 
-TEST_F(TestJobWidget, ListsAreLimitedAsTheWidgetSays)
+TEST_F(TestJobWidget, MacrosAreLimitedAsTheWidgetSays)
 {
-	UI::Xml::XmlView few{"few", screen.getRootPtr(), "dashboard_job", nullptr, {{"recent", "2"}, {"macros", "1"}}};
+	UI::Xml::XmlView few{"few", screen.getRootPtr(), "dashboard_job", nullptr, {{"macros", "1"}}};
 	connectWithFiles("tests/object_model/rr_filelist/gcodes_recent.json",
 					 "tests/object_model/rr_filelist/macros_dashboard.json");
 	few.show();
 	lv_obj_t* root = few.getRootPtr();
-	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(lv_obj_find_by_name(root, "recent"), "list")), 2u);
 	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(lv_obj_find_by_name(root, "macros"), "list")), 1u);
 }
 
@@ -199,13 +214,15 @@ TEST_F(TestJobWidget, NewFilesAreListedAsThePrinterCountsThem)
 {
 	connectWithFiles("tests/object_model/rr_filelist/gcodes.json", "tests/object_model/rr_filelist/macros.json");
 	view.show();
-	ASSERT_EQ(lv_obj_get_child_count(listIn("recent")), 1u);
+	ASSERT_EQ(rowsOf(listIn("recent")).size(), 1u);
 
 	// A job uploaded: the printer counts a change to the volume's files, and the jobs are listed again
 	load_model_data(R"({"key":"","flags":"d99f","result":{"seqs":{"volChanges":[27,0]}}})");
 	deliverModelEvents();
 	load_model_data_from_file("tests/object_model/rr_filelist/gcodes_recent.json");
-	EXPECT_EQ(lv_obj_get_child_count(listIn("recent")), 5u);
+	const auto rows = rowsOf(listIn("recent"));
+	ASSERT_GT(rows.size(), 1u);
+	EXPECT_EQ(nameOf(rows[1]), "Cable chain link x12.gcode");
 }
 
 TEST_F(TestJobWidget, ARunningJobShowsItsStatusAndCanBeFoundAgain)
@@ -223,4 +240,44 @@ TEST_F(TestJobWidget, ARunningJobShowsItsStatusAndCanBeFoundAgain)
 	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "last"), LV_OBJ_FLAG_HIDDEN)) << "it runs: nothing to repeat";
 	lv_obj_send_event(lv_obj_find_by_name(root, "current"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(shows("dashboard_job_status"));
+}
+
+TEST_F(TestJobWidget, WhileAJobRunsTheDialogSaysWhyNoneCanStartAndItCantBeDeleted)
+{
+	connectWithFiles("tests/object_model/rr_filelist/gcodes_recent.json",
+					 "tests/object_model/rr_filelist/macros_dashboard.json");
+	runJob(); // test.gcode, the newest
+	lv_obj_t* root = view.getRootPtr();
+	view.show();
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(root, "pages"), "back"), LV_EVENT_CLICKED, nullptr);
+	const auto rows = rowsOf(listIn("recent"));
+	ASSERT_GE(rows.size(), 2u);
+	const auto disabled = [](const char* name) { return lv_obj_has_state(TestDialogs::find(name), LV_STATE_DISABLED); };
+
+	// Another job: it can't start until this one has ended
+	lv_obj_send_event(rows[1], LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("file_dialog"), nullptr);
+	EXPECT_TRUE(disabled("ok"));
+	EXPECT_FALSE(disabled("delete"));
+	EXPECT_EQ(TestDialogs::text("reason"), "Another job is running: this one can start once it has ended");
+	home.show(); // Whose dialog surface shows the dialog
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_EQUAL_SCREENSHOT("job_widget/start_while_running.png");
+	home.hide();
+	UI::closeDialogs();
+
+	// The job running: it can't be started again, nor deleted
+	lv_obj_send_event(rows[0], LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("file_dialog"), nullptr);
+	EXPECT_TRUE(disabled("ok"));
+	EXPECT_TRUE(disabled("delete"));
+	EXPECT_EQ(TestDialogs::text("reason"),
+			  "This is the job running: it can't be started again or deleted until it has ended");
+
+	// It ends with the dialog open: now it can
+	endJob(false);
+	EXPECT_FALSE(disabled("ok"));
+	EXPECT_FALSE(disabled("delete"));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("reason"), LV_OBJ_FLAG_HIDDEN));
+	UI::closeDialogs();
 }

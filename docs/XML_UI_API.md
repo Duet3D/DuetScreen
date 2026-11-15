@@ -288,7 +288,7 @@ From [FilesSource.cpp](../src/UI/Xml/Data/FilesSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.files.recent` | list | The newest jobs in the jobs folder (not in its folders), newest first, at most 20 (show fewer with <ds_list limit>). Tap one to ask whether to start it (actions.files.ask_start). |
+| `source.files.recent` | list | The jobs in the jobs folder (not in its folders), newest first: every one, so show it windowed. Tap one to ask whether to start it (actions.files.ask_start). |
 | `source.files.recent_count` | int | How many jobs `recent` lists |
 | `source.files.macros` | list | The macros in the macros folder (not in its folders), in the folder's order. Tap one to ask whether to run it (actions.files.ask_run). |
 | `source.files.macro_count` | int | How many macros `macros` lists |
@@ -297,7 +297,9 @@ From [FilesSource.cpp](../src/UI/Xml/Data/FilesSource.cpp).
 | `source.files.dialog_text` | text | The file dialog's message |
 | `source.files.dialog_image` | text | The job's thumbnail, shown in the dialog, or empty |
 | `source.files.dialog_has_image` | int | 1 if the dialog shows a thumbnail, else 0 |
-| `source.files.dialog_can_delete` | int | 1 if the dialog offers to delete the file (starting a job does), else 0 |
+| `source.files.dialog_confirm` | int | Starting the job or running the macro (actions.files.confirm): 1 disabled (a job runs, see `dialog_reason`), 2 usable |
+| `source.files.dialog_delete` | int | Deleting the file (actions.files.ask_delete): 0 hidden (a macro), 1 disabled (it is the job running), 2 usable |
+| `source.files.dialog_reason` | text | Why the job can't be started or deleted now, e.g. "Another job is running"; empty if it can |
 | `source.files.info_shown` | int | 1 if the job's details (the info_* fields) are known, else 0 |
 | `source.files.info_date` | text | The job's modification date |
 | `source.files.info_size` | text | The job's size |
@@ -1764,6 +1766,7 @@ Also takes every `lv_obj` attribute.
 | `note` | A note at the end of the title's line, if there is no `note_tag` |
 | `note_tag` | Translation key for the note, e.g. who sets the settings; follows language changes |
 | `danger` | "true" for a group whose actions can't be undone, such as erasing every setting: the box is edged in the error colour (`setting_group_danger`) |
+| `fill` | "true" for a box that fills the group's height rather than its rows' (give the group a height, or flex_grow), e.g. for a list that scrolls in it |
 
 ### ds_slider
 
@@ -2484,7 +2487,6 @@ At its smallest, 272×278 px:
 
 | Setting | Shown as | Takes | Default |
 | --- | --- | --- | --- |
-| `recent` | Newest jobs shown | int, 0 to 20 | `5` |
 | `macros` | Macros shown | int, 0 to 20 | `4` |
 
 #### job_progress
@@ -3004,7 +3006,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
-| `dashboard_job` |  | `recent`, `macros` | `job` | [dashboard_job.xml](../assets/ui/components/dashboard/dashboard_job.xml) |
+| `dashboard_job` |  | `macros` | `job` | [dashboard_job.xml](../assets/ui/components/dashboard/dashboard_job.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
 | [`dashboard_job_status`](#home) | `job_status` |  | `dashboard_files`, `dashboard_job`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
@@ -3057,7 +3059,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `job_detail` |  | `title_tag`, `value` | `dashboard_job_status` | [job_detail.xml](../assets/ui/components/dashboard/job_detail.xml) |
 | `job_macro` |  |  | `job_ready` | [job_macro.xml](../assets/ui/components/dashboard/job_macro.xml) |
 | `job_override` |  | `title_tag`, `value`, `tap_action`, `shown` | `dashboard_job_status` | [job_override.xml](../assets/ui/components/dashboard/job_override.xml) |
-| [`job_ready`](#job_ready) |  | `recent`, `macros` | `dashboard_job` | [job_ready.xml](../assets/ui/components/dashboard/job_ready.xml) |
+| [`job_ready`](#job_ready) |  | `macros` | `dashboard_job` | [job_ready.xml](../assets/ui/components/dashboard/job_ready.xml) |
 | `job_recent_row` |  |  | `job_ready` | [job_recent_row.xml](../assets/ui/components/dashboard/job_recent_row.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
