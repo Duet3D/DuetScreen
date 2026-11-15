@@ -1,0 +1,21 @@
+<!--
+  Which coordinates the positions are in: the workplace's, with its offsets (G54 to G59), or the machine's (G53). The
+  positions shown above follow it, and so does a move to a position typed in (actions.move.set_position).
+
+  Data:     source.settings.machine_position_mode (declared in src/UI/Presenters/Control/Move/MoveActions.cpp)
+  Actions:  actions.settings.set (in settings_option.xml)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content">
+		<style name="setting_group"/>
+		<ds_setting name="coordinates" title_tag="tr.move.coordinates" hint_tag="tr.move.coordinates_hint">
+			<lv_obj name="options">
+				<style name="setting_options"/>
+				<settings_option name="workplace" translation_tag="tr.move.coordinates_options.workplace"
+								 setting="machine_position_mode" value="0"/>
+				<settings_option name="machine" translation_tag="tr.move.coordinates_options.machine"
+								 setting="machine_position_mode" value="1"/>
+			</lv_obj>
+		</ds_setting>
+	</view>
+</component>

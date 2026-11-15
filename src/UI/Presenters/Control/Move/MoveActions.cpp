@@ -7,8 +7,10 @@
 #include "Storage.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/AxesSource.h"
+#include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/JogSource.h"
 #include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Data/SettingsSource.h"
 #include "UI/Xml/Dialogs/Prompts.h"
 #include "UI/Xml/Runtime/Services.h"
 #include "UI/Xml/View/Actions.h"
@@ -198,6 +200,18 @@ namespace UI::MoveActions
 
 	void registerAll()
 	{
+		// Shown and chosen in the Move tab (move_coordinates.xml), so declared with the moves it changes
+		Xml::Settings::add({.name = "machine_position_mode",
+							.description = "1 if positions are shown in, and moves to a position use, machine "
+										   "coordinates (G53), ignoring the workplace's offsets",
+							.read = [] { return StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE) ? 1 : 0; },
+							.write =
+								[](int32_t on)
+							{
+								StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, on != 0);
+								Xml::DataSources::updateAll(); // The positions shown change
+							}});
+
 		Xml::Actions::addGlobal("move.jog",
 								"Jog by the chosen distance at the chosen speed (source.jog). `arg` is `X+`, `Z-`, …; "
 								"`other+` or `other-` for the axis chosen from source.axes.others; from a row of "

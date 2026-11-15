@@ -268,6 +268,12 @@
       "z_offset": "Desfase Z",
       "work_zero": "Cero de trabajo aquí",
       "workplace": "Sistema de trabajo",
+      "coordinates": "Coordenadas",
+      "coordinates_hint": "Máquina ignora los desfases de trabajo (G53)",
+      "coordinates_options": {
+        "workplace": "Trabajo",
+        "machine": "Máquina"
+      },
       "all_axes": "Todos",
       "overrides": "Ajustes en vivo",
       "speed_factor": "Factor de velocidad",
@@ -379,7 +385,6 @@
       },
       "screensaver_timeout": "Salvapantallas tras",
       "show_confirmation_dialogs": "Confirmar antes de actuar",
-      "move_machine_position_mode": "Movimientos absolutos en coordenadas de máquina",
       "units": "Unidades",
       "units_options": {
         "mm": "mm",
@@ -471,7 +476,6 @@
       "hints": {
         "language": "DuetScreen se reinicia para cambiar de idioma",
         "confirmations": "Preguntar antes de las acciones que cambian la máquina",
-        "machine_coordinates": "Envía G53, por lo que se ignoran los desfases de trabajo",
         "units": "Cómo muestra la pantalla distancias y velocidades. Los movimientos se convierten a las unidades del Duet (G20/G21)",
         "job_progress": "Lo que mide la barra de progreso",
         "screensaver": "Segundos sin tocar antes de que la pantalla se atenúe; 0 para nunca",

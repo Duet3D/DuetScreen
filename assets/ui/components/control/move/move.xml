@@ -1,7 +1,8 @@
 <!--
   The Move tab. On the left: every axis' position (tap one to move to a position), X and Y on a pad, Z in a column,
-  and one more column for the axis chosen from any others, then the jog step and speed. On the right: homing; the Z offset on a printer, or work zero on a
-  CNC; and the speed factor, which scales jogging too.
+  and one more column for the axis chosen from any others, then the jog step and speed, and whether positions are the
+  workplace's or the machine's (G53). On the right: homing; the Z offset on a printer, or work zero on a CNC; and the
+  speed factor, which scales jogging too.
 
   Data:     source.axes.* (src/UI/Xml/Data/AxesSource.h), source.jog.* (src/UI/Xml/Data/JogSource.h),
             source.machine.connected, om.state.machineMode
@@ -52,6 +53,7 @@
 			</lv_obj>
 
 			<move_jog_choices name="jog_choices" width="100%"/>
+			<move_coordinates name="coordinates" width="100%"/>
 		</lv_obj>
 
 		<lv_obj name="side" width="30%" height="100%" flex_flow="column" scroll_dir="ver">

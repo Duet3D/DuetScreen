@@ -269,6 +269,12 @@
       "z_offset": "Z offset",
       "work_zero": "Work zero here",
       "workplace": "Workplace",
+      "coordinates": "Coordinates",
+      "coordinates_hint": "Machine ignores workplace offsets (G53)",
+      "coordinates_options": {
+        "workplace": "Workplace",
+        "machine": "Machine"
+      },
       "all_axes": "All",
       "overrides": "Overrides",
       "speed_factor": "Speed factor",
@@ -380,7 +386,6 @@
       "screensaver_timeout": "Screensaver after",
       "send_config_to_duet": "Back up settings to the Duet",
       "show_confirmation_dialogs": "Confirm before acting",
-      "move_machine_position_mode": "Absolute moves use machine coordinates",
       "units": "Units",
       "units_options": {
         "mm": "mm",
@@ -472,7 +477,6 @@
       "hints": {
         "language": "DuetScreen restarts to change language",
         "confirmations": "Ask first before actions that change the machine",
-        "machine_coordinates": "Sends G53, so workplace offsets are ignored",
         "units": "How the screen shows distances and speeds. Moves are converted to the Duet's own units (G20/G21)",
         "job_progress": "What the progress bar measures",
         "screensaver": "Seconds without a touch before the screen dims; 0 for never",

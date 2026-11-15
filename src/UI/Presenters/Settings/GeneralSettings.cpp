@@ -158,15 +158,6 @@ namespace UI::GeneralSettings
 			 .description = "1 if actions on the machine are confirmed first",
 			 .read = [] { return StorageHelper::getData(ID_SHOW_CONFIRMATION_DIALOGS) ? 1 : 0; },
 			 .write = [](int32_t on) { StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, on != 0); }});
-		Xml::Settings::add({.name = "machine_position_mode",
-							.description = "1 if absolute moves use machine coordinates (G53)",
-							.read = [] { return StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE) ? 1 : 0; },
-							.write =
-								[](int32_t on)
-							{
-								StorageHelper::setData(ID_MOVE_MACHINE_POSITION_MODE, on != 0);
-								Xml::DataSources::updateAll(); // The positions shown change
-							}});
 		Xml::Settings::add({.name = "units",
 							.description =
 								"The unit the screen shows distances and speeds in: 0 millimetres, 1 inches. "

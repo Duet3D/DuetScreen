@@ -464,7 +464,6 @@ From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
 | `source.settings.keyboard_layout` | int | Index of the USB keyboard layout in use (actions.settings.set) |
 | `source.settings.keyboard_layout_options` | text | What `source.settings.keyboard_layout` can be, one per line, translated |
 | `source.settings.confirmations` | int | 1 if actions on the machine are confirmed first (actions.settings.set) |
-| `source.settings.machine_position_mode` | int | 1 if absolute moves use machine coordinates (G53) (actions.settings.set) |
 | `source.settings.units` | int | The unit the screen shows distances and speeds in: 0 millimetres, 1 inches. The Duet's own (G20/G21) is unaffected: moves are converted to it (actions.settings.set) |
 | `source.settings.progress_source` | int | Index of how a job's progress is worked out (actions.settings.set) |
 | `source.settings.progress_source_options` | text | What `source.settings.progress_source` can be, one per line, translated |
@@ -500,6 +499,7 @@ From [SettingsSource.cpp](../src/UI/Xml/Data/SettingsSource.cpp).
 | `source.settings.ssh` | int | 1 if ssh is on (developer mode builds) (actions.settings.set) |
 | `source.settings.adb` | int | 1 if adb is on (developer mode builds) (actions.settings.set) |
 | `source.settings.system_monitor` | int | 1 if the system monitor is shown (actions.settings.set) |
+| `source.settings.machine_position_mode` | int | 1 if positions are shown in, and moves to a position use, machine coordinates (G53), ignoring the workplace's offsets (actions.settings.set) |
 | `source.settings.duet_ip` | text | The Duet's IP address (actions.settings.set, actions.settings.ask) |
 | `source.settings.duet_password` | text | The Duet's password (actions.settings.set) |
 
@@ -2570,11 +2570,11 @@ At its smallest, 272×184 px:
 
 **Move**: The Move tab: jog and home every axis, babystep, and choose the jog distance and speed
 
-In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a free layout it is 920×467 px, and at least 920×420 px.
+In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a free layout it is 920×527 px, and at least 920×480 px.
 
 ![move](../tests/ref_imgs/xml_ui_api/widgets/move.png)
 
-At its smallest, 920×420 px:
+At its smallest, 920×480 px:
 
 ![move at its smallest](../tests/ref_imgs/xml_ui_api/widgets/move_smallest.png)
 
@@ -3071,6 +3071,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_axis_choice` |  |  | `move` | [move_axis_choice.xml](../assets/ui/components/control/move/move_axis_choice.xml) |
+| `move_coordinates` |  |  | `move` | [move_coordinates.xml](../assets/ui/components/control/move/move_coordinates.xml) |
 | `move_home_axis` |  |  | `move_homing` | [move_home_axis.xml](../assets/ui/components/control/move/move_home_axis.xml) |
 | `move_homing` |  |  | `move` | [move_homing.xml](../assets/ui/components/control/move/move_homing.xml) |
 | `move_jog_button` |  | `usable`, `jog` | `move_axis`, `move_xy` | [move_jog_button.xml](../assets/ui/components/control/move/move_jog_button.xml) |
@@ -3104,7 +3105,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`settings_display`](#settings_display) |  |  | `settings` | [settings_display.xml](../assets/ui/components/settings/settings_display.xml) |
 | [`settings_general`](#settings) |  |  | `settings` | [settings_general.xml](../assets/ui/components/settings/settings_general.xml) |
 | [`settings_notifications`](#settings_notifications) |  |  | `settings` | [settings_notifications.xml](../assets/ui/components/settings/settings_notifications.xml) |
-| `settings_option` |  | `setting`, `value` | `settings_connection`, `settings_display`, `settings_general`, `settings_notifications` | [settings_option.xml](../assets/ui/components/settings/settings_option.xml) |
+| `settings_option` |  | `setting`, `value` | `move_coordinates`, `settings_connection`, `settings_display`, `settings_general`, `settings_notifications` | [settings_option.xml](../assets/ui/components/settings/settings_option.xml) |
 | [`settings_system`](#settings_system) |  |  | `settings` | [settings_system.xml](../assets/ui/components/settings/settings_system.xml) |
 | [`settings_theme_preview`](#settings_theme_preview) | `settings_theme_preview` |  | `settings` | [settings_theme_preview.xml](../assets/ui/components/settings/settings_theme_preview.xml) |
 | `settings_theme_swatch` |  |  | `settings_theme_preview` | [settings_theme_swatch.xml](../assets/ui/components/settings/settings_theme_swatch.xml) |

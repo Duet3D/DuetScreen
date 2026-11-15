@@ -268,6 +268,12 @@
       "z_offset": "Décalage Z",
       "work_zero": "Zéro pièce ici",
       "workplace": "Repère de travail",
+      "coordinates": "Coordonnées",
+      "coordinates_hint": "Machine ignore les décalages d'origine pièce (G53)",
+      "coordinates_options": {
+        "workplace": "Pièce",
+        "machine": "Machine"
+      },
       "all_axes": "Tous",
       "overrides": "Réglages en cours",
       "speed_factor": "Facteur de vitesse",
@@ -379,7 +385,6 @@
       },
       "screensaver_timeout": "Économiseur d’écran après",
       "show_confirmation_dialogs": "Confirmer avant d'agir",
-      "move_machine_position_mode": "Déplacements absolus en coordonnées machine",
       "units": "Unités",
       "units_options": {
         "mm": "mm",
@@ -471,7 +476,6 @@
       "hints": {
         "language": "DuetScreen redémarre pour changer de langue",
         "confirmations": "Demander avant les actions qui modifient la machine",
-        "machine_coordinates": "Envoie G53 : les décalages d'origine pièce sont ignorés",
         "units": "Comment l'écran affiche distances et vitesses. Les mouvements sont convertis dans les unités du Duet (G20/G21)",
         "job_progress": "Ce que mesure la barre de progression",
         "screensaver": "Secondes sans toucher avant que l'écran ne s'assombrisse ; 0 pour jamais",

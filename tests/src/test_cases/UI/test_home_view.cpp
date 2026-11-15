@@ -1340,6 +1340,54 @@ TEST_F(TestHomeViewWithData, TheScreenShowsItsOwnUnitsWhateverTheDuetUses)
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
+TEST_F(TestHomeViewWithData, MoveTabChoosesWorkplaceOrMachineCoordinates)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"move":{"axes":[{"userPosition":5,"machinePosition":105,"homed":true}]}}})"
+		"\n");
+	deliverModelEvents();
+	const auto firstTile = [&]
+	{
+		lv_obj_t* tiles = lv_obj_find_by_name(lv_obj_find_by_name(move, "positions"), "list");
+		return lv_obj_get_child(tiles, 0);
+	};
+	const auto firstPosition = [&]
+	{ return std::string(lv_label_get_text(lv_obj_find_by_name(firstTile(), "position"))); };
+
+	// The workplace's coordinates at first: the position shown is the workplace's, and a move to one has no G53
+	lv_obj_t* coordinates = lv_obj_find_by_name(move, "coordinates");
+	ASSERT_NE(coordinates, nullptr);
+	lv_obj_t* workplace = lv_obj_find_by_name(coordinates, "workplace");
+	lv_obj_t* machine = lv_obj_find_by_name(coordinates, "machine");
+	EXPECT_TRUE(lv_obj_has_state(workplace, LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(machine, LV_STATE_CHECKED));
+	EXPECT_EQ(firstPosition(), "5.00");
+	lv_obj_send_event(firstTile(), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::enterOnPad("20");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back().find("G53"), std::string::npos) << sent.back();
+
+	// The machine's: chosen here and kept as a setting, the position shown is the machine's, and moves send G53
+	lv_obj_send_event(machine, LV_EVENT_CLICKED, nullptr);
+	deliverModelEvents();
+	EXPECT_TRUE(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+	EXPECT_TRUE(lv_obj_has_state(machine, LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(workplace, LV_STATE_CHECKED));
+	EXPECT_EQ(firstPosition(), "105.00");
+	lv_obj_send_event(firstTile(), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::enterOnPad("20");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_NE(sent.back().find("G53 G1 X20"), std::string::npos) << sent.back();
+
+	lv_obj_send_event(workplace, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
 TEST_F(TestHomeViewWithData, MacroView)
 {
 	openFilesTab(0);

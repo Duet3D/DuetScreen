@@ -20,8 +20,6 @@
 		<ds_setting_group name="machine" title_tag="tr.settings.groups.machine">
 			<settings_toggle name="show_confirmation_dialogs" title_tag="tr.settings.show_confirmation_dialogs"
 							 hint_tag="tr.settings.hints.confirmations" setting="confirmations"/>
-			<settings_toggle name="move_machine_position_mode" title_tag="tr.settings.move_machine_position_mode"
-							 hint_tag="tr.settings.hints.machine_coordinates" setting="machine_position_mode"/>
 			<!-- One of a few: the chosen one is checked -->
 			<ds_setting name="units" title_tag="tr.settings.units" hint_tag="tr.settings.hints.units">
 				<lv_obj name="options">

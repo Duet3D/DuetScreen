@@ -788,6 +788,7 @@
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
+			<xs:enumeration value="move_coordinates"/>
 			<xs:enumeration value="move_home_axis"/>
 			<xs:enumeration value="move_homing"/>
 			<xs:enumeration value="move_jog_button"/>
@@ -954,6 +955,7 @@
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
+			<xs:enumeration value="move_coordinates"/>
 			<xs:enumeration value="move_home_axis"/>
 			<xs:enumeration value="move_homing"/>
 			<xs:enumeration value="move_jog_button"/>
@@ -1180,6 +1182,7 @@
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
+			<xs:enumeration value="move_coordinates"/>
 			<xs:enumeration value="move_home_axis"/>
 			<xs:enumeration value="move_homing"/>
 			<xs:enumeration value="move_jog_button"/>
@@ -1994,6 +1997,10 @@
 			<xs:enumeration value="tr.message.update_successful_text"/>
 			<xs:enumeration value="tr.move.all_axes"/>
 			<xs:enumeration value="tr.move.axis_home"/>
+			<xs:enumeration value="tr.move.coordinates"/>
+			<xs:enumeration value="tr.move.coordinates_hint"/>
+			<xs:enumeration value="tr.move.coordinates_options.machine"/>
+			<xs:enumeration value="tr.move.coordinates_options.workplace"/>
 			<xs:enumeration value="tr.move.disable_motors"/>
 			<xs:enumeration value="tr.move.disable_motors_confirm.text"/>
 			<xs:enumeration value="tr.move.disable_motors_confirm.title"/>
@@ -2117,7 +2124,6 @@
 			<xs:enumeration value="tr.settings.hints.hardware_test"/>
 			<xs:enumeration value="tr.settings.hints.job_progress"/>
 			<xs:enumeration value="tr.settings.hints.language"/>
-			<xs:enumeration value="tr.settings.hints.machine_coordinates"/>
 			<xs:enumeration value="tr.settings.hints.notification_level"/>
 			<xs:enumeration value="tr.settings.hints.poll_interval"/>
 			<xs:enumeration value="tr.settings.hints.reboot"/>
@@ -2134,7 +2140,6 @@
 			<xs:enumeration value="tr.settings.language"/>
 			<xs:enumeration value="tr.settings.language_confirm.text"/>
 			<xs:enumeration value="tr.settings.language_confirm.title"/>
-			<xs:enumeration value="tr.settings.move_machine_position_mode"/>
 			<xs:enumeration value="tr.settings.network.available_wifi"/>
 			<xs:enumeration value="tr.settings.network.connect"/>
 			<xs:enumeration value="tr.settings.network.connected"/>
@@ -13347,6 +13352,14 @@
 			<xs:attribute name="moves_machine" type="bool">
 				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_coordinates">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_coordinates.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
