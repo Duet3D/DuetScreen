@@ -36,7 +36,7 @@
 				</ds_button>
 			</lv_obj>
 
-			<console_input name="input_cont"/>
+			<console_input name="command_line"/>
 		</lv_obj>
 
 		<ds_dialog name="reference_dialog" bind_open="presenter.open" title_tag="tr.console.reference"

@@ -37,7 +37,7 @@ TEST_F(TestBabyStep, Display)
 
 TEST_F(TestBabyStep, StepsByTheChosenSize)
 {
-	lv_obj_t* steps = part("value_list");
+	lv_obj_t* steps = part("presets");
 	ASSERT_GE(lv_obj_get_child_count(steps), 2u);
 	EXPECT_TRUE(lv_obj_has_state(lv_obj_get_child(steps, 0), LV_STATE_CHECKED)) << "the first is chosen to start with";
 
@@ -55,8 +55,8 @@ TEST_F(TestBabyStep, EveryPanelSharesTheChosenSize)
 {
 	UI::Xml::XmlView other{"other", screen, "babystep"};
 	other.show();
-	lv_obj_t* steps = part("value_list");
-	lv_obj_t* otherSteps = lv_obj_find_by_name(other.getRootPtr(), "value_list");
+	lv_obj_t* steps = part("presets");
+	lv_obj_t* otherSteps = lv_obj_find_by_name(other.getRootPtr(), "presets");
 	ASSERT_GE(lv_obj_get_child_count(otherSteps), 2u);
 
 	// Chosen in one panel, it is chosen in the other, which steps by it

@@ -55,15 +55,8 @@
 				<bind_style_if_eq name="gauge_off" subject="$state" ref_value="off" selector="indicator"/>
 				<bind_style_if_eq name="gauge_fault" subject="$state" ref_value="fault" selector="indicator"/>
 			</ds_arc>
-			<lv_obj name="readout" width="content" height="content" align="center" flex_flow="column"
-					style_flex_cross_place="center" style_flex_track_place="center" clickable="false"
-					scrollable="false">
-				<style name="pad_zero"/>
-				<gauge_reading name="reading" text="$text" unit="$unit" grow="$grow"/>
-				<lv_label name="detail" bind_text="$detail" clickable="false">
-					<style name="widget_detail"/>
-				</lv_label>
-			</lv_obj>
+			<gauge_readout name="readout" text="$text" unit="$unit" grow="$grow" detail="$detail" width="content"
+						   height="content" align="center"/>
 		</lv_obj>
 	</view>
 </component>

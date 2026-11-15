@@ -9,7 +9,7 @@
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="row">
 		<style name="bg_dark"/>
 
-		<lv_obj name="temperature_cont" height="100%" flex_grow="2" flex_flow="column">
+		<lv_obj name="heaters" height="100%" flex_grow="2" flex_flow="column">
 			<style name="card"/>
 
 			<lv_obj name="tools" width="100%" height="content" flex_flow="column">
@@ -35,10 +35,10 @@
 			</lv_obj>
 		</lv_obj>
 
-		<lv_obj name="control_cont" height="100%" flex_grow="1" flex_flow="column" style_pad_all="0">
-			<lv_label name="selected_tool_label" bind_text="presenter.selected_tool" width="100%" height="content"
+		<lv_obj name="extruder" height="100%" flex_grow="1" flex_flow="column" style_pad_all="0">
+			<lv_label name="selected_tool" bind_text="presenter.selected_tool" width="100%" height="content"
 					  style_text_align="center"/>
-			<ds_view name="extruder_control" view="temperature_extrusion" shown="true" width="100%" flex_grow="1">
+			<ds_view name="extrusion" view="temperature_extrusion" shown="true" width="100%" flex_grow="1">
 				<style name="card"/>
 			</ds_view>
 		</lv_obj>

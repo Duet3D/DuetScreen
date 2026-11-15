@@ -766,6 +766,7 @@
 			<xs:enumeration value="gauge_heaters"/>
 			<xs:enumeration value="gauge_list"/>
 			<xs:enumeration value="gauge_reading"/>
+			<xs:enumeration value="gauge_readout"/>
 			<xs:enumeration value="gauge_sensors"/>
 			<xs:enumeration value="gauge_tool"/>
 			<xs:enumeration value="gauge_track"/>
@@ -931,6 +932,7 @@
 			<xs:enumeration value="gauge_heaters"/>
 			<xs:enumeration value="gauge_list"/>
 			<xs:enumeration value="gauge_reading"/>
+			<xs:enumeration value="gauge_readout"/>
 			<xs:enumeration value="gauge_sensors"/>
 			<xs:enumeration value="gauge_tool"/>
 			<xs:enumeration value="gauge_track"/>
@@ -1131,6 +1133,7 @@
 			<xs:enumeration value="gauge_heaters"/>
 			<xs:enumeration value="gauge_list"/>
 			<xs:enumeration value="gauge_reading"/>
+			<xs:enumeration value="gauge_readout"/>
 			<xs:enumeration value="gauge_sensors"/>
 			<xs:enumeration value="gauge_tool"/>
 			<xs:enumeration value="gauge_track"/>
@@ -4224,6 +4227,20 @@
 			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="gauge_readout.attributes">
+		<xs:attribute name="text" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `text` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="unit" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `unit` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="grow" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `grow` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="detail" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `detail` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="gauge_sensors.attributes">
 		<xs:attribute name="key" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
@@ -6076,9 +6093,6 @@
 		</xs:attribute>
 		<xs:attribute name="action" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="icon" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `icon` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="styledef.attributes">
@@ -11507,6 +11521,15 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="gauge_reading.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="gauge_readout">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/gauge/gauge_readout.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="gauge_readout.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

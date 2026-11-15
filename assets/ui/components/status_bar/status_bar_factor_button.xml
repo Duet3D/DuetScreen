@@ -1,12 +1,11 @@
 <!--
-  A small status bar button showing an override (`value`, a subject such as move.speed_factor) that opens its dialog
-  (`action`, e.g. factors.speed): the `status_speed` and `status_extrusion` widgets.
+  A small status bar button showing an override (`value`, e.g. source.move.speed_factor) that opens its dialog
+  (`action`, e.g. actions.factors.speed): the `status_speed` and `status_extrusion` widgets.
 -->
 <component>
 	<api>
 		<prop name="value" type="string" default="source.move.speed_factor"/>
 		<prop name="action" type="string" default="actions.factors.speed"/>
-		<prop name="icon" type="string" default=""/>
 	</api>
 
 	<view extends="lv_obj" width="content" height="content" scrollable="false">

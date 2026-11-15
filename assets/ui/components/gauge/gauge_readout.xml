@@ -1,0 +1,24 @@
+<!--
+  A gauge's reading (gauge_reading.xml) over its detail, centred: inside an arc gauge's arc, and the middle of a value
+  gauge. Give it a size.
+
+      <gauge_readout name="readout" text="$text" unit="$unit" grow="$grow" detail="$detail"/>
+
+  Props:    text, unit, grow  as gauge_reading.xml       detail  the name of what the detail shows
+-->
+<component>
+	<api>
+		<prop name="text" type="string" default="''"/>
+		<prop name="unit" type="string" default="''"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="detail" type="string" default="''"/>
+	</api>
+	<view extends="lv_obj" flex_flow="column" style_flex_main_place="center" style_flex_cross_place="center"
+		  style_flex_track_place="center" clickable="false" scrollable="false">
+		<style name="pad_zero"/>
+		<gauge_reading name="reading" text="$text" unit="$unit" grow="$grow"/>
+		<lv_label name="detail" bind_text="$detail" clickable="false">
+			<style name="widget_detail"/>
+		</lv_label>
+	</view>
+</component>

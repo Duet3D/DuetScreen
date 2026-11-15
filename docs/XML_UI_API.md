@@ -3048,7 +3048,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_heater_slots` |  | `list`, `title`, `key`, `match`, `look`, `flow`, `grow`, `portrait` | `gauge_beds`, `gauge_chambers`, `gauge_tool` | [gauge_heater_slots.xml](../assets/ui/components/gauge/gauge_heater_slots.xml) |
 | `gauge_heaters` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `heater_gauges` | [gauge_heaters.xml](../assets/ui/components/gauge/gauge_heaters.xml) |
 | `gauge_list` |  | `list`, `key`, `match`, `look`, `flow`, `frame`, `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `gauge_fans`, `gauge_heater_slots`, `gauge_heaters`, `gauge_sensors`, `custom_gauges` | [gauge_list.xml](../assets/ui/components/gauge/gauge_list.xml) |
-| `gauge_reading` |  | `text`, `unit`, `grow` | `gauge_arc`, `gauge_bar`, `gauge_value` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
+| `gauge_reading` |  | `text`, `unit`, `grow` | `gauge_bar`, `gauge_readout` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
+| `gauge_readout` |  | `text`, `unit`, `grow`, `detail` | `gauge_arc`, `gauge_value` | [gauge_readout.xml](../assets/ui/components/gauge/gauge_readout.xml) |
 | `gauge_sensors` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `sensor_arc`, `sensor_bar`, `sensor_gauges`, `sensor_value` | [gauge_sensors.xml](../assets/ui/components/gauge/gauge_sensors.xml) |
 | `gauge_tool` |  | `tool`, `key`, `match`, `look`, `flow`, `grow`, `portrait` | `tool_arc`, `tool_bar`, `tool_value` | [gauge_tool.xml](../assets/ui/components/gauge/gauge_tool.xml) |
 | `gauge_track` |  | `value`, `min`, `max`, `target`, `state` | `gauge_bar`, `heater_bar` | [gauge_track.xml](../assets/ui/components/gauge/gauge_track.xml) |
@@ -3117,7 +3118,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `sidebar_page_button` |  | `page`, `action`, `label_tag`, `icon`, `flash` | `page_console`, `page_control`, `page_files`, `page_home`, `page_settings` | [sidebar_page_button.xml](../assets/ui/components/sidebar/sidebar_page_button.xml) |
 | [`status_bar`](#home) |  |  | `home` | [status_bar.xml](../assets/ui/components/status_bar/status_bar.xml) |
 | `status_bar_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `status_button`, `status_gcode` | [status_bar_button.xml](../assets/ui/components/status_bar/status_bar_button.xml) |
-| `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
+| `status_bar_factor_button` |  | `value`, `action` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
 | `temperature` | `temperature` |  | `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
 | [`temperature_extrusion`](#temperature_extrusion) |  |  | `temperature` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |

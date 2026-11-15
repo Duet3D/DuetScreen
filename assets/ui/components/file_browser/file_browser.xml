@@ -14,7 +14,7 @@
 		<style name="card"/>
 
 		<!-- Wraps where it is too narrow for every button, e.g. in a small widget -->
-		<lv_obj name="sidebar" width="100%" height="content" flex_flow="row_wrap"
+		<lv_obj name="toolbar" width="100%" height="content" flex_flow="row_wrap"
 				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 			<ds_button name="sort_name" bind_text="presenter.sort_name" width="content" height="content">
 				<bind_state_if_eq subject="presenter.sort" state="checked" ref_value="0"/>
@@ -43,8 +43,8 @@
 			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
 					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 				<style name="bg_color_header"/>
-				<lv_label name="breadcrumb_prefix" translation_tag="tr.file.header_prefix" width="content" height="content"/>
-				<ds_list name="breadcrumb_container" list="presenter.crumbs" item="file_browser_crumb" height="content" flex_grow="1"
+				<lv_label name="path_prefix" translation_tag="tr.file.header_prefix" width="content" height="content"/>
+				<ds_list name="path" list="presenter.crumbs" item="file_browser_crumb" height="content" flex_grow="1"
 						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="center"
 						 style_flex_track_place="start">
 					<style name="pad_tiny"/>

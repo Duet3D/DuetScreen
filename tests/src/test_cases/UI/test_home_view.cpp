@@ -513,7 +513,7 @@ TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
 {
 	openFilesTab(1);
 	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
-	lv_obj_t* crumbs = lv_obj_find_by_name(browser, "breadcrumb_container");
+	lv_obj_t* crumbs = lv_obj_find_by_name(browser, "path");
 	ASSERT_EQ(lv_obj_get_child_count(crumbs), 1u);
 
 	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
@@ -1244,7 +1244,7 @@ TEST_F(TestHomeViewWithData, ControlView)
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
 	{
 		// Hold the second babystep size to change it
-		lv_obj_t* steps = lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "value_list");
+		lv_obj_t* steps = lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "presets");
 		ASSERT_NE(steps, nullptr);
 		ASSERT_GE(lv_obj_get_child_count(steps), 2u);
 		lv_obj_send_event(lv_obj_get_child(steps, 1), LV_EVENT_LONG_PRESSED, nullptr);
