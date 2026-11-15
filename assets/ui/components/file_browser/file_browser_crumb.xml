@@ -1,5 +1,5 @@
 <!--
-  One folder of the file browser's path: a separator before all but the first, then the folder's name, which can be
+  One folder of the file browser's path: a chevron before all but the first, then the folder's name, which can be
   tapped to go back up to it unless it is the open folder.
 
   Fields:   a crumbs row: row.name, row.last (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
@@ -9,9 +9,9 @@
 		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
 		<style name="pad_tiny"/>
 
-		<lv_label name="separator" translation_tag="tr.file.crumb_separator">
+		<chevron name="separator">
 			<bind_flag_if_eq subject="row.index" flag="hidden" ref_value="0"/>
-		</lv_label>
+		</chevron>
 		<ds_button name="folder" bind_text="row.name">
 			<style name="file_crumb"/>
 			<bind_flag_if_eq subject="row.last" flag="hidden" ref_value="1"/>
@@ -19,6 +19,7 @@
 		</ds_button>
 		<lv_label name="open_folder" bind_text="row.name">
 			<style name="file_crumb_current"/>
+			<style name="text_emphasis"/>
 			<bind_flag_if_eq subject="row.last" flag="hidden" ref_value="0"/>
 		</lv_label>
 	</view>

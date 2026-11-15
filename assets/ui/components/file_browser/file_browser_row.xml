@@ -1,43 +1,31 @@
 <!--
-  One file or folder in the file browser's list: its name and date, with the file's thumbnail or a folder icon on the
-  right. Tap to open it. The list sets its size.
+  One file or folder in the file browser's list, a row as the job widget's are (job_recent_row.xml): its picture, then
+  its name over its detail (its job's time and filament, else its date and size). A file's picture is its thumbnail, or
+  a file icon until it has one; a folder's is a folder icon in the accent colour, and a chevron ends its row. Tap it to
+  open it. The list sets its size.
 
-  Fields:   a files row: row.name, row.date, row.thumbnail, row.is_folder (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
+  Fields:   a files row: row.name, row.detail, row.thumbnail, row.is_folder
+            (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="90" scrollable="false" style_layout="grid"
-		  style_grid_column_dsc_array="fr(3) content" style_grid_row_dsc_array="content fr(1) content content">
-		<style name="file"/>
-		<style name="folder" selector="checked"/>
-		<bind_state_if_eq subject="row.is_folder" state="checked" ref_value="1"/>
+	<view extends="lv_obj" width="100%" height="64" flex_flow="row" scrollable="false" style_radius="#radius"
+		  style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="setting_row"/>
+		<style name="pressed" selector="pressed"/>
 		<action trigger="clicked" name="presenter.files.open"/>
 
-		<!-- Room for a thumbnail is kept while it loads, so the text doesn't move when it arrives -->
-		<lv_obj name="thumb_box" width="72" height="72" style_pad_all="0" scrollable="false" clickable="false"
-				style_grid_cell_column_pos="1" style_grid_cell_column_span="1" style_grid_cell_x_align="end"
-				style_grid_cell_row_pos="0" style_grid_cell_row_span="4" style_grid_cell_y_align="start">
-			<bind_flag_if_eq subject="row.is_folder" flag="hidden" ref_value="1"/>
-			<lv_image name="thumb" bind_src="row.thumbnail" inner_align="contain" width="100%" height="100%">
-				<bind_flag_if_eq subject="row.thumbnail" flag="hidden" ref_value=""/>
-			</lv_image>
+		<file_browser_picture name="picture" width="48" height="48"/>
+		<lv_obj name="about" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+				clickable="false" style_pad_all="0">
+			<lv_label name="label" bind_text="row.name" width="100%" long_mode="dots">
+				<style name="setting_title"/>
+			</lv_label>
+			<lv_label name="detail" bind_text="row.detail" width="100%" long_mode="dots">
+				<style name="setting_hint"/>
+			</lv_label>
 		</lv_obj>
-		<ds_icon name="folder_icon" icon="folder.png" width="72" height="72"
-				 style_grid_cell_column_pos="1" style_grid_cell_column_span="1" style_grid_cell_x_align="end"
-				 style_grid_cell_row_pos="0" style_grid_cell_row_span="4" style_grid_cell_y_align="start">
-			<style name="folder_icon"/>
+		<chevron name="chevron">
 			<bind_flag_if_eq subject="row.is_folder" flag="hidden" ref_value="0"/>
-		</ds_icon>
-		<lv_label name="label" bind_text="row.name" width="100%" height="content" long_mode="dots"
-				  style_text_align="left"
-				  style_grid_cell_column_pos="0" style_grid_cell_column_span="1" style_grid_cell_x_align="stretch"
-				  style_grid_cell_row_pos="0" style_grid_cell_row_span="1" style_grid_cell_y_align="start">
-			<style name="text_emphasis" selector="checked"/>
-			<bind_state_if_eq subject="row.is_folder" state="checked" ref_value="1"/>
-		</lv_label>
-		<lv_label name="date" bind_text="row.date"
-				  style_grid_cell_column_pos="0" style_grid_cell_column_span="1" style_grid_cell_x_align="stretch"
-				  style_grid_cell_row_pos="3" style_grid_cell_row_span="1" style_grid_cell_y_align="end">
-			<style name="text_muted"/>
-		</lv_label>
+		</chevron>
 	</view>
 </component>

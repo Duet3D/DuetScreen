@@ -434,7 +434,7 @@ TEST_F(TestHomeView, FoldersStandApartFromFiles)
 	lv_obj_update_layout(lv_screen_active());
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_tiles.png");
 
-	lv_obj_send_event(lv_obj_find_by_name(browser, "display_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(browser, "list_mode"), LV_EVENT_CLICKED, nullptr);
 	lv_obj_update_layout(lv_screen_active());
 	lv_timer_handler();
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_rows.png");
@@ -464,7 +464,8 @@ TEST_F(TestHomeView, TappingAFileAnywhereOnItOpensIt)
 		tapMiddle(fileItem(browser, "test.gcode"));
 		EXPECT_NE(openFileDialog(), nullptr) << (layout == 0 ? "a tile" : "a row");
 		UI::closeDialogs();
-		lv_obj_send_event(lv_obj_find_by_name(browser, "display_mode"), LV_EVENT_CLICKED, nullptr);
+		lv_obj_send_event(
+			lv_obj_find_by_name(browser, layout == 0 ? "list_mode" : "tiles_mode"), LV_EVENT_CLICKED, nullptr);
 		lv_obj_update_layout(lv_screen_active());
 		lv_timer_handler();
 	}
@@ -522,12 +523,43 @@ TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
 	lv_obj_t* base = lv_obj_get_child(crumbs, 0);
 	lv_obj_t* folder = lv_obj_get_child(crumbs, 1);
 	EXPECT_FALSE(isHidden(base, "folder")) << "the base folder can be tapped";
-	EXPECT_EQ(labelText(lv_obj_find_by_name(base, "folder"), "label"), "0:/gcodes");
+	EXPECT_EQ(labelText(lv_obj_find_by_name(base, "folder"), "label"), "Jobs") << "named for what it holds";
 	EXPECT_EQ(labelText(folder, "open_folder"), "Folder");
 	EXPECT_FALSE(isHidden(folder, "separator"));
 
 	lv_obj_send_event(lv_obj_find_by_name(base, "folder"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(lv_obj_get_child_count(crumbs), 1u);
+}
+
+TEST_F(TestHomeView, FileBrowserGoesUpSaysWhatAFileIsAndWhenAFolderIsEmpty)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_t* up = lv_obj_find_by_name(browser, "up");
+	lv_obj_t* empty = lv_obj_find_by_name(browser, "empty");
+	lv_obj_t* crumbs = lv_obj_find_by_name(browser, "path");
+	EXPECT_TRUE(lv_obj_has_state(up, LV_STATE_DISABLED)) << "nothing is above the jobs folder";
+	EXPECT_TRUE(lv_obj_has_flag(empty, LV_OBJ_FLAG_HIDDEN));
+
+	// A file the printer hasn't described yet: when it was changed, to the minute, and its size; a folder: when
+	lv_obj_send_event(lv_obj_find_by_name(browser, "list_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQ(labelText(fileItem(browser, "test.gcode"), "detail"), "2025-03-18 18:21 · 695.98 KB");
+	EXPECT_EQ(labelText(fileItem(browser, "Folder"), "detail"), "2024-09-18 14:48");
+
+	// In a folder with nothing in it, which says so, Up goes back
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	load_model_data(R"({"dir":"0:/gcodes/Folder/","first":0,"files":[],"next":0})"
+					"\n");
+	deliverModelEvents();
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_FALSE(lv_obj_has_state(up, LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_flag(empty, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/empty_folder.png");
+	lv_obj_send_event(up, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(crumbs), 1u);
+	EXPECT_TRUE(lv_obj_has_state(up, LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeView, BlankStatusView)

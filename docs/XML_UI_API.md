@@ -322,7 +322,7 @@ Each row of `source.files.recent`:
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
 | `row.name` | text | The job's file name, e.g. "benchy.gcode" |
-| `row.detail` | text | How long it should take and the filament it uses, e.g. "2 h 40 min · 12.4 m", once the printer has said; until then, its date |
+| `row.detail` | text | How long it should take and the filament it uses, e.g. "2 h 40 min · 12.4 m", once the printer has said; until then, its date and size, e.g. "2025-03-18 18:21 · 1.2 MB" |
 | `row.thumbnail` | text | Thumbnail image path, or empty if there is none (yet) |
 
 Each row of `source.files.macros`:
@@ -750,7 +750,8 @@ Each row of `presenter.saved`:
 | `presenter.sort_date` | text | As `sort_name`, for the date order |
 | `presenter.sort_size` | text | As `sort_name`, for the size order |
 | `presenter.tiles` | int | 1 when files are shown as tiles, 0 as a list |
-| `presenter.mode_icon` | text | Symbol for the other way of showing files |
+| `presenter.in_subfolder` | int | 1 while a folder below the base folder is open (so there is one above) |
+| `presenter.empty` | int | 1 once the open folder has been read and has nothing in it, else 0 |
 
 Each row of `presenter.files`:
 
@@ -758,9 +759,10 @@ Each row of `presenter.files`:
 | --- | --- | --- |
 | `row.index` | int | Position in the list, from 0 |
 | `row.name` | text | Shown name; a macro's "12_" ordering prefix is left out |
-| `row.date` | text | Modification date, e.g. "2025-03-18 18:21:58" |
+| `row.detail` | text | Under its name: its job's time and filament once the printer has said, e.g. "2 h 40 min · 12.4 m"; else its date and size, e.g. "2025-03-18 18:21 · 1.2 MB"; a folder's date |
 | `row.thumbnail` | text | Thumbnail image path, or empty if there is none (yet) |
 | `row.is_folder` | int | 1 for a folder, else 0 |
+| `row.picture` | int | What its picture is: 0 a file icon (no thumbnail yet), 1 its thumbnail, 2 a folder |
 
 Each row of `presenter.crumbs`:
 
@@ -773,10 +775,11 @@ Each row of `presenter.crumbs`:
 | Action | Description |
 | --- | --- |
 | `presenter.files.crumb` | Open that folder. From a row of `crumbs`. |
+| `presenter.files.mode` | Show the files as a `list` or as `tiles`, as `arg` says. Remembered. |
 | `presenter.files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
 | `presenter.files.refresh` | Read the folder again |
 | `presenter.files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
-| `presenter.files.toggle_mode` | Show tiles instead of a list, or the other way round. Remembered. |
+| `presenter.files.up` | Open the folder above the open one |
 
 ### dialog_choice
 
@@ -1550,7 +1553,7 @@ A container with one component per row of a list. Each item is built in a scope 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>
+<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="64" flow="column"/>
 ```
 
 | Attribute | Description |
@@ -2992,7 +2995,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`babystep`](#babystep) |  | `hide_title` | `babystep_dialog`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
 | `card_view` |  | `view`, `presenter` | `babystep`, `extrude`, `job_status`, `jobs`, `macros` | [card_view.xml](../assets/ui/components/common/card_view.xml) |
-| `chevron` |  |  | `customise_setting`, `job_ready`, `job_recent_row` | [chevron.xml](../assets/ui/components/common/chevron.xml) |
+| `chevron` |  |  | `customise_setting`, `file_browser_crumb`, `file_browser_row`, `job_ready`, `job_recent_row` | [chevron.xml](../assets/ui/components/common/chevron.xml) |
 | `chevron_button` |  |  | `settings_display`, `settings_wifi_network` | [chevron_button.xml](../assets/ui/components/common/chevron_button.xml) |
 | [`console`](#console) | `gcode_reference` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
 | `console_command_list` | `gcode_reference` |  | `console_command_list` | [console_command_list.xml](../assets/ui/components/console/console_command_list.xml) |
@@ -3043,11 +3046,12 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
 | [`file_browser`](#files) |  |  | `dashboard_files`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
+| `file_browser_picture` |  |  | `file_browser_row`, `file_browser_tile` | [file_browser_picture.xml](../assets/ui/components/file_browser/file_browser_picture.xml) |
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | `file_dialog` |  |  | `home` | [file_dialog.xml](../assets/ui/components/modals/file_dialog.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
-| `flex_pad` |  | `grow` | `dashboard_job_status`, `file_browser`, `file_dialog`, `hardware_test`, `move`, `notifications`, `temperature_tool` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
+| `flex_pad` |  | `grow` | `dashboard_job_status`, `file_dialog`, `hardware_test`, `move`, `notifications`, `temperature_tool` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
 | `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
 | `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |
@@ -3104,7 +3108,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `object_cancel_key` |  | `title_tag`, `current`, `cancelled` | `object_cancel` | [object_cancel_key.xml](../assets/ui/components/control/object_cancel/object_cancel_key.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
-| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `heightmap`, `settings_option`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
+| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `file_browser`, `heightmap`, `settings_option`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
 | `settings_button` |  | `label_tag`, `action`, `danger` | `settings_developer`, `settings_display`, `settings_system`, `settings_wifi` | [settings_button.xml](../assets/ui/components/settings/settings_button.xml) |
 | `settings_choice` |  | `title_tag`, `setting` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general` | [settings_choice.xml](../assets/ui/components/settings/settings_choice.xml) |
@@ -3135,7 +3139,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `temperature_heater_card` |  | `label_tag` | `temperature` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
 | `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
-| `thumbnail_box` |  | `src` | `dashboard_job_status`, `job_ready`, `job_recent_row` | [thumbnail_box.xml](../assets/ui/components/common/thumbnail_box.xml) |
+| `thumbnail_box` |  | `src` | `dashboard_job_status`, `file_browser_picture`, `job_ready`, `job_recent_row` | [thumbnail_box.xml](../assets/ui/components/common/thumbnail_box.xml) |
 | [`tools`](#tools) |  |  | `control` | [tools.xml](../assets/ui/components/control/tools/tools.xml) |
 | `tools_beds` |  | `compact` | `dashboard_tools`, `tools_list` | [tools_beds.xml](../assets/ui/components/control/tools/tools_beds.xml) |
 | `tools_current` |  |  | `tools` | [tools_current.xml](../assets/ui/components/control/tools/tools_current.xml) |

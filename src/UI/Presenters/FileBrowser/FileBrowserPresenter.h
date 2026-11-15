@@ -2,8 +2,10 @@
  * FileBrowserPresenter.h
  *
  * Behaviour for the file browser (assets/ui/components/file_browser/file_browser.xml): browse the jobs or macros
- * folder and sort it. Tapping a job or macro opens the shared file dialog (UI/Xml/Data/FilesSource.h), which asks
- * whether to start or run it, or delete it; the folder is listed again whenever the printer's files change.
+ * folder, up and down its folders, sort it, and show it as a list or as tiles. Each file says how long its job takes
+ * and the filament it uses once the printer has said, else its date and size (FilesSource::detail). Tapping a job or
+ * macro opens the shared file dialog (UI/Xml/Data/FilesSource.h), which asks whether to start or run it, or delete
+ * it; the folder is listed again whenever the printer's files change.
  *
  * The browser is shown in several places, each with its own folder and remembered settings, so each placement
  * registers a presenter of its own (see Presenters/Presenters.cpp) and names it: `<ds_view view="file_browser"
@@ -30,13 +32,25 @@ namespace UI
 	class FileRow : public Xml::Row
 	{
 	  public:
+		/** What a file's or folder's picture is, as `picture` publishes it */
+		enum class Picture : int32_t
+		{
+			FileIcon = 0,  // A file with no thumbnail (yet)
+			Thumbnail = 1, // A file's thumbnail
+			FolderIcon = 2 // A folder
+		};
+
+		/** Show the thumbnail at `path` ("" for none), or a folder (`folder`) */
+		void showPicture(bool folder, const std::string& path);
+
 		/** Declare the row's fields */
 		void fields(Xml::FieldVisitor& f) override;
 
 		Xml::StringSubject<128> name;	   // Shown name
-		Xml::StringSubject<24> date;	   // Modification date
+		Xml::StringSubject<64> detail;	   // Its job's time and filament, else its date and size
 		Xml::StringSubject<256> thumbnail; // Thumbnail path, or empty
 		Xml::IntSubject isFolder;		   // 1 for a folder
+		Xml::IntSubject picture;		   // What its picture is: a Picture
 	};
 
 	/** One folder of the open folder's path */
@@ -126,6 +140,12 @@ namespace UI
 		/** A thumbnail arrived: show it on its file */
 		void thumbnailReceived(const std::string& path);
 
+		/** A file's info arrived: show its job's time and filament */
+		void fileInfoReceived(const std::string& path);
+
+		/** The row showing the file at `path`, or nullptr if it isn't shown */
+		FileRow* rowOf(const std::string& path);
+
 		/** The base folder's path, e.g. "0:/gcodes". It reads the object model, so call it only on the UI's thread,
 		 * not from a reply's callback (see m_baseFolder). */
 		std::string baseFolderPath() const;
@@ -146,6 +166,7 @@ namespace UI
 		Xml::StringSubject<32> m_sortDate;		  // Date-order button text
 		Xml::StringSubject<32> m_sortSize;		  // Size-order button text
 		Xml::IntSubject m_tiles;				  // 1 when showing tiles
-		Xml::StringSubject<8> m_modeIcon;		  // Symbol for the other display mode
+		Xml::IntSubject m_inSubfolder;			  // 1 while a folder below the base folder is open
+		Xml::IntSubject m_empty;				  // 1 once the open folder is read and has nothing in it
 	};
 } // namespace UI

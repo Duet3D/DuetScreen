@@ -1,7 +1,9 @@
 <!--
-  Browse a folder of jobs or macros: sort buttons and display mode at the top, the folder's path, then its files as a
-  list or as tiles. Tapping a file asks whether to start it (or run it, for a macro) in the shared file dialog
-  (modals/file_dialog.xml).
+  Browse a folder of jobs or macros. Along the top: Up, to the folder above; the open folder's path, starting from the
+  jobs or macros folder, whose folders can be tapped to go back to them; the order (by name, date or size: the one in
+  use, tapped again, reverses it); a list or tiles; and reading the folder again. Under it, the folder's files and
+  folders as a list or as tiles, or a line saying it is empty. Tapping a folder opens it; tapping a file asks whether to
+  start it (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml).
 
   Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
   e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Presenters/Presenters.cpp).
@@ -13,50 +15,54 @@
 		<style name="bg_dark"/>
 		<style name="card"/>
 
-		<!-- Wraps where it is too narrow for every button, e.g. in a small widget -->
-		<lv_obj name="toolbar" width="100%" height="content" flex_flow="row_wrap"
+		<!-- Wraps where it is too narrow for everything, e.g. in a small widget -->
+		<lv_obj name="toolbar" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
 				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-			<ds_button name="sort_name" bind_text="presenter.sort_name" width="content" height="content">
-				<bind_state_if_eq subject="presenter.sort" state="checked" ref_value="0"/>
-				<action trigger="clicked" name="presenter.files.sort" arg="name"/>
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<ds_button name="up" icon="folder_up.png" width="48" height="40">
+				<bind_state_if_eq subject="presenter.in_subfolder" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="presenter.files.up"/>
 			</ds_button>
-			<ds_button name="sort_date" bind_text="presenter.sort_date" width="content" height="content">
-				<bind_state_if_eq subject="presenter.sort" state="checked" ref_value="1"/>
-				<action trigger="clicked" name="presenter.files.sort" arg="date"/>
-			</ds_button>
-			<ds_button name="sort_size" bind_text="presenter.sort_size" width="content" height="content">
-				<bind_state_if_eq subject="presenter.sort" state="checked" ref_value="2"/>
-				<action trigger="clicked" name="presenter.files.sort" arg="size"/>
-			</ds_button>
-			<flex_pad name="pad"/>
-			<ds_button name="display_mode" bind_text="presenter.mode_icon" width="content" height="content">
-				<bind_state_if_eq subject="presenter.tiles" state="checked" ref_value="1"/>
-				<action trigger="clicked" name="presenter.files.toggle_mode"/>
-			</ds_button>
-			<ds_button name="refresh" translation_tag="tr.file.refresh" width="content" height="content">
+			<!-- The path takes what room the buttons leave, and wraps within it -->
+			<ds_list name="path" list="presenter.crumbs" item="file_browser_crumb" width="1" height="content"
+					 flex_grow="1" style_min_width="120" flex_flow="row_wrap" style_pad_all="0" style_pad_row="4"
+					 style_pad_column="4" style_flex_main_place="start" style_flex_cross_place="center"
+					 style_flex_track_place="center"/>
+			<lv_obj name="sort">
+				<style name="setting_options"/>
+				<option_button name="sort_name" bind_text="presenter.sort_name" subject="presenter.sort" value="0"
+							   action="presenter.files.sort" arg="name"/>
+				<option_button name="sort_date" bind_text="presenter.sort_date" subject="presenter.sort" value="1"
+							   action="presenter.files.sort" arg="date"/>
+				<option_button name="sort_size" bind_text="presenter.sort_size" subject="presenter.sort" value="2"
+							   action="presenter.files.sort" arg="size"/>
+			</lv_obj>
+			<lv_obj name="display_mode">
+				<style name="setting_options"/>
+				<option_button name="list_mode" icon="view_list.png" subject="presenter.tiles" value="0"
+							   action="presenter.files.mode" arg="list" style_min_width="48"/>
+				<option_button name="tiles_mode" icon="view_grid.png" subject="presenter.tiles" value="1"
+							   action="presenter.files.mode" arg="tiles" style_min_width="48"/>
+			</lv_obj>
+			<ds_button name="refresh" icon="refresh.png" width="48" height="40">
 				<action trigger="clicked" name="presenter.files.refresh"/>
 			</ds_button>
 		</lv_obj>
 
-		<lv_obj name="list" width="100%" flex_grow="1" flex_flow="column">
-			<!-- The folder's path; folders above the open one can be tapped -->
-			<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-					style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-				<style name="bg_color_header"/>
-				<lv_label name="path_prefix" translation_tag="tr.file.header_prefix" width="content" height="content"/>
-				<ds_list name="path" list="presenter.crumbs" item="file_browser_crumb" height="content" flex_grow="1"
-						 flex_flow="row_wrap" style_flex_main_place="start" style_flex_cross_place="center"
-						 style_flex_track_place="start">
-					<style name="pad_tiny"/>
-				</ds_list>
-			</lv_obj>
-
-			<ds_list name="rows" list="presenter.files" item="file_browser_row" windowed="true" item_height="90"
-					 width="100%" height="100%" flex_grow="1" scroll_dir="ver">
+		<lv_obj name="list" width="100%" flex_grow="1" flex_flow="column" scrollable="false">
+			<style name="pad_zero"/>
+			<lv_label name="empty" translation_tag="tr.file.empty" width="100%" style_text_align="center"
+					  style_pad_ver="32">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.empty" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<ds_list name="rows" list="presenter.files" item="file_browser_row" windowed="true" item_height="64"
+					 width="100%" height="100%" flex_grow="1" scroll_dir="ver" style_pad_row="6">
 				<bind_flag_if_eq subject="presenter.tiles" flag="hidden" ref_value="1"/>
 			</ds_list>
-			<ds_list name="tiles" list="presenter.files" item="file_browser_tile" windowed="true" item_width="150" item_height="170"
-					 flow="row_wrap" width="100%" height="100%" flex_grow="1" scroll_dir="ver">
+			<ds_list name="tiles" list="presenter.files" item="file_browser_tile" windowed="true" item_width="150"
+					 item_height="170" flow="row_wrap" width="100%" height="100%" flex_grow="1" scroll_dir="ver">
 				<bind_flag_if_eq subject="presenter.tiles" flag="hidden" ref_value="0"/>
 			</ds_list>
 		</lv_obj>

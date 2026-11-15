@@ -117,7 +117,7 @@ namespace UI::Xml
 				 "rows whose `key` field is `value` are shown, e.g. one fan. Each item is given the list's `item.*` "
 				 "attributes.",
 			 .example =
-				 R"(<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="90" flow="column"/>)",
+				 R"(<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="64" flow="column"/>)",
 			 .attributes =
 				 {{"list",
 				   "The list shown (required), named like a subject: e.g. `presenter.files`, "

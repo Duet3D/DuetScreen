@@ -33,7 +33,7 @@ namespace UI::Xml
 		void fields(FieldVisitor& f) override;
 
 		StringSubject<128> name;	   // File name
-		StringSubject<64> detail;	   // How long it takes and how much filament, else its date
+		StringSubject<64> detail;	   // How long it takes and how much filament, else its date and size
 		StringSubject<256> thumbnail;  // Thumbnail path, or empty
 		std::string path;			   // The file's path, e.g. "0:/gcodes/benchy.gcode"; not shown
 	};
@@ -75,6 +75,11 @@ namespace UI::Xml
 		/** `name` as shown in a list of macros (`macro`) or jobs: a macro's "12_" ordering prefix is left out */
 		static std::string_view shownName(std::string_view name, bool macro);
 
+		/** What a list shows under a file's name: how long the job takes and the filament it uses, once the printer
+		 * has said, e.g. "2 h 40 min · 12.4 m"; else when it was changed and its size, e.g. "2025-03-18 18:21 ·
+		 * 1.2 MB". A folder's is when it was changed. */
+		static std::string detail(const OM::FileSystem::FileSystemItem& item);
+
 		/** List the jobs and macros again */
 		void refresh();
 
@@ -110,7 +115,7 @@ namespace UI::Xml
 		/** The printer sent the macros folder's files: list them in order */
 		void receiveMacros(OM::FileSystem::ItemList items);
 
-		/** Fill in `row` for the job `item`: its thumbnail, and what its file info says, else its date */
+		/** Fill in `row` for the job `item`: its thumbnail and its detail() */
 		static void showJob(RecentJobRow& row, const OM::FileSystem::FileSystemItem& item);
 
 		/** A file's info arrived: show its job's time and filament */

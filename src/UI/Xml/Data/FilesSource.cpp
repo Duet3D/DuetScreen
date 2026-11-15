@@ -24,10 +24,15 @@ namespace UI::Xml
 {
 	namespace
 	{
-		/** `date` as shown: "2025-03-18T18:21:58" becomes "2025-03-18 18:21:58" */
+		/** `date` as shown, to the minute: "2025-03-18T18:21:58" becomes "2025-03-18 18:21" */
 		std::string shownDate(std::string date)
 		{
 			std::replace(date.begin(), date.end(), 'T', ' ');
+			constexpr size_t TO_THE_MINUTE = 16; // "2025-03-18 18:21"
+			if (date.size() > TO_THE_MINUTE)
+			{
+				date.resize(TO_THE_MINUTE);
+			}
 			return date;
 		}
 
@@ -47,7 +52,7 @@ namespace UI::Xml
 		f.field("detail",
 				detail,
 				"How long it should take and the filament it uses, e.g. \"2 h 40 min · 12.4 m\", once the printer has "
-				"said; until then, its date");
+				"said; until then, its date and size, e.g. \"2025-03-18 18:21 · 1.2 MB\"");
 		f.field("thumbnail", thumbnail, "Thumbnail image path, or empty if there is none (yet)");
 	}
 
@@ -234,21 +239,28 @@ namespace UI::Xml
 		m_macroCount.set(static_cast<int32_t>(m_macros.size()));
 	}
 
+	std::string FilesSource::detail(const OM::FileSystem::FileSystemItem& item)
+	{
+		if (item.GetType() == OM::FileSystem::FileSystemItemType::folder)
+		{
+			return shownDate(item.GetDate());
+		}
+		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(item.GetPath());
+		const uint32_t seconds = info ? std::max(info->printTime, info->simulatedTime) : 0;
+		if (seconds == 0)
+		{
+			return _("file.date_and_size", shownDate(item.GetDate()), item.GetReadableSize());
+		}
+		const float filament = std::accumulate(info->filament.begin(), info->filament.end(), 0.0f); // mm
+		return filament > 0 ? _("file.time_and_filament", JobSource::duration(seconds), filament / 1000.0f)
+							: JobSource::duration(seconds);
+	}
+
 	void FilesSource::showJob(RecentJobRow& row, const OM::FileSystem::FileSystemItem& item)
 	{
 		const std::string path = item.GetPath();
 		row.thumbnail.set(IsThumbnailCached(path) ? GetThumbnailPath(path).string() : std::string());
-
-		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(path);
-		const uint32_t seconds = info ? std::max(info->printTime, info->simulatedTime) : 0;
-		if (seconds == 0)
-		{
-			row.detail.set(shownDate(item.GetDate()));
-			return;
-		}
-		const float filament = std::accumulate(info->filament.begin(), info->filament.end(), 0.0f); // mm
-		row.detail.set(filament > 0 ? _("file.time_and_filament", JobSource::duration(seconds), filament / 1000.0f)
-									: JobSource::duration(seconds));
+		row.detail.set(detail(item));
 	}
 
 	void FilesSource::askStart(const OM::FileSystem::FileSystemItem& item)

@@ -26,13 +26,6 @@ namespace UI
 																	  : OM::Directories::DirectoryType::GCODES;
 		}
 
-		/** `date` as shown: "2025-03-18T18:21:58" becomes "2025-03-18 18:21:58" */
-		std::string shownDate(std::string date)
-		{
-			std::replace(date.begin(), date.end(), 'T', ' ');
-			return date;
-		}
-
 		/** A sort button's text: its name, with an arrow for the direction if it is the order in use */
 		std::string sortText(const char* key, bool inUse, bool descending)
 		{
@@ -47,9 +40,22 @@ namespace UI
 	void FileRow::fields(Xml::FieldVisitor& f)
 	{
 		f.field("name", name, "Shown name; a macro's \"12_\" ordering prefix is left out");
-		f.field("date", date, "Modification date, e.g. \"2025-03-18 18:21:58\"");
+		f.field("detail",
+				detail,
+				"Under its name: its job's time and filament once the printer has said, e.g. \"2 h 40 min · 12.4 m\"; "
+				"else its date and size, e.g. \"2025-03-18 18:21 · 1.2 MB\"; a folder's date");
 		f.field("thumbnail", thumbnail, "Thumbnail image path, or empty if there is none (yet)");
 		f.field("is_folder", isFolder, "1 for a folder, else 0");
+		f.field(
+			"picture", picture, "What its picture is: 0 a file icon (no thumbnail yet), 1 its thumbnail, 2 a folder");
+	}
+
+	void FileRow::showPicture(bool folder, const std::string& path)
+	{
+		thumbnail.set(folder ? std::string() : path);
+		picture.set(static_cast<int32_t>(folder			? Picture::FolderIcon
+										 : path.empty() ? Picture::FileIcon
+														: Picture::Thumbnail));
 	}
 
 	void CrumbRow::fields(Xml::FieldVisitor& f)
@@ -99,10 +105,23 @@ namespace UI
 				   StorageHelper::setData(m_settings.sortDescending, m_sortDescending);
 				   showFiles();
 			   });
-		action("files.toggle_mode",
-			   "Show tiles instead of a list, or the other way round. Remembered.",
+		action("files.up",
+			   "Open the folder above the open one",
 			   [this](const Xml::ActionArgs&)
-			   { setDisplayMode(m_tiles.get() != 0 ? DisplayMode::List : DisplayMode::Tile); });
+			   {
+				   if (m_folder.empty())
+				   {
+					   return;
+				   }
+				   // "parts/brackets/" goes up to "parts/"
+				   const size_t slash = m_folder.find_last_of('/', m_folder.size() - 2);
+				   const std::string above = slash == std::string::npos ? std::string() : m_folder.substr(0, slash + 1);
+				   openFolder(above);
+			   });
+		action("files.mode",
+			   "Show the files as a `list` or as `tiles`, as `arg` says. Remembered.",
+			   [this](const Xml::ActionArgs& args)
+			   { setDisplayMode(args.arg == "tiles" ? DisplayMode::Tile : DisplayMode::List); });
 		action("files.refresh", "Read the folder again", [this](const Xml::ActionArgs&) { requestFiles(); });
 	}
 
@@ -117,12 +136,15 @@ namespace UI
 		f.field("sort_date", m_sortDate, "As `sort_name`, for the date order");
 		f.field("sort_size", m_sortSize, "As `sort_name`, for the size order");
 		f.field("tiles", m_tiles, "1 when files are shown as tiles, 0 as a list");
-		f.field("mode_icon", m_modeIcon, "Symbol for the other way of showing files");
+		f.field(
+			"in_subfolder", m_inSubfolder, "1 while a folder below the base folder is open (so there is one above)");
+		f.field("empty", m_empty, "1 once the open folder has been read and has nothing in it, else 0");
 	}
 
 	void FileBrowserPresenter::onInit()
 	{
 		registerEventListener<EventType::ThumbnailData>(this, &FileBrowserPresenter::thumbnailReceived);
+		registerEventListener<EventType::FileInfo>(this, &FileBrowserPresenter::fileInfoReceived);
 		// A different printer has different folders
 		registerEventListener<EventType::PrinterUniqueId>([this]() { openFolder(""); });
 		// The base folder can arrive after the browser opens; it is noted here, on the UI's thread
@@ -161,6 +183,7 @@ namespace UI
 		UI_LOCK();
 		m_items.clear();
 		m_files.clear();
+		m_empty.set(0);
 	}
 
 	void FileBrowserPresenter::openFolder(std::string_view folder)
@@ -170,6 +193,7 @@ namespace UI
 		{
 			m_folder += '/';
 		}
+		m_inSubfolder.set(m_folder.empty() ? 0 : 1);
 		m_baseFolder = baseFolderPath();
 		showCrumbs();
 		requestFiles();
@@ -203,6 +227,7 @@ namespace UI
 		UI_LOCK();
 		std::erase(items, nullptr);
 		m_items = std::move(items);
+		m_empty.set(m_items.empty() ? 1 : 0);
 		showCrumbs(); // The path of the listing shown
 		showFiles();
 	}
@@ -220,22 +245,22 @@ namespace UI
 						 const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
 						 row.name.set(
 							 Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
-						 row.date.set(shownDate(item.GetDate()));
+						 row.detail.set(Xml::FilesSource::detail(item));
 						 row.isFolder.set(isFolder ? 1 : 0);
-						 row.thumbnail.set(!isFolder && IsThumbnailCached(item.GetPath())
-											   ? GetThumbnailPath(item.GetPath()).string()
-											   : std::string());
+						 row.showPicture(isFolder,
+										 !isFolder && IsThumbnailCached(item.GetPath())
+											 ? GetThumbnailPath(item.GetPath()).string()
+											 : std::string());
 					 });
 	}
 
 	void FileBrowserPresenter::showCrumbs()
 	{
-		// The base folder, e.g. "0:/gcodes", then each folder below it
-		const std::string& base = m_baseFolder;
+		// The base folder, named for what it holds ("Jobs", not "0:/gcodes"), then each folder below it
 		std::vector<std::pair<std::string, std::string>> crumbs; // Name and path below the base folder
-		if (!base.empty())
+		if (!m_baseFolder.empty())
 		{
-			crumbs.emplace_back(base, "");
+			crumbs.emplace_back(_(m_settings.folder == BaseFolder::MACROS ? "file.macros" : "file.jobs"), "");
 			std::string path;
 			size_t start = 0;
 			while (start < m_folder.size())
@@ -271,7 +296,6 @@ namespace UI
 	{
 		StorageHelper::setData(m_settings.displayMode, mode);
 		m_tiles.set(mode == DisplayMode::Tile ? 1 : 0);
-		m_modeIcon.set(mode == DisplayMode::Tile ? LV_SYMBOL_LIST : LV_SYMBOL_IMAGE);
 	}
 
 	void FileBrowserPresenter::open(const FileRow& row)
@@ -313,14 +337,32 @@ namespace UI
 	{
 		ZoneScoped;
 		UI_LOCK();
+		if (FileRow* row = rowOf(path))
+		{
+			row->showPicture(false, GetThumbnailPath(path).string());
+		}
+	}
+
+	void FileBrowserPresenter::fileInfoReceived(const std::string& path)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (FileRow* row = rowOf(path))
+		{
+			row->detail.set(Xml::FilesSource::detail(*m_items[static_cast<size_t>(row->index.get())]));
+		}
+	}
+
+	FileRow* FileBrowserPresenter::rowOf(const std::string& path)
+	{
 		for (size_t i = 0; i < m_items.size() && i < m_files.size(); i++)
 		{
 			if (m_items[i]->GetPath() == path)
 			{
-				m_files[i].thumbnail.set(GetThumbnailPath(path).string());
-				break;
+				return &m_files[i];
 			}
 		}
+		return nullptr;
 	}
 
 	std::string FileBrowserPresenter::baseFolderPath() const

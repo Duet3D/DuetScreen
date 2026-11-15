@@ -1,0 +1,23 @@
+<!--
+  A file's or folder's picture in the file browser, as a row (file_browser_row.xml) or a tile (file_browser_tile.xml)
+  shows it: a file's thumbnail, or a file icon while it has none; a folder icon, in the accent colour, for a folder.
+  Give it a size; it lets taps through to what it is in.
+
+  Fields:   a files row: row.picture (0 file icon, 1 thumbnail, 2 folder), row.thumbnail
+            (src/UI/Presenters/FileBrowser/FileBrowserPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" scrollable="false" clickable="false">
+		<style name="pad_zero"/>
+		<ds_icon name="file_icon" icon="file.png" width="100%" height="100%" clickable="false">
+			<bind_flag_if_not_eq subject="row.picture" flag="hidden" ref_value="0"/>
+		</ds_icon>
+		<thumbnail_box name="thumbnail" src="row.thumbnail" width="100%" height="100%">
+			<bind_flag_if_not_eq subject="row.picture" flag="hidden" ref_value="1"/>
+		</thumbnail_box>
+		<ds_icon name="folder_icon" icon="folder.png" width="100%" height="100%" clickable="false">
+			<style name="folder_icon"/>
+			<bind_flag_if_not_eq subject="row.picture" flag="hidden" ref_value="2"/>
+		</ds_icon>
+	</view>
+</component>

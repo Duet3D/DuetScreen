@@ -44,6 +44,7 @@
 			<xs:enumeration value="presenter.controls_shown"/>
 			<xs:enumeration value="presenter.crumbs"/>
 			<xs:enumeration value="presenter.current_object"/>
+			<xs:enumeration value="presenter.empty"/>
 			<xs:enumeration value="presenter.exit_shown"/>
 			<xs:enumeration value="presenter.failed"/>
 			<xs:enumeration value="presenter.file"/>
@@ -55,13 +56,13 @@
 			<xs:enumeration value="presenter.has_saved"/>
 			<xs:enumeration value="presenter.header_shown"/>
 			<xs:enumeration value="presenter.heater"/>
+			<xs:enumeration value="presenter.in_subfolder"/>
 			<xs:enumeration value="presenter.ip"/>
 			<xs:enumeration value="presenter.levelling_usable"/>
 			<xs:enumeration value="presenter.load_open"/>
 			<xs:enumeration value="presenter.map_options"/>
 			<xs:enumeration value="presenter.message"/>
 			<xs:enumeration value="presenter.mode"/>
-			<xs:enumeration value="presenter.mode_icon"/>
 			<xs:enumeration value="presenter.network.connected"/>
 			<xs:enumeration value="presenter.network.known"/>
 			<xs:enumeration value="presenter.network.open"/>
@@ -151,7 +152,6 @@
 			<xs:enumeration value="row.connected"/>
 			<xs:enumeration value="row.control"/>
 			<xs:enumeration value="row.current"/>
-			<xs:enumeration value="row.date"/>
 			<xs:enumeration value="row.description"/>
 			<xs:enumeration value="row.detail"/>
 			<xs:enumeration value="row.filament_loaded"/>
@@ -179,6 +179,7 @@
 			<xs:enumeration value="row.on"/>
 			<xs:enumeration value="row.output"/>
 			<xs:enumeration value="row.passed"/>
+			<xs:enumeration value="row.picture"/>
 			<xs:enumeration value="row.position"/>
 			<xs:enumeration value="row.presets"/>
 			<xs:enumeration value="row.secured"/>
@@ -550,10 +551,11 @@
 			<xs:enumeration value="presenter.dialog.close"/>
 			<xs:enumeration value="presenter.dialog.outside"/>
 			<xs:enumeration value="presenter.files.crumb"/>
+			<xs:enumeration value="presenter.files.mode"/>
 			<xs:enumeration value="presenter.files.open"/>
 			<xs:enumeration value="presenter.files.refresh"/>
 			<xs:enumeration value="presenter.files.sort"/>
-			<xs:enumeration value="presenter.files.toggle_mode"/>
+			<xs:enumeration value="presenter.files.up"/>
 			<xs:enumeration value="presenter.hardware_test.buzzer_heard"/>
 			<xs:enumeration value="presenter.hardware_test.colour_tapped"/>
 			<xs:enumeration value="presenter.hardware_test.exit"/>
@@ -760,6 +762,7 @@
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
 			<xs:enumeration value="file_browser_crumb"/>
+			<xs:enumeration value="file_browser_picture"/>
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="file_dialog"/>
@@ -927,6 +930,7 @@
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
 			<xs:enumeration value="file_browser_crumb"/>
+			<xs:enumeration value="file_browser_picture"/>
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="file_dialog"/>
@@ -1129,6 +1133,7 @@
 			<xs:enumeration value="fans"/>
 			<xs:enumeration value="file_browser"/>
 			<xs:enumeration value="file_browser_crumb"/>
+			<xs:enumeration value="file_browser_picture"/>
 			<xs:enumeration value="file_browser_row"/>
 			<xs:enumeration value="file_browser_tile"/>
 			<xs:enumeration value="file_dialog"/>
@@ -1617,16 +1622,15 @@
 			<xs:enumeration value="tr.filament.select_tool"/>
 			<xs:enumeration value="tr.filament.select_tool_list_header"/>
 			<xs:enumeration value="tr.filament.unload"/>
-			<xs:enumeration value="tr.file.crumb_separator"/>
+			<xs:enumeration value="tr.file.date_and_size"/>
 			<xs:enumeration value="tr.file.delete"/>
 			<xs:enumeration value="tr.file.delete_message"/>
 			<xs:enumeration value="tr.file.delete_title"/>
+			<xs:enumeration value="tr.file.empty"/>
 			<xs:enumeration value="tr.file.file"/>
 			<xs:enumeration value="tr.file.folder"/>
-			<xs:enumeration value="tr.file.header_prefix"/>
 			<xs:enumeration value="tr.file.jobs"/>
 			<xs:enumeration value="tr.file.macros"/>
-			<xs:enumeration value="tr.file.refresh"/>
 			<xs:enumeration value="tr.file.run_macro_message"/>
 			<xs:enumeration value="tr.file.run_macro_title"/>
 			<xs:enumeration value="tr.file.running_another"/>
@@ -11178,6 +11182,14 @@
 	</xs:element>
 	<xs:element name="file_browser_crumb">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser_crumb.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="file_browser_picture">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/file_browser/file_browser_picture.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
