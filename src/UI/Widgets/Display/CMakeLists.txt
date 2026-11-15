@@ -3,6 +3,7 @@ target_sources(
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/Bar.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Canvas.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/CanvasTitle.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsArc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsBar.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/DsBarMarker.cpp

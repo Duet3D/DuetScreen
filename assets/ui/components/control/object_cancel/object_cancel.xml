@@ -61,14 +61,15 @@
 			</lv_obj>
 		</lv_obj>
 
-		<lv_obj name="side" width="34%" height="100%" flex_flow="column" scrollable="false" style_min_width="200">
+		<lv_obj name="side" width="34%" height="100%" flex_flow="column" scrollable="false" style_min_width="220">
 			<style name="card"/>
 			<style name="pad_gap"/>
 			<lv_obj name="list_area" width="100%" flex_grow="1" flex_flow="column" scroll_dir="ver" style_pad_all="0">
-				<ds_list name="list" list="presenter.objects" item="object_cancel_row">
-					<style name="setting_list"/>
-					<style name="setting_group"/>
-				</ds_list>
+				<ds_setting_group name="objects_group" title_tag="tr.object_cancel.objects" width="100%">
+					<ds_list name="list" list="presenter.objects" item="object_cancel_row">
+						<style name="setting_list"/>
+					</ds_list>
+				</ds_setting_group>
 			</lv_obj>
 			<ds_button name="cancel" bind_text="presenter.chosen.cancel_text" long_mode="wrap" width="100%" height="content"
 					   style_min_height="50">

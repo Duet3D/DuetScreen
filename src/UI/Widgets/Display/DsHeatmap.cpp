@@ -3,6 +3,7 @@
  */
 
 #include "DsHeatmap.h"
+#include "CanvasTitle.h"
 #include "UI/Widgets/WidgetSupport.h"
 #include "UI/Widgets/Widgets.h"
 #include "UI/Xml/Binding/Surface.h"
@@ -33,14 +34,23 @@ namespace UI::Xml
 			{.name = "ds_heatmap",
 			 .extends = "lv_obj",
 			 .description = "A colour map of a surface, such as a bed's height map, with X and Y scales, a "
-							"grid, a title, and the colour scale beside it",
+							"grid, a title (with a detail, as a `<ds_plot>`'s), and the colour scale beside it",
 			 .example =
-				 R"(<ds_heatmap bind_surface="presenter.surface" bind_title="presenter.title" resolution="200" width="400" height="300"/>)",
+				 R"(<ds_heatmap bind_surface="presenter.surface" title_tag="tr.heightmap.mesh" title_style="text_emphasis"
+			bind_detail="presenter.file" resolution="200" width="400" height="300"/>)",
 			 .attributes =
-				 {{"bind_surface", "The surface subject to show; redrawn whenever it changes", AttributeKind::Subject},
-				  {"bind_title", "Follow a text subject for the title shown above the map", AttributeKind::Subject},
-				  {"resolution", "Pixels the map is drawn with along each side, scaled to fit (default 200)"}},
-			 .exampleSubjects = {{"presenter.title", "string", "Heightmap: heightmap.csv"}}},
+				 []
+			 {
+				 auto attributes = CanvasTitle::attributes();
+				 attributes.insert(
+					 attributes.end(),
+					 {{"bind_surface",
+					   "The surface subject to show; redrawn whenever it changes",
+					   AttributeKind::Subject},
+					  {"resolution", "Pixels the map is drawn with along each side, scaled to fit (default 200)"}});
+				 return attributes;
+			 }(),
+			 .exampleSubjects = {{"presenter.file", "string", "heightmap.csv"}}},
 			xmlCreate,
 			xmlApply);
 	}
@@ -93,10 +103,7 @@ namespace UI::Xml
 			const auto pixels = static_cast<uint32_t>(lv_xml_atoi(resolution));
 			heatmap.setResolution(pixels, pixels);
 		}
-		if (lv_subject_t* subject = findSubject(state, attrs, "bind_title"))
-		{
-			lv_subject_add_observer_obj(subject, titleObserverCb, root, &heatmap);
-		}
+		CanvasTitle::apply(state, attrs, heatmap.getCanvas(), "ds_heatmap");
 		if (lv_subject_t* subject = findSubject(state, attrs, "bind_surface"))
 		{
 			lv_subject_add_observer_obj(subject, surfaceObserverCb, root, &heatmap);
@@ -112,10 +119,5 @@ namespace UI::Xml
 		}
 		auto& heatmap = *static_cast<DsHeatmap*>(lv_observer_get_user_data(observer));
 		heatmap.show(*static_cast<const Surface*>(lv_subject_get_pointer(subject)));
-	}
-
-	void DsHeatmap::titleObserverCb(lv_observer_t* observer, lv_subject_t* subject)
-	{
-		static_cast<DsHeatmap*>(lv_observer_get_user_data(observer))->setTitle(lv_subject_get_string(subject));
 	}
 } // namespace UI::Xml

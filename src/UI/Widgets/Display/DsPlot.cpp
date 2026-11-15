@@ -3,6 +3,7 @@
  */
 
 #include "DsPlot.h"
+#include "CanvasTitle.h"
 #include "UI/Widgets/Display/DsPlotLayer.h"
 #include "UI/Widgets/Display/DsPlotRect.h"
 #include "UI/Widgets/WidgetSupport.h"
@@ -50,21 +51,23 @@ namespace UI::Xml
 		<ds_list list="presenter.objects" item="object_cancel_outline" width="100%" height="100%"/>
 	</ds_plot_layer>
 </ds_plot>)",
-			 .attributes = {{"title", "The title above the area, if there is no `title_tag`"},
-							{"title_tag", "Translation key for the title", AttributeKind::Translation},
-							{"bind_title", "Follow a text subject for the title", AttributeKind::Subject},
-							{"title_style", "A theme style for the title, e.g. `text_emphasis`", AttributeKind::Style},
-							{"bind_detail", "Follow a text subject shown after the title", AttributeKind::Subject},
-							{"x_min", "Left of the span (default 0)"},
-							{"x_max", "Right of the span (default 100)"},
-							{"y_min", "Bottom of the span (default 0)"},
-							{"y_max", "Top of the span (default 100)"},
-							{"bind_x_min", "Follow an int subject for `x_min`", AttributeKind::Subject},
-							{"bind_x_max", "Follow an int subject for `x_max`", AttributeKind::Subject},
-							{"bind_y_min", "Follow an int subject for `y_min`", AttributeKind::Subject},
-							{"bind_y_max", "Follow an int subject for `y_max`", AttributeKind::Subject},
-							{"resolution",
-							 "Pixels the grid is drawn with along each side, scaled to fit (default 200)"}},
+			 .attributes =
+				 [] // The title's, as every canvas widget takes them, then the span's
+			 {
+				 auto attributes = CanvasTitle::attributes();
+				 attributes.insert(
+					 attributes.end(),
+					 {{"x_min", "Left of the span (default 0)"},
+					  {"x_max", "Right of the span (default 100)"},
+					  {"y_min", "Bottom of the span (default 0)"},
+					  {"y_max", "Top of the span (default 100)"},
+					  {"bind_x_min", "Follow an int subject for `x_min`", AttributeKind::Subject},
+					  {"bind_x_max", "Follow an int subject for `x_max`", AttributeKind::Subject},
+					  {"bind_y_min", "Follow an int subject for `y_min`", AttributeKind::Subject},
+					  {"bind_y_max", "Follow an int subject for `y_max`", AttributeKind::Subject},
+					  {"resolution", "Pixels the grid is drawn with along each side, scaled to fit (default 200)"}});
+				 return attributes;
+			 }(),
 			 .exampleSubjects = {{"presenter.current", "string", "gear"},
 								 {"presenter.x_min", "int", "0"},
 								 {"presenter.x_max", "int", "300"},
@@ -117,33 +120,7 @@ namespace UI::Xml
 		lv_obj_t* root = itemOf(state);
 		auto& plot = static_cast<DsPlot&>(*LvObj::fromPtr(root));
 
-		if (const char* tag = lv_xml_get_value_of(attrs, "title_tag"))
-		{
-			plot.setTitle(Xml::Translations::translate(tag));
-		}
-		else if (const char* title = lv_xml_get_value_of(attrs, "title"))
-		{
-			plot.setTitle(title);
-		}
-		if (lv_subject_t* subject = findSubject(state, attrs, "bind_title"))
-		{
-			lv_subject_add_observer_obj(subject, titleObserverCb, root, &plot);
-		}
-		if (const char* styleName = lv_xml_get_value_of(attrs, "title_style"))
-		{
-			if (lv_xml_style_t* style = lv_xml_get_style_by_name(&state->scope, styleName))
-			{
-				plot.getTitle().addStyle(lv_xml_style_get_lv_style(style));
-			}
-			else
-			{
-				LOG_WARN("ds_plot title_style=\"{:s}\": no such style", styleName);
-			}
-		}
-		if (lv_subject_t* subject = findSubject(state, attrs, "bind_detail"))
-		{
-			lv_subject_add_observer_obj(subject, detailObserverCb, root, &plot);
-		}
+		CanvasTitle::apply(state, attrs, plot, "ds_plot");
 		if (const char* resolution = lv_xml_get_value_of(attrs, "resolution"))
 		{
 			const auto pixels = static_cast<uint32_t>(lv_xml_atoi(resolution));
@@ -181,16 +158,6 @@ namespace UI::Xml
 	{
 		*static_cast<int32_t*>(lv_observer_get_user_data(observer)) = lv_subject_get_int(subject);
 		static_cast<DsPlot&>(*LvObj::fromPtr(lv_observer_get_target_obj(observer))).applyRange();
-	}
-
-	void DsPlot::titleObserverCb(lv_observer_t* observer, lv_subject_t* subject)
-	{
-		static_cast<DsPlot*>(lv_observer_get_user_data(observer))->setTitle(lv_subject_get_string(subject));
-	}
-
-	void DsPlot::detailObserverCb(lv_observer_t* observer, lv_subject_t* subject)
-	{
-		static_cast<DsPlot*>(lv_observer_get_user_data(observer))->detail().setText(lv_subject_get_string(subject));
 	}
 
 	void DsPlot::eventCb(lv_event_t* e)
@@ -245,23 +212,5 @@ namespace UI::Xml
 				},
 				nullptr);
 		}
-	}
-
-	LvLabel& DsPlot::detail()
-	{
-		if (m_detail == nullptr)
-		{
-			auto& header = getHeader();
-			header.setFlexFlow(LV_FLEX_FLOW_ROW);
-			header.setFlexAlign(LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-			m_detail = std::make_unique<LvLabel>("detail", header);
-			// One line taking what room the title leaves, scrolling by if it is longer: a long name, such as an
-			// object's, mustn't wrap onto the area below
-			header.setWidth(LV_PCT(100));
-			m_detail->setSize(0, LV_SIZE_CONTENT);
-			m_detail->setFlexGrow(1);
-			m_detail->setLongMode(LV_LABEL_LONG_MODE_SCROLL_CIRCULAR);
-		}
-		return *m_detail;
 	}
 } // namespace UI::Xml

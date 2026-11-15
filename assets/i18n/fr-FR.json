@@ -163,7 +163,6 @@
       "not_supported": "Carte de hauteur non supportée en mode {:s}",
       "num_points": "{:d}",
       "std_dev": "{:g} {:s}",
-      "title": "Carte de hauteur : {:s}",
       "unload": "Décharger",
       "points": "Points",
       "area_title": "Surface",
@@ -183,7 +182,9 @@
       "level": "Niveler",
       "scale": "Échelle de couleurs",
       "scale_hint": "Fixe : ±0,25 mm. Auto : la plage du maillage",
-      "no_maps": "Aucun maillage enregistré : palpez le plateau pour en créer un"
+      "no_maps": "Aucun maillage enregistré : palpez le plateau pour en créer un",
+      "mesh": "Maillage :",
+      "no_mesh": "Aucun"
     },
     "object_cancel": {
       "title": "Annulation d'objet",
@@ -200,7 +201,8 @@
       "confirm_cancel_title": "Annuler cet objet ?",
       "confirm_cancel_text": "L'imprimante ignore '{:s}' à partir de maintenant. Le reste de la tâche continue.",
       "confirm_resume_title": "Reprendre cet objet ?",
-      "confirm_resume_text": "L'imprimante imprime de nouveau '{:s}' à partir de la couche actuelle. Les couches ignorées restent manquantes."
+      "confirm_resume_text": "L'imprimante imprime de nouveau '{:s}' à partir de la couche actuelle. Les couches ignorées restent manquantes.",
+      "objects": "Objets"
     },
     "message": {
       "connected": "Connecté au Duet",

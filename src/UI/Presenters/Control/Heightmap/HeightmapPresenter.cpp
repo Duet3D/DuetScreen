@@ -68,7 +68,7 @@ namespace UI
 	void HeightmapPresenter::fields(Xml::FieldVisitor& f)
 	{
 		f.field("surface", m_surface, "The height map shown, sampled for <ds_heatmap>");
-		f.field("title", m_title, "E.g. \"Heightmap: heightmap.csv\"");
+		f.field("file", m_file, "The file of the mesh shown, e.g. \"heightmap.csv\", or \"None\"");
 		f.list("maps", m_maps, "The height map files");
 		f.field("has_maps", m_hasMaps, "1 if there are height map files, else 0");
 		f.field("stats.points", m_points, "Number of points, e.g. \"121\"");
@@ -201,7 +201,7 @@ namespace UI
 		UI_LOCK();
 		m_xRange = xRange;
 		m_yRange = yRange;
-		m_title.set(_("heightmap.title", map->GetFileName()));
+		m_file.set(map->GetFileName());
 		m_surface.set(std::move(values));
 		showStats(static_cast<int>(map->GetPointCount()),
 				  static_cast<float>(map->GetArea()),
@@ -230,7 +230,7 @@ namespace UI
 
 	void HeightmapPresenter::clear()
 	{
-		m_title.set(_("heightmap.title", ""));
+		m_file.set(_("heightmap.no_mesh"));
 		m_surface.clear();
 		showStats(0, 0, 0, 0, 0, 0);
 	}

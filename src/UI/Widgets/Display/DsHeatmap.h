@@ -39,8 +39,5 @@ namespace UI::Xml
 
 		/** `bind_surface` observer: draw the surface */
 		static void surfaceObserverCb(lv_observer_t* observer, lv_subject_t* subject);
-
-		/** `bind_title` observer: show the title */
-		static void titleObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 	};
 } // namespace UI::Xml

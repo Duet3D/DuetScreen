@@ -163,7 +163,6 @@
       "not_supported": "Höhenkarte wird im {:s}-Modus nicht unterstützt",
       "num_points": "{:d}",
       "std_dev": "{:g} {:s}",
-      "title": "Höhenkarte: {:s}",
       "unload": "Entladen",
       "points": "Punkte",
       "area_title": "Fläche",
@@ -183,7 +182,9 @@
       "level": "Ausrichten",
       "scale": "Farbskala",
       "scale_hint": "Fest: ±0,25 mm. Auto: der eigene Bereich des Netzes",
-      "no_maps": "Noch keine gespeicherten Netze: Bett abtasten, um eins zu erstellen"
+      "no_maps": "Noch keine gespeicherten Netze: Bett abtasten, um eins zu erstellen",
+      "mesh": "Netz:",
+      "no_mesh": "Keines"
     },
     "object_cancel": {
       "title": "Objekt abbrechen",
@@ -200,7 +201,8 @@
       "confirm_cancel_title": "Dieses Objekt abbrechen?",
       "confirm_cancel_text": "Der Drucker überspringt '{:s}' ab jetzt. Der Rest des Auftrags läuft weiter.",
       "confirm_resume_title": "Dieses Objekt fortsetzen?",
-      "confirm_resume_text": "Der Drucker druckt '{:s}' ab der aktuellen Schicht wieder. Die übersprungenen Schichten fehlen weiterhin."
+      "confirm_resume_text": "Der Drucker druckt '{:s}' ab der aktuellen Schicht wieder. Die übersprungenen Schichten fehlen weiterhin.",
+      "objects": "Objekte"
     },
     "message": {
       "connected": "Verbunden mit Duet",

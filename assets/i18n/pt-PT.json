@@ -163,7 +163,6 @@
       "not_supported": "Mapa de altura não suportado no modo {:s}",
       "num_points": "{:d}",
       "std_dev": "{:g} {:s}",
-      "title": "Mapa de altura: {:s}",
       "unload": "Descarregar",
       "points": "Pontos",
       "area_title": "Área",
@@ -183,7 +182,9 @@
       "level": "Nivelar",
       "scale": "Escala de cores",
       "scale_hint": "Fixa: ±0,25 mm. Auto: o intervalo da própria malha",
-      "no_maps": "Ainda não há malhas guardadas: sonde a mesa para criar uma"
+      "no_maps": "Ainda não há malhas guardadas: sonde a mesa para criar uma",
+      "mesh": "Malha:",
+      "no_mesh": "Nenhuma"
     },
     "object_cancel": {
       "title": "Cancelar objeto",
@@ -200,7 +201,8 @@
       "confirm_cancel_title": "Cancelar este objeto?",
       "confirm_cancel_text": "A impressora salta '{:s}' a partir de agora. O resto do trabalho continua.",
       "confirm_resume_title": "Retomar este objeto?",
-      "confirm_resume_text": "A impressora volta a imprimir '{:s}' a partir da camada atual. As camadas saltadas continuam em falta."
+      "confirm_resume_text": "A impressora volta a imprimir '{:s}' a partir da camada atual. As camadas saltadas continuam em falta.",
+      "objects": "Objetos"
     },
     "message": {
       "connected": "Conectado ao Duet",

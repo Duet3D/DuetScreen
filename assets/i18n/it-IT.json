@@ -163,7 +163,6 @@
       "not_supported": "Mappa di altezza non supportata in modalità {:s}",
       "num_points": "{:d}",
       "std_dev": "{:g} {:s}",
-      "title": "Mappa di altezza: {:s}",
       "unload": "Scarica",
       "points": "Punti",
       "area_title": "Area",
@@ -183,7 +182,9 @@
       "level": "Livella",
       "scale": "Scala colori",
       "scale_hint": "Fissa: ±0,25 mm. Auto: l'intervallo della mesh",
-      "no_maps": "Nessuna mesh salvata: tasta il piano per crearne una"
+      "no_maps": "Nessuna mesh salvata: tasta il piano per crearne una",
+      "mesh": "Mesh:",
+      "no_mesh": "Nessuna"
     },
     "object_cancel": {
       "title": "Annulla oggetto",
@@ -200,7 +201,8 @@
       "confirm_cancel_title": "Annullare questo oggetto?",
       "confirm_cancel_text": "La stampante salta '{:s}' da ora in poi. Il resto del lavoro prosegue.",
       "confirm_resume_title": "Riprendere questo oggetto?",
-      "confirm_resume_text": "La stampante stampa di nuovo '{:s}' dallo strato attuale. Gli strati saltati restano mancanti."
+      "confirm_resume_text": "La stampante stampa di nuovo '{:s}' dallo strato attuale. Gli strati saltati restano mancanti.",
+      "objects": "Oggetti"
     },
     "message": {
       "connected": "Connesso al Duet",

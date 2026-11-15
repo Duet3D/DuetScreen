@@ -51,6 +51,9 @@ namespace UI
 		LvLabel& getTitle() { return m_title; }
 		void setTitle(std::string_view title);
 
+		/** Show `detail` after the title, on the same line, scrolling by if it is longer than the room left */
+		void setDetail(std::string_view detail);
+
 		void showTitle(const bool show);
 		void showXScale(const bool show);
 		void showYScale(const bool show);
@@ -87,6 +90,7 @@ namespace UI
 
 		LvContainer m_header{"header", getRoot()};
 		LvLabel m_title{"title", m_header};
+		std::unique_ptr<LvLabel> m_detail; // After the title, made when first set; nullptr until then
 		LvCanvas m_canvas{"canvas", getRoot()};
 		LvScale m_vScale{"vscale", getRoot()};
 		LvScale m_hScale{"hscale", getRoot()};

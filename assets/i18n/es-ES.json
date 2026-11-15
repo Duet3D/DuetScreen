@@ -163,7 +163,6 @@
       "not_supported": "Mapa de altura no soportado en modo {:s}",
       "num_points": "{:d}",
       "std_dev": "{:g} {:s}",
-      "title": "Mapa de altura: {:s}",
       "unload": "Descargar",
       "points": "Puntos",
       "area_title": "Área",
@@ -183,7 +182,9 @@
       "level": "Nivelar",
       "scale": "Escala de color",
       "scale_hint": "Fija: ±0,25 mm. Auto: el rango de la propia malla",
-      "no_maps": "Aún no hay mallas guardadas: sondea la cama para crear una"
+      "no_maps": "Aún no hay mallas guardadas: sondea la cama para crear una",
+      "mesh": "Malla:",
+      "no_mesh": "Ninguna"
     },
     "object_cancel": {
       "title": "Cancelar objeto",
@@ -200,7 +201,8 @@
       "confirm_cancel_title": "¿Cancelar este objeto?",
       "confirm_cancel_text": "La impresora omite '{:s}' a partir de ahora. El resto del trabajo continúa.",
       "confirm_resume_title": "¿Reanudar este objeto?",
-      "confirm_resume_text": "La impresora vuelve a imprimir '{:s}' desde la capa actual. Las capas omitidas siguen faltando."
+      "confirm_resume_text": "La impresora vuelve a imprimir '{:s}' desde la capa actual. Las capas omitidas siguen faltando.",
+      "objects": "Objetos"
     },
     "message": {
       "connected": "Conectado al Duet",

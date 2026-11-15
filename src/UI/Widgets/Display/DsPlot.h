@@ -49,11 +49,7 @@ namespace UI::Xml
 		/** Observer of one of the span's subjects; its user data is the value it sets */
 		static void rangeObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		/** `bind_title` observer */
-		static void titleObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
-		/** `bind_detail` observer */
-		static void detailObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
 		/** Redraw the grid when the theme changes, and keep the layers over the drawing area */
 		static void eventCb(lv_event_t* e);
@@ -64,9 +60,6 @@ namespace UI::Xml
 		/** Put every layer over the drawing area and every rectangle at its bounds */
 		void placeContent();
 
-		/** The label after the title, made when first needed */
-		LvLabel& detail();
-
 		/** The span, as set */
 		struct Span
 		{
@@ -76,6 +69,5 @@ namespace UI::Xml
 			int32_t yMax = 100; // Highest Y
 		} m_range;
 
-		std::unique_ptr<LvLabel> m_detail; // Shown after the title, or nullptr if there is no bind_detail
 	};
 } // namespace UI::Xml

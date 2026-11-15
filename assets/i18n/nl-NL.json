@@ -163,7 +163,6 @@
       "not_supported": "Hoogtekaart niet ondersteund in {:s}-modus",
       "num_points": "{:d}",
       "std_dev": "{:g} {:s}",
-      "title": "Hoogtekaart: {:s}",
       "unload": "Ontladen",
       "points": "Punten",
       "area_title": "Oppervlak",
@@ -183,7 +182,9 @@
       "level": "Uitlijnen",
       "scale": "Kleurschaal",
       "scale_hint": "Vast: ±0,25 mm. Auto: het bereik van de mesh",
-      "no_maps": "Nog geen opgeslagen meshes: meet het bed om er een te maken"
+      "no_maps": "Nog geen opgeslagen meshes: meet het bed om er een te maken",
+      "mesh": "Mesh:",
+      "no_mesh": "Geen"
     },
     "object_cancel": {
       "title": "Object annuleren",
@@ -200,7 +201,8 @@
       "confirm_cancel_title": "Dit object annuleren?",
       "confirm_cancel_text": "De printer slaat '{:s}' vanaf nu over. De rest van de taak gaat door.",
       "confirm_resume_title": "Dit object hervatten?",
-      "confirm_resume_text": "De printer print '{:s}' weer vanaf de huidige laag. De overgeslagen lagen blijven ontbreken."
+      "confirm_resume_text": "De printer print '{:s}' weer vanaf de huidige laag. De overgeslagen lagen blijven ontbreken.",
+      "objects": "Objecten"
     },
     "message": {
       "connected": "Verbonden met Duet",

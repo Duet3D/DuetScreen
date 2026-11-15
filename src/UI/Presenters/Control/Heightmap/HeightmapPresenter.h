@@ -114,7 +114,7 @@ namespace UI
 		AxisRange m_yRange;							// Y span the map was shown with
 
 		Xml::Surface m_surface;						// The map shown
-		Xml::StringSubject<96> m_title;				// "Heightmap: …"
+		Xml::StringSubject<96> m_file;				// The mesh shown's file, or "None"
 		Xml::List<HeightmapFileRow> m_maps;			// The files
 		Xml::IntSubject m_hasMaps;					// `has_maps`
 		Xml::StringSubject<48> m_points;			// Statistics, as text

@@ -892,7 +892,7 @@ Used by `heightmap`.
 | Name | Type | Description |
 | --- | --- | --- |
 | `presenter.surface` | surface | The height map shown, sampled for <ds_heatmap> |
-| `presenter.title` | text | E.g. "Heightmap: heightmap.csv" |
+| `presenter.file` | text | The file of the mesh shown, e.g. "heightmap.csv", or "None" |
 | `presenter.maps` | list | The height map files |
 | `presenter.has_maps` | int | 1 if there are height map files, else 0 |
 | `presenter.stats.points` | text | Number of points, e.g. "121" |
@@ -1383,20 +1383,25 @@ Also takes every `lv_obj` attribute.
 
 ### ds_heatmap
 
-A colour map of a surface, such as a bed's height map, with X and Y scales, a grid, a title, and the colour scale beside it
+A colour map of a surface, such as a bed's height map, with X and Y scales, a grid, a title (with a detail, as a `<ds_plot>`'s), and the colour scale beside it
 
 Also takes every `lv_obj` attribute.
 
 ```xml
-<ds_heatmap bind_surface="presenter.surface" bind_title="presenter.title" resolution="200" width="400" height="300"/>
+<ds_heatmap bind_surface="presenter.surface" title_tag="tr.heightmap.mesh" title_style="text_emphasis"
+			bind_detail="presenter.file" resolution="200" width="400" height="300"/>
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_heatmap.png)
 
 | Attribute | Description |
 | --- | --- |
+| `title` | The title above the area, if there is no `title_tag` |
+| `title_tag` | Translation key for the title |
+| `bind_title` | Follow a text subject for the title |
+| `title_style` | A theme style for the title, e.g. `text_emphasis` |
+| `bind_detail` | Follow a text subject shown after the title |
 | `bind_surface` | The surface subject to show; redrawn whenever it changes |
-| `bind_title` | Follow a text subject for the title shown above the map |
 | `resolution` | Pixels the map is drawn with along each side, scaled to fit (default 200) |
 
 ### ds_hue_slider
