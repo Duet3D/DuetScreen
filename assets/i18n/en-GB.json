@@ -638,7 +638,10 @@
         "3d": "3D"
       },
       "icon_sets": {
-        "material": "Material"
+        "material": "Outlined",
+        "filled": "Filled",
+        "line": "Line",
+        "bold": "Bold"
       },
       "primary_hue": "Primary hue",
       "secondary_hue": "Secondary hue",

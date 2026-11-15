@@ -502,6 +502,7 @@ namespace UI::Themes
 	void resetIconFolder();
 	const std::string& getIconFolder();
 	void setIconFolder(std::string_view folder);
+	/** The icon sets there are (folders of assets/icons): the default first, then the others by name */
 	std::vector<std::string> getIconSets();
 	std::string getIconPath(std::string_view icon_name);
 	std::string getFixedIconPath(std::string_view folder, std::string_view icon_name);

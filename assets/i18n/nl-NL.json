@@ -637,7 +637,10 @@
         "3d": "3D"
       },
       "icon_sets": {
-        "material": "Material"
+        "material": "Omtrek",
+        "filled": "Gevuld",
+        "line": "Lijn",
+        "bold": "Vet"
       },
       "primary_hue": "Primaire tint",
       "secondary_hue": "Secundaire tint",

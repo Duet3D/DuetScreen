@@ -637,7 +637,10 @@
         "3d": "3D"
       },
       "icon_sets": {
-        "material": "Material"
+        "material": "Umriss",
+        "filled": "Gefüllt",
+        "line": "Linie",
+        "bold": "Fett"
       },
       "primary_hue": "Primärton",
       "secondary_hue": "Sekundärton",

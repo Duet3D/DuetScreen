@@ -1388,6 +1388,25 @@ TEST_F(TestHomeViewWithData, MoveTabChoosesWorkplaceOrMachineCoordinates)
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
+TEST_F(TestHomeViewWithData, EveryIconFollowsTheIconSetChosen)
+{
+	// The Control page's Tools tab shows icons of every kind: the sidebar's, the tabs', drawn ones and buttons'
+	openControlTab(1);
+	const auto toolsTabIcon = []
+	{
+		UI::TabView::TabButton* button = controlPage().getTabButton(1);
+		const void* src = button != nullptr ? button->getIcon().getSrc() : nullptr;
+		return src != nullptr ? std::string(static_cast<const char*>(src)) : std::string();
+	};
+	for (const auto& set : UI::Themes::getIconSets())
+	{
+		UI::Themes::setIconFolder(set);
+		EXPECT_EQ(toolsTabIcon(), UI::Themes::getFixedIconPath(set, "tools.png"));
+		EXPECT_EQUAL_SCREENSHOT(fmt::format("home_view/icon_sets/{:s}.png", set).c_str());
+	}
+	UI::Themes::resetIconFolder();
+}
+
 TEST_F(TestHomeViewWithData, MoveTabDoesNotJogPastALimit)
 {
 	openControlTab(0);

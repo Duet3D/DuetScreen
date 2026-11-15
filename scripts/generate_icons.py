@@ -48,6 +48,8 @@ SUPERSAMPLE = 8  # Drawings are drawn this many times larger, then scaled down, 
 # google/material-design-icons, 2026-10-23
 MATERIAL_COMMIT = "10ecc14790612ca8fd164e3f4ffe9c16fc50d5b7"
 MATERIAL_URL = f"https://raw.githubusercontent.com/google/material-design-icons/{MATERIAL_COMMIT}"
+# @phosphor-icons/web, 2025-03-31
+PHOSPHOR_URL = "https://unpkg.com/@phosphor-icons/web@2.1.2"
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,38 @@ MATERIAL_OUTLINED = FontSource(
     reference_glyph="cancel",  # A circle 2 to 22 of 24
     reference_box=(2 / 24, 2 / 24, 22 / 24, 22 / 24),
 )
+
+MATERIAL_ROUNDED = FontSource(
+    key="material_symbols_rounded",
+    font_url=f"{MATERIAL_URL}/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.ttf",
+    names_url=f"{MATERIAL_URL}/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.codepoints",
+    license_url=f"{MATERIAL_URL}/LICENSE",
+    license_name="Apache License 2.0",
+    homepage="https://github.com/google/material-design-icons (Material Symbols Rounded)",
+    reference_glyph="cancel",  # A circle 2 to 22 of 24, filled or not
+    reference_box=(2 / 24, 2 / 24, 22 / 24, 22 / 24),
+)
+
+
+def phosphor(weight: str, file_suffix: str, stroke: float) -> FontSource:
+    """Phosphor in `weight` (regular, bold, …), whose font file is Phosphor<file_suffix>.ttf and whose lines are
+    `stroke` units wide of its 256"""
+    # Its square's sides are at 40 and 216 of 256, the line centred on them
+    inset = (40 - stroke / 2) / 256
+    return FontSource(
+        key=f"phosphor_{weight}",
+        font_url=f"{PHOSPHOR_URL}/src/{weight}/Phosphor{file_suffix}.ttf",
+        names_url=f"{PHOSPHOR_URL}/src/{weight}/style.css",
+        license_url=f"{PHOSPHOR_URL}/LICENSE",
+        license_name="MIT License",
+        homepage=f"https://phosphoricons.com (Phosphor {weight}, @phosphor-icons/web 2.1.2)",
+        reference_glyph="square",
+        reference_box=(inset, inset, 1 - inset, 1 - inset),
+    )
+
+
+PHOSPHOR_REGULAR = phosphor("regular", "", stroke=16)
+PHOSPHOR_BOLD = phosphor("bold", "-Bold", stroke=24)
 
 
 class Font:
@@ -386,10 +420,10 @@ ICONS: dict[str, Icon] = {
     "button": Icon("A button the user sets up", "smart_button", "cursor-click"),
     "text": Icon("Text the user writes", "text_fields", "text-t"),
     # A WiFi network's signal, weakest first
-    "wifi_signal_1": Icon("A weak WiFi signal", "network_wifi_1_bar", "wifi-none"),
-    "wifi_signal_2": Icon("A fair WiFi signal", "network_wifi_2_bar", "wifi-low"),
-    "wifi_signal_3": Icon("A good WiFi signal", "network_wifi_3_bar", "wifi-medium"),
-    "wifi_signal_4": Icon("A strong WiFi signal", "signal_wifi_4_bar", "wifi-high"),
+    "wifi_signal_1": Icon("A weak WiFi signal", "network_wifi_1_bar", "cell-signal-low"),
+    "wifi_signal_2": Icon("A fair WiFi signal", "network_wifi_2_bar", "cell-signal-medium"),
+    "wifi_signal_3": Icon("A good WiFi signal", "network_wifi_3_bar", "cell-signal-high"),
+    "wifi_signal_4": Icon("A strong WiFi signal", "signal_wifi_4_bar", "cell-signal-full"),
 }
 
 # ---------------------------------------------------------------------------
@@ -411,6 +445,12 @@ class IconSet:
 SETS: list[IconSet] = [
     # Outlined, the default: Material Symbols at weight 400 and optical size 24
     IconSet("material", "material", MATERIAL_OUTLINED, [0, 0, 24, 400], Pen(width=2.0, filled=False)),
+    # Filled: Material Symbols Rounded, filled, at the same weight
+    IconSet("filled", "material", MATERIAL_ROUNDED, [1, 0, 24, 400], Pen(width=2.0, filled=True)),
+    # Line: Phosphor's regular weight, thinner and lighter (16 of 256 is 1.5 of 24)
+    IconSet("line", "phosphor", PHOSPHOR_REGULAR, None, Pen(width=1.5, filled=False)),
+    # Bold: Phosphor's bold weight (24 of 256 is 2.25 of 24)
+    IconSet("bold", "phosphor", PHOSPHOR_BOLD, None, Pen(width=2.25, filled=False)),
 ]
 
 

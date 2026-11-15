@@ -10,6 +10,7 @@
 #include "UI/Core/View.h"
 #include "lvgl/src/lvgl_private.h"
 #include "utils/StorageHelper.h"
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <map>
@@ -1226,6 +1227,15 @@ namespace UI::Themes
 				continue;
 			sets.push_back(entry.path().filename().string());
 		}
+		// The default first, then the others by name: directories are listed in no particular order
+		std::sort(sets.begin(),
+				  sets.end(),
+				  [](const std::string& a, const std::string& b)
+				  {
+					  const bool aDefault = a == DEFAULT_ICON_SET;
+					  const bool bDefault = b == DEFAULT_ICON_SET;
+					  return aDefault != bDefault ? aDefault : a < b;
+				  });
 		return sets;
 	}
 

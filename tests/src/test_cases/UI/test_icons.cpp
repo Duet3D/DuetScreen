@@ -5,6 +5,7 @@
  * choosing a set never leaves a button without its icon.
  */
 
+#include "Configuration.h"
 #include "UI/Styles/Styles.h"
 #include <filesystem>
 #include <fstream>
@@ -81,6 +82,30 @@ namespace
 		return names;
 	}
 } // namespace
+
+TEST(TestIcons, EverySetHasTheSameIcons)
+{
+	const auto icons = [](const std::string& set)
+	{
+		std::set<std::string> names;
+		for (const auto& entry : std::filesystem::directory_iterator(ASSETS_FOLDER "icons/" + set))
+		{
+			if (entry.path().extension() == ".png")
+			{
+				names.insert(entry.path().filename().string());
+			}
+		}
+		return names;
+	};
+	const auto sets = UI::Themes::getIconSets();
+	ASSERT_GE(sets.size(), 4u) << "the default set, filled, line and bold";
+	EXPECT_EQ(sets.front(), DEFAULT_ICON_SET) << "the default set is listed first";
+	const auto expected = icons(std::string(DEFAULT_ICON_SET));
+	for (const auto& set : sets)
+	{
+		EXPECT_EQ(icons(set), expected) << "icon set " << set << " differs from " << DEFAULT_ICON_SET;
+	}
+}
 
 TEST(TestIcons, EveryIconTheUiNamesIsInEverySet)
 {

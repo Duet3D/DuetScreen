@@ -2338,6 +2338,9 @@
 			<xs:enumeration value="tr.temperature.tools"/>
 			<xs:enumeration value="tr.theme.chroma"/>
 			<xs:enumeration value="tr.theme.dark_mode"/>
+			<xs:enumeration value="tr.theme.icon_sets.bold"/>
+			<xs:enumeration value="tr.theme.icon_sets.filled"/>
+			<xs:enumeration value="tr.theme.icon_sets.line"/>
 			<xs:enumeration value="tr.theme.icon_sets.material"/>
 			<xs:enumeration value="tr.theme.id.3d"/>
 			<xs:enumeration value="tr.theme.id.duetscreen"/>

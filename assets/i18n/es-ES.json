@@ -637,7 +637,10 @@
         "3d": "3D"
       },
       "icon_sets": {
-        "material": "Material"
+        "material": "Contorno",
+        "filled": "Relleno",
+        "line": "Línea",
+        "bold": "Negrita"
       },
       "primary_hue": "Tono primario",
       "secondary_hue": "Tono secundario",
