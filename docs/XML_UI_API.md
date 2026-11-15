@@ -893,7 +893,10 @@ Used by `heightmap`.
 | --- | --- | --- |
 | `presenter.surface` | surface | The height map shown, sampled for <ds_heatmap> |
 | `presenter.file` | text | The file of the mesh shown, e.g. "heightmap.csv", or "None" |
-| `presenter.maps` | list | The height map files |
+| `presenter.map_options` | text | The saved meshes' files, one per line, for a <ds_choice> |
+| `presenter.shown_index` | int | The line of `map_options` shown, or -1 if none is |
+| `presenter.shown_loaded` | int | 1 if the printer uses the mesh shown |
+| `presenter.shown_load_text` | text | "Load", or "Unload" if the printer uses the mesh shown |
 | `presenter.has_maps` | int | 1 if there are height map files, else 0 |
 | `presenter.stats.points` | text | Number of points, e.g. "121" |
 | `presenter.stats.area` | text | Probed area, in cm² or in² as the displayed unit is, e.g. "400 cm²" |
@@ -904,20 +907,11 @@ Used by `heightmap`.
 | `presenter.mode` | int | How values are coloured: 0 fixed (±0.25 mm), 1 auto (the map's own range) |
 | `presenter.levelling_usable` | int | 1 if the bed can be levelled or probed: connected and no job running |
 
-Each row of `presenter.maps`:
-
-| Name | Type | Description |
-| --- | --- | --- |
-| `row.index` | int | Position in the list, from 0 |
-| `row.name` | text | File name |
-| `row.loaded` | int | 1 for the one the printer is using |
-| `row.load_text` | text | "Load", or "Unload" for the one in use |
-
 | Action | Description |
 | --- | --- |
 | `presenter.heightmap.mode` | Colour values by `arg`: `fixed` (±0.25 mm) or `auto` (the map's own range) |
-| `presenter.heightmap.show` | Show that height map. From a row of `maps`. |
-| `presenter.heightmap.toggle` | Make the printer use that height map, or stop using it, and show it. From a row of `maps`. |
+| `presenter.heightmap.show` | Show the saved mesh picked in the choice of `map_options` (value_confirmed: its line) |
+| `presenter.heightmap.toggle` | Make the printer use the mesh shown (G29 S1), or stop using it (G29 S2) |
 
 ### notifications
 
@@ -2984,7 +2978,6 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `heater_bar` |  | `heater` | `dialog_number`, `heater_row` | [heater_bar.xml](../assets/ui/components/common/heater_bar.xml) |
 | `heater_row` |  | `label`, `active`, `standby` | `tools_bed_heater`, `tools_chamber_heater`, `tools_tool_heater` | [heater_row.xml](../assets/ui/components/common/heater_row.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
-| `heightmap_file` |  |  | `heightmap` | [heightmap_file.xml](../assets/ui/components/control/heightmap/heightmap_file.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |

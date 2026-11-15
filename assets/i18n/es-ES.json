@@ -182,7 +182,8 @@
       "level": "Nivelar",
       "no_maps": "Aún no hay mallas guardadas: sondea la cama para crear una",
       "mesh": "Malla:",
-      "no_mesh": "Ninguna"
+      "no_mesh": "Ninguna",
+      "shown": "Malla mostrada"
     },
     "object_cancel": {
       "title": "Cancelar objeto",

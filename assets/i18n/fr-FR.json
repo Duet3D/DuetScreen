@@ -182,7 +182,8 @@
       "level": "Niveler",
       "no_maps": "Aucun maillage enregistré : palpez le plateau pour en créer un",
       "mesh": "Maillage :",
-      "no_mesh": "Aucun"
+      "no_mesh": "Aucun",
+      "shown": "Maillage affiché"
     },
     "object_cancel": {
       "title": "Annulation d'objet",

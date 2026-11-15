@@ -1,8 +1,9 @@
 <!--
   The Bed mesh tab, and the `heightmap` widget. On the left, the mesh shown, named above it as the Objects tab names
   the object being printed, with its colour scale. On the right, wide enough that nothing wraps: probing the bed (G29)
-  and levelling it (G32); the meshes saved on the printer (tap one to show it, Load to use it); how values are
-  coloured, fixed or the mesh's own range; and the shown mesh's statistics, in the displayed unit.
+  and levelling it (G32); the mesh shown, picked from those saved on the printer in a choice dialog, beside whether
+  the printer uses it (Load, Unload); how values are coloured, fixed or the mesh's own range; and the shown mesh's
+  statistics, in the displayed unit.
 
   Fields and actions: src/UI/Presenters/Control/Heightmap/HeightmapPresenter.h
 -->
@@ -34,9 +35,22 @@
 			</ds_setting_group>
 
 			<ds_setting_group name="saved" title_tag="tr.heightmap.saved" width="100%">
-				<ds_list name="list" list="presenter.maps" item="heightmap_file">
-					<style name="setting_list"/>
-				</ds_list>
+				<!-- The mesh shown (tap to pick another of those saved), and whether the printer uses it -->
+				<ds_setting name="shown" title_tag="tr.heightmap.shown">
+					<bind_flag_if_eq subject="presenter.has_maps" flag="hidden" ref_value="0"/>
+					<ds_choice name="choice" title_tag="tr.heightmap.saved" bind_options="presenter.map_options"
+							   bind_selected="presenter.shown_index">
+						<action trigger="value_confirmed" name="presenter.heightmap.show"/>
+					</ds_choice>
+					<ds_button name="load" bind_text="presenter.shown_load_text" height="content"
+							   style_min_width="content">
+						<style name="action_btn"/>
+						<bind_style name="btn_checked" subject="presenter.shown_loaded" ref_value="1"/>
+						<bind_flag_if_eq subject="presenter.shown_index" flag="hidden" ref_value="-1"/>
+						<bind_state_if_eq subject="presenter.levelling_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="presenter.heightmap.toggle"/>
+					</ds_button>
+				</ds_setting>
 				<lv_obj name="no_maps" height="content" scrollable="false">
 					<style name="setting_row"/>
 					<bind_flag_if_eq subject="presenter.has_maps" flag="hidden" ref_value="1"/>

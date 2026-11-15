@@ -24,18 +24,6 @@
 
 namespace UI
 {
-	/** One height map file */
-	class HeightmapFileRow : public Xml::Row
-	{
-	  public:
-		/** Declare the row's fields */
-		void fields(Xml::FieldVisitor& f) override;
-
-		Xml::StringSubject<64> name;	  // File name
-		Xml::IntSubject loaded;			  // 1 if the printer is using it
-		Xml::StringSubject<16> loadText;  // "Load" or "Unload"
-	};
-
 	class HeightmapPresenter : public Xml::XmlPresenter
 	{
 	  public:
@@ -91,7 +79,7 @@ namespace UI
 		/** Ask for the list of height map files */
 		void requestFiles();
 
-		/** Show the height map files, marking the one in use */
+		/** Show the height map files as the choice's options, and which is shown and whether it is in use */
 		void showFiles();
 
 		/** Show whether the bed can be levelled */
@@ -103,19 +91,21 @@ namespace UI
 		/** The span of the axis whose letter is `letter`, from the object model; nothing if there is no such axis */
 		static std::optional<AxisRange> spanOf(char letter);
 
-		/** The file a maps row is about, or nullptr */
-		OM::FileSystem::ItemPtr fileOf(const Xml::ActionArgs& args) const;
 
 		std::mutex m_mapMutex;						// Guards m_map, which is loaded on another thread
 		OM::HeightmapPtr m_map;						// The map shown, or nullptr
 		OM::FileSystem::ItemList m_files;			// Height map files, by name
+		std::string m_shownName;					// The file of the map shown, noted on the UI's thread; empty for none
 		RenderMode m_mode = RenderMode::Fixed;		// How values are coloured
 		AxisRange m_xRange;							// X span the map was shown with
 		AxisRange m_yRange;							// Y span the map was shown with
 
 		Xml::Surface m_surface;						// The map shown
 		Xml::StringSubject<96> m_file;				// The mesh shown's file, or "None"
-		Xml::List<HeightmapFileRow> m_maps;			// The files
+		Xml::StringSubject<2048> m_mapOptions;		// `map_options`: the files, one per line
+		Xml::IntSubject m_shownIndex{-1};			// `shown_index`: the shown map's line, or -1
+		Xml::IntSubject m_shownLoaded;				// `shown_loaded`: 1 if the printer uses the map shown
+		Xml::StringSubject<16> m_shownLoadText;		// `shown_load_text`: "Load" or "Unload"
 		Xml::IntSubject m_hasMaps;					// `has_maps`
 		Xml::StringSubject<48> m_points;			// Statistics, as text
 		Xml::StringSubject<48> m_area;				// …

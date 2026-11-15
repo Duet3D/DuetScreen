@@ -71,7 +71,7 @@
 			<xs:enumeration value="presenter.ip"/>
 			<xs:enumeration value="presenter.levelling_usable"/>
 			<xs:enumeration value="presenter.load_open"/>
-			<xs:enumeration value="presenter.maps"/>
+			<xs:enumeration value="presenter.map_options"/>
 			<xs:enumeration value="presenter.message"/>
 			<xs:enumeration value="presenter.mode"/>
 			<xs:enumeration value="presenter.mode_icon"/>
@@ -118,6 +118,9 @@
 			<xs:enumeration value="presenter.serial_invalid"/>
 			<xs:enumeration value="presenter.settings"/>
 			<xs:enumeration value="presenter.settings_open"/>
+			<xs:enumeration value="presenter.shown_index"/>
+			<xs:enumeration value="presenter.shown_load_text"/>
+			<xs:enumeration value="presenter.shown_loaded"/>
 			<xs:enumeration value="presenter.sort"/>
 			<xs:enumeration value="presenter.sort_date"/>
 			<xs:enumeration value="presenter.sort_name"/>
@@ -180,8 +183,6 @@
 			<xs:enumeration value="row.label"/>
 			<xs:enumeration value="row.last"/>
 			<xs:enumeration value="row.letter"/>
-			<xs:enumeration value="row.load_text"/>
-			<xs:enumeration value="row.loaded"/>
 			<xs:enumeration value="row.max"/>
 			<xs:enumeration value="row.min"/>
 			<xs:enumeration value="row.name"/>
@@ -385,7 +386,6 @@
 			<xs:enumeration value="presenter.failed"/>
 			<xs:enumeration value="presenter.files"/>
 			<xs:enumeration value="presenter.gcodes"/>
-			<xs:enumeration value="presenter.maps"/>
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.objects"/>
 			<xs:enumeration value="presenter.passed"/>
@@ -751,7 +751,6 @@
 			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
-			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
 			<xs:enumeration value="move"/>
@@ -902,7 +901,6 @@
 			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
-			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
 			<xs:enumeration value="move"/>
@@ -1088,7 +1086,6 @@
 			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
-			<xs:enumeration value="heightmap_file"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
 			<xs:enumeration value="lv_arc"/>
@@ -1864,6 +1861,7 @@
 			<xs:enumeration value="tr.heightmap.probe_group"/>
 			<xs:enumeration value="tr.heightmap.rms"/>
 			<xs:enumeration value="tr.heightmap.saved"/>
+			<xs:enumeration value="tr.heightmap.shown"/>
 			<xs:enumeration value="tr.heightmap.std_dev"/>
 			<xs:enumeration value="tr.heightmap.unload"/>
 			<xs:enumeration value="tr.message.connected"/>
@@ -11400,14 +11398,6 @@
 	</xs:element>
 	<xs:element name="heightmap">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/heightmap/heightmap.xml, with presenter heightmap.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="heightmap_file">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/heightmap/heightmap_file.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>

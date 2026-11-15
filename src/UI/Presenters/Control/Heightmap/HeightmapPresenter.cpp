@@ -20,33 +20,28 @@ namespace UI
 	/** The values the fixed render mode colours, mm either side of 0 */
 	static constexpr float FIXED_SCALE = 0.25f;
 
-	void HeightmapFileRow::fields(Xml::FieldVisitor& f)
-	{
-		f.field("name", name, "File name");
-		f.field("loaded", loaded, "1 for the one the printer is using");
-		f.field("load_text", loadText, "\"Load\", or \"Unload\" for the one in use");
-	}
-
 	HeightmapPresenter::HeightmapPresenter()
 		: XmlPresenter("heightmap")
 	{
 		action("heightmap.show",
-			   "Show that height map. From a row of `maps`.",
+			   "Show the saved mesh picked in the choice of `map_options` (value_confirmed: its line)",
 			   [this](const Xml::ActionArgs& args)
 			   {
-				   if (auto file = fileOf(args))
+				   const auto index = args.value();
+				   if (!index || *index < 0 || static_cast<size_t>(*index) >= m_files.size())
 				   {
-					   load(OM::GetHeightmapData(file->GetName()));
+					   LOG_WARN("heightmap.show needs the line of a saved mesh");
+					   return;
 				   }
+				   load(OM::GetHeightmapData(m_files[static_cast<size_t>(*index)]->GetName()));
 			   });
 		action("heightmap.toggle",
-			   "Make the printer use that height map, or stop using it, and show it. From a row of `maps`.",
-			   [this](const Xml::ActionArgs& args)
+			   "Make the printer use the mesh shown (G29 S1), or stop using it (G29 S2)",
+			   [this](const Xml::ActionArgs&)
 			   {
-				   if (auto file = fileOf(args))
+				   if (!m_shownName.empty())
 				   {
-					   OM::ToggleHeightmap(file->GetName());
-					   load(OM::GetHeightmapData(file->GetName()));
+					   OM::ToggleHeightmap(m_shownName);
 				   }
 			   });
 		action("heightmap.mode",
@@ -69,7 +64,10 @@ namespace UI
 	{
 		f.field("surface", m_surface, "The height map shown, sampled for <ds_heatmap>");
 		f.field("file", m_file, "The file of the mesh shown, e.g. \"heightmap.csv\", or \"None\"");
-		f.list("maps", m_maps, "The height map files");
+		f.field("map_options", m_mapOptions, "The saved meshes' files, one per line, for a <ds_choice>");
+		f.field("shown_index", m_shownIndex, "The line of `map_options` shown, or -1 if none is");
+		f.field("shown_loaded", m_shownLoaded, "1 if the printer uses the mesh shown");
+		f.field("shown_load_text", m_shownLoadText, "\"Load\", or \"Unload\" if the printer uses the mesh shown");
 		f.field("has_maps", m_hasMaps, "1 if there are height map files, else 0");
 		f.field("stats.points", m_points, "Number of points, e.g. \"121\"");
 		f.field("stats.area", m_area, "Probed area, in cm² or in² as the displayed unit is, e.g. \"400 cm²\"");
@@ -118,8 +116,8 @@ namespace UI
 			m_map = nullptr;
 		}
 		m_files.clear();
-		m_maps.clear();
-		m_hasMaps.set(0);
+		m_shownName.clear();
+		showFiles();
 		clear();
 		showUsable();
 	}
@@ -130,6 +128,8 @@ namespace UI
 			std::lock_guard lock(m_mapMutex);
 			m_map = map;
 		}
+		m_shownName = map != nullptr ? std::string(map->GetFileName()) : std::string();
+		showFiles();
 		if (map == nullptr)
 		{
 			clear();
@@ -255,14 +255,23 @@ namespace UI
 	void HeightmapPresenter::showFiles()
 	{
 		UI_LOCK();
-		m_maps.sync(m_files.size(),
-					[this](HeightmapFileRow& row, size_t i)
-					{
-						const bool loaded = m_files[i]->GetName() == m_current;
-						row.name.set(m_files[i]->GetName());
-						row.loaded.set(loaded ? 1 : 0);
-						row.loadText.set(loaded ? _("heightmap.unload") : _("heightmap.load"));
-					});
+		std::string options;
+		int32_t shown = -1;
+		for (size_t i = 0; i < m_files.size(); ++i)
+		{
+			const std::string_view name = m_files[i]->GetName();
+			options += options.empty() ? "" : "\n";
+			options += name;
+			if (name == m_shownName)
+			{
+				shown = static_cast<int32_t>(i);
+			}
+		}
+		const bool loaded = !m_shownName.empty() && m_shownName == m_current;
+		m_mapOptions.set(options);
+		m_shownIndex.set(shown);
+		m_shownLoaded.set(loaded ? 1 : 0);
+		m_shownLoadText.set(loaded ? _("heightmap.unload") : _("heightmap.load"));
 		m_hasMaps.set(m_files.empty() ? 0 : 1);
 	}
 
@@ -305,16 +314,5 @@ namespace UI
 		const float offset = Xml::PrinterModel::toolOffset(letter);
 		return AxisRange{static_cast<float>(axis["min"].number()) + offset,
 						 static_cast<float>(axis["max"].number()) + offset};
-	}
-
-	OM::FileSystem::ItemPtr HeightmapPresenter::fileOf(const Xml::ActionArgs& args) const
-	{
-		const auto* row = args.row<HeightmapFileRow>();
-		if (row == nullptr || static_cast<size_t>(row->index.get()) >= m_files.size())
-		{
-			LOG_WARN("{:s} must come from a maps row", args.name);
-			return nullptr;
-		}
-		return m_files[static_cast<size_t>(row->index.get())];
 	}
 } // namespace UI

@@ -182,7 +182,8 @@
       "level": "Uitlijnen",
       "no_maps": "Nog geen opgeslagen meshes: meet het bed om er een te maken",
       "mesh": "Mesh:",
-      "no_mesh": "Geen"
+      "no_mesh": "Geen",
+      "shown": "Getoonde mesh"
     },
     "object_cancel": {
       "title": "Object annuleren",
