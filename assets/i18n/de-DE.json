@@ -107,7 +107,12 @@
       "select_tool": "Filament für {:s} wählen",
       "select_tool_list_header": "Werkzeuge",
       "not_loaded": "Kein Filament geladen",
-      "none": "Auf dem Duet sind keine Filamente eingerichtet"
+      "none": "Auf dem Duet sind keine Filamente eingerichtet",
+      "confirm_load_title": "{:s} laden?",
+      "confirm_load_text": "{:s} lädt {:s}.",
+      "confirm_change_text": "{:s} entlädt zuerst {:s} und lädt dann {:s}.",
+      "confirm_unload_title": "{:s} entladen?",
+      "confirm_unload_text": "{:s} entlädt {:s}."
     },
     "file": {
       "macros": "Makros",

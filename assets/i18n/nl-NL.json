@@ -107,7 +107,12 @@
       "select_tool": "Filament selecteren voor {:s}",
       "select_tool_list_header": "Gereedschappen",
       "not_loaded": "Geen filament geladen",
-      "none": "Er zijn geen filamenten ingesteld op de Duet"
+      "none": "Er zijn geen filamenten ingesteld op de Duet",
+      "confirm_load_title": "{:s} laden?",
+      "confirm_load_text": "{:s} laadt {:s}.",
+      "confirm_change_text": "{:s} ontlaadt eerst {:s} en laadt dan {:s}.",
+      "confirm_unload_title": "{:s} ontladen?",
+      "confirm_unload_text": "{:s} ontlaadt {:s}."
     },
     "file": {
       "macros": "Macro's",

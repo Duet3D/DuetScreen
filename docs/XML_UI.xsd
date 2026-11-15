@@ -1508,7 +1508,12 @@
 			<xs:enumeration value="tr.fan.off"/>
 			<xs:enumeration value="tr.fan.title"/>
 			<xs:enumeration value="tr.filament.change"/>
+			<xs:enumeration value="tr.filament.confirm_change_text"/>
 			<xs:enumeration value="tr.filament.confirm_filament_change"/>
+			<xs:enumeration value="tr.filament.confirm_load_text"/>
+			<xs:enumeration value="tr.filament.confirm_load_title"/>
+			<xs:enumeration value="tr.filament.confirm_unload_text"/>
+			<xs:enumeration value="tr.filament.confirm_unload_title"/>
 			<xs:enumeration value="tr.filament.load"/>
 			<xs:enumeration value="tr.filament.management_header"/>
 			<xs:enumeration value="tr.filament.none"/>

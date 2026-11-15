@@ -38,20 +38,38 @@ namespace UI::FilamentActions
 			return static_cast<size_t>(*number);
 		}
 
-		/** Load `filament` into `tool`: select the tool, unload what is loaded, load it and run its config */
-		void load(size_t tool, const std::string& filament)
+		/** Tool `tool`'s name, else "Tool <number>" (the model lock held) */
+		std::string toolName(size_t tool)
+		{
+			const std::string_view name = Xml::PrinterModel::tool(tool)["name"].text();
+			return name.empty() ? _("temperature.default_tool_name", tool) : std::string(name);
+		}
+
+		/**
+		 * Load `filament` into `tool`, asking first if confirmations are on: select the tool, unload what is loaded,
+		 * load it and run its config
+		 */
+		void load(size_t tool, const std::string& filament, lv_obj_t* asker)
 		{
 			std::string loaded;
+			std::string name;
 			{
 				MODEL_LOCK();
 				loaded = Xml::PrinterModel::filament(tool);
+				name = toolName(tool);
 			}
 			if (loaded == filament)
 			{
 				return;
 			}
-			Xml::Services::sendGcode(
-				fmt::format("T{:d}\n{:s}M701 S\"{:s}\"\nM703\n", tool, loaded.empty() ? "" : "M702\n", filament));
+			const std::string gcode =
+				fmt::format("T{:d}\n{:s}M701 S\"{:s}\"\nM703\n", tool, loaded.empty() ? "" : "M702\n", filament);
+			Xml::Prompts::confirm({.title = _("filament.confirm_load_title", filament),
+								   .text = loaded.empty() ? _("filament.confirm_load_text", name, filament)
+														  : _("filament.confirm_change_text", name, loaded, filament),
+								   .yes = _("filament.load"),
+								   .onYes = [gcode]() { Xml::Services::sendGcode(gcode); },
+								   .asker = asker});
 		}
 
 		/** `actions.filament.choose` */
@@ -75,11 +93,12 @@ namespace UI::FilamentActions
 				Model::get().post<EventType::Response>(ResponseType::WARNING, _("filament.none"));
 				return;
 			}
-			Xml::Prompts::ChoiceRequest request{.title = _("filament.select"),
-												.chosen = loaded,
-												.onChoose = [number = *tool](const std::string& filament)
-												{ load(number, filament); },
-												.asker = args.target};
+			Xml::Prompts::ChoiceRequest request{
+				.title = _("filament.select"),
+				.chosen = loaded,
+				.onChoose = [number = *tool, asker = args.target](const std::string& filament)
+				{ load(number, filament, asker); },
+				.asker = args.target};
 			for (const auto& filament : filaments)
 			{
 				request.choices.push_back({.value = filament, .title = filament});
@@ -95,14 +114,23 @@ namespace UI::FilamentActions
 			{
 				return;
 			}
+			std::string loaded;
+			std::string name;
 			{
 				MODEL_LOCK();
-				if (Xml::PrinterModel::filament(*tool).empty())
-				{
-					return;
-				}
+				loaded = Xml::PrinterModel::filament(*tool);
+				name = toolName(*tool);
 			}
-			Xml::Services::sendGcode(fmt::format("T{:d}\nM702\n", *tool));
+			if (loaded.empty())
+			{
+				return;
+			}
+			Xml::Prompts::confirm(
+				{.title = _("filament.confirm_unload_title", loaded),
+				 .text = _("filament.confirm_unload_text", name, loaded),
+				 .yes = _("filament.unload"),
+				 .onYes = [gcode = fmt::format("T{:d}\nM702\n", *tool)]() { Xml::Services::sendGcode(gcode); },
+				 .asker = args.target});
 		}
 	} // namespace
 
@@ -110,9 +138,13 @@ namespace UI::FilamentActions
 	{
 		Xml::Actions::addGlobal("filament.choose",
 								"Ask which of the printer's filaments to load into the tool numbered `arg`, and load "
-								"it, unloading any loaded first (M701, M702, M703)",
+								"it, unloading any loaded first (M701, M702, M703), asking first if confirmations are "
+								"on",
 								choose);
 		Xml::Actions::addGlobal(
-			"filament.unload", "Unload the filament of the tool numbered `arg` (M702), if it has any loaded", unload);
+			"filament.unload",
+			"Unload the filament of the tool numbered `arg` (M702), if it has any loaded, asking first if "
+			"confirmations are on",
+			unload);
 	}
 } // namespace UI::FilamentActions

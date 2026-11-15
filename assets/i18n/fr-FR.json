@@ -107,7 +107,12 @@
       "select_tool": "Sélectionner le filament pour {:s}",
       "select_tool_list_header": "Outils",
       "not_loaded": "Aucun filament chargé",
-      "none": "Aucun filament n'est configuré sur le Duet"
+      "none": "Aucun filament n'est configuré sur le Duet",
+      "confirm_load_title": "Charger {:s} ?",
+      "confirm_load_text": "{:s} charge {:s}.",
+      "confirm_change_text": "{:s} décharge d'abord {:s}, puis charge {:s}.",
+      "confirm_unload_title": "Décharger {:s} ?",
+      "confirm_unload_text": "{:s} décharge {:s}."
     },
     "file": {
       "macros": "Macros",

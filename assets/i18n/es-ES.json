@@ -107,7 +107,12 @@
       "select_tool": "Seleccionar filamento para {:s}",
       "select_tool_list_header": "Herramientas",
       "not_loaded": "Sin filamento cargado",
-      "none": "El Duet no tiene filamentos configurados"
+      "none": "El Duet no tiene filamentos configurados",
+      "confirm_load_title": "¿Cargar {:s}?",
+      "confirm_load_text": "{:s} carga {:s}.",
+      "confirm_change_text": "{:s} descarga primero {:s} y luego carga {:s}.",
+      "confirm_unload_title": "¿Descargar {:s}?",
+      "confirm_unload_text": "{:s} descarga {:s}."
     },
     "file": {
       "macros": "Macros",

@@ -1911,6 +1911,17 @@ TEST_F(TestHomeViewWithData, ToolsTabSelectsToolsAndTurnsAPrintersSpindle)
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools_spindle_turning.png");
 	lv_obj_send_event(lv_obj_find_by_name(tools, "stop"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQ(sent.back(), "M5 P0\n");
+
+	// Unloading filament asks first
+	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
+	const size_t before = sent.size();
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(card(4), "filament"), "unload"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("filament.confirm_unload_title", "test"));
+	EXPECT_EQ(sent.size(), before) << "nothing sent before agreeing";
+	TestDialogs::tap("yes");
+	EXPECT_EQ(sent.back(), "T4\nM702\n");
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 

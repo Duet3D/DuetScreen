@@ -108,7 +108,12 @@
       "select_tool": "Select Filament for {:s}",
       "select_tool_list_header": "Tools",
       "not_loaded": "No Filament Loaded",
-      "none": "The Duet has no filaments set up"
+      "none": "The Duet has no filaments set up",
+      "confirm_load_title": "Load {:s}?",
+      "confirm_load_text": "{:s} loads {:s}.",
+      "confirm_change_text": "{:s} unloads {:s} first, then loads {:s}.",
+      "confirm_unload_title": "Unload {:s}?",
+      "confirm_unload_text": "{:s} unloads {:s}."
     },
     "file": { /* File screen */
       "macros": "Macros",
