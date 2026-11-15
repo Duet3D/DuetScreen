@@ -53,7 +53,7 @@
 			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
 				<!-- The theme's accents -->
 				<lv_obj name="swatches" width="content" height="content" flex_flow="row" clickable="false"
-						style_pad_all="0" style_pad_column="6" style_bg_opa="0" style_border_width="0">
+						style_pad_all="0" style_pad_column="6">
 					<lv_obj name="primary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
 						<style name="border"/>
 						<bind_style_prop prop="bg_color" subject="source.theme.primary"/>

@@ -1,0 +1,22 @@
+<!--
+  A button that jogs one axis one way by the jog step (the global source.jog.*), in the accent colour, disabled while
+  that axis can't be jogged: the arrows of the XY pad (move_xy.xml) and of an axis' column (move_axis.xml). Give it
+  its icon and text.
+
+      <move_jog_button name="y_increment" icon="arrow_up.png" text="Y+" usable="source.axes.y.jog_usable" jog="Y+"/>
+
+  Props:    usable  the name of an int: 1 while the axis can be jogged
+            jog     the arg of actions.move.jog: the axis and the way, e.g. Y+, Z-, other+
+  Actions:  actions.move.jog (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<api>
+		<prop name="usable" type="string"/>
+		<prop name="jog" type="string"/>
+	</api>
+	<view extends="ds_button">
+		<style name="action_btn"/>
+		<bind_state_if_eq subject="$usable" state="disabled" ref_value="0"/>
+		<action trigger="clicked" name="actions.move.jog" arg="$jog"/>
+	</view>
+</component>

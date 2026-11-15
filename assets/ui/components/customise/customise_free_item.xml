@@ -1,8 +1,8 @@
 <!--
   The edit overlay over each widget of a free layout while the user customises the screen: as customise_item.xml, with
-  crop-tool handles on the selected widget: a bracket on each corner and a bar on each edge. They show where to drag:
-  <ds_layout> resizes the widget from a drag that starts anywhere near an edge or corner (see DsLayout.h), so they
-  needn't be hit exactly. The theme draws the handles (customise_handle).
+  crop-tool handles on the selected widget: a bracket on each corner (customise_corner_handle.xml) and a bar on each
+  edge (customise_edge_handle.xml). They show where to drag: <ds_layout> resizes the widget from a drag that starts
+  anywhere near an edge or corner (see DsLayout.h), so they needn't be hit exactly.
 -->
 <component>
 	<api>
@@ -10,73 +10,15 @@
 	</api>
 
 	<view extends="customise_item" key="$key">
-		<lv_obj name="handle_nw" align="top_left" width="32" height="32" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="top_left" width="32" height="5" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-			<lv_obj align="top_left" width="5" height="32" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_ne" align="top_right" width="32" height="32" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="top_right" width="32" height="5" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-			<lv_obj align="top_right" width="5" height="32" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_se" align="bottom_right" width="32" height="32" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="bottom_right" width="32" height="5" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-			<lv_obj align="bottom_right" width="5" height="32" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_sw" align="bottom_left" width="32" height="32" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="bottom_left" width="32" height="5" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-			<lv_obj align="bottom_left" width="5" height="32" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_n" align="top_mid" width="48" height="24" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="top_mid" width="32" height="5" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_s" align="bottom_mid" width="48" height="24" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="bottom_mid" width="32" height="5" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_e" align="right_mid" width="24" height="48" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="right_mid" width="5" height="32" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
-		<lv_obj name="handle_w" align="left_mid" width="24" height="48" clickable="false" scrollable="false">
-			<style name="pad_zero"/>
-			<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
-			<lv_obj align="left_mid" width="5" height="32" clickable="false" scrollable="false">
-				<style name="customise_handle"/>
-			</lv_obj>
-		</lv_obj>
+		<customise_corner_handle name="handle_nw" key="$key" corner="top_left"/>
+		<customise_corner_handle name="handle_ne" key="$key" corner="top_right"/>
+		<customise_corner_handle name="handle_se" key="$key" corner="bottom_right"/>
+		<customise_corner_handle name="handle_sw" key="$key" corner="bottom_left"/>
+		<customise_edge_handle name="handle_n" key="$key" edge="top_mid"/>
+		<customise_edge_handle name="handle_s" key="$key" edge="bottom_mid"/>
+		<customise_edge_handle name="handle_e" key="$key" edge="right_mid" width="24" height="48" bar_width="5"
+							   bar_height="32"/>
+		<customise_edge_handle name="handle_w" key="$key" edge="left_mid" width="24" height="48" bar_width="5"
+							   bar_height="32"/>
 	</view>
 </component>

@@ -2997,6 +2997,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`customise`](#home) | `customise` |  | `home` | [customise.xml](../assets/ui/components/customise/customise.xml) |
 | `customise_catalogue_category` |  |  | `customise` | [customise_catalogue_category.xml](../assets/ui/components/customise/customise_catalogue_category.xml) |
 | `customise_catalogue_item` |  |  | `customise_catalogue_category` | [customise_catalogue_item.xml](../assets/ui/components/customise/customise_catalogue_item.xml) |
+| `customise_corner_handle` |  | `key`, `corner` | `customise_free_item` | [customise_corner_handle.xml](../assets/ui/components/customise/customise_corner_handle.xml) |
+| `customise_edge_handle` |  | `key`, `edge`, `bar_width`, `bar_height` | `customise_free_item` | [customise_edge_handle.xml](../assets/ui/components/customise/customise_edge_handle.xml) |
 | [`customise_free_item`](#customise_free_item) |  | `key` |  | [customise_free_item.xml](../assets/ui/components/customise/customise_free_item.xml) |
 | `customise_guide` |  |  |  | [customise_guide.xml](../assets/ui/components/customise/customise_guide.xml) |
 | `customise_item` |  | `key` | `customise_free_item` | [customise_item.xml](../assets/ui/components/customise/customise_item.xml) |
@@ -3052,28 +3054,32 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_track` |  | `value`, `min`, `max`, `target`, `state` | `gauge_bar`, `heater_bar` | [gauge_track.xml](../assets/ui/components/gauge/gauge_track.xml) |
 | `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
+| `hardware_test_answers` |  | `action`, `usable` | `hardware_test` | [hardware_test_answers.xml](../assets/ui/components/hardware_test/hardware_test_answers.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
 | `heater_bar` |  | `heater` | `dashboard_tool_tile_heater`, `dialog_number`, `heater_row` | [heater_bar.xml](../assets/ui/components/common/heater_bar.xml) |
-| `heater_row` |  | `label`, `active`, `standby`, `compact` | `tools_bed_heater`, `tools_chamber_heater`, `tools_tool_heater` | [heater_row.xml](../assets/ui/components/common/heater_row.xml) |
+| `heater_row` |  | `label`, `active`, `standby`, `compact` | `tools_slot_heater`, `tools_tool_heater` | [heater_row.xml](../assets/ui/components/common/heater_row.xml) |
 | [`heightmap`](#heightmap) | `heightmap` |  | `control`, `heightmap` | [heightmap.xml](../assets/ui/components/control/heightmap/heightmap.xml) |
 | [`home`](#home) |  |  |  | [home.xml](../assets/ui/components/home/home.xml) |
 | [`home_main_window`](#home) |  |  | `home` | [home_main_window.xml](../assets/ui/components/home/home_main_window.xml) |
+| `job_control` |  | `control`, `action`, `look` | `dashboard_job_status` | [job_control.xml](../assets/ui/components/dashboard/job_control.xml) |
 | `job_detail` |  | `title_tag`, `value` | `dashboard_job_status` | [job_detail.xml](../assets/ui/components/dashboard/job_detail.xml) |
 | `job_macro` |  |  | `job_ready` | [job_macro.xml](../assets/ui/components/dashboard/job_macro.xml) |
-| `job_override` |  | `title_tag`, `value`, `tap_action`, `shown` | `dashboard_job_status` | [job_override.xml](../assets/ui/components/dashboard/job_override.xml) |
 | [`job_ready`](#job_ready) |  | `macros` | `dashboard_job` | [job_ready.xml](../assets/ui/components/dashboard/job_ready.xml) |
 | `job_recent_row` |  |  | `job_ready` | [job_recent_row.xml](../assets/ui/components/dashboard/job_recent_row.xml) |
+| `list_header` |  | `title` | `temperature`, `value_selector` | [list_header.xml](../assets/ui/components/common/list_header.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
 | `move_axis_choice` |  |  | `move` | [move_axis_choice.xml](../assets/ui/components/control/move/move_axis_choice.xml) |
 | `move_home_axis` |  |  | `move_homing` | [move_home_axis.xml](../assets/ui/components/control/move/move_home_axis.xml) |
 | `move_homing` |  |  | `move` | [move_homing.xml](../assets/ui/components/control/move/move_homing.xml) |
+| `move_jog_button` |  | `usable`, `jog` | `move_axis`, `move_xy` | [move_jog_button.xml](../assets/ui/components/control/move/move_jog_button.xml) |
 | `move_jog_choices` |  |  | `move`, `jog_choices` | [move_jog_choices.xml](../assets/ui/components/control/move/move_jog_choices.xml) |
 | `move_overrides` |  |  | `move` | [move_overrides.xml](../assets/ui/components/control/move/move_overrides.xml) |
 | `move_position` |  |  | `move_positions` | [move_position.xml](../assets/ui/components/control/move/move_position.xml) |
 | `move_positions` |  |  | `move`, `move_positions_card` | [move_positions.xml](../assets/ui/components/control/move/move_positions.xml) |
 | `move_positions_card` |  |  | `axes` | [move_positions_card.xml](../assets/ui/components/control/move/move_positions_card.xml) |
 | `move_work_zero` |  |  | `move` | [move_work_zero.xml](../assets/ui/components/control/move/move_work_zero.xml) |
+| `move_workplace` |  | `number`, `column`, `row` | `move_work_zero` | [move_workplace.xml](../assets/ui/components/control/move/move_workplace.xml) |
 | `move_xy` |  |  | `move`, `move_xy_card` | [move_xy.xml](../assets/ui/components/control/move/move_xy.xml) |
 | `move_xy_card` |  |  | `jog_xy` | [move_xy_card.xml](../assets/ui/components/control/move/move_xy_card.xml) |
 | `move_z_card` |  |  | `jog_z` | [move_z_card.xml](../assets/ui/components/control/move/move_z_card.xml) |
@@ -3081,9 +3087,11 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`notifications`](#home) | `notifications` |  | `home` | [notifications.xml](../assets/ui/components/notifications/notifications.xml) |
 | `notifications_alert_axis` |  |  | `notifications` | [notifications_alert_axis.xml](../assets/ui/components/notifications/notifications_alert_axis.xml) |
 | `notifications_alert_choice` |  |  | `notifications` | [notifications_alert_choice.xml](../assets/ui/components/notifications/notifications_alert_choice.xml) |
+| `notifications_alert_jog` |  | `step` | `notifications_alert_axis` | [notifications_alert_jog.xml](../assets/ui/components/notifications/notifications_alert_jog.xml) |
 | `numpad` |  | `pad` | `dialog_number`, `notifications` | [numpad.xml](../assets/ui/components/dialogs/numpad.xml) |
 | `numpad_key` |  | `key`, `column`, `row`, `pad` | `numpad` | [numpad_key.xml](../assets/ui/components/dialogs/numpad_key.xml) |
 | [`object_cancel`](#object_cancel) | `object_cancel` |  | `control`, `object_cancel` | [object_cancel.xml](../assets/ui/components/control/object_cancel/object_cancel.xml) |
+| `object_cancel_key` |  | `title_tag`, `current`, `cancelled` | `object_cancel` | [object_cancel_key.xml](../assets/ui/components/control/object_cancel/object_cancel_key.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
 | `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `heightmap`, `settings_option`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
@@ -3111,25 +3119,23 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `status_bar_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `status_button`, `status_gcode` | [status_bar_button.xml](../assets/ui/components/status_bar/status_bar_button.xml) |
 | `status_bar_factor_button` |  | `value`, `action`, `icon` | `status_extrusion`, `status_speed` | [status_bar_factor_button.xml](../assets/ui/components/status_bar/status_bar_factor_button.xml) |
 | `temperature` | `temperature` |  | `temperatures` | [temperature.xml](../assets/ui/components/control/temperature/temperature.xml) |
-| `temperature_bed` |  |  | `temperature` | [temperature_bed.xml](../assets/ui/components/control/temperature/temperature_bed.xml) |
-| `temperature_chamber` |  |  | `temperature` | [temperature_chamber.xml](../assets/ui/components/control/temperature/temperature_chamber.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
 | [`temperature_extrusion`](#temperature_extrusion) |  |  | `temperature` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
 | `temperature_heater` |  | `label`, `active`, `standby` | `temperature_heater_card`, `temperature_tool_heater` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
-| `temperature_heater_card` |  | `label_tag` | `temperature_bed`, `temperature_chamber` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
+| `temperature_heater_card` |  | `label_tag` | `temperature` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
 | `temperature_tool_heater` |  |  | `temperature_tool` | [temperature_tool_heater.xml](../assets/ui/components/control/temperature/temperature_tool_heater.xml) |
 | `thumbnail_box` |  | `src` | `dashboard_job_status`, `job_ready`, `job_recent_row` | [thumbnail_box.xml](../assets/ui/components/common/thumbnail_box.xml) |
 | [`tools`](#tools) |  |  | `control` | [tools.xml](../assets/ui/components/control/tools/tools.xml) |
-| `tools_bed_heater` |  | `compact` | `tools_beds` | [tools_bed_heater.xml](../assets/ui/components/control/tools/tools_bed_heater.xml) |
 | `tools_beds` |  | `compact` | `dashboard_tools`, `tools_list` | [tools_beds.xml](../assets/ui/components/control/tools/tools_beds.xml) |
-| `tools_chamber_heater` |  | `compact` | `tools_beds` | [tools_chamber_heater.xml](../assets/ui/components/control/tools/tools_chamber_heater.xml) |
 | `tools_current` |  |  | `tools` | [tools_current.xml](../assets/ui/components/control/tools/tools_current.xml) |
 | `tools_extrusion_factor` |  |  | `tools_current` | [tools_extrusion_factor.xml](../assets/ui/components/control/tools/tools_extrusion_factor.xml) |
 | `tools_list` |  | `compact` | `dashboard_tools`, `tools` | [tools_list.xml](../assets/ui/components/control/tools/tools_list.xml) |
+| `tools_slot_heater` |  | `label_tag`, `compact` | `tools_beds` | [tools_slot_heater.xml](../assets/ui/components/control/tools/tools_slot_heater.xml) |
 | `tools_spindle_preset` |  |  | `tools_current` | [tools_spindle_preset.xml](../assets/ui/components/control/tools/tools_spindle_preset.xml) |
 | `tools_tool` |  | `compact` | `dashboard_current_tool`, `dashboard_tool_card`, `dashboard_tools`, `tools_list` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  | `compact` | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
+| `value_button` |  | `title_tag`, `value`, `value_style` | `dashboard_job_status`, `heater_row` | [value_button.xml](../assets/ui/components/common/value_button.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  | `format` | `value_selector_presets` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |
 | `value_selector_presets` |  | `choices` | `babystep`, `move_jog_choices`, `tools_current`, `value_selector` | [value_selector_presets.xml](../assets/ui/components/common/value_selector_presets.xml) |

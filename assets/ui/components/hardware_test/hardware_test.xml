@@ -11,8 +11,6 @@
 		<!-- Not plain black: the panel drops the low bits, and content fades away on black -->
 		<style name="hardware_test_bg" bg_color="0x111111" bg_opa="100%"/>
 		<style name="hardware_test_stage" width="100%" height="100%" pad_all="0" border_width="0" radius="0"/>
-		<style name="hardware_test_yes" bg_color="0x4caf50" bg_grad_dir="none"/>
-		<style name="hardware_test_no" bg_color="0xf44336" bg_grad_dir="none"/>
 	</styles>
 
 	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
@@ -55,13 +53,13 @@
 			<style name="hardware_test_stage"/>
 			<style name="hardware_test_bg"/>
 			<bind_flag_if_not_eq subject="presenter.stage" flag="hidden" ref_value="colours"/>
-			<lv_obj name="fail_half" height="100%" flex_grow="1" style_bg_opa="0" style_border_width="0">
+			<lv_obj name="fail_half" height="100%" flex_grow="1">
 				<lv_label name="hint" text="Check for dead pixels" align="top_left"/>
 				<lv_label name="fail" text="Fail" align="center"/>
 			</lv_obj>
 			<lv_obj name="divider" width="2" height="100%" style_bg_color="0xffffff" style_bg_opa="100%"
 					style_border_width="0" style_radius="0"/>
-			<lv_obj name="pass_half" height="100%" flex_grow="1" style_bg_opa="0" style_border_width="0">
+			<lv_obj name="pass_half" height="100%" flex_grow="1">
 				<lv_label name="pass" text="Pass" align="center"/>
 			</lv_obj>
 			<ds_button name="start" text="Start" width="20%" height="20%" floating="true" align="center">
@@ -108,16 +106,8 @@
 			<style name="hardware_test_bg"/>
 			<bind_flag_if_not_eq subject="presenter.stage" flag="hidden" ref_value="buzzer"/>
 			<lv_label name="question" text="Did you hear a sound?"/>
-			<lv_obj name="answers" width="50%" height="50%" flex_flow="row" style_bg_opa="0" style_border_width="0">
-				<ds_button name="no" text="No" height="100%" flex_grow="1">
-					<style name="hardware_test_no"/>
-					<action trigger="clicked" name="presenter.hardware_test.buzzer_heard" arg="0"/>
-				</ds_button>
-				<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
-					<style name="hardware_test_yes"/>
-					<action trigger="clicked" name="presenter.hardware_test.buzzer_heard" arg="1"/>
-				</ds_button>
-			</lv_obj>
+			<hardware_test_answers name="answers" action="presenter.hardware_test.buzzer_heard" width="50%"
+								   height="50%"/>
 			<ds_button name="play_again" text="Play Again" width="30%" height="20%">
 				<action trigger="clicked" name="presenter.hardware_test.play_buzzer"/>
 			</ds_button>
@@ -132,19 +122,8 @@
 			<lv_label name="message" bind_text="presenter.message"/>
 			<ds_textarea name="output" bind_text="presenter.output" keyboard="none" clickable="false" style_text_align="left" width="70%"
 						 flex_grow="3"/>
-			<lv_obj name="answers" width="50%" flex_grow="1" flex_flow="row" style_bg_opa="0"
-					style_border_width="0">
-				<ds_button name="no" text="No" height="100%" flex_grow="1">
-					<style name="hardware_test_no"/>
-					<bind_state_if_eq subject="presenter.speaker_answerable" state="disabled" ref_value="0"/>
-					<action trigger="clicked" name="presenter.hardware_test.speaker_heard" arg="0"/>
-				</ds_button>
-				<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
-					<style name="hardware_test_yes"/>
-					<bind_state_if_eq subject="presenter.speaker_answerable" state="disabled" ref_value="0"/>
-					<action trigger="clicked" name="presenter.hardware_test.speaker_heard" arg="1"/>
-				</ds_button>
-			</lv_obj>
+			<hardware_test_answers name="answers" action="presenter.hardware_test.speaker_heard"
+								   usable="presenter.speaker_answerable" width="50%" flex_grow="1"/>
 			<ds_button name="play_sound" text="Play Sound" width="30%" height="20%">
 				<action trigger="clicked" name="presenter.hardware_test.play_speaker"/>
 			</ds_button>
@@ -164,8 +143,7 @@
 			<lv_label name="failed_title" text="Failed Tests" width="100%"/>
 			<ds_list name="failed" list="presenter.failed" item="hardware_test_result" width="100%" flex_grow="1"
 					 flex_flow="row"/>
-			<lv_obj name="buttons" width="50%" height="content" flex_flow="row" style_bg_opa="0"
-					style_border_width="0">
+			<lv_obj name="buttons" width="50%" height="content" flex_flow="row">
 				<ds_button name="restart" text="Restart" height="content" flex_grow="1">
 					<action trigger="clicked" name="presenter.hardware_test.restart"/>
 				</ds_button>

@@ -81,47 +81,38 @@
 			</lv_obj>
 		</lv_obj>
 
-		<!-- The overrides, each tapped to change it; extrusion and Z offset only on a printer -->
+		<!-- The overrides (value_button.xml), each tapped to change it; extrusion and Z offset only on a printer -->
 		<lv_obj name="overrides" width="100%" height="content" flex_flow="row" scrollable="false">
 			<style name="pad_zero"/>
 			<style name="pad_gap"/>
-			<job_override name="speed_multiplier" title_tag="tr.job.speed" value="source.move.speed_factor"
-						  tap_action="actions.factors.speed"/>
-			<job_override name="flow_multiplier" title_tag="tr.job.extrusion" value="source.move.extrusion_factor"
-						  tap_action="actions.factors.extrusion" shown="om.state.machineMode|eq:FFF"/>
-			<job_override name="babystep_button" title_tag="tr.job.z_offset" value="source.move.babystep"
-						  tap_action="actions.babystep.open" shown="om.state.machineMode|eq:FFF"/>
+			<value_button name="speed_override" title_tag="tr.job.speed" value="source.move.speed_factor"
+						  value_style="text_emphasis" width="1" flex_grow="1">
+				<action trigger="clicked" name="actions.factors.speed"/>
+			</value_button>
+			<value_button name="extrusion_override" title_tag="tr.job.extrusion" value="source.move.extrusion_factor"
+						  value_style="text_emphasis" width="1" flex_grow="1">
+				<bind_flag_if cond="not (om.state.machineMode|eq:FFF)" flag="hidden"/>
+				<action trigger="clicked" name="actions.factors.extrusion"/>
+			</value_button>
+			<value_button name="z_offset_override" title_tag="tr.job.z_offset" value="source.move.babystep"
+						  value_style="text_emphasis" width="1" flex_grow="1">
+				<bind_flag_if cond="not (om.state.machineMode|eq:FFF)" flag="hidden"/>
+				<action trigger="clicked" name="actions.babystep.open"/>
+			</value_button>
 		</lv_obj>
 
-		<!-- Job controls: each is hidden (0), disabled (1) or usable (2) -->
-		<lv_obj name="footer" width="100%" height="content" flex_flow="row" scrollable="false">
+		<!-- Job controls: each is hidden (0), disabled (1) or usable (2) (job_control.xml) -->
+		<lv_obj name="controls" width="100%" height="content" flex_flow="row" scrollable="false">
 			<style name="pad_zero"/>
 			<style name="pad_gap"/>
-			<ds_button name="pause" translation_tag="tr.status.pause" icon="pause.png" height="56" flex_grow="1">
-				<style name="action_btn"/>
-				<bind_flag_if_eq subject="source.job.pause_control" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="source.job.pause_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="actions.job.pause"/>
-			</ds_button>
-			<ds_button name="resume" translation_tag="tr.status.resume" icon="resume.png" height="56" flex_grow="1">
-				<style name="action_btn"/>
-				<bind_flag_if_eq subject="source.job.resume_control" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="source.job.resume_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="actions.job.resume"/>
-			</ds_button>
-			<ds_button name="print_again" translation_tag="tr.status.print_again" icon="print_again.png" height="56"
-					   flex_grow="1">
-				<style name="action_btn"/>
-				<bind_flag_if_eq subject="source.job.print_again_control" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="source.job.print_again_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="actions.job.print_again"/>
-			</ds_button>
-			<ds_button name="cancel" translation_tag="tr.job.cancel" height="56" flex_grow="1">
-				<style name="danger_outline_btn"/>
-				<bind_flag_if_eq subject="source.job.cancel_control" flag="hidden" ref_value="0"/>
-				<bind_state_if_not_eq subject="source.job.cancel_control" state="disabled" ref_value="2"/>
-				<action trigger="clicked" name="actions.job.ask_cancel"/>
-			</ds_button>
+			<job_control name="pause" translation_tag="tr.status.pause" icon="pause.png"
+						 control="source.job.pause_control" action="actions.job.pause"/>
+			<job_control name="resume" translation_tag="tr.status.resume" icon="resume.png"
+						 control="source.job.resume_control" action="actions.job.resume"/>
+			<job_control name="print_again" translation_tag="tr.status.print_again" icon="print_again.png"
+						 control="source.job.print_again_control" action="actions.job.print_again"/>
+			<job_control name="cancel" translation_tag="tr.job.cancel" control="source.job.cancel_control"
+						 action="actions.job.ask_cancel" look="danger_outline_btn"/>
 		</lv_obj>
 	</view>
 </component>

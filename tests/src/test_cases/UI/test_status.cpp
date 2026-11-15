@@ -81,8 +81,8 @@ TEST_F(TestStatus, ThumbnailGoesBesideTheNameWhereThereIsNoRoomAbove)
 	lv_obj_t* card = lv_obj_find_by_name(root, "job");
 	EXPECT_GE(lv_obj_get_y(lv_obj_find_by_name(card, "header")), 0);
 	EXPECT_EQ(lv_obj_get_scroll_bottom(root), 0);
-	lv_obj_t* footer = lv_obj_find_by_name(root, "footer");
-	EXPECT_LE(lv_obj_get_y(footer) + lv_obj_get_height(footer), lv_obj_get_content_height(root));
+	lv_obj_t* controls = lv_obj_find_by_name(root, "controls");
+	EXPECT_LE(lv_obj_get_y(controls) + lv_obj_get_height(controls), lv_obj_get_content_height(root));
 	EXPECT_EQUAL_SCREENSHOT("status_view/thumbnail_squeezed.png");
 }
 

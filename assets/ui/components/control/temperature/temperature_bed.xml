@@ -1,8 +1,0 @@
-<!--
-  A bed on the Temperature tab (temperature_heater_card.xml), named for its sensor, else "Bed <number>".
-
-  Fields:   a row of om.heat.bedHeaters
--->
-<component>
-	<view extends="temperature_heater_card" label_tag="tr.temperature.bed_number"/>
-</component>

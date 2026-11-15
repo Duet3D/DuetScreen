@@ -714,6 +714,8 @@
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
+			<xs:enumeration value="customise_corner_handle"/>
+			<xs:enumeration value="customise_edge_handle"/>
 			<xs:enumeration value="customise_free_item"/>
 			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_item"/>
@@ -769,28 +771,32 @@
 			<xs:enumeration value="gauge_track"/>
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
+			<xs:enumeration value="hardware_test_answers"/>
 			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_control"/>
 			<xs:enumeration value="job_detail"/>
 			<xs:enumeration value="job_macro"/>
-			<xs:enumeration value="job_override"/>
 			<xs:enumeration value="job_ready"/>
 			<xs:enumeration value="job_recent_row"/>
+			<xs:enumeration value="list_header"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
 			<xs:enumeration value="move_home_axis"/>
 			<xs:enumeration value="move_homing"/>
+			<xs:enumeration value="move_jog_button"/>
 			<xs:enumeration value="move_jog_choices"/>
 			<xs:enumeration value="move_overrides"/>
 			<xs:enumeration value="move_position"/>
 			<xs:enumeration value="move_positions"/>
 			<xs:enumeration value="move_positions_card"/>
 			<xs:enumeration value="move_work_zero"/>
+			<xs:enumeration value="move_workplace"/>
 			<xs:enumeration value="move_xy"/>
 			<xs:enumeration value="move_xy_card"/>
 			<xs:enumeration value="move_z_card"/>
@@ -798,9 +804,11 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="notifications_alert_jog"/>
 			<xs:enumeration value="numpad"/>
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="object_cancel_key"/>
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="option_button"/>
@@ -828,8 +836,6 @@
 			<xs:enumeration value="status_bar_button"/>
 			<xs:enumeration value="status_bar_factor_button"/>
 			<xs:enumeration value="temperature"/>
-			<xs:enumeration value="temperature_bed"/>
-			<xs:enumeration value="temperature_chamber"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_heater"/>
@@ -838,15 +844,15 @@
 			<xs:enumeration value="temperature_tool_heater"/>
 			<xs:enumeration value="thumbnail_box"/>
 			<xs:enumeration value="tools"/>
-			<xs:enumeration value="tools_bed_heater"/>
 			<xs:enumeration value="tools_beds"/>
-			<xs:enumeration value="tools_chamber_heater"/>
 			<xs:enumeration value="tools_current"/>
 			<xs:enumeration value="tools_extrusion_factor"/>
 			<xs:enumeration value="tools_list"/>
+			<xs:enumeration value="tools_slot_heater"/>
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 			<xs:enumeration value="value_selector_presets"/>
@@ -873,6 +879,8 @@
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
+			<xs:enumeration value="customise_corner_handle"/>
+			<xs:enumeration value="customise_edge_handle"/>
 			<xs:enumeration value="customise_free_item"/>
 			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_item"/>
@@ -928,28 +936,32 @@
 			<xs:enumeration value="gauge_track"/>
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
+			<xs:enumeration value="hardware_test_answers"/>
 			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_control"/>
 			<xs:enumeration value="job_detail"/>
 			<xs:enumeration value="job_macro"/>
-			<xs:enumeration value="job_override"/>
 			<xs:enumeration value="job_ready"/>
 			<xs:enumeration value="job_recent_row"/>
+			<xs:enumeration value="list_header"/>
 			<xs:enumeration value="move"/>
 			<xs:enumeration value="move_axis"/>
 			<xs:enumeration value="move_axis_choice"/>
 			<xs:enumeration value="move_home_axis"/>
 			<xs:enumeration value="move_homing"/>
+			<xs:enumeration value="move_jog_button"/>
 			<xs:enumeration value="move_jog_choices"/>
 			<xs:enumeration value="move_overrides"/>
 			<xs:enumeration value="move_position"/>
 			<xs:enumeration value="move_positions"/>
 			<xs:enumeration value="move_positions_card"/>
 			<xs:enumeration value="move_work_zero"/>
+			<xs:enumeration value="move_workplace"/>
 			<xs:enumeration value="move_xy"/>
 			<xs:enumeration value="move_xy_card"/>
 			<xs:enumeration value="move_z_card"/>
@@ -957,9 +969,11 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="notifications_alert_jog"/>
 			<xs:enumeration value="numpad"/>
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="object_cancel_key"/>
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="option_button"/>
@@ -987,8 +1001,6 @@
 			<xs:enumeration value="status_bar_button"/>
 			<xs:enumeration value="status_bar_factor_button"/>
 			<xs:enumeration value="temperature"/>
-			<xs:enumeration value="temperature_bed"/>
-			<xs:enumeration value="temperature_chamber"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_heater"/>
@@ -997,15 +1009,15 @@
 			<xs:enumeration value="temperature_tool_heater"/>
 			<xs:enumeration value="thumbnail_box"/>
 			<xs:enumeration value="tools"/>
-			<xs:enumeration value="tools_bed_heater"/>
 			<xs:enumeration value="tools_beds"/>
-			<xs:enumeration value="tools_chamber_heater"/>
 			<xs:enumeration value="tools_current"/>
 			<xs:enumeration value="tools_extrusion_factor"/>
 			<xs:enumeration value="tools_list"/>
+			<xs:enumeration value="tools_slot_heater"/>
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 			<xs:enumeration value="value_selector_presets"/>
@@ -1032,6 +1044,8 @@
 			<xs:enumeration value="customise"/>
 			<xs:enumeration value="customise_catalogue_category"/>
 			<xs:enumeration value="customise_catalogue_item"/>
+			<xs:enumeration value="customise_corner_handle"/>
+			<xs:enumeration value="customise_edge_handle"/>
 			<xs:enumeration value="customise_free_item"/>
 			<xs:enumeration value="customise_guide"/>
 			<xs:enumeration value="customise_item"/>
@@ -1122,17 +1136,19 @@
 			<xs:enumeration value="gauge_track"/>
 			<xs:enumeration value="gauge_value"/>
 			<xs:enumeration value="hardware_test"/>
+			<xs:enumeration value="hardware_test_answers"/>
 			<xs:enumeration value="hardware_test_result"/>
 			<xs:enumeration value="heater_bar"/>
 			<xs:enumeration value="heater_row"/>
 			<xs:enumeration value="heightmap"/>
 			<xs:enumeration value="home"/>
 			<xs:enumeration value="home_main_window"/>
+			<xs:enumeration value="job_control"/>
 			<xs:enumeration value="job_detail"/>
 			<xs:enumeration value="job_macro"/>
-			<xs:enumeration value="job_override"/>
 			<xs:enumeration value="job_ready"/>
 			<xs:enumeration value="job_recent_row"/>
+			<xs:enumeration value="list_header"/>
 			<xs:enumeration value="lv_arc"/>
 			<xs:enumeration value="lv_bar"/>
 			<xs:enumeration value="lv_button"/>
@@ -1163,12 +1179,14 @@
 			<xs:enumeration value="move_axis_choice"/>
 			<xs:enumeration value="move_home_axis"/>
 			<xs:enumeration value="move_homing"/>
+			<xs:enumeration value="move_jog_button"/>
 			<xs:enumeration value="move_jog_choices"/>
 			<xs:enumeration value="move_overrides"/>
 			<xs:enumeration value="move_position"/>
 			<xs:enumeration value="move_positions"/>
 			<xs:enumeration value="move_positions_card"/>
 			<xs:enumeration value="move_work_zero"/>
+			<xs:enumeration value="move_workplace"/>
 			<xs:enumeration value="move_xy"/>
 			<xs:enumeration value="move_xy_card"/>
 			<xs:enumeration value="move_z_card"/>
@@ -1176,9 +1194,11 @@
 			<xs:enumeration value="notifications"/>
 			<xs:enumeration value="notifications_alert_axis"/>
 			<xs:enumeration value="notifications_alert_choice"/>
+			<xs:enumeration value="notifications_alert_jog"/>
 			<xs:enumeration value="numpad"/>
 			<xs:enumeration value="numpad_key"/>
 			<xs:enumeration value="object_cancel"/>
+			<xs:enumeration value="object_cancel_key"/>
 			<xs:enumeration value="object_cancel_outline"/>
 			<xs:enumeration value="object_cancel_row"/>
 			<xs:enumeration value="option_button"/>
@@ -1207,8 +1227,6 @@
 			<xs:enumeration value="status_bar_button"/>
 			<xs:enumeration value="status_bar_factor_button"/>
 			<xs:enumeration value="temperature"/>
-			<xs:enumeration value="temperature_bed"/>
-			<xs:enumeration value="temperature_chamber"/>
 			<xs:enumeration value="temperature_extruder"/>
 			<xs:enumeration value="temperature_extrusion"/>
 			<xs:enumeration value="temperature_heater"/>
@@ -1217,15 +1235,15 @@
 			<xs:enumeration value="temperature_tool_heater"/>
 			<xs:enumeration value="thumbnail_box"/>
 			<xs:enumeration value="tools"/>
-			<xs:enumeration value="tools_bed_heater"/>
 			<xs:enumeration value="tools_beds"/>
-			<xs:enumeration value="tools_chamber_heater"/>
 			<xs:enumeration value="tools_current"/>
 			<xs:enumeration value="tools_extrusion_factor"/>
 			<xs:enumeration value="tools_list"/>
+			<xs:enumeration value="tools_slot_heater"/>
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
 			<xs:enumeration value="value_selector_presets"/>
@@ -3219,6 +3237,28 @@
 			<xs:annotation><xs:documentation>Prop `keyboard` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="customise_corner_handle.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="corner" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `corner` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="customise_edge_handle.attributes">
+		<xs:attribute name="key" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="edge" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `edge` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bar_width" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `bar_width` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bar_height" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `bar_height` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="customise_free_item.attributes">
 		<xs:attribute name="key" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `key` (string)</xs:documentation></xs:annotation>
@@ -4297,6 +4337,14 @@
 			<xs:annotation><xs:documentation>Prop `hold_arg` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="hardware_test_answers.attributes">
+		<xs:attribute name="action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="usable" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `usable` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="heater_bar.attributes">
 		<xs:attribute name="heater" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `heater` (string)</xs:documentation></xs:annotation>
@@ -4316,6 +4364,17 @@
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="job_control.attributes">
+		<xs:attribute name="control" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `control` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="action" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `action` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="look" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `look` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="job_detail.attributes">
 		<xs:attribute name="title_tag" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
@@ -4324,23 +4383,14 @@
 			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="job_override.attributes">
-		<xs:attribute name="title_tag" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="value" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="tap_action" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `tap_action` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-		<xs:attribute name="shown" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-	</xs:attributeGroup>
 	<xs:attributeGroup name="job_ready.attributes">
 		<xs:attribute name="macros" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `macros` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="list_header.attributes">
+		<xs:attribute name="title" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_arc.attributes">
@@ -5847,6 +5897,30 @@
 			<xs:annotation><xs:documentation>Prop `minus` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="move_jog_button.attributes">
+		<xs:attribute name="usable" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `usable` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="jog" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `jog` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="move_workplace.attributes">
+		<xs:attribute name="number" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `number` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="column" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `column` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="row" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `row` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="notifications_alert_jog.attributes">
+		<xs:attribute name="step" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `step` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="numpad.attributes">
 		<xs:attribute name="pad" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `pad` (string)</xs:documentation></xs:annotation>
@@ -5864,6 +5938,17 @@
 		</xs:attribute>
 		<xs:attribute name="pad" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `pad` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="object_cancel_key.attributes">
+		<xs:attribute name="title_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="current" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `current` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="cancelled" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `cancelled` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="option_button.attributes">
@@ -6391,22 +6476,20 @@
 			<xs:annotation><xs:documentation>Prop `src` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="tools_bed_heater.attributes">
-		<xs:attribute name="compact" type="xs:string">
-			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
-		</xs:attribute>
-	</xs:attributeGroup>
 	<xs:attributeGroup name="tools_beds.attributes">
 		<xs:attribute name="compact" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="tools_chamber_heater.attributes">
+	<xs:attributeGroup name="tools_list.attributes">
 		<xs:attribute name="compact" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
-	<xs:attributeGroup name="tools_list.attributes">
+	<xs:attributeGroup name="tools_slot_heater.attributes">
+		<xs:attribute name="label_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `label_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="compact" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -6419,6 +6502,17 @@
 	<xs:attributeGroup name="tools_tool_heater.attributes">
 		<xs:attribute name="compact" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `compact` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="value_button.attributes">
+		<xs:attribute name="title_tag" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `title_tag` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="value_style" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `value_style` (string)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="value_selector.attributes">
@@ -9181,6 +9275,24 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="customise_corner_handle">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_corner_handle.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="customise_corner_handle.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="customise_edge_handle">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_edge_handle.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="customise_edge_handle.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="customise_free_item">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/customise/customise_free_item.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -11539,6 +11651,15 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="hardware_test_answers">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/hardware_test/hardware_test_answers.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="hardware_test_answers.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="hardware_test_result">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/hardware_test/hardware_test_result.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -11587,6 +11708,528 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="job_control">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_control.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="job_control.attributes"/>
+			<xs:attributeGroup ref="ds_button.attributes"/>
+			<xs:attribute name="name" type="xs:string">
+				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x" type="size">
+				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y" type="size">
+				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="align" type="lv_align">
+				<xs:annotation><xs:documentation>Align on parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_click_area" type="xs:string">
+				<xs:annotation><xs:documentation>Extra clickable area around object in px</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_x" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children horizontally</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_y" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children vertically</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollbar_mode" type="lv_scrollbar_mode">
+				<xs:annotation><xs:documentation>Set the scrollbar mode</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_dir" type="lv_dir">
+				<xs:annotation><xs:documentation>Directions the object can be scrolled in</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_draw_size" type="xs:string">
+				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_height" type="size">
+				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_height" type="size">
+				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_width" type="size">
+				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_width" type="size">
+				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_length" type="size">
+				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the top from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the bottom from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the left from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the right from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_row" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between rows of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_column" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between columns of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set both the row and the column padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance above the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance below the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the left of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the right of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radius" type="radius">
+				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radial_offset" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial offset (e.g. on ticks of circular scales). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_align" type="lv_align">
+				<xs:annotation><xs:documentation>Set alignment on the parent. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_clip_corner" type="bool">
+				<xs:annotation><xs:documentation>Enable corner clipping. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_base_dir" type="lv_base_dir">
+				<xs:annotation><xs:documentation>Set base text dir. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set bg color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set background opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_dir" type="lv_grad_dir">
+				<xs:annotation><xs:documentation>Set background gradient type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad" type="xs:string">
+				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_src" type="image">
+				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_tiled" type="bool">
+				<xs:annotation><xs:documentation>Tile background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor the background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set the recolor intensity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set border color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set border width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set border opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_side" type="lv_border_side">
+				<xs:annotation><xs:documentation>Set border sides. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_post" type="bool">
+				<xs:annotation><xs:documentation>Draw border after content. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_pad" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow size. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow X offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow Y offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_spread" type="xs:string">
+				<xs:annotation><xs:documentation>Assume that the base rectangle is larger by this. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set text color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_font" type="font">
+				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_align" type="lv_text_align">
+				<xs:annotation><xs:documentation>Set text align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_letter_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set letter spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_line_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set line spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_decor" type="lv_text_decor">
+				<xs:annotation><xs:documentation>Set text decor. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set image opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set recolor opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set line width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set line color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set line opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash gap. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round line ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_image_src" type="image">
+				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_layout" type="lv_layout">
+				<xs:annotation><xs:documentation>Set layout type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set how flex should flow the children (row, column, etc). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_main_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set main axis align (horizontal with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_cross_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set cross axis align (vertical with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_track_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set track align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set column descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set row descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the columns. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the rows. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's column. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many columns the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_x_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell horizontally. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's row. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many rows the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_y_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell vertically. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Scale down the opacity of the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa_layered" type="xs:string">
+				<xs:annotation><xs:documentation>Create a snapshot from the widget and blend it with opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_anim_duration" type="xs:string">
+				<xs:annotation><xs:documentation>Set animation duration in ms (e.g. for label scroll). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blend_mode" type="lv_blend_mode">
+				<xs:annotation><xs:documentation>Set how to blend colors. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_width" type="xs:string">
+				<xs:annotation><xs:documentation>Change the width without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_height" type="xs:string">
+				<xs:annotation><xs:documentation>Change the height without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_x" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in X after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_y" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in Y after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Translate radial. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_x" type="xs:string">
+				<xs:annotation><xs:documentation>Scale X (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_y" type="xs:string">
+				<xs:annotation><xs:documentation>Scale Y (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_rotation" type="xs:string">
+				<xs:annotation><xs:documentation>Rotate (0.1° units). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot X. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot Y. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_x" type="xs:string">
+				<xs:annotation><xs:documentation>Skew X (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_y" type="xs:string">
+				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bitmap_mask_src" type="image">
+				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
+				<xs:annotation><xs:documentation>Set rotary sensitivity for Crown input devices. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Mix this color to the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of recoloring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_color_filter_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of the color filter. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_radius" type="xs:string">
+				<xs:annotation><xs:documentation>The radius of the blurring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_quality" type="xs:string">
+				<xs:annotation><xs:documentation>Set whether to prefer speed or precision. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_backdrop" type="bool">
+				<xs:annotation><xs:documentation>true: blur the background first, false: blur the widget. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set flex flow direction (row, column, etc.)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="checked" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as checked (e.g. switch or checkbox)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focused" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focus_key" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused via key navigation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="edited" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being edited (e.g. text input)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hovered" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as hovered by a pointer</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="pressed" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as pressed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrolled" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being scrolled</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="disabled" type="bool">
+				<xs:annotation><xs:documentation>Disable widget interaction</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden" type="bool">
+				<xs:annotation><xs:documentation>Make the object hidden. (Like it wasn't there at all)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="clickable" type="bool">
+				<xs:annotation><xs:documentation>Make the object clickable by the input devices</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="click_focusable" type="bool">
+				<xs:annotation><xs:documentation>Add focused state to the object when clicked</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollable" type="bool">
+				<xs:annotation><xs:documentation>Make the object scrollable</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_elastic" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling inside but with slower speed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_momentum" type="bool">
+				<xs:annotation><xs:documentation>Make the object scroll further when 'thrown'</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_one" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling only one snappable children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_hor" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the horizontal scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_ver" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the vertical scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain" type="bool">
+				<xs:annotation><xs:documentation>SCROLL_CHAIN_HOR and SCROLL_CHAIN_VER</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_on_focus" type="bool">
+				<xs:annotation><xs:documentation>Automatically scroll object to make it visible when focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_with_arrow" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling the focused object with arrow keys</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="snappable" type="bool">
+				<xs:annotation><xs:documentation>If scroll snap is enabled on the parent it can snap to this object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="press_lock" type="bool">
+				<xs:annotation><xs:documentation>Keep the object pressed even if the press slid from the object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the events to the parent too</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_trickle" type="bool">
+				<xs:annotation><xs:documentation>Send events to children first</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state_trickle" type="bool">
+				<xs:annotation><xs:documentation>Propagate state changes to children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="gesture_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the gestures to the parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="adv_hittest" type="bool">
+				<xs:annotation><xs:documentation>Allow performing more accurate hit (click) test. E.g. consider rounded corners.</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ignore_layout" type="bool">
+				<xs:annotation><xs:documentation>Make the object not positioned by the layouts</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="floating" type="bool">
+				<xs:annotation><xs:documentation>Do not scroll the object when the parent scrolls and ignore layout</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="send_draw_task_events" type="bool">
+				<xs:annotation><xs:documentation>Send `LV_EVENT_DRAW_TASK_ADDED` events</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="overflow_visible" type="bool">
+				<xs:annotation><xs:documentation>Do not clip the children to the parent's ext draw size</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="radio_button" type="bool">
+				<xs:annotation><xs:documentation>Allow only one radio_button sibling to be checked (can't be bound: LVGL 9.6 gives it no flag bit)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_in_new_track" type="bool">
+				<xs:annotation><xs:documentation>Start a new flex track on this item</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_checked" type="subject">
+				<xs:annotation><xs:documentation>Bind widget’s checked state to a subject</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object when the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_not_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object unless the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_empty" type="xs:string">
+				<xs:annotation><xs:documentation>Hide the object when the value, typically a `$prop`, is empty. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="moves_machine" type="bool">
+				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
@@ -12120,15 +12763,6 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="job_override">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_override.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="job_override.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="job_ready">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_ready.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -12142,6 +12776,15 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_recent_row.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="list_header">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/list_header.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="list_header.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -13209,7 +13852,530 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_homing.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_setting_group.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_jog_button">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_jog_button.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="move_jog_button.attributes"/>
+			<xs:attributeGroup ref="ds_button.attributes"/>
+			<xs:attribute name="name" type="xs:string">
+				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x" type="size">
+				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y" type="size">
+				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="align" type="lv_align">
+				<xs:annotation><xs:documentation>Align on parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_click_area" type="xs:string">
+				<xs:annotation><xs:documentation>Extra clickable area around object in px</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_x" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children horizontally</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_y" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children vertically</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollbar_mode" type="lv_scrollbar_mode">
+				<xs:annotation><xs:documentation>Set the scrollbar mode</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_dir" type="lv_dir">
+				<xs:annotation><xs:documentation>Directions the object can be scrolled in</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_draw_size" type="xs:string">
+				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_height" type="size">
+				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_height" type="size">
+				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_width" type="size">
+				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_width" type="size">
+				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_length" type="size">
+				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the top from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the bottom from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the left from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the right from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_row" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between rows of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_column" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between columns of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set both the row and the column padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance above the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance below the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the left of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the right of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radius" type="radius">
+				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radial_offset" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial offset (e.g. on ticks of circular scales). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_align" type="lv_align">
+				<xs:annotation><xs:documentation>Set alignment on the parent. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_clip_corner" type="bool">
+				<xs:annotation><xs:documentation>Enable corner clipping. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_base_dir" type="lv_base_dir">
+				<xs:annotation><xs:documentation>Set base text dir. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set bg color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set background opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_dir" type="lv_grad_dir">
+				<xs:annotation><xs:documentation>Set background gradient type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad" type="xs:string">
+				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_src" type="image">
+				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_tiled" type="bool">
+				<xs:annotation><xs:documentation>Tile background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor the background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set the recolor intensity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set border color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set border width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set border opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_side" type="lv_border_side">
+				<xs:annotation><xs:documentation>Set border sides. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_post" type="bool">
+				<xs:annotation><xs:documentation>Draw border after content. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_pad" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow size. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow X offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow Y offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_spread" type="xs:string">
+				<xs:annotation><xs:documentation>Assume that the base rectangle is larger by this. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set text color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_font" type="font">
+				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_align" type="lv_text_align">
+				<xs:annotation><xs:documentation>Set text align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_letter_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set letter spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_line_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set line spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_decor" type="lv_text_decor">
+				<xs:annotation><xs:documentation>Set text decor. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set image opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set recolor opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set line width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set line color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set line opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash gap. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round line ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_image_src" type="image">
+				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_layout" type="lv_layout">
+				<xs:annotation><xs:documentation>Set layout type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set how flex should flow the children (row, column, etc). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_main_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set main axis align (horizontal with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_cross_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set cross axis align (vertical with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_track_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set track align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set column descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set row descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the columns. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the rows. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's column. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many columns the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_x_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell horizontally. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's row. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many rows the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_y_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell vertically. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Scale down the opacity of the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa_layered" type="xs:string">
+				<xs:annotation><xs:documentation>Create a snapshot from the widget and blend it with opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_anim_duration" type="xs:string">
+				<xs:annotation><xs:documentation>Set animation duration in ms (e.g. for label scroll). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blend_mode" type="lv_blend_mode">
+				<xs:annotation><xs:documentation>Set how to blend colors. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_width" type="xs:string">
+				<xs:annotation><xs:documentation>Change the width without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_height" type="xs:string">
+				<xs:annotation><xs:documentation>Change the height without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_x" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in X after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_y" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in Y after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Translate radial. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_x" type="xs:string">
+				<xs:annotation><xs:documentation>Scale X (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_y" type="xs:string">
+				<xs:annotation><xs:documentation>Scale Y (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_rotation" type="xs:string">
+				<xs:annotation><xs:documentation>Rotate (0.1° units). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot X. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot Y. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_x" type="xs:string">
+				<xs:annotation><xs:documentation>Skew X (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_y" type="xs:string">
+				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bitmap_mask_src" type="image">
+				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
+				<xs:annotation><xs:documentation>Set rotary sensitivity for Crown input devices. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Mix this color to the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of recoloring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_color_filter_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of the color filter. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_radius" type="xs:string">
+				<xs:annotation><xs:documentation>The radius of the blurring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_quality" type="xs:string">
+				<xs:annotation><xs:documentation>Set whether to prefer speed or precision. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_backdrop" type="bool">
+				<xs:annotation><xs:documentation>true: blur the background first, false: blur the widget. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set flex flow direction (row, column, etc.)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="checked" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as checked (e.g. switch or checkbox)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focused" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focus_key" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused via key navigation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="edited" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being edited (e.g. text input)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hovered" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as hovered by a pointer</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="pressed" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as pressed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrolled" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being scrolled</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="disabled" type="bool">
+				<xs:annotation><xs:documentation>Disable widget interaction</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden" type="bool">
+				<xs:annotation><xs:documentation>Make the object hidden. (Like it wasn't there at all)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="clickable" type="bool">
+				<xs:annotation><xs:documentation>Make the object clickable by the input devices</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="click_focusable" type="bool">
+				<xs:annotation><xs:documentation>Add focused state to the object when clicked</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollable" type="bool">
+				<xs:annotation><xs:documentation>Make the object scrollable</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_elastic" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling inside but with slower speed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_momentum" type="bool">
+				<xs:annotation><xs:documentation>Make the object scroll further when 'thrown'</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_one" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling only one snappable children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_hor" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the horizontal scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_ver" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the vertical scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain" type="bool">
+				<xs:annotation><xs:documentation>SCROLL_CHAIN_HOR and SCROLL_CHAIN_VER</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_on_focus" type="bool">
+				<xs:annotation><xs:documentation>Automatically scroll object to make it visible when focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_with_arrow" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling the focused object with arrow keys</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="snappable" type="bool">
+				<xs:annotation><xs:documentation>If scroll snap is enabled on the parent it can snap to this object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="press_lock" type="bool">
+				<xs:annotation><xs:documentation>Keep the object pressed even if the press slid from the object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the events to the parent too</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_trickle" type="bool">
+				<xs:annotation><xs:documentation>Send events to children first</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state_trickle" type="bool">
+				<xs:annotation><xs:documentation>Propagate state changes to children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="gesture_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the gestures to the parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="adv_hittest" type="bool">
+				<xs:annotation><xs:documentation>Allow performing more accurate hit (click) test. E.g. consider rounded corners.</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ignore_layout" type="bool">
+				<xs:annotation><xs:documentation>Make the object not positioned by the layouts</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="floating" type="bool">
+				<xs:annotation><xs:documentation>Do not scroll the object when the parent scrolls and ignore layout</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="send_draw_task_events" type="bool">
+				<xs:annotation><xs:documentation>Send `LV_EVENT_DRAW_TASK_ADDED` events</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="overflow_visible" type="bool">
+				<xs:annotation><xs:documentation>Do not clip the children to the parent's ext draw size</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="radio_button" type="bool">
+				<xs:annotation><xs:documentation>Allow only one radio_button sibling to be checked (can't be bound: LVGL 9.6 gives it no flag bit)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_in_new_track" type="bool">
+				<xs:annotation><xs:documentation>Start a new flex track on this item</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_checked" type="subject">
+				<xs:annotation><xs:documentation>Bind widget’s checked state to a subject</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object when the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_not_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object unless the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_empty" type="xs:string">
+				<xs:annotation><xs:documentation>Hide the object when the value, typically a `$prop`, is empty. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="moves_machine" type="bool">
+				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
@@ -13225,6 +14391,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_overrides.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_setting_group.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -13257,7 +14424,530 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_work_zero.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_setting_group.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="move_workplace">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/move/move_workplace.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="move_workplace.attributes"/>
+			<xs:attributeGroup ref="ds_button.attributes"/>
+			<xs:attribute name="name" type="xs:string">
+				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x" type="size">
+				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y" type="size">
+				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="align" type="lv_align">
+				<xs:annotation><xs:documentation>Align on parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_click_area" type="xs:string">
+				<xs:annotation><xs:documentation>Extra clickable area around object in px</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_x" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children horizontally</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_y" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children vertically</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollbar_mode" type="lv_scrollbar_mode">
+				<xs:annotation><xs:documentation>Set the scrollbar mode</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_dir" type="lv_dir">
+				<xs:annotation><xs:documentation>Directions the object can be scrolled in</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_draw_size" type="xs:string">
+				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_height" type="size">
+				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_height" type="size">
+				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_width" type="size">
+				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_width" type="size">
+				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_length" type="size">
+				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the top from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the bottom from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the left from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the right from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_row" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between rows of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_column" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between columns of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set both the row and the column padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance above the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance below the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the left of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the right of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radius" type="radius">
+				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radial_offset" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial offset (e.g. on ticks of circular scales). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_align" type="lv_align">
+				<xs:annotation><xs:documentation>Set alignment on the parent. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_clip_corner" type="bool">
+				<xs:annotation><xs:documentation>Enable corner clipping. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_base_dir" type="lv_base_dir">
+				<xs:annotation><xs:documentation>Set base text dir. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set bg color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set background opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_dir" type="lv_grad_dir">
+				<xs:annotation><xs:documentation>Set background gradient type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad" type="xs:string">
+				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_src" type="image">
+				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_tiled" type="bool">
+				<xs:annotation><xs:documentation>Tile background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor the background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set the recolor intensity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set border color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set border width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set border opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_side" type="lv_border_side">
+				<xs:annotation><xs:documentation>Set border sides. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_post" type="bool">
+				<xs:annotation><xs:documentation>Draw border after content. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_pad" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow size. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow X offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow Y offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_spread" type="xs:string">
+				<xs:annotation><xs:documentation>Assume that the base rectangle is larger by this. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set text color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_font" type="font">
+				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_align" type="lv_text_align">
+				<xs:annotation><xs:documentation>Set text align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_letter_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set letter spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_line_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set line spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_decor" type="lv_text_decor">
+				<xs:annotation><xs:documentation>Set text decor. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set image opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set recolor opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set line width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set line color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set line opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash gap. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round line ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_image_src" type="image">
+				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_layout" type="lv_layout">
+				<xs:annotation><xs:documentation>Set layout type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set how flex should flow the children (row, column, etc). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_main_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set main axis align (horizontal with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_cross_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set cross axis align (vertical with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_track_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set track align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set column descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set row descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the columns. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the rows. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's column. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many columns the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_x_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell horizontally. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's row. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many rows the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_y_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell vertically. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Scale down the opacity of the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa_layered" type="xs:string">
+				<xs:annotation><xs:documentation>Create a snapshot from the widget and blend it with opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_anim_duration" type="xs:string">
+				<xs:annotation><xs:documentation>Set animation duration in ms (e.g. for label scroll). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blend_mode" type="lv_blend_mode">
+				<xs:annotation><xs:documentation>Set how to blend colors. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_width" type="xs:string">
+				<xs:annotation><xs:documentation>Change the width without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_height" type="xs:string">
+				<xs:annotation><xs:documentation>Change the height without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_x" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in X after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_y" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in Y after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Translate radial. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_x" type="xs:string">
+				<xs:annotation><xs:documentation>Scale X (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_y" type="xs:string">
+				<xs:annotation><xs:documentation>Scale Y (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_rotation" type="xs:string">
+				<xs:annotation><xs:documentation>Rotate (0.1° units). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot X. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot Y. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_x" type="xs:string">
+				<xs:annotation><xs:documentation>Skew X (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_y" type="xs:string">
+				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bitmap_mask_src" type="image">
+				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
+				<xs:annotation><xs:documentation>Set rotary sensitivity for Crown input devices. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Mix this color to the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of recoloring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_color_filter_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of the color filter. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_radius" type="xs:string">
+				<xs:annotation><xs:documentation>The radius of the blurring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_quality" type="xs:string">
+				<xs:annotation><xs:documentation>Set whether to prefer speed or precision. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_backdrop" type="bool">
+				<xs:annotation><xs:documentation>true: blur the background first, false: blur the widget. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set flex flow direction (row, column, etc.)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="checked" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as checked (e.g. switch or checkbox)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focused" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focus_key" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused via key navigation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="edited" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being edited (e.g. text input)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hovered" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as hovered by a pointer</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="pressed" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as pressed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrolled" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being scrolled</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="disabled" type="bool">
+				<xs:annotation><xs:documentation>Disable widget interaction</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden" type="bool">
+				<xs:annotation><xs:documentation>Make the object hidden. (Like it wasn't there at all)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="clickable" type="bool">
+				<xs:annotation><xs:documentation>Make the object clickable by the input devices</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="click_focusable" type="bool">
+				<xs:annotation><xs:documentation>Add focused state to the object when clicked</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollable" type="bool">
+				<xs:annotation><xs:documentation>Make the object scrollable</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_elastic" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling inside but with slower speed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_momentum" type="bool">
+				<xs:annotation><xs:documentation>Make the object scroll further when 'thrown'</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_one" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling only one snappable children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_hor" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the horizontal scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_ver" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the vertical scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain" type="bool">
+				<xs:annotation><xs:documentation>SCROLL_CHAIN_HOR and SCROLL_CHAIN_VER</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_on_focus" type="bool">
+				<xs:annotation><xs:documentation>Automatically scroll object to make it visible when focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_with_arrow" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling the focused object with arrow keys</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="snappable" type="bool">
+				<xs:annotation><xs:documentation>If scroll snap is enabled on the parent it can snap to this object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="press_lock" type="bool">
+				<xs:annotation><xs:documentation>Keep the object pressed even if the press slid from the object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the events to the parent too</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_trickle" type="bool">
+				<xs:annotation><xs:documentation>Send events to children first</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state_trickle" type="bool">
+				<xs:annotation><xs:documentation>Propagate state changes to children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="gesture_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the gestures to the parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="adv_hittest" type="bool">
+				<xs:annotation><xs:documentation>Allow performing more accurate hit (click) test. E.g. consider rounded corners.</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ignore_layout" type="bool">
+				<xs:annotation><xs:documentation>Make the object not positioned by the layouts</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="floating" type="bool">
+				<xs:annotation><xs:documentation>Do not scroll the object when the parent scrolls and ignore layout</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="send_draw_task_events" type="bool">
+				<xs:annotation><xs:documentation>Send `LV_EVENT_DRAW_TASK_ADDED` events</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="overflow_visible" type="bool">
+				<xs:annotation><xs:documentation>Do not clip the children to the parent's ext draw size</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="radio_button" type="bool">
+				<xs:annotation><xs:documentation>Allow only one radio_button sibling to be checked (can't be bound: LVGL 9.6 gives it no flag bit)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_in_new_track" type="bool">
+				<xs:annotation><xs:documentation>Start a new flex track on this item</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_checked" type="subject">
+				<xs:annotation><xs:documentation>Bind widget’s checked state to a subject</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object when the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_not_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object unless the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_empty" type="xs:string">
+				<xs:annotation><xs:documentation>Hide the object when the value, typically a `$prop`, is empty. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="moves_machine" type="bool">
+				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
@@ -14343,6 +16033,528 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="notifications_alert_jog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/notifications/notifications_alert_jog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="notifications_alert_jog.attributes"/>
+			<xs:attributeGroup ref="ds_button.attributes"/>
+			<xs:attribute name="name" type="xs:string">
+				<xs:annotation><xs:documentation>Object name (for lv_obj_find_by_name or debugging)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="x" type="size">
+				<xs:annotation><xs:documentation>Set X position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="y" type="size">
+				<xs:annotation><xs:documentation>Set Y position (px or %)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, % or content)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="align" type="lv_align">
+				<xs:annotation><xs:documentation>Align on parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_click_area" type="xs:string">
+				<xs:annotation><xs:documentation>Extra clickable area around object in px</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_x" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children horizontally</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_snap_y" type="lv_scroll_snap">
+				<xs:annotation><xs:documentation>Snap children vertically</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollbar_mode" type="lv_scrollbar_mode">
+				<xs:annotation><xs:documentation>Set the scrollbar mode</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_dir" type="lv_dir">
+				<xs:annotation><xs:documentation>Directions the object can be scrolled in</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ext_draw_size" type="xs:string">
+				<xs:annotation><xs:documentation>Extra area around the object it may draw in, in px, e.g. so a child dragged out of it isn't clipped</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_height" type="size">
+				<xs:annotation><xs:documentation>Set height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_height" type="size">
+				<xs:annotation><xs:documentation>Set min height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_height" type="size">
+				<xs:annotation><xs:documentation>Set max height (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_width" type="size">
+				<xs:annotation><xs:documentation>Set width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_min_width" type="size">
+				<xs:annotation><xs:documentation>Set min width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_max_width" type="size">
+				<xs:annotation><xs:documentation>Set max width (px, %, or content). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_length" type="size">
+				<xs:annotation><xs:documentation>Set length (used by some widgets). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the top from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the bottom from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the left from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep this distance on the right from the content inside. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_row" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between rows of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_column" type="xs:string">
+				<xs:annotation><xs:documentation>Set padding between columns of layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set both the row and the column padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_pad_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial padding. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_top" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance above the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_bottom" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance below the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_left" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the left of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_right" type="xs:string">
+				<xs:annotation><xs:documentation>Keep distance to the right of the widget when used in a layout. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_hor" type="xs:string">
+				<xs:annotation><xs:documentation>Set both left and right margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_ver" type="xs:string">
+				<xs:annotation><xs:documentation>Set both top and bottom margin. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_margin_all" type="xs:string">
+				<xs:annotation><xs:documentation>Set margins in all 4 directions. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radius" type="radius">
+				<xs:annotation><xs:documentation>Set corner radius; `circle` for fully round. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_radial_offset" type="xs:string">
+				<xs:annotation><xs:documentation>Set radial offset (e.g. on ticks of circular scales). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_align" type="lv_align">
+				<xs:annotation><xs:documentation>Set alignment on the parent. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_clip_corner" type="bool">
+				<xs:annotation><xs:documentation>Enable corner clipping. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_base_dir" type="lv_base_dir">
+				<xs:annotation><xs:documentation>Set base text dir. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set bg color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set background opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_dir" type="lv_grad_dir">
+				<xs:annotation><xs:documentation>Set background gradient type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_stop" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second stop. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_main_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient main color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set gradient second color opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_grad" type="xs:string">
+				<xs:annotation><xs:documentation>Set a gradient defined in `&lt;gradients&gt;`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_src" type="image">
+				<xs:annotation><xs:documentation>Set background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_tiled" type="bool">
+				<xs:annotation><xs:documentation>Tile background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor the background image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bg_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set the recolor intensity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set border color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set border width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set border opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_side" type="lv_border_side">
+				<xs:annotation><xs:documentation>Set border sides. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_border_post" type="bool">
+				<xs:annotation><xs:documentation>Draw border after content. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_outline_pad" type="xs:string">
+				<xs:annotation><xs:documentation>Set outline spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow size. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow X offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_offset_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set shadow Y offset. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_shadow_spread" type="xs:string">
+				<xs:annotation><xs:documentation>Assume that the base rectangle is larger by this. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set text color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set text opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_font" type="font">
+				<xs:annotation><xs:documentation>Set font. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_align" type="lv_text_align">
+				<xs:annotation><xs:documentation>Set text align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_letter_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set letter spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_line_space" type="xs:string">
+				<xs:annotation><xs:documentation>Set line spacing. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_text_decor" type="lv_text_decor">
+				<xs:annotation><xs:documentation>Set text decor. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set image opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Recolor image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_image_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set recolor opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set line width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set line color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set line opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_dash_gap" type="xs:string">
+				<xs:annotation><xs:documentation>Set dash gap. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_line_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round line ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_width" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc width. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_color" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc color. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Set arc opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_rounded" type="bool">
+				<xs:annotation><xs:documentation>Round arc ends. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_arc_image_src" type="image">
+				<xs:annotation><xs:documentation>Set arc image. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_layout" type="lv_layout">
+				<xs:annotation><xs:documentation>Set layout type. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set how flex should flow the children (row, column, etc). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_main_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set main axis align (horizontal with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_cross_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set cross axis align (vertical with flex_flow=row). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_track_place" type="lv_flex_align">
+				<xs:annotation><xs:documentation>Set track align. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set column descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_dsc_array" type="xs:string">
+				<xs:annotation><xs:documentation>Set row descriptor array, e.g. `fr(1) content 100`. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_column_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the columns. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_row_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>Where to align the rows. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's column. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_column_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many columns the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_x_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell horizontally. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_pos" type="xs:string">
+				<xs:annotation><xs:documentation>Set cell's row. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_row_span" type="xs:string">
+				<xs:annotation><xs:documentation>How many rows the cell should span. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_grid_cell_y_align" type="lv_grid_align">
+				<xs:annotation><xs:documentation>How to align the cell vertically. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa" type="xs:string">
+				<xs:annotation><xs:documentation>Scale down the opacity of the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_opa_layered" type="xs:string">
+				<xs:annotation><xs:documentation>Create a snapshot from the widget and blend it with opacity. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_anim_duration" type="xs:string">
+				<xs:annotation><xs:documentation>Set animation duration in ms (e.g. for label scroll). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blend_mode" type="lv_blend_mode">
+				<xs:annotation><xs:documentation>Set how to blend colors. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_width" type="xs:string">
+				<xs:annotation><xs:documentation>Change the width without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_height" type="xs:string">
+				<xs:annotation><xs:documentation>Change the height without affecting the layouts. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_x" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in X after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_y" type="xs:string">
+				<xs:annotation><xs:documentation>Offset in Y after the layouts are calculated. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_translate_radial" type="xs:string">
+				<xs:annotation><xs:documentation>Translate radial. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_x" type="xs:string">
+				<xs:annotation><xs:documentation>Scale X (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_scale_y" type="xs:string">
+				<xs:annotation><xs:documentation>Scale Y (256=100%). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_rotation" type="xs:string">
+				<xs:annotation><xs:documentation>Rotate (0.1° units). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_x" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot X. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_pivot_y" type="xs:string">
+				<xs:annotation><xs:documentation>Set pivot Y. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_x" type="xs:string">
+				<xs:annotation><xs:documentation>Skew X (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_transform_skew_y" type="xs:string">
+				<xs:annotation><xs:documentation>Skew Y (no SW render). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_bitmap_mask_src" type="image">
+				<xs:annotation><xs:documentation>Set bitmap mask (A8 or L8). Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_rotary_sensitivity" type="xs:string">
+				<xs:annotation><xs:documentation>Set rotary sensitivity for Crown input devices. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor" type="xs:string">
+				<xs:annotation><xs:documentation>Mix this color to the widget and all its children. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_recolor_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of recoloring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_color_filter_opa" type="xs:string">
+				<xs:annotation><xs:documentation>The intensity of the color filter. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_radius" type="xs:string">
+				<xs:annotation><xs:documentation>The radius of the blurring. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_quality" type="xs:string">
+				<xs:annotation><xs:documentation>Set whether to prefer speed or precision. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="style_blur_backdrop" type="bool">
+				<xs:annotation><xs:documentation>true: blur the background first, false: blur the widget. Add a part or state after a dash to style only that, e.g. `-pressed`</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_grow" type="xs:string">
+				<xs:annotation><xs:documentation>Set flex grow to fill the available space in the track</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_flow" type="lv_flex_flow">
+				<xs:annotation><xs:documentation>Set flex flow direction (row, column, etc.)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="checked" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as checked (e.g. switch or checkbox)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focused" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="focus_key" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as focused via key navigation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="edited" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being edited (e.g. text input)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hovered" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as hovered by a pointer</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="pressed" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as pressed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrolled" type="bool">
+				<xs:annotation><xs:documentation>Mark widget as being scrolled</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="disabled" type="bool">
+				<xs:annotation><xs:documentation>Disable widget interaction</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden" type="bool">
+				<xs:annotation><xs:documentation>Make the object hidden. (Like it wasn't there at all)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="clickable" type="bool">
+				<xs:annotation><xs:documentation>Make the object clickable by the input devices</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="click_focusable" type="bool">
+				<xs:annotation><xs:documentation>Add focused state to the object when clicked</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scrollable" type="bool">
+				<xs:annotation><xs:documentation>Make the object scrollable</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_elastic" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling inside but with slower speed</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_momentum" type="bool">
+				<xs:annotation><xs:documentation>Make the object scroll further when 'thrown'</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_one" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling only one snappable children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_hor" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the horizontal scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain_ver" type="bool">
+				<xs:annotation><xs:documentation>Allow propagating the vertical scroll to a parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_chain" type="bool">
+				<xs:annotation><xs:documentation>SCROLL_CHAIN_HOR and SCROLL_CHAIN_VER</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_on_focus" type="bool">
+				<xs:annotation><xs:documentation>Automatically scroll object to make it visible when focused</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="scroll_with_arrow" type="bool">
+				<xs:annotation><xs:documentation>Allow scrolling the focused object with arrow keys</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="snappable" type="bool">
+				<xs:annotation><xs:documentation>If scroll snap is enabled on the parent it can snap to this object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="press_lock" type="bool">
+				<xs:annotation><xs:documentation>Keep the object pressed even if the press slid from the object</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the events to the parent too</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="event_trickle" type="bool">
+				<xs:annotation><xs:documentation>Send events to children first</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="state_trickle" type="bool">
+				<xs:annotation><xs:documentation>Propagate state changes to children</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="gesture_bubble" type="bool">
+				<xs:annotation><xs:documentation>Propagate the gestures to the parent</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="adv_hittest" type="bool">
+				<xs:annotation><xs:documentation>Allow performing more accurate hit (click) test. E.g. consider rounded corners.</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="ignore_layout" type="bool">
+				<xs:annotation><xs:documentation>Make the object not positioned by the layouts</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="floating" type="bool">
+				<xs:annotation><xs:documentation>Do not scroll the object when the parent scrolls and ignore layout</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="send_draw_task_events" type="bool">
+				<xs:annotation><xs:documentation>Send `LV_EVENT_DRAW_TASK_ADDED` events</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="overflow_visible" type="bool">
+				<xs:annotation><xs:documentation>Do not clip the children to the parent's ext draw size</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="radio_button" type="bool">
+				<xs:annotation><xs:documentation>Allow only one radio_button sibling to be checked (can't be bound: LVGL 9.6 gives it no flag bit)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="flex_in_new_track" type="bool">
+				<xs:annotation><xs:documentation>Start a new flex track on this item</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="bind_checked" type="subject">
+				<xs:annotation><xs:documentation>Bind widget’s checked state to a subject</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object when the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_prop_not_eq" type="xs:string">
+				<xs:annotation><xs:documentation>`$prop|value`: hide the object unless the prop equals the value. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="hidden_if_empty" type="xs:string">
+				<xs:annotation><xs:documentation>Hide the object when the value, typically a `$prop`, is empty. Decided once, at creation</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="moves_machine" type="bool">
+				<xs:annotation><xs:documentation>true: disabled while the `machine_motion_blocked` subject is 1, for controls that move the machine</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="numpad">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dialogs/numpad.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -14878,6 +17090,15 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/object_cancel.xml, with presenter object_cancel.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="object_cancel_key">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/object_cancel/object_cancel_key.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="object_cancel_key.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -16169,26 +18390,6 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="temperature_bed">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_bed.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="temperature_heater_card.attributes"/>
-			<xs:attributeGroup ref="temperature_heater.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="temperature_chamber">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_chamber.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="temperature_heater_card.attributes"/>
-			<xs:attributeGroup ref="temperature_heater.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="temperature_extruder">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/temperature/temperature_extruder.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
@@ -16771,48 +18972,12 @@
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="tools_bed_heater">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_bed_heater.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="tools_bed_heater.attributes"/>
-			<xs:attribute name="label" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="active" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="standby" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
 	<xs:element name="tools_beds">
 		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_beds.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="tools_beds.attributes"/>
 			<xs:attributeGroup ref="ds_setting_group.attributes"/>
-			<xs:attributeGroup ref="lv_obj.attributes"/>
-			<xs:anyAttribute processContents="lax"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="tools_chamber_heater">
-		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_chamber_heater.xml.</xs:documentation></xs:annotation>
-		<xs:complexType>
-			<xs:group ref="anyContent"/>
-			<xs:attributeGroup ref="tools_chamber_heater.attributes"/>
-			<xs:attribute name="label" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="active" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
-			<xs:attribute name="standby" type="xs:string">
-				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
-			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -16838,6 +19003,24 @@
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="tools_list.attributes"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tools_slot_heater">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/control/tools/tools_slot_heater.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="tools_slot_heater.attributes"/>
+			<xs:attribute name="label" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `label` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="active" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `active` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="standby" type="xs:string">
+				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
+			</xs:attribute>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -17387,6 +19570,15 @@
 			<xs:attribute name="standby" type="xs:string">
 				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="value_button">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/value_button.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="value_button.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

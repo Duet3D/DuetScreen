@@ -1501,19 +1501,19 @@ TEST_F(TestHomeViewWithData, StatusView)
 		lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
 	};
 
-	click("speed_multiplier");
+	click("speed_override");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_dialog.png")
 
 	UI::closeDialogs();
 
-	click("flow_multiplier");
+	click("extrusion_override");
 	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"extruders":[{"factor":1.2},{}]}}})"
 					"\n");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_dialog.png")
 
 	UI::closeDialogs();
 
-	click("babystep_button");
+	click("z_offset_override");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
 }
 
@@ -1621,10 +1621,10 @@ TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
 	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(response, "text")), "first");
 
-	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(response, "text")), "second");
 
-	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
 
 	// The console shows responses itself
@@ -1718,7 +1718,7 @@ TEST_F(TestHomeView, AlertAnswersThePrinter)
 	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 P1 S{:d}\n", seq3)}));
 	EXPECT_FALSE(notificationShown("alert"));
 	EXPECT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN)) << "then the response shows";
-	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
 
 	// A choice answers with its index
 	sent.clear();
@@ -2062,7 +2062,7 @@ TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
 	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
 	deliverModelEvents();
 	showJobStatus();
-	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "flow_multiplier"),
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "extrusion_override"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
 	lv_obj_t* dialog = TestDialogs::shownNamed("extrusion_dialog");
@@ -2108,7 +2108,7 @@ TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
 	letGo(0.1f); // A tap: says to drag it
 	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQ(std::string_view(lv_label_get_text(lv_obj_find_by_name(response, "text"))), _("estop.prompt"));
-	lv_obj_send_event(lv_obj_find_by_name(response, "cancel"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
 
 	letGo(1.0f); // All the way: stopped
 	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
@@ -2150,7 +2150,7 @@ TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
 					"\n");
 	deliverModelEvents();
 	showJobStatus();
-	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_multiplier"),
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_override"),
 					  LV_EVENT_CLICKED,
 					  nullptr);
 	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");

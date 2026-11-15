@@ -7,27 +7,24 @@
   Actions:  actions.move.home, actions.move.disable_motors (src/UI/Presenters/Control/Move/MoveActions.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="content" scrollable="false">
-		<style name="pad_zero"/>
-		<ds_setting_group name="group" title_tag="tr.move.homing" width="100%">
-			<lv_obj name="buttons" height="content" flex_flow="column" scrollable="false">
-				<style name="setting_row"/>
-				<ds_button name="home_all" translation_tag="tr.move.home_all" icon="home_axis.png" width="100%"
-						   height="content" style_min_height="48">
-					<bind_style name="action_btn" subject="source.axes.all_homed" ref_value="0"/>
-					<bind_state_if_eq subject="source.axes.home_all_usable" state="disabled" ref_value="0"/>
-					<action trigger="clicked" name="actions.move.home" arg="all"/>
-				</ds_button>
-				<ds_list name="axes" list="source.axes.all" item="move_home_axis" width="100%" height="content"
-						 flex_flow="row_wrap" style_pad_all="0" style_pad_row="#pad" style_pad_column="#pad">
-					<bind_flag_if_eq subject="om.move.kinematics.name|eq:delta" flag="hidden" ref_value="1"/>
-				</ds_list>
-				<ds_button name="motors_off" translation_tag="tr.move.disable_motors" width="100%" height="content"
-						   style_min_height="40">
-					<bind_state_if_eq subject="source.axes.disable_motors_usable" state="disabled" ref_value="0"/>
-					<action trigger="clicked" name="actions.move.disable_motors"/>
-				</ds_button>
-			</lv_obj>
-		</ds_setting_group>
+	<view extends="ds_setting_group" title_tag="tr.move.homing" width="100%">
+		<lv_obj name="buttons" height="content" flex_flow="column" scrollable="false">
+			<style name="setting_row"/>
+			<ds_button name="home_all" translation_tag="tr.move.home_all" icon="home_axis.png" width="100%"
+					   height="content" style_min_height="48">
+				<bind_style name="action_btn" subject="source.axes.all_homed" ref_value="0"/>
+				<bind_state_if_eq subject="source.axes.home_all_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="actions.move.home" arg="all"/>
+			</ds_button>
+			<ds_list name="axes" list="source.axes.all" item="move_home_axis" width="100%" height="content"
+					 flex_flow="row_wrap" style_pad_all="0" style_pad_row="#pad" style_pad_column="#pad">
+				<bind_flag_if_eq subject="om.move.kinematics.name|eq:delta" flag="hidden" ref_value="1"/>
+			</ds_list>
+			<ds_button name="motors_off" translation_tag="tr.move.disable_motors" width="100%" height="content"
+					   style_min_height="40">
+				<bind_state_if_eq subject="source.axes.disable_motors_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="actions.move.disable_motors"/>
+			</ds_button>
+		</lv_obj>
 	</view>
 </component>

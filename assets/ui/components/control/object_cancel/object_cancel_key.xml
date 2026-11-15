@@ -1,0 +1,32 @@
+<!--
+  One sort of object in the Objects tab's key (object_cancel.xml): a small shape drawn as the objects on the bed are
+  (object_cancel_outline.xml), and what it means.
+
+      <object_cancel_key name="cancelled" title_tag="tr.object_cancel.cancelled" cancelled="1"/>
+
+  Props:    title_tag  the translation key of what it means
+            current, cancelled  names (or constants, 0 or 1) of whether the shape is drawn as the object being
+                       printed, or as one cancelled
+-->
+<component>
+	<api>
+		<prop name="title_tag" type="string"/>
+		<prop name="current" type="string" default="0"/>
+		<prop name="cancelled" type="string" default="0"/>
+	</api>
+	<view extends="lv_obj" height="content" flex_flow="row" scrollable="false" style_flex_cross_place="center"
+		  style_pad_all="0" style_pad_column="8">
+		<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
+			<style name="object_shape"/>
+			<bind_style name="object_shape_now" subject="$current" ref_value="1"/>
+			<bind_style name="object_shape_cancelled" subject="$cancelled" ref_value="1"/>
+			<ds_cross name="cross" width="100%" height="100%">
+				<style name="object_cross"/>
+				<bind_flag_if_eq subject="$cancelled" flag="hidden" ref_value="0"/>
+			</ds_cross>
+		</lv_obj>
+		<lv_label name="title" translation_tag="$title_tag">
+			<style name="text_muted"/>
+		</lv_label>
+	</view>
+</component>

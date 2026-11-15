@@ -23,41 +23,12 @@
 							 height="100%" style_pad_all="0" scrollable="false"/>
 				</ds_plot_layer>
 			</ds_plot>
-			<!-- The key: a small shape of each sort, and what it means -->
+			<!-- The key: a small shape of each sort, and what it means (object_cancel_key.xml) -->
 			<lv_obj name="key" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
 					style_flex_cross_place="center" style_pad_all="0" style_pad_column="20" style_pad_row="4">
-				<lv_obj name="to_print" height="content" flex_flow="row" scrollable="false"
-						style_flex_cross_place="center" style_pad_all="0" style_pad_column="8">
-					<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
-						<style name="object_shape"/>
-					</lv_obj>
-					<lv_label translation_tag="tr.object_cancel.to_print">
-						<style name="text_muted"/>
-					</lv_label>
-				</lv_obj>
-				<lv_obj name="printing" height="content" flex_flow="row" scrollable="false"
-						style_flex_cross_place="center" style_pad_all="0" style_pad_column="8">
-					<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
-						<style name="object_shape"/>
-						<style name="object_shape_now"/>
-					</lv_obj>
-					<lv_label translation_tag="tr.object_cancel.printing">
-						<style name="text_muted"/>
-					</lv_label>
-				</lv_obj>
-				<lv_obj name="cancelled" height="content" flex_flow="row" scrollable="false"
-						style_flex_cross_place="center" style_pad_all="0" style_pad_column="8">
-					<lv_obj name="shape" width="18" height="18" scrollable="false" style_pad_all="0">
-						<style name="object_shape"/>
-						<style name="object_shape_cancelled"/>
-						<ds_cross name="cross" width="100%" height="100%">
-							<style name="object_cross"/>
-						</ds_cross>
-					</lv_obj>
-					<lv_label translation_tag="tr.object_cancel.cancelled">
-						<style name="text_muted"/>
-					</lv_label>
-				</lv_obj>
+				<object_cancel_key name="to_print" title_tag="tr.object_cancel.to_print"/>
+				<object_cancel_key name="printing" title_tag="tr.object_cancel.printing" current="1"/>
+				<object_cancel_key name="cancelled" title_tag="tr.object_cancel.cancelled" cancelled="1"/>
 			</lv_obj>
 		</lv_obj>
 

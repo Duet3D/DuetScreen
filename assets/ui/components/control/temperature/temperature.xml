@@ -13,43 +13,23 @@
 			<style name="card"/>
 
 			<lv_obj name="tools" width="100%" height="content" flex_flow="column">
-				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-					<style name="bg_color_header"/>
-					<style name="list_header"/>
-					<lv_label name="title" translation_tag="tr.temperature.tools" width="content" height="content">
-						<style name="list_title"/>
-					</lv_label>
-				</lv_obj>
+				<list_header name="header" title="tr.temperature.tools"/>
 				<ds_list name="list" list="presenter.tools" item="temperature_tool" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>
 
 			<lv_obj name="beds" width="100%" height="content" flex_flow="column">
-				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-					<style name="bg_color_header"/>
-					<style name="list_header"/>
-					<lv_label name="title" translation_tag="tr.temperature.beds" width="content" height="content">
-						<style name="list_title"/>
-					</lv_label>
-				</lv_obj>
-				<ds_list name="list" list="om.heat.bedHeaters" item="temperature_bed" width="100%" height="content"
+				<list_header name="header" title="tr.temperature.beds"/>
+				<ds_list name="list" list="om.heat.bedHeaters" item="temperature_heater_card" item.label_tag="tr.temperature.bed_number" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>
 
 			<lv_obj name="chambers" width="100%" height="content" flex_flow="column">
-				<lv_obj name="header" width="100%" height="content" style_min_width="content" flex_flow="row"
-						style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
-					<style name="bg_color_header"/>
-					<style name="list_header"/>
-					<lv_label name="title" translation_tag="tr.temperature.chambers" width="content" height="content">
-						<style name="list_title"/>
-					</lv_label>
-				</lv_obj>
-				<ds_list name="list" list="om.heat.chamberHeaters" item="temperature_chamber" width="100%" height="content"
+				<list_header name="header" title="tr.temperature.chambers"/>
+				<ds_list name="list" list="om.heat.chamberHeaters" item="temperature_heater_card"
+						 item.label_tag="tr.temperature.chamber_number" width="100%" height="content"
 						 flex_flow="column"
 						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
 			</lv_obj>

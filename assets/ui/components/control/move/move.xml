@@ -59,16 +59,13 @@
 			<style name="pad_gap"/>
 			<move_homing name="homing"/>
 			<!-- A printer's Z offset; a CNC's work zero -->
-			<lv_obj name="z_offset" width="100%" height="content" scrollable="false">
-				<style name="pad_zero"/>
+			<ds_setting_group name="z_offset" title_tag="tr.move.z_offset" width="100%">
 				<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="1"/>
-				<ds_setting_group name="group" title_tag="tr.move.z_offset" width="100%">
-					<lv_obj name="row" height="content" scrollable="false">
-						<style name="setting_row"/>
-						<babystep name="babystep" hide_title="true" width="100%" height="content"/>
-					</lv_obj>
-				</ds_setting_group>
-			</lv_obj>
+				<lv_obj name="row" height="content" scrollable="false">
+					<style name="setting_row"/>
+					<babystep name="babystep" hide_title="true" width="100%" height="content"/>
+				</lv_obj>
+			</ds_setting_group>
 			<move_work_zero name="work_zero">
 				<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="0"/>
 			</move_work_zero>

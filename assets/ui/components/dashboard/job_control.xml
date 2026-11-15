@@ -1,0 +1,24 @@
+<!--
+  One of the job's controls, as the job status shows them (dashboard_job_status.xml): a button that is hidden (0),
+  disabled (1) or usable (2), as `control` says. Give it its text (translation_tag), its icon and its style.
+
+      <job_control name="pause" translation_tag="tr.status.pause" icon="pause.png" control="source.job.pause_control"
+                   action="actions.job.pause" look="action_btn"/>
+
+  Props:    control  the name of whether it is hidden (0), disabled (1) or usable (2)
+            action   the action run when it is tapped
+            look     its style: action_btn, or danger_outline_btn for one that ends the job
+-->
+<component>
+	<api>
+		<prop name="control" type="string"/>
+		<prop name="action" type="string"/>
+		<prop name="look" type="string" default="action_btn"/>
+	</api>
+	<view extends="ds_button" height="56" flex_grow="1">
+		<style name="$look"/>
+		<bind_flag_if_eq subject="$control" flag="hidden" ref_value="0"/>
+		<bind_state_if_not_eq subject="$control" state="disabled" ref_value="2"/>
+		<action trigger="clicked" name="$action"/>
+	</view>
+</component>

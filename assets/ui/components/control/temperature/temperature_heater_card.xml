@@ -3,7 +3,7 @@
   else "<label_tag> <number>". A slot without a heater (-1) isn't shown.
 
   Props:    label_tag  the translation of its name when its sensor has none, with the number in it
-                       (temperature_bed.xml, temperature_chamber.xml)
+                       (item.label_tag on temperature.xml's lists)
   Fields:   a row of om.heat.bedHeaters or om.heat.chamberHeaters: row.index (its number), row.value (its heater)
 -->
 <component>

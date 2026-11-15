@@ -1,0 +1,25 @@
+<!--
+  A corner's handle on the selected widget of a free layout (customise_free_item.xml): a bracket in the corner, shown
+  while the widget whose overlay it is in is selected. The theme draws it (customise_handle).
+
+      <customise_corner_handle name="handle_nw" key="$key" corner="top_left"/>
+
+  Props:    key     the overlay's key: the value source.customise.selected has while its widget is selected
+            corner  where it is: top_left, top_right, bottom_right or bottom_left
+-->
+<component>
+	<api>
+		<prop name="key" type="string"/>
+		<prop name="corner" type="string" default="top_left"/>
+	</api>
+	<view extends="lv_obj" align="$corner" width="32" height="32" clickable="false" scrollable="false">
+		<style name="pad_zero"/>
+		<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
+		<lv_obj name="across" align="$corner" width="32" height="5" clickable="false" scrollable="false">
+			<style name="customise_handle"/>
+		</lv_obj>
+		<lv_obj name="down" align="$corner" width="5" height="32" clickable="false" scrollable="false">
+			<style name="customise_handle"/>
+		</lv_obj>
+	</view>
+</component>

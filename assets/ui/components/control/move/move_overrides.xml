@@ -6,21 +6,18 @@
   Actions:  actions.factors.speed (src/UI/Presenters/Modals/FactorsActions.h)
 -->
 <component>
-	<view extends="lv_obj" width="100%" height="content" scrollable="false">
-		<style name="pad_zero"/>
-		<ds_setting_group name="group" title_tag="tr.move.overrides" width="100%">
-			<ds_setting name="speed_factor" title_tag="tr.move.speed_factor" hint_tag="tr.move.override_hint">
-				<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="1"/>
-				<ds_button name="value" bind_text="source.move.speed_factor">
-					<action trigger="clicked" name="actions.factors.speed"/>
-				</ds_button>
-			</ds_setting>
-			<ds_setting name="feed_override" title_tag="tr.move.feed_override" hint_tag="tr.move.override_hint">
-				<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="0"/>
-				<ds_button name="value" bind_text="source.move.speed_factor">
-					<action trigger="clicked" name="actions.factors.speed"/>
-				</ds_button>
-			</ds_setting>
-		</ds_setting_group>
+	<view extends="ds_setting_group" title_tag="tr.move.overrides" width="100%">
+		<ds_setting name="speed_factor" title_tag="tr.move.speed_factor" hint_tag="tr.move.override_hint">
+			<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="1"/>
+			<ds_button name="value" bind_text="source.move.speed_factor">
+				<action trigger="clicked" name="actions.factors.speed"/>
+			</ds_button>
+		</ds_setting>
+		<ds_setting name="feed_override" title_tag="tr.move.feed_override" hint_tag="tr.move.override_hint">
+			<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="0"/>
+			<ds_button name="value" bind_text="source.move.speed_factor">
+				<action trigger="clicked" name="actions.factors.speed"/>
+			</ds_button>
+		</ds_setting>
 	</view>
 </component>

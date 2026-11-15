@@ -1,0 +1,19 @@
+<!--
+  One step an M291 alert lets an axis be jogged by (notifications_alert_axis.xml): a button with the step, disabled
+  until the axis is homed.
+
+      <notifications_alert_jog name="back_2" step="-2"/>
+
+  Props:    step  how far it moves the axis, and the button's text, e.g. -0.2
+  Fields:   the axis' presenter.alert.axes row: row.homed
+  Actions:  presenter.alert.jog (src/UI/Presenters/Notifications/NotificationsPresenter.h)
+-->
+<component>
+	<api>
+		<prop name="step" type="string" default="0"/>
+	</api>
+	<view extends="ds_button" text="$step" width="0%" height="content" flex_grow="1" style_text_align="center">
+		<bind_state_if_eq subject="row.homed" state="disabled" ref_value="0"/>
+		<action trigger="clicked" name="presenter.alert.jog" arg="$step"/>
+	</view>
+</component>

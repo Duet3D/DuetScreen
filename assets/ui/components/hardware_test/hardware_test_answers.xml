@@ -1,0 +1,35 @@
+<!--
+  The answers to a hardware test's question (hardware_test.xml), side by side: No, red, and Yes, green. Each runs
+  `action`, with the arg 0 for No and 1 for Yes.
+
+      <hardware_test_answers name="answers" action="presenter.hardware_test.buzzer_heard" width="50%" height="50%"/>
+
+  Props:    action  the action run with the answer
+            usable  the name of whether they can be answered yet (default 1: always)
+
+  The text is English only: the test is run at the factory.
+-->
+<component>
+	<api>
+		<prop name="action" type="string"/>
+		<prop name="usable" type="string" default="1"/>
+	</api>
+
+	<styles>
+		<style name="hardware_test_yes" bg_color="0x4caf50" bg_grad_dir="none"/>
+		<style name="hardware_test_no" bg_color="0xf44336" bg_grad_dir="none"/>
+	</styles>
+
+	<view extends="lv_obj" flex_flow="row">
+		<ds_button name="no" text="No" height="100%" flex_grow="1">
+			<style name="hardware_test_no"/>
+			<bind_state_if_eq subject="$usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="$action" arg="0"/>
+		</ds_button>
+		<ds_button name="yes" text="Yes" height="100%" flex_grow="1">
+			<style name="hardware_test_yes"/>
+			<bind_state_if_eq subject="$usable" state="disabled" ref_value="0"/>
+			<action trigger="clicked" name="$action" arg="1"/>
+		</ds_button>
+	</view>
+</component>
