@@ -64,8 +64,8 @@ namespace UI::Xml
 	{
 		f.list("recent",
 			   m_recent,
-			   "The newest jobs in the jobs folder (not in its folders), newest first, at most five. Tap one to ask "
-			   "whether to start it (actions.files.ask_start).");
+			   "The newest jobs in the jobs folder (not in its folders), newest first, at most 20 (show fewer with "
+			   "<ds_list limit>). Tap one to ask whether to start it (actions.files.ask_start).");
 		f.field("recent_count", m_recentCount, "How many jobs `recent` lists");
 		f.list("macros",
 			   m_macroRows,
@@ -95,13 +95,30 @@ namespace UI::Xml
 	{
 		registerEventListener<EventType::ThumbnailData>(this, &FilesSource::thumbnailReceived);
 		registerEventListener<EventType::FileInfo>(this, &FilesSource::fileInfoReceived);
-		// The printer counts each volume's changes to its files: an upload or a deletion lists them again. So does a
-		// different printer or a change of folders
+		// A different printer has different files
 		registerEventListener<EventType::PrinterUniqueId>([this]() { requestFiles(); });
-		m_watch = OmWatch({"seqs.volChanges", "directories"}, [this] { requestFiles(); });
+		// Coming back to the home screens, where the files are offered, from another screen
+		registerEventListener<EventType::NavigationCurrentScreen>(
+			[this](LvObj* screen)
+			{
+				const bool home = screen == nullptr;
+				if (home && !m_home)
+				{
+					requestFiles();
+				}
+				m_home = home;
+			});
+		// The printer counts each volume's changes to its files, where it reports them: an upload or a deletion. A job
+		// ending (a new last job), or a change of folders, lists them again too
+		m_watch = OmWatch({"seqs.volChanges", "directories", "job.lastFileName"}, [this] { requestFiles(); });
 	}
 
 	void FilesSource::update()
+	{
+		requestFiles();
+	}
+
+	void FilesSource::refresh()
 	{
 		requestFiles();
 	}

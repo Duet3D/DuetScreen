@@ -50,6 +50,7 @@ namespace UI::Xml
 	JobSource::JobSource()
 		: DataSource("job")
 	{
+		m_page.set(READY_PAGE);
 	}
 
 	void JobSource::fields(FieldVisitor& f)
@@ -57,8 +58,14 @@ namespace UI::Xml
 		f.field("latest_file",
 				m_latest,
 				"The latest job's file: the current job's, or the last job's when it has finished");
-		f.field("finished", m_finished, "1 when the latest job is the last one, finished, else 0");
-		f.field("running", m_running, "1 while a job's file is open (printing, paused or simulating), else 0");
+		f.field("finished",
+				m_finished,
+				"1 once the latest job has ended (finished, cancelled, stopped or simulated) and no other runs, else "
+				"0. Whether a job runs is source.machine.job_active.");
+		f.field("page",
+				m_page,
+				"The job widget's page (dashboard_job.xml): \"status\" from when a job starts until the user goes "
+				"back, else \"ready\". Its <ds_pages bind_page> follows and sets it.");
 		f.field("name", m_name, "The latest job's file, without its folder, e.g. \"benchy.gcode\"");
 		f.field("state",
 				m_state,
@@ -118,7 +125,6 @@ namespace UI::Xml
 		showProgress();
 		showRemaining();
 		showLayer();
-		showLastDetail();
 		showControls(OM::GetStatus());
 	}
 
@@ -131,14 +137,10 @@ namespace UI::Xml
 			file = std::string(job()["file"]["fileName"].text());
 			last = std::string(job()["lastFileName"].text());
 		}
-		// A job starting or ending changes one name; the latest job is the one that changed last
+		// A job starting changes the file (which stays once it has ended); a job ending, the last file. The latest job
+		// is the one that changed last
 		if (file != m_seenFile)
 		{
-			// A job ended, now
-			if (file.empty())
-			{
-				m_endedAt = timeOfDayIn(0);
-			}
 			m_seenFile = file;
 			fileChanged(file);
 		}
@@ -150,7 +152,8 @@ namespace UI::Xml
 		showProgress();
 		showRemaining();
 		showLayer();
-		showLastDetail();
+		// How the last job ended may change after the printer's state does
+		showControls(OM::GetStatus());
 	}
 
 	void JobSource::clear()
@@ -164,14 +167,15 @@ namespace UI::Xml
 		m_elapsedText.set(_("status.elapsed_time", clock(0)));
 		m_remainingText.set(_("status.remaining_time", clock(0)));
 		m_name.set("");
-		m_running.set(0);
 		m_state.set("");
 		m_layer.set("");
 		m_finishAt.set("");
 		m_lastDetail.set("");
 		m_endedAt.clear();
+		m_seenLast.clear();
+		m_wasActive = false;
+		m_page.set(READY_PAGE);
 		showControls(OM::PrinterStatus::disconnected);
-		m_printAgain.set(static_cast<int32_t>(Control::Hidden));
 	}
 
 	const OM::Node& JobSource::job()
@@ -230,27 +234,33 @@ namespace UI::Xml
 		return minutes < 60 ? _("job.duration_minutes", minutes) : _("job.duration_hours", minutes / 60, minutes % 60);
 	}
 
+	const char* JobSource::endedKey()
+	{
+		MODEL_LOCK();
+		const OM::Node& node = job();
+		if (node["lastFileSimulated"].boolean(false))
+		{
+			return "job.ended_simulated";
+		}
+		if (node["lastFileCancelled"].boolean(false))
+		{
+			return "job.ended_cancelled";
+		}
+		if (node["lastFileAborted"].boolean(false))
+		{
+			return "job.ended_stopped";
+		}
+		return "job.ended_finished";
+	}
+
 	void JobSource::showLastDetail()
 	{
 		std::string file;
-		const char* ended = "job.ended_finished";
 		uint32_t took = 0;
 		{
 			MODEL_LOCK();
 			const OM::Node& node = job();
 			file = std::string(node["lastFileName"].text());
-			if (node["lastFileSimulated"].boolean(false))
-			{
-				ended = "job.ended_simulated";
-			}
-			else if (node["lastFileCancelled"].boolean(false))
-			{
-				ended = "job.ended_cancelled";
-			}
-			else if (node["lastFileAborted"].boolean(false))
-			{
-				ended = "job.ended_stopped";
-			}
 			took = static_cast<uint32_t>(std::max<int64_t>(node["lastDuration"].integer(0), 0));
 		}
 		if (file.empty())
@@ -258,6 +268,7 @@ namespace UI::Xml
 			m_lastDetail.set("");
 			return;
 		}
+		const char* ended = endedKey();
 		const std::string how = m_endedAt.empty() ? _(ended) : _("job.ended_at", _(ended), m_endedAt);
 		m_lastDetail.set(took > 0 ? _("job.ended_took", how, duration(took)) : how);
 	}
@@ -266,21 +277,17 @@ namespace UI::Xml
 	{
 		m_latest.set(file);
 		m_name.set(file.substr(file.find_last_of('/') + 1));
-		m_running.set(file.empty() ? 0 : 1);
-		m_finished.set(0);
 		showThumbnail(file);
 	}
 
 	void JobSource::lastFileChanged(const std::string& file)
 	{
-		m_printAgain.set(static_cast<int32_t>(file.empty() ? Control::Hidden : Control::Usable));
 		if (file.empty())
 		{
 			return;
 		}
 		m_latest.set(file);
 		m_name.set(file.substr(file.find_last_of('/') + 1));
-		m_finished.set(1);
 		showThumbnail(file);
 	}
 
@@ -302,12 +309,7 @@ namespace UI::Xml
 		m_remaining.set(clock(left));
 		m_remainingText.set(_("status.remaining_time", m_remaining.get()));
 		// The time of day it should finish, while it runs and the time left is known
-		bool running = false;
-		{
-			MODEL_LOCK();
-			running = !job()["file"]["fileName"].text().empty();
-		}
-		if (!running || left == 0)
+		if (!OM::IsPrintingStatus(OM::GetStatus()) || left == 0)
 		{
 			m_finishAt.set("");
 			return;
@@ -317,7 +319,32 @@ namespace UI::Xml
 
 	void JobSource::showControls(OM::PrinterStatus status)
 	{
+		// A job starting shows its status; one ending notes when, while the screen watched
+		const bool active = OM::IsPrintingStatus(status);
+		if (active && !m_wasActive)
+		{
+			m_page.set(STATUS_PAGE);
+			m_endedAt.clear();
+		}
+		else if (!active && m_wasActive)
+		{
+			m_endedAt = timeOfDayIn(0);
+		}
+		m_wasActive = active;
+
+		bool hasLast = false;
+		{
+			MODEL_LOCK();
+			hasLast = !job()["lastFileName"].text().empty();
+		}
+		// Ended once it has been cancelled too: the printer cancels it before it says how it ended
+		const bool cancelling = status == OM::PrinterStatus::cancelling;
+		const bool ended = !active && !cancelling && hasLast;
+		m_finished.set(ended ? 1 : 0);
+
 		const auto set = [](IntSubject& subject, Control control) { subject.set(static_cast<int32_t>(control)); };
+		// Printing the last job again, once it has ended
+		set(m_printAgain, ended ? Control::Usable : Control::Hidden);
 		switch (status)
 		{
 		case OM::PrinterStatus::processing:
@@ -344,7 +371,7 @@ namespace UI::Xml
 		default:
 			set(m_resume, Control::Hidden);
 			set(m_pause, Control::Hidden);
-			set(m_cancel, Control::Disabled);
+			set(m_cancel, Control::Hidden);
 			break;
 		}
 
@@ -368,10 +395,15 @@ namespace UI::Xml
 		case OM::PrinterStatus::pausing:
 			m_state.set(_("job.paused"));
 			break;
+		case OM::PrinterStatus::cancelling:
+			m_state.set(_("job.cancelling"));
+			break;
 		default:
-			m_state.set(m_finished.get() != 0 ? _("job.finished") : std::string());
+			// How the last job ended
+			m_state.set(m_finished.get() != 0 ? _(endedKey()) : std::string());
 			break;
 		}
+		showLastDetail();
 	}
 
 	void JobSource::showThumbnail(const std::string& file)

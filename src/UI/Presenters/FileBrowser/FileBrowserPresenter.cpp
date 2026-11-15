@@ -179,8 +179,9 @@ namespace UI
 	{
 		ZoneScoped;
 		// The listing arrives on the connection's thread, where the object model can't be read under the UI lock:
-		// note the base folder now, for its path
+		// note the base folder now, for its path, which shows while the folder is listed
 		m_baseFolder = baseFolderPath();
+		showCrumbs();
 		// The reply may come after the browser has gone
 		std::weak_ptr<XmlPresenter> self = weak_from_this();
 		OM::FileSystem::RequestFiles(

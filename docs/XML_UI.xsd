@@ -278,13 +278,13 @@
 			<xs:enumeration value="source.job.latest_file"/>
 			<xs:enumeration value="source.job.layer"/>
 			<xs:enumeration value="source.job.name"/>
+			<xs:enumeration value="source.job.page"/>
 			<xs:enumeration value="source.job.pause_control"/>
 			<xs:enumeration value="source.job.print_again_control"/>
 			<xs:enumeration value="source.job.progress"/>
 			<xs:enumeration value="source.job.remaining"/>
 			<xs:enumeration value="source.job.remaining_text"/>
 			<xs:enumeration value="source.job.resume_control"/>
-			<xs:enumeration value="source.job.running"/>
 			<xs:enumeration value="source.job.state"/>
 			<xs:enumeration value="source.job.thumbnail"/>
 			<xs:enumeration value="source.jog.distance.choices"/>
@@ -462,6 +462,7 @@
 			<xs:enumeration value="actions.files.ask_run"/>
 			<xs:enumeration value="actions.files.ask_start"/>
 			<xs:enumeration value="actions.files.confirm"/>
+			<xs:enumeration value="actions.files.refresh"/>
 			<xs:enumeration value="actions.gcode.send"/>
 			<xs:enumeration value="actions.heater.set_active"/>
 			<xs:enumeration value="actions.heater.set_standby"/>
@@ -1902,6 +1903,8 @@
 			<xs:enumeration value="tr.heightmap.unload"/>
 			<xs:enumeration value="tr.job.all_files"/>
 			<xs:enumeration value="tr.job.cancel"/>
+			<xs:enumeration value="tr.job.cancelling"/>
+			<xs:enumeration value="tr.job.current_job"/>
 			<xs:enumeration value="tr.job.done_at"/>
 			<xs:enumeration value="tr.job.duration_hours"/>
 			<xs:enumeration value="tr.job.duration_minutes"/>
@@ -2392,8 +2395,10 @@
 			<xs:enumeration value="tr.widget.heightmap_desc"/>
 			<xs:enumeration value="tr.widget.job"/>
 			<xs:enumeration value="tr.widget.job_desc"/>
+			<xs:enumeration value="tr.widget.job_macros"/>
 			<xs:enumeration value="tr.widget.job_progress"/>
 			<xs:enumeration value="tr.widget.job_progress_desc"/>
+			<xs:enumeration value="tr.widget.job_recent"/>
 			<xs:enumeration value="tr.widget.job_status_desc"/>
 			<xs:enumeration value="tr.widget.jobs_desc"/>
 			<xs:enumeration value="tr.widget.jog_choices"/>
@@ -3217,6 +3222,14 @@
 			<xs:annotation><xs:documentation>Prop `fan` (int)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
+	<xs:attributeGroup name="dashboard_job.attributes">
+		<xs:attribute name="recent" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `recent` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="macros" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `macros` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
 	<xs:attributeGroup name="dashboard_temperature_graph.attributes">
 		<xs:attribute name="seconds" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `seconds` (int)</xs:documentation></xs:annotation>
@@ -3509,6 +3522,9 @@
 		<xs:attribute name="flow" type="xs:string">
 			<xs:annotation><xs:documentation>How the items are placed: `column`, one per line; `row`, side by side; `row_wrap`, as many per line as fit; or `pages`, one at a time, each filling the list, swiped through sideways with a dot per item below (styled by the theme's list_pages, list_page_dot and list_page_dot_current). Without it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed list takes `column` or `row_wrap`.</xs:documentation></xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="limit" type="xs:string">
+			<xs:annotation><xs:documentation>Show only the first this many rows, e.g. a widget's setting: `limit=&quot;$count&quot;`; every row if not given or below 0</xs:documentation></xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="follow_end" type="xs:string">
 			<xs:annotation><xs:documentation>&quot;true&quot; to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false)</xs:documentation></xs:annotation>
 		</xs:attribute>
@@ -3520,6 +3536,11 @@
 		</xs:attribute>
 		<xs:attribute name="bind_value" type="subject">
 			<xs:annotation><xs:documentation>With `key`, instead of `value`: follow a subject for the value shown rows have, e.g. `bind_value=&quot;om.state.currentTool&quot;` with `key=&quot;row.index&quot;` shows the tool in use</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="ds_pages.attributes">
+		<xs:attribute name="bind_page" type="subject">
+			<xs:annotation><xs:documentation>A text subject naming the page shown: setting it shows that page (going back to it if it was opened on the way, else opening it), and moving between pages sets it; empty shows the first</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="ds_pages-page.attributes">
@@ -4253,6 +4274,14 @@
 		</xs:attribute>
 		<xs:attribute name="shown" type="xs:string">
 			<xs:annotation><xs:documentation>Prop `shown` (string)</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+	<xs:attributeGroup name="job_ready.attributes">
+		<xs:attribute name="recent" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `recent` (int)</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="macros" type="xs:string">
+			<xs:annotation><xs:documentation>Prop `macros` (int)</xs:documentation></xs:annotation>
 		</xs:attribute>
 	</xs:attributeGroup>
 	<xs:attributeGroup name="lv_arc.attributes">
@@ -7599,6 +7628,7 @@
 		<xs:annotation><xs:documentation>Pages that share one place, the first shown to start with. Each is a `&lt;ds_pages-page&gt;` inside it. `actions.navigation.open_page` from inside the stack slides the page it names in, under a header with the page's title and a button back to the page it came from; that button, or the back key while the stack is on screen, slides back. Also takes every lv_obj attribute.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="ds_pages.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -8607,6 +8637,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/dashboard_job.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="dashboard_job.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>
@@ -11455,6 +11486,7 @@
 		<xs:annotation><xs:documentation>Component from assets/ui/components/dashboard/job_ready.xml.</xs:documentation></xs:annotation>
 		<xs:complexType>
 			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="job_ready.attributes"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

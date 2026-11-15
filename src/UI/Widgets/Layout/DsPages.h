@@ -4,8 +4,9 @@
  * <ds_pages>: pages that share one place, the first shown to start with. Opening another (open(), or the global action
  * `actions.navigation.open_page` from inside the stack) slides it in over the one shown, under a header with its title
  * and a button back to the page it came from; going back (that button, or the back key while the stack is on screen,
- * see addBackLayer() in Navigation.h) slides back. Each page is a <ds_pages-page> inside it. Its attributes are in
- * registerXml().
+ * see addBackLayer() in Navigation.h) slides back. Each page is a <ds_pages-page> inside it. With `bind_page`, a text
+ * subject names the page shown: setting it shows that page (going back to it if it was opened before), and the user
+ * moving between pages sets it. Its attributes are in registerXml().
  */
 
 #pragma once
@@ -70,6 +71,18 @@ namespace UI::Xml
 		/** Translate the pages' titles again after a language change */
 		static void languageChangedCb(lv_event_t* e);
 
+		/** `bind_page`'s subject changed: show the page it names */
+		static void pageObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/**
+		 * Show the page called `name` (the first if empty): go back to it if it was opened on the way to the one shown,
+		 * else open it over the one shown. Nothing if there is no such page (yet: it may be written later)
+		 */
+		void showNamed(std::string_view name);
+
+		/** Set `bind_page`'s subject, if there is one, to the page shown */
+		void tellShown();
+
 		/** Add a page called `name` with `title` (its translation key `titleTag`, if it has one); the first is shown */
 		LvContainer& addPage(std::string name, std::string title, std::string titleTag);
 
@@ -88,5 +101,7 @@ namespace UI::Xml
 		LvContainer m_body{"body", getRoot()};	  // Where the pages are, one shown at a time
 		std::vector<Page> m_pages;				  // The pages, in the order written
 		std::vector<size_t> m_shown;			  // The pages opened, each from the one before; the one shown last
+		lv_subject_t* m_page = nullptr;			  // `bind_page`: names the page shown; nullptr if not bound
+		bool m_telling = false;					  // Setting m_page, so its change isn't followed back
 	};
 } // namespace UI::Xml

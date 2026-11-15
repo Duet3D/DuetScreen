@@ -1,11 +1,14 @@
 <!--
-  One of the macros in the job widget's ready face (job_ready.xml), two to a line. Tap it to ask whether to run it.
+  One of the macros in the job widget's ready face (job_ready.xml), two to a line, its name on one line. Tap it to ask
+  whether to run it.
 
   Fields:   a macros row: row.name (src/UI/Xml/Data/FilesSource.h)
   Actions:  actions.files.ask_run (src/UI/Presenters/FileBrowser/FilesActions.h)
 -->
 <component>
-	<view extends="ds_button" bind_text="row.name" long_mode="dots" height="52" flex_grow="1" style_min_width="40%">
+	<!-- A width of its own, grown to half the line, so its name is cut short with dots rather than overflowing -->
+	<view extends="ds_button" bind_text="row.name" long_mode="dots" width="1" height="52" flex_grow="1"
+		  style_min_width="40%">
 		<action trigger="clicked" name="actions.files.ask_run"/>
 	</view>
 </component>

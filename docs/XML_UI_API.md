@@ -288,7 +288,7 @@ From [FilesSource.cpp](../src/UI/Xml/Data/FilesSource.cpp).
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `source.files.recent` | list | The newest jobs in the jobs folder (not in its folders), newest first, at most five. Tap one to ask whether to start it (actions.files.ask_start). |
+| `source.files.recent` | list | The newest jobs in the jobs folder (not in its folders), newest first, at most 20 (show fewer with <ds_list limit>). Tap one to ask whether to start it (actions.files.ask_start). |
 | `source.files.recent_count` | int | How many jobs `recent` lists |
 | `source.files.macros` | list | The macros in the macros folder (not in its folders), in the folder's order. Tap one to ask whether to run it (actions.files.ask_run). |
 | `source.files.macro_count` | int | How many macros `macros` lists |
@@ -356,8 +356,8 @@ From [JobSource.cpp](../src/UI/Xml/Data/JobSource.cpp).
 | Name | Type | Description |
 | --- | --- | --- |
 | `source.job.latest_file` | text | The latest job's file: the current job's, or the last job's when it has finished |
-| `source.job.finished` | int | 1 when the latest job is the last one, finished, else 0 |
-| `source.job.running` | int | 1 while a job's file is open (printing, paused or simulating), else 0 |
+| `source.job.finished` | int | 1 once the latest job has ended (finished, cancelled, stopped or simulated) and no other runs, else 0. Whether a job runs is source.machine.job_active. |
+| `source.job.page` | text | The job widget's page (dashboard_job.xml): "status" from when a job starts until the user goes back, else "ready". Its <ds_pages bind_page> follows and sets it. |
 | `source.job.name` | text | The latest job's file, without its folder, e.g. "benchy.gcode" |
 | `source.job.state` | text | What the job is doing, in the machine's words: "Printing" ("Running" on a CNC or laser machine), "Paused", "Finished"; empty for no job |
 | `source.job.layer` | text | The layer being printed, e.g. "51 of 120"; empty if the job has no layers |
@@ -602,6 +602,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.files.ask_run` | Ask whether to run the macro. From a row of source.files.macros. | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
 | `actions.files.ask_start` | Ask whether to start the job, with its details and thumbnail. From a row of source.files.recent. | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
 | `actions.files.confirm` | Do what the file dialog asks (start the job, and show the dashboard, or run the macro), and close it | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
+| `actions.files.refresh` | List the jobs and macros (source.files.recent and macros) again, e.g. after uploading some | [FilesActions.cpp](../src/UI/Presenters/FileBrowser/FilesActions.cpp) |
 | `actions.gcode.send` | Send `arg` to the printer as G-code, e.g. `arg="M106 P{number} S{event.value}"`. Offered to users for their widgets' action settings, as `tr.actions.gcode_send`. | [GcodeActions.cpp](../src/UI/Xml/Runtime/GcodeActions.cpp) |
 | `actions.heater.set_active` | Set the heater's active temperature to the edited value (`value_confirmed`), else ask for it with a number pad. From the same rows as `actions.heater.toggle`. | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
 | `actions.heater.set_standby` | As `actions.heater.set_active`, for the standby temperature | [HeaterActions.cpp](../src/UI/Presenters/Control/Temperature/HeaterActions.cpp) |
@@ -620,7 +621,7 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.move.zero` | Make the current position work zero in the workplace in use (G10 L20): `arg` is the axis letter or `all`, or raise it from a row of `source.axes.all` or `others`. Asks first if confirmations are on. Offered to users for their widgets' action settings, as `tr.actions.move_zero`. | [MoveActions.cpp](../src/UI/Presenters/Control/Move/MoveActions.cpp) |
 | `actions.navigation.back` | Close the top modal, or else go back a screen | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.home` | Close every screen and show the home screens | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
-| `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
+| `actions.navigation.open` | Open the screen registered as `arg`, e.g. `arg="control"`; `arg="files/jobs"` opens it on its tab called `jobs`. Offered to users for their widgets' action settings, as `tr.actions.navigation_open`. | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.navigation.open_page` | Open the page called `arg` in the <ds_pages> around the widget, e.g. `arg="colours"` | [NavigationActions.cpp](../src/UI/Xml/Runtime/NavigationActions.cpp) |
 | `actions.selector.decrement` | Step the selector named by `arg` (its id, e.g. `jog.distance`) down | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
 | `actions.selector.edit` | Ask for a value for the selector named by `arg` (its id) with a number pad | [SelectorActions.cpp](../src/UI/Xml/View/SelectorActions.cpp) |
@@ -1550,6 +1551,7 @@ Also takes every `lv_obj` attribute.
 | `item_height` | Windowed: each item's height in pixels (required when windowed) |
 | `item_width` | Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; the list scrolls sideways); the list's full width if not given |
 | `flow` | How the items are placed: `column`, one per line; `row`, side by side; `row_wrap`, as many per line as fit; or `pages`, one at a time, each filling the list, swiped through sideways with a dot per item below (styled by the theme's list_pages, list_page_dot and list_page_dot_current). Without it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed list takes `column` or `row_wrap`. |
+| `limit` | Show only the first this many rows, e.g. a widget's setting: `limit="$count"`; every row if not given or below 0 |
 | `follow_end` | "true" to keep a list that isn't windowed showing its last rows as rows are added, like a log, unless the user has scrolled back (default false) |
 | `key` | A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the data changes. Not with `windowed`. Empty for every row, so a component can leave it to a prop. |
 | `value` | With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, e.g. `<ds_list list="om.fans" key="row.index" value="2" item="…"/>` shows fan 2 |
@@ -1593,6 +1595,10 @@ Also takes every `lv_obj` attribute.
 ```
 
 ![The example](../tests/ref_imgs/xml_ui_api/themes/duetscreen/widgets/ds_pages.png)
+
+| Attribute | Description |
+| --- | --- |
+| `bind_page` | A text subject naming the page shown: setting it shows that page (going back to it if it was opened on the way, else opening it), and moving between pages sets it; empty shows the first |
 
 ### ds_pages-page
 
@@ -1935,7 +1941,7 @@ The built-in slots and the layout each shows until the user changes it.
 
 | Slot | Kind | Items (id: widget) |
 | --- | --- | --- |
-| `dashboard` | free, 920×561 px | `tools`: `tools` at 0,0, 548×277; `temperature_graph`: `temperature_graph` at 0,282, 548×279; `files`: `files` at 553,0, 367×561 |
+| `dashboard` | free, 920×561 px | `tools`: `tools` at 0,0, 548×277; `temperature_graph`: `temperature_graph` at 0,282, 548×279; `job`: `job` at 553,0, 367×561 |
 | `sidebar` | strip | `home`: `page_home`; `control`: `page_control`; `files`: `page_files`; `console`: `page_console`; `settings`: `page_settings`, locked; `estop`: `estop`, locked |
 | `status_bar` | strip | none |
 
@@ -2466,7 +2472,7 @@ At its smallest, 550×372 px:
 
 #### job
 
-**Job**: The job while it runs; else the last job, the newest jobs and the macros
+**Job**: The job: what is ready to start (the last job, the newest jobs and the macros), and the job's status once one starts
 
 In Jobs; placed in `dashboard`; component `dashboard_job` ([job.json](../assets/ui/widgets/jobs/job.json)). In a free layout it is 365×561 px, and at least 272×278 px.
 
@@ -2475,6 +2481,11 @@ In Jobs; placed in `dashboard`; component `dashboard_job` ([job.json](../assets/
 At its smallest, 272×278 px:
 
 ![job at its smallest](../tests/ref_imgs/xml_ui_api/widgets/job_smallest.png)
+
+| Setting | Shown as | Takes | Default |
+| --- | --- | --- | --- |
+| `recent` | Newest jobs shown | int, 0 to 20 | `5` |
+| `macros` | Macros shown | int, 0 to 20 | `4` |
 
 #### job_progress
 
@@ -2993,9 +3004,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
-| `dashboard_job` |  |  | `job` | [dashboard_job.xml](../assets/ui/components/dashboard/dashboard_job.xml) |
+| `dashboard_job` |  | `recent`, `macros` | `job` | [dashboard_job.xml](../assets/ui/components/dashboard/dashboard_job.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
-| [`dashboard_job_status`](#dashboard_job_status) | `job_status` |  | `dashboard_files`, `dashboard_job`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
+| [`dashboard_job_status`](#home) | `job_status` |  | `dashboard_files`, `dashboard_job`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
 | `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
 | `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
@@ -3046,7 +3057,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `job_detail` |  | `title_tag`, `value` | `dashboard_job_status` | [job_detail.xml](../assets/ui/components/dashboard/job_detail.xml) |
 | `job_macro` |  |  | `job_ready` | [job_macro.xml](../assets/ui/components/dashboard/job_macro.xml) |
 | `job_override` |  | `title_tag`, `value`, `tap_action`, `shown` | `dashboard_job_status` | [job_override.xml](../assets/ui/components/dashboard/job_override.xml) |
-| [`job_ready`](#job_ready) |  |  | `dashboard_job` | [job_ready.xml](../assets/ui/components/dashboard/job_ready.xml) |
+| [`job_ready`](#job_ready) |  | `recent`, `macros` | `dashboard_job` | [job_ready.xml](../assets/ui/components/dashboard/job_ready.xml) |
 | `job_recent_row` |  |  | `job_ready` | [job_recent_row.xml](../assets/ui/components/dashboard/job_recent_row.xml) |
 | [`move`](#control) |  |  | `control`, `move` | [move.xml](../assets/ui/components/control/move/move.xml) |
 | `move_axis` |  | `letter`, `usable`, `plus`, `minus` | `move`, `move_z_card` | [move_axis.xml](../assets/ui/components/control/move/move_axis.xml) |
@@ -3143,10 +3154,6 @@ Also shows `move`.
 
 ![customise_place](../tests/ref_imgs/xml_ui_api/views/customise_place.png)
 
-#### dashboard_job_status
-
-![dashboard_job_status](../tests/ref_imgs/xml_ui_api/views/dashboard_job_status.png)
-
 #### dialog_host
 
 ![dialog_host](../tests/ref_imgs/xml_ui_api/views/dialog_host.png)
@@ -3179,7 +3186,7 @@ Also shows `file_browser`.
 
 #### home
 
-Also shows `customise`, `dashboard`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
+Also shows `customise`, `dashboard`, `dashboard_job_status`, `home_main_window`, `notifications`, `sidebar`, `status_bar`.
 
 ![home](../tests/ref_imgs/xml_ui_api/views/home.png)
 

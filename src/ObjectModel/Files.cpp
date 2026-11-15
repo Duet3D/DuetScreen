@@ -388,7 +388,9 @@ namespace OM::FileSystem
 			s_fileListRequests[full_path] = reqPtr;
 		}
 
-		if (cached && callback)
+		// What the folder held when last listed, while it is listed again; nothing yet if it is still being listed (its
+		// requesters are answered with this request)
+		if (cached && callback && !cached->IsPending())
 		{
 			LOG_DBG("Running callback with cached {:d} file items for '{:s}'", cached->GetItemCount(), full_path);
 			callback(cached->GetItemsCopy());

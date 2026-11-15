@@ -443,7 +443,7 @@ TEST_F(TestCustomiseHome, CustomisingCoversEveryWidgetAndShowsTheToolbar)
 	EXPECT_TRUE(UI::Xml::LayoutEditor::get().isEditing());
 	EXPECT_TRUE(shownOnScreen(toolbar()));
 	for (const auto& [slot, id] : std::vector<std::pair<const char*, const char*>>{
-			 {"dashboard", "tools"}, {"dashboard", "files"}, {"sidebar", "home"}, {"sidebar", "estop"}})
+			 {"dashboard", "tools"}, {"dashboard", "job"}, {"sidebar", "home"}, {"sidebar", "estop"}})
 	{
 		EXPECT_NE(overlayOf(slot, id), nullptr) << slot << "/" << id;
 	}
@@ -495,7 +495,7 @@ TEST_F(TestCustomiseHome, WidgetsAreRemovedMovedAndResizedByTouch)
 	EXPECT_EQUAL_SCREENSHOT("customise/handles.png")
 
 	// Other widgets show no handles
-	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(overlayOf("dashboard", "files"), "handle_n"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(overlayOf("dashboard", "job"), "handle_n"), LV_OBJ_FLAG_HIDDEN));
 }
 
 TEST_F(TestCustomiseHome, WidgetsAreAddedFromThePoolWhereTheUserTapped)
@@ -627,7 +627,7 @@ TEST_F(TestCustomiseHome, EveryWidgetCanBeAddedToEverySlotItFits)
 	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
 	auto& editor = UI::Xml::LayoutEditor::get();
 	start();
-	for (const char* id : {"tools", "temperature_graph", "files"})
+	for (const char* id : {"tools", "temperature_graph", "job"})
 	{
 		editor.select("dashboard", id);
 		EXPECT_TRUE(editor.removeSelected());

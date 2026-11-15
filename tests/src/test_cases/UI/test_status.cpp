@@ -48,6 +48,8 @@ TEST_F(TestStatus, ThumbnailGoesBesideTheNameWhereThereIsNoRoomAbove)
 	std::filesystem::create_directories(thumbnailPath.parent_path());
 	std::filesystem::remove(thumbnailPath);
 	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
+	// Printing
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
 	load_model_data(
 		R"({"key":"job","flags":"v","result":{"duration":50,"warmUpDuration":0,"file":{"fileName":"test.gcode","size":100,"printTime":100}}})");
 
@@ -91,6 +93,8 @@ TEST_F(TestStatus, Header)
 	std::filesystem::create_directories(thumbnailPath.parent_path());
 	std::filesystem::remove(thumbnailPath);
 	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
+	// Printing
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
 	load_model_data(
 		R"({"key":"job","flags":"v","result":{"duration":50,"warmUpDuration":0,"file":{"fileName":"test.gcode","size":100,"printTime":100}}})");
 

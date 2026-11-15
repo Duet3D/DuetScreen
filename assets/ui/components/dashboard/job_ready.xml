@@ -1,15 +1,23 @@
 <!--
-  What is ready to start while no job runs, the `job` widget's face then (dashboard_job.xml): the last job, to print
-  again; the newest jobs, each tapped to ask whether to start it; and the macros, each tapped to ask whether to run
-  it. All files opens the Files page.
+  What is ready to start, the `job` widget's first page (dashboard_job.xml): while a job runs, it, tapped to see its
+  status; else the last job, to print again; the newest jobs, each tapped to ask whether to start it (not while a job
+  runs); and the macros, each tapped to ask whether to run it. All files opens the Files page's jobs; the refresh
+  button lists the files again (they are also listed again on coming back to the dashboard and when a job ends).
 
-  Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the last job, how it ended and its thumbnail;
-            source.files.* (src/UI/Xml/Data/FilesSource.h): the newest jobs and the macros
-  Actions:  job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h), files.ask_start and files.ask_run
-            (global: src/UI/Presenters/FileBrowser/FilesActions.h), navigation.open
+  Props:    recent: how many of the newest jobs to show; macros: how many macros
+  Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the job, how the last ended and its thumbnail;
+            source.files.* (src/UI/Xml/Data/FilesSource.h): the newest jobs and the macros;
+            source.machine.job_active (src/UI/Xml/Data/MachineSource.h): whether a job runs
+  Actions:  job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h), files.ask_start, files.ask_run and
+            files.refresh (global: src/UI/Presenters/FileBrowser/FilesActions.h), navigation.open, open_page
   It has no presenter: everything it shows and does is global.
 -->
 <component>
+	<api>
+		<prop name="recent" type="int" default="5"/>
+		<prop name="macros" type="int" default="4"/>
+	</api>
+
 	<!-- Its scrollbar runs clear of the rows, in the room on the right -->
 	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver" style_pad_row="12"
 		  style_pad_right="14">
@@ -26,12 +34,16 @@
 				<style name="text_header"/>
 				<bind_flag_if cond="om.state.machineMode|eq:CNC eq 0 and om.state.machineMode|eq:Laser eq 0" flag="hidden"/>
 			</lv_label>
+			<ds_button name="refresh" text="&#xF021;" width="content" height="content" style_pad_hor="12"
+					   style_pad_ver="8" style_margin_right="8">
+				<action trigger="clicked" name="actions.files.refresh"/>
+			</ds_button>
 			<lv_obj name="all_files" width="content" height="content" flex_flow="row" scrollable="false"
 					style_flex_cross_place="center" style_flex_track_place="center" style_pad_hor="12"
 					style_pad_ver="8" style_pad_column="8">
 				<style name="btn"/>
 				<style name="pressed" selector="pressed"/>
-				<action trigger="clicked" name="actions.navigation.open" arg="files"/>
+				<action trigger="clicked" name="actions.navigation.open" arg="files/jobs"/>
 				<lv_label name="text" translation_tag="tr.job.all_files" clickable="false"/>
 				<lv_label name="chevron" text="&#xF054;" clickable="false">
 					<style name="text_muted"/>
@@ -39,7 +51,43 @@
 			</lv_obj>
 		</lv_obj>
 
-		<!-- The last job, while there is one -->
+		<!-- The job, while it runs: tapped, its status -->
+		<ds_setting_group name="now" title_tag="tr.job.current_job" width="100%">
+			<bind_flag_if_eq subject="source.machine.job_active" flag="hidden" ref_value="0"/>
+			<lv_obj name="current" height="content" flex_flow="row" scrollable="false" style_flex_cross_place="center"
+					style_flex_track_place="center">
+				<style name="setting_row"/>
+				<style name="pressed" selector="pressed"/>
+				<action trigger="clicked" name="actions.navigation.open_page" arg="status"/>
+				<lv_obj name="picture" width="40" height="40" flex_flow="row" scrollable="false" clickable="false"
+						style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+						style_pad_all="0" style_bg_opa="0" style_border_width="0">
+					<ds_thumbnail name="thumbnail" bind_src="source.job.thumbnail" inner_align="contain" height="100%"
+								  style_max_width="100%"/>
+				</lv_obj>
+				<lv_obj name="about" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+						clickable="false" style_pad_all="0" style_bg_opa="0" style_border_width="0">
+					<lv_label name="name" bind_text="source.job.name" width="100%" long_mode="dots">
+						<style name="setting_title"/>
+					</lv_label>
+					<lv_obj name="detail" width="100%" height="content" flex_flow="row" scrollable="false"
+							clickable="false" style_pad_all="0" style_pad_column="6" style_bg_opa="0"
+							style_border_width="0">
+						<lv_label name="state" bind_text="source.job.state">
+							<style name="setting_hint"/>
+						</lv_label>
+						<lv_label name="progress" bind_text="source.job.progress" bind_text-fmt="· %d%%">
+							<style name="setting_hint"/>
+						</lv_label>
+					</lv_obj>
+				</lv_obj>
+				<lv_label name="chevron" text="&#xF054;">
+					<style name="text_muted"/>
+				</lv_label>
+			</lv_obj>
+		</ds_setting_group>
+
+		<!-- The last job, while there is one and none runs -->
 		<ds_setting_group name="last" title_tag="tr.job.last_job" width="100%">
 			<bind_flag_if_eq subject="source.job.print_again_control" flag="hidden" ref_value="0"/>
 			<lv_obj name="last_job" height="content" flex_flow="row" scrollable="false" style_flex_cross_place="center"
@@ -70,19 +118,19 @@
 			</lv_obj>
 		</ds_setting_group>
 
-		<!-- The newest jobs -->
+		<!-- The newest jobs; none can start while a job runs -->
 		<ds_setting_group name="recent" title_tag="tr.job.recent" width="100%">
 			<bind_flag_if_eq subject="source.files.recent_count" flag="hidden" ref_value="0"/>
-			<ds_list name="list" list="source.files.recent" item="job_recent_row">
+			<ds_list name="list" list="source.files.recent" item="job_recent_row" limit="$recent">
 				<style name="setting_list"/>
 			</ds_list>
 		</ds_setting_group>
 
-		<!-- The macros, two to a line -->
+		<!-- The first macros, two to a line -->
 		<ds_setting_group name="macros" title_tag="tr.job.macros" width="100%">
 			<bind_flag_if_eq subject="source.files.macro_count" flag="hidden" ref_value="0"/>
-			<ds_list name="list" list="source.files.macros" item="job_macro" flow="row_wrap" width="100%"
-					 height="content" style_pad_row="8" style_pad_column="8">
+			<ds_list name="list" list="source.files.macros" item="job_macro" flow="row_wrap" limit="$macros"
+					 width="100%" height="content" style_pad_row="8" style_pad_column="8">
 				<style name="setting_row"/>
 			</ds_list>
 		</ds_setting_group>

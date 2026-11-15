@@ -87,7 +87,12 @@ namespace UI::Xml
 	<ds_pages-page name="colours" title="Colours">
 		<lv_label text="The colours"/>
 	</ds_pages-page>
-</ds_pages>)"},
+</ds_pages>)",
+					  .attributes = {{"bind_page",
+									  "A text subject naming the page shown: setting it shows that page (going back to "
+									  "it if it was opened on the way, else opening it), and moving between pages sets "
+									  "it; empty shows the first",
+									  AttributeKind::Subject}}},
 					 xmlCreate,
 					 xmlApply);
 		Widgets::add({.name = "ds_pages-page",
@@ -118,6 +123,7 @@ namespace UI::Xml
 		}
 		m_shown.push_back(index);
 		slideTo(shown, index, 1);
+		tellShown();
 		return true;
 	}
 
@@ -131,7 +137,53 @@ namespace UI::Xml
 		const size_t shown = m_shown.back();
 		m_shown.pop_back();
 		slideTo(shown, m_shown.back(), -1);
+		tellShown();
 		return true;
+	}
+
+	void DsPages::showNamed(std::string_view name)
+	{
+		UI_LOCK();
+		if (m_pages.empty())
+		{
+			return;
+		}
+		const size_t index = name.empty() ? 0 : indexOf(name);
+		if (index >= m_pages.size() || index == m_shown.back())
+		{
+			return;
+		}
+		const auto earlier = std::find(m_shown.begin(), m_shown.end(), index);
+		if (earlier == m_shown.end())
+		{
+			open(m_pages[index].name);
+			return;
+		}
+		// Back to it, past the pages opened since
+		const size_t shown = m_shown.back();
+		m_shown.erase(earlier + 1, m_shown.end());
+		slideTo(shown, index, -1);
+		tellShown();
+	}
+
+	void DsPages::tellShown()
+	{
+		if (m_page == nullptr || m_telling || shownPage() == lv_subject_get_string(m_page))
+		{
+			return;
+		}
+		m_telling = true;
+		lv_subject_copy_string(m_page, std::string(shownPage()).c_str());
+		m_telling = false;
+	}
+
+	void DsPages::pageObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* pages = static_cast<DsPages*>(lv_observer_get_user_data(observer));
+		if (!pages->m_telling)
+		{
+			pages->showNamed(lv_subject_get_string(subject));
+		}
 	}
 
 	std::string_view DsPages::shownPage() const
@@ -164,6 +216,30 @@ namespace UI::Xml
 	void DsPages::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
 	{
 		lv_xml_obj_apply(state, attrs);
+		lv_obj_t* root = itemOf(state);
+		DsPages* pages = nullptr;
+		for (DsPages* stack : s_stacks)
+		{
+			if (stack->getRootPtr() == root)
+			{
+				pages = stack;
+			}
+		}
+		if (pages == nullptr)
+		{
+			return;
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_page"))
+		{
+			if (subject->type != LV_SUBJECT_TYPE_STRING)
+			{
+				LOG_WARN("<ds_pages bind_page>: the subject must be text");
+				return;
+			}
+			// Its pages are written after it: each, as it is added, is shown if the subject names it
+			pages->m_page = subject;
+			lv_subject_add_observer_obj(subject, pageObserverCb, root, pages);
+		}
 	}
 
 	void* DsPages::xmlCreatePage(lv_xml_parser_state_t* state, const char** attrs)
@@ -220,6 +296,14 @@ namespace UI::Xml
 		if (m_shown.empty())
 		{
 			m_shown.push_back(0);
+		}
+		else if (m_page != nullptr && added.getName() == lv_subject_get_string(m_page))
+		{
+			// The page the subject names, written after the stack: shown at once, over the first
+			m_pages[m_shown.back()].content->setFlag(LV_OBJ_FLAG_HIDDEN, true);
+			m_shown.push_back(m_pages.size() - 1);
+			added.setFlag(LV_OBJ_FLAG_HIDDEN, false);
+			showHeader();
 		}
 		return added;
 	}

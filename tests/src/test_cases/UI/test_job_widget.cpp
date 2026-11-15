@@ -13,6 +13,7 @@
 #include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include <filesystem>
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 #include <thread>
 
@@ -55,6 +56,38 @@ class TestJobWidget : public UiTestSuite
 		load_model_data_from_file(macros);
 	}
 
+	/** A job, test.gcode, runs */
+	static void runJob()
+	{
+		load_model_data_from_file("tests/object_model/job/model_state_printing.json");
+		load_model_data(
+			R"({"key":"job","flags":"v","result":{"duration":50,"file":{"fileName":"0:/gcodes/test.gcode","size":100,"printTime":100}}})");
+		deliverModelEvents();
+	}
+
+	/** The job ends, cancelled or finished, after 1 h 13 min */
+	static void endJob(bool cancelled)
+	{
+		load_model_data(R"({"key":"state","flags":"v","result":{"status":"idle"}})");
+		load_model_data(fmt::format(
+			R"({{"key":"job","flags":"v","result":{{"lastFileName":"0:/gcodes/test.gcode","lastDuration":4380,"lastFileCancelled":{:s},"lastFileAborted":false,"lastFileSimulated":false}}}})",
+			cancelled ? "true" : "false"));
+		deliverModelEvents();
+	}
+
+	/** Whether the widget called `name` shows: neither it nor anything it is in is hidden */
+	bool shows(const char* name) const
+	{
+		for (lv_obj_t* obj = lv_obj_find_by_name(view.getRootPtr(), name); obj != nullptr; obj = lv_obj_get_parent(obj))
+		{
+			if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+			{
+				return false;
+			}
+		}
+		return lv_obj_find_by_name(view.getRootPtr(), name) != nullptr;
+	}
+
 	/** The rows of the list in the group called `group` */
 	lv_obj_t* listIn(const char* group) const
 	{
@@ -73,19 +106,46 @@ TEST_F(TestJobWidget, DurationsReadAsHoursAndMinutes)
 	EXPECT_EQ(UI::Xml::JobSource::duration(160 * 60), "2 h 40 min");
 }
 
+TEST_F(TestJobWidget, AnEndedJobSaysHowUntilTheUserGoesBackToWhatIsReady)
+{
+	connectWithFiles("tests/object_model/rr_filelist/gcodes_recent.json",
+					 "tests/object_model/rr_filelist/macros_dashboard.json",
+					 "0:/gcodes/test.gcode");
+	view.show();
+	EXPECT_TRUE(shows("job_ready")) << "no job yet: what is ready to start";
+
+	// A job runs, and its status shows; it is cancelled while the screen watches, and its status says so
+	runJob();
+	EXPECT_TRUE(shows("dashboard_job_status"));
+	endJob(true);
+	view.updateLayout();
+	lv_obj_t* status = lv_obj_find_by_name(view.getRootPtr(), "dashboard_job_status");
+	EXPECT_TRUE(shows("dashboard_job_status")) << "it stays until the user goes back";
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(status, "state")), "Cancelled");
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(status, "cancel"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(status, "print_again"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("job_widget/ended.png");
+
+	// Back: what is ready to start
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(view.getRootPtr(), "pages"), "back"), LV_EVENT_CLICKED, nullptr);
+	view.updateLayout();
+	EXPECT_TRUE(shows("job_ready"));
+}
+
 TEST_F(TestJobWidget, ReadyShowsTheLastJobTheNewestJobsAndTheMacros)
 {
 	connectWithFiles("tests/object_model/rr_filelist/gcodes_recent.json",
 					 "tests/object_model/rr_filelist/macros_dashboard.json",
 					 "0:/gcodes/test.gcode");
-	// A job ran, and finished while the screen watched
-	load_model_data(R"({"key":"job","flags":"v","result":{"file":{"fileName":"0:/gcodes/test.gcode"}}})");
-	deliverModelEvents();
-	load_model_data(
-		R"({"key":"job","flags":"v","result":{"file":{"fileName":null},"lastFileName":"0:/gcodes/test.gcode","lastDuration":4380,"lastFileCancelled":false,"lastFileAborted":false,"lastFileSimulated":false}})");
-	deliverModelEvents();
+	// A job ran, and finished while the screen watched; the user went back from its status
+	runJob();
+	endJob(false);
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(view.getRootPtr(), "pages"), "back"), LV_EVENT_CLICKED, nullptr);
 	view.show();
 	view.updateLayout();
+	ASSERT_TRUE(shows("job_ready"));
 	EXPECT_EQUAL_SCREENSHOT("job_widget/ready.png");
 	// The macros, below
 	lv_obj_t* face = lv_obj_get_parent(lv_obj_find_by_name(view.getRootPtr(), "ready_print"));
@@ -96,17 +156,16 @@ TEST_F(TestJobWidget, ReadyShowsTheLastJobTheNewestJobsAndTheMacros)
 	lv_obj_scroll_to_y(face, 0, LV_ANIM_OFF);
 
 	lv_obj_t* root = view.getRootPtr();
-	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "dashboard_job_status"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(root, "last"), "detail")),
 				 "Finished at 12:00 · took 1 h 13 min");
 
-	// The five newest jobs, newest first, without the folder
+	// The five newest jobs (the widget's default), newest first, without the folder
 	lv_obj_t* recent = listIn("recent");
 	ASSERT_EQ(lv_obj_get_child_count(recent), 5u);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(recent, 0), "name")), "test.gcode");
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(recent, 4), "name")), "Calibration cube.gcode");
 
-	// The macros in the folder's order, named without their ordering prefix or ".g"
+	// The first four macros (the widget's default) in the folder's order, named without their ordering prefix or ".g"
 	lv_obj_t* macros = listIn("macros");
 	ASSERT_EQ(lv_obj_get_child_count(macros), 4u);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(macros, 0), "label")), "Preheat PLA");
@@ -125,6 +184,17 @@ TEST_F(TestJobWidget, ReadyShowsTheLastJobTheNewestJobsAndTheMacros)
 	UI::closeDialogs();
 }
 
+TEST_F(TestJobWidget, ListsAreLimitedAsTheWidgetSays)
+{
+	UI::Xml::XmlView few{"few", screen.getRootPtr(), "dashboard_job", nullptr, {{"recent", "2"}, {"macros", "1"}}};
+	connectWithFiles("tests/object_model/rr_filelist/gcodes_recent.json",
+					 "tests/object_model/rr_filelist/macros_dashboard.json");
+	few.show();
+	lv_obj_t* root = few.getRootPtr();
+	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(lv_obj_find_by_name(root, "recent"), "list")), 2u);
+	EXPECT_EQ(lv_obj_get_child_count(lv_obj_find_by_name(lv_obj_find_by_name(root, "macros"), "list")), 1u);
+}
+
 TEST_F(TestJobWidget, NewFilesAreListedAsThePrinterCountsThem)
 {
 	connectWithFiles("tests/object_model/rr_filelist/gcodes.json", "tests/object_model/rr_filelist/macros.json");
@@ -138,13 +208,19 @@ TEST_F(TestJobWidget, NewFilesAreListedAsThePrinterCountsThem)
 	EXPECT_EQ(lv_obj_get_child_count(listIn("recent")), 5u);
 }
 
-TEST_F(TestJobWidget, ARunningJobShowsItsStatus)
+TEST_F(TestJobWidget, ARunningJobShowsItsStatusAndCanBeFoundAgain)
 {
-	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
-	load_model_data_from_file("tests/object_model/job/model_job_printing_layer_2.json");
-	deliverModelEvents();
+	runJob();
 	view.show();
+	EXPECT_TRUE(shows("dashboard_job_status"));
+	EXPECT_FALSE(shows("job_ready"));
+
+	// Back to what is ready, where the running job leads back to its status
 	lv_obj_t* root = view.getRootPtr();
-	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(root, "dashboard_job_status"), LV_OBJ_FLAG_HIDDEN));
-	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "job_ready"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(root, "pages"), "back"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_TRUE(shows("job_ready"));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(root, "now"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(root, "last"), LV_OBJ_FLAG_HIDDEN)) << "it runs: nothing to repeat";
+	lv_obj_send_event(lv_obj_find_by_name(root, "current"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(shows("dashboard_job_status"));
 }

@@ -26,6 +26,16 @@ namespace UI::FilesActions
 
 	void registerAll()
 	{
+		Xml::Actions::addGlobal("files.refresh",
+								"List the jobs and macros (source.files.recent and macros) again, e.g. after uploading "
+								"some",
+								[](const Xml::ActionArgs&)
+								{
+									if (auto* source = files())
+									{
+										source->refresh();
+									}
+								});
 		Xml::Actions::addGlobal("files.ask_start",
 								"Ask whether to start the job, with its details and thumbnail. From a row of "
 								"source.files.recent.",

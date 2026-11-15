@@ -23,15 +23,17 @@ namespace UI::Xml
 				   std::optional<Window> window,
 				   bool followEnd,
 				   std::optional<Key> key,
-				   bool pages)
+				   bool pages,
+				   std::optional<size_t> limit)
 		: m_container(container)
 		, m_list(&list)
 		, m_item(std::move(item))
 		, m_itemAttributes(std::move(itemAttributes))
 		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
 		, m_key(std::move(key))
+		, m_limit(limit)
 		, m_window(window)
-		, m_count(list.size())
+		, m_count(shownOf(list.size()))
 		, m_followEnd(followEnd)
 	{
 		m_list->addListener(this);
@@ -48,7 +50,7 @@ namespace UI::Xml
 			{
 				m_pages = std::make_unique<ListPages>(m_container);
 			}
-			build(0, m_list->size());
+			build(0, shownOf(m_list->size()));
 			return;
 		}
 
@@ -138,6 +140,9 @@ namespace UI::Xml
 				   "it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed "
 				   "list "
 				   "takes `column` or `row_wrap`."},
+				  {"limit",
+				   "Show only the first this many rows, e.g. a widget's setting: `limit=\"$count\"`; every row if not "
+				   "given or below 0"},
 				  {"follow_end",
 				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
 				   "unless the user has scrolled back (default false)"},
@@ -160,13 +165,13 @@ namespace UI::Xml
 			xmlApply);
 	}
 
-	void DsList::onListResized(size_t oldSize, size_t newSize)
+	void DsList::onListResized(size_t /* oldSize */, size_t newSize)
 	{
 		if (m_window)
 		{
 			// Removed rows' widgets go now, before the rows do. The list still holds them until every listener has
 			// been told, so from here on only the first newSize rows are used.
-			m_count = newSize;
+			m_count = shownOf(newSize);
 			for (auto it = m_shown.lower_bound(newSize); it != m_shown.end();)
 			{
 				deleteRow(it->second);
@@ -174,14 +179,19 @@ namespace UI::Xml
 			}
 			updateWindow();
 		}
-		else if (newSize > oldSize)
+		else if (shownOf(newSize) > m_entries.size())
 		{
-			build(m_entries.size(), newSize);
+			build(m_entries.size(), shownOf(newSize));
 		}
 		else
 		{
-			truncate(newSize);
+			truncate(shownOf(newSize));
 		}
+	}
+
+	size_t DsList::shownOf(size_t rows) const
+	{
+		return m_limit ? std::min(rows, *m_limit) : rows;
 	}
 
 	void DsList::onListDestroyed()
@@ -306,8 +316,22 @@ namespace UI::Xml
 		}
 		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
 		const bool keyed = key.has_value();
-		auto* built = new DsList(
-			container, *list, item, context, ItemAttributes::from(attrs), window, followEnd, std::move(key), *pages);
+		// A negative limit, or none, shows every row
+		std::optional<size_t> limit;
+		if (const char* text = lv_xml_get_value_of(attrs, "limit"); text != nullptr && lv_xml_atoi(text) >= 0)
+		{
+			limit = static_cast<size_t>(lv_xml_atoi(text));
+		}
+		auto* built = new DsList(container,
+								 *list,
+								 item,
+								 context,
+								 ItemAttributes::from(attrs),
+								 window,
+								 followEnd,
+								 std::move(key),
+								 *pages,
+								 limit);
 		deleteWith(container, built);
 		if (keyed && valueSubject != nullptr)
 		{

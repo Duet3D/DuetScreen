@@ -129,6 +129,19 @@ namespace UI
 		return m_tabButtons.getItem(index);
 	}
 
+	size_t TabView::indexOfTab(std::string_view name) const
+	{
+		for (size_t i = 0; i < m_tabs.size(); i++)
+		{
+			const char* tabName = lv_obj_get_name(m_tabs[i]->getRootPtr());
+			if (tabName != nullptr && name == tabName)
+			{
+				return i;
+			}
+		}
+		return m_tabs.size();
+	}
+
 	LvContainer* TabView::getTab(size_t index)
 	{
 		ZoneScoped;
@@ -186,33 +199,23 @@ namespace UI
 
 	void TabView::styleTabButton(TabButton& button)
 	{
-		const lv_style_t* edge = Themes::getLvglStyles().tab_btn;
-		const lv_style_t* header = Themes::getLvglStyles().text_header;
-		const lv_style_t* top = Themes::getComponentStyles().tab_button;
+		const lv_style_t* base = Themes::getComponentStyles().tab_button;
+		const lv_style_t* top = Themes::getComponentStyles().tab_button_top;
 		const lv_style_t* side = Themes::getComponentStyles().tab_button_side;
 		if (m_barSide == LV_DIR_LEFT || m_barSide == LV_DIR_RIGHT)
 		{
-			button.removeStyle(edge, LV_STATE_CHECKED);
-			button.removeStyle(header);
+			button.removeStyle(base, LV_STATE_CHECKED);
 			button.removeStyle(top);
 			button.addStyle(side);
 			button.setIconBeforeText(true, SIDE_TAB_ICON_SIZE);
-			button.setFlexGrow(0);
-			button.setSize(LV_PCT(100), LV_SIZE_CONTENT);
-			button.removeLocalStyleProp(LV_STYLE_MIN_HEIGHT); // The theme's (tab_button_side)
 		}
 		else
 		{
 			button.removeStyle(side);
-			button.addStyle(header);
 			button.addStyle(top);
-			button.addStyle(edge, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
+			button.addStyle(base, LV_STATE_CHECKED); // The selected tab, as LVGL's tabs
 			button.setIconBeforeText(false);
-			button.setFlexGrow(1);
-			button.setSize(LV_PCT(100), LV_PCT(100));
-			button.setMinHeight(LV_SIZE_CONTENT);
 		}
-		button.setMinWidth(LV_SIZE_CONTENT);
 	}
 
 	void TabView::pinToEnd(size_t index)

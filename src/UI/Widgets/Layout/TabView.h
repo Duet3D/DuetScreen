@@ -30,6 +30,9 @@ namespace UI
 		LvContainer& getActiveTab();
 		TabButton* getTabButton(size_t index);
 		LvContainer* getTab(size_t index);
+
+		/** The index of the tab called `name` (its content's name, the `<ds_tabs-tab>`'s), or getTabCount() if none */
+		size_t indexOfTab(std::string_view name) const;
 		size_t getTabCount() const { return m_tabs.size(); };
 		size_t getActiveTabIndex() const { return m_currentTabIndex; };
 

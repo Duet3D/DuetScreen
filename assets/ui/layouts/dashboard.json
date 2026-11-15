@@ -1,4 +1,4 @@
-/* The dashboard: the tool list and temperature graph on the left, the jobs, macros and status on the right.
+/* The dashboard: the tools and temperature graph on the left, the job on the right: what is ready to start, or its status.
    A free layout of the dashboard's area on a 1024x600 screen; the user's own layout (made on the screen) can change it. */
 {
   "format": 1,
@@ -25,8 +25,8 @@
       "h": 279
     },
     {
-      "id": "files",
-      "widget": "files",
+      "id": "job",
+      "widget": "job",
       "x": 553,
       "y": 0,
       "w": 367,

@@ -16,5 +16,23 @@
       272,
       278
     ]
-  }
+  },
+  "settings": [
+    {
+      "name": "recent",
+      "kind": "int",
+      "title_tag": "tr.widget.job_recent",
+      "default": 5,
+      "min": 0,
+      "max": 20
+    },
+    {
+      "name": "macros",
+      "kind": "int",
+      "title_tag": "tr.widget.job_macros",
+      "default": 4,
+      "min": 0,
+      "max": 20
+    }
+  ]
 }

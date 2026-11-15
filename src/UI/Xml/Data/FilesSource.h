@@ -2,7 +2,9 @@
  * FilesSource.h
  *
  * Publishes the jobs and macros any view can offer: the newest jobs in the jobs folder, and the macros in the macros
- * folder, each listed afresh whenever the printer's files change (seqs.volChanges). And the shared dialog that asks
+ * folder. They are listed afresh on connecting, on coming back to the home screens, when a job ends, when asked
+ * (actions.files.refresh), and whenever the printer counts a change to its files (seqs.volChanges; not every firmware
+ * reports it). And the shared dialog that asks
  * before starting a job (with its details and thumbnail, and an offer to delete it) or running a macro, which the file
  * browser and the dashboard both open (assets/ui/components/modals/file_dialog.xml, hosted by the home screen).
  *
@@ -50,8 +52,8 @@ namespace UI::Xml
 	class FilesSource : public DataSource
 	{
 	  public:
-		/** How many of the newest jobs are listed */
-		static constexpr size_t RECENT_JOBS = 5;
+		/** How many of the newest jobs are listed, at most; a view shows as many of them as it likes (ds_list limit) */
+		static constexpr size_t RECENT_JOBS = 20;
 
 		/** Create the source. Nothing is published until DataSources::start(). */
 		FilesSource();
@@ -67,6 +69,9 @@ namespace UI::Xml
 
 		/** `name` as shown in a list of macros (`macro`) or jobs: a macro's "12_" ordering prefix is left out */
 		static std::string_view shownName(std::string_view name, bool macro);
+
+		/** List the jobs and macros again */
+		void refresh();
 
 		/** Ask whether to start the job `item`, with its details and thumbnail */
 		void askStart(const OM::FileSystem::FileSystemItem& item);
@@ -114,7 +119,8 @@ namespace UI::Xml
 
 		OM::FileSystem::ItemList m_jobs;   // The newest jobs, newest first, as `recent` shows them
 		OM::FileSystem::ItemList m_macros; // The macros, as `macros` shows them
-		OmWatch m_watch;				   // Lists the files again as they or the folders change
+		OmWatch m_watch;				   // Lists the files again as they or the folders change, or a job ends
+		bool m_home = true;				   // The home screens were showing when the screen last changed
 		std::string m_selected;			   // Path of the file the dialog is about
 		std::string m_selectedName;		   // Its name
 
