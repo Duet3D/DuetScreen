@@ -79,7 +79,7 @@ tests/ref_imgs/xml_ui_api/                their pictures: reference images, like
 assets/ui/                                the built-in bundle
   components/<part>/                      each part of the UI (home, dashboard, control/move, settings, …): its page
                                           and the pieces only it uses; mirrors src/UI/Presenters/ (see Naming below)
-  components/common/                      small pieces used by several parts (value selector, babystepping)
+  components/common/                      small pieces used by several parts (see Common pieces below)
   components/dialogs/                     the dialog surface's chrome, and the prompts code asks (number, choice,
                                           question)
   components/modals/                      the dialogs every part shares: speed and extrusion factors, babystepping
@@ -211,6 +211,25 @@ The [UI API reference](XML_UI_API.md) lists the names of each kind: the globals 
 Wherever a subject is bound, a constant may be given instead ([Constants.h](../src/UI/Xml/Binding/Constants.h)): a whole number (`100`), text between single quotes (`'Hotend'`) or a translation key (`tr.widget.job_progress`, which follows the language). So a component whose prop takes a name can be given data or a fixed value alike: `<gauge_bar value="source.job.progress" max="100" unit="'%'" title="tr.widget.job_progress"/>`.
 
 A string subject can be compared with `bind_*_if_eq`: the sidebar checks the button of the open page with `<bind_state_if_eq subject="source.navigation.screen" state="checked" ref_value="control"/>`.
+
+### Common pieces
+
+Before writing a piece out, look in `components/common/` (and, for settings, `components/settings/settings_*.xml`):
+what several places show is one component there, which they all use. Each file says what it takes.
+
+| Component | Is |
+| --- | --- |
+| `flex_pad` | an empty flex item taking the room left (`grow` shares), to push things apart or centre them |
+| `chevron`, `chevron_button` | the muted chevron at the end of something that opens what it is about; the same as a settings row's button |
+| `option_button` | one of a few options, joined in a box styled `setting_options`, checked while its `subject` has its `value` |
+| `value_selector`, `value_selector_presets`, `value_selector_choice` | a value with − and +, its presets in a row, one preset |
+| `value_button` | what a value is, muted, over it, as a button: tap to change it |
+| `fact_row` | what a fact is, muted, and its value at the end of the line |
+| `list_header` | a list's title on the header colour |
+| `thumbnail_box` | a job's thumbnail, fitted and centred in a box of a set size |
+| `card_view` | a view filling a card, for a placed widget showing a piece of a page |
+| `heater_row`, `heater_bar` | a heater as a row with its state and targets; its temperature as a thin bar (a `gauge_track`) |
+| `settings_toggle`, `settings_choice`, `settings_option`, `settings_button`, `settings_value` | a setting's row: a switch, a choice from a list, one of a few values, an action, a value shown |
 
 ### Lists
 
