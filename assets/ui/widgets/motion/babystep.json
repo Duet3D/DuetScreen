@@ -1,5 +1,5 @@
 {
-  "component": "dashboard_babystep",
+  "component": "card_view",
   "title_tag": "tr.widget.babystep",
   "description_tag": "tr.widget.babystep_desc",
   "category_tag": "tr.widget.category_motion",
@@ -7,6 +7,9 @@
   "slots": [
     "dashboard"
   ],
+  "props": {
+    "view": "babystep"
+  },
   "size": {
     "default": [
       272,

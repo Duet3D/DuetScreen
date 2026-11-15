@@ -1,9 +1,0 @@
-<!--
-  The job's status on its own, in a card: the `job_status` widget (widgets/jobs/job_status.json).
--->
-<component>
-	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
-		<style name="card"/>
-		<ds_view name="dashboard_job_status" view="dashboard_job_status" shown="true" width="100%" height="100%"/>
-	</view>
-</component>

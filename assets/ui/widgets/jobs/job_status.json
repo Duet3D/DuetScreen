@@ -1,5 +1,5 @@
 {
-  "component": "dashboard_job_status_card",
+  "component": "card_view",
   "title_tag": "tr.app_drawer.status",
   "description_tag": "tr.widget.job_status_desc",
   "category_tag": "tr.widget.category_jobs",
@@ -7,6 +7,9 @@
   "slots": [
     "dashboard"
   ],
+  "props": {
+    "view": "dashboard_job_status"
+  },
   "size": {
     "default": [
       365,

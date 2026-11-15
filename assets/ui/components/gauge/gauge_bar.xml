@@ -73,25 +73,10 @@
 			<gauge_reading name="reading" text="$text" unit="$unit" grow="$grow"/>
 		</lv_obj>
 
-		<lv_obj name="track" width="100%" flex_grow="1" style_min_height="12" scrollable="false" clickable="false">
-			<style name="pad_zero"/>
+		<gauge_track name="track" value="$value" min="$min" max="$max" target="$target" state="$state" width="100%"
+					 flex_grow="1" style_min_height="12">
 			<bind_style_if name="gauge_bar_track_flat" cond="not (${portrait})"/>
-			<ds_bar name="target" bind_value="$target" bind_min="$min" bind_max="$max" label_format="" width="100%"
-					height="100%">
-				<style name="gauge_bar"/>
-				<style name="gauge_bar_indic" selector="indicator"/>
-				<style name="gauge_bar_target" selector="indicator"/>
-				<bind_style_if_eq name="gauge_standby_target" subject="$state" ref_value="standby" selector="indicator"/>
-			</ds_bar>
-			<!-- Over the target, with no track of its own -->
-			<ds_bar name="value" bind_value="$value" bind_min="$min" bind_max="$max" label_format="" width="100%"
-					height="100%" style_bg_opa="0">
-				<style name="gauge_bar_indic" selector="indicator"/>
-				<bind_style_if_eq name="gauge_standby" subject="$state" ref_value="standby" selector="indicator"/>
-				<bind_style_if_eq name="gauge_off" subject="$state" ref_value="off" selector="indicator"/>
-				<bind_style_if_eq name="gauge_fault" subject="$state" ref_value="fault" selector="indicator"/>
-			</ds_bar>
-		</lv_obj>
+		</gauge_track>
 
 		<lv_label name="detail" bind_text="$detail" width="100%" long_mode="scroll_circular" clickable="false">
 			<style name="widget_detail"/>

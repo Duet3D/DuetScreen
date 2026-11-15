@@ -1,5 +1,5 @@
 {
-  "component": "dashboard_macros_card",
+  "component": "card_view",
   "title_tag": "tr.file.macros",
   "description_tag": "tr.widget.macros_desc",
   "category_tag": "tr.widget.category_jobs",
@@ -7,6 +7,10 @@
   "slots": [
     "dashboard"
   ],
+  "props": {
+    "view": "file_browser",
+    "presenter": "dashboard_macros"
+  },
   "size": {
     "default": [
       365,

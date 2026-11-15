@@ -1,7 +1,8 @@
 <!--
   A heater's temperature as a thin bar, from 0 to the heater's maximum: its temperature over what it heats to, muted,
-  coloured by its state as a bar gauge is (gauge_bar.xml). Under each heater on the Tools tab (heater_row.xml), and
-  above the number pad when one of its targets is set (dialog_number.xml).
+  coloured by its state as a bar gauge is (gauge_track.xml). Under each heater on the Tools tab (heater_row.xml), on a
+  tool's tile (dashboard_tool_tile_heater.xml), and above the number pad when one of its targets is set
+  (dialog_number.xml).
 
       <heater_bar heater="row.value"/>
 
@@ -12,27 +13,7 @@
 	<api>
 		<prop name="heater" type="string" default="row.value"/>
 	</api>
-	<!-- The target, muted, with the temperature over it -->
-	<view extends="lv_obj" width="100%" height="4" scrollable="false" clickable="false" style_pad_all="0">
-		<style name="pad_zero"/>
-		<ds_bar name="target" bind_value="om.heat.heaters[{${heater}}]|heater_target"
-				bind_max="om.heat.heaters[{${heater}}].max|int" label_format="" width="100%" height="100%">
-			<style name="gauge_bar"/>
-			<style name="gauge_bar_indic" selector="indicator"/>
-			<style name="gauge_bar_target" selector="indicator"/>
-			<bind_style_if_eq name="gauge_standby_target" subject="om.heat.heaters[{${heater}}].state" ref_value="standby"
-							  selector="indicator"/>
-		</ds_bar>
-		<ds_bar name="value" bind_value="om.heat.heaters[{${heater}}].current|int"
-				bind_max="om.heat.heaters[{${heater}}].max|int" label_format="" width="100%" height="100%"
-				style_bg_opa="0">
-			<style name="gauge_bar_indic" selector="indicator"/>
-			<bind_style_if_eq name="gauge_standby" subject="om.heat.heaters[{${heater}}].state" ref_value="standby"
-							  selector="indicator"/>
-			<bind_style_if_eq name="gauge_off" subject="om.heat.heaters[{${heater}}].state" ref_value="off"
-							  selector="indicator"/>
-			<bind_style_if_eq name="gauge_fault" subject="om.heat.heaters[{${heater}}].state" ref_value="fault"
-							  selector="indicator"/>
-		</ds_bar>
-	</view>
+	<view extends="gauge_track" value="om.heat.heaters[{${heater}}].current|int"
+		  max="om.heat.heaters[{${heater}}].max|int" target="om.heat.heaters[{${heater}}]|heater_target"
+		  state="om.heat.heaters[{${heater}}].state" width="100%" height="4"/>
 </component>

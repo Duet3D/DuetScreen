@@ -1980,7 +1980,7 @@ At its smallest, 272×89 px:
 
 **Babystepping**: Move Z by small steps while printing
 
-In Motion; placed in `dashboard`; component `dashboard_babystep` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a free layout it is 272×372 px, and at least 180×278 px.
+In Motion; placed in `dashboard`; component `card_view` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a free layout it is 272×372 px, and at least 180×278 px.
 
 ![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
 
@@ -2279,7 +2279,7 @@ In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.j
 
 **Extrude**: Extrude or retract with the selected tool
 
-In Motion; placed in `dashboard`; component `temperature_extrusion_card` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a free layout it is 319×420 px, and at least 272×372 px.
+In Motion; placed in `dashboard`; component `card_view` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a free layout it is 319×420 px, and at least 272×372 px.
 
 ![extrude](../tests/ref_imgs/xml_ui_api/widgets/extrude.png)
 
@@ -2506,7 +2506,7 @@ At its smallest, 272×89 px:
 
 **Status**: The job's progress, times and controls
 
-In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a free layout it is 365×372 px, and at least 365×372 px.
+In Jobs; placed in `dashboard`; component `card_view` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a free layout it is 365×372 px, and at least 365×372 px.
 
 ![job_status](../tests/ref_imgs/xml_ui_api/widgets/job_status.png)
 
@@ -2514,7 +2514,7 @@ In Jobs; placed in `dashboard`; component `dashboard_job_status_card` ([job_stat
 
 **Jobs**: The jobs on the printer, to start one
 
-In Jobs; placed in `dashboard`; component `dashboard_jobs_card` ([jobs.json](../assets/ui/widgets/jobs/jobs.json)). In a free layout it is 365×372 px, and at least 272×184 px.
+In Jobs; placed in `dashboard`; component `card_view` ([jobs.json](../assets/ui/widgets/jobs/jobs.json)). In a free layout it is 365×372 px, and at least 272×184 px.
 
 ![jobs](../tests/ref_imgs/xml_ui_api/widgets/jobs.png)
 
@@ -2558,7 +2558,7 @@ At its smallest, 88×231 px:
 
 **Macros**: The printer's macros, to run one
 
-In Jobs; placed in `dashboard`; component `dashboard_macros_card` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a free layout it is 365×372 px, and at least 272×184 px.
+In Jobs; placed in `dashboard`; component `card_view` ([macros.json](../assets/ui/widgets/jobs/macros.json)). In a free layout it is 365×372 px, and at least 272×184 px.
 
 ![macros](../tests/ref_imgs/xml_ui_api/widgets/macros.png)
 
@@ -2981,8 +2981,9 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 
 | Component | Presenter | Props | Used by | File |
 | --- | --- | --- | --- | --- |
-| [`babystep`](#babystep) |  | `hide_title` | `babystep_dialog`, `dashboard_babystep`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
+| [`babystep`](#babystep) |  | `hide_title` | `babystep_dialog`, `move` | [babystep.xml](../assets/ui/components/common/babystep.xml) |
 | `babystep_dialog` |  |  | `home` | [babystep_dialog.xml](../assets/ui/components/modals/babystep_dialog.xml) |
+| `card_view` |  | `view`, `presenter` | `babystep`, `extrude`, `job_status`, `jobs`, `macros` | [card_view.xml](../assets/ui/components/common/card_view.xml) |
 | `chevron` |  |  | `customise_setting`, `job_ready`, `job_recent_row` | [chevron.xml](../assets/ui/components/common/chevron.xml) |
 | `chevron_button` |  |  | `settings_display`, `settings_wifi_network` | [chevron_button.xml](../assets/ui/components/common/chevron_button.xml) |
 | [`console`](#console) | `gcode_reference` |  | `home`, `console` | [console.xml](../assets/ui/components/console/console.xml) |
@@ -3004,17 +3005,13 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `customise_saved_layout` |  |  | `customise` | [customise_saved_layout.xml](../assets/ui/components/customise/customise_saved_layout.xml) |
 | `customise_setting` |  |  | `customise` | [customise_setting.xml](../assets/ui/components/customise/customise_setting.xml) |
 | [`dashboard`](#home) |  |  | `home` | [dashboard.xml](../assets/ui/components/dashboard/dashboard.xml) |
-| `dashboard_babystep` |  |  | `babystep` | [dashboard_babystep.xml](../assets/ui/components/dashboard/dashboard_babystep.xml) |
 | `dashboard_button` |  | `label`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `button`, `gcode_button` | [dashboard_button.xml](../assets/ui/components/dashboard/dashboard_button.xml) |
 | `dashboard_current_tool` |  |  | `current_tool` | [dashboard_current_tool.xml](../assets/ui/components/dashboard/dashboard_current_tool.xml) |
 | `dashboard_fan` |  | `fan` | `fan` | [dashboard_fan.xml](../assets/ui/components/dashboard/dashboard_fan.xml) |
 | `dashboard_files` |  |  | `files` | [dashboard_files.xml](../assets/ui/components/dashboard/dashboard_files.xml) |
 | `dashboard_job` |  | `macros` | `job` | [dashboard_job.xml](../assets/ui/components/dashboard/dashboard_job.xml) |
 | `dashboard_job_progress` |  |  | `job_progress` | [dashboard_job_progress.xml](../assets/ui/components/dashboard/dashboard_job_progress.xml) |
-| [`dashboard_job_status`](#home) | `job_status` |  | `dashboard_files`, `dashboard_job`, `dashboard_job_status_card` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
-| `dashboard_job_status_card` |  |  | `job_status` | [dashboard_job_status_card.xml](../assets/ui/components/dashboard/dashboard_job_status_card.xml) |
-| `dashboard_jobs_card` |  |  | `jobs` | [dashboard_jobs_card.xml](../assets/ui/components/dashboard/dashboard_jobs_card.xml) |
-| `dashboard_macros_card` |  |  | `macros` | [dashboard_macros_card.xml](../assets/ui/components/dashboard/dashboard_macros_card.xml) |
+| [`dashboard_job_status`](#home) | `job_status` |  | `dashboard_files`, `dashboard_job` | [dashboard_job_status.xml](../assets/ui/components/dashboard/dashboard_job_status.xml) |
 | `dashboard_temperature_graph` |  | `seconds`, `legend` | `temperature_graph` | [dashboard_temperature_graph.xml](../assets/ui/components/dashboard/dashboard_temperature_graph.xml) |
 | `dashboard_text` |  | `text`, `size`, `colour`, `align`, `background` | `text` | [dashboard_text.xml](../assets/ui/components/dashboard/dashboard_text.xml) |
 | `dashboard_tool_card` |  | `tool` | `tool` | [dashboard_tool_card.xml](../assets/ui/components/dashboard/dashboard_tool_card.xml) |
@@ -3034,7 +3031,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `factors_row` |  |  | `factors_dialog` | [factors_row.xml](../assets/ui/components/modals/factors_row.xml) |
 | `fan_row` |  | `automatic` | `dashboard_fan`, `fans` | [fan_row.xml](../assets/ui/components/control/fans/fan_row.xml) |
 | [`fans`](#fans) |  |  | `control`, `fans` | [fans.xml](../assets/ui/components/control/fans/fans.xml) |
-| [`file_browser`](#files) |  |  | `dashboard_files`, `dashboard_jobs_card`, `dashboard_macros_card`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
+| [`file_browser`](#files) |  |  | `dashboard_files`, `files` | [file_browser.xml](../assets/ui/components/file_browser/file_browser.xml) |
 | `file_browser_crumb` |  |  | `file_browser` | [file_browser_crumb.xml](../assets/ui/components/file_browser/file_browser_crumb.xml) |
 | `file_browser_row` |  |  | `file_browser` | [file_browser_row.xml](../assets/ui/components/file_browser/file_browser_row.xml) |
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
@@ -3052,6 +3049,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_reading` |  | `text`, `unit`, `grow` | `gauge_arc`, `gauge_bar`, `gauge_value` | [gauge_reading.xml](../assets/ui/components/gauge/gauge_reading.xml) |
 | `gauge_sensors` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `sensor_arc`, `sensor_bar`, `sensor_gauges`, `sensor_value` | [gauge_sensors.xml](../assets/ui/components/gauge/gauge_sensors.xml) |
 | `gauge_tool` |  | `tool`, `key`, `match`, `look`, `flow`, `grow`, `portrait` | `tool_arc`, `tool_bar`, `tool_value` | [gauge_tool.xml](../assets/ui/components/gauge/gauge_tool.xml) |
+| `gauge_track` |  | `value`, `min`, `max`, `target`, `state` | `gauge_bar`, `heater_bar` | [gauge_track.xml](../assets/ui/components/gauge/gauge_track.xml) |
 | `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_result` |  |  | `hardware_test` | [hardware_test_result.xml](../assets/ui/components/hardware_test/hardware_test_result.xml) |
@@ -3116,8 +3114,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `temperature_bed` |  |  | `temperature` | [temperature_bed.xml](../assets/ui/components/control/temperature/temperature_bed.xml) |
 | `temperature_chamber` |  |  | `temperature` | [temperature_chamber.xml](../assets/ui/components/control/temperature/temperature_chamber.xml) |
 | `temperature_extruder` |  |  | `temperature_tool` | [temperature_extruder.xml](../assets/ui/components/control/temperature/temperature_extruder.xml) |
-| [`temperature_extrusion`](#temperature_extrusion) |  |  | `temperature`, `temperature_extrusion_card` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
-| `temperature_extrusion_card` |  |  | `extrude` | [temperature_extrusion_card.xml](../assets/ui/components/control/temperature/temperature_extrusion_card.xml) |
+| [`temperature_extrusion`](#temperature_extrusion) |  |  | `temperature` | [temperature_extrusion.xml](../assets/ui/components/control/temperature/temperature_extrusion.xml) |
 | `temperature_heater` |  | `label`, `active`, `standby` | `temperature_heater_card`, `temperature_tool_heater` | [temperature_heater.xml](../assets/ui/components/control/temperature/temperature_heater.xml) |
 | `temperature_heater_card` |  | `label_tag` | `temperature_bed`, `temperature_chamber` | [temperature_heater_card.xml](../assets/ui/components/control/temperature/temperature_heater_card.xml) |
 | `temperature_tool` |  |  | `temperature` | [temperature_tool.xml](../assets/ui/components/control/temperature/temperature_tool.xml) |
