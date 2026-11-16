@@ -213,6 +213,11 @@ namespace UI::Xml
 	void DsList::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
 	{
 		lv_xml_obj_apply(state, attrs);
+		// Already showing a list: a component's view that extends ds_list, whose instance attributes come next
+		if (ownerOf<DsList>(itemOf(state)) != nullptr)
+		{
+			return;
+		}
 
 		const char* listName = lv_xml_get_value_of(attrs, "list");
 		const char* item = lv_xml_get_value_of(attrs, "item");

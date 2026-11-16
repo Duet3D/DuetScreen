@@ -34,7 +34,7 @@
 				<move_axis name="z_control" letter="'Z'" axis="source.axes.z" plus="Z+" minus="Z-"
 						   style_max_height="300"/>
 				<flex_pad>
-					<bind_flag_if flag="hidden" subject="source.axes.others_shown" ref_value="0"/>
+					<bind_flag_if_eq subject="source.axes.others_shown" flag="hidden" ref_value="0"/>
 				</flex_pad>
 				<!-- Any other axes: the one chosen beside it is jogged, so there is never more than one more column; with
 					 only one, there is nothing to choose -->

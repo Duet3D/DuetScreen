@@ -97,7 +97,11 @@ namespace UI::Xml
 		 */
 		static std::optional<bool> applyFlow(lv_obj_t* container, std::string_view flow, bool windowed);
 
-		/** `<ds_list>` apply callback: lv_obj attributes, then start showing the list */
+		/**
+		 * `<ds_list>` apply callback: lv_obj attributes, then start showing the list. Applied again to a ds_list
+		 * already showing one (a component's `<view extends="ds_list">` gets its instance's attributes too), it only
+		 * applies the lv_obj attributes: the first apply's list, item and the rest stay.
+		 */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** The field of `row` called `name`, or nullptr if it has none or it is a list */

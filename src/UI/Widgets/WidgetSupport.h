@@ -48,11 +48,33 @@ namespace UI::Xml::WidgetSupport
 		return static_cast<lv_obj_t*>(lv_xml_state_get_item(state));
 	}
 
+	/** LV_EVENT_DELETE callback of deleteWith(): delete the `T` that is the event's user data */
+	template <typename T>
+	void deleteOwnerCb(lv_event_t* e)
+	{
+		delete static_cast<T*>(lv_event_get_user_data(e));
+	}
+
 	/** Delete the heap-allocated `owner` when LVGL deletes `root` */
 	template <typename T>
 	void deleteWith(lv_obj_t* root, T* owner)
 	{
-		lv_obj_add_event_cb(
-			root, [](lv_event_t* e) { delete static_cast<T*>(lv_event_get_user_data(e)); }, LV_EVENT_DELETE, owner);
+		lv_obj_add_event_cb(root, deleteOwnerCb<T>, LV_EVENT_DELETE, owner);
+	}
+
+	/** The `T` that deleteWith() gave `root`, or nullptr if it has none */
+	template <typename T>
+	T* ownerOf(lv_obj_t* root)
+	{
+		const uint32_t count = lv_obj_get_event_count(root);
+		for (uint32_t i = 0; i < count; i++)
+		{
+			lv_event_dsc_t* dsc = lv_obj_get_event_dsc(root, i);
+			if (lv_event_dsc_get_cb(dsc) == deleteOwnerCb<T>)
+			{
+				return static_cast<T*>(lv_event_dsc_get_user_data(dsc));
+			}
+		}
+		return nullptr;
 	}
 } // namespace UI::Xml::WidgetSupport

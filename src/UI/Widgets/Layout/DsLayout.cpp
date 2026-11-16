@@ -126,13 +126,18 @@ namespace UI::Xml
 	void DsLayout::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
 	{
 		lv_xml_obj_apply(state, attrs);
+		lv_obj_t* container = itemOf(state);
+		// Already showing a layout: a component's view that extends ds_layout, whose instance attributes come next
+		if (ownerOf<DsLayout>(container) != nullptr)
+		{
+			return;
+		}
 		const char* slot = lv_xml_get_value_of(attrs, "slot");
 		if (slot == nullptr || slot[0] == '\0')
 		{
 			LOG_WARN("<ds_layout> needs a slot=");
 			return;
 		}
-		lv_obj_t* container = itemOf(state);
 		deleteWith(container, new DsLayout(container, slot));
 	}
 

@@ -110,7 +110,11 @@ namespace UI::Xml
 		/** `<ds_layout>` create callback: a plain container */
 		static void* xmlCreate(lv_xml_parser_state_t* state, const char** attrs);
 
-		/** `<ds_layout>` apply callback: lv_obj attributes, then start showing the slot's layout */
+		/**
+		 * `<ds_layout>` apply callback: lv_obj attributes, then start showing the slot's layout. Applied again to a
+		 * ds_layout already showing one (a component's `<view extends="ds_layout">` gets its instance's attributes
+		 * too), it only applies the lv_obj attributes: the first apply's `slot` stays.
+		 */
 		static void xmlApply(lv_xml_parser_state_t* state, const char** attrs);
 
 		/** A free layout's box asks how far beyond itself it draws: as far as its widget does */
