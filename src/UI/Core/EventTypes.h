@@ -37,6 +37,11 @@ namespace UI
 	class LvObj;
 } // namespace UI
 
+namespace Comm
+{
+	struct FileTransfer;
+} // namespace Comm
+
 // Central event registry. Add events here with optional payload types.
 #define EVENTS(XX)                                                                                                     \
 	XX(Tick)                                                                                                           \
@@ -49,6 +54,7 @@ namespace UI
 	XX(ObjectModelChanged)                                                                                             \
 	XX(ThumbnailData, std::string)                                                                                     \
 	XX(FileInfo, std::string)                                                                                          \
+	XX(FileTransfer, Comm::FileTransfer)                                                                               \
 	XX(Response, ResponseType, std::string)                                                                            \
 	XX(ConsoleCommand, std::string)                                                                                    \
 	XX(LogMessage, Log::DebugLevel, Log::log_time_t, std::string)                                                      \

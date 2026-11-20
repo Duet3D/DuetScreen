@@ -70,9 +70,9 @@ namespace Comm
 		void fileInfo(std::string_view file, Handler<FileInfo> handler) override;
 		void thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler) override;
 		void readFile(std::string_view file, Handler<std::string> handler) override;
-		void writeFile(std::string_view file, std::string contents, Handler<void> handler) override;
+		void writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler) override;
 		void deleteFile(std::string_view file, Handler<void> handler) override;
-		void expire(Clock::time_point now) override;
+		void tick(Clock::time_point now) override;
 		std::optional<Clock::time_point> nextDue() const override;
 		void close() override;
 		Clock::time_point lastHeard() const override { return std::max(m_lastHeard, m_http.lastHeard()); }

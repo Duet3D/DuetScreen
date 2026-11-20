@@ -7,6 +7,7 @@
 #include "Comm/Lines.h"
 #include "Debug.h"
 #include "Duet3D/General/CRC16.h"
+#include "Duet3D/General/CRC32.h"
 #include "ObjectModel/Tree/Json.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
@@ -32,6 +33,9 @@ namespace Comm
 
 		/** A request whose small reply says every line sent before it has been dealt with */
 		constexpr std::string_view acknowledgement = R"(M409 K"state.status" F"v")";
+
+		/** What ends a file sent with M559 without a size: how an empty file is written (S0 means "no size") */
+		constexpr std::string_view endOfFile = "<!-- **EoF** -->";
 
 		/** Why a request still waiting when the link closed has no reply */
 		ReplyError closedError()
@@ -107,13 +111,26 @@ namespace Comm
 	void SerialLink::sendGcode(std::string_view gcode)
 	{
 		ZoneScoped;
+		if (holding())
+		{
+			hold([this, gcode = std::string(gcode)] { sendGcode(gcode); });
+			return;
+		}
 		forEachLine(gcode, EmptyLines::skip, [this](std::string_view line) { sendLine(line); });
 	}
 
 	void SerialLink::emergencyStop()
 	{
 		ZoneScoped;
-		sendLine("M112 M999");
+		constexpr std::string_view command = "M112 M999";
+		// Once M559 is sent, the printer may take whatever follows on its channel as part of the file
+		if (holding() && m_upload->stage != Upload::Stage::waitingForChannel && channelFor(command) == fileChannel)
+		{
+			LOG_WARN("The emergency stop is sent once the file being written has been");
+			m_held.push_front([this] { emergencyStop(); });
+			return;
+		}
+		sendLine(command);
 	}
 
 	void SerialLink::listFiles(std::string_view dir, size_t first, Handler<FileList> handler)
@@ -174,9 +191,24 @@ namespace Comm
 				});
 	}
 
-	void SerialLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
+	void SerialLink::writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler)
 	{
 		ZoneScoped;
+		if (holding())
+		{
+			hold([this,
+				  file = std::string(file),
+				  contents = std::move(contents),
+				  progress = std::move(progress),
+				  handler = std::move(handler)]() mutable
+				 { writeFile(file, std::move(contents), std::move(progress), std::move(handler)); });
+			return;
+		}
+		if (m_closed)
+		{
+			handler(std::unexpected(closedError()));
+			return;
+		}
 		if (contents.size() > m_port.maxUploadSize())
 		{
 			handler(std::unexpected(
@@ -185,59 +217,174 @@ namespace Comm
 												  m_port.maxUploadSize())}));
 			return;
 		}
-		// A line at a time: `echo >` starts the file, `echo >>` adds to it
-		std::vector<std::string> commands;
-		forEachLine(
-			contents,
-			EmptyLines::keep,
-			[&](std::string_view line)
+		// Checked with the longest line number: an emergency stop may go ahead of M559 while the channel is waited for
+		if (frame(UINT32_MAX, fmt::format("M559 P{:s} S{:d} C{:d}", Comm::quoted(file), contents.size(), UINT32_MAX))
+				.size() > maxLineLength)
+		{
+			handler(std::unexpected(ReplyError{
+				.message = fmt::format("the file's name is too long to send (lines are at most {:d} characters)",
+									   maxLineLength)}));
+			return;
+		}
+		const size_t size = contents.size();
+		m_upload = Upload{.stage = Upload::Stage::waitingForChannel,
+						  .file = std::string(file),
+						  .bytes = size == 0 ? std::string(endOfFile) : std::move(contents),
+						  .size = size,
+						  .written = 0,
+						  .line = 0,
+						  .progress = std::move(progress),
+						  .handler = std::move(handler)};
+		requestNow(
+			acknowledgement, [this](std::expected<OM::Node, ReplyError> reply) { channelFree(reply); }, fileChannel);
+	}
+
+	void SerialLink::channelFree(const std::expected<OM::Node, ReplyError>& reply)
+	{
+		ZoneScoped;
+		if (!m_upload)
+		{
+			return;
+		}
+		if (!reply)
+		{
+			uploadFailed(m_closed
+							 ? closedError()
+							 : ReplyError{.message = fmt::format("the printer is busy ({:s})", reply.error().message)});
+			return;
+		}
+		Upload& upload = *m_upload;
+		upload.stage = Upload::Stage::opening;
+		std::string command;
+		if (upload.size == 0)
+		{
+			command = fmt::format("M559 P{:s}", Comm::quoted(upload.file));
+		}
+		else
+		{
+			CRC32 crc;
+			crc.Update(upload.bytes.data(), upload.bytes.size());
+			command = fmt::format("M559 P{:s} S{:d} C{:d}", Comm::quoted(upload.file), upload.size, crc.Get());
+		}
+		upload.line = m_nextLine;
+		requestNow(command, [this](std::expected<OM::Node, ReplyError> reply) { uploadOpened(reply); }, fileChannel);
+	}
+
+	void SerialLink::uploadOpened(const std::expected<OM::Node, ReplyError>& reply)
+	{
+		ZoneScoped;
+		if (!m_upload)
+		{
+			return;
+		}
+		if (!reply)
+		{
+			if (!m_closed)
 			{
-				commands.push_back(fmt::format(
-					"echo {:s}{:s} {:s}", commands.empty() ? ">" : ">>", Comm::quoted(file), Comm::quoted(line)));
-			});
-		runFileJob(commands, std::move(handler));
+				// The printer may take M559 yet, and the next bytes sent with it: only connecting again is safe
+				LOG_ERROR("No reply to M559: connecting again");
+				m_failed = true;
+			}
+			uploadFailed(m_closed ? closedError() : reply.error());
+			return;
+		}
+		if (const std::string_view response = (*reply)["resp"].text(); response.starts_with("Error"))
+		{
+			uploadFailed(ReplyError{.message = std::string(response)});
+			return;
+		}
+		m_upload->stage = Upload::Stage::sending; // the next tick() sends the first piece
+	}
+
+	void SerialLink::sendPiece()
+	{
+		ZoneScoped;
+		Upload& upload = *m_upload;
+		const size_t length = std::min(filePieceSize, upload.bytes.size() - upload.written);
+		ZoneValue(length);
+		if (!m_port.write(fileChannel, std::string_view(upload.bytes).substr(upload.written, length)))
+		{
+			LOG_WARN("Couldn't send a piece of {:s}", upload.file);
+			m_failed = true;
+			uploadFailed(ReplyError{.message = "the file couldn't be sent"});
+			return;
+		}
+		upload.written += length;
+		// Nothing else is sent while the file is, so nothing else is heard: its being taken is what is heard
+		m_lastHeard = Clock::now();
+		if (upload.progress)
+		{
+			upload.progress(std::min(upload.written, upload.size), upload.size);
+		}
+		if (upload.written < upload.bytes.size())
+		{
+			return;
+		}
+		Upload sent = std::move(*m_upload);
+		m_upload.reset();
+		acknowledge(sent.line, sent.line, fileChannel, std::move(sent.handler));
+		releaseHeld();
+	}
+
+	void SerialLink::uploadFailed(ReplyError error)
+	{
+		ZoneScoped;
+		LOG_WARN("Writing {:s} failed: {:s}", m_upload->file, error.message);
+		Upload failed = std::move(*m_upload);
+		m_upload.reset();
+		failed.handler(std::unexpected(std::move(error)));
+		releaseHeld();
+	}
+
+	void SerialLink::hold(std::function<void()> task)
+	{
+		m_held.push_back(std::move(task));
+		TracyPlot("Serial requests held", static_cast<int64_t>(m_held.size()));
+	}
+
+	void SerialLink::releaseHeld()
+	{
+		ZoneScoped;
+		while (!holding() && !m_held.empty())
+		{
+			std::function<void()> task = std::move(m_held.front());
+			m_held.pop_front();
+			task();
+		}
+		TracyPlot("Serial requests held", static_cast<int64_t>(m_held.size()));
 	}
 
 	void SerialLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
 		ZoneScoped;
-		runFileJob({fmt::format("M30 {:s}", Comm::quoted(file))}, std::move(handler));
-	}
-
-	void SerialLink::runFileJob(const std::vector<std::string>& commands, Handler<void> handler)
-	{
-		ZoneScoped;
-		if (m_closed)
+		if (holding())
 		{
-			handler(std::unexpected(closedError()));
+			hold([this, file = std::string(file), handler = std::move(handler)]() mutable
+				 { deleteFile(file, std::move(handler)); });
 			return;
 		}
-		// Every line must fit before any is sent, so a file is never left half written for that
-		for (size_t i = 0; i < commands.size(); i++)
+		const std::string command = fmt::format("M30 {:s}", Comm::quoted(file));
+		const std::optional<uint32_t> line = sendLine(command);
+		if (!line)
 		{
-			if (frame(m_nextLine + static_cast<uint32_t>(i), commands[i]).size() > maxLineLength)
-			{
-				handler(std::unexpected(ReplyError{
-					.message = fmt::format(
-						"line {:d} is longer than RepRapFirmware takes ({:d} characters)", i + 1, maxLineLength)}));
-				return;
-			}
+			handler(std::unexpected(m_closed ? closedError()
+											 : ReplyError{.message = fmt::format("couldn't send {:s}", command)}));
+			return;
 		}
-		// The acknowledgement goes on the job's channel: only there does its reply follow the job's lines
-		const size_t channel = commands.empty() ? 0 : channelFor(commands.front());
+		// The acknowledgement goes on the command's channel: only there does its reply follow the command
+		acknowledge(*line, *line, channelFor(command), std::move(handler));
+	}
+
+	void SerialLink::acknowledge(uint32_t first, uint32_t last, size_t channel, Handler<void> handler)
+	{
+		ZoneScoped;
 		const uint64_t id = m_nextJob++;
-		FileJob job{.first = m_nextLine, .last = m_nextLine, .error = std::nullopt};
-		for (const std::string& command : commands)
-		{
-			sendLine(command, channel);
-		}
-		job.last = m_nextLine - 1;
-		m_jobs.emplace(id, job);
-		request(
+		m_jobs.emplace(id, FileJob{.first = first, .last = last, .error = std::nullopt});
+		requestNow(
 			acknowledgement,
 			[this, id, handler = std::move(handler)](std::expected<OM::Node, ReplyError> reply)
 			{
-				ZoneScopedN("runFileJob_cb");
+				ZoneScopedN("acknowledge_cb");
 				const auto it = m_jobs.find(id);
 				const std::optional<ReplyError> error = it != m_jobs.end() ? it->second.error : std::nullopt;
 				if (it != m_jobs.end())
@@ -260,9 +407,13 @@ namespace Comm
 			channel);
 	}
 
-	void SerialLink::expire(Clock::time_point now)
+	void SerialLink::tick(Clock::time_point now)
 	{
 		ZoneScoped;
+		if (m_upload && m_upload->stage == Upload::Stage::sending)
+		{
+			sendPiece();
+		}
 		std::vector<Pending> expired;
 		for (auto it = m_pending.begin(); it != m_pending.end();)
 		{
@@ -290,6 +441,10 @@ namespace Comm
 
 	std::optional<SerialLink::Clock::time_point> SerialLink::nextDue() const
 	{
+		if (m_upload && m_upload->stage == Upload::Stage::sending)
+		{
+			return Clock::now(); // the next piece
+		}
 		if (m_pending.empty())
 		{
 			return std::nullopt;
@@ -313,9 +468,27 @@ namespace Comm
 		{
 			request.handler(std::unexpected(closedError()));
 		}
+		// A file being written, and what was held back for it, are told too
+		if (m_upload)
+		{
+			uploadFailed(closedError());
+		}
+		releaseHeld();
 	}
 
 	void SerialLink::request(std::string_view command, ReplyHandler handler, std::optional<size_t> channel)
+	{
+		ZoneScoped;
+		if (holding())
+		{
+			hold([this, command = std::string(command), handler = std::move(handler), channel]() mutable
+				 { request(command, std::move(handler), channel); });
+			return;
+		}
+		requestNow(command, std::move(handler), channel);
+	}
+
+	void SerialLink::requestNow(std::string_view command, ReplyHandler handler, std::optional<size_t> channel)
 	{
 		ZoneScoped;
 		ZoneText(command.data(), command.size());

@@ -103,12 +103,21 @@ namespace UI::Xml
 		f.field("info_print_time", m_infoPrintTime, "The job's estimated print time");
 		f.field("info_height", m_infoHeight, "The object's height");
 		f.field("info_layer_height", m_infoLayerHeight, "The job's layer height");
+		f.field("transferring",
+				m_transferring,
+				"1 while a file is being written to the printer (e.g. the settings backed up), else 0. Over USB and "
+				"UART nothing else is sent to the printer meanwhile");
+		f.field("transfer_file",
+				m_transferFile,
+				"The name of the file being written to the printer, or of the last one written");
+		f.field("transfer_progress", m_transferProgress, "How much of that file has been sent, 0-100");
 	}
 
 	void FilesSource::onInit()
 	{
 		registerEventListener<EventType::ThumbnailData>(this, &FilesSource::thumbnailReceived);
 		registerEventListener<EventType::FileInfo>(this, &FilesSource::fileInfoReceived);
+		registerEventListener<EventType::FileTransfer>(this, &FilesSource::transferReported);
 		// A job starting or ending changes what the dialog allows
 		registerEventListener<EventType::Status>([this](OM::PrinterStatus) { showAllowed(); });
 		// A different printer has different files
@@ -148,6 +157,19 @@ namespace UI::Xml
 		m_macroRows.clear();
 		m_macroCount.set(0);
 		closeDialog();
+	}
+
+	void FilesSource::transferReported(const Comm::FileTransfer& transfer)
+	{
+		ZoneScoped;
+		m_transferring.set(transfer.finished ? 0 : 1);
+		if (transfer.finished)
+		{
+			return; // the name and progress stay as they were last
+		}
+		const size_t slash = transfer.file.find_last_of('/');
+		m_transferFile.set(slash == std::string::npos ? transfer.file : transfer.file.substr(slash + 1));
+		m_transferProgress.set(transfer.total == 0 ? 0 : static_cast<int32_t>(transfer.sent * 100 / transfer.total));
 	}
 
 	std::string_view FilesSource::shownName(std::string_view name, bool macro)

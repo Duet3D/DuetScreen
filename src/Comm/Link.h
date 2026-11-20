@@ -26,6 +26,9 @@ namespace Comm
 	template <typename T>
 	using Handler = std::function<void(std::expected<T, ReplyError>)>;
 
+	/** Told how much of a file has been sent: `sent` of `total` bytes */
+	using Progress = std::function<void(size_t sent, size_t total)>;
+
 	class Link : public ModelLink
 	{
 	  public:
@@ -50,22 +53,30 @@ namespace Comm
 		/** The whole of `file` */
 		virtual void readFile(std::string_view file, Handler<std::string> handler) = 0;
 
-		/** Write `contents` to `file`, replacing it */
-		virtual void writeFile(std::string_view file, std::string contents, Handler<void> handler) = 0;
+		/**
+		 * Write `contents` to `file`, replacing it
+		 * @param progress Told as pieces of it are sent, where the link sends it in pieces (a serial link); perhaps
+		 * never
+		 * @param handler Told once the printer has the file, or why it hasn't
+		 */
+		virtual void writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler) = 0;
 
 		/** Delete `file` */
 		virtual void deleteFile(std::string_view file, Handler<void> handler) = 0;
 
-		/** Let time pass: a request not answered by its deadline is given up (its handler told) */
-		virtual void expire(std::chrono::steady_clock::time_point now) = 0;
+		/**
+		 * Let time pass: do what is due by `now`. A request not answered by its deadline is given up (its handler
+		 * told); a file being sent in pieces gets its next piece.
+		 */
+		virtual void tick(std::chrono::steady_clock::time_point now) = 0;
 
-		/** When expire() next has something to do, if anything */
+		/** When tick() next has something to do, if anything */
 		virtual std::optional<std::chrono::steady_clock::time_point> nextDue() const = 0;
 
 		/** Give up everything still waiting, telling each handler there is no answer, and end the session */
 		virtual void close() = 0;
 
-		/** When the printer last sent anything */
+		/** When the printer last sent anything (or took a piece of a file being sent, when nothing else is heard) */
 		virtual std::chrono::steady_clock::time_point lastHeard() const = 0;
 
 		/** Whether the link can't go on (its port has gone, or the printer forgot the session): connect again */

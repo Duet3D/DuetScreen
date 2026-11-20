@@ -4,6 +4,7 @@
 
 #include "Connection.h"
 #include "Comm/FileInfoCache.h"
+#include "Comm/FileTransfer.h"
 #include "Comm/LineFramer.h"
 #include "Comm/Links/DsfLink.h"
 #include "Comm/Links/HttpLink.h"
@@ -52,6 +53,13 @@ namespace Comm
 			{
 				LOG_WARN("Unknown control command \"{:s}\"", command);
 			}
+		}
+
+		/** Tell the UI how writing a file is going */
+		void reportTransfer(FileTransfer transfer)
+		{
+			ZoneScoped;
+			Model::get().post<EventType::FileTransfer>(std::move(transfer));
 		}
 
 		/** A handler that only notes a failure, for a request whose asker doesn't wait for the answer */
@@ -336,9 +344,30 @@ namespace Comm
 		{
 			handler = logFailure(fmt::format("Writing {:s}", file));
 		}
-		ask(std::move(handler),
-			[file = std::move(file), contents = std::move(contents)](Link& link, Handler<void> answer) mutable
-			{ link.writeFile(file, std::move(contents), std::move(answer)); });
+		const size_t total = contents.size();
+		// The UI is told it ended, however it went
+		Handler<void> answer = [file, total, handler = std::move(handler)](std::expected<void, ReplyError> result)
+		{
+			ZoneScopedN("writeFile_cb");
+			reportTransfer(FileTransfer{.file = file, .sent = 0, .total = total, .finished = true});
+			handler(std::move(result));
+		};
+		ask(std::move(answer),
+			[file = std::move(file), contents = std::move(contents), total](Link& link, Handler<void> answer) mutable
+			{
+				reportTransfer(FileTransfer{.file = file, .sent = 0, .total = total, .finished = false});
+				// Told whenever another whole percent has been sent, which is all the UI shows
+				Progress progress = [file, percent = 0](size_t sent, size_t total) mutable
+				{
+					const int now = total == 0 ? 100 : static_cast<int>(sent * 100 / total);
+					if (now != percent)
+					{
+						percent = now;
+						reportTransfer(FileTransfer{.file = file, .sent = sent, .total = total, .finished = false});
+					}
+				};
+				link.writeFile(file, std::move(contents), std::move(progress), std::move(answer));
+			});
 	}
 
 	void Connection::deleteFile(std::string file, Handler<void> handler)
@@ -589,7 +618,7 @@ namespace Comm
 			lost("the link to the printer failed");
 			return;
 		}
-		m_link->expire(now);
+		m_link->tick(now);
 		if (m_sync)
 		{
 			m_sync->tick(now);

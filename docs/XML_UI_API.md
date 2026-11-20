@@ -317,6 +317,9 @@ From [FilesSource.cpp](../src/UI/Xml/Data/FilesSource.cpp).
 | `source.files.info_print_time` | text | The job's estimated print time |
 | `source.files.info_height` | text | The object's height |
 | `source.files.info_layer_height` | text | The job's layer height |
+| `source.files.transferring` | int | 1 while a file is being written to the printer (e.g. the settings backed up), else 0. Over USB and UART nothing else is sent to the printer meanwhile |
+| `source.files.transfer_file` | text | The name of the file being written to the printer, or of the last one written |
+| `source.files.transfer_progress` | int | How much of that file has been sent, 0-100 |
 
 Each row of `source.files.recent`:
 

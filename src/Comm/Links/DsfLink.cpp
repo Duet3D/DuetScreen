@@ -341,7 +341,7 @@ namespace Comm
 					});
 	}
 
-	void DsfLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
+	void DsfLink::writeFile(std::string_view file, std::string contents, Progress, Handler<void> handler)
 	{
 		ZoneScoped;
 		m_http.send({.method = HTTP_PUT,
@@ -359,7 +359,7 @@ namespace Comm
 					httpSucceeded(std::move(handler)));
 	}
 
-	void DsfLink::expire(Clock::time_point now)
+	void DsfLink::tick(Clock::time_point now)
 	{
 		ZoneScoped;
 		if (m_modelReceived && now - m_lastSent > pingInterval)

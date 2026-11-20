@@ -296,6 +296,9 @@
 			<xs:enumeration value="source.files.macros"/>
 			<xs:enumeration value="source.files.recent"/>
 			<xs:enumeration value="source.files.recent_count"/>
+			<xs:enumeration value="source.files.transfer_file"/>
+			<xs:enumeration value="source.files.transfer_progress"/>
+			<xs:enumeration value="source.files.transferring"/>
 			<xs:enumeration value="source.job.cancel_control"/>
 			<xs:enumeration value="source.job.elapsed"/>
 			<xs:enumeration value="source.job.elapsed_text"/>

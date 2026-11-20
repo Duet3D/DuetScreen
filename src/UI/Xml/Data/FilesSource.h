@@ -9,6 +9,8 @@
  * running a macro, which the file browser and the dashboard both open (assets/ui/components/modals/file_dialog.xml,
  * hosted by the home screen).
  *
+ * And how writing a file to the printer is going (Comm::Connection::writeFile()), e.g. the screen's settings backed up.
+ *
  * The global actions that open and answer the dialog are in Presenters/FileBrowser/FilesActions.h. The names it
  * publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
  */
@@ -16,6 +18,7 @@
 #pragma once
 
 #include "Comm/FileInfoCache.h"
+#include "Comm/FileTransfer.h"
 #include "DataSource.h"
 #include "ObjectModel/Files.h"
 #include "UI/Xml/Binding/List.h"
@@ -138,6 +141,9 @@ namespace UI::Xml
 		/** Close the dialog */
 		void closeDialog();
 
+		/** Show how writing a file to the printer is going */
+		void transferReported(const Comm::FileTransfer& transfer);
+
 		OM::FileSystem::ItemList m_jobs;   // The jobs, newest first, as `recent` shows them
 		OM::FileSystem::ItemList m_macros; // The macros, as `macros` shows them
 		OmWatch m_watch;				   // Lists the files again as they or the folders change, or a job ends
@@ -164,5 +170,8 @@ namespace UI::Xml
 		StringSubject<16> m_infoPrintTime;	 // `info_print_time`
 		StringSubject<16> m_infoHeight;		 // `info_height`
 		StringSubject<16> m_infoLayerHeight; // `info_layer_height`
+		IntSubject m_transferring;			 // `transferring`
+		StringSubject<128> m_transferFile;	 // `transfer_file`
+		IntSubject m_transferProgress;		 // `transfer_progress`
 	};
 } // namespace UI::Xml

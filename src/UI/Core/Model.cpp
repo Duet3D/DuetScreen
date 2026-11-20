@@ -23,6 +23,7 @@
 #include <utility>
 
 // Ensure ResponseType and OM types are complete for payload sizing in this TU
+#include "Comm/FileTransfer.h"
 #include "Comm/Responses.h"
 #include "utils/UpgradeHelper.h"
 

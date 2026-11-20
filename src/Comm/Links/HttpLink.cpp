@@ -218,7 +218,7 @@ namespace Comm
 					});
 	}
 
-	void HttpLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
+	void HttpLink::writeFile(std::string_view file, std::string contents, Progress, Handler<void> handler)
 	{
 		ZoneScoped;
 		hv::QueryParams query;
