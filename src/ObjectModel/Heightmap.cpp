@@ -18,7 +18,6 @@
 #include "ObjectModel/Directories.h"
 #include "utils/csv.h"
 #include <cmath>
-#include <fstream>
 #include <map>
 #include <sstream>
 
@@ -26,12 +25,6 @@ namespace OM
 {
 	static std::vector<HeightmapPtr> s_heightmapCache;
 	static std::string s_emptyStr = "";
-
-	static std::string GetLocalFilePath(std::string_view filename)
-	{
-		ZoneScoped;
-		return fmt::format("/tmp/heightmaps/{}", filename);
-	}
 
 	HeightmapMeta::HeightmapMeta()
 	{
@@ -162,18 +155,6 @@ namespace OM
 					LOG_WARN("CSV file \"{:s}\" not a heightmap", m_fileName);
 					return;
 				}
-
-				// Write the file to disk
-				std::string localFilePath = GetLocalFilePath(m_fileName);
-				std::ofstream file(localFilePath.c_str(), std::ios::out | std::ios::binary);
-				if (!file.is_open())
-				{
-					LOG_ERROR("Failed to open file {:s} for writing", localFilePath.c_str());
-					return;
-				}
-
-				LOG_INFO("Writing heightmap to {:s}", localFilePath.c_str());
-				file.write(csvContents.data(), csvContents.length());
 
 				if (!ParseMeta(csvContents))
 				{

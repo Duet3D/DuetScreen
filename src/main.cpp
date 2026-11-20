@@ -120,7 +120,6 @@ int main(int argc, char** argv)
 	{
 		ZoneScopedN("Comm::init");
 		std::filesystem::create_directories("/tmp/thumbnails");
-		std::filesystem::create_directories("/tmp/heightmaps");
 		OM::Followers::start();
 		Comm::usbInit();
 	}
