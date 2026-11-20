@@ -8,8 +8,8 @@
 #ifndef JNI_COMM_FILEINFO_H_
 #define JNI_COMM_FILEINFO_H_
 
-#include "Thumbnail.h"
 #include "Comm/Replies.h"
+#include "Thumbnail.h"
 
 #include "Configuration.h"
 #include "Duet3D/General/String.h"
@@ -177,7 +177,6 @@ namespace Comm
 
 		  protected:
 			bool RequestDataInner() override;
-
 		};
 
 		using FileInfoRequestPtr = std::shared_ptr<FileInfoRequest>;

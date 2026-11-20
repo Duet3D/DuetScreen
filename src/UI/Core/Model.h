@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Comm/Responses.h"
 #include "Debug.h"
 #include "LockWrapper.h"
-#include "Comm/Responses.h"
 #include "UI/Core/EventTypes.h"
 #include "lvgl/lvgl.h"
 #include "nameof.hpp"
@@ -128,7 +128,6 @@ class Model
 	}
 
 	void runEventLoop();
-
 
   private:
 	Model();

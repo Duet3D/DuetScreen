@@ -33,6 +33,13 @@ namespace OM
 		return patch;
 	}
 
+	Patch Patch::wholeModel(Node& model)
+	{
+		Patch patch;
+		patch.m_result = std::move(model);
+		return patch;
+	}
+
 	Patch Patch::liveModel(Node& model)
 	{
 		Patch patch;

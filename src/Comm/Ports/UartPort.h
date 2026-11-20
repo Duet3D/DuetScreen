@@ -29,8 +29,8 @@ namespace Comm
 		bool needsChecksums() const override { return true; }
 
 	  private:
-		std::string m_device;	// The UART's device
-		speed_t m_baudRate;		// Its speed
+		std::string m_device;  // The UART's device
+		speed_t m_baudRate;	   // Its speed
 		UartController m_uart; // The UART itself
 	};
 } // namespace Comm

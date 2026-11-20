@@ -41,8 +41,8 @@ namespace Comm
 		struct Options
 		{
 			std::chrono::milliseconds replyTimeout{5000}; // How long a request waits for its reply
-			bool useStatusChannel = true;				   // Put state requests on a second channel, if there is one
-			size_t maxUploadSize = SIZE_MAX;			   // The largest file writeFile() sends (UART is slow)
+			bool useStatusChannel = true;				  // Put state requests on a second channel, if there is one
+			size_t maxUploadSize = SIZE_MAX;			  // The largest file writeFile() sends (UART is slow)
 		};
 
 		/**
@@ -86,9 +86,9 @@ namespace Comm
 		/** A request sent, waiting for its reply */
 		struct Pending
 		{
-			std::string command;	 // What was sent, for the log
-			Clock::time_point due;	 // When it is given up
-			ReplyHandler handler;	 // Given the reply
+			std::string command;   // What was sent, for the log
+			Clock::time_point due; // When it is given up
+			ReplyHandler handler;  // Given the reply
 		};
 
 		/** Send `command` as a line, and give its reply to `handler` */
@@ -106,12 +106,12 @@ namespace Comm
 		/** Ask for the piece of `file` from `offset` on (M36.2), adding it to `contents` until the file is whole */
 		void readFrom(const std::string& file, uint32_t offset, std::string contents, Handler<std::string> handler);
 
-		SerialPort& m_port;					  // Where lines go
-		UnaskedHandler m_unasked;			  // Given replies nothing waits for
-		Options m_options;					  // How it behaves
-		uint32_t m_nextLine = 0;			  // The number the next line sent gets
+		SerialPort& m_port;					   // Where lines go
+		UnaskedHandler m_unasked;			   // Given replies nothing waits for
+		Options m_options;					   // How it behaves
+		uint32_t m_nextLine = 0;			   // The number the next line sent gets
 		std::map<uint32_t, Pending> m_pending; // Requests waiting, by line number
-		Clock::time_point m_lastHeard;		  // When a line was last received
-		bool m_failed = false;				  // A line couldn't be written: the port has gone
+		Clock::time_point m_lastHeard;		   // When a line was last received
+		bool m_failed = false;				   // A line couldn't be written: the port has gone
 	};
 } // namespace Comm

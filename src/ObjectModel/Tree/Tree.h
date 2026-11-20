@@ -24,8 +24,8 @@
  * each bed's or chamber's first heater, so everything that reads it (views, and user bundles, as om.* is the UI's API)
  * works with 3.7 as with 3.6 and earlier, which send no mapping and whose own lists stand.
  *
- * Threads: the connection applies patches on its own thread, and the UI reads from another, so reading the tree (root(),
- * and every Node it leads to) needs the model lock (MODEL_LOCK) held for as long as the nodes are used.
+ * Threads: the connection applies patches on its own thread, and the UI reads from another, so reading the tree
+ * (root(), and every Node it leads to) needs the model lock (MODEL_LOCK) held for as long as the nodes are used.
  */
 
 #pragma once
@@ -55,7 +55,8 @@ namespace OM
 		/** An empty tree; normally only get()'s, but tests may make their own */
 		Tree();
 
-		/** The root of the object model, always an object. Hold the model lock while using it or anything it leads to. */
+		/** The root of the object model, always an object. Hold the model lock while using it or anything it leads to.
+		 */
 		const Node& root() const { return m_root; }
 
 		/** Merge a complete response into the tree (see the file comment) and tell the listeners if anything changed */
@@ -122,15 +123,15 @@ namespace OM
 			size_t want;					// What want() gave for the paths
 		};
 
-		Node m_root;					 // The object model
-		ChangeSet m_changes;			 // Changed since the last takeChanges()
-		bool m_notified = false;		 // Whether listeners have been told about m_changes
+		Node m_root;										  // The object model
+		ChangeSet m_changes;								  // Changed since the last takeChanges()
+		bool m_notified = false;							  // Whether listeners have been told about m_changes
 		std::vector<std::pair<size_t, Listener>> m_listeners; // Told about changes, with their ids
-		size_t m_nextListenerId = 1;						   // Id of the next listener added
-		std::vector<Watcher> m_watchers;   // Called after the changes they watch
-		std::mutex m_listenersMutex;	 // Guards m_listeners and m_watchers
-		std::map<size_t, std::vector<std::string>> m_wants; // The top-level keys each want() asked for, by id
-		size_t m_nextWantId = 1;							// Id of the next want()
-		mutable std::mutex m_wantsMutex;					// Guards m_wants
+		size_t m_nextListenerId = 1;						  // Id of the next listener added
+		std::vector<Watcher> m_watchers;					  // Called after the changes they watch
+		std::mutex m_listenersMutex;						  // Guards m_listeners and m_watchers
+		std::map<size_t, std::vector<std::string>> m_wants;	  // The top-level keys each want() asked for, by id
+		size_t m_nextWantId = 1;							  // Id of the next want()
+		mutable std::mutex m_wantsMutex;					  // Guards m_wants
 	};
 } // namespace OM

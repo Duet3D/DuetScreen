@@ -91,8 +91,9 @@ namespace Comm
 		/** What is known about one top-level key */
 		struct KeyState
 		{
-			std::optional<int64_t> seq;		// Its number in `seqs`, if the firmware reports one
-			std::optional<int64_t> fetched; // The number it had when last fetched; set (to 0 if unreported) once fetched
+			std::optional<int64_t> seq; // Its number in `seqs`, if the firmware reports one
+			std::optional<int64_t>
+				fetched; // The number it had when last fetched; set (to 0 if unreported) once fetched
 		};
 
 		/** Ask for the live model, as of `now` */
@@ -116,23 +117,21 @@ namespace Comm
 		void fetch(const std::string& key, const std::string& path, size_t from);
 
 		/** Part of a detailed fetch arrived (or didn't) */
-		void fetchArrived(const std::string& key,
-						  const std::string& path,
-						  std::expected<OM::Node, ReplyError> reply);
+		void fetchArrived(const std::string& key, const std::string& path, std::expected<OM::Node, ReplyError> reply);
 
 		/** A detailed fetch is complete: the key is up to date as of the number it had when asked for */
 		void fetchDone(const std::string& key);
 
-		ModelLink& m_link;									  // Where the model is asked for
-		OM::Tree& m_tree;									  // The model kept up to date
-		std::chrono::milliseconds m_pollInterval{250};		  // How often the live model is asked for
-		std::optional<Clock::time_point> m_lastPoll;		  // When the live model was last asked for
-		bool m_liveAsked = false;							  // The live model is asked for and not yet answered
-		bool m_liveSeen = false;							  // A live model has arrived since reset(): `seqs` are known
-		uint64_t m_generation = 0;							  // Counts reset()s, so a reply asked for before one is ignored
-		bool m_fetching = false;							  // A detailed fetch is in flight
-		std::optional<int64_t> m_fetchSeq;					  // The fetched key's number when its fetch started
+		ModelLink& m_link;							   // Where the model is asked for
+		OM::Tree& m_tree;							   // The model kept up to date
+		std::chrono::milliseconds m_pollInterval{250}; // How often the live model is asked for
+		std::optional<Clock::time_point> m_lastPoll;   // When the live model was last asked for
+		bool m_liveAsked = false;					   // The live model is asked for and not yet answered
+		bool m_liveSeen = false;					   // A live model has arrived since reset(): `seqs` are known
+		uint64_t m_generation = 0;					   // Counts reset()s, so a reply asked for before one is ignored
+		bool m_fetching = false;					   // A detailed fetch is in flight
+		std::optional<int64_t> m_fetchSeq;			   // The fetched key's number when its fetch started
 		std::map<std::string, KeyState, std::less<>> m_keys; // What is known of each key
-		std::optional<int64_t> m_replySeq;					  // `seqs.reply` when last seen
+		std::optional<int64_t> m_replySeq;					 // `seqs.reply` when last seen
 	};
 } // namespace Comm

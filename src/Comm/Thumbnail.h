@@ -1,16 +1,16 @@
 #ifndef THUMBNAIL_HPP
-#  define THUMBNAIL_HPP 1
+#define THUMBNAIL_HPP 1
 
-#  include <cstddef>
-#  include <sys/types.h>
+#include <cstddef>
+#include <sys/types.h>
 
-#  include "Configuration.h"
-#  include "Duet3D/General/String.h"
-#  include "image/bmp.h"
-#  include "image/png.h"
-#  include "image/qoi.h"
-#  include <nlohmann/json.hpp>
-#  include <string>
+#include "Configuration.h"
+#include "Duet3D/General/String.h"
+#include "image/bmp.h"
+#include "image/png.h"
+#include "image/qoi.h"
+#include <nlohmann/json.hpp>
+#include <string>
 
 namespace Comm
 {

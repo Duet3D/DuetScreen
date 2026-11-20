@@ -5,6 +5,7 @@
 #include "Connection.h"
 #include "Comm/FileInfo.h"
 #include "Comm/LineFramer.h"
+#include "Comm/Links/DsfLink.h"
 #include "Comm/Links/HttpLink.h"
 #include "Comm/Ports/UartPort.h"
 #include "Comm/Ports/UsbPort.h"
@@ -549,11 +550,12 @@ namespace Comm
 						lost(fmt::format("rr_connect failed: {:s}", session.error().message));
 						return;
 					}
+					OM::SetChannelIndex(0); // state.thisInput isn't sent by rr_model
 					if (session->sbc)
 					{
-						LOG_INFO("The Duet has an SBC");
+						connectDsf();
+						return;
 					}
-					OM::SetChannelIndex(0); // state.thisInput isn't sent by rr_model
 					m_sync = std::make_unique<ModelSync>(*m_link);
 					m_sync->setPollInterval(pollInterval());
 					connected();
@@ -561,6 +563,29 @@ namespace Comm
 			break;
 		}
 		}
+	}
+
+	void Connection::connectDsf()
+	{
+		LOG_INFO("The Duet has an SBC: talking to DSF");
+		auto link = std::make_unique<DsfLink>(
+			ipAddress(), password(), [this](std::function<void()> task) { post(std::move(task)); });
+		DsfLink& dsf = *link;
+		m_link = std::move(link); // the rr_* session's link goes
+		dsf.open(
+			[this, generation = m_generation](std::expected<void, ReplyError> opened)
+			{
+				if (generation != m_generation)
+				{
+					return;
+				}
+				if (!opened)
+				{
+					lost(fmt::format("DSF couldn't be reached: {:s}", opened.error().message));
+					return;
+				}
+				connected();
+			});
 	}
 
 	void Connection::connectSerial(std::unique_ptr<SerialPort> port, bool needsChecksums)

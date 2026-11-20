@@ -29,8 +29,14 @@ namespace OM
 		static std::optional<Patch> fromReply(Node& reply);
 
 		/**
-		 * A live patch of the whole object model, as the DSF WebSocket sends: objects update only the fields they
-		 * send, arrays take the length sent
+		 * The whole object model, as the DSF WebSocket sends first: it replaces everything
+		 * @param model The model; it is taken
+		 */
+		static Patch wholeModel(Node& model);
+
+		/**
+		 * A live patch of the whole object model, as the DSF WebSocket sends after the whole model: objects update
+		 * only the fields they send, arrays take the length sent
 		 * @param model The patch; it is taken
 		 */
 		static Patch liveModel(Node& model);
@@ -61,7 +67,7 @@ namespace OM
 
 		Path m_root;		 // Where the result belongs
 		bool m_live = false; // 'f' flag: a live response
-		size_t m_first = 0; // 'a' flag: index of the first array element sent
+		size_t m_first = 0;	 // 'a' flag: index of the first array element sent
 		size_t m_next = 0;	 // `next`: where the array continues, or 0
 		Node m_result;		 // The result
 	};

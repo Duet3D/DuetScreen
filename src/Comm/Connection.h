@@ -151,7 +151,8 @@ namespace Comm
 		/** Delete `file` */
 		void deleteFile(std::string file, Handler<void> handler = nullptr);
 
-		// -- For tests --------------------------------------------------------------------------------------------------
+		// -- For tests
+		// --------------------------------------------------------------------------------------------------
 
 		/** Connect over `port`, which a test plays the printer on, as over USB; started at the next process() */
 		void connectThrough(std::unique_ptr<SerialPort> port);
@@ -209,8 +210,8 @@ namespace Comm
 		/** Open a serial port (USB, UART or simulator) and start talking over it */
 		void connectSerial(std::unique_ptr<SerialPort> port, bool needsChecksums);
 
-		/** The network link answered rr_connect */
-		void networkOpened(std::expected<bool, ReplyError> sbc);
+		/** rr_connect said the Duet has an SBC: talk to it through DSF's own API instead */
+		void connectDsf();
 
 		/** The printer answered: the connection is made */
 		void connected();
@@ -228,28 +229,28 @@ namespace Comm
 		template <typename T, typename Ask>
 		void ask(Handler<T> handler, Ask ask);
 
-		std::atomic<CommunicationType> m_type{CommunicationType::usb};	  // How the printer is reached
-		std::atomic<std::chrono::milliseconds> m_pollInterval;			  // How often the live model is asked for
-		mutable std::mutex m_settingsMutex;								  // Guards the settings below
-		std::string m_ipAddress;										  // The printer's network address
-		std::string m_password;											  // Its network password
+		std::atomic<CommunicationType> m_type{CommunicationType::usb}; // How the printer is reached
+		std::atomic<std::chrono::milliseconds> m_pollInterval;		   // How often the live model is asked for
+		mutable std::mutex m_settingsMutex;							   // Guards the settings below
+		std::string m_ipAddress;									   // The printer's network address
+		std::string m_password;										   // Its network password
 
 		std::atomic<State> m_state{State::disconnected}; // Where the connection is
 		std::unique_ptr<SerialPort> m_port;				 // The serial port talked over, if the link is a SerialLink
 		std::unique_ptr<Link> m_link;					 // What talks to the printer, while connecting or connected
-		SerialLink* m_serial = nullptr;				 // m_link, when it is a SerialLink (lines come from a port)
+		SerialLink* m_serial = nullptr;					 // m_link, when it is a SerialLink (lines come from a port)
 		std::unique_ptr<ModelSync> m_sync;				 // Keeps the object model up to date, unless the link does
 		uint64_t m_generation = 0;						 // Counts connections, so lines from an old port are dropped
 		Clock::time_point m_lastHeard;					 // When the printer last sent anything
 		Clock::time_point m_connectStarted;				 // When connecting started
 		std::optional<Clock::time_point> m_retryAt;		 // When to connect next, while disconnected
 
-		mutable std::mutex m_queueMutex;				// Guards m_queue
-		std::condition_variable m_queueChanged;			// Wakes the thread when something is queued
-		std::deque<std::function<void()>> m_queue;		// Tasks for the connection's thread
-		bool m_manual = false;							// Run by hand (tests)
-		std::atomic<bool> m_running{false};				// The thread carries on
-		std::thread m_thread;							// The connection's thread
+		mutable std::mutex m_queueMutex;		   // Guards m_queue
+		std::condition_variable m_queueChanged;	   // Wakes the thread when something is queued
+		std::deque<std::function<void()>> m_queue; // Tasks for the connection's thread
+		bool m_manual = false;					   // Run by hand (tests)
+		std::atomic<bool> m_running{false};		   // The thread carries on
+		std::thread m_thread;					   // The connection's thread
 	};
 
 } // namespace Comm

@@ -30,8 +30,8 @@
 #include "UI/Xml/Binding/Resolver.h"
 #include <functional>
 #include <map>
-#include <optional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -126,7 +126,7 @@ namespace UI::Xml
 
 		std::map<std::string, std::unique_ptr<OmField>, std::less<>> m_fields; // By path and converter, e.g. "a.b|int"
 		std::map<std::string, std::unique_ptr<OmList>, std::less<>> m_lists;   // By path
-		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_forwards;	// Forwarders made outside any scope
+		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_forwards; // Forwarders made outside any scope
 		std::map<std::string, std::unique_ptr<ListBase>, std::less<>> m_forwardLists; // As m_forwards, for lists
 
 		/** One watch() */

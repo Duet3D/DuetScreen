@@ -38,7 +38,7 @@ namespace Sim
 		int32_t replyDelayMs = 0; // Each request is answered this long after it was sent
 		bool responding = true;	  // Answers requests; if not, the screen times out and reconnects
 		bool pluggedIn = true;	  // Can be connected to; unplugged, it doesn't answer either
-		float noise = 0.3f;		  // Noise on a heater's readings while it holds its temperature, °C (standard deviation)
+		float noise = 0.3f; // Noise on a heater's readings while it holds its temperature, °C (standard deviation)
 	};
 
 	/** The simulated Duet. See the file comment. */
@@ -115,8 +115,8 @@ namespace Sim
 		/** A line sent, waiting to be answered */
 		struct Request
 		{
-			std::string line;							   // The line
-			std::chrono::steady_clock::time_point due;	   // When to answer it
+			std::string line;						   // The line
+			std::chrono::steady_clock::time_point due; // When to answer it
 		};
 
 		/** The thread's loop: time passes, requests are answered */

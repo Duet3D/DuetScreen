@@ -10,10 +10,10 @@
 
 #include "Comm/Replies.h"
 #include "ObjectModel/Directories.h"
-#include <expected>
 #include "tracy/Tracy.hpp"
 #include "utils/TimeHelper.h"
 #include <atomic>
+#include <expected>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -165,7 +165,6 @@ namespace OM::FileSystem
 	using FileListRequestPtr = std::shared_ptr<FileListRequest>;
 	using FileListRequestWeakPtr = std::weak_ptr<FileListRequest>;
 
-
 	/* File List */
 
 	FileListRequestPtr GetFileListRequest(const std::string& path);
@@ -205,13 +204,12 @@ namespace OM::FileSystem
 							 request_file_contents_cb_t callback);
 
 	/**
-	 * The firmware's answer to a folder listing request (M20 S3, rr_filelist): the page is added to the folder's request,
-	 * its G-code files' information asked for, and the next page asked for; or why there is none, which answers the
-	 * request with no items
+	 * The firmware's answer to a folder listing request (M20 S3, rr_filelist): the page is added to the folder's
+	 * request, its G-code files' information asked for, and the next page asked for; or why there is none, which
+	 * answers the request with no items
 	 * @param dir The folder asked for
 	 */
 	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply);
-
 
 	/* Misc */
 

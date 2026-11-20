@@ -37,8 +37,8 @@ namespace Comm
 		/** Hand on the line gathered, if it isn't empty, and start the next */
 		void endLine();
 
-		LineHandler m_handler;	  // Receives each whole line
-		std::string m_line;		  // The line being gathered
+		LineHandler m_handler;	 // Receives each whole line
+		std::string m_line;		 // The line being gathered
 		bool m_dropping = false; // The line being received is too long and is being skipped up to its end
 	};
 } // namespace Comm

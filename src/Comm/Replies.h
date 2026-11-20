@@ -61,16 +61,16 @@ namespace Comm
 	/** What the firmware knows about a G-code file: M36, rr_fileinfo or DSF's file info */
 	struct FileInfoReply
 	{
-		std::string fileName;					// Full path on the printer
-		uint64_t size = 0;						// Bytes
-		std::string lastModified;				// When it last changed; may be empty
-		double height = 0;						// Height of the object, mm
-		double layerHeight = 0;					// mm
-		uint32_t numLayers = 0;					// 0 if unknown
-		uint32_t printTime = 0;					// The slicer's estimate, s; 0 if unknown
-		uint32_t simulatedTime = 0;				// The firmware's simulation, s; 0 if never simulated
-		std::vector<double> filament;			// Filament per extruder, mm
-		std::string generatedBy;				// The slicer; may be empty
+		std::string fileName;				   // Full path on the printer
+		uint64_t size = 0;					   // Bytes
+		std::string lastModified;			   // When it last changed; may be empty
+		double height = 0;					   // Height of the object, mm
+		double layerHeight = 0;				   // mm
+		uint32_t numLayers = 0;				   // 0 if unknown
+		uint32_t printTime = 0;				   // The slicer's estimate, s; 0 if unknown
+		uint32_t simulatedTime = 0;			   // The firmware's simulation, s; 0 if never simulated
+		std::vector<double> filament;		   // Filament per extruder, mm
+		std::string generatedBy;			   // The slicer; may be empty
 		std::vector<ThumbnailInfo> thumbnails; // The thumbnails it holds
 
 		/** Read file information */
