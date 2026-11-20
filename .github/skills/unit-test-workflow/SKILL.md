@@ -24,37 +24,37 @@ Use the project virtualenv and test runner script from the workspace root.
 
 ### Fast rerun (already configured build)
 ```bash
-python3 scripts/run_tests.py --skip_configure --compare-mode cli
+scripts/run_tests.py --skip-configure --compare-mode cli
 ```
 
 ### Filtered tests (preferred during iteration)
 ```bash
-python3 scripts/run_tests.py --test_filter='<FILTER>' --skip_configure --compare-mode cli
+scripts/run_tests.py --filter='<FILTER>' --skip-configure --compare-mode cli
 ```
 
 ### Configure + run tests
 ```bash
-python3 scripts/run_tests.py --test_filter='<FILTER>' --compare-mode cli
+scripts/run_tests.py --filter='<FILTER>' --compare-mode cli
 ```
 
 ### Full run
 ```bash
-python3 scripts/run_tests.py --compare-mode cli
+scripts/run_tests.py --compare-mode cli
 ```
 
 ### Coverage
 ```bash
-python3 scripts/run_tests.py --coverage --compare-mode cli
+scripts/run_tests.py --coverage --compare-mode cli
 ```
 
 ### LVGL tests
 ```bash
-python3 scripts/run_tests.py --test_filter='<FILTER>' --lvgl-tests --compare-mode cli
+scripts/run_tests.py --filter='<FILTER>' --lvgl --compare-mode cli
 ```
 
 ## Required Workflow
 1. Start with filtered tests for the changed area when possible.
-2. If build/config is stale, rerun without `--skip_configure`.
+2. If build/config is stale, rerun without `--skip-configure`.
 3. For UI image/LVGL related changes, include LVGL tests and prefer `EXPECT_EQUAL_SCREENSHOT` in new UI test coverage.
 4. For logic-heavy or riskier changes, run coverage.
 5. Run tests with `--compare-mode cli` so any `*_err.png` images are reviewed in terminal prompts.
