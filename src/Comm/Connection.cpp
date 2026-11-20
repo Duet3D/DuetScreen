@@ -331,8 +331,7 @@ namespace Comm
 				disconnect();
 				m_retryAt.reset();
 				beginConnecting();
-				const bool checksums = (*holder)->needsChecksums();
-				connectSerial(std::move(*holder), checksums);
+				connectSerial(std::move(*holder));
 			});
 	}
 
@@ -516,15 +515,14 @@ namespace Comm
 		switch (type())
 		{
 		case CommunicationType::usb:
-			connectSerial(std::make_unique<UsbPort>(), false);
+			connectSerial(std::make_unique<UsbPort>());
 			break;
 		case CommunicationType::uart:
-			connectSerial(std::make_unique<UartPort>(DEFAULT_UART_PORT, StorageHelper::getData(ID_DUET_BAUD_RATE)),
-						  true);
+			connectSerial(std::make_unique<UartPort>(DEFAULT_UART_PORT, StorageHelper::getData(ID_DUET_BAUD_RATE)));
 			break;
 		case CommunicationType::simulator:
 #if DUET_SIMULATOR
-			connectSerial(std::make_unique<SimulatorPort>(), false);
+			connectSerial(std::make_unique<SimulatorPort>());
 #else
 			lost("this build has no simulated Duet");
 #endif
@@ -588,7 +586,7 @@ namespace Comm
 			});
 	}
 
-	void Connection::connectSerial(std::unique_ptr<SerialPort> port, bool needsChecksums)
+	void Connection::connectSerial(std::unique_ptr<SerialPort> port)
 	{
 		// Each channel's bytes are gathered into lines on the port's thread, and the lines handled on this one
 		auto framers = std::make_shared<std::array<std::unique_ptr<LineFramer>, 2>>();
@@ -609,6 +607,7 @@ namespace Comm
 			return;
 		}
 		m_port = std::move(port);
+		const bool needsChecksums = m_port->needsChecksums(); // a UART: slow, and its lines checksummed
 
 		const bool usb = type() == CommunicationType::usb;
 		auto link = std::make_unique<SerialLink>(

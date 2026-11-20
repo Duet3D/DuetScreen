@@ -207,8 +207,8 @@ namespace Comm
 		/** Start connecting as the settings say */
 		void connect();
 
-		/** Open a serial port (USB, UART or simulator) and start talking over it */
-		void connectSerial(std::unique_ptr<SerialPort> port, bool needsChecksums);
+		/** Open a serial port (USB, UART, the simulator, a test's) and start talking over it */
+		void connectSerial(std::unique_ptr<SerialPort> port);
 
 		/** rr_connect said the Duet has an SBC: talk to it through DSF's own API instead */
 		void connectDsf();
@@ -241,7 +241,6 @@ namespace Comm
 		SerialLink* m_serial = nullptr;					 // m_link, when it is a SerialLink (lines come from a port)
 		std::unique_ptr<ModelSync> m_sync;				 // Keeps the object model up to date, unless the link does
 		uint64_t m_generation = 0;						 // Counts connections, so lines from an old port are dropped
-		Clock::time_point m_lastHeard;					 // When the printer last sent anything
 		Clock::time_point m_connectStarted;				 // When connecting started
 		std::optional<Clock::time_point> m_retryAt;		 // When to connect next, while disconnected
 
