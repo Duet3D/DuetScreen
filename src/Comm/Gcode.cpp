@@ -3,11 +3,13 @@
  */
 
 #include "Gcode.h"
+#include "tracy/Tracy.hpp"
 
 namespace Comm
 {
 	std::string quoted(std::string_view text)
 	{
+		ZoneScoped;
 		std::string result;
 		result.reserve(text.size() + 2);
 		result += '"';

@@ -4,16 +4,20 @@
 
 #include "LineFramer.h"
 #include "Debug.h"
+#include "tracy/Tracy.hpp"
 
 namespace Comm
 {
 	LineFramer::LineFramer(LineHandler handler)
 		: m_handler(std::move(handler))
 	{
+		ZoneScoped;
 	}
 
 	void LineFramer::push(std::string_view bytes)
 	{
+		ZoneScoped;
+		ZoneValue(bytes.size());
 		while (!bytes.empty())
 		{
 			const size_t end = bytes.find('\n');
@@ -42,12 +46,14 @@ namespace Comm
 
 	void LineFramer::reset()
 	{
+		ZoneScoped;
 		m_line.clear();
 		m_dropping = false;
 	}
 
 	void LineFramer::endLine()
 	{
+		ZoneScoped;
 		if (!m_line.empty() && m_line.back() == '\r')
 		{
 			m_line.pop_back();

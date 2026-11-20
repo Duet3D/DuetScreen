@@ -3,6 +3,7 @@
  */
 
 #include "Replies.h"
+#include "tracy/Tracy.hpp"
 #include <fmt/format.h>
 
 namespace Comm
@@ -13,6 +14,7 @@ namespace Comm
 		template <typename T>
 		T count(const OM::Node& node, T fallback = 0)
 		{
+			ZoneScoped;
 			const int64_t value = node.integer(-1);
 			return value < 0 ? fallback : static_cast<T>(value);
 		}
@@ -20,12 +22,14 @@ namespace Comm
 		/** A ReplyError for a reply without the field `field` */
 		ReplyError missing(std::string_view what, std::string_view field)
 		{
+			ZoneScoped;
 			return ReplyError{.code = 0, .message = fmt::format("{:s} without \"{:s}\"", what, field)};
 		}
 
 		/** Read one item of a folder */
 		FileEntry readEntry(const OM::Node& item)
 		{
+			ZoneScoped;
 			return FileEntry{
 				.folder = item["type"].text() == "d",
 				.name = std::string(item["name"].text()),
@@ -37,6 +41,7 @@ namespace Comm
 
 	std::optional<ReplyError> firmwareError(const OM::Node& reply)
 	{
+		ZoneScoped;
 		const int64_t err = reply["err"].integer(0);
 		if (err == 0)
 		{
@@ -47,6 +52,7 @@ namespace Comm
 
 	std::expected<FileList, ReplyError> FileList::read(const OM::Node& reply, std::string_view dir)
 	{
+		ZoneScoped;
 		FileList list;
 		if (reply.isArray())
 		{
@@ -78,6 +84,7 @@ namespace Comm
 
 	std::expected<FileInfoReply, ReplyError> FileInfoReply::read(const OM::Node& reply)
 	{
+		ZoneScoped;
 		if (const auto error = firmwareError(reply))
 		{
 			return std::unexpected(*error);
@@ -118,6 +125,7 @@ namespace Comm
 
 	std::expected<FileChunk, ReplyError> FileChunk::read(const OM::Node& reply, std::string_view wrapper)
 	{
+		ZoneScoped;
 		const OM::Node& fields = reply[wrapper].isObject() ? reply[wrapper] : reply;
 		if (const auto error = firmwareError(fields))
 		{

@@ -6,6 +6,7 @@
 #include "Configuration.h"
 #include "Debug.h"
 #include "ObjectModel/Tree/Json.h"
+#include "tracy/Tracy.hpp"
 #include <fmt/format.h>
 
 namespace Comm
@@ -17,10 +18,12 @@ namespace Comm
 		, m_alive(std::make_shared<bool>(true))
 		, m_lastHeard(std::chrono::steady_clock::now())
 	{
+		ZoneScoped;
 	}
 
 	HttpRequester::~HttpRequester()
 	{
+		ZoneScoped;
 		m_alive.reset();
 	}
 
@@ -31,6 +34,8 @@ namespace Comm
 							 ResponseHandler handler,
 							 std::string body)
 	{
+		ZoneScoped;
+		ZoneText(path.data(), path.size());
 		auto request = std::make_shared<HttpRequest>();
 		request->method = method;
 		request->host = m_host;
@@ -50,6 +55,7 @@ namespace Comm
 
 	void HttpRequester::getJson(std::string_view path, hv::QueryParams query, JsonHandler handler)
 	{
+		ZoneScoped;
 		send(HTTP_GET,
 			 path,
 			 std::move(query),
@@ -59,6 +65,7 @@ namespace Comm
 
 	std::expected<OM::Node, ReplyError> HttpRequester::readJson(const HttpResponsePtr& response)
 	{
+		ZoneScoped;
 		auto text = readText(response);
 		if (!text)
 		{
@@ -75,6 +82,7 @@ namespace Comm
 
 	std::expected<std::string, ReplyError> HttpRequester::readText(const HttpResponsePtr& response)
 	{
+		ZoneScoped;
 		if (!response)
 		{
 			return std::unexpected(ReplyError{.message = "no response from the printer"});
@@ -88,26 +96,31 @@ namespace Comm
 
 	void HttpRequester::sendQueued()
 	{
+		ZoneScoped;
 		while (m_inFlight < m_maxInFlight && !m_queue.empty())
 		{
 			Queued next = std::move(m_queue.front());
 			m_queue.pop_front();
 			m_inFlight++;
+			TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight));
 			LOG_DBG("HTTP {:s} {:s}", http_method_str(next.request->method), next.request->path);
 			m_client.sendAsync(
 				next.request,
 				[this, alive = std::weak_ptr<bool>(m_alive), post = m_post, handler = std::move(next.handler)](
 					const HttpResponsePtr& response)
 				{
+					ZoneScopedN("httpReceived_cb");
 					// On libhv's thread: everything else happens on the connection's
 					post(
 						[this, alive, handler, response]
 						{
+							ZoneScopedN("httpResponse_cb");
 							if (!alive.lock())
 							{
 								return; // the requester has gone
 							}
 							m_inFlight--;
+							TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight));
 							if (response)
 							{
 								m_lastHeard = std::chrono::steady_clock::now();

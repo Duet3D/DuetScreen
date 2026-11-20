@@ -6,6 +6,7 @@
 #include "Comm/Responses.h"
 #include "Configuration.h"
 #include "Debug.h"
+#include "tracy/Tracy.hpp"
 #include <fmt/format.h>
 
 namespace Comm
@@ -22,6 +23,7 @@ namespace Comm
 		template <typename T, typename Read>
 		HttpRequester::JsonHandler readAs(Handler<T> handler, Read read)
 		{
+			ZoneScoped;
 			return [handler = std::move(handler), read](std::expected<OM::Node, ReplyError> json)
 			{ handler(json.and_then([&read](const OM::Node& node) { return read(node); })); };
 		}
@@ -29,8 +31,10 @@ namespace Comm
 		/** A handler of a request's JSON that only says whether it worked ({"err":0}) */
 		HttpRequester::JsonHandler succeeded(Handler<void> handler)
 		{
+			ZoneScoped;
 			return [handler = std::move(handler)](std::expected<OM::Node, ReplyError> json)
 			{
+				ZoneScopedN("succeeded_cb");
 				if (!json)
 				{
 					handler(std::unexpected(json.error()));
@@ -52,10 +56,12 @@ namespace Comm
 		, m_unasked(std::move(unasked))
 		, m_http(std::move(host), std::move(post), maxInFlight)
 	{
+		ZoneScoped;
 	}
 
 	HttpLink::~HttpLink()
 	{
+		ZoneScoped;
 		if (m_sessionKey != 0 && !m_http.unauthorised())
 		{
 			// Waited for (briefly), as the requester goes with the link
@@ -73,6 +79,7 @@ namespace Comm
 
 	void HttpLink::open(Handler<Session> handler)
 	{
+		ZoneScoped;
 		LOG_INFO("Connecting to the Duet at {:s}", m_http.host());
 		hv::QueryParams query;
 		query["password"] = m_password;
@@ -81,6 +88,7 @@ namespace Comm
 					   std::move(query),
 					   [this, handler = std::move(handler)](std::expected<OM::Node, ReplyError> json)
 					   {
+						   ZoneScopedN("rr_connect_cb");
 						   if (!json)
 						   {
 							   handler(std::unexpected(json.error()));
@@ -103,6 +111,7 @@ namespace Comm
 
 	void HttpLink::requestModel(std::string_view key, std::string_view flags, ModelHandler handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["key"] = key;
 		query["flags"] = flags;
@@ -111,12 +120,14 @@ namespace Comm
 
 	void HttpLink::fetchResponses()
 	{
+		ZoneScoped;
 		m_http.send(HTTP_GET,
 					"/rr_reply",
 					{},
 					HTTP_TIMEOUT,
 					[this](const HttpResponsePtr& response)
 					{
+						ZoneScopedN("fetchResponses_cb");
 						const auto text = HttpRequester::readText(response);
 						if (!text || text->empty())
 						{
@@ -144,12 +155,14 @@ namespace Comm
 
 	void HttpLink::sendGcode(std::string_view gcode)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["gcode"] = gcode;
 		m_http.getJson("/rr_gcode",
 					   std::move(query),
 					   [gcode = std::string(gcode)](std::expected<OM::Node, ReplyError> json)
 					   {
+						   ZoneScopedN("sendGcode_cb");
 						   if (!json)
 						   {
 							   LOG_ERROR("Failed to send \"{:s}\": {:s}", gcode, json.error().message);
@@ -159,11 +172,13 @@ namespace Comm
 
 	void HttpLink::emergencyStop()
 	{
+		ZoneScoped;
 		sendGcode("M112 M999");
 	}
 
 	void HttpLink::listFiles(std::string_view dir, size_t first, Handler<FileList> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["dir"] = dir;
 		query["first"] = fmt::format("{:d}", first);
@@ -174,6 +189,7 @@ namespace Comm
 
 	void HttpLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
 		m_http.getJson("/rr_fileinfo",
@@ -183,6 +199,7 @@ namespace Comm
 
 	void HttpLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
 		query["offset"] = fmt::format("{:d}", offset);
@@ -194,6 +211,7 @@ namespace Comm
 
 	void HttpLink::readFile(std::string_view file, Handler<std::string> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
 		m_http.send(HTTP_GET,
@@ -206,6 +224,7 @@ namespace Comm
 
 	void HttpLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
 		m_http.send(
@@ -220,6 +239,7 @@ namespace Comm
 
 	void HttpLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
 		m_http.getJson("/rr_delete", std::move(query), succeeded(std::move(handler)));

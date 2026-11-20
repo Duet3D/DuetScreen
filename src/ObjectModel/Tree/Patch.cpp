@@ -3,12 +3,14 @@
  */
 
 #include "Patch.h"
+#include "tracy/Tracy.hpp"
 #include <charconv>
 
 namespace OM
 {
 	std::optional<Patch> Patch::fromReply(Node& reply)
 	{
+		ZoneScoped;
 		const Node& key = reply["key"];
 		if (key.kind() != Node::Kind::string || reply["result"].kind() == Node::Kind::missing)
 		{
@@ -35,6 +37,7 @@ namespace OM
 
 	Patch Patch::wholeModel(Node& model)
 	{
+		ZoneScoped;
 		Patch patch;
 		patch.m_result = std::move(model);
 		return patch;
@@ -42,6 +45,7 @@ namespace OM
 
 	Patch Patch::liveModel(Node& model)
 	{
+		ZoneScoped;
 		Patch patch;
 		patch.m_live = true;
 		patch.m_result = std::move(model);

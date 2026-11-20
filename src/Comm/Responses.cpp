@@ -5,12 +5,14 @@
 #include "Responses.h"
 #include "Debug.h"
 #include "UI/Core/Model.h"
+#include "tracy/Tracy.hpp"
 #include <string>
 
 namespace Comm
 {
 	void showResponse(std::string_view text)
 	{
+		ZoneScoped;
 		while (!text.empty() && (text.back() == '\n' || text.back() == '\r'))
 		{
 			text.remove_suffix(1);

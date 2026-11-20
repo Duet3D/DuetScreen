@@ -165,12 +165,14 @@ namespace OM::FileSystem
 
 	bool FileListRequest::IsPending() const
 	{
+		ZoneScoped;
 		std::lock_guard<LockableBase(std::mutex)> lk(m_mutex);
 		return !m_done;
 	}
 
 	void FileListRequest::TakeCallbacksFrom(const FileListRequest& pending)
 	{
+		ZoneScoped;
 		std::scoped_lock lk(m_mutex, pending.m_mutex);
 		m_callbacks.insert(m_callbacks.begin(), pending.m_callbacks.begin(), pending.m_callbacks.end());
 	}
@@ -185,6 +187,7 @@ namespace OM::FileSystem
 	/** Ask for the page of the folder `dir` from item `first` on; it is handed to FileListArrived() */
 	static void RequestPage(const std::string& dir, size_t first)
 	{
+		ZoneScoped;
 		Comm::Connection::get().listFiles(
 			dir, first, [dir](std::expected<Comm::FileList, Comm::ReplyError> reply) { FileListArrived(dir, reply); });
 	}
@@ -237,6 +240,7 @@ namespace OM::FileSystem
 			SortFilesBy(items,
 						[descending](const ItemPtr& L, const ItemPtr& R)
 						{
+							ZoneScopedN("SortFilesBy_cb");
 							if (L->GetType() == R->GetType())
 								return descending == (L->GetName() > R->GetName());
 							return L->GetType() < R->GetType();
@@ -246,6 +250,7 @@ namespace OM::FileSystem
 			SortFilesBy(items,
 						[descending](const ItemPtr& L, const ItemPtr& R)
 						{
+							ZoneScopedN("SortFilesBy_cb");
 							if (L->GetType() == R->GetType())
 								return descending == (L->GetDate() > R->GetDate());
 							return L->GetType() < R->GetType();
@@ -255,6 +260,7 @@ namespace OM::FileSystem
 			SortFilesBy(items,
 						[descending](const ItemPtr& L, const ItemPtr& R)
 						{
+							ZoneScopedN("SortFilesBy_cb");
 							if (L->GetType() == R->GetType())
 								return descending == (L->GetSize() > R->GetSize());
 							return L->GetType() < R->GetType();
@@ -443,6 +449,7 @@ namespace OM::FileSystem
 					 "",
 					 [](OM::FileSystem::ItemList files)
 					 {
+						 ZoneScopedN("RequestFilaments_cb");
 						 {
 							 ZoneScopedN("RequestFilaments Callback");
 							 MODEL_LOCK();
@@ -480,6 +487,7 @@ namespace OM::FileSystem
 			fullPath,
 			[fullPath, callback = std::move(callback)](std::expected<std::string, Comm::ReplyError> contents)
 			{
+				ZoneScopedN("lambda_cb");
 				if (!contents)
 				{
 					LOG_ERROR("Couldn't read {:s}: {:s}", fullPath, contents.error().message);

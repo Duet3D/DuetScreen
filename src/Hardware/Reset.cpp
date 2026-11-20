@@ -9,6 +9,7 @@
 #include "Reset.h"
 #include "Debug.h"
 #include "UI/Xml/Runtime/XmlUi.h"
+#include "tracy/Tracy.hpp"
 #include "utils/NetworkHelper.h"
 #include "utils/SystemHelper.h"
 
@@ -27,6 +28,7 @@ extern "C"
 	 */
 	void Restart() noexcept
 	{
+		ZoneScoped;
 #if SIMULATION
 		exit(EXIT_SUCCESS);
 #else
@@ -39,6 +41,7 @@ extern "C"
 	 */
 	void Reboot() noexcept
 	{
+		ZoneScoped;
 #if !SIMULATION
 		reboot(RB_AUTOBOOT);
 #endif
@@ -50,6 +53,7 @@ extern "C"
 	 */
 	void EraseAndRestart() noexcept
 	{
+		ZoneScoped;
 #if SIMULATION
 		if (!std::filesystem::remove("config.json"))
 		{

@@ -23,6 +23,7 @@
 #include "Comm/ModelSync.h"
 #include "Comm/Ports/SerialPort.h"
 #include "ObjectModel/Tree/Node.h"
+#include "tracy/Tracy.hpp"
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -231,7 +232,7 @@ namespace Comm
 
 		std::atomic<CommunicationType> m_type{CommunicationType::usb}; // How the printer is reached
 		std::atomic<std::chrono::milliseconds> m_pollInterval;		   // How often the live model is asked for
-		mutable std::mutex m_settingsMutex;							   // Guards the settings below
+		mutable TracyLockable(std::mutex, m_settingsMutex);			   // Guards the settings below
 		std::string m_ipAddress;									   // The printer's network address
 		std::string m_password;										   // Its network password
 
@@ -244,12 +245,12 @@ namespace Comm
 		Clock::time_point m_connectStarted;				 // When connecting started
 		std::optional<Clock::time_point> m_retryAt;		 // When to connect next, while disconnected
 
-		mutable std::mutex m_queueMutex;		   // Guards m_queue
-		std::condition_variable m_queueChanged;	   // Wakes the thread when something is queued
-		std::deque<std::function<void()>> m_queue; // Tasks for the connection's thread
-		bool m_manual = false;					   // Run by hand (tests)
-		std::atomic<bool> m_running{false};		   // The thread carries on
-		std::thread m_thread;					   // The connection's thread
+		mutable TracyLockable(std::mutex, m_queueMutex); // Guards m_queue
+		std::condition_variable_any m_queueChanged;		 // Wakes the thread when something is queued
+		std::deque<std::function<void()>> m_queue;		 // Tasks for the connection's thread
+		bool m_manual = false;							 // Run by hand (tests)
+		std::atomic<bool> m_running{false};				 // The thread carries on
+		std::thread m_thread;							 // The connection's thread
 	};
 
 } // namespace Comm

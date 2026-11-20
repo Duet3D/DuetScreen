@@ -43,6 +43,7 @@ namespace Comm
 		/** Act on a control command, which the firmware sends to update or restart the screen */
 		void controlCommand(std::string_view command)
 		{
+			ZoneScoped;
 			if (command == "reset")
 			{
 				Restart(); // Does not return
@@ -60,8 +61,10 @@ namespace Comm
 		/** A handler that only notes a failure, for a request whose asker doesn't wait for the answer */
 		Handler<void> logFailure(std::string what)
 		{
+			ZoneScoped;
 			return [what = std::move(what)](std::expected<void, ReplyError> result)
 			{
+				ZoneScopedN("logFailure_cb");
 				if (!result)
 				{
 					LOG_WARN("{:s} failed: {:s}", what, result.error().message);
@@ -72,6 +75,7 @@ namespace Comm
 
 	Connection& Connection::get()
 	{
+		ZoneScoped;
 		static Connection s_connection;
 		return s_connection;
 	}
@@ -79,10 +83,12 @@ namespace Comm
 	Connection::Connection()
 		: m_pollInterval(DEFAULT_PRINTER_POLL_INTERVAL)
 	{
+		ZoneScoped;
 	}
 
 	Connection::~Connection()
 	{
+		ZoneScoped;
 		// Only the thread: the rest of the program may have gone already
 		m_running = false;
 		m_queueChanged.notify_all();
@@ -119,6 +125,7 @@ namespace Comm
 
 	void Connection::stop()
 	{
+		ZoneScoped;
 		if (m_running)
 		{
 			m_running = false;
@@ -138,11 +145,13 @@ namespace Comm
 
 	std::string_view Connection::typeName() const
 	{
+		ZoneScoped;
 		return communicationTypeNames[static_cast<size_t>(type())];
 	}
 
 	void Connection::setType(CommunicationType type)
 	{
+		ZoneScoped;
 #if !DUET_SIMULATOR
 		if (type == CommunicationType::simulator)
 		{
@@ -158,6 +167,7 @@ namespace Comm
 
 	void Connection::setPollInterval(std::chrono::milliseconds interval)
 	{
+		ZoneScoped;
 		if (interval < MIN_PRINTER_POLL_INTERVAL)
 		{
 			LOG_WARN("Poll interval too low, setting to {}", MIN_PRINTER_POLL_INTERVAL);
@@ -168,6 +178,7 @@ namespace Comm
 		post(
 			[this, interval]
 			{
+				ZoneScopedN("setPollInterval_cb");
 				if (m_sync)
 				{
 					m_sync->setPollInterval(interval);
@@ -177,12 +188,14 @@ namespace Comm
 
 	std::string Connection::ipAddress() const
 	{
+		ZoneScoped;
 		std::lock_guard lock(m_settingsMutex);
 		return m_ipAddress;
 	}
 
 	void Connection::setIpAddress(std::string_view address)
 	{
+		ZoneScoped;
 		{
 			std::lock_guard lock(m_settingsMutex);
 			if (m_ipAddress == address)
@@ -201,12 +214,14 @@ namespace Comm
 
 	std::string Connection::password() const
 	{
+		ZoneScoped;
 		std::lock_guard lock(m_settingsMutex);
 		return m_password;
 	}
 
 	void Connection::setPassword(std::string_view password)
 	{
+		ZoneScoped;
 		{
 			std::lock_guard lock(m_settingsMutex);
 			m_password = password;
@@ -220,9 +235,11 @@ namespace Comm
 
 	void Connection::reconnect()
 	{
+		ZoneScoped;
 		post(
 			[this]
 			{
+				ZoneScopedN("reconnect_cb");
 				disconnect();
 				m_retryAt = Clock::now();
 			});
@@ -230,9 +247,11 @@ namespace Comm
 
 	void Connection::sendGcode(std::string_view gcode)
 	{
+		ZoneScoped;
 		post(
 			[this, gcode = std::string(gcode)]
 			{
+				ZoneScopedN("sendGcode_cb");
 				if (m_state != State::connected || !m_link)
 				{
 					LOG_DBG("Not connected to the printer, not sending: {:s}", gcode);
@@ -244,9 +263,11 @@ namespace Comm
 
 	void Connection::emergencyStop()
 	{
+		ZoneScoped;
 		post(
 			[this]
 			{
+				ZoneScopedN("emergencyStop_cb");
 				if (!m_link)
 				{
 					LOG_WARN("Not connected to the printer: it can't be stopped");
@@ -260,9 +281,11 @@ namespace Comm
 	template <typename T, typename Ask>
 	void Connection::ask(Handler<T> handler, Ask ask)
 	{
+		ZoneScoped;
 		post(
 			[this, handler = std::move(handler), ask = std::move(ask)]() mutable
 			{
+				ZoneScopedN("ask_cb");
 				if (m_state != State::connected || !m_link)
 				{
 					handler(std::unexpected(ReplyError{.message = "not connected to the printer"}));
@@ -274,6 +297,7 @@ namespace Comm
 
 	void Connection::listFiles(std::string dir, size_t first, Handler<FileList> handler)
 	{
+		ZoneScoped;
 		ask(std::move(handler),
 			[dir = std::move(dir), first](Link& link, Handler<FileList> answer)
 			{ link.listFiles(dir, first, std::move(answer)); });
@@ -281,6 +305,7 @@ namespace Comm
 
 	void Connection::fileInfo(std::string file, Handler<FileInfoReply> handler)
 	{
+		ZoneScoped;
 		ask(std::move(handler),
 			[file = std::move(file)](Link& link, Handler<FileInfoReply> answer)
 			{ link.fileInfo(file, std::move(answer)); });
@@ -288,6 +313,7 @@ namespace Comm
 
 	void Connection::thumbnail(std::string file, uint32_t offset, Handler<FileChunk> handler)
 	{
+		ZoneScoped;
 		ask(std::move(handler),
 			[file = std::move(file), offset](Link& link, Handler<FileChunk> answer)
 			{ link.thumbnail(file, offset, std::move(answer)); });
@@ -295,6 +321,7 @@ namespace Comm
 
 	void Connection::readFile(std::string file, Handler<std::string> handler)
 	{
+		ZoneScoped;
 		ask(std::move(handler),
 			[file = std::move(file)](Link& link, Handler<std::string> answer)
 			{ link.readFile(file, std::move(answer)); });
@@ -302,6 +329,7 @@ namespace Comm
 
 	void Connection::writeFile(std::string file, std::string contents, Handler<void> handler)
 	{
+		ZoneScoped;
 		if (!handler)
 		{
 			handler = logFailure(fmt::format("Writing {:s}", file));
@@ -313,6 +341,7 @@ namespace Comm
 
 	void Connection::deleteFile(std::string file, Handler<void> handler)
 	{
+		ZoneScoped;
 		if (!handler)
 		{
 			handler = logFailure(fmt::format("Deleting {:s}", file));
@@ -323,11 +352,13 @@ namespace Comm
 
 	void Connection::connectThrough(std::unique_ptr<SerialPort> port)
 	{
+		ZoneScoped;
 		// A task is copied, so the port is held where a copy shares it
 		auto holder = std::make_shared<std::unique_ptr<SerialPort>>(std::move(port));
 		post(
 			[this, holder]
 			{
+				ZoneScopedN("connectThrough_cb");
 				disconnect();
 				m_retryAt.reset();
 				beginConnecting();
@@ -337,6 +368,7 @@ namespace Comm
 
 	void Connection::setManual(bool manual)
 	{
+		ZoneScoped;
 		if (manual && m_running)
 		{
 			m_running = false;
@@ -351,6 +383,7 @@ namespace Comm
 
 	void Connection::process()
 	{
+		ZoneScoped;
 		runQueued();
 		step(Clock::now());
 		runQueued();
@@ -358,9 +391,11 @@ namespace Comm
 
 	void Connection::pollNow()
 	{
+		ZoneScoped;
 		post(
 			[this]
 			{
+				ZoneScopedN("pollNow_cb");
 				if (m_sync)
 				{
 					m_sync->pollNow();
@@ -370,6 +405,7 @@ namespace Comm
 
 	bool Connection::busy() const
 	{
+		ZoneScoped;
 		{
 			std::lock_guard lock(m_queueMutex);
 			if (!m_queue.empty())
@@ -382,6 +418,7 @@ namespace Comm
 
 	void Connection::receiveUnasked(OM::Node& reply)
 	{
+		ZoneScoped;
 		if (auto patch = OM::Patch::fromReply(reply))
 		{
 			if (m_sync)
@@ -413,6 +450,7 @@ namespace Comm
 
 	void Connection::post(std::function<void()> task)
 	{
+		ZoneScoped;
 		{
 			std::lock_guard lock(m_queueMutex);
 			m_queue.push_back(std::move(task));
@@ -422,6 +460,7 @@ namespace Comm
 
 	void Connection::run()
 	{
+		ZoneScoped;
 		tracy::SetThreadName("Connection");
 		while (m_running)
 		{
@@ -436,13 +475,16 @@ namespace Comm
 
 	void Connection::runQueued()
 	{
+		ZoneScoped;
 		while (true)
 		{
+			ZoneScoped;
 			std::deque<std::function<void()>> tasks;
 			{
 				std::lock_guard lock(m_queueMutex);
 				tasks.swap(m_queue);
 			}
+			TracyPlot("Connection tasks queued", static_cast<int64_t>(tasks.size()));
 			if (tasks.empty())
 			{
 				return;
@@ -500,6 +542,7 @@ namespace Comm
 
 	void Connection::beginConnecting()
 	{
+		ZoneScoped;
 		m_generation++;
 		m_state = State::connecting;
 		m_connectStarted = Clock::now();
@@ -539,6 +582,7 @@ namespace Comm
 			http.open(
 				[this, generation = m_generation](std::expected<HttpLink::Session, ReplyError> session)
 				{
+					ZoneScopedN("rrConnect_cb");
 					if (generation != m_generation)
 					{
 						return;
@@ -565,6 +609,7 @@ namespace Comm
 
 	void Connection::connectDsf()
 	{
+		ZoneScoped;
 		LOG_INFO("The Duet has an SBC: talking to DSF");
 		auto link = std::make_unique<DsfLink>(
 			ipAddress(), password(), [this](std::function<void()> task) { post(std::move(task)); });
@@ -573,6 +618,7 @@ namespace Comm
 		dsf.open(
 			[this, generation = m_generation](std::expected<void, ReplyError> opened)
 			{
+				ZoneScopedN("dsfOpen_cb");
 				if (generation != m_generation)
 				{
 					return;
@@ -588,6 +634,7 @@ namespace Comm
 
 	void Connection::connectSerial(std::unique_ptr<SerialPort> port)
 	{
+		ZoneScoped;
 		// Each channel's bytes are gathered into lines on the port's thread, and the lines handled on this one
 		auto framers = std::make_shared<std::array<std::unique_ptr<LineFramer>, 2>>();
 		for (size_t channel = 0; channel < framers->size(); channel++)
@@ -595,12 +642,18 @@ namespace Comm
 			(*framers)[channel] = std::make_unique<LineFramer>(
 				[this, generation = m_generation, channel](std::string_view line)
 				{
+					ZoneScopedN("lineFramed_cb");
 					post([this, generation, channel, line = std::string(line)]
 						 { lineReceived(generation, channel, line); });
 				});
 		}
-		const bool opened = port->open([framers](size_t channel, std::string_view bytes)
-									   { (*framers)[std::min(channel, framers->size() - 1)]->push(bytes); });
+		const bool opened = port->open(
+			[framers](size_t channel, std::string_view bytes)
+			{
+				ZoneScopedN("portReceived_cb"); // on the port's thread
+				ZoneValue(bytes.size());
+				(*framers)[std::min(channel, framers->size() - 1)]->push(bytes);
+			});
 		if (!opened)
 		{
 			lost("the port couldn't be opened");
@@ -636,6 +689,7 @@ namespace Comm
 
 	void Connection::connected()
 	{
+		ZoneScoped;
 		LOG_INFO("Connected to the printer");
 		m_state = State::connected;
 		OM::Followers::refresh(); // the printer's status, in place of "connecting"
@@ -672,6 +726,8 @@ namespace Comm
 
 	void Connection::lost(std::string_view reason)
 	{
+		ZoneScoped;
+		ZoneText(reason.data(), reason.size());
 		LOG_WARN("Connection lost: {:s}", reason);
 		disconnect();
 		m_retryAt = Clock::now() + retryDelay;
@@ -679,6 +735,7 @@ namespace Comm
 
 	void Connection::lineReceived(uint64_t generation, size_t channel, std::string line)
 	{
+		ZoneScoped;
 		if (generation != m_generation || m_serial == nullptr)
 		{
 			return; // from a port closed since

@@ -5,6 +5,7 @@
 #include "ModelSync.h"
 #include "Configuration.h"
 #include "Debug.h"
+#include "tracy/Tracy.hpp"
 #include <algorithm>
 #include <array>
 #include <fmt/format.h>
@@ -37,6 +38,7 @@ namespace Comm
 		/** Where `key` comes in fetchOrder; keys not in it come after all of them */
 		size_t rank(std::string_view key)
 		{
+			ZoneScoped;
 			return static_cast<size_t>(std::ranges::find(fetchOrder, key) - fetchOrder.begin());
 		}
 	} // namespace
@@ -45,10 +47,12 @@ namespace Comm
 		: m_link(link)
 		, m_tree(tree)
 	{
+		ZoneScoped;
 	}
 
 	std::string_view ModelSync::detailFlags(std::string_view key)
 	{
+		ZoneScoped;
 		if (key == "heat")
 		{
 			return "vo"; // 'o' for heat.bedHeaters and heat.chamberHeaters, obsolete since RepRapFirmware 3.7
@@ -62,6 +66,7 @@ namespace Comm
 
 	void ModelSync::reset()
 	{
+		ZoneScoped;
 		m_generation++;
 		m_lastPoll.reset();
 		m_liveAsked = false;
@@ -74,6 +79,7 @@ namespace Comm
 
 	void ModelSync::tick(Clock::time_point now)
 	{
+		ZoneScoped;
 		if (!m_liveAsked && (!m_lastPoll || now - *m_lastPoll >= m_pollInterval))
 		{
 			askLive(now);
@@ -83,6 +89,7 @@ namespace Comm
 
 	void ModelSync::pollNow()
 	{
+		ZoneScoped;
 		if (!m_liveAsked)
 		{
 			askLive(Clock::now());
@@ -91,12 +98,14 @@ namespace Comm
 
 	void ModelSync::askLive(Clock::time_point now)
 	{
+		ZoneScoped;
 		m_liveAsked = true;
 		m_lastPoll = now;
 		m_link.requestModel("",
 							liveFlags,
 							[this, generation = m_generation](std::expected<OM::Node, ReplyError> reply)
 							{
+								ZoneScopedN("askLive_cb");
 								if (generation == m_generation)
 								{
 									liveArrived(std::move(reply));
@@ -106,6 +115,7 @@ namespace Comm
 
 	void ModelSync::receiveUnasked(const OM::Patch& patch)
 	{
+		ZoneScoped;
 		m_tree.apply(patch);
 		if (patch.root().empty())
 		{
@@ -116,6 +126,7 @@ namespace Comm
 
 	void ModelSync::liveArrived(std::expected<OM::Node, ReplyError> reply)
 	{
+		ZoneScoped;
 		m_liveAsked = false;
 		if (!reply)
 		{
@@ -136,6 +147,7 @@ namespace Comm
 
 	void ModelSync::readSeqs(const OM::Node& seqs)
 	{
+		ZoneScoped;
 		seqs.forEachField(
 			[this](std::string_view name, const OM::Node& value)
 			{
@@ -154,6 +166,7 @@ namespace Comm
 
 	void ModelSync::fetchNext()
 	{
+		ZoneScoped;
 		if (m_fetching || !m_liveSeen)
 		{
 			return;
@@ -184,6 +197,8 @@ namespace Comm
 
 	void ModelSync::fetch(const std::string& key, const std::string& path, size_t from)
 	{
+		ZoneScoped;
+		ZoneText(path.data(), path.size());
 		m_fetching = true;
 		std::string flags(detailFlags(key));
 		if (from > 0)
@@ -195,6 +210,7 @@ namespace Comm
 							flags,
 							[this, key, path, generation = m_generation](std::expected<OM::Node, ReplyError> reply)
 							{
+								ZoneScopedN("fetch_cb");
 								if (generation == m_generation)
 								{
 									fetchArrived(key, path, std::move(reply));
@@ -206,6 +222,7 @@ namespace Comm
 								 const std::string& path,
 								 std::expected<OM::Node, ReplyError> reply)
 	{
+		ZoneScoped;
 		if (!reply)
 		{
 			// Tried again once the next live model has arrived
@@ -242,6 +259,7 @@ namespace Comm
 
 	void ModelSync::fetchDone(const std::string& key)
 	{
+		ZoneScoped;
 		m_keys[key].fetched = m_fetchSeq.value_or(0);
 		m_fetching = false;
 		fetchNext();

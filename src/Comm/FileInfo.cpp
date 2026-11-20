@@ -27,11 +27,13 @@ namespace Comm
 
 	FileInfo::FileInfo()
 	{
+		ZoneScoped;
 		LOG_VERBOSE("Created new fileinfo");
 	}
 
 	FileInfo::~FileInfo()
 	{
+		ZoneScoped;
 		LOG_VERBOSE("Deleted fileinfo {:s}", filename.c_str());
 	}
 
@@ -142,6 +144,7 @@ namespace Comm
 		Model::get().addEventListener<EventType::PrinterUniqueId>(
 			[this]()
 			{
+				ZoneScopedN("FileInfoCache_cb");
 				if (!OM::GetPrinterUniqueId().empty())
 					LoadCacheFromMemory();
 			});
@@ -195,6 +198,7 @@ namespace Comm
 		GetCachePath().transform(
 			[this](const std::filesystem::path& path)
 			{
+				ZoneScopedN("LoadCacheFromMemory_cb");
 				if (!std::filesystem::exists(path))
 				{
 					LOG_INFO("Creating file info cache directory: {:s}", path.string());
@@ -252,6 +256,7 @@ namespace Comm
 		GetCachePath().transform(
 			[&](const std::filesystem::path& path)
 			{
+				ZoneScopedN("SaveCacheToFile_cb");
 				std::string file_path_str = fmt::format("{:s}/{:s}.json", path.string(), fileInfo.filename.c_str());
 				utils::replaceSubstring(file_path_str, ":", "\\%3A");
 
@@ -296,6 +301,7 @@ namespace Comm
 		GetCachePath().transform(
 			[this, &ret](const std::filesystem::path& path)
 			{
+				ZoneScopedN("SaveCache_cb");
 				if (!std::filesystem::exists(path))
 				{
 					LOG_INFO("Creating file info cache directory: {:s}", path.string());
@@ -691,6 +697,7 @@ namespace Comm
 	/** Ask the printer about `filepath`; the answer goes to FileInfoCache::FileInfoArrived() */
 	static void RequestFileInfo(const std::string& filepath)
 	{
+		ZoneScoped;
 		Connection::get().fileInfo(filepath,
 								   [filepath](std::expected<FileInfoReply, ReplyError> reply)
 								   { FILEINFO_CACHE->FileInfoArrived(filepath, reply); });
@@ -700,6 +707,7 @@ namespace Comm
 	 * FileInfoCache::ThumbnailArrived() */
 	static void RequestThumbnailPiece(const std::string& filepath, uint32_t offset)
 	{
+		ZoneScoped;
 		Connection::get().thumbnail(filepath,
 									offset,
 									[filepath](std::expected<FileChunk, ReplyError> reply)
@@ -1047,6 +1055,7 @@ namespace Comm
 
 	void FileInfoCache::Debug()
 	{
+		ZoneScoped;
 		std::lock_guard<LockableBase(std::recursive_mutex)> lock(s_mutex);
 		LOG_DBG("File info cache debug");
 		LOG_INFO("File info cache:");

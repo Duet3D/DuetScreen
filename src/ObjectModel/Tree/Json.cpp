@@ -3,6 +3,7 @@
  */
 
 #include "Json.h"
+#include "tracy/Tracy.hpp"
 #include <charconv>
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -162,6 +163,8 @@ namespace OM
 
 	std::expected<Node, JsonError> parseJson(std::string_view text)
 	{
+		ZoneScoped;
+		ZoneValue(text.size());
 		Node root;
 		NodeBuilder builder(root);
 		if (!nlohmann::json::sax_parse(text, &builder))

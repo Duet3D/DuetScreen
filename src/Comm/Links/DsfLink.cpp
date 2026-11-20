@@ -9,6 +9,7 @@
 #include "ObjectModel/Tree/Json.h"
 #include "ObjectModel/Tree/Patch.h"
 #include "ObjectModel/Tree/Tree.h"
+#include "tracy/Tracy.hpp"
 #include <cctype>
 #include <fmt/format.h>
 #include <hv/WebSocketClient.h>
@@ -26,8 +27,10 @@ namespace Comm
 		/** A handler of a response that only says whether it worked */
 		HttpRequester::ResponseHandler succeeded(Handler<void> handler)
 		{
+			ZoneScoped;
 			return [handler = std::move(handler)](const HttpResponsePtr& response)
 			{
+				ZoneScopedN("succeeded_cb");
 				const auto text = HttpRequester::readText(response);
 				if (!text)
 				{
@@ -41,6 +44,7 @@ namespace Comm
 		/** `text` with every character a URL path segment can't hold written as %XX */
 		std::string escapeSegment(std::string_view text)
 		{
+			ZoneScoped;
 			std::string escaped;
 			for (const char c : text)
 			{
@@ -66,10 +70,12 @@ namespace Comm
 		, m_lastHeard(Clock::now())
 		, m_lastSent(Clock::now())
 	{
+		ZoneScoped;
 	}
 
 	DsfLink::~DsfLink()
 	{
+		ZoneScoped;
 		m_alive.reset();
 		if (m_socket)
 		{
@@ -93,6 +99,7 @@ namespace Comm
 
 	void DsfLink::open(Handler<void> handler)
 	{
+		ZoneScoped;
 		LOG_INFO("Connecting to DSF at {:s}", m_http.host());
 		hv::QueryParams query;
 		if (!m_password.empty())
@@ -103,6 +110,7 @@ namespace Comm
 					   std::move(query),
 					   [this, handler = std::move(handler)](std::expected<OM::Node, ReplyError> json) mutable
 					   {
+						   ZoneScopedN("machine_connect_cb");
 						   if (!json)
 						   {
 							   handler(std::unexpected(json.error()));
@@ -121,14 +129,17 @@ namespace Comm
 
 	void DsfLink::openSocket(Handler<void> handler)
 	{
+		ZoneScoped;
 		m_opened = std::move(handler);
 		m_socket = std::make_unique<hv::WebSocketClient>();
 		// Its events arrive on libhv's thread: everything else happens on the connection's
 		const auto onThread = [this, alive = std::weak_ptr<bool>(m_alive)](std::function<void()> task)
 		{
+			ZoneScopedN("socketEvent_cb"); // on libhv's thread
 			m_post(
 				[alive, task = std::move(task)]
 				{
+					ZoneScopedN("socketTask_cb");
 					if (alive.lock())
 					{
 						task();
@@ -148,6 +159,8 @@ namespace Comm
 
 	void DsfLink::messageArrived(const std::string& message)
 	{
+		ZoneScoped;
+		ZoneValue(message.size());
 		m_lastHeard = Clock::now();
 		if (message.starts_with("PONG"))
 		{
@@ -178,6 +191,7 @@ namespace Comm
 
 	void DsfLink::socketClosed()
 	{
+		ZoneScoped;
 		LOG_WARN("DSF closed the socket");
 		m_closed = true;
 		if (m_opened)
@@ -190,6 +204,7 @@ namespace Comm
 
 	void DsfLink::sendOnSocket(const std::string& text)
 	{
+		ZoneScoped;
 		if (m_socket && !m_closed)
 		{
 			m_socket->send(text);
@@ -199,16 +214,19 @@ namespace Comm
 
 	std::string DsfLink::filePath(std::string_view prefix, std::string_view file)
 	{
+		ZoneScoped;
 		return std::string(prefix) + escapeSegment(file);
 	}
 
 	void DsfLink::requestModel(std::string_view, std::string_view, ModelHandler handler)
 	{
+		ZoneScoped;
 		handler(std::unexpected(ReplyError{.message = "DSF pushes the object model: it isn't asked for"}));
 	}
 
 	void DsfLink::sendGcode(std::string_view gcode)
 	{
+		ZoneScoped;
 		m_http.send(
 			HTTP_POST,
 			"/machine/code",
@@ -216,6 +234,7 @@ namespace Comm
 			codeTimeout,
 			[gcode = std::string(gcode)](const HttpResponsePtr& response)
 			{
+				ZoneScopedN("sendGcode_cb");
 				const auto reply = HttpRequester::readText(response);
 				if (!reply)
 				{
@@ -229,11 +248,13 @@ namespace Comm
 
 	void DsfLink::emergencyStop()
 	{
+		ZoneScoped;
 		sendGcode("M112\nM999");
 	}
 
 	void DsfLink::listFiles(std::string_view dir, size_t first, Handler<FileList> handler)
 	{
+		ZoneScoped;
 		if (first > 0)
 		{
 			handler(FileList{.dir = std::string(dir),
@@ -250,6 +271,7 @@ namespace Comm
 
 	void DsfLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
 	{
+		ZoneScoped;
 		m_http.getJson(filePath("/machine/fileinfo/", file),
 					   {},
 					   [handler = std::move(handler)](std::expected<OM::Node, ReplyError> json)
@@ -258,6 +280,7 @@ namespace Comm
 
 	void DsfLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)
 	{
+		ZoneScoped;
 		hv::QueryParams query;
 		query["readThumbnailContent"] = "true";
 		m_http.getJson(
@@ -265,6 +288,7 @@ namespace Comm
 			std::move(query),
 			[handler = std::move(handler), file = std::string(file), offset](std::expected<OM::Node, ReplyError> json)
 			{
+				ZoneScopedN("thumbnail_cb");
 				if (!json)
 				{
 					handler(std::unexpected(json.error()));
@@ -290,6 +314,7 @@ namespace Comm
 
 	void DsfLink::readFile(std::string_view file, Handler<std::string> handler)
 	{
+		ZoneScoped;
 		m_http.send(HTTP_GET,
 					filePath("/machine/file/", file),
 					{},
@@ -300,6 +325,7 @@ namespace Comm
 
 	void DsfLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
 	{
+		ZoneScoped;
 		m_http.send(HTTP_PUT,
 					filePath("/machine/file/", file),
 					{},
@@ -310,11 +336,13 @@ namespace Comm
 
 	void DsfLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
+		ZoneScoped;
 		m_http.send(HTTP_DELETE, filePath("/machine/file/", file), {}, HTTP_TIMEOUT, succeeded(std::move(handler)));
 	}
 
 	void DsfLink::expire(Clock::time_point now)
 	{
+		ZoneScoped;
 		if (m_modelReceived && now - m_lastSent > pingInterval)
 		{
 			sendOnSocket("PING\n");

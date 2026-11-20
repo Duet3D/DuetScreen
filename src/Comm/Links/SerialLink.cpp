@@ -7,6 +7,7 @@
 #include "Debug.h"
 #include "Duet3D/General/CRC16.h"
 #include "ObjectModel/Tree/Json.h"
+#include "tracy/Tracy.hpp"
 #include <algorithm>
 #include <array>
 #include <fmt/format.h>
@@ -31,6 +32,7 @@ namespace Comm
 		/** Why a request still waiting when the link closed has no reply */
 		ReplyError closedError()
 		{
+			ZoneScoped;
 			return ReplyError{.message = "the connection closed"};
 		}
 	} // namespace
@@ -41,10 +43,12 @@ namespace Comm
 		, m_options(options)
 		, m_lastHeard(Clock::now())
 	{
+		ZoneScoped;
 	}
 
 	SerialLink::~SerialLink()
 	{
+		ZoneScoped;
 		std::map<uint32_t, Pending> pending = std::move(m_pending);
 		m_pending.clear();
 		for (auto& [line, request] : pending)
@@ -55,6 +59,8 @@ namespace Comm
 
 	void SerialLink::receive(size_t channel, std::string_view line)
 	{
+		ZoneScoped;
+		ZoneValue(line.size());
 		m_lastHeard = Clock::now();
 		auto reply = OM::parseJson(line);
 		if (!reply)
@@ -74,6 +80,7 @@ namespace Comm
 			{
 				ReplyHandler handler = std::move(it->second.handler);
 				m_pending.erase(it);
+				TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
 				handler(std::move(*reply));
 				return;
 			}
@@ -83,6 +90,7 @@ namespace Comm
 
 	std::optional<SerialLink::Clock::time_point> SerialLink::nextDeadline() const
 	{
+		ZoneScoped;
 		if (m_pending.empty())
 		{
 			return std::nullopt;
@@ -92,6 +100,7 @@ namespace Comm
 
 	void SerialLink::requestModel(std::string_view key, std::string_view flags, ModelHandler handler)
 	{
+		ZoneScoped;
 		if (key.empty())
 		{
 			request(fmt::format("M409 F{:s}", Comm::quoted(flags)), std::move(handler));
@@ -104,6 +113,7 @@ namespace Comm
 
 	void SerialLink::sendGcode(std::string_view gcode)
 	{
+		ZoneScoped;
 		while (!gcode.empty())
 		{
 			const size_t end = gcode.find('\n');
@@ -122,11 +132,13 @@ namespace Comm
 
 	void SerialLink::emergencyStop()
 	{
+		ZoneScoped;
 		sendLine("M112 M999");
 	}
 
 	void SerialLink::listFiles(std::string_view dir, size_t first, Handler<FileList> handler)
 	{
+		ZoneScoped;
 		request(fmt::format("M20 S3 P{:s} R{:d}", Comm::quoted(dir), first),
 				[handler = std::move(handler)](std::expected<OM::Node, ReplyError> reply)
 				{ handler(reply.and_then([](const OM::Node& json) { return FileList::read(json); })); });
@@ -134,6 +146,7 @@ namespace Comm
 
 	void SerialLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
 	{
+		ZoneScoped;
 		request(fmt::format("M36 {:s}", Comm::quoted(file)),
 				[handler = std::move(handler)](std::expected<OM::Node, ReplyError> reply)
 				{ handler(reply.and_then([](const OM::Node& json) { return FileInfoReply::read(json); })); });
@@ -141,6 +154,7 @@ namespace Comm
 
 	void SerialLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)
 	{
+		ZoneScoped;
 		request(fmt::format("M36.1 P{:s} S{:d}", Comm::quoted(file), offset),
 				[handler = std::move(handler)](std::expected<OM::Node, ReplyError> reply)
 				{ handler(reply.and_then([](const OM::Node& json) { return FileChunk::read(json, "thumbnail"); })); });
@@ -148,6 +162,7 @@ namespace Comm
 
 	void SerialLink::readFile(std::string_view file, Handler<std::string> handler)
 	{
+		ZoneScoped;
 		readFrom(std::string(file), 0, std::string(), std::move(handler));
 	}
 
@@ -156,10 +171,12 @@ namespace Comm
 							  std::string contents,
 							  Handler<std::string> handler)
 	{
+		ZoneScoped;
 		request(fmt::format("M36.2 P{:s} S{:d}", Comm::quoted(file), offset),
 				[this, file, contents = std::move(contents), handler = std::move(handler)](
 					std::expected<OM::Node, ReplyError> reply) mutable
 				{
+					ZoneScopedN("readFrom_cb");
 					const auto chunk =
 						reply.and_then([](const OM::Node& json) { return FileChunk::read(json, "fragment"); });
 					if (!chunk)
@@ -179,6 +196,7 @@ namespace Comm
 
 	void SerialLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
 	{
+		ZoneScoped;
 		if (contents.size() > m_options.maxUploadSize)
 		{
 			handler(std::unexpected(
@@ -203,12 +221,14 @@ namespace Comm
 
 	void SerialLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
+		ZoneScoped;
 		sendLine(fmt::format("M30 {:s}", Comm::quoted(file)));
 		handler({});
 	}
 
 	void SerialLink::expire(Clock::time_point now)
 	{
+		ZoneScoped;
 		std::vector<Pending> expired;
 		for (auto it = m_pending.begin(); it != m_pending.end();)
 		{
@@ -222,6 +242,10 @@ namespace Comm
 				++it;
 			}
 		}
+		if (!expired.empty())
+		{
+			TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
+		}
 		for (Pending& request : expired)
 		{
 			LOG_WARN("No reply to \"{:s}\"", request.command);
@@ -231,7 +255,10 @@ namespace Comm
 
 	void SerialLink::request(std::string_view command, ReplyHandler handler)
 	{
+		ZoneScoped;
+		ZoneText(command.data(), command.size());
 		const uint32_t line = sendLine(command);
+		TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size() + 1));
 		m_pending.emplace(line,
 						  Pending{.command = std::string(command),
 								  .due = Clock::now() + m_options.replyTimeout,
@@ -240,6 +267,8 @@ namespace Comm
 
 	uint32_t SerialLink::sendLine(std::string_view command)
 	{
+		ZoneScoped;
+		ZoneText(command.data(), command.size());
 		const uint32_t number = m_nextLine++;
 		std::string line = fmt::format("N{:d} {:s}", number, command);
 		if (m_port.needsChecksums())
@@ -261,6 +290,7 @@ namespace Comm
 
 	size_t SerialLink::channelFor(std::string_view command) const
 	{
+		ZoneScoped;
 		if (m_port.channels() < 2 || !m_options.useStatusChannel)
 		{
 			return 0;
