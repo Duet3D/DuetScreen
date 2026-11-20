@@ -50,7 +50,7 @@ def contents(binary: bool) -> list[tuple[Path, str]]:
     if binary:
         for built in (buildroot.BINARY, buildroot.VERSION_FILE):
             if not built.exists():
-                sys.exit(f'{built} has not been built: build DuetScreen for the screen first (scripts/build.py T113-Release)')
+                sys.exit(f'{built} has not been built: build DuetScreen for the screen first (scripts/build.py --screen)')
         files += [(buildroot.BINARY, screen.BINARY), (buildroot.VERSION_FILE, 'buildroot_version')]
     return files
 

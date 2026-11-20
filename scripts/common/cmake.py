@@ -38,6 +38,26 @@ def local_presets() -> list[str]:
     return [p for p in presets() if not p.startswith(SCREEN_PREFIX)]
 
 
+def choose(screen: bool = False, tests: bool = False, debug: bool = False, profiling: bool = False) -> str:
+    """The preset of what is built: the simulator, the tests or the screen's DuetScreen, as Release, Debug,
+    or (for the screen) Release with Tracy profiling, which Debug has too. Raises ValueError for a
+    combination there is no preset of."""
+    if screen and tests:
+        raise ValueError('the tests are not built for the screen')
+    if debug and profiling:
+        raise ValueError('a Debug build is already profiled')
+    if tests:
+        if debug or profiling:
+            raise ValueError('the tests are only built as Release')
+        return 'Test'
+    if screen:
+        return f'{SCREEN_PREFIX}Debug' if debug else f'{SCREEN_PREFIX}Release_with_profiling' if profiling else \
+            f'{SCREEN_PREFIX}Release'
+    if profiling:
+        raise ValueError('the simulator is only profiled as Debug')
+    return 'Simulation' if debug else 'Simulation-Release'
+
+
 def build_dir(preset: str) -> Path:
     """Where a preset is built."""
     return BUILD / preset

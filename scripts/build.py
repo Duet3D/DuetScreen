@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 # pyright: strict
-"""Build DuetScreen with a CMake preset (CMakePresets.json), and put it on a screen.
+"""Build DuetScreen for the simulator, the tests or the screen, and put it on a screen.
 
-The simulator and test presets are built here, in out/build/<preset>. The screen's presets (T113-*)
-cross-compile, so they are built by Buildroot, which has their toolchain: it is cloned beside this
-repository (see docs/DEVELOPMENT.md), or BUILDROOT_WORKSPACE says where. --image goes on to make the SD
-card image of the whole firmware, and --deploy puts DuetScreen and the assets on a screen over SSH and
-restarts it there, copying only the files that differ from the screen's, and removing the assets no longer
-in assets/.
+What is built, and whether as Release or Debug, chooses the CMake preset (CMakePresets.json), or
+--preset names it. The simulator and the tests are built here, in out/build/<preset>. The screen's
+DuetScreen is cross-compiled by Buildroot, which has its toolchain: it is cloned beside this repository
+(see docs/DEVELOPMENT.md), or BUILDROOT_WORKSPACE says where. --image goes on to make the SD card image of
+the whole firmware, and --deploy puts DuetScreen and the assets on a screen over SSH and restarts it
+there, copying only the files that differ from the screen's, and removing the assets no longer in
+assets/. Both build for the screen without --screen.
 
-    scripts/build.py                                  the simulator (Simulation)
-    scripts/build.py Test --target DuetScreen.tests   a target of a preset
-    scripts/build.py Simulation --fresh               configured from scratch
-    scripts/build.py T113-Debug --deploy 192.168.1.20 for the screen, then onto it
-    scripts/build.py T113-Release --clean --image     the SD card image, DuetScreen built from clean
-    scripts/build.py T113-Release --image --hardware-test AD-04-01_
-                                                      the image of a hardware test
+    scripts/build.py                              the simulator (Simulation-Release)
+    scripts/build.py --debug --fresh              the simulator as Debug (Simulation), configured from scratch
+    scripts/build.py --tests                      the tests (Test)
+    scripts/build.py --screen                     for the screen (T113-Release)
+    scripts/build.py --deploy 192.168.1.20        for the screen, then onto it
+    scripts/build.py --deploy 192.168.1.20 --debug --no-start
+                                                  as Debug (T113-Debug), left stopped to debug it
+    scripts/build.py --clean --image              the SD card image, DuetScreen built from clean
+    scripts/build.py --image --hardware-test AD-04-01_
+                                                  the image of a hardware test
+    scripts/build.py --preset Test -t DuetScreen  a target of a preset
 """
 
 from __future__ import annotations
@@ -49,18 +54,23 @@ class Options:
 def parse_options(argv: Sequence[str]) -> Options:
     """Read the command line, and check its options suit the preset."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    complete_with(parser.add_argument('preset', nargs='?', default='Simulation',
-                                      help='the CMake preset (default: Simulation)'), cmake.presets)
+    what = parser.add_argument_group('what is built')
+    what.add_argument('-d', '--debug', action='store_true', help='as Debug, with profiling (default: Release)')
+    what.add_argument('-p', '--profiling', action='store_true', help='as Release with profiling (the screen only)')
+    what.add_argument('--tests', action='store_true', help='the tests, not the simulator')
+    what.add_argument('-s', '--screen', action='store_true', help='for the screen, not the simulator')
+    complete_with(what.add_argument('--preset', help='this CMake preset, rather than the one the options above choose'),
+                  cmake.presets)
     parser.add_argument('-c', '--clean', action='store_true', help='build from clean')
 
-    local = parser.add_argument_group('the simulator and test presets')
+    local = parser.add_argument_group('the simulator and the tests')
     complete_with(local.add_argument('-t', '--target', dest='targets', action='append', default=[], metavar='TARGET',
                                      help='a target to build (repeatable; default: DuetScreen, or the tests for Test)'),
                   lambda: ['DuetScreen', 'DuetScreen.tests', 'clang-format', 'update_version_h'])
     local.add_argument('-f', '--fresh', action='store_true', help='configure from scratch')
     local.add_argument('-j', '--jobs', type=int, help='parallel jobs (default: as the generator chooses)')
 
-    screen_group = parser.add_argument_group("the screen's presets (T113-*)")
+    screen_group = parser.add_argument_group('the screen')
     screen_group.add_argument('--duet-simulator', action='store_true', help='with the simulated Duet to connect to')
     screen_group.add_argument('--hardware-test', metavar='SERIAL_PREFIX',
                               help="as a hardware test image, whose serial numbers start with this")
@@ -69,10 +79,23 @@ def parse_options(argv: Sequence[str]) -> Options:
     screen_group.add_argument('--no-start', action='store_true',
                               help='leave DuetScreen stopped once deployed, e.g. to start it under gdbserver')
     complete(parser)
-    options = Options(**vars(parser.parse_args(argv)))
+    args = vars(parser.parse_args(argv))
+    chosen = {name: args.pop(name) for name in ('debug', 'profiling', 'tests', 'screen')}
+    preset: str | None = args.pop('preset')
+    if preset is not None:
+        if any(chosen.values()):
+            parser.error('--preset chooses the preset by itself, without --debug, --profiling, --tests or --screen')
+        if preset not in cmake.presets():
+            parser.error(f'no preset {preset}: choose from {", ".join(cmake.presets())}')
+    else:
+        # Deploying and making the image are for the screen
+        chosen['screen'] = chosen['screen'] or args['deploy'] is not None or args['image']
+        try:
+            preset = cmake.choose(**chosen)
+        except ValueError as e:
+            parser.error(str(e))
+    options = Options(preset=preset, **args)
 
-    if options.preset not in cmake.presets():
-        parser.error(f'no preset {options.preset}: choose from {", ".join(cmake.presets())}')
     for_screen = options.preset in cmake.screen_presets()
     wrong = ([] if not for_screen else
              [name for name, given in (('--target', options.targets), ('--fresh', options.fresh),

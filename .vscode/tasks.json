@@ -22,15 +22,19 @@
 			}
 		},
 		{
+			// Resolves to build.py's option for the build type
 			"id": "build_type",
-			"type": "pickString",
-			"description": "Build type for DuetScreen",
-			"options": [
-				"Release",
-				"Release_with_profiling",
-				"Debug",
-			],
-			"default": "Release"
+			"type": "command",
+			"command": "extension.commandvariable.pickStringRemember",
+			"args": {
+				"description": "Build type for DuetScreen",
+				"options": [
+					["Release", ""],
+					["Release_with_profiling", "--profiling"],
+					["Debug", "--debug"]
+				],
+				"default": ""
+			}
 		},
 		{
 			// Resolves to build.py's option; the serial number is only prompted for when ON is picked
@@ -58,7 +62,7 @@
 		{
 			"label": "Build",
 			"type": "shell",
-			"command": "scripts/build.py ${command:cmake.activeConfigurePresetName}",
+			"command": "scripts/build.py --preset ${command:cmake.activeConfigurePresetName}",
 			"problemMatcher": ["$gcc"],
 			"group": {
 				"kind": "build",
@@ -69,7 +73,7 @@
 		{
 			"label": "Build Tests",
 			"type": "shell",
-			"command": "scripts/build.py ${command:cmake.activeConfigurePresetName} --target DuetScreen.tests",
+			"command": "scripts/build.py --preset ${command:cmake.activeConfigurePresetName} --target DuetScreen.tests",
 			"problemMatcher": ["$gcc"],
 			"group": "build",
 			"detail": "Builds the tests with the active CMake preset"
@@ -89,7 +93,7 @@
 		{
 			"label": "Build DuetScreen for Remote",
 			"type": "shell",
-			"command": "scripts/build.py T113-${input:build_type} --duet-simulator",
+			"command": "scripts/build.py --screen ${input:build_type} --duet-simulator",
 			"problemMatcher": ["$gcc"],
 			"group": "build",
 			"detail": "Builds DuetScreen for the screen with Buildroot, with the simulated Duet"
@@ -97,7 +101,7 @@
 		{
 			"label": "Rebuild DuetScreen for Remote from Clean",
 			"type": "shell",
-			"command": "scripts/build.py T113-${input:build_type} --duet-simulator --clean",
+			"command": "scripts/build.py --screen ${input:build_type} --duet-simulator --clean",
 			"problemMatcher": ["$gcc"],
 			"group": "build",
 			"detail": "Removes Buildroot's build of DuetScreen, then builds it again"
@@ -105,7 +109,7 @@
 		{
 			"label": "Build Buildroot sdcard.img",
 			"type": "shell",
-			"command": "scripts/build.py T113-${input:build_type} --image ${input:hardware_test}",
+			"command": "scripts/build.py --image ${input:build_type} ${input:hardware_test}",
 			"problemMatcher": ["$gcc"],
 			"group": "build",
 			"detail": "Builds the screen's whole firmware with the local DuetScreen, as output/images/sdcard.img in Buildroot"
@@ -113,7 +117,7 @@
 		{
 			"label": "Deploy DuetScreen - SSH",
 			"type": "shell",
-			"command": "scripts/build.py T113-${input:build_type} --duet-simulator --deploy ${input:duetscreen_ip_address}",
+			"command": "scripts/build.py --deploy ${input:duetscreen_ip_address} ${input:build_type} --duet-simulator",
 			"problemMatcher": ["$gcc"],
 			"group": "build",
 			"detail": "Builds DuetScreen for the screen, copies it and the assets to the screen, and restarts it",

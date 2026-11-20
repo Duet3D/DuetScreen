@@ -18,9 +18,9 @@ These instructions guide Copilot (and AI agents) when proposing code or edits in
 
 ## Developer Workflows (VS Code + CLI)
 - **Scripts**: Everything is done with the Python scripts in `scripts/` (each has `--help`); the VS Code tasks run them. `scripts/common/` is what they share, `scripts/internal/` what the build runs. They are checked with `pyright` (strict).
-- **Building**: `scripts/build.py` builds a CMake preset (default `Simulation`; run `./out/build/Simulation/DuetScreen`). The `T113-*` presets are built through `buildroot-duetscreen`; `--image` makes the SD card image.
+- **Building**: `scripts/build.py` builds the simulator (`--debug` for Debug; run `./out/build/Simulation-Release/DuetScreen`, or `Simulation` for Debug), `--tests` the tests, `--screen` the screen's DuetScreen through `buildroot-duetscreen` (`--image` makes the SD card image). `--preset` names a CMake preset instead.
 - **Remote Deploy**: Requires `buildroot-duetscreen` and SSH.
-	- Build + deploy: `scripts/build.py T113-Release --deploy <ip>` (task `Deploy DuetScreen - SSH`); only changed files are copied.
+	- Build + deploy: `scripts/build.py --deploy <ip> [--debug]` (task `Deploy DuetScreen - SSH`); only changed files are copied.
 	- `scripts/screen.py <ip> start|stop|gdbserver|push assets|push config`.
 	- Package update: `scripts/create_upgrade.py`; print notes: `scripts/release_notes.py`.
 - **Testing**: Run `scripts/run_tests.py`. UI image tests under `tests/src/test_cases/UI/` compare against `tests/ref_imgs/` with `_err` diffs and a review GUI.

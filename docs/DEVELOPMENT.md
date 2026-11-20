@@ -151,17 +151,17 @@ The device must exist on the host when the container starts; devices plugged in 
 
 A number of CMake presets are provided for different configurations. The 2 main ones for simulation are: `Simulation` and `Simulation-Release`. If you want to have breakpoint debugging and performance/memory overlays enabled, use the `Simulation` preset, otherwise use the `Simulation-Release` preset.
 
-`scripts/build.py` configures a preset the first time it builds it (`--fresh` configures it again from scratch):
+`scripts/build.py` chooses the preset from its options, and configures it the first time it builds it (`--fresh` configures it again from scratch). `--debug` builds `Simulation`:
 ```bash
-scripts/build.py Simulation
+scripts/build.py --debug
 ```
-or use the release configuration to remove performance and memory overlays (breakpoint debugging won't work):
+or, without it, the release configuration `Simulation-Release`, without performance and memory overlays (breakpoint debugging won't work):
 ```bash
-scripts/build.py Simulation-Release
+scripts/build.py
 ```
 
 ### Build the project:
-Building is the same command, also the `Build` task, which builds the active CMake preset. `cmake --preset <preset>` and `cmake --build --preset <preset>` do the same by hand.
+Building is the same command, also the `Build` task, which builds the active CMake preset (`--preset <preset>`). `cmake --preset <preset>` and `cmake --build --preset <preset>` do the same by hand.
 
 ### Run the simulation:
 The built binary can be found in the `out/build/<preset_name>/` directory. Run it using:
@@ -194,16 +194,17 @@ It is built only with the `DUETSCREEN_DUET_SIMULATOR` CMake option, which is on 
 4. Build buildroot at least once. The post-create step only runs `make duet3d_duetscreen_defconfig`; the cross toolchain itself (including `output/host/bin/arm-none-linux-gnueabihf-gdb`, which the `Remote Debug DuetScreen` configuration uses) does not exist until buildroot has been built.
     - From a terminal in the container, build the SD card image, which builds everything:
       ```bash
-      scripts/build.py T113-Release --image
+      scripts/build.py --image
       ```
     - This takes a long time on the first run.
 5. Enable SSH on the Duet3D screen.
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
 6. Build and deploy:
     ```bash
-    scripts/build.py T113-Release --deploy <ip_address>
+    scripts/build.py --deploy <ip_address>
     ```
   - Or run the `Deploy DuetScreen - SSH` task, which prompts for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address.
+  - `--debug` builds it as Debug (`T113-Debug`), `--profiling` as Release with profiling (`T113-Release_with_profiling`); without either it is `T113-Release`. `--screen` builds it without deploying it.
   - It builds DuetScreen with Buildroot, then copies it, without its debug symbols, and the assets to the screen, and restarts DuetScreen there. Only the files that differ from the screen's are copied, and assets that are no longer in `assets/` are removed from it.
   - `--no-start` leaves DuetScreen stopped; `scripts/screen.py <ip_address> start` starts it.
 7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
@@ -280,7 +281,7 @@ VSCode has been configured for both of these scenarios.
 - To debug the simulation, select the `Debug DuetScreen` configuration in VSCode and start debugging.
 - To debug the code running on the physical hardware, select the `Remote Debug DuetScreen` configuration in VSCode and start debugging.
   - This will start the code and attach gdb to it.
-  - Deploy a `Debug` build first (`scripts/build.py T113-Debug --deploy <ip_address>`). The configuration stops the code running on the screen before it starts it under gdbserver.
+  - Deploy a `Debug` build first (`scripts/build.py --deploy <ip_address> --debug`). The configuration stops the code running on the screen before it starts it under gdbserver.
 
 ## Commit messages
 Commit messages should be in the following format:
@@ -494,7 +495,7 @@ A version of the UI which boots straight into the hardware tests can be created 
 > [!NOTE]
 > `ccmake <path_to_build_dir>` can be used to change the CMake cache variables.
 > Or `cmake -DDUETSCREEN_HARDWARE_TEST=ON --preset <preset_name>` can be used to set the variable.
-> When building for the screen, `scripts/build.py T113-Release --image --hardware-test <serial_prefix>` sets both.
+> When building for the screen, `scripts/build.py --image --hardware-test <serial_prefix>` sets both.
 
 A hardware test `sdcard.img` and `DuetScreen.tar.gz` can also be built in CI by manually running the **Build Hardware Test** GitHub Action (`.github/workflows/build-hardware-test.yml`).
 
