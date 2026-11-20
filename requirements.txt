@@ -1,4 +1,6 @@
 pillow
+# Tab completion of the scripts' arguments (scripts/completions)
+argcomplete
 # Pinned to match LVGL's formatter (lvgl/astyle v3.4.12, not on PyPI; 3.4.13 formats
 # identically). Newer releases indent continuation lines differently and reformat
 # dozens of files when libraries/lvgl/scripts/code-format.py runs.
