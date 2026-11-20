@@ -6,16 +6,21 @@
  * again while the files don't change.
  *
  *   - refresh(): a file listed (Files.h) with its date; its information is asked for if it isn't known or the file
- *     has changed since, and then its small thumbnail if there isn't one kept
+ *     has changed since, and then its small thumbnail if it isn't kept
  *   - requestThumbnail(): a thumbnail wanted now (the job running, the file chosen), ahead of the rest
+ *   - thumbnail(): the image to show for a file, the nearest kept to the size wanted
  *
  * One request is made at a time, the next as soon as the last is answered (a little later while printing, so the
  * printer isn't kept busy); every request is answered, if only with why there is no answer (Connection.h), so nothing
  * here waits or times out by itself. FileInfo and ThumbnailData events say what has arrived.
  *
- * Kept per printer (its board's unique id), in NVS_FOLDER/fileinfo_cache/<id>/: each file's information as JSON,
- * written as RepRapFirmware sends it (read back with FileInfo::read()), and its thumbnail, a PNG or BMP, beside it.
- * A thumbnail being fetched is written to a temporary folder and moved there once whole.
+ * Kept per printer (its board's unique id), in NVS_FOLDER/fileinfo_cache/<id>/, loaded the first time that printer's
+ * files are asked about: each file's information as JSON, written as RepRapFirmware sends it (read back with
+ * FileInfo::read()), and beside it the thumbnails fetched, a PNG or BMP each, named for what they show:
+ * <file>.<the file's date>.<width>x<height>. A thumbnail that differs (another size, or the file changed)
+ * so has another name, and whatever shows a file's thumbnail sees the new one by its name changing; an image is
+ * never rewritten under a name already shown. A thumbnail being fetched is written to a temporary folder and moved
+ * there once whole.
  */
 
 #pragma once
@@ -33,6 +38,8 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace Comm
 {
@@ -45,7 +52,7 @@ namespace Comm
 		enum class ThumbnailSize
 		{
 			small, // The largest no bigger than MAX_THUMBNAIL_CACHE_PIXELS square: for lists
-			large, // The largest no bigger than largeThumbnailPixels square: for a job's status, a file chosen
+			large, // The largest no bigger than largeThumbnailPixels square: for a file chosen
 		};
 
 		/** The biggest a large thumbnail may be, pixels square */
@@ -55,22 +62,23 @@ namespace Comm
 		static FileInfoCache& get();
 
 		/** What is known about `path` (a full path, e.g. "0:/gcodes/a.gcode"), if anything */
-		std::optional<FileInfo> find(const std::string& path) const;
+		std::optional<FileInfo> find(const std::string& path);
 
 		/**
 		 * A file has been listed: ask for its information if it isn't known, or is older than `lastModified`, then for
-		 * its small thumbnail if there isn't one kept
+		 * its small thumbnail if it isn't kept
 		 */
 		void refresh(const std::string& path, std::string_view lastModified);
 
-		/** Ask for `path`'s thumbnail of `size` now, ahead of everything else waiting */
+		/** Ask for `path`'s thumbnail of `size` now, ahead of everything else waiting, unless it is kept */
 		void requestThumbnail(const std::string& path, ThumbnailSize size);
 
-		/** Whether a thumbnail of `path` is kept */
-		bool hasThumbnail(const std::string& path) const;
-
-		/** Where `path`'s thumbnail is kept (there may be none yet) */
-		std::filesystem::path thumbnailPath(const std::string& path) const;
+		/**
+		 * The image to show for `path` at `size`: the thumbnail of that size if it is kept, otherwise the kept one
+		 * nearest to it (a small one while the large is fetched, or a large one where the file has no small one);
+		 * none if no thumbnail of the file, as it is now, is kept
+		 */
+		std::optional<std::filesystem::path> thumbnail(const std::string& path, ThumbnailSize size);
 
 		/** The printer has gone: forget what is waiting, and what is known (what is kept stays, for when it's back) */
 		void forget();
@@ -82,7 +90,7 @@ namespace Comm
 		void setFolders(std::filesystem::path kept, std::filesystem::path temporary);
 
 		/** Log what is known */
-		void log() const;
+		void log();
 
 	  private:
 		/** Something to ask the printer */
@@ -99,16 +107,40 @@ namespace Comm
 			bool infoAsked = false;					   // For a thumbnail: its file's information was asked for first
 		};
 
+		/** A thumbnail being fetched, a piece at a time */
+		struct Fetch
+		{
+			Job job;								 // What asked for it
+			ThumbnailInfo thumbnail;				 // Which of the file's thumbnails
+			std::filesystem::path temporary;		 // Where it is written while it arrives
+			std::filesystem::path image;			 // Where it is kept once whole
+			std::shared_ptr<ThumbnailWriter> writer; // Writes it to `temporary`
+			uint64_t generation = 0;				 // m_generation when it started
+		};
+
+		/** Keep under NVS_FOLDER, fetch into /tmp */
 		FileInfoCache();
 
-		/** Load what is kept about the printer now connected */
-		void load();
+		/** Load what is kept about the printer now connected, unless it is already loaded (the lock not held) */
+		void loadPrinter();
 
 		/** The folder kept for the printer now connected, if it is known */
 		std::optional<std::filesystem::path> printerFolder() const;
 
+		/** Where the images of the printer now connected are: its folder, or the temporary one until it is known */
+		std::filesystem::path imageFolder() const;
+
 		/** `path` as a path under a folder: ':' can't be in a file name everywhere */
 		static std::string relative(const std::string& path);
+
+		/** Where `thumbnail` of the file `info` describes is kept, when it is */
+		std::filesystem::path imagePath(const FileInfo& info, const ThumbnailInfo& thumbnail) const;
+
+		/** Whether the image `image` is kept */
+		static bool kept(const std::filesystem::path& image);
+
+		/** Whether the thumbnail of `size` of the file `info` describes is to be fetched: it isn't kept nor failed */
+		bool wanted(const FileInfo& info, ThumbnailSize size) const;
 
 		/** Whether a job like `job` is waiting or running (the lock held) */
 		bool queued(Job::Kind kind, const std::string& path) const;
@@ -122,11 +154,8 @@ namespace Comm
 		/** The information `job` asked for arrived, or didn't */
 		void infoArrived(const Job& job, const std::expected<FileInfo, ReplyError>& info);
 
-		/** Ask for the piece of the thumbnail `job` wants at `offset`, adding it to `writer` until it is whole */
-		void fetchPiece(const Job& job,
-						const ThumbnailInfo& thumbnail,
-						std::shared_ptr<ThumbnailWriter> writer,
-						uint32_t offset);
+		/** Ask for the piece of the thumbnail `fetch` fetches at `offset`, adding it until it is whole */
+		void fetchPiece(std::shared_ptr<Fetch> fetch, uint32_t offset);
 
 		/** The running job is done: start the next */
 		void jobDone();
@@ -136,6 +165,8 @@ namespace Comm
 
 		mutable TracyLockable(std::mutex, m_mutex);			 // Guards everything below
 		std::unordered_map<std::string, FileInfo> m_infos;	 // What is known, by full path
+		std::string m_loadedFor;							 // The printer whose kept files m_infos holds
+		std::unordered_set<std::string> m_failed;			 // Images that couldn't be fetched: not asked for again
 		std::deque<Job> m_jobs;								 // Waiting, next first
 		std::optional<Job> m_running;						 // Asked for and not yet answered
 		bool m_startScheduled = false;						 // startNext() is due later (while printing)

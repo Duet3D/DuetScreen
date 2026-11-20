@@ -17,27 +17,60 @@
 #include <iterator>
 #include <nlohmann/json.hpp>
 #include <sys/stat.h>
+#include <utility>
 
 namespace Comm
 {
 	namespace
 	{
+		/** The biggest a thumbnail of `size` may be, pixels square */
+		uint32_t limitOf(FileInfoCache::ThumbnailSize size)
+		{
+			return size == FileInfoCache::ThumbnailSize::small ? static_cast<uint32_t>(MAX_THUMBNAIL_CACHE_PIXELS)
+															   : FileInfoCache::largeThumbnailPixels;
+		}
+
+		/** Whether `thumbnail` is no bigger than `size` allows */
+		bool fits(const ThumbnailInfo& thumbnail, FileInfoCache::ThumbnailSize size)
+		{
+			return thumbnail.width <= limitOf(size) && thumbnail.height <= limitOf(size);
+		}
+
+		/**
+		 * The thumbnails of `info` that can be shown, nearest to `size` first: those that fit, the largest first, then
+		 * those too big, the smallest first
+		 */
+		std::vector<ThumbnailInfo> ranked(const FileInfo& info, FileInfoCache::ThumbnailSize size)
+		{
+			std::vector<ThumbnailInfo> thumbnails;
+			std::ranges::copy_if(info.thumbnails, std::back_inserter(thumbnails), &ThumbnailWriter::canWrite);
+			std::ranges::sort(thumbnails,
+							  {},
+							  [size](const ThumbnailInfo& thumbnail)
+							  {
+								  const auto area = static_cast<int64_t>(thumbnail.width) * thumbnail.height;
+								  return fits(thumbnail, size) ? std::pair(0, -area) : std::pair(1, area);
+							  });
+			return thumbnails;
+		}
+
 		/** The thumbnail of `info` to fetch for `size`: the largest that fits, of a format that can be written */
 		std::optional<ThumbnailInfo> choose(const FileInfo& info, FileInfoCache::ThumbnailSize size)
 		{
-			const uint32_t limit = size == FileInfoCache::ThumbnailSize::small
-									   ? static_cast<uint32_t>(MAX_THUMBNAIL_CACHE_PIXELS)
-									   : FileInfoCache::largeThumbnailPixels;
-			std::optional<ThumbnailInfo> chosen;
-			for (const ThumbnailInfo& thumbnail : info.thumbnails)
+			const std::vector<ThumbnailInfo> thumbnails = ranked(info, size);
+			if (thumbnails.empty() || !fits(thumbnails.front(), size))
 			{
-				if (ThumbnailWriter::canWrite(thumbnail) && thumbnail.width <= limit && thumbnail.height <= limit &&
-					(!chosen || thumbnail.width * thumbnail.height > chosen->width * chosen->height))
-				{
-					chosen = thumbnail;
-				}
+				return std::nullopt;
 			}
-			return chosen;
+			return thumbnails.front();
+		}
+
+		/** `lastModified` ("2026-06-17T09:30:10") as part of a file name: its digits ("20260617093010") */
+		std::string version(std::string_view lastModified)
+		{
+			std::string digits;
+			std::ranges::copy_if(lastModified, std::back_inserter(digits), [](char c) { return c >= '0' && c <= '9'; });
+			return digits;
 		}
 
 		/** `info` as RepRapFirmware sends it, so it is read back with FileInfo::read() */
@@ -66,17 +99,48 @@ namespace Comm
 					{"thumbnails", thumbnails}};
 		}
 
+		/** What is kept in `folder`: each file's information, by full path */
+		std::unordered_map<std::string, FileInfo> readKept(const std::filesystem::path& folder)
+		{
+			ZoneScoped;
+			std::unordered_map<std::string, FileInfo> infos;
+			std::error_code error;
+			for (auto it = std::filesystem::recursive_directory_iterator(folder, error);
+				 !error && it != std::filesystem::recursive_directory_iterator();
+				 it.increment(error))
+			{
+				if (!it->is_regular_file() || it->path().extension() != ".json")
+				{
+					continue;
+				}
+				std::ifstream file(it->path());
+				const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+				auto info = OM::parseJson(text)
+								.transform_error([](const OM::JsonError& error)
+												 { return ReplyError{.message = error.message}; })
+								.and_then([](const OM::Node& json) { return FileInfo::read(json); });
+				if (info)
+				{
+					infos.emplace(info->fileName, std::move(*info));
+				}
+				else
+				{
+					LOG_WARN("Ignoring {:s}: {:s}", it->path().string(), info.error().message);
+				}
+			}
+			return infos;
+		}
+
 		/** Move `from` to `to`, replacing it; they may be on different file systems (/tmp and the kept folder) */
 		bool move(const std::filesystem::path& from, const std::filesystem::path& to)
 		{
 			std::error_code error;
 			std::filesystem::create_directories(to.parent_path(), error);
-			std::filesystem::remove(to, error);
 			std::filesystem::rename(from, to, error);
 			if (error)
 			{
 				error.clear();
-				std::filesystem::copy_file(from, to, error);
+				std::filesystem::copy_file(from, to, std::filesystem::copy_options::overwrite_existing, error);
 				std::filesystem::remove(from);
 			}
 			return !error;
@@ -96,19 +160,12 @@ namespace Comm
 		: m_keptRoot(std::filesystem::path(NVS_FOLDER) / "fileinfo_cache")
 		, m_temporaryRoot("/tmp/thumbnails")
 	{
-		ZoneScoped;
-		// Another printer has other files: what is kept about it is loaded once it is known
-		Model::get().addEventListener<EventType::PrinterUniqueId>(
-			[this]
-			{
-				ZoneScopedN("FileInfoCache_cb");
-				load();
-			});
 	}
 
-	std::optional<FileInfo> FileInfoCache::find(const std::string& path) const
+	std::optional<FileInfo> FileInfoCache::find(const std::string& path)
 	{
 		ZoneScoped;
+		loadPrinter();
 		std::lock_guard lock(m_mutex);
 		const auto it = m_infos.find(path);
 		return it != m_infos.end() ? std::optional(it->second) : std::nullopt;
@@ -117,12 +174,13 @@ namespace Comm
 	void FileInfoCache::refresh(const std::string& path, std::string_view lastModified)
 	{
 		ZoneScoped;
+		loadPrinter();
 		{
 			std::lock_guard lock(m_mutex);
 			const auto it = m_infos.find(path);
 			if (it != m_infos.end() && it->second.lastModified == lastModified)
 			{
-				if (!hasThumbnail(path) && !queued(Job::Kind::thumbnail, path))
+				if (wanted(it->second, ThumbnailSize::small) && !queued(Job::Kind::thumbnail, path))
 				{
 					m_jobs.push_back({.kind = Job::Kind::thumbnail, .path = path, .size = ThumbnailSize::small});
 				}
@@ -138,30 +196,43 @@ namespace Comm
 	void FileInfoCache::requestThumbnail(const std::string& path, ThumbnailSize size)
 	{
 		ZoneScoped;
+		loadPrinter();
 		{
 			std::lock_guard lock(m_mutex);
+			if (const auto it = m_infos.find(path); it != m_infos.end() && !wanted(it->second, size))
+			{
+				return; // kept, or not to be had
+			}
 			if (m_running && m_running->kind == Job::Kind::thumbnail && m_running->path == path &&
 				m_running->size == size)
 			{
 				return; // on its way
 			}
 			std::erase_if(m_jobs,
-						  [&path](const Job& job) { return job.kind == Job::Kind::thumbnail && job.path == path; });
+						  [&](const Job& job)
+						  { return job.kind == Job::Kind::thumbnail && job.path == path && job.size == size; });
 			m_jobs.push_front({.kind = Job::Kind::thumbnail, .path = path, .size = size});
 		}
 		startNext();
 	}
 
-	bool FileInfoCache::hasThumbnail(const std::string& path) const
+	std::optional<std::filesystem::path> FileInfoCache::thumbnail(const std::string& path, ThumbnailSize size)
 	{
-		struct stat status;
-		// More than a byte: an empty file marks a thumbnail that couldn't be had
-		return stat(thumbnailPath(path).c_str(), &status) == 0 && S_ISREG(status.st_mode) && status.st_size > 1;
-	}
-
-	std::filesystem::path FileInfoCache::thumbnailPath(const std::string& path) const
-	{
-		return printerFolder().value_or(m_temporaryRoot) / relative(path);
+		ZoneScoped;
+		const std::optional<FileInfo> info = find(path);
+		if (!info)
+		{
+			return std::nullopt;
+		}
+		for (const ThumbnailInfo& thumbnail : ranked(*info, size))
+		{
+			std::filesystem::path image = imagePath(*info, thumbnail);
+			if (kept(image))
+			{
+				return image;
+			}
+		}
+		return std::nullopt;
 	}
 
 	void FileInfoCache::forget()
@@ -173,6 +244,8 @@ namespace Comm
 			m_jobs.clear();
 			m_running.reset();
 			m_infos.clear();
+			m_loadedFor.clear();
+			m_failed.clear();
 		}
 		std::error_code error;
 		std::filesystem::remove_all(m_temporaryRoot, error);
@@ -193,8 +266,9 @@ namespace Comm
 		m_temporaryRoot = std::move(temporary);
 	}
 
-	void FileInfoCache::log() const
+	void FileInfoCache::log()
 	{
+		loadPrinter();
 		std::lock_guard lock(m_mutex);
 		LOG_INFO("File info cache: {:d} files known, {:d} requests waiting{:s}",
 				 m_infos.size(),
@@ -202,47 +276,43 @@ namespace Comm
 				 m_running ? ", one running" : "");
 		for (const auto& [path, info] : m_infos)
 		{
-			LOG_INFO("  {:s}: {:s}, {:d} bytes, {:d} s, {:d} thumbnails{:s}",
+			const auto images = std::ranges::count_if(
+				info.thumbnails, [&](const ThumbnailInfo& thumbnail) { return kept(imagePath(info, thumbnail)); });
+			LOG_INFO("  {:s}: {:s}, {:d} bytes, {:d} s, {:d} thumbnails, {:d} kept",
 					 path,
 					 info.lastModified,
 					 info.size,
 					 info.printTime,
 					 info.thumbnails.size(),
-					 hasThumbnail(path) ? ", one kept" : "");
+					 images);
 		}
 	}
 
-	void FileInfoCache::load()
+	void FileInfoCache::loadPrinter()
 	{
+		const std::string id = OM::GetPrinterUniqueId();
+		std::filesystem::path folder;
+		{
+			std::lock_guard lock(m_mutex);
+			if (id == m_loadedFor)
+			{
+				return;
+			}
+			folder = m_keptRoot / id;
+		}
 		ZoneScoped;
 		std::unordered_map<std::string, FileInfo> infos;
-		if (const auto folder = printerFolder(); folder && std::filesystem::exists(*folder))
+		if (!id.empty())
 		{
-			for (const auto& entry : std::filesystem::recursive_directory_iterator(*folder))
-			{
-				if (!entry.is_regular_file() || entry.path().extension() != ".json")
-				{
-					continue;
-				}
-				std::ifstream file(entry.path());
-				const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-				auto info = OM::parseJson(text)
-								.transform_error([](const OM::JsonError& error)
-												 { return ReplyError{.message = error.message}; })
-								.and_then([](const OM::Node& json) { return FileInfo::read(json); });
-				if (info)
-				{
-					infos.emplace(info->fileName, std::move(*info));
-				}
-				else
-				{
-					LOG_WARN("Ignoring {:s}: {:s}", entry.path().string(), info.error().message);
-				}
-			}
+			infos = readKept(folder);
+			LOG_INFO("Loaded what is known about {:d} files", infos.size());
 		}
-		LOG_INFO("Loaded what is known about {:d} files", infos.size());
 		std::lock_guard lock(m_mutex);
-		m_infos = std::move(infos);
+		if (id != m_loadedFor)
+		{
+			m_infos.merge(infos); // what arrived meanwhile stays: it is newer than what was kept
+			m_loadedFor = id;
+		}
 	}
 
 	std::optional<std::filesystem::path> FileInfoCache::printerFolder() const
@@ -255,11 +325,44 @@ namespace Comm
 		return m_keptRoot / id;
 	}
 
+	std::filesystem::path FileInfoCache::imageFolder() const
+	{
+		return printerFolder().value_or(m_temporaryRoot);
+	}
+
 	std::string FileInfoCache::relative(const std::string& path)
 	{
 		std::string relative = path;
 		utils::replaceSubstring(relative, ":", "\\%3A");
 		return relative;
+	}
+
+	std::filesystem::path FileInfoCache::imagePath(const FileInfo& info, const ThumbnailInfo& thumbnail) const
+	{
+		// No .png or .bmp: LVGL's BMP decoder would take a .bmp, and it can't scale; FFmpeg's (lv_conf.h) and libpng's
+		// tell the format from what is in the file
+		return imageFolder() / fmt::format("{:s}.{:s}.{:d}x{:d}",
+										   relative(info.fileName),
+										   version(info.lastModified),
+										   thumbnail.width,
+										   thumbnail.height);
+	}
+
+	bool FileInfoCache::kept(const std::filesystem::path& image)
+	{
+		struct stat status;
+		return stat(image.c_str(), &status) == 0 && S_ISREG(status.st_mode) && status.st_size > 0;
+	}
+
+	bool FileInfoCache::wanted(const FileInfo& info, ThumbnailSize size) const
+	{
+		const std::optional<ThumbnailInfo> thumbnail = choose(info, size);
+		if (!thumbnail)
+		{
+			return false;
+		}
+		const std::filesystem::path image = imagePath(info, *thumbnail);
+		return !kept(image) && !m_failed.contains(image.string());
 	}
 
 	bool FileInfoCache::queued(Job::Kind kind, const std::string& path) const
@@ -347,14 +450,30 @@ namespace Comm
 			return;
 		}
 		const std::optional<ThumbnailInfo> thumbnail = choose(*info, job.size);
-		auto writer = std::make_shared<ThumbnailWriter>();
-		if (!thumbnail || !writer->open(*thumbnail, m_temporaryRoot / relative(job.path)))
+		if (!thumbnail)
 		{
 			LOG_DBG("{:s} has no thumbnail the screen can show", job.path);
 			jobDone();
 			return;
 		}
-		fetchPiece(job, *thumbnail, std::move(writer), thumbnail->offset);
+		auto fetch = std::make_shared<Fetch>(Fetch{.job = job,
+												   .thumbnail = *thumbnail,
+												   .temporary = m_temporaryRoot / (relative(job.path) + ".part"),
+												   .image = imagePath(*info, *thumbnail),
+												   .writer = std::make_shared<ThumbnailWriter>(),
+												   .generation = generation});
+		if (kept(fetch->image))
+		{
+			jobDone(); // fetched since it was asked for
+			return;
+		}
+		if (!fetch->writer->open(*thumbnail, fetch->temporary))
+		{
+			LOG_WARN("Couldn't write the thumbnail of {:s} to {:s}", job.path, fetch->temporary.string());
+			jobDone();
+			return;
+		}
+		fetchPiece(std::move(fetch), thumbnail->offset);
 	}
 
 	void FileInfoCache::infoArrived(const Job& job, const std::expected<FileInfo, ReplyError>& reply)
@@ -368,26 +487,32 @@ namespace Comm
 		}
 		FileInfo info = *reply;
 		info.fileName = job.path;
-		bool changed = true;
+		std::optional<FileInfo> previous;
 		{
 			std::lock_guard lock(m_mutex);
-			const auto it = m_infos.find(job.path);
-			changed = it == m_infos.end() || it->second.lastModified != info.lastModified;
-			m_infos[job.path] = info;
+			if (const auto it = m_infos.find(job.path); it != m_infos.end())
+			{
+				previous = std::exchange(it->second, info);
+			}
+			else
+			{
+				m_infos.emplace(job.path, info);
+			}
 		}
-		if (changed)
+		if (previous && previous->lastModified != info.lastModified)
 		{
-			std::error_code error;
-			std::filesystem::remove(thumbnailPath(job.path), error); // the file has changed: so may its thumbnail
+			// The file has changed: its old thumbnails won't be shown again (the new ones have other names)
+			for (const ThumbnailInfo& thumbnail : previous->thumbnails)
+			{
+				std::error_code error;
+				std::filesystem::remove(imagePath(*previous, thumbnail), error);
+			}
 		}
 		save(info);
 		Model::get().post<EventType::FileInfo>(job.path);
-		if (!hasThumbnail(job.path))
 		{
 			std::lock_guard lock(m_mutex);
-			if (!std::ranges::any_of(m_jobs,
-									 [&](const Job& waiting)
-									 { return waiting.kind == Job::Kind::thumbnail && waiting.path == job.path; }))
+			if (wanted(info, ThumbnailSize::small) && !queued(Job::Kind::thumbnail, job.path))
 			{
 				m_jobs.push_back({.kind = Job::Kind::thumbnail, .path = job.path, .size = ThumbnailSize::small});
 			}
@@ -395,70 +520,67 @@ namespace Comm
 		jobDone();
 	}
 
-	void FileInfoCache::fetchPiece(const Job& job,
-								   const ThumbnailInfo& thumbnail,
-								   std::shared_ptr<ThumbnailWriter> writer,
-								   uint32_t offset)
+	void FileInfoCache::fetchPiece(std::shared_ptr<Fetch> fetch, uint32_t offset)
 	{
 		ZoneScoped;
-		uint64_t generation = 0;
-		{
-			std::lock_guard lock(m_mutex);
-			generation = m_generation;
-		}
-		Connection::get().thumbnail(
-			job.path,
-			offset,
-			[this, job, thumbnail, writer, offset, generation](std::expected<FileChunk, ReplyError> piece)
-			{
-				ZoneScopedN("fetchPiece_cb");
-				{
-					std::lock_guard lock(m_mutex);
-					if (generation != m_generation)
-					{
-						return; // forgotten
-					}
-				}
-				const std::filesystem::path temporary = m_temporaryRoot / relative(job.path);
-				const auto fail = [&](std::string_view why)
-				{
-					LOG_WARN("No thumbnail for {:s}: {:s}", job.path, why);
-					writer->finish();
-					std::error_code error;
-					std::filesystem::remove(temporary, error);
-					jobDone();
-				};
-				if (!piece)
-				{
-					fail(piece.error().message);
-					return;
-				}
-				if (piece->offset != offset)
-				{
-					fail("a piece from somewhere else in the file came");
-					return;
-				}
-				if (!writer->add(piece->data))
-				{
-					fail("a piece couldn't be decoded");
-					return;
-				}
-				if (piece->next != 0)
-				{
-					fetchPiece(job, thumbnail, writer, piece->next);
-					return;
-				}
-				if (!writer->finish())
-				{
-					fail("it ended short");
-					return;
-				}
-				if (move(temporary, thumbnailPath(job.path)))
-				{
-					Model::get().post<EventType::ThumbnailData>(job.path);
-				}
-				jobDone();
-			});
+		const std::string path = fetch->job.path;
+		Connection::get().thumbnail(path,
+									offset,
+									[this, fetch = std::move(fetch), offset](std::expected<FileChunk, ReplyError> piece)
+									{
+										ZoneScopedN("fetchPiece_cb");
+										{
+											std::lock_guard lock(m_mutex);
+											if (fetch->generation != m_generation)
+											{
+												return; // forgotten
+											}
+										}
+										const auto fail = [&](std::string_view why)
+										{
+											LOG_WARN("No thumbnail for {:s}: {:s}", fetch->job.path, why);
+											fetch->writer->finish();
+											std::error_code error;
+											std::filesystem::remove(fetch->temporary, error);
+											{
+												std::lock_guard lock(m_mutex);
+												m_failed.insert(fetch->image.string());
+											}
+											jobDone();
+										};
+										if (!piece)
+										{
+											fail(piece.error().message);
+											return;
+										}
+										if (piece->offset != offset)
+										{
+											fail("a piece from somewhere else in the file came");
+											return;
+										}
+										if (!fetch->writer->add(piece->data))
+										{
+											fail("a piece couldn't be decoded");
+											return;
+										}
+										if (piece->next != 0)
+										{
+											fetchPiece(fetch, piece->next);
+											return;
+										}
+										if (!fetch->writer->finish())
+										{
+											fail("it ended short");
+											return;
+										}
+										if (!move(fetch->temporary, fetch->image))
+										{
+											fail("it couldn't be kept");
+											return;
+										}
+										Model::get().post<EventType::ThumbnailData>(fetch->job.path);
+										jobDone();
+									});
 	}
 
 	void FileInfoCache::jobDone()

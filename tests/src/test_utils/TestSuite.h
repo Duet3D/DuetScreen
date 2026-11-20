@@ -28,6 +28,13 @@ class TestSuite : public ::testing::Test
 	 */
 	static ScriptedPrinter& connectScriptedPrinter();
 
+	/**
+	 * Have `printer` give the file `file` a thumbnail, the example one (300 pixels square), as the screen asks for it:
+	 * the file cache asks for the large thumbnail, and `printer` sends the file's information and then the thumbnail,
+	 * which the cache keeps; anything the cache asked about other files first is answered as missing
+	 */
+	static void giveThumbnail(ScriptedPrinter& printer, const std::string& file);
+
 	static bool load_model_data_from_file(std::string_view filename);
 	static bool load_model_data(std::string_view data);
 

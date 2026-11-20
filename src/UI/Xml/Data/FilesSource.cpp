@@ -258,8 +258,7 @@ namespace UI::Xml
 	void FilesSource::showJob(RecentJobRow& row, const OM::FileSystem::FileSystemItem& item)
 	{
 		const std::string path = item.GetPath();
-		const Comm::FileInfoCache& cache = Comm::FileInfoCache::get();
-		row.thumbnail.set(cache.hasThumbnail(path) ? cache.thumbnailPath(path).string() : std::string());
+		row.thumbnail.set(thumbnail(path, Comm::FileInfoCache::ThumbnailSize::small));
 		row.detail.set(detail(item));
 	}
 
@@ -283,9 +282,7 @@ namespace UI::Xml
 			m_infoLayerHeight.set(fmt::format("{:g} {:s}", info->layerHeight, Units::getDisplayedDistanceUnit()));
 		}
 
-		const bool hasImage = Comm::FileInfoCache::get().hasThumbnail(path);
-		m_dialogImage.set(hasImage ? Comm::FileInfoCache::get().thumbnailPath(path).string() : std::string());
-		m_dialogHasImage.set(hasImage ? 1 : 0);
+		showDialogImage();
 		m_dialogTitle.set(_("file.start_print_title"));
 		m_dialogText.set(_("file.start_print.file", item.GetName()));
 		m_dialog.set("start_print");
@@ -407,6 +404,18 @@ namespace UI::Xml
 		}
 	}
 
+	std::string FilesSource::thumbnail(const std::string& path, Comm::FileInfoCache::ThumbnailSize size)
+	{
+		return Comm::FileInfoCache::get().thumbnail(path, size).value_or(std::filesystem::path()).string();
+	}
+
+	void FilesSource::showDialogImage()
+	{
+		const std::string image = thumbnail(m_selected, Comm::FileInfoCache::ThumbnailSize::large);
+		m_dialogImage.set(image);
+		m_dialogHasImage.set(image.empty() ? 0 : 1);
+	}
+
 	void FilesSource::thumbnailReceived(const std::string& path)
 	{
 		ZoneScoped;
@@ -415,15 +424,14 @@ namespace UI::Xml
 		{
 			if (m_jobs[i]->GetPath() == path)
 			{
-				m_recent[i].thumbnail.set(Comm::FileInfoCache::get().thumbnailPath(path).string());
+				m_recent[i].thumbnail.set(thumbnail(path, Comm::FileInfoCache::ThumbnailSize::small));
 				break;
 			}
 		}
 
 		if (m_dialog.get() == "start_print" && path == m_selected)
 		{
-			m_dialogImage.set(Comm::FileInfoCache::get().thumbnailPath(path).string());
-			m_dialogHasImage.set(1);
+			showDialogImage();
 		}
 	}
 } // namespace UI::Xml

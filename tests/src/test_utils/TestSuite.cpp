@@ -8,6 +8,7 @@
 #include "TestSuite.h"
 #include "Comm/Connection.h"
 #include "Comm/FileInfoCache.h"
+#include "Comm/Gcode.h"
 #include "Comm/LineFramer.h"
 #include "Comm/Replies.h"
 #include "Comm/UsbMode.h"
@@ -19,11 +20,18 @@
 #include "ObjectModel/Tree/Json.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "ObjectModel/Utils.h"
+#include "UI/Styles/Styles.h"
 #include "test_utils/utils.h"
 #include "utils/StorageHelper.h"
+extern "C"
+{
+#include "image/base64.h"
+}
 #include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
+#include <iterator>
+#include <nlohmann/json.hpp>
 #include <unistd.h>
 #if DUET_SIMULATOR
 #  include "Simulator/Simulator.h"
@@ -97,6 +105,35 @@ ScriptedPrinter& TestSuite::connectScriptedPrinter()
 	EXPECT_TRUE(printer.answer("M409", R"({"key":"","flags":"d99f","result":{}})"));
 	EXPECT_TRUE(Comm::Connection::get().isConnected());
 	return printer;
+}
+
+void TestSuite::giveThumbnail(ScriptedPrinter& printer, const std::string& file)
+{
+	std::ifstream png(UI::Themes::getFixedIconPath("examples", "print_thumbnail.png"), std::ios::binary);
+	const std::string bytes((std::istreambuf_iterator<char>(png)), std::istreambuf_iterator<char>());
+	ASSERT_FALSE(bytes.empty());
+	std::string base64(bytes.size() / 3 * 4 + 5, '\0');
+	base64.resize(base64_encode(
+		reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<unsigned int>(bytes.size()), base64.data()));
+	constexpr uint32_t offset = 1000; // Where the thumbnail is in the file
+
+	Comm::FileInfoCache::get().requestThumbnail(file, Comm::FileInfoCache::ThumbnailSize::large);
+	const nlohmann::json info = {
+		{"err", 0},
+		{"fileName", file},
+		{"size", 100000},
+		{"lastModified", "2026-01-01T00:00:00"},
+		{"thumbnails",
+		 {{{"format", "png"}, {"width", 300}, {"height", 300}, {"offset", offset}, {"size", base64.size()}}}}};
+	int others = 0;
+	while (!printer.answer(fmt::format("M36 {:s}", Comm::quoted(file)), info.dump()))
+	{
+		ASSERT_TRUE(printer.answer("M36 ", R"({"err":1})")) << "the screen didn't ask about " << file;
+		ASSERT_LT(++others, 100);
+	}
+	const nlohmann::json piece = {{"err", 0}, {"fileName", file}, {"offset", offset}, {"data", base64}, {"next", 0}};
+	ASSERT_TRUE(printer.answer(fmt::format("M36.1 P{:s} S{:d}", Comm::quoted(file), offset), piece.dump()));
+	EXPECT_TRUE(Comm::FileInfoCache::get().thumbnail(file, Comm::FileInfoCache::ThumbnailSize::large).has_value());
 }
 
 bool TestSuite::load_model_data_from_file(std::string_view filename)

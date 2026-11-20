@@ -122,7 +122,6 @@ int main(int argc, char** argv)
 		std::filesystem::create_directories("/tmp/thumbnails");
 		std::filesystem::create_directories("/tmp/heightmaps");
 		OM::Followers::start();
-		Comm::FileInfoCache::get(); // made now, to hear which printer it is as soon as it is known
 		Comm::usbInit();
 	}
 

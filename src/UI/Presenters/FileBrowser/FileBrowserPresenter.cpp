@@ -246,20 +246,20 @@ namespace UI
 		UI_LOCK();
 		OM::FileSystem::SortFilesBy(m_items, m_sortBy, m_sortDescending);
 		showSort();
-		m_files.sync(m_items.size(),
-					 [this](FileRow& row, size_t i)
-					 {
-						 const auto& item = *m_items[i];
-						 const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
-						 row.name.set(
-							 Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
-						 row.detail.set(Xml::FilesSource::detail(item));
-						 row.isFolder.set(isFolder ? 1 : 0);
-						 row.showPicture(isFolder,
-										 !isFolder && Comm::FileInfoCache::get().hasThumbnail(item.GetPath())
-											 ? Comm::FileInfoCache::get().thumbnailPath(item.GetPath()).string()
-											 : std::string());
-					 });
+		m_files.sync(
+			m_items.size(),
+			[this](FileRow& row, size_t i)
+			{
+				const auto& item = *m_items[i];
+				const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
+				row.name.set(Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
+				row.detail.set(Xml::FilesSource::detail(item));
+				row.isFolder.set(isFolder ? 1 : 0);
+				row.showPicture(
+					isFolder,
+					isFolder ? std::string()
+							 : Xml::FilesSource::thumbnail(item.GetPath(), Comm::FileInfoCache::ThumbnailSize::large));
+			});
 	}
 
 	void FileBrowserPresenter::showCrumbs()
@@ -347,7 +347,7 @@ namespace UI
 		UI_LOCK();
 		if (FileRow* row = rowOf(path))
 		{
-			row->showPicture(false, Comm::FileInfoCache::get().thumbnailPath(path).string());
+			row->showPicture(false, Xml::FilesSource::thumbnail(path, Comm::FileInfoCache::ThumbnailSize::large));
 		}
 	}
 

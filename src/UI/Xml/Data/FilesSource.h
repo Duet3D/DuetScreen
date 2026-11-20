@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "Comm/FileInfoCache.h"
 #include "DataSource.h"
 #include "ObjectModel/Files.h"
 #include "UI/Xml/Binding/List.h"
@@ -32,10 +33,10 @@ namespace UI::Xml
 		/** Declare the row's fields */
 		void fields(FieldVisitor& f) override;
 
-		StringSubject<128> name;	   // File name
-		StringSubject<64> detail;	   // How long it takes and how much filament, else its date and size
-		StringSubject<256> thumbnail;  // Thumbnail path, or empty
-		std::string path;			   // The file's path, e.g. "0:/gcodes/benchy.gcode"; not shown
+		StringSubject<128> name;	  // File name
+		StringSubject<64> detail;	  // How long it takes and how much filament, else its date and size
+		StringSubject<256> thumbnail; // Thumbnail path, or empty
+		std::string path;			  // The file's path, e.g. "0:/gcodes/benchy.gcode"; not shown
 	};
 
 	/** One of the macros */
@@ -80,6 +81,9 @@ namespace UI::Xml
 		 * 1.2 MB". A folder's is when it was changed. */
 		static std::string detail(const OM::FileSystem::FileSystemItem& item);
 
+		/** The image to show for the file `path` at `size` (FileInfoCache::thumbnail()), or empty if there is none */
+		static std::string thumbnail(const std::string& path, Comm::FileInfoCache::ThumbnailSize size);
+
 		/** List the jobs and macros again */
 		void refresh();
 
@@ -123,6 +127,9 @@ namespace UI::Xml
 
 		/** A thumbnail arrived: show it on its job, and in the dialog if it is about that job */
 		void thumbnailReceived(const std::string& path);
+
+		/** Show the dialog's job's large thumbnail, or the nearest kept while it is fetched */
+		void showDialogImage();
 
 		/** Show what the dialog allows now: no job starts while another runs, nor the one running is deleted */
 		void showAllowed();

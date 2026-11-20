@@ -5,7 +5,6 @@
  * ready to start (job_ready.xml), from source.job.* and source.files.*.
  */
 
-#include "Comm/FileInfoCache.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/Data/JobSource.h"
@@ -32,18 +31,9 @@ class TestJobWidget : public UiTestSuite
 		home.hide();
 	}
 
-	/** Give the job `file` the example thumbnail */
-	static void giveThumbnail(const char* file)
-	{
-		std::filesystem::path path = Comm::FileInfoCache::get().thumbnailPath(file);
-		std::filesystem::create_directories(path.parent_path());
-		std::filesystem::remove(path);
-		std::filesystem::copy_file(UI::Themes::getFixedIconPath("examples", "print_thumbnail.png"), path);
-	}
-
 	/**
 	 * Connect to the test bench, which lists its jobs and macros, and hand it `jobs` and `macros` as the listings; the
-	 * job `thumbnailed`, if given, has the example thumbnail (kept in the printer's own folder, so once connected)
+	 * job `thumbnailed`, if given, has the example thumbnail, sent by a printer the test plays (giveThumbnail())
 	 */
 	static void connectWithFiles(const char* jobs, const char* macros, const char* thumbnailed = nullptr)
 	{
@@ -52,7 +42,7 @@ class TestJobWidget : public UiTestSuite
 		deliverModelEvents();
 		if (thumbnailed != nullptr)
 		{
-			giveThumbnail(thumbnailed);
+			giveThumbnail(connectScriptedPrinter(), thumbnailed);
 		}
 		load_model_data_from_file(jobs);
 		load_model_data_from_file(macros);
@@ -245,7 +235,8 @@ TEST_F(TestJobWidget, ARunningJobShowsItsStatusAndCanBeFoundAgain)
 TEST_F(TestJobWidget, WhileAJobRunsTheDialogSaysWhyNoneCanStartAndItCantBeDeleted)
 {
 	connectWithFiles("tests/object_model/rr_filelist/gcodes_recent.json",
-					 "tests/object_model/rr_filelist/macros_dashboard.json");
+					 "tests/object_model/rr_filelist/macros_dashboard.json",
+					 "0:/gcodes/test.gcode");
 	runJob(); // test.gcode, the newest
 	lv_obj_t* root = view.getRootPtr();
 	view.show();
