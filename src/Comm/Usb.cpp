@@ -86,6 +86,9 @@ namespace Comm
 		{
 			stopReceiving();
 
+			// Closing the port: the Duet throws away any line it has only partly received
+			setDtr(false);
+
 			for (std::size_t i = 0; i < m_claimedInterfaceCount; ++i)
 			{
 				if (m_claimedInterfaces[i] == 0xFF)
@@ -196,6 +199,11 @@ namespace Comm
 			goto close_handle;
 		}
 
+		// The port may not have been closed last time (the screen restarted): close it first, so the Duet throws away
+		// any line it has only partly received rather than joining the first line sent now onto it. RepRapFirmware
+		// notices the port closed when it next reads it, so it stays closed for a while
+		setDtr(false);
+		std::this_thread::sleep_for(s_portClosedTime);
 		r = setDtr(true);
 		if (r < 0)
 		{

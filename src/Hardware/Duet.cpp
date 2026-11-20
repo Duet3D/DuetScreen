@@ -427,31 +427,29 @@ namespace Comm
 				}
 			}
 
-			auto send_cb = [usbChannel](std::string_view payload) { return sendUsbData(payload, usbChannel); };
+			// Each line goes in one transfer, numbered and ended: sent in parts, a connection lost between them would
+			// leave the start of a line at the Duet for the next line to be joined onto
+			const auto sendLine = [this, usbChannel](std::string_view text)
+			{ sendUsbData(fmt::format("N{:d} {:s}\n", GetNextLineNumber(), text), usbChannel); };
 			for (size_t i = 0; i < gcode.length(); i++)
 			{
 				char c = gcode[i];
 				if (c == '\n')
 				{
-					line = gcode.substr(i - len, len);
-					send_cb(line);
-					send_cb("\n");
+					if (len > 0) // an empty line says nothing
+					{
+						line = gcode.substr(i - len, len);
+						sendLine(line);
+					}
 					len = 0;
 					continue;
-				}
-				if (len == 0)
-				{
-					uint32_t lineNumber = GetNextLineNumber();
-					std::string lineNumberStr = fmt::format("N{:d} ", lineNumber);
-					send_cb(lineNumberStr);
 				}
 				len++;
 			}
 			if (len > 0)
 			{
 				line = gcode.substr(gcode.length() - len, len);
-				send_cb(line);
-				send_cb("\n");
+				sendLine(line);
 			}
 			break;
 		}

@@ -2,6 +2,7 @@
 
 #include <array>
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <cstddef>
 #include <cstdint>
@@ -76,6 +77,8 @@ namespace Comm
 		static constexpr std::size_t s_receiveBufferSize = 4096;
 		// Bulk IN transfers kept queued per channel so the device always has a URB to fill
 		static constexpr std::size_t s_receiveTransferCount = 4;
+		// How long the port is held closed (DTR low) on connecting, so the Duet sees it closed
+		static constexpr std::chrono::milliseconds s_portClosedTime{100};
 
 		struct ReceiveTransfer
 		{
