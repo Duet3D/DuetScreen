@@ -14,7 +14,7 @@
 #pragma once
 
 #include "ObjectModel/Alert.h"
-#include "Subscribers/ResponseSubscribers.h"
+#include "Comm/Responses.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/Dialogs/NumberPad.h"

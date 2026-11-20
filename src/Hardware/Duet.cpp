@@ -7,7 +7,10 @@
 
 #include "Comm/Communication.h"
 #include "Comm/FileInfo.h"
-#include "Comm/JsonDecoder.h"
+#include "Comm/LineFramer.h"
+#include "Comm/Receive.h"
+#include "Comm/Replies.h"
+#include "Comm/Responses.h"
 #include "Comm/Usb.h"
 #include "Debug.h"
 
@@ -15,7 +18,9 @@
 
 #include "Duet3D/General/CRC16.h"
 #include "Hardware/SerialIo.h"
+#include "ObjectModel/Files.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Json.h"
 #include "ObjectModel/Utils.h"
 #include "Storage.h"
 #include "UI/Core/Model.h"
@@ -31,6 +36,37 @@
 
 namespace Comm
 {
+	/**
+	 * An HTTP reply's body, read as JSON
+	 * @return the JSON, or why there is none: an HTTP error, or a body that isn't JSON
+	 */
+	static std::expected<OM::Node, ReplyError> readJsonBody(const HttpResponse& r)
+	{
+		if (r.status_code != HTTP_STATUS_OK)
+		{
+			return std::unexpected(ReplyError{.message = fmt::format("HTTP error {:d}", (int)r.status_code)});
+		}
+		auto json = OM::parseJson(r.body);
+		if (!json)
+		{
+			return std::unexpected(
+				ReplyError{.message = fmt::format("a reply that isn't JSON: {:s}", json.error().message)});
+		}
+		return std::move(*json);
+	}
+
+	/** Hand an object model reply (rr_model's body) to the object model */
+	static void receiveModelBody(const HttpResponse& r, std::string_view what)
+	{
+		auto json = readJsonBody(r);
+		if (!json)
+		{
+			LOG_ERROR("Failed to get model update for {:s}: {:s}", what, json.error().message);
+			return;
+		}
+		receiveReply(*json);
+	}
+
 	Duet::Duet()
 		: m_lastRequestTime(0)
 		, m_pollIntervalScale(1.0f)
@@ -215,17 +251,6 @@ namespace Comm
 			return false;
 		}
 
-#if 0
-		if (((!m_sbcMode && m_sessionKey == sm_noSessionKey) ||
-			 (TimeHelper::getCurrentTime() - m_lastRequestTime > m_sessionTimeout)) &&
-			(path != "/rr_connect" && path != "/rr_disconnect"))
-		{
-			LOG_DBG("Session expired, reconnecting. Request '{:s}' will not be sent", path);
-			Reconnect();
-			return false;
-		}
-#endif
-
 		auto req = std::make_shared<HttpRequest>();
 		PrepareRequest(*req, path, queryParameters);
 		LOG_DBG("Get (async): \"{:s}\", sessionKey={:d}", req->url.c_str(), m_sessionKey);
@@ -249,17 +274,6 @@ namespace Comm
 			LOG_DBG("Not connected to Duet, cannot send get request {:s}", path);
 			return false;
 		}
-
-#if 0
-		if (((!m_sbcMode && m_sessionKey == sm_noSessionKey) ||
-			 (TimeHelper::getCurrentTime() - m_lastRequestTime > m_sessionTimeout)) &&
-			(path != "/rr_connect" && path != "/rr_disconnect"))
-		{
-			LOG_DBG("Session expired, reconnecting. Request '{:s}' will not be sent", path);
-			Reconnect();
-			return false;
-		}
-#endif
 
 		HttpRequest req;
 		PrepareRequest(req, path, queryParameters);
@@ -464,7 +478,7 @@ namespace Comm
 			query["gcode"] = gcode;
 			AsyncGet("/rr_gcode",
 					 query,
-					 [gcode](const HttpResponsePtr& r)
+					 [gcode = std::string(gcode)](const HttpResponsePtr& r)
 					 {
 						 if (r->status_code != HTTP_STATUS_OK)
 						 {
@@ -572,13 +586,11 @@ namespace Comm
 		{
 		case CommunicationType::network:
 		{
-#if 1
-			HttpResponse r;
 			hv::QueryParams query;
 			query["name"] = filename;
 			if (!AsyncGet("/rr_download",
 						  query,
-						  [cb = std::move(onComplete), filename](const HttpResponsePtr& r)
+						  [cb = std::move(onComplete), filename = std::string(filename)](const HttpResponsePtr& r)
 						  {
 							  if (r->status_code != HTTP_STATUS_OK)
 							  {
@@ -593,7 +605,6 @@ namespace Comm
 				LOG_ERROR("Failed to download file {:s}", filename);
 				return false;
 			}
-#endif
 			break;
 		}
 		default:
@@ -622,12 +633,11 @@ namespace Comm
 			break;
 		case CommunicationType::network:
 		{
-			HttpResponse r;
 			hv::QueryParams query;
 			query["name"] = filename;
 			if (!AsyncGet("/rr_delete",
 						  query,
-						  [filename](const HttpResponsePtr& r)
+						  [filename = std::string(filename)](const HttpResponsePtr& r)
 						  {
 							  if (r->status_code != HTTP_STATUS_OK)
 							  {
@@ -667,33 +677,9 @@ namespace Comm
 		{
 			hv::QueryParams query;
 			query["flags"] = flags;
-#if ASYNC_RR_MODEL
-			AsyncGet("/rr_model",
-					 query,
-					 [flags](const HttpResponsePtr& r)
-					 {
-						 JsonDecoder decoder;
-						 if (r->status_code != HTTP_STATUS_OK)
-						 {
-							 LOG_ERROR("HTTP error {:d}: Failed to get model update for flags: {:s}",
-									   (int)r->status_code,
-									   flags);
-							 return false;
-						 }
-						 decoder.CheckInput((const unsigned char*)r->body.c_str(), r->body.length() + 1);
-						 return true;
-					 });
-#else
 			HttpResponse r;
 			Get("/rr_model", r, query);
-			JsonDecoder decoder;
-			if (r.status_code != HTTP_STATUS_OK)
-			{
-				LOG_ERROR("HTTP error {:d}: Failed to get model update for flags: {:s}", (int)r.status_code, flags);
-				break;
-			}
-			decoder.CheckInput((const unsigned char*)r.body.c_str(), r.body.length() + 1);
-#endif
+			receiveModelBody(r, fmt::format("flags {:s}", flags));
 			break;
 		}
 		}
@@ -720,37 +706,9 @@ namespace Comm
 			hv::QueryParams query;
 			query["key"] = key;
 			query["flags"] = flags;
-#if ASYNC_RR_MODEL
-			AsyncGet("/rr_model",
-					 query,
-					 [key, flags](const HttpResponsePtr& r)
-					 {
-						 JsonDecoder decoder;
-						 if (r->status_code != HTTP_STATUS_OK)
-						 {
-							 LOG_ERROR("HTTP error {:d}: Failed to get model update for key: {:s}, flags: {:s}",
-									   (int)r->status_code,
-									   key,
-									   flags);
-							 return false;
-						 }
-						 decoder.CheckInput((const unsigned char*)r->body.c_str(), r->body.length() + 1);
-						 return true;
-					 });
-#else
 			HttpResponse r;
 			Get("/rr_model", r, query);
-			JsonDecoder decoder;
-			if (r.status_code != HTTP_STATUS_OK)
-			{
-				LOG_ERROR("HTTP error {:d}: Failed to get model update for key: {:s}, flags: {:s}",
-						  (int)r.status_code,
-						  key,
-						  flags);
-				break;
-			}
-			decoder.CheckInput((const unsigned char*)r.body.c_str(), r.body.length() + 1);
-#endif
+			receiveModelBody(r, fmt::format("key {:s}, flags {:s}", key, flags));
 			break;
 		}
 		}
@@ -780,22 +738,15 @@ namespace Comm
 			hv::QueryParams query;
 			query["dir"] = dir;
 			query["first"] = fmt::format("{:d}", first);
-			ret = AsyncGet("/rr_filelist",
-						   query,
-						   [dir](const HttpResponsePtr& r) -> bool
-						   {
-							   JsonDecoder decoder;
-							   if (r->status_code != 200)
-							   {
-								   LOG_ERROR("HTTP error {:d} ({:s}): Failed to get file list for {:s}",
-											 (int)r->status_code,
-											 r->status_message(),
-											 dir);
-								   return false;
-							   }
-							   decoder.CheckInput((const unsigned char*)r->body.c_str(), r->body.length() + 1);
-							   return true;
-						   });
+			ret = AsyncGet(
+				"/rr_filelist",
+				query,
+				[dir = std::string(dir)](const HttpResponsePtr& r) -> bool
+				{
+					OM::FileSystem::FileListArrived(
+						dir, readJsonBody(*r).and_then([](const OM::Node& json) { return FileList::read(json); }));
+					return true;
+				});
 			break;
 		}
 		}
@@ -824,138 +775,17 @@ namespace Comm
 		{
 			hv::QueryParams query;
 			query["name"] = filename;
-
-#if 1
-			ret = AsyncGet("/rr_fileinfo",
-						   query,
-						   [](const HttpResponsePtr& r) -> bool
-						   {
-							   JsonDecoder decoder;
-							   if (r->status_code != 200)
-							   {
-								   LOG_ERROR("HTTP error {:d}: Failed to get file info for file: {:s}",
-											 (int)r->status_code,
-											 r->body.c_str());
-								   return false;
-							   }
-							   decoder.CheckInput((const unsigned char*)r->body.c_str(), r->body.length() + 1);
-							   return true;
-						   });
-
-			break;
-#endif
-
-/* This way is quicker but duplicates code to decode the received data */
-#if 0
-			std::string name(filename);
 			ret = AsyncGet(
 				"/rr_fileinfo",
 				query,
-				[this, name](HttpResponse& r) -> bool {
-					Json::Reader reader;
-					Json::Value body;
-					const char* filename = name.c_str();
-					LOG_DBG("Name = {:s}", filename);
-					if (r.code != 200)
-					{
-						LOG_ERROR("HTTP error {:d}: Failed to get file info for file: {:s}", (int)r.code, r.body);
-						return false;
-					}
-					reader.parse(r.body, body);
-					if (body.isMember("err") && body["err"].asInt() != 0)
-					{
-						LOG_ERROR("Failed to get file info for file: {:s}, returned error {:d}", r.body, body["err"].asInt());
-						return false;
-					}
-					if (!body.isMember("thumbnails"))
-					{
-						LOG_INFO("No thumbnails found for {:s}", filename);
-						return false;
-					}
-					Json::Value thumbnailsJson = body["thumbnails"];
-					for (Json::ArrayIndex i = 0; i < thumbnailsJson.size(); i++)
-					{
-						Thumbnail thumbnail;
-						ThumbnailContext context;
-						ThumbnailInit(thumbnail);
-						if (!thumbnailsJson[i].isMember("width"))
-						{
-							continue;
-						}
-						thumbnail.meta.width = thumbnailsJson[i]["width"].asInt();
-
-						if (!thumbnailsJson[i].isMember("height"))
-						{
-							continue;
-						}
-						thumbnail.meta.height = thumbnailsJson[i]["height"].asInt();
-
-						if (!thumbnailsJson[i].isMember("offset"))
-						{
-							continue;
-						}
-						context.next = thumbnailsJson[i]["offset"].asInt();
-
-						if (!thumbnailsJson[i].isMember("format"))
-						{
-							continue;
-						}
-						std::string format = thumbnailsJson[i]["format"].asString();
-						if (!thumbnail.meta.SetImageFormat(format.c_str()))
-						{
-							LOG_WARN("Unsupported thumbnail format: {:s}", format.c_str());
-							continue;
-						}
-						thumbnail.image.New(thumbnail.meta, filename);
-
-						LOG_INFO("File {:s} has thumbnail {:d}: {:d}x{:d}", filename, i, thumbnail.width, thumbnail.height);
-
-						hv::QueryParams query;
-						query["name"] = filename;
-						while (context.next != 0)
-						{
-							// Request thumbnail data
-							query["offset"] = fmt::format("{:d}", context.next);
-							LOG_INFO("Requesting thumbnail data for {:s} at offset {:d}\n", filename, context.next);
-							if (!Get("/rr_thumbnail", r, query))
-							{
-								LOG_ERROR("Failed to get thumbnail data for {:s} at offset {:d}", filename, context.next);
-								continue;
-							}
-							LOG_DBG("Parsing rr_thumbnail response");
-							reader.parse(r.body, body);
-
-							if (body.isMember("err") && body["err"].asInt() != 0)
-							{
-								LOG_ERROR("Failed to get thumbnail data for {:s} at offset {:d}: {:d}",
-									  filename,
-									  context.next,
-									  body["err"].asInt());
-								continue;
-							}
-
-							if (body.isMember("next"))
-							{
-								context.next = body["next"].asInt();
-								LOG_DBG("Next thumbnail offset: {:d}", context.next);
-							}
-
-							LOG_DBG("Decoding thumbnail data");
-							if (body.isMember("data"))
-							{
-								ThumbnailBuf data;
-								data.size = std::min(body["data"].asString().size(), sizeof(data.buffer));
-								memcpy(data.buffer, body["data"].asString().c_str(), data.size);
-								ThumbnailDecodeChunk(thumbnail, data);
-							}
-						}
-						thumbnail.Close();
-						OM::FileSystem::GetListView()->refreshListView();
-					}
+				[name = std::string(filename)](const HttpResponsePtr& r) -> bool
+				{
+					FILEINFO_CACHE->FileInfoArrived(
+						name,
+						readJsonBody(*r).and_then([](const OM::Node& json) { return FileInfoReply::read(json); }));
 					return true;
 				});
 			break;
-#endif
 		}
 		}
 		return ret;
@@ -981,27 +811,19 @@ namespace Comm
 			break;
 		case CommunicationType::network:
 		{
-#if 1
 			hv::QueryParams query;
 			query["name"] = filename;
 			query["offset"] = fmt::format("{:d}", offset);
 			ret = AsyncGet("/rr_thumbnail",
 						   query,
-						   [](const HttpResponsePtr& r) -> bool
+						   [name = std::string(filename)](const HttpResponsePtr& r) -> bool
 						   {
-							   JsonDecoder decoder;
-							   if (r->status_code != 200)
-							   {
-								   LOG_ERROR("HTTP error {:d}: Failed to get thumbnail for file: {:s}",
-											 (int)r->status_code,
-											 r->body.c_str());
-								   return false;
-							   }
-							   decoder.SetPrefix("thumbnail:");
-							   decoder.CheckInput((const unsigned char*)r->body.c_str(), r->body.size() + 1);
+							   FILEINFO_CACHE->ThumbnailArrived(
+								   name,
+								   readJsonBody(*r).and_then([](const OM::Node& json)
+															 { return FileChunk::read(json, "thumbnail"); }));
 							   return true;
 						   });
-#endif
 			break;
 		}
 		}
@@ -1020,42 +842,20 @@ namespace Comm
 			return;
 		}
 
-		JsonDecoder decoder;
-		if (reply.body[0] != '{')
+		if (reply.body.front() == '{')
 		{
-			LOG_DBG("Reply not json: assuming it is a gcode response");
-
-			LOG_DBG("Removing \\r from reply body");
-			utils::removeCharFromString(reply.body, '\r');
-			size_t prevPosition = 0;
-			size_t position = reply.body.find("\n"); // Find the first occurrence of \n
-
-			// Split reply by new line and handle each as its own response.
-			// The replicates the uart behaviour and is required because rr_reply will group multiple
-			// replies together into a single response.
-			StringRef ref((char*)"resp", 5);
-			size_t indices[MAX_ARRAY_NESTING] = {0};
-			while (position != std::string::npos)
-			{
-				std::string line =
-					reply.body.substr(prevPosition, position - prevPosition); // `ProcessReceivedValue()` needs
-																			  // null terminated string
-				LOG_DBG("line: {:s}", line);
-				prevPosition = position + 1;
-				position = reply.body.find("\n", position + 1); // Find the next occurrence, if any
-				LOG_VERBOSE("position={:d}, prevPosition={:d}", position, prevPosition);
-				if (line.empty())
-				{
-					LOG_VERBOSE("Skipping empty line");
-					continue;
-				}
-				// Can skip checking the input since we know it's a gcode response
-				decoder.ProcessReceivedValue(ref, line.data(), indices);
-			}
+			receiveLine(reply.body);
 			return;
 		}
-		decoder.CheckInput((const unsigned char*)reply.body.c_str(), reply.body.length() + 1);
-		return;
+
+		// rr_reply gathers the responses since it was last asked: each line is one, as over USB and UART
+		std::string_view rest = reply.body;
+		while (!rest.empty())
+		{
+			const size_t end = rest.find('\n');
+			showResponse(rest.substr(0, end));
+			rest = end == std::string_view::npos ? std::string_view() : rest.substr(end + 1);
+		}
 	}
 
 	void Duet::RequestReply(HttpResponse& r)
@@ -1173,11 +973,7 @@ namespace Comm
 		{
 #if DUET_SIMULATOR
 			ret = Sim::Simulator::get().connect(
-				[](std::string_view reply)
-				{
-					static JsonDecoder decoder;
-					decoder.CheckInput(reinterpret_cast<const unsigned char*>(reply.data()), reply.size());
-				});
+				[framer = std::make_shared<LineFramer>(receiveLine)](std::string_view reply) { framer->push(reply); });
 			if (ret)
 			{
 				m_connectionState = ConnectionState::CONNECTED;

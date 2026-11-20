@@ -5,11 +5,14 @@
  * Every recorded response in tests/object_model must arrive whole; the merge rules are checked with small responses.
  */
 
+#include "ObjectModel/Tree/Json.h"
 #include "ObjectModel/Tree/Schema.h"
 #include "ObjectModel/Tree/Tree.h"
+#include "ObjectModel/Utils.h"
 #include "test_utils/TestSuite.h"
 #include <algorithm>
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
 #include <functional>
 #include <gtest/gtest.h>
@@ -92,12 +95,6 @@ TEST_F(TestOmTree, PathsReadAndWriteAsRepRapFirmwareDoes)
 	{
 		EXPECT_FALSE(Path::parse(bad)) << bad;
 	}
-
-	const size_t indices[] = {1, 2};
-	EXPECT_EQ(Path::fromDecoderId("heat:heaters^:current", indices)->str(), "heat.heaters[1].current");
-	EXPECT_EQ(Path::fromDecoderId("tools^:axes^", indices)->str(), "tools[1].axes[2]");
-	EXPECT_EQ(Path::fromDecoderId(":heaters^", indices)->str(), "heaters[1]");
-	EXPECT_FALSE(Path::fromDecoderId("a^:b^:c^", indices)) << "more '^' than indices";
 
 	EXPECT_TRUE(OM::isAtOrBelow("heat.heaters[1].current", "heat.heaters[1]"));
 	EXPECT_TRUE(OM::isAtOrBelow("heat.heaters[1]", "heat.heaters[1]"));
@@ -274,20 +271,22 @@ TEST_F(TestOmTree, ListenersAreToldOnceUntilTheChangesAreTaken)
 	int told = 0;
 	const size_t id = tree.addListener([&] { told++; });
 
-	OM::Patch patch;
-	patch.setKey("a");
-	patch.setFlags("v");
-	patch.value(Path(), Node::Kind::number, "1");
-	tree.apply(patch);
+	const auto patch = [](std::string_view value)
+	{
+		auto reply = OM::parseJson(fmt::format(R"({{"key":"a","flags":"v","result":{:s}}})", value));
+		EXPECT_TRUE(reply);
+		auto patch = OM::Patch::fromReply(*reply);
+		EXPECT_TRUE(patch);
+		return std::move(*patch);
+	};
+	tree.apply(patch("1"));
 	EXPECT_EQ(told, 1);
 
-	patch.value(Path(), Node::Kind::number, "2");
-	tree.apply(patch);
+	tree.apply(patch("2"));
 	EXPECT_EQ(told, 1) << "not told again while changes wait";
 
 	EXPECT_EQ(tree.takeChanges().paths().size(), 1u);
-	patch.value(Path(), Node::Kind::number, "3");
-	tree.apply(patch);
+	tree.apply(patch("3"));
 	EXPECT_EQ(told, 2);
 
 	tree.takeChanges();
@@ -298,7 +297,7 @@ TEST_F(TestOmTree, ListenersAreToldOnceUntilTheChangesAreTaken)
 	EXPECT_TRUE(tree.takeChanges().touches("a.b"));
 
 	tree.removeListener(id);
-	tree.apply(patch);
+	tree.apply(patch("4"));
 	EXPECT_EQ(told, 3) << "a removed listener isn't told";
 }
 

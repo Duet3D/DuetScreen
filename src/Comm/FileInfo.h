@@ -9,8 +9,8 @@
 #define JNI_COMM_FILEINFO_H_
 
 #include "Thumbnail.h"
+#include "Comm/Replies.h"
 
-#include "Comm/Commands.h"
 #include "Configuration.h"
 #include "Duet3D/General/String.h"
 #include "Duet3D/General/StringRef.h"
@@ -168,7 +168,6 @@ namespace Comm
 		struct ThumbnailRequest : public Request<Thumbnail>
 		{
 			using Request<Thumbnail>::Request;
-			ThumbnailBuf& GetBuffer() { return m_buf; }
 
 			virtual ~ThumbnailRequest() = default;
 			ThumbnailRequest(const ThumbnailRequest& other) = default;
@@ -179,7 +178,6 @@ namespace Comm
 		  protected:
 			bool RequestDataInner() override;
 
-			ThumbnailBuf m_buf;
 		};
 
 		using FileInfoRequestPtr = std::shared_ptr<FileInfoRequest>;
@@ -202,7 +200,18 @@ namespace Comm
 		// and lastModified is the same
 
 		FileInfoPtr GetFileInfo(const std::string& filepath);
-		void ReceivingFileInfoResponse(const std::string& filepath);
+		/**
+		 * The firmware's answer to a file info request (M36, rr_fileinfo): the file's information, kept, and its
+		 * thumbnail asked for; or why there is none, which ends the request
+		 * @param filepath The file asked about
+		 */
+		void FileInfoArrived(const std::string& filepath, const std::expected<FileInfoReply, ReplyError>& reply);
+		/**
+		 * The firmware's answer to a thumbnail request (M36.1, rr_thumbnail): the next piece of the thumbnail, decoded,
+		 * and the one after it asked for; or why there is none, which ends the request
+		 * @param filepath The file whose thumbnail was asked for
+		 */
+		void ThumbnailArrived(const std::string& filepath, const std::expected<FileChunk, ReplyError>& reply);
 		FileInfoRequestPtr GetFileInfoRequest(const std::string& filepath);
 		void FileInfoRequestComplete(const std::string& filepath); // called when the file info request is complete
 

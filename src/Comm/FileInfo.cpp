@@ -532,17 +532,96 @@ namespace Comm
 							{ return request->IsInProgress(); }) != m_fileInfoRequestQueue.end();
 	}
 
-	void FileInfoCache::ReceivingFileInfoResponse(const std::string& filepath)
+	void FileInfoCache::FileInfoArrived(const std::string& filepath,
+										const std::expected<FileInfoReply, ReplyError>& reply)
 	{
 		ZoneScoped;
 		std::lock_guard<LockableBase(std::recursive_mutex)> lock(s_mutex);
 		FileInfoRequestPtr request = GetFileInfoRequest(filepath);
 		if (request == nullptr)
 		{
-			request = m_fileInfoRequestQueue.emplace_front(std::make_shared<FileInfoRequest>(filepath));
+			LOG_WARN("File info for {:s} wasn't asked for, ignoring it", filepath);
+			return;
+		}
+		if (!reply)
+		{
+			LOG_WARN("No file info for {:s}: {:s}", filepath, reply.error().message);
+			request->Complete(true);
+			return;
 		}
 
+		FileInfo& fileInfo = *request->GetData();
+		fileInfo.lastModified.copy(reply->lastModified.c_str());
+		fileInfo.size = static_cast<uint32_t>(reply->size);
+		fileInfo.height = static_cast<float>(reply->height);
+		fileInfo.layerHeight = static_cast<float>(reply->layerHeight);
+		fileInfo.numLayers = reply->numLayers;
+		fileInfo.printTime = reply->printTime;
+		fileInfo.simulatedTime = reply->simulatedTime;
+		fileInfo.generatedBy.copy(reply->generatedBy.c_str());
+		fileInfo.filament.assign(reply->filament.begin(), reply->filament.end());
+		for (size_t i = 0; i < reply->thumbnails.size(); i++)
+		{
+			const ThumbnailInfo& sent = reply->thumbnails[i];
+			ThumbnailPtr thumbnail = fileInfo.GetOrCreateThumbnail(i);
+			if (!thumbnail->meta.SetImageFormat(sent.format))
+			{
+				LOG_WARN("Thumbnail {:d} of {:s} has a format the screen can't show: {:s}", i, filepath, sent.format);
+			}
+			thumbnail->meta.width = sent.width;
+			thumbnail->meta.height = sent.height;
+			thumbnail->meta.offset = sent.offset;
+			thumbnail->meta.size = sent.size;
+			thumbnail->context.next = sent.offset;
+		}
+		fileInfo.ClearThumbnails(reply->thumbnails.size()); // the file may have been replaced by one with fewer
+		LOG_INFO("FileInfo: filename({:s}) thumbnails({:d})", filepath, fileInfo.GetThumbnailCount());
+
+		FileInfoRequestComplete(filepath);
+		if (!IsThumbnailCached(filepath, fileInfo.lastModified.c_str()))
+		{
+			QueueThumbnailRequest(filepath);
+		}
+	}
+
+	void FileInfoCache::ThumbnailArrived(const std::string& filepath, const std::expected<FileChunk, ReplyError>& reply)
+	{
+		ZoneScoped;
+		std::lock_guard<LockableBase(std::recursive_mutex)> lock(s_mutex);
+		ThumbnailRequestPtr request = GetThumbnailRequest(filepath);
+		if (request == nullptr)
+		{
+			LOG_WARN("Not expecting to receive thumbnail data for \"{:s}\", ignoring", filepath);
+			return;
+		}
+		ThumbnailPtr thumbnail = request->GetData();
+		if (!reply)
+		{
+			LOG_ERROR("No thumbnail data for {:s}: {:s}", filepath, reply.error().message);
+			thumbnail->context.err = reply.error().code;
+			thumbnail->context.parseErr = ThumbnailContext::ParseErr::RrfError;
+			request->Complete(true);
+			return;
+		}
+		if (reply->offset != thumbnail->context.next)
+		{
+			LOG_WARN("thumbnail offset mismatch, expected {:d} got {:d}", thumbnail->context.next, reply->offset);
+			thumbnail->context.parseErr = ThumbnailContext::ParseErr::MismatchOffset;
+			request->Complete(true);
+			return;
+		}
 		request->Receiving();
+		thumbnail->context.offset = reply->offset;
+		thumbnail->context.next = reply->next;
+
+		const int ret = ThumbnailDecodeChunk(*thumbnail, reply->data);
+		if (ret < 0)
+		{
+			LOG_ERROR("failed to decode thumbnail chunk {:d}.\n", ret);
+			request->Complete(true);
+			return;
+		}
+		thumbnail->context.state = reply->next == 0 ? ThumbnailState::Cached : ThumbnailState::DataRequest;
 	}
 
 	/**

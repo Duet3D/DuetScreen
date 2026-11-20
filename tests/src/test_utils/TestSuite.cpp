@@ -7,7 +7,8 @@
 
 #include "TestSuite.h"
 #include "Comm/Communication.h"
-#include "Comm/JsonDecoder.h"
+#include "Comm/LineFramer.h"
+#include "Comm/Receive.h"
 #include "Configuration.h"
 #include "DeadlockDetector.h"
 #include "Debug.h"
@@ -73,8 +74,6 @@ std::filesystem::path TestSuite::configFile()
 bool TestSuite::load_model_data_from_file(std::string_view filename)
 {
 	ZoneScoped;
-	// Read from file and send data to JsonDecoder
-
 	std::ifstream file(filename.data());
 
 	EXPECT_TRUE(file.is_open());
@@ -86,8 +85,9 @@ bool TestSuite::load_model_data_from_file(std::string_view filename)
 bool TestSuite::load_model_data(std::string_view data)
 {
 	ZoneScoped;
-	Comm::JsonDecoder decoder;
-	decoder.CheckInput(reinterpret_cast<const unsigned char*>(data.data()), static_cast<unsigned int>(data.size()));
+	Comm::LineFramer framer(Comm::receiveLine);
+	framer.push(data);
+	framer.push("\n"); // a recorded reply may not end its line
 	return true;
 }
 #if DUET_SIMULATOR

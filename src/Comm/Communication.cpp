@@ -14,14 +14,13 @@
 #include "Comm/Communication.h"
 #include <stdarg.h>
 
-#include "Comm/JsonDecoder.h"
 #include "Comm/Usb.h"
 #include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/SerialIo.h"
 
-#include "Comm/ControlCommands.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "ObjectModel/Utils.h"
 #include "nameof.hpp"
 #include "tracy/Tracy.hpp"
@@ -51,54 +50,55 @@ namespace Comm
 
 	static std::chrono::milliseconds s_lastResponseTime(0);
 	static bool s_sendFreqNext = true;
+	static int64_t s_lastReplySeq = -1; // The last `seqs.reply` seen; a change means rr_reply has a response
 
 	static std::array s_seqs = {
 #if FETCH_NETWORK
-		Seq{.seqid = rcvSeqsNetwork, .lastSeq = 0, .state = SeqStateInit, .key = "network", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "network", .flags = "v"},
 #endif
 #if FETCH_BOARDS
-		Seq{.seqid = rcvSeqsBoards, .lastSeq = 0, .state = SeqStateInit, .key = "boards", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "boards", .flags = "v"},
 #endif
 #if FETCH_MOVE
-		Seq{.seqid = rcvSeqsMove, .lastSeq = 0, .state = SeqStateInit, .key = "move", .flags = "vn"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "move", .flags = "vn"},
 #endif
 #if FETCH_HEAT
 		// TODO 'o' needed as we still use the 'bedHeaters' and 'chamberHeaters' fields
-		Seq{.seqid = rcvSeqsHeat, .lastSeq = 0, .state = SeqStateInit, .key = "heat", .flags = "vo"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "heat", .flags = "vo"},
 #endif
 #if FETCH_TOOLS
-		Seq{.seqid = rcvSeqsTools, .lastSeq = 0, .state = SeqStateInit, .key = "tools", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "tools", .flags = "v"},
 #endif
 #if FETCH_SPINDLES
-		Seq{.seqid = rcvSeqsSpindles, .lastSeq = 0, .state = SeqStateInit, .key = "spindles", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "spindles", .flags = "v"},
 #endif
 #if FETCH_DIRECTORIES
-		Seq{.seqid = rcvSeqsDirectories, .lastSeq = 0, .state = SeqStateInit, .key = "directories", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "directories", .flags = "v"},
 #endif
 #if FETCH_FANS
-		Seq{.seqid = rcvSeqsFans, .lastSeq = 0, .state = SeqStateInit, .key = "fans", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "fans", .flags = "v"},
 #endif
 #if FETCH_INPUTS
-		Seq{.seqid = rcvSeqsInputs, .lastSeq = 0, .state = SeqStateInit, .key = "inputs", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "inputs", .flags = "v"},
 #endif
 #if FETCH_JOB
-		Seq{.seqid = rcvSeqsJob, .lastSeq = 0, .state = SeqStateInit, .key = "job", .flags = "vn"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "job", .flags = "vn"},
 #endif
 #if FETCH_SCANNER
-		Seq{.seqid = rcvSeqsScanner, .lastSeq = 0, .state = SeqStateInit, .key = "scanner", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "scanner", .flags = "v"},
 #endif
 #if FETCH_SENSORS
-		Seq{.seqid = rcvSeqsSensors, .lastSeq = 0, .state = SeqStateInit, .key = "sensors", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "sensors", .flags = "v"},
 #endif
 #if FETCH_STATE
-		Seq{.seqid = rcvSeqsState, .lastSeq = 0, .state = SeqStateInit, .key = "state", .flags = "vn"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "state", .flags = "vn"},
 #endif
 #if FETCH_VOLUMES
-		Seq{.seqid = rcvSeqsVolumes, .lastSeq = 0, .state = SeqStateInit, .key = "volumes", .flags = "v"},
+		Seq{.lastSeq = 0, .state = SeqStateInit, .key = "volumes", .flags = "v"},
 #endif
 	};
 
-	static Seq s_freqSeq = {.seqid = rcvSeqsFreq, .lastSeq = 0, .state = SeqStateInit, .key = "", .flags = "d99f"};
+	static Seq s_freqSeq = {.lastSeq = 0, .state = SeqStateInit, .key = "", .flags = "d99f"};
 
 	Seq* g_currentReqSeq = nullptr;
 
@@ -208,19 +208,16 @@ namespace Comm
 		return nullptr;
 	}
 
-	void UpdateSeq(const ReceivedDataEvent seqid, int32_t val)
+	void UpdateSeq(std::string_view key, int32_t val)
 	{
 		ZoneScoped;
-		for (size_t i = 0; i < s_seqs.size(); ++i)
+		for (Seq& seq : s_seqs)
 		{
-			if (s_seqs[i].seqid == seqid)
+			if (key == seq.key && seq.lastSeq != val)
 			{
-				if (s_seqs[i].lastSeq != val)
-				{
-					LOG_DBG("Seq {:s} needs updating {:d} -> {:d}\n", s_seqs[i].key, s_seqs[i].lastSeq, val);
-					s_seqs[i].lastSeq = val;
-					s_seqs[i].state = SeqStateUpdate;
-				}
+				LOG_DBG("Seq {:s} needs updating {:d} -> {:d}\n", seq.key, seq.lastSeq, val);
+				seq.lastSeq = val;
+				seq.state = SeqStateUpdate;
 			}
 		}
 	}
@@ -234,6 +231,7 @@ namespace Comm
 			s_seqs[i].state = SeqStateInit;
 		}
 		s_freqSeq.state = SeqStateInit; // else a live request left unanswered holds up the next
+		s_lastReplySeq = -1;
 		g_currentReqSeq = nullptr;
 		s_sendFreqNext = true;
 	}
@@ -394,6 +392,76 @@ namespace Comm
 		ResetSeqs();
 	}
 
+	/** Ask for the axes a `move` or `move.axes` reply didn't include */
+	static void RequestMoreAxes(const OM::Patch& patch)
+	{
+		if (patch.live())
+		{
+			return;
+		}
+		const std::string root = patch.root().str();
+		size_t from = 0;
+		if (root == "move")
+		{
+			// `move` holds the first MAX_REPORTED_AXES axes only: there may be more
+			const size_t sent = patch.result()["axes"].size();
+			from = sent >= MAX_REPORTED_AXES ? sent : 0;
+		}
+		else if (root == "move.axes")
+		{
+			from = patch.next();
+		}
+		if (from > 0)
+		{
+			DUET.RequestModel("move.axes", fmt::format("vna{:d}", from));
+		}
+	}
+
+	void ReceiveModelReply(const OM::Patch& patch)
+	{
+		ZoneScoped;
+		KickWatchdog();
+		const std::string key = patch.root().str();
+		if (key == "move.axes")
+		{
+			// Asked for by RequestMoreAxes(), not by a seq
+		}
+		else if (Seq* seq = FindSeqByKey(key.c_str()))
+		{
+			seq->state = SeqStateOk;
+			LOG_DBG("seq '{:s}' DONE", seq->key);
+		}
+
+		if (key.empty())
+		{
+			patch.result()["seqs"].forEachField(
+				[](std::string_view name, const OM::Node& value)
+				{
+					if (name != "reply")
+					{
+						UpdateSeq(name, static_cast<int32_t>(value.integer()));
+					}
+				});
+		}
+
+		OM::Tree::get().apply(patch);
+		RequestMoreAxes(patch);
+
+		// Over the network, responses wait for rr_reply; over USB and UART they arrive by themselves
+		const OM::Node& replySeq = patch.result()["seqs"]["reply"];
+		if (key.empty() && replySeq.exists() && replySeq.integer() != s_lastReplySeq)
+		{
+			s_lastReplySeq = replySeq.integer();
+			if (DUET.GetCommunicationType() == CommunicationType::network)
+			{
+				LOG_DBG("Requesting reply for seq {:d}", s_lastReplySeq);
+				HttpResponse r;
+				DUET.RequestReply(r);
+				DUET.ProcessReply(r);
+			}
+		}
+	}
+
 	void KickWatchdog()
 	{
 		ZoneScoped;
@@ -467,7 +535,6 @@ namespace Comm
 		std::filesystem::create_directories("/tmp/thumbnails");
 		std::filesystem::create_directories("/tmp/heightmaps");
 		std::filesystem::create_directories("/tmp/files");
-		SortFieldTable();
 		OM::Followers::start();
 		usbInit();
 		ResetSeqs();

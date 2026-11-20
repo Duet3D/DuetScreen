@@ -8,7 +8,9 @@
 #ifndef JNI_OBJECTMODEL_FILES_HPP_
 #define JNI_OBJECTMODEL_FILES_HPP_
 
+#include "Comm/Replies.h"
 #include "ObjectModel/Directories.h"
+#include <expected>
 #include "tracy/Tracy.hpp"
 #include "utils/TimeHelper.h"
 #include <atomic>
@@ -234,7 +236,20 @@ namespace OM::FileSystem
 							 std::string_view path,
 							 request_file_contents_cb_t callback,
 							 bool runEveryTime = false);
-	FileContentsPtr GetCurrentFileRequestContents();
+	/**
+	 * The firmware's answer to a folder listing request (M20 S3, rr_filelist): the page is added to the folder's request,
+	 * its G-code files' information asked for, and the next page asked for; or why there is none, which answers the
+	 * request with no items
+	 * @param dir The folder asked for
+	 */
+	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply);
+
+	/**
+	 * The firmware's answer to a file contents request over USB or UART (M36.2): the piece is added to the contents and
+	 * the next piece asked for; or why there is none, which ends the request
+	 * @param filepath The file asked for
+	 */
+	void FileContentsArrived(const std::string& filepath, const std::expected<Comm::FileChunk, Comm::ReplyError>& reply);
 
 	/* Misc */
 

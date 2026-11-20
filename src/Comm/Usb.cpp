@@ -1,5 +1,7 @@
 #include "Usb.h"
-#include "Comm/JsonDecoder.h"
+#include "Comm/Communication.h"
+#include "Comm/LineFramer.h"
+#include "Comm/Receive.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"
 #include "Pins.h"
@@ -985,14 +987,16 @@ namespace Comm
 			goto finish;
 		}
 
-		s_currentUsbDevice.init(device_name,
-								device,
-								[](unsigned char* buf, size_t len, size_t channelIndex)
-								{
-									ZoneScopedN("USB Receive Callback");
-									static std::array<Comm::JsonDecoder, Comm::UsbDevice::s_maxChannelCount> s_decoder;
-									s_decoder[channelIndex].CheckInput(buf, len);
-								});
+		s_currentUsbDevice.init(
+			device_name,
+			device,
+			[](unsigned char* buf, size_t len, size_t channelIndex)
+			{
+				ZoneScopedN("USB Receive Callback");
+				static std::array<LineFramer, UsbDevice::s_maxChannelCount> s_framers{LineFramer(receiveLine),
+																					  LineFramer(receiveLine)};
+				s_framers[channelIndex].push(std::string_view(reinterpret_cast<const char*>(buf), len));
+			});
 
 		if (!s_currentUsbDevice.connect())
 		{

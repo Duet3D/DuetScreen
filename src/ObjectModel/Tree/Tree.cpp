@@ -153,12 +153,8 @@ namespace OM
 		m_root.makeObject();
 	}
 
-	void Tree::apply(Patch& patch)
+	void Tree::apply(const Patch& patch)
 	{
-		if (!patch.hasResult())
-		{
-			return;
-		}
 		ChangeSet changes; // What this response changed
 		{
 			std::lock_guard lock(mutexModel);
@@ -172,14 +168,14 @@ namespace OM
 					changes.add(patch.root().str());
 					target.makeArray();
 				}
-				const size_t end = patch.first() + patch.count();
+				const size_t end = patch.first() + patch.result().size();
 				for (size_t i = patch.first(); i < end; i++)
 				{
 					if (i >= target.size())
 					{
 						changes.add(patch.root().str());
 					}
-					merger.assign(target.item(i), patch.result()[i], patch.root().index(i), false);
+					merger.assign(target.item(i), patch.result()[i - patch.first()], patch.root().index(i), false);
 				}
 				if (patch.last() && target.size() != end)
 				{

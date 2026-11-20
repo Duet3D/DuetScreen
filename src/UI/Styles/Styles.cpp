@@ -6,6 +6,7 @@
  */
 
 #include "Styles.h"
+#include "Configuration.h"
 #include "Debug.h"
 #include "UI/Core/View.h"
 #include "lvgl/src/lvgl_private.h"

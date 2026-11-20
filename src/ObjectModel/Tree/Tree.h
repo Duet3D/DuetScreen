@@ -5,9 +5,9 @@
  * the shape the firmware sends it, so the UI can read any field by its RRF path (`heat.heaters[1].current`) without
  * code for that field.
  *
- *   JSON decoder ──Patch──▶ Tree::apply() ──changes──▶ listeners (the UI's OM bindings, …)
+ *   connection ──Patch──▶ Tree::apply() ──changes──▶ listeners (the UI's OM bindings, …)
  *
- * The decoder builds one Patch per response and gives it to apply() when the response is complete. apply() merges it
+ * The connection makes one Patch per response (see Patch.h) and gives it to apply(). apply() merges it
  * in and notes which paths changed; listeners are then told, once per response, and take the changes with
  * takeChanges().
  *
@@ -24,7 +24,7 @@
  * each bed's or chamber's first heater, so everything that reads it (views, and user bundles, as om.* is the UI's API)
  * works with 3.7 as with 3.6 and earlier, which send no mapping and whose own lists stand.
  *
- * Threads: the decoder applies patches on its own thread, and the UI reads from another, so reading the tree (root(),
+ * Threads: the connection applies patches on its own thread, and the UI reads from another, so reading the tree (root(),
  * and every Node it leads to) needs the model lock (MODEL_LOCK) held for as long as the nodes are used.
  */
 
@@ -57,7 +57,7 @@ namespace OM
 		const Node& root() const { return m_root; }
 
 		/** Merge a complete response into the tree (see the file comment) and tell the listeners if anything changed */
-		void apply(Patch& patch);
+		void apply(const Patch& patch);
 
 		/** Forget everything (e.g. when disconnected) and tell the listeners */
 		void clear();

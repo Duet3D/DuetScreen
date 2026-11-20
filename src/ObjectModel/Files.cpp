@@ -10,6 +10,7 @@
 #include "Files.h"
 
 #include "Comm/Communication.h"
+#include "Comm/FileInfo.h"
 #include "Hardware/Duet.h"
 #include "Hardware/Usb.h"
 #include "ObjectModel/Tree/Tree.h"
@@ -590,10 +591,96 @@ namespace OM::FileSystem
 		}
 	}
 
-	FileContentsPtr GetCurrentFileRequestContents()
+	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply)
 	{
 		ZoneScoped;
-		return s_fileContents;
+		FileListRequestPtr request = GetFileListRequest(dir);
+		if (!request)
+		{
+			LOG_WARN("Not expecting to receive file list data for \"{:s}\", ignoring", dir);
+			return;
+		}
+		if (!reply)
+		{
+			LOG_WARN("Couldn't list {:s}: {:s}", dir, reply.error().message);
+			request->ClearItems();
+			request->SetNext(0);
+			request->RunCallback();
+			return;
+		}
+		if (reply->first != request->GetNext())
+		{
+			LOG_WARN(
+				"First index {:d} does not match expected next index {:d}, ignoring", reply->first, request->GetNext());
+			return;
+		}
+
+		if (reply->first == 0)
+		{
+			request->ClearItems();
+		}
+		request->SetFirst(reply->first);
+		for (const Comm::FileEntry& entry : reply->files)
+		{
+			ItemPtr item = entry.folder ? request->AddFolder() : request->AddFile();
+			item->SetName(entry.name);
+			item->SetPath(dir);
+			item->SetSize(static_cast<size_t>(entry.size));
+			item->SetDate(entry.date);
+		}
+
+		// The G-code files' information (and thumbnails) is kept; other folders' files have none
+		if (dir.find(OM::Directories::GetGcodesDirectory()) != std::string::npos)
+		{
+			for (const ItemPtr& item : request->GetItemsCopy())
+			{
+				if (item->GetType() == FileSystemItemType::folder)
+				{
+					continue;
+				}
+				Comm::FileInfoPtr fileInfo = FILEINFO_CACHE->GetFileInfo(item->GetPath());
+				if (fileInfo == nullptr || !fileInfo->lastModified.Equals(item->GetDate().c_str()))
+				{
+					FILEINFO_CACHE->QueueFileInfoRequest(item->GetPath());
+				}
+				else if (!FILEINFO_CACHE->IsThumbnailCached(item->GetPath(), item->GetDate().c_str()))
+				{
+					FILEINFO_CACHE->QueueThumbnailRequest(item->GetPath());
+				}
+			}
+		}
+
+		request->SetNext(reply->next);
+		request->RunCallback();
+		if (reply->next != 0)
+		{
+			Comm::DUET.RequestFileList(dir, reply->next);
+		}
+	}
+
+	void FileContentsArrived(const std::string& filepath, const std::expected<Comm::FileChunk, Comm::ReplyError>& reply)
+	{
+		ZoneScoped;
+		FileContentsPtr contents = s_fileContents;
+		if (!contents || contents->GetFilename() != filepath)
+		{
+			LOG_WARN("Not expecting to receive file contents data for \"{:s}\", ignoring", filepath);
+			return;
+		}
+		if (!reply)
+		{
+			LOG_ERROR("Couldn't read {:s}: {:s}", filepath, reply.error().message);
+			s_fileContents = nullptr;
+			return;
+		}
+		contents->SetOffset(reply->offset);
+		contents->AppendData(reply->data);
+		contents->SetNext(reply->next);
+		contents->RunCallback();
+		if (reply->next != 0)
+		{
+			Comm::DUET.SendGcodef("M36.2 P\"{:s}\" S{:d}\n", filepath, reply->next);
+		}
 	}
 
 	std::string_view GetFileExtension(std::string_view filename)

@@ -8,8 +8,8 @@
 #ifndef JNI_COMM_COMMUNICATION_HPP_
 #define JNI_COMM_COMMUNICATION_HPP_
 
-#include "Comm/Commands.h"
-#include "FileInfo.h"
+#include "ObjectModel/Tree/Patch.h"
+#include <chrono>
 #include <stdint.h>
 
 namespace Comm
@@ -27,11 +27,9 @@ namespace Comm
 
 	struct Seq
 	{
-		const ReceivedDataEvent seqid;
-
 		int32_t lastSeq;
 		enum SeqState state;
-		std::chrono::milliseconds lastRequestTime = 0ms;
+		std::chrono::milliseconds lastRequestTime{0};
 
 		const char* const key;
 		const char* const flags;
@@ -46,10 +44,16 @@ namespace Comm
 	void Reconnect();
 
 	Seq* FindSeqByKey(const char* key);
-	void UpdateSeq(const ReceivedDataEvent seqid, int32_t val);
+	void UpdateSeq(std::string_view key, int32_t val);
 	void ResetSeqs();
 
 	void KickWatchdog();
+
+	/**
+	 * Merge an object model reply into the object model, noting the request it answers as done and what its `seqs` say
+	 * has changed since, and asking for whatever else the reply says is still to come
+	 */
+	void ReceiveModelReply(const OM::Patch& patch);
 
 	Seq* GetNextSeq(struct Seq* current);
 	bool sendNext();

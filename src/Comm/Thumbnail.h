@@ -108,12 +108,6 @@ namespace Comm
 	void to_json(nlohmann::json& j, const Thumbnail& t);
 	void from_json(const nlohmann::json& j, Thumbnail& t);
 
-	struct ThumbnailBuf
-	{
-		uint16_t size;
-		unsigned char buffer[MAX_JSON_VALUE_LENGTH]; // 1024 bytes for UART, 2600 bytes for network, some extra since we
-													 // have lots of memory. DSF will send the thumbnail in 1 chunk
-	};
 } // namespace Comm
 
 typedef bool (*ThumbnailProcessCb)(const struct Thumbnail& thumbnail,
@@ -122,10 +116,10 @@ typedef bool (*ThumbnailProcessCb)(const struct Thumbnail& thumbnail,
 								   size_t pixels_count);
 
 bool ThumbnailIsValid(const Comm::Thumbnail& thumbnail);
-bool ThumbnailDataIsValid(const Comm::ThumbnailBuf& data);
 
 int ThumbnailInit(Comm::Thumbnail& thumbnail);
-int ThumbnailDecodeChunk(Comm::Thumbnail& thumbnail, Comm::ThumbnailBuf& data);
+/** Decode a piece of `thumbnail`'s data, sent as base64, into its image; 0 or more once it is done, less on error */
+int ThumbnailDecodeChunk(Comm::Thumbnail& thumbnail, std::string_view base64);
 
 std::filesystem::path GetThumbnailPath(const std::filesystem::path& filepath, const bool temp = false);
 bool IsThumbnailCached(const std::filesystem::path& filepath, bool includeBlank = false);

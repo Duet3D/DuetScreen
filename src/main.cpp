@@ -7,6 +7,7 @@
  *      INCLUDES
  *********************/
 #include "Comm/Communication.h"
+#include "Comm/FileInfo.h"
 #include "Comm/Usb.h"
 #include "Debug.h"
 #include "Hardware/Duet.h"

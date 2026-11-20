@@ -6,6 +6,7 @@
  */
 
 #include "ObjectModel/Tree/Tree.h"
+#include "ObjectModel/Utils.h"
 #include "UI/Xml/Binding/Globals.h"
 #include "UI/Xml/Om/Converters.h"
 #include "UI/Xml/Om/OmName.h"

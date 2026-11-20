@@ -6,7 +6,8 @@
  * covered by test_home_view.cpp (control_view/fan.png), these tests check behaviour and structure.
  */
 
-#include "Subscribers/ResponseSubscribers.h"
+#include "Comm/Responses.h"
+#include "ObjectModel/Utils.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"

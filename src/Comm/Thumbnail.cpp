@@ -6,6 +6,8 @@
 extern "C"
 {
 #include "image/base64.h"
+#include <span>
+#include <vector>
 }
 
 #include "sys/param.h"
@@ -173,16 +175,6 @@ bool ThumbnailIsValid(const Comm::Thumbnail& thumbnail)
 	return true;
 }
 
-bool ThumbnailDataIsValid(const Comm::ThumbnailBuf& data)
-{
-	if (data.size == 0)
-	{
-		return false;
-	}
-
-	return true;
-}
-
 int ThumbnailInit(Comm::Thumbnail& thumbnail)
 {
 	thumbnail.meta.width = 0;
@@ -193,14 +185,16 @@ int ThumbnailInit(Comm::Thumbnail& thumbnail)
 	return qoi_decode_init(&thumbnail.image.qoi);
 }
 
-static int ThumbnailDecodeChunkPng(Comm::Thumbnail& thumbnail, Comm::ThumbnailBuf& data)
+/** Add a decoded piece of a PNG thumbnail */
+static int ThumbnailDecodeChunkPng(Comm::Thumbnail& thumbnail, std::span<unsigned char> data)
 {
-	size_t ret = thumbnail.image.png.appendData(data.buffer, data.size);
-	LOG_DBG("done {:d}/{:d} {:s}\n", ret, data.size, thumbnail.filename.c_str());
+	size_t ret = thumbnail.image.png.appendData(data.data(), static_cast<int>(data.size()));
+	LOG_DBG("done {:d}/{:d} {:s}\n", ret, data.size(), thumbnail.filename.c_str());
 	return 0;
 }
 
-static int ThumbnailDecodeChunkQoi(Comm::Thumbnail& thumbnail, Comm::ThumbnailBuf& data)
+/** Decode a piece of a QOI thumbnail into its bitmap */
+static int ThumbnailDecodeChunkQoi(Comm::Thumbnail& thumbnail, std::span<unsigned char> data)
 {
 	int ret;
 	int size_done = 0;
@@ -210,15 +204,15 @@ static int ThumbnailDecodeChunkQoi(Comm::Thumbnail& thumbnail, Comm::ThumbnailBu
 	do
 	{
 		LOG_DBG("buffer {:p} (size {:d}, done {:d}) pixbuf {:p} (size {:d}, decoded {:d})\n",
-				static_cast<const void*>(data.buffer),
-				data.size,
+				static_cast<const void*>(data.data()),
+				data.size(),
 				size_done,
 				static_cast<const void*>(rgba_buffer),
 				sizeof(rgba_buffer),
 				pixel_decoded);
 		ret = qoi_decode_chunked(&thumbnail.image.qoi,
-								 (data.buffer) + size_done,
-								 data.size - size_done,
+								 data.data() + size_done,
+								 static_cast<int>(data.size()) - size_done,
 								 rgba_buffer,
 								 sizeof(rgba_buffer),
 								 &pixel_decoded);
@@ -244,7 +238,7 @@ static int ThumbnailDecodeChunkQoi(Comm::Thumbnail& thumbnail, Comm::ThumbnailBu
 		LOG_VERBOSE("decoded {:d} bytes, done {:d}/{:d}; decoded {:d} missing {:d}({:#02x}) count {:d}/{:d}/{:d}\n",
 					ret,
 					size_done,
-					data.size,
+					data.size(),
 					pixel_decoded,
 					thumbnail.image.qoi.last_bytes_size,
 					thumbnail.image.qoi.last_bytes[0] & 0xc0,
@@ -253,11 +247,12 @@ static int ThumbnailDecodeChunkQoi(Comm::Thumbnail& thumbnail, Comm::ThumbnailBu
 					thumbnail.meta.height * thumbnail.meta.width);
 
 		thumbnail.image.bmp.appendPixels(rgba_buffer, pixel_decoded);
-	} while (size_done < data.size && qoi_decode_state_get(&thumbnail.image.qoi) == qoi_decoder_body);
+	} while (size_done < static_cast<int>(data.size()) &&
+			 qoi_decode_state_get(&thumbnail.image.qoi) == qoi_decoder_body);
 
 	LOG_DBG("done {:d}/{:d} pixels {:d}/{:d} {:s}",
 			size_done,
-			data.size,
+			data.size(),
 			thumbnail.image.pixel_count,
 			thumbnail.meta.height * thumbnail.meta.width,
 			thumbnail.filename.c_str());
@@ -265,7 +260,7 @@ static int ThumbnailDecodeChunkQoi(Comm::Thumbnail& thumbnail, Comm::ThumbnailBu
 	return qoi_decode_state_get(&thumbnail.image.qoi) != qoi_decoder_done;
 }
 
-int ThumbnailDecodeChunk(Comm::Thumbnail& thumbnail, Comm::ThumbnailBuf& data)
+int ThumbnailDecodeChunk(Comm::Thumbnail& thumbnail, std::string_view base64)
 {
 	if (!ThumbnailIsValid(thumbnail))
 	{
@@ -273,23 +268,22 @@ int ThumbnailDecodeChunk(Comm::Thumbnail& thumbnail, Comm::ThumbnailBuf& data)
 		return -1;
 	}
 
-	if (!ThumbnailDataIsValid(data))
+	if (base64.empty())
 	{
-		LOG_ERROR("data invalid.\n");
+		LOG_ERROR("no data.\n");
 		return -2;
 	}
 
-	int ret = base64_decode((const char*)data.buffer, data.size, data.buffer);
+	std::vector<unsigned char> decoded(base64.size() / 4 * 3 + 3);
+	int ret = base64_decode(base64.data(), static_cast<unsigned int>(base64.size()), decoded.data());
 	if (ret < 0)
 	{
-		LOG_ERROR(
-			"decode error {:d} size {:d} data\n{:s}\n", ret, data.size, reinterpret_cast<const char*>(data.buffer));
+		LOG_ERROR("decode error {:d} size {:d} data\n{:s}\n", ret, base64.size(), base64);
 		return -4;
 	}
 
-	LOG_DBG("*** received size {:d}, base64 decoded size {:d}\n", data.size, ret);
-
-	data.size = static_cast<uint16_t>(ret);
+	LOG_DBG("*** received size {:d}, base64 decoded size {:d}\n", base64.size(), ret);
+	const std::span<unsigned char> data(decoded.data(), static_cast<size_t>(ret));
 
 	switch (thumbnail.meta.imageFormat)
 	{

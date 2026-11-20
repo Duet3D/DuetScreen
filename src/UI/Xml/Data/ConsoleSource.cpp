@@ -3,9 +3,9 @@
  */
 
 #include "ConsoleSource.h"
+#include "Comm/Responses.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "Subscribers/ResponseSubscribers.h"
 #include "UI/Core/Model.h"
 #include <algorithm>
 #include <chrono>
