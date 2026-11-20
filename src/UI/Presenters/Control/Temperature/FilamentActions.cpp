@@ -87,7 +87,6 @@ namespace UI::FilamentActions
 				filaments = OM::FileSystem::GetFilamentList();
 				loaded = Xml::PrinterModel::filament(*tool);
 			}
-			OM::FileSystem::RequestFilaments(); // Fresh for next time
 			if (filaments.empty())
 			{
 				Model::get().post<EventType::Response>(ResponseType::WARNING, _("filament.none"));

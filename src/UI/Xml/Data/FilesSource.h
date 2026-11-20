@@ -4,9 +4,10 @@
  * Publishes the jobs and macros any view can offer: the newest jobs in the jobs folder, and the macros in the macros
  * folder. They are listed afresh on connecting, on coming back to the home screens, when a job ends, when asked
  * (actions.files.refresh), and whenever the printer counts a change to its files (seqs.volChanges; not every firmware
- * reports it). And the shared dialog that asks
- * before starting a job (with its details and thumbnail, and an offer to delete it) or running a macro, which the file
- * browser and the dashboard both open (assets/ui/components/modals/file_dialog.xml, hosted by the home screen).
+ * reports it). The filaments folder is listed with them, for actions.filament.choose (GetFilamentList()).
+ * And the shared dialog that asks before starting a job (with its details and thumbnail, and an offer to delete it) or
+ * running a macro, which the file browser and the dashboard both open (assets/ui/components/modals/file_dialog.xml,
+ * hosted by the home screen).
  *
  * The global actions that open and answer the dialog are in Presenters/FileBrowser/FilesActions.h. The names it
  * publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
@@ -110,7 +111,7 @@ namespace UI::Xml
 		void onInit() override;
 
 	  private:
-		/** Ask the printer for the jobs folder's and macros folder's files */
+		/** Ask the printer for the jobs, macros and filaments folders' files */
 		void requestFiles();
 
 		/** The printer sent the jobs folder's files: list the newest */

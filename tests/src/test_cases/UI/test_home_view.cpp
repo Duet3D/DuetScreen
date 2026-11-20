@@ -894,6 +894,21 @@ TEST_F(TestHomeViewWithSimulator, ConnectingListsNoFilesBeforeTheFoldersAreKnown
 	EXPECT_NE(fileItem(page<UI::LvObj>("files_jobs").getRootPtr(), "benchy.gcode"), nullptr);
 }
 
+TEST_F(TestHomeViewWithSimulator, TheFirstTapOnAToolsFilamentOffersThePrintersFilaments)
+{
+	// The filaments are listed on connecting, with the jobs and macros, so the first tap already has them
+	openControlTab(1);
+	deliverModelEvents();
+	lv_obj_t* cards = lv_obj_find_by_name(page<UI::LvObj>("tools").getRootPtr(), "tools");
+	ASSERT_NE(cards, nullptr);
+	lv_obj_t* choose = lv_obj_find_by_name(lv_obj_find_by_name(lv_obj_get_child(cards, 0), "filament"), "choose");
+	ASSERT_NE(choose, nullptr);
+	lv_obj_send_event(choose, LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(TestDialogs::choiceCount(), 4u) << "ABS, PETG, PLA and TPU";
+	EXPECT_EQ(TestDialogs::chosenIndex(), 2) << "PLA is loaded";
+	UI::closeDialogs();
+}
+
 TEST_F(TestHomeViewWithSimulator, DashboardFollowsAJob)
 {
 	sendToSimulator("M32 \"benchy.gcode\"");

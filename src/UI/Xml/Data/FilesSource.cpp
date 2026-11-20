@@ -197,6 +197,8 @@ namespace UI::Xml
 											 static_cast<FilesSource&>(*source).receiveMacros(std::move(items));
 										 }
 									 });
+		// The filaments a tool can load (actions.filament.choose) are kept as fresh as the jobs and macros
+		OM::FileSystem::RequestFilaments();
 	}
 
 	void FilesSource::receiveJobs(OM::FileSystem::ItemList items)

@@ -425,9 +425,10 @@ namespace OM::FileSystem
 	void ClearFileSystem()
 	{
 		ZoneScoped;
-		LOG_DBG("Clearing all file list requests");
+		LOG_DBG("Clearing all file list requests and the filaments");
 		MODEL_LOCK();
 		s_fileListRequests.clear();
+		s_filaments.clear();
 	}
 
 	void ClearFileList(const std::string& path)
