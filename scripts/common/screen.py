@@ -5,6 +5,7 @@ shell and tools understand."""
 
 from __future__ import annotations
 
+import hashlib
 import shlex
 import shutil
 import subprocess
@@ -76,7 +77,8 @@ def copy_to(host: str, files: Sequence[tuple[Path, str]], before: str = 'true') 
     a power cycle cannot lose them. Each is a local path and the absolute path it goes to. before is a
     shell command run on the screen first, such as one removing what the files replace."""
     remote = f'{before} && tar -x -f - -C / && sync'
-    print(f'{host}$ {remote}  < ' + ' '.join(shlex.quote(target) for _, target in files), flush=True)
+    shown = ' '.join(shlex.quote(target) for _, target in files) if len(files) <= 5 else f'{len(files)} files'
+    print(f'{host}$ {remote}  < {shown}', flush=True)
     with subprocess.Popen(ssh_command(host, remote), stdin=subprocess.PIPE) as process:
         stdin: IO[bytes] | None = process.stdin
         assert stdin is not None
@@ -89,6 +91,48 @@ def copy_to(host: str, files: Sequence[tuple[Path, str]], before: str = 'true') 
         finally:
             stdin.close()
         return process.wait() == 0
+
+
+def sync_to(host: str, source: Path, target: str) -> bool:
+    """Make a file or directory on a screen the same as a local one, sending only what differs: the files
+    that are new or changed, by their MD5, are copied, and those no longer there locally are removed. The
+    screen has no rsync, but its busybox has md5sum."""
+    local = _local_digests(source)
+    remote = _remote_digests(host, target)
+    changed = [name for name, digest in local.items() if remote.get(name) != digest]
+    removed = sorted(remote.keys() - local.keys())
+    print(f'{target}: {len(changed)} to copy, {len(removed)} to remove, {len(local) - len(changed)} unchanged')
+    if not changed and not removed:
+        return True
+    remove = 'true'
+    if removed:
+        # Then any folders that are left empty, deepest first; rmdir leaves those with files in them alone
+        remove = (f'cd {shlex.quote(target)} && rm -f -- {" ".join(shlex.quote(name) for name in removed)} && '
+                  f'{{ find . -type d | sort -r | xargs rmdir 2>/dev/null; true; }}')
+    if not changed:
+        return run_on(host, f'{remove} && sync')
+    return copy_to(host, [(source / name if name else source, f'{target}/{name}' if name else target)
+                          for name in changed], before=remove)
+
+
+def _local_digests(source: Path) -> dict[str, str]:
+    """The MD5 of each local file under a directory, by its path in it, or of a file, by the empty path."""
+    files = {'': source} if source.is_file() else {p.relative_to(source).as_posix(): p
+                                                    for p in sorted(source.rglob('*')) if p.is_file()}
+    return {name: hashlib.md5(path.read_bytes()).hexdigest() for name, path in files.items()}
+
+
+def _remote_digests(host: str, target: str) -> dict[str, str]:
+    """The MD5 of each file on a screen under a directory, by its path in it, or of a file, by the empty
+    path; none if it is not there."""
+    quoted = shlex.quote(target)
+    command = (f'if [ -d {quoted} ]; then cd {quoted} && find . -type f -exec md5sum {{}} +; '
+               f'elif [ -f {quoted} ]; then md5sum < {quoted}; fi')
+    digests: dict[str, str] = {}
+    for line in lines_of(host, command):
+        digest, _, name = line.partition('  ')
+        digests['' if name == '-' else name.removeprefix('./')] = digest
+    return digests
 
 
 def as_installed(info: tarfile.TarInfo) -> tarfile.TarInfo:

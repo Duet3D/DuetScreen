@@ -17,8 +17,21 @@
         },
         {
             "id": "duetscreen_ip_address",
-            "type": "promptString",
-            "description": "IP address for DuetScreen"
+            "type": "command",
+            "command": "extension.commandvariable.promptStringRemember",
+            "args": {
+                "key": "duetscreen_ip_address",
+                "description": "IP address for DuetScreen"
+            }
+        },
+        {
+            "id": "duet_address",
+            "type": "command",
+            "command": "extension.commandvariable.promptStringRemember",
+            "args": {
+                "key": "duet_address",
+                "description": "Address of the Duet"
+            }
         }
     ],
     "configurations": [
@@ -29,7 +42,7 @@
             "program": "${workspaceFolder}/out/build/${command:cmake.activeConfigurePresetName}/DuetScreen",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "CMake: build",
+            "preLaunchTask": "Build",
             "stopAtEntry": false,
             "linux": {
                 "MIMode": "gdb",
@@ -58,7 +71,7 @@
             "program": "${workspaceFolder}/out/build/${command:cmake.activeConfigurePresetName}/DuetScreen",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "CMake: build"
+            "preLaunchTask": "Build"
         },
         {
             "name": "Debug GTest",
@@ -67,7 +80,7 @@
             "program": "${workspaceFolder}/out/build/${command:cmake.activeConfigurePresetName}/tests/DuetScreen.tests",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "CMake: build tests",
+            "preLaunchTask": "Build Tests",
             "stopAtEntry": false,
             "linux": {
                 "MIMode": "gdb",
@@ -98,7 +111,7 @@
                 "${cmake.testArgs}"
             ],
             "cwd": "${workspaceFolder}",
-            // "preLaunchTask": "CMake: build tests",
+            // "preLaunchTask": "Build Tests",
             "stopAtEntry": false,
             "linux": {
                 "MIMode": "gdb",
@@ -129,7 +142,7 @@
                 "--gtest_filter=${input:gtest_filter}"
             ],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "CMake: build tests",
+            "preLaunchTask": "Build Tests",
             "stopAtEntry": false,
             "linux": {
                 "MIMode": "gdb",
@@ -255,9 +268,9 @@
             "name": "Python: Filter Remote Logs",
             "type": "debugpy",
             "request": "launch",
-            "program": "scripts/filter_logs.py --remote ${input:duetscreen_ip_address}",
+            "program": "scripts/filter_logs.py",
             "console": "integratedTerminal",
-            "args": "${input:log_filters}"
+            "args": "--remote ${input:duetscreen_ip_address} ${input:log_filters}"
         },
         {
             "name": "Python: Get Object Model Data",
@@ -266,8 +279,7 @@
             "program": "scripts/get_object_model_data.py",
             "console": "integratedTerminal",
             "args": [
-                "--ip",
-                "${input:duetscreen_ip_address}"
+                "${input:duet_address}"
             ]
         },
         {
@@ -277,9 +289,9 @@
             "program": "scripts/run_tests.py",
             "console": "integratedTerminal",
             "args": [
-                "--test_filter",
+                "--filter",
                 "${input:gtest_filter}",
-                "--skip_configure"
+                "--skip-configure"
             ]
         },
         {
