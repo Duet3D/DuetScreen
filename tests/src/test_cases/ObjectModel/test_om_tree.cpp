@@ -404,3 +404,23 @@ TEST_F(TestOmTree, BedAndChamberHeatersComeFromTheMappingsOfNewerFirmware)
 	EXPECT_EQ(at("heat.bedHeaters[0]").integer(), 2);
 	EXPECT_EQ(at("heat.bedHeaters").size(), 2u);
 }
+
+TEST_F(TestOmTree, WantedKeysAreTheTopLevelKeysOfWhatIsWantedOrWatched)
+{
+	Tree tree;
+	EXPECT_TRUE(tree.wantedKeys().empty());
+
+	const size_t heat = tree.want({"heat.heaters[1].current", "heat.bedHeaters"});
+	const size_t move = tree.want({"move", "not a path", ""});
+	EXPECT_EQ(tree.wantedKeys(), (std::set<std::string>{"heat", "move"}));
+
+	const size_t watch = tree.watch({"state.status", "move.axes"}, [] {});
+	EXPECT_EQ(tree.wantedKeys(), (std::set<std::string>{"heat", "move", "state"})) << "watching wants too";
+
+	tree.unwant(move);
+	EXPECT_EQ(tree.wantedKeys(), (std::set<std::string>{"heat", "move", "state"})) << "still wanted by the watch";
+	tree.unwatch(watch);
+	EXPECT_EQ(tree.wantedKeys(), std::set<std::string>{"heat"});
+	tree.unwant(heat);
+	EXPECT_TRUE(tree.wantedKeys().empty());
+}

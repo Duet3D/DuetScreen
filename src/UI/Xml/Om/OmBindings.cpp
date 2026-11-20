@@ -39,6 +39,7 @@ namespace UI::Xml
 			return nullptr;
 		}
 		auto field = std::make_unique<OmField>(path, *converter, std::string(argument));
+		m_wants.push_back(OM::Tree::get().want({path.str()}));
 		{
 			MODEL_LOCK();
 			field->update(OM::Tree::get().root());
@@ -54,6 +55,7 @@ namespace UI::Xml
 			return it->second.get();
 		}
 		auto list = std::make_unique<OmList>(*this, path);
+		m_wants.push_back(OM::Tree::get().want({path.str()}));
 		{
 			MODEL_LOCK();
 			list->refresh(OM::Tree::get().root());
@@ -141,16 +143,34 @@ namespace UI::Xml
 		}
 	}
 
+	OmBindings::~OmBindings()
+	{
+		for (const size_t wanted : m_wants)
+		{
+			OM::Tree::get().unwant(wanted);
+		}
+		for (const Watcher& watcher : m_watchers)
+		{
+			OM::Tree::get().unwant(watcher.want);
+		}
+	}
+
 	size_t OmBindings::watch(std::vector<std::string> paths, std::function<void()> callback)
 	{
 		const size_t id = m_nextWatcher++;
-		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback)});
+		const size_t wanted = OM::Tree::get().want(paths);
+		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback), .want = wanted});
 		return id;
 	}
 
 	void OmBindings::unwatch(size_t id)
 	{
-		std::erase_if(m_watchers, [id](const Watcher& watcher) { return watcher.id == id; });
+		const auto it = std::ranges::find(m_watchers, id, &Watcher::id);
+		if (it != m_watchers.end())
+		{
+			OM::Tree::get().unwant(it->want);
+			m_watchers.erase(it);
+		}
 	}
 
 	void OmBindings::refreshAll()

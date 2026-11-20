@@ -254,16 +254,65 @@ namespace OM
 
 	size_t Tree::watch(std::vector<std::string> paths, Listener callback)
 	{
+		const size_t wanted = want(paths);
 		std::lock_guard lock(m_listenersMutex);
 		const size_t id = m_nextListenerId++;
-		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback)});
+		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback), .want = wanted});
 		return id;
 	}
 
 	void Tree::unwatch(size_t id)
 	{
-		std::lock_guard lock(m_listenersMutex);
-		std::erase_if(m_watchers, [id](const Watcher& watcher) { return watcher.id == id; });
+		size_t wanted = 0;
+		{
+			std::lock_guard lock(m_listenersMutex);
+			const auto it = std::ranges::find(m_watchers, id, &Watcher::id);
+			if (it == m_watchers.end())
+			{
+				return;
+			}
+			wanted = it->want;
+			m_watchers.erase(it);
+		}
+		unwant(wanted);
+	}
+
+	size_t Tree::want(const std::vector<std::string>& paths)
+	{
+		std::vector<std::string> keys;
+		for (const std::string& text : paths)
+		{
+			const auto path = Path::parse(text);
+			if (!path || path->empty())
+			{
+				continue;
+			}
+			if (const auto* key = std::get_if<std::string>(&path->segments().front()))
+			{
+				keys.push_back(*key);
+			}
+		}
+		std::lock_guard lock(m_wantsMutex);
+		const size_t id = m_nextWantId++;
+		m_wants.emplace(id, std::move(keys));
+		return id;
+	}
+
+	void Tree::unwant(size_t id)
+	{
+		std::lock_guard lock(m_wantsMutex);
+		m_wants.erase(id);
+	}
+
+	std::set<std::string> Tree::wantedKeys() const
+	{
+		std::lock_guard lock(m_wantsMutex);
+		std::set<std::string> keys;
+		for (const auto& [id, wanted] : m_wants)
+		{
+			keys.insert(wanted.begin(), wanted.end());
+		}
+		return keys;
 	}
 
 	void Tree::tellWatchers(const ChangeSet& changes)

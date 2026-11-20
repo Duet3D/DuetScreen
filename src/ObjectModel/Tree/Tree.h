@@ -34,7 +34,9 @@
 #include "Node.h"
 #include "Patch.h"
 #include <functional>
+#include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -86,6 +88,20 @@ namespace OM
 		/** Stop the watcher watch() returned `id` for */
 		void unwatch(size_t id);
 
+		/**
+		 * Ask for the object model at `paths` (e.g. "heat.heaters", "move") to be kept up to date: the connection only
+		 * fetches the top-level keys something wants (see Comm/ModelSync.h). Watching paths, here or through the UI's
+		 * bindings, wants them too.
+		 * @return what unwant() takes
+		 */
+		size_t want(const std::vector<std::string>& paths);
+
+		/** Stop wanting what want() returned `id` for */
+		void unwant(size_t id);
+
+		/** The top-level keys something wants, e.g. "heat" for "heat.heaters[1].current" */
+		std::set<std::string> wantedKeys() const;
+
 	  private:
 		/** Tell the listeners, if there are changes they haven't been told about */
 		void notify();
@@ -103,6 +119,7 @@ namespace OM
 			size_t id;						// What unwatch() takes
 			std::vector<std::string> paths; // Paths watched
 			Listener callback;				// Called after a change to one
+			size_t want;					// What want() gave for the paths
 		};
 
 		Node m_root;					 // The object model
@@ -112,5 +129,8 @@ namespace OM
 		size_t m_nextListenerId = 1;						   // Id of the next listener added
 		std::vector<Watcher> m_watchers;   // Called after the changes they watch
 		std::mutex m_listenersMutex;	 // Guards m_listeners and m_watchers
+		std::map<size_t, std::vector<std::string>> m_wants; // The top-level keys each want() asked for, by id
+		size_t m_nextWantId = 1;							// Id of the next want()
+		mutable std::mutex m_wantsMutex;					// Guards m_wants
 	};
 } // namespace OM
