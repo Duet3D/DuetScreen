@@ -258,7 +258,7 @@ namespace UI
 				row.showPicture(
 					isFolder,
 					isFolder ? std::string()
-							 : Xml::FilesSource::thumbnail(item.GetPath(), Comm::FileInfoCache::ThumbnailSize::large));
+							 : Xml::FilesSource::thumbnail(item.GetPath(), Comm::FileInfoCache::ThumbnailSize::small));
 			});
 	}
 
