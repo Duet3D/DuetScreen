@@ -41,9 +41,6 @@ namespace Comm
 		/** How long the socket may stay quiet before a PING is sent */
 		static constexpr std::chrono::milliseconds pingInterval{4000};
 
-		/** How long a file's thumbnails are kept for its next thumbnail */
-		static constexpr std::chrono::seconds thumbnailsKept{30};
-
 		/** How many requests are in flight at once at most (DSF answers many at once) */
 		static constexpr size_t maxInFlight = 4;
 
@@ -95,10 +92,6 @@ namespace Comm
 		/** Send `text` on the socket */
 		void sendOnSocket(const std::string& text);
 
-		/** Fetch `file`'s information with every thumbnail's data in it, then give `thumbnails` its thumbnails */
-		void withThumbnails(const std::string& file,
-							std::function<void(std::expected<const OM::Node*, ReplyError>)> thumbnails);
-
 		/** The path of `file` (e.g. "0:/gcodes/a b.gcode") in a request after `prefix` (e.g. "/machine/file/") */
 		static std::string filePath(std::string_view prefix, std::string_view file);
 
@@ -111,9 +104,6 @@ namespace Comm
 		Handler<void> m_opened;						   // Told once the whole model has arrived
 		bool m_modelReceived = false;				   // The whole model has arrived: later messages are patches
 		bool m_closed = false;						   // The socket closed, or close() was called
-		std::string m_thumbnailsFile;				   // The file whose thumbnails m_thumbnails holds
-		OM::Node m_thumbnails;						   // Its thumbnails, data included, kept for its next thumbnail
-		Clock::time_point m_thumbnailsFetched;		   // When they were fetched: kept only briefly, in case it changes
 		Clock::time_point m_lastHeard;				   // When the socket last received anything
 		Clock::time_point m_lastSent;				   // When anything was last sent on the socket
 	};

@@ -296,60 +296,36 @@ namespace Comm
 	void DsfLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)
 	{
 		ZoneScoped;
-		withThumbnails(std::string(file),
-					   [handler = std::move(handler), file = std::string(file), offset](
-						   std::expected<const OM::Node*, ReplyError> thumbnails)
-					   {
-						   ZoneScopedN("thumbnail_cb");
-						   if (!thumbnails)
-						   {
-							   handler(std::unexpected(thumbnails.error()));
-							   return;
-						   }
-						   for (size_t i = 0; i < (*thumbnails)->size(); i++)
-						   {
-							   const OM::Node& thumbnail = (**thumbnails)[i];
-							   if (thumbnail["offset"].integer(-1) == static_cast<int64_t>(offset))
-							   {
-								   // The whole thumbnail, in one piece
-								   handler(FileChunk{.fileName = file,
-													 .offset = offset,
-													 .data = std::string(thumbnail["data"].text()),
-													 .next = 0});
-								   return;
-							   }
-						   }
-						   handler(std::unexpected(
-							   ReplyError{.message = fmt::format("{:s} has no thumbnail at {:d}", file, offset)}));
-					   });
-	}
-
-	void DsfLink::withThumbnails(const std::string& file,
-								 std::function<void(std::expected<const OM::Node*, ReplyError>)> thumbnails)
-	{
-		ZoneScoped;
-		if (file == m_thumbnailsFile && Clock::now() - m_thumbnailsFetched < thumbnailsKept)
-		{
-			thumbnails(&m_thumbnails); // fetched for one of its other thumbnails
-			return;
-		}
+		// DSF sends a file's thumbnails only with its information, all of them whole: the one at `offset` is answered
 		hv::QueryParams query;
 		query["readThumbnailContent"] = "true";
-		m_http.getJson(filePath("/machine/fileinfo/", file),
-					   std::move(query),
-					   [this, file, thumbnails = std::move(thumbnails)](std::expected<OM::Node, ReplyError> json)
-					   {
-						   ZoneScopedN("withThumbnails_cb");
-						   if (!json)
-						   {
-							   thumbnails(std::unexpected(json.error()));
-							   return;
-						   }
-						   m_thumbnailsFile = file;
-						   m_thumbnailsFetched = Clock::now();
-						   m_thumbnails = std::move(json->field("thumbnails"));
-						   thumbnails(&m_thumbnails);
-					   });
+		m_http.getJson(
+			filePath("/machine/fileinfo/", file),
+			std::move(query),
+			[handler = std::move(handler), file = std::string(file), offset](std::expected<OM::Node, ReplyError> json)
+			{
+				ZoneScopedN("thumbnail_cb");
+				if (!json)
+				{
+					handler(std::unexpected(json.error()));
+					return;
+				}
+				const OM::Node& thumbnails = (*json)["thumbnails"];
+				for (size_t i = 0; i < thumbnails.size(); i++)
+				{
+					const OM::Node& thumbnail = thumbnails[i];
+					if (thumbnail["offset"].integer(-1) == static_cast<int64_t>(offset))
+					{
+						handler(FileChunk{.fileName = file,
+										  .offset = offset,
+										  .data = std::string(thumbnail["data"].text()),
+										  .next = 0});
+						return;
+					}
+				}
+				handler(
+					std::unexpected(ReplyError{.message = fmt::format("{:s} has no thumbnail at {:d}", file, offset)}));
+			});
 	}
 
 	void DsfLink::readFile(std::string_view file, Handler<std::string> handler)
@@ -368,7 +344,6 @@ namespace Comm
 	void DsfLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
 	{
 		ZoneScoped;
-		m_thumbnailsFile.clear(); // the file may be the one whose thumbnails are kept
 		m_http.send({.method = HTTP_PUT,
 					 .path = filePath("/machine/file/", file),
 					 .timeout = fileTransferTimeout,
@@ -380,7 +355,6 @@ namespace Comm
 	void DsfLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
 		ZoneScoped;
-		m_thumbnailsFile.clear();
 		m_http.send({.method = HTTP_DELETE, .path = filePath("/machine/file/", file), .timeout = HTTP_TIMEOUT},
 					httpSucceeded(std::move(handler)));
 	}
