@@ -1,3 +1,4 @@
+# pyright: strict
 """
 Review the images written by the screenshot tests, and act on the decisions.
 
@@ -28,7 +29,10 @@ from dataclasses import dataclass, field
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, cast
+
+if TYPE_CHECKING:
+	from PIL.Image import Image
 
 PAGE_PATH = Path(__file__).with_name("image_review.html")  # The browser reviewer's page
 ERR_SUFFIX = "_err.png"  # Suffix of a screenshot that did not match its reference
@@ -67,12 +71,12 @@ class ReviewItem:
 class ReviewSummary:
 	"""What applying the decisions changed on disk."""
 
-	updated: List[str] = field(default_factory=list)  # References replaced by their screenshot
-	kept_old: List[str] = field(default_factory=list)  # References kept despite a difference
-	kept_new: List[str] = field(default_factory=list)  # New references kept
-	deleted_new: List[str] = field(default_factory=list)  # New references deleted
-	undecided: List[str] = field(default_factory=list)  # Items left as the test run wrote them
-	failed: List[str] = field(default_factory=list)  # Items whose change could not be applied
+	updated: List[str] = field(default_factory=list[str])  # References replaced by their screenshot
+	kept_old: List[str] = field(default_factory=list[str])  # References kept despite a difference
+	kept_new: List[str] = field(default_factory=list[str])  # New references kept
+	deleted_new: List[str] = field(default_factory=list[str])  # New references deleted
+	undecided: List[str] = field(default_factory=list[str])  # Items left as the test run wrote them
+	failed: List[str] = field(default_factory=list[str])  # Items whose change could not be applied
 	abandoned: bool = False  # True when the review was cancelled before applying anything
 
 	def log_to(self, log: Callable[[str], None]) -> None:
@@ -112,7 +116,7 @@ def apply_decisions(items: List[ReviewItem]) -> ReviewSummary:
 			if item.decision is None:
 				summary.undecided.append(item.label)
 			elif item.kind == KIND_DIFF and item.decision == ACCEPT:
-				item.reference.write_bytes(item.image.read_bytes())
+				reference_for(item.image).write_bytes(item.image.read_bytes())
 				item.image.unlink()
 				summary.updated.append(item.label)
 			elif item.kind == KIND_DIFF:
@@ -185,10 +189,10 @@ class _ItemImages:
 	reference: Optional[bytes] = None  # The existing reference, for a changed screenshot
 	diff: Optional[bytes] = None  # Per-pixel difference, contrast stretched
 	overlay: Optional[bytes] = None  # The new screenshot in grey with differences in red
-	stats: Dict[str, object] = field(default_factory=dict)  # Sizes and changed-pixel count
+	stats: Dict[str, object] = field(default_factory=dict[str, object])  # Sizes and changed-pixel count
 
 
-def _png_bytes(image) -> bytes:
+def _png_bytes(image: Image) -> bytes:
 	"""Encode a Pillow image as PNG."""
 	out = io.BytesIO()
 	image.save(out, format="PNG")
@@ -213,7 +217,7 @@ def _compare(reference: bytes, new: bytes) -> tuple[Optional[bytes], Optional[by
 	# Compare on a canvas big enough for both, so a size change shows up as a difference.
 	size = (max(ref.width, err.width), max(ref.height, err.height))
 
-	def padded(img):
+	def padded(img: Image) -> Image:
 		"""Place `img` at the top left of a transparent canvas of the shared size."""
 		if img.size == size:
 			return img
@@ -226,7 +230,7 @@ def _compare(reference: bytes, new: bytes) -> tuple[Optional[bytes], Optional[by
 	# The difference is taken on RGB only, so it isn't hidden by a transparent alpha.
 	raw = ImageChops.difference(ref.convert("RGB"), err.convert("RGB"))
 	mask = raw.convert("L")
-	stats["changedPixels"] = mask.point(lambda v: 255 if v else 0).histogram()[255]
+	stats["changedPixels"] = sum(mask.histogram()[1:])
 	diff = ImageOps.autocontrast(raw)
 
 	red = Image.new("RGBA", size, (255, 0, 0, 0))
@@ -252,7 +256,8 @@ class _BrowserSession:
 			log(f"  Preparing {index}/{len(items)}: {item.label}")
 			images = _ItemImages(new=item.image.read_bytes())
 			if item.kind == KIND_DIFF:
-				images.reference = item.reference.read_bytes() if item.reference.exists() else None
+				reference = reference_for(item.image)
+				images.reference = reference.read_bytes() if reference.exists() else None
 				if images.reference is not None:
 					images.diff, images.overlay, images.stats = _compare(images.reference, images.new)
 			self.images.append(images)
@@ -260,8 +265,8 @@ class _BrowserSession:
 	def items_json(self) -> Dict[str, object]:
 		"""Describe every item and its views for the page."""
 		with self.lock:
-			listed = []
-			for index, (item, images) in enumerate(zip(self.items, self.images)):
+			listed: List[Dict[str, object]] = []
+			for item, images in zip(self.items, self.images):
 				listed.append({
 					"kind": item.kind,
 					"label": item.label,
@@ -280,12 +285,12 @@ class _BrowserSession:
 			return None
 		return getattr(self.images[index], view)
 
-	def decide(self, index: int, decision: Optional[str]) -> bool:
-		"""Record (or clear, with None) an item's decision; False if the request is invalid."""
+	def decide(self, index: int, decision: object) -> bool:
+		"""Record (or clear, with None) an item's decision, as the page sent it; False if the request is invalid."""
 		with self.lock:
 			if self.summary or not 0 <= index < len(self.items):
 				return False
-			if decision is not None and decision not in DECISIONS:
+			if decision is not None and (not isinstance(decision, str) or decision not in DECISIONS):
 				return False
 			self.items[index].decision = decision
 			return True
@@ -305,7 +310,7 @@ def _make_handler(session: _BrowserSession) -> type:
 	class Handler(BaseHTTPRequestHandler):
 		"""Serves the page, its JSON API and its images under /<token>/."""
 
-		def log_message(self, format: str, *args) -> None:
+		def log_message(self, format: str, *args: object) -> None:
 			"""Keep request logging out of the test output."""
 
 		def _route(self) -> Optional[List[str]]:
@@ -370,7 +375,7 @@ def _make_handler(session: _BrowserSession) -> type:
 				self._send_json({"error": "Expected a JSON object"}, HTTPStatus.BAD_REQUEST)
 			elif route is not None and len(route) == 4 and route[:2] == ["api", "items"] and route[3] == "decision":
 				try:
-					ok = session.decide(int(route[2]), body.get("decision"))
+					ok = session.decide(int(route[2]), cast(Dict[str, object], body).get("decision"))
 				except ValueError:
 					ok = False
 				if ok:
@@ -412,4 +417,5 @@ def review_in_browser(items: List[ReviewItem], log: Callable[[str], None], port:
 	finally:
 		server.shutdown()
 		server.server_close()
+	assert session.summary is not None  # set before finished is
 	return session.summary

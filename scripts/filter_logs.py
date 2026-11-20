@@ -1,265 +1,180 @@
-import subprocess
+#!/usr/bin/env python3
+# pyright: strict
+"""Show DuetScreen's logs, only the lines matching the filters, coloured by level.
+
+The logs are read from the working directory, where the simulator writes them, or with --remote from a
+screen over SSH. spdlog rotates them, so the older files (DuetScreen.2.log, DuetScreen.1.log) are shown
+first, then DuetScreen.log. Each filter is a case-insensitive regular expression; a line is shown when
+any of them matches it, and the matches are highlighted.
+
+    scripts/filter_logs.py Connection Model             lines mentioning either
+    scripts/filter_logs.py --follow "\\[ERROR\\]"         errors as they are logged
+    scripts/filter_logs.py -r 192.168.1.20 -f -o out.log  follow a screen's log into a file
+"""
+
+from __future__ import annotations
+
 import argparse
-import sys
 import os
-from pathlib import Path
 import re
+import sys
 import time
-from typing import List, Iterator
-import tempfile
+from collections.abc import Iterator, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TextIO
 
-class Colors:
-    FATAL = '\033[95m'    # Purple
-    ERROR = '\033[91m'    # Red
-    WARN = '\033[93m'     # Yellow
-    INFO = '\033[92m'    # Green
-    DEBUG = '\033[94m'     # Blue
-    TRACE = '\033[97m'    # White
-    RESET = '\033[0m'     # Reset color
+from common import screen
+from common.project import complete
 
+LOCAL_LOG = Path('DuetScreen.log')
+"""The simulator's log, in the directory it was run from."""
 
-def is_piped() -> bool:
-    return not sys.stdout.isatty()
+POLL_INTERVAL = 0.1
+"""Seconds between looks at a followed log for new lines."""
 
+ROTATION_TIMEOUT = 30
+"""Seconds to wait for a rotated log to be replaced before giving up following it."""
 
-def highlight_matches(line: str, patterns: List[re.Pattern], use_color: bool) -> str:
-    if not use_color or not patterns:
-        return line
+RESET = '\033[0m'
+"""Ends a colour."""
 
-    result = line
-    for pattern in patterns:
-        matches = list(pattern.finditer(line))
-        if matches:
-            offset = 0
-            for match in matches:
-                start, end = match.span()
-                start += offset
-                end += offset
-                result = f"{result[:start]}\033[7m{result[start:end]}\033[27m{result[end:]}"
-                offset += 9
+HIGHLIGHT, END_HIGHLIGHT = '\033[7m', '\033[27m'
+"""Start and end the inverse video of a filter's match."""
 
-    return result
+LEVEL_COLOURS = [
+    (re.compile(r'\[(CRITICAL|FATAL)\]', re.IGNORECASE), '\033[95m'),  # purple
+    (re.compile(r'\[ERROR\]', re.IGNORECASE), '\033[91m'),  # red
+    (re.compile(r'\[WARN(ING)?\]', re.IGNORECASE), '\033[93m'),  # yellow
+    (re.compile(r'\[INFO\]', re.IGNORECASE), '\033[92m'),  # green
+    (re.compile(r'\[DEBUG\]', re.IGNORECASE), '\033[94m'),  # blue
+    (re.compile(r'\[TRACE\]', re.IGNORECASE), '\033[97m'),  # white
+]
+"""The colour of a line, by the first level tag it carries."""
 
 
-def colorize(line: str, use_color: bool, patterns: List[re.Pattern] = None) -> str:
-    if not use_color:
-        return line
-
-    colored_line = line
-    if re.search(r'(\[CRITICAL\]|\[FATAL\])', line, re.IGNORECASE):
-        colored_line = f"{Colors.FATAL}{line}{Colors.RESET}"
-    elif re.search(r'(\[ERROR\])', line, re.IGNORECASE):
-        colored_line = f"{Colors.ERROR}{line}{Colors.RESET}"
-    elif re.search(r'\[WARN(ING)?\]', line, re.IGNORECASE):
-        colored_line = f"{Colors.WARN}{line}{Colors.RESET}"
-    elif re.search(r'\[INFO\]', line, re.IGNORECASE):
-        colored_line = f"{Colors.INFO}{line}{Colors.RESET}"
-    elif re.search(r'\[DEBUG\]', line, re.IGNORECASE):
-        colored_line = f"{Colors.DEBUG}{line}{Colors.RESET}"
-    elif re.search(r'\[TRACE\]', line, re.IGNORECASE):
-        colored_line = f"{Colors.TRACE}{line}{Colors.RESET}"
-
-    return highlight_matches(colored_line, patterns, use_color)
+@dataclass(frozen=True)
+class Options:
+    """The command line, typed."""
+    filters: list[str]
+    follow: bool
+    output: str | None
+    remote: str | None
 
 
-def follow_remote_file(host: str, remote_path: str = "/var/log/DuetScreen.log") -> Iterator[str]:
-    """Follow a remote log file in real-time using SSH."""
-    try:
-        process = subprocess.Popen(
-            ["ssh", f"root@{host}", f"tail -f {remote_path}"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            bufsize=0
-        )
-
-        while True:
-            line = process.stdout.readline().decode('utf-8', errors='replace')
-            if not line and process.poll() is not None:
-                break
-            if line:
-                yield line.rstrip()
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error following remote log: {e}", file=sys.stderr)
-    except KeyboardInterrupt:
-        process.terminate()
-        process.wait()
-        raise
-    finally:
-        process.terminate()
-        process.wait()
+def parse_options(argv: Sequence[str]) -> Options:
+    """Read the command line."""
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('filters', nargs='*', help='regular expressions; a line matching any is shown (default: all)')
+    parser.add_argument('-f', '--follow', action='store_true', help='keep showing lines as they are logged')
+    parser.add_argument('-o', '--output', help='write the lines to this file, uncoloured')
+    parser.add_argument('-r', '--remote', metavar='HOST', help="read a screen's logs over SSH")
+    complete(parser)
+    return Options(**vars(parser.parse_args(argv)))
 
 
-def get_remote_logs(host: str, remote_path: str = "/var/log/DuetScreen.log") -> Path:
-    """Get log files from remote device via SSH."""
-    print(f"Fetching logs from {host}:{remote_path}", file=sys.stderr)
-
-    temp_dir = Path(tempfile.mkdtemp())
-    base_log = temp_dir / "DuetScreen.log"
-
-    try:
-        subprocess.run(["scp", f"root@{host}:{remote_path}", str(base_log)], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error fetching main log file: {e}", file=sys.stderr)
-        return None
-
-    i = 1
-    while True:
-        remote_rotated = f"{remote_path}.{i}"
-        local_rotated = base_log.with_suffix(f".{i}.log")
-        try:
-            subprocess.run(["scp", f"root@{host}:{remote_rotated}", str(local_rotated)], check=True)
-            i += 1
-        except subprocess.CalledProcessError:
-            break
-
-    return base_log
+# Showing lines
 
 
-def get_log_files(base_log: Path) -> List[Path]:
-    """Get all rotated log files in order."""
-    files = []
-    if base_log.exists():
-        files.append(base_log)
-    
-    i = 1
-    while True:
-        rotated = base_log.with_suffix(f'.{i}.log')
-        if not rotated.exists():
-            break
-        files.append(rotated)
-        i += 1
-    
-    return sorted(files, reverse=True)
+@dataclass(frozen=True)
+class Filter:
+    """Which lines to show, and how."""
+    patterns: list[re.Pattern[str]]
+    colour: bool
+
+    def matches(self, line: str) -> bool:
+        """Whether a line is shown."""
+        return not self.patterns or any(p.search(line) for p in self.patterns)
+
+    def format(self, line: str) -> str:
+        """A line as it is shown: coloured by its level, its matches highlighted."""
+        if not self.colour:
+            return line
+        for pattern in self.patterns:
+            line = pattern.sub(lambda m: f'{HIGHLIGHT}{m[0]}{END_HIGHLIGHT}', line)
+        colour = next((c for level, c in LEVEL_COLOURS if level.search(line)), None)
+        return f'{colour}{line}{RESET}' if colour else line
 
 
-def wait_for_new_file(filepath: Path, max_wait: int = 30) -> bool:
-    start_time = time.time()
-    while time.time() - start_time < max_wait:
-        if filepath.exists():
-            return True
-        time.sleep(0.1)
-    return False
+def show(lines: Iterator[str], filter: Filter, out: TextIO, flush: bool) -> None:
+    """Write the lines that match, flushing each one when following a log into a file."""
+    for line in lines:
+        if filter.matches(line):
+            print(filter.format(line), file=out, flush=flush)
 
 
-def follow_file(filepath: Path) -> Iterator[str]:
+# Reading the logs
+
+
+def rotated_logs(base: Path) -> list[Path]:
+    """A log and its rotated files, oldest first."""
+    older: list[Path] = []
+    while (rotated := base.with_suffix(f'.{len(older) + 1}{base.suffix}')).exists():
+        older.append(rotated)
+    return older[::-1] + ([base] if base.exists() else [])
+
+
+def read_local(base: Path) -> Iterator[str]:
+    """The lines of a log and its rotated files, oldest first."""
+    logs = rotated_logs(base)
+    if not logs:
+        sys.exit(f'No log at {base.resolve()}')
+    for log in logs:
+        with log.open(errors='replace') as f:
+            for line in f:
+                yield line.rstrip('\n')
+
+
+def follow_local(log: Path) -> Iterator[str]:
+    """The lines of a log, then those added to it, carrying on into the new file when it is rotated."""
     position = 0
-    current_file = filepath
-    current_inode = None if not filepath.exists() else os.stat(filepath).st_ino
-
+    inode = log.stat().st_ino if log.exists() else None
     while True:
-        if not current_file.exists():
-            print(f"\nLog file rotated, waiting for new file...", file=sys.stderr)
-            if wait_for_new_file(filepath):
-                current_file = filepath
-                current_inode = os.stat(filepath).st_ino
-                position = 0
-            else:
-                print(f"Timeout waiting for new log file", file=sys.stderr)
-                break
-
-        try:
-            with open(current_file, 'r', errors='replace') as f:
-                # Check if file has been rotated by comparing inodes
-                try:
-                    new_inode = os.stat(current_file).st_ino
-                    if current_inode is not None and new_inode != current_inode:
-                        position = 0
-                        current_inode = new_inode
-                except FileNotFoundError:
-                    continue
-
-                f.seek(position)
-                while True:
-                    line = f.readline()
-                    if not line:
-                        position = f.tell()
-                        break
-                    yield line.rstrip()
-
-                time.sleep(0.1)
-
-        except FileNotFoundError:
-            continue
-        except Exception as e:
-            print(f"Error reading log file: {e}", file=sys.stderr)
-            break
+        deadline = time.monotonic() + ROTATION_TIMEOUT
+        while not log.exists():
+            if time.monotonic() > deadline:
+                sys.exit(f'{log} has not come back after being rotated')
+            time.sleep(POLL_INTERVAL)
+        if os.stat(log).st_ino != inode:
+            inode, position = os.stat(log).st_ino, 0
+        with log.open(errors='replace') as f:
+            f.seek(position)
+            while line := f.readline():
+                yield line.rstrip('\n')
+            position = f.tell()
+        time.sleep(POLL_INTERVAL)
 
 
-def filter_logs(filters: List[str], follow: bool = False, output_file: str = None, remote_host: str = None) -> None:
-    patterns = [re.compile(f, re.IGNORECASE) for f in filters]
-    use_color = not (is_piped() or output_file)
-    output = open(output_file, 'w') if output_file else sys.stdout
+def read_remote(host: str) -> Iterator[str]:
+    """The lines of a screen's log and its rotated files, oldest first."""
+    base = screen.LOG.removesuffix('.log')
+    yield from screen.lines_of(host, f'for n in 9 8 7 6 5 4 3 2 1; do f={base}.$n.log; [ -f $f ] && cat $f; done; '
+                                     f'cat {screen.LOG}')
 
+
+def follow_remote(host: str) -> Iterator[str]:
+    """The lines of a screen's log, then those added to it."""
+    yield from screen.lines_of(host, f'tail -n +1 -f {screen.LOG}')
+
+
+def main() -> int:
+    """Show the logs asked for."""
+    options = parse_options(sys.argv[1:])
+    if options.remote:
+        lines = follow_remote(options.remote) if options.follow else read_remote(options.remote)
+    else:
+        lines = follow_local(LOCAL_LOG) if options.follow else read_local(LOCAL_LOG)
+    patterns = [re.compile(f, re.IGNORECASE) for f in options.filters]
     try:
-        if remote_host:
-            if follow:
-                for line in follow_remote_file(remote_host):
-                    if not filters or any(p.search(line) for p in patterns):
-                        print(colorize(line, use_color, patterns), file=output)
-                        if output_file:
-                            output.flush()
-            else:
-                base_log = get_remote_logs(remote_host)
-                if not base_log:
-                    print("Failed to fetch remote logs", file=sys.stderr)
-                    return
-
-                log_files = get_log_files(base_log)
-                if not log_files:
-                    print("No log files found", file=sys.stderr)
-                    return
-
-                for log_file in log_files:
-                    with open(log_file, 'r', errors='replace') as f:
-                        for line in f:
-                            if not filters or any(p.search(line) for p in patterns):
-                                print(colorize(line.rstrip(), use_color, patterns), file=output)
+        if options.output:
+            with open(options.output, 'w') as out:
+                show(lines, Filter(patterns, colour=False), out, flush=options.follow)
         else:
-            base_log = Path('DuetScreen.log')
-
-            if not follow:
-                log_files = get_log_files(base_log)
-                if not log_files:
-                    print("No log files found", file=sys.stderr)
-                    return
-
-                for log_file in log_files:
-                    with open(log_file, 'r', errors='replace') as f:
-                        for line in f:
-                            if not filters or any(p.search(line) for p in patterns):
-                                print(colorize(line.rstrip(), use_color, patterns), file=output)
-            else:
-                for line in follow_file(base_log):
-                    if not filters or any(p.search(line) for p in patterns):
-                        print(colorize(line, use_color, patterns), file=output)
-                        if output_file:
-                            output.flush()
-    finally:
-        if output_file:
-            output.close()
-        if remote_host and not follow and 'base_log' in locals():
-            temp_dir = base_log.parent
-            if temp_dir.exists():
-                for file in temp_dir.glob("*"):
-                    file.unlink()
-                temp_dir.rmdir()
-
-
-def main():
-    parser = argparse.ArgumentParser(description='Filter DuetScreen log files')
-    parser.add_argument('--follow', '-f', action='store_true', help='Follow the log file in real-time')
-    parser.add_argument('--output', '-o', help='Output file path')
-    parser.add_argument('--remote', '-r', help='Remote device IP address')
-    parser.add_argument('filters', nargs='*', help='Filter patterns')
-    args = parser.parse_args()
-
-    try:
-        filter_logs(args.filters, args.follow, args.output, args.remote)
+            show(lines, Filter(patterns, colour=sys.stdout.isatty()), sys.stdout, flush=False)
     except KeyboardInterrupt:
-        sys.exit(0)
+        pass
+    return 0
 
 
 if __name__ == '__main__':
-    main()
-
+    sys.exit(main())
