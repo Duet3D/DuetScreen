@@ -16,6 +16,9 @@ from typing import IO
 LOG = '/var/log/DuetScreen.log'
 """DuetScreen's log on the screen; spdlog rotates it to DuetScreen.1.log, DuetScreen.2.log..."""
 
+BINARY = '/usr/bin/DuetScreen'
+"""DuetScreen on the screen."""
+
 ASSETS = '/etc/assets'
 """Where the screen keeps the assets."""
 
@@ -80,7 +83,7 @@ def copy_to(host: str, files: Sequence[tuple[Path, str]], before: str = 'true') 
         try:
             with tarfile.open(fileobj=stdin, mode='w|', format=tarfile.GNU_FORMAT) as tar:
                 for source, target in files:
-                    tar.add(source, arcname=target.lstrip('/'), filter=_owned_by_root)
+                    tar.add(source, arcname=target.lstrip('/'), filter=as_installed)
         except BrokenPipeError:
             pass  # the screen stopped reading; its exit status says why
         finally:
@@ -88,8 +91,9 @@ def copy_to(host: str, files: Sequence[tuple[Path, str]], before: str = 'true') 
         return process.wait() == 0
 
 
-def _owned_by_root(info: tarfile.TarInfo) -> tarfile.TarInfo:
-    """A file as the screen should own it: root's, readable by all, as Buildroot installs them."""
+def as_installed(info: tarfile.TarInfo) -> tarfile.TarInfo:
+    """A file in a tar archive as the screen should have it: root's, readable by all, as Buildroot installs
+    them."""
     info.uid = info.gid = 0
     info.uname = info.gname = 'root'
     info.mode = 0o755 if info.isdir() or info.mode & 0o111 else 0o644

@@ -277,9 +277,10 @@ ${LIBRARIES_DIR}/Duet3D/**.cpp)
 target_sources(DuetScreen.lib PRIVATE ${DUET_LIB_SOURCES})
 
 # Update DuetScreen version.h
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_custom_target(
   update_version_h
-  COMMAND "${CMAKE_SOURCE_DIR}/scripts/update_version.sh"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/scripts/internal/update_version.py"
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Updating version.h"
 )
