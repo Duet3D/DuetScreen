@@ -46,6 +46,12 @@ namespace OM
 		Node(const Node&) = delete;
 		Node& operator=(const Node&) = delete;
 
+		/** Take what `other` holds, children included; `other` is left null */
+		Node(Node&& other) noexcept;
+
+		/** Take what `other` holds, children included, instead of what this held; `other` is left null */
+		Node& operator=(Node&& other) noexcept;
+
 		/** The node every failed lookup gives: it reads as null and has no children */
 		static const Node& missing();
 

@@ -7,6 +7,7 @@ target_sources(
           ${CMAKE_CURRENT_SOURCE_DIR}/Heightmap.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/PrinterStatus.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/ChangeSet.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Json.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Node.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Patch.cpp
           ${CMAKE_CURRENT_SOURCE_DIR}/Tree/Path.cpp
