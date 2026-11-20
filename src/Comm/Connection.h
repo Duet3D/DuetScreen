@@ -19,12 +19,10 @@
 #pragma once
 
 #include "Comm/Link.h"
-#include "Comm/Links/SerialLink.h"
 #include "Comm/ModelSync.h"
 #include "Comm/Ports/SerialPort.h"
 #include "ObjectModel/Tree/Node.h"
 #include "tracy/Tracy.hpp"
-#include <array>
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
@@ -37,11 +35,12 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <termios.h>
 #include <thread>
 
 namespace Comm
 {
+	class SerialLink;
+
 	/** How the screen reaches the printer; the value is kept with the settings */
 	enum class CommunicationType
 	{
@@ -196,6 +195,12 @@ namespace Comm
 		/** The connection's thread: run what is queued, and what is due, until stopped */
 		void run();
 
+		/** When the connection's thread next has something to do, if nothing is queued before then */
+		Clock::time_point nextWake() const;
+
+		/** Stop the connection's thread: wait for it, unless this is it (the program ending from it) */
+		void stopThread();
+
 		/** Run what is queued (the queue's lock not held) */
 		void runQueued();
 
@@ -236,11 +241,13 @@ namespace Comm
 		std::string m_ipAddress;									   // The printer's network address
 		std::string m_password;										   // Its network password
 
+		// Destroyed in the order opposite to this: the link before what it uses (the model sync and the port)
 		std::atomic<State> m_state{State::disconnected}; // Where the connection is
 		std::unique_ptr<SerialPort> m_port;				 // The serial port talked over, if the link is a SerialLink
+		std::unique_ptr<ModelSync> m_sync;				 // Keeps the object model up to date, unless the link does
 		std::unique_ptr<Link> m_link;					 // What talks to the printer, while connecting or connected
 		SerialLink* m_serial = nullptr;					 // m_link, when it is a SerialLink (lines come from a port)
-		std::unique_ptr<ModelSync> m_sync;				 // Keeps the object model up to date, unless the link does
+		std::atomic<bool> m_linkWaiting{false};			 // Whether the link has answers to come, for busy()
 		uint64_t m_generation = 0;						 // Counts connections, so lines from an old port are dropped
 		Clock::time_point m_connectStarted;				 // When connecting started
 		std::optional<Clock::time_point> m_retryAt;		 // When to connect next, while disconnected

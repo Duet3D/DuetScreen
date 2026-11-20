@@ -30,9 +30,6 @@ namespace Comm
 		/** Add the bytes received next, handing on every line they complete */
 		void push(std::string_view bytes);
 
-		/** Forget a line partly received, e.g. when the connection starts again */
-		void reset();
-
 	  private:
 		/** Hand on the line gathered, if it isn't empty, and start the next */
 		void endLine();

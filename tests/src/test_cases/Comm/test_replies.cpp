@@ -68,11 +68,6 @@ TEST(LineFramer, AnOverlongLineIsDroppedUpToItsEnd)
 	framer.push(std::string(LineFramer::maxLineLength, 'x'));
 	framer.push("yz\n{\"next\":1}\n");
 	EXPECT_EQ(lines, std::vector<std::string>{R"({"next":1})"});
-
-	framer.push("{\"cut\":");
-	framer.reset();
-	framer.push("{\"whole\":1}\n");
-	EXPECT_EQ(lines.back(), R"({"whole":1})") << "a line partly received is forgotten on reset";
 }
 
 TEST(Replies, AFolderListingIsRead)

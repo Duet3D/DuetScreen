@@ -44,13 +44,6 @@ namespace Comm
 		}
 	}
 
-	void LineFramer::reset()
-	{
-		ZoneScoped;
-		m_line.clear();
-		m_dropping = false;
-	}
-
 	void LineFramer::endLine()
 	{
 		ZoneScoped;

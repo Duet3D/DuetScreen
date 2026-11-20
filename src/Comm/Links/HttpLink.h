@@ -5,7 +5,8 @@
  * rr_connect for a session, rr_model for the object model, rr_gcode and rr_reply for G-code and its responses,
  * rr_filelist, rr_fileinfo, rr_thumbnail, rr_download, rr_upload and rr_delete for files.
  *
- * Only a couple of requests are in flight at once: RepRapFirmware has only a few HTTP sessions (see HttpRequester.h).
+ * Only a couple of requests are in flight at once (RepRapFirmware has only a few HTTP sessions), with files coming
+ * and going in a lane of their own and an emergency stop ahead of everything (see HttpRequester.h).
  *
  * A Duet with an SBC answers rr_connect too (DSF emulates it), and says so: the connection then talks to it through
  * DSF's own API instead (DsfLink.h).
@@ -45,9 +46,6 @@ namespace Comm
 		 */
 		HttpLink(std::string host, std::string password, HttpRequester::Post post, UnaskedHandler unasked);
 
-		/** End the session (rr_disconnect), and forget every answer still to come */
-		~HttpLink() override;
-
 		HttpLink(const HttpLink&) = delete;
 		HttpLink& operator=(const HttpLink&) = delete;
 
@@ -67,6 +65,8 @@ namespace Comm
 		void writeFile(std::string_view file, std::string contents, Handler<void> handler) override;
 		void deleteFile(std::string_view file, Handler<void> handler) override;
 		void expire(std::chrono::steady_clock::time_point) override {}
+		std::optional<std::chrono::steady_clock::time_point> nextDue() const override { return std::nullopt; }
+		void close() override;
 		std::chrono::steady_clock::time_point lastHeard() const override { return m_http.lastHeard(); }
 		bool failed() const override { return m_http.unauthorised(); }
 		bool waiting() const override { return m_http.waiting(); }

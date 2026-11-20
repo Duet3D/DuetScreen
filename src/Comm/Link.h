@@ -4,7 +4,8 @@
  * What the screen can ask of a printer, the same however it is connected: SerialLink (USB, UART, the simulated Duet:
  * G-code lines), HttpLink (a standalone Duet's rr_* requests) and DsfLink (a Duet with an SBC). The Connection
  * (Connection.h) owns one and calls it on its own thread only; every answer comes back on that thread too, once, as
- * the value asked for or why there is none.
+ * the value asked for or why there is none. close() answers whatever is still waiting; a link destroyed without being
+ * closed (the program ending) calls nothing.
  */
 
 #pragma once
@@ -15,6 +16,7 @@
 #include <cstdint>
 #include <expected>
 #include <functional>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -56,6 +58,12 @@ namespace Comm
 
 		/** Let time pass: a request not answered by its deadline is given up (its handler told) */
 		virtual void expire(std::chrono::steady_clock::time_point now) = 0;
+
+		/** When expire() next has something to do, if anything */
+		virtual std::optional<std::chrono::steady_clock::time_point> nextDue() const = 0;
+
+		/** Give up everything still waiting, telling each handler there is no answer, and end the session */
+		virtual void close() = 0;
 
 		/** When the printer last sent anything */
 		virtual std::chrono::steady_clock::time_point lastHeard() const = 0;

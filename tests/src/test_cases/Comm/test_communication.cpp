@@ -40,6 +40,8 @@ namespace
 
 		size_t channels() const override { return m_channels; }
 		bool needsChecksums() const override { return m_checksums; }
+		std::chrono::milliseconds replyTimeout() const override { return timeout; }
+		size_t maxUploadSize() const override { return maxUpload; }
 
 		/** One write */
 		struct Write
@@ -48,8 +50,10 @@ namespace
 			std::string bytes; // What
 		};
 
-		std::vector<Write> written; // Everything written, oldest first
-		bool writable = true;		// Whether writes work
+		std::vector<Write> written;				 // Everything written, oldest first
+		bool writable = true;					 // Whether writes work
+		std::chrono::milliseconds timeout{5000}; // How long a request waits for its reply
+		size_t maxUpload = SIZE_MAX;			 // The largest file written
 
 	  private:
 		size_t m_channels; // How many channels it has
@@ -73,9 +77,9 @@ class TestSerialLink : public ::testing::Test
 {
   protected:
 	/** Make the link over `port` */
-	void open(FakePort& port, SerialLink::Options options = {})
+	void open(FakePort& port)
 	{
-		link.emplace(port, [this](OM::Node& reply) { unasked.push_back(reply.toJson()); }, options);
+		link.emplace(port, [this](OM::Node& reply) { unasked.push_back(reply.toJson()); });
 	}
 
 	std::optional<SerialLink> link;	  // What is tested
@@ -135,15 +139,16 @@ TEST_F(TestSerialLink, RepliesFindTheirRequestsByLineNumber)
 TEST_F(TestSerialLink, ARequestNotAnsweredInTimeIsGivenUp)
 {
 	FakePort port;
-	open(port, {.replyTimeout = std::chrono::milliseconds(100)});
+	port.timeout = std::chrono::milliseconds(100);
+	open(port);
 	std::optional<std::string> error;
 	link->fileInfo("0:/gcodes/a.gcode",
 				   [&error](std::expected<Comm::FileInfoReply, Comm::ReplyError> reply)
 				   { error = reply ? "" : reply.error().message; });
-	ASSERT_TRUE(link->nextDeadline());
+	ASSERT_TRUE(link->nextDue());
 	link->expire(SerialLink::Clock::now());
 	EXPECT_FALSE(error) << "not yet";
-	link->expire(*link->nextDeadline() + std::chrono::milliseconds(1));
+	link->expire(*link->nextDue() + std::chrono::milliseconds(1));
 	ASSERT_TRUE(error);
 	EXPECT_NE(error->find("M36"), std::string::npos) << *error;
 
@@ -160,9 +165,15 @@ TEST_F(TestSerialLink, RequestsStillWaitingAreToldWhenTheLinkCloses)
 					0,
 					[&error](std::expected<Comm::FileList, Comm::ReplyError> reply)
 					{ error = reply ? "" : reply.error().message; });
-	link.reset();
+	link->close();
 	ASSERT_TRUE(error);
 	EXPECT_FALSE(error->empty());
+	error.reset();
+	link->fileInfo("0:/gcodes/a.gcode",
+				   [&error](std::expected<Comm::FileInfoReply, Comm::ReplyError> reply)
+				   { error = reply ? "" : reply.error().message; });
+	EXPECT_TRUE(error) << "asking a closed link is answered at once";
+	EXPECT_EQ(lines(port).size(), 1u) << "and sends nothing";
 }
 
 TEST_F(TestSerialLink, FileRequestsAreReadAsWhatTheyAskFor)
@@ -212,31 +223,61 @@ TEST_F(TestSerialLink, StateRequestsGoOnTheSecondChannel)
 	open(single);
 	link->requestModel("", "d99f", [](auto) {});
 	EXPECT_EQ(single.written[0].channel, 0u) << "with one channel, everything goes on it";
-
-	FakePort unused(2);
-	open(unused, {.useStatusChannel = false});
-	link->requestModel("", "d99f", [](auto) {});
-	EXPECT_EQ(unused.written[0].channel, 0u) << "unless the second channel isn't to be used";
 }
 
 TEST_F(TestSerialLink, FilesAreWrittenALineAtATimeWithTheirQuotesKept)
 {
-	FakePort port;
-	open(port, {.maxUploadSize = 64});
-	bool written = false;
+	FakePort port(2);
+	port.maxUpload = 64;
+	open(port);
+	std::optional<bool> written;
 	link->writeFile("0:/sys/a \"b\".g",
 					"M118 S\"it's\"\nG4 S1",
 					[&written](std::expected<void, Comm::ReplyError> result) { written = result.has_value(); });
-	EXPECT_TRUE(written);
 	EXPECT_EQ(lines(port),
 			  (std::vector<std::string>{R"(N0 echo >"0:/sys/a ""b"".g" "M118 S""it''s""")",
-										R"(N1 echo >>"0:/sys/a ""b"".g" "G4 S1")"}));
+										R"(N1 echo >>"0:/sys/a ""b"".g" "G4 S1")",
+										R"(N2 M409 K"state.status" F"v")"}));
+	EXPECT_EQ(port.written[2].channel, 0u) << "the acknowledgement follows the lines on their channel";
+	EXPECT_FALSE(written) << "not done until the printer has dealt with every line";
+	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":2})");
+	ASSERT_TRUE(written);
+	EXPECT_TRUE(*written);
 
 	std::optional<Comm::ReplyError> tooLarge;
 	link->writeFile("0:/sys/big.g",
 					std::string(65, 'x'),
 					[&tooLarge](std::expected<void, Comm::ReplyError> result) { tooLarge = result.error(); });
 	EXPECT_TRUE(tooLarge);
+}
+
+TEST_F(TestSerialLink, AnErrorFromALineOfAFileFailsIt)
+{
+	FakePort port;
+	open(port);
+	std::optional<std::expected<void, Comm::ReplyError>> deleted;
+	link->deleteFile("0:/gcodes/none.gcode",
+					 [&deleted](std::expected<void, Comm::ReplyError> result) { deleted = result; });
+	EXPECT_EQ(lines(port),
+			  (std::vector<std::string>{R"(N0 M30 "0:/gcodes/none.gcode")", R"(N1 M409 K"state.status" F"v")"}));
+	link->receive(0, R"({"resp":"Error: M30: file not found","line":0})");
+	EXPECT_EQ(unasked.size(), 1u) << "the error is shown too";
+	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":1})");
+	ASSERT_TRUE(deleted);
+	ASSERT_FALSE(*deleted);
+	EXPECT_EQ(deleted->error().message, "Error: M30: file not found");
+}
+
+TEST_F(TestSerialLink, ALineTooLongForTheFirmwareIsntSent)
+{
+	FakePort port;
+	open(port);
+	std::optional<Comm::ReplyError> error;
+	link->writeFile("0:/sys/long.g",
+					"G1 X1\n" + std::string(SerialLink::maxLineLength, 'x'),
+					[&error](std::expected<void, Comm::ReplyError> result) { error = result.error(); });
+	ASSERT_TRUE(error);
+	EXPECT_TRUE(port.written.empty()) << "no line of it is sent, so no file is left half written";
 }
 
 TEST_F(TestSerialLink, AWriteThatFailsMeansThePortHasGone)

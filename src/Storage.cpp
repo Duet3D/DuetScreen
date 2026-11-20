@@ -11,7 +11,7 @@
 /* For types */
 #include "Comm/Connection.h"
 #include "Comm/Responses.h"
-#include "Comm/Usb.h"		   // Comm::UsbMode
+#include "Comm/UsbMode.h"	   // Comm::UsbMode
 #include "Debug.h"			   // Log::DebugLevel
 #include "ObjectModel/Files.h" // OM::FileSystem::SortBy
 #include "ObjectModel/JobProgressSource.h"
@@ -93,7 +93,7 @@ constexpr StorageKey<bool> ID_ENABLE_UI_LOGGING = {"debug:ui_logging", false};
 constexpr StorageKey<std::chrono::milliseconds> ID_BURNIN_FREQUENCY = {"debug:burnin_frequency",
 																	   std::chrono::milliseconds(2000)};
 constexpr StorageKey<bool> ID_SYSTEM_MONITOR_ENABLED = {"debug:system_monitor_enabled", false};
-constexpr StorageKey<bool> ID_ENABLE_SECOND_USB_CHANNEL = {"developer:enable_second_usb_channel", false};
+constexpr StorageKey<bool> ID_ENABLE_SECOND_USB_CHANNEL = {"developer:enable_second_usb_channel", true};
 
 #if DEBUG_BORDERS
 constexpr StorageKey<bool> ID_DEBUG_BORDERS = {"debug:borders", false};

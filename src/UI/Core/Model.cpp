@@ -1,6 +1,6 @@
 #include "Model.h"
 #include "Comm/Connection.h"
-#include "Comm/Usb.h"
+#include "Comm/UsbMode.h"
 #include "Configuration.h"
 #include "Debug.h"
 #include "Hardware/Usb.h"

@@ -3,6 +3,7 @@
  */
 
 #include "HttpLink.h"
+#include "Comm/Lines.h"
 #include "Comm/Responses.h"
 #include "Configuration.h"
 #include "Debug.h"
@@ -23,18 +24,19 @@ namespace Comm
 		template <typename T, typename Read>
 		HttpRequester::JsonHandler readAs(Handler<T> handler, Read read)
 		{
-			ZoneScoped;
 			return [handler = std::move(handler), read](std::expected<OM::Node, ReplyError> json)
-			{ handler(json.and_then([&read](const OM::Node& node) { return read(node); })); };
+			{
+				ZoneScopedN("readAs_cb");
+				handler(json.and_then([&read](const OM::Node& node) { return read(node); }));
+			};
 		}
 
-		/** A handler of a request's JSON that only says whether it worked ({"err":0}) */
-		HttpRequester::JsonHandler succeeded(Handler<void> handler)
+		/** A handler of a request's JSON that tells `handler` whether the firmware's "err" says it worked */
+		HttpRequester::JsonHandler firmwareSucceeded(Handler<void> handler)
 		{
-			ZoneScoped;
 			return [handler = std::move(handler)](std::expected<OM::Node, ReplyError> json)
 			{
-				ZoneScopedN("succeeded_cb");
+				ZoneScopedN("firmwareSucceeded_cb");
 				if (!json)
 				{
 					handler(std::unexpected(json.error()));
@@ -56,25 +58,12 @@ namespace Comm
 		, m_unasked(std::move(unasked))
 		, m_http(std::move(host), std::move(post), maxInFlight)
 	{
-		ZoneScoped;
 	}
 
-	HttpLink::~HttpLink()
+	void HttpLink::close()
 	{
 		ZoneScoped;
-		if (m_sessionKey != 0 && !m_http.unauthorised())
-		{
-			// Waited for (briefly), as the requester goes with the link
-			HttpRequest request;
-			request.method = HTTP_GET;
-			request.host = m_http.host();
-			request.path = "/rr_disconnect";
-			request.headers["X-Session-Key"] = fmt::format("{:d}", m_sessionKey);
-			request.timeout = 1;
-			request.DumpUrl();
-			HttpResponse response;
-			hv::HttpClient().send(&request, &response);
-		}
+		m_http.close(m_sessionKey != 0 ? "/rr_disconnect" : "");
 	}
 
 	void HttpLink::open(Handler<Session> handler)
@@ -121,21 +110,18 @@ namespace Comm
 	void HttpLink::fetchResponses()
 	{
 		ZoneScoped;
-		m_http.send(HTTP_GET,
-					"/rr_reply",
-					{},
-					HTTP_TIMEOUT,
-					[this](const HttpResponsePtr& response)
+		m_http.send({.path = "/rr_reply", .timeout = HTTP_TIMEOUT},
+					[this](const HttpRequester::Response& response)
 					{
 						ZoneScopedN("fetchResponses_cb");
-						const auto text = HttpRequester::readText(response);
+						const auto text = HttpRequester::text(response);
 						if (!text || text->empty())
 						{
 							return;
 						}
 						if (text->front() == '{')
 						{
-							auto json = HttpRequester::readJson(response);
+							auto json = HttpRequester::json(*text);
 							if (json)
 							{
 								m_unasked(*json);
@@ -143,13 +129,7 @@ namespace Comm
 							return;
 						}
 						// The responses since rr_reply was last asked, a line each
-						std::string_view rest = *text;
-						while (!rest.empty())
-						{
-							const size_t end = rest.find('\n');
-							showResponse(rest.substr(0, end));
-							rest = end == std::string_view::npos ? std::string_view() : rest.substr(end + 1);
-						}
+						forEachLine(*text, EmptyLines::skip, [](std::string_view line) { showResponse(line); });
 					});
 	}
 
@@ -173,7 +153,20 @@ namespace Comm
 	void HttpLink::emergencyStop()
 	{
 		ZoneScoped;
-		sendGcode("M112 M999");
+		hv::QueryParams query;
+		query["gcode"] = "M112 M999";
+		m_http.send({.path = "/rr_gcode",
+					 .query = std::move(query),
+					 .timeout = HTTP_TIMEOUT,
+					 .lane = HttpRequester::Lane::urgent},
+					[](const HttpRequester::Response& response)
+					{
+						ZoneScopedN("emergencyStop_cb");
+						if (const auto text = HttpRequester::text(response); !text)
+						{
+							LOG_ERROR("The emergency stop wasn't taken: {:s}", text.error().message);
+						}
+					});
 	}
 
 	void HttpLink::listFiles(std::string_view dir, size_t first, Handler<FileList> handler)
@@ -214,12 +207,15 @@ namespace Comm
 		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
-		m_http.send(HTTP_GET,
-					"/rr_download",
-					std::move(query),
-					fileTransferTimeout,
-					[handler = std::move(handler)](const HttpResponsePtr& response)
-					{ handler(HttpRequester::readText(response)); });
+		m_http.send({.path = "/rr_download",
+					 .query = std::move(query),
+					 .timeout = fileTransferTimeout,
+					 .lane = HttpRequester::Lane::slow},
+					[handler = std::move(handler)](const HttpRequester::Response& response)
+					{
+						ZoneScopedN("readFile_cb");
+						handler(HttpRequester::text(response));
+					});
 	}
 
 	void HttpLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
@@ -227,14 +223,18 @@ namespace Comm
 		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
-		m_http.send(
-			HTTP_POST,
-			"/rr_upload",
-			std::move(query),
-			fileTransferTimeout,
-			[handler = succeeded(std::move(handler))](const HttpResponsePtr& response)
-			{ handler(HttpRequester::readJson(response)); },
-			std::move(contents));
+		m_http.send({.method = HTTP_POST,
+					 .path = "/rr_upload",
+					 .query = std::move(query),
+					 .timeout = fileTransferTimeout,
+					 .lane = HttpRequester::Lane::slow,
+					 .body = std::move(contents)},
+					[handler = firmwareSucceeded(std::move(handler))](const HttpRequester::Response& response)
+					{
+						ZoneScopedN("writeFile_cb");
+						handler(HttpRequester::text(response).and_then([](const std::string& body)
+																	   { return HttpRequester::json(body); }));
+					});
 	}
 
 	void HttpLink::deleteFile(std::string_view file, Handler<void> handler)
@@ -242,6 +242,6 @@ namespace Comm
 		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
-		m_http.getJson("/rr_delete", std::move(query), succeeded(std::move(handler)));
+		m_http.getJson("/rr_delete", std::move(query), firmwareSucceeded(std::move(handler)));
 	}
 } // namespace Comm

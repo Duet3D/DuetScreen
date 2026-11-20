@@ -7,6 +7,7 @@
 #include "Comm/LineFramer.h"
 #include "Comm/Links/DsfLink.h"
 #include "Comm/Links/HttpLink.h"
+#include "Comm/Links/SerialLink.h"
 #include "Comm/Ports/UartPort.h"
 #include "Comm/Ports/UsbPort.h"
 #include "Comm/Responses.h"
@@ -31,14 +32,9 @@ namespace Comm
 {
 	namespace
 	{
-		/** How often the connection's thread looks at what is due, when nothing is queued */
-		constexpr std::chrono::milliseconds threadTick{20};
-
-		/** How long a request over USB, or to the simulated Duet, waits for its reply */
-		constexpr std::chrono::milliseconds usbReplyTimeout{5000};
-
-		/** How long a request over UART waits for its reply: a large reply takes a while at a low baud rate */
-		constexpr std::chrono::milliseconds uartReplyTimeout{10000};
+		/** The longest the connection's thread sleeps without looking at what is due (a port that has gone says
+		 * nothing) */
+		constexpr std::chrono::milliseconds longestSleep{1000};
 
 		/** Act on a control command, which the firmware sends to update or restart the screen */
 		void controlCommand(std::string_view command)
@@ -89,10 +85,24 @@ namespace Comm
 	Connection::~Connection()
 	{
 		ZoneScoped;
-		// Only the thread: the rest of the program may have gone already
+		// Only the thread: the rest of the program may have gone already, so the link goes without telling anyone
+		stopThread();
+	}
+
+	void Connection::stopThread()
+	{
+		ZoneScoped;
 		m_running = false;
 		m_queueChanged.notify_all();
-		if (m_thread.joinable())
+		if (!m_thread.joinable())
+		{
+			return;
+		}
+		if (m_thread.get_id() == std::this_thread::get_id())
+		{
+			m_thread.detach(); // the program is ending from the connection's own thread (a reset the firmware sent)
+		}
+		else
 		{
 			m_thread.join();
 		}
@@ -126,15 +136,7 @@ namespace Comm
 	void Connection::stop()
 	{
 		ZoneScoped;
-		if (m_running)
-		{
-			m_running = false;
-			m_queueChanged.notify_all();
-			if (m_thread.joinable())
-			{
-				m_thread.join();
-			}
-		}
+		stopThread();
 		{
 			std::lock_guard lock(m_queueMutex);
 			m_queue.clear();
@@ -387,6 +389,7 @@ namespace Comm
 		runQueued();
 		step(Clock::now());
 		runQueued();
+		m_linkWaiting = m_link && m_link->waiting();
 	}
 
 	void Connection::pollNow()
@@ -413,7 +416,7 @@ namespace Comm
 				return true;
 			}
 		}
-		return m_link && m_link->waiting();
+		return m_linkWaiting.load();
 	}
 
 	void Connection::receiveUnasked(OM::Node& reply)
@@ -464,13 +467,44 @@ namespace Comm
 		tracy::SetThreadName("Connection");
 		while (m_running)
 		{
+			const Clock::time_point wake = nextWake();
 			{
 				std::unique_lock lock(m_queueMutex);
-				m_queueChanged.wait_for(lock, threadTick, [this] { return !m_queue.empty() || !m_running; });
+				m_queueChanged.wait_until(lock, wake, [this] { return !m_queue.empty() || !m_running; });
 			}
 			runQueued();
 			step(Clock::now());
+			m_linkWaiting = m_link && m_link->waiting();
 		}
+	}
+
+	Connection::Clock::time_point Connection::nextWake() const
+	{
+		ZoneScoped;
+		const Clock::time_point now = Clock::now();
+		Clock::time_point wake = now + longestSleep;
+		const auto noLaterThan = [&wake](Clock::time_point time) { wake = std::min(wake, time); };
+		if (m_retryAt)
+		{
+			noLaterThan(*m_retryAt);
+		}
+		if (m_state == State::connecting)
+		{
+			noLaterThan(m_connectStarted + PRINTER_REQUEST_TIMEOUT);
+		}
+		if (m_link)
+		{
+			noLaterThan(m_link->lastHeard() + PRINTER_REQUEST_TIMEOUT);
+			if (const auto due = m_link->nextDue())
+			{
+				noLaterThan(*due);
+			}
+		}
+		if (m_sync)
+		{
+			noLaterThan(m_sync->nextPoll());
+		}
+		return std::max(wake, now);
 	}
 
 	void Connection::runQueued()
@@ -558,7 +592,7 @@ namespace Comm
 		switch (type())
 		{
 		case CommunicationType::usb:
-			connectSerial(std::make_unique<UsbPort>());
+			connectSerial(std::make_unique<UsbPort>(StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL)));
 			break;
 		case CommunicationType::uart:
 			connectSerial(std::make_unique<UartPort>(DEFAULT_UART_PORT, StorageHelper::getData(ID_DUET_BAUD_RATE)));
@@ -582,7 +616,7 @@ namespace Comm
 			http.open(
 				[this, generation = m_generation](std::expected<HttpLink::Session, ReplyError> session)
 				{
-					ZoneScopedN("rrConnect_cb");
+					ZoneScopedN("connect_cb");
 					if (generation != m_generation)
 					{
 						return;
@@ -660,27 +694,13 @@ namespace Comm
 			return;
 		}
 		m_port = std::move(port);
-		const bool needsChecksums = m_port->needsChecksums(); // a UART: slow, and its lines checksummed
 
-		const bool usb = type() == CommunicationType::usb;
-		auto link = std::make_unique<SerialLink>(
-			*m_port,
-			[this](OM::Node& reply) { receiveUnasked(reply); },
-			SerialLink::Options{
-				.replyTimeout = needsChecksums ? uartReplyTimeout : usbReplyTimeout,
-				.useStatusChannel = StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL),
-				.maxUploadSize = needsChecksums ? MAX_UART_UPLOAD_SIZE : SIZE_MAX,
-			});
+		auto link = std::make_unique<SerialLink>(*m_port, [this](OM::Node& reply) { receiveUnasked(reply); });
 		m_serial = link.get();
 		m_link = std::move(link);
-		if (usb)
+		for (const std::string& line : m_port->openingGcode())
 		{
-			// JSON replies, without checksums (USB has its own error checking)
-			m_link->sendGcode("M575 P0 S0");
-			if (StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL) && m_port->channels() > 1)
-			{
-				m_link->sendGcode("M575 P1 S0");
-			}
+			m_link->sendGcode(line);
 		}
 		m_sync = std::make_unique<ModelSync>(*m_link);
 		m_sync->setPollInterval(pollInterval());
@@ -703,7 +723,11 @@ namespace Comm
 		const bool wasDisconnected = m_state == State::disconnected && !m_link && !m_port;
 		m_generation++;
 		m_serial = nullptr;
-		m_link.reset(); // tells whoever waits for an answer that there is none
+		if (m_link)
+		{
+			m_link->close(); // whoever waits for an answer is told there is none
+		}
+		m_link.reset();
 		m_sync.reset();
 		if (m_port)
 		{
@@ -741,7 +765,8 @@ namespace Comm
 			return; // from a port closed since
 		}
 		m_serial->receive(channel, line);
-		if (m_state == State::connecting)
+		// Connected once the printer has answered the live model request: any line could be noise (a wrong baud rate)
+		if (m_state == State::connecting && m_sync && m_sync->hasLiveModel())
 		{
 			connected();
 		}

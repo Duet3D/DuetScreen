@@ -209,13 +209,25 @@ TEST_F(TestModelSync, AxesBeyondThoseInMoveAreFetchedFromMoveAxes)
 TEST_F(TestModelSync, AFailedFetchIsTriedAgainAfterTheNextLiveModel)
 {
 	tree.want({"fans"});
-	sync.pollNow();
+	sync.setPollInterval(std::chrono::milliseconds(250));
+	const Clock::time_point start = Clock::now();
+	sync.tick(start);
 	link.answer(live(R"("fans":1)"));
-	link.fail();
-	EXPECT_TRUE(link.waiting().empty()) << "not at once, so a printer that doesn't answer isn't flooded";
-	sync.pollNow();
+	link.fail(); // e.g. RepRapFirmware out of reply buffers (HTTP 503)
+	for (int ms = 1; ms < 250; ms += 20)
+	{
+		sync.tick(start + std::chrono::milliseconds(ms));
+	}
+	EXPECT_TRUE(link.waiting().empty()) << "not on every tick, so a printer that is struggling isn't flooded";
+
+	sync.tick(start + std::chrono::milliseconds(260));
+	ASSERT_EQ(link.waiting(), std::vector<std::string>{" d99f"});
 	link.answer(live(R"("fans":1)"));
-	EXPECT_EQ(link.waiting(), std::vector<std::string>{"fans v"});
+	EXPECT_EQ(link.waiting(), std::vector<std::string>{"fans v"}) << "once the printer answers again";
+
+	link.answer(R"({"key":"heat","flags":"vo","result":{}})");
+	sync.tick(start + std::chrono::milliseconds(300));
+	EXPECT_TRUE(link.waiting().empty()) << "nor after an answer to something else";
 }
 
 TEST_F(TestModelSync, TheLiveModelIsAskedForEachPollInterval)
@@ -247,17 +259,6 @@ TEST_F(TestModelSync, ResponsesAreFetchedWhenTheReplySeqChanges)
 	sync.pollNow();
 	link.answer(live(R"("reply":4)"));
 	EXPECT_EQ(link.responsesFetched, 2);
-}
-
-TEST_F(TestModelSync, AReplyAskedForBeforeAResetIsIgnored)
-{
-	tree.want({"fans"});
-	sync.pollNow();
-	link.answer(live(R"("fans":1)"));
-	sync.reset();
-	link.answerResult(R"([{"name":"old"}])");
-	EXPECT_EQ(tree.root().at("fans").kind(), OM::Node::Kind::missing);
-	EXPECT_TRUE(sync.idle());
 }
 
 TEST_F(TestModelSync, AStatusReportNobodyAskedForIsMerged)

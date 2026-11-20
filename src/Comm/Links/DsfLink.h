@@ -9,7 +9,9 @@
  *     "OK" before DSF sends the next, and "PING" keeps a quiet socket open. Nothing is polled.
  *   - POST /machine/code runs G-code and answers with its response
  *   - /machine/directory, /machine/fileinfo and /machine/file list, describe, read, write and delete files, with the
- *     field names RepRapFirmware uses; a thumbnail comes whole in its file's information
+ *     field names RepRapFirmware uses; a thumbnail comes whole in its file's information, which holds every thumbnail
+ * of the file, so it is fetched once for them all
+ *   - G-code waits in a lane of its own (DSF answers once it has run), an emergency stop goes ahead of everything
  *
  * The connection finds it is talking to DSF when rr_connect says so (see HttpLink.h).
  */
@@ -18,6 +20,7 @@
 
 #include "Comm/Link.h"
 #include "HttpRequester.h"
+#include "ObjectModel/Tree/Node.h"
 #include <algorithm>
 #include <chrono>
 #include <memory>
@@ -38,6 +41,9 @@ namespace Comm
 		/** How long the socket may stay quiet before a PING is sent */
 		static constexpr std::chrono::milliseconds pingInterval{4000};
 
+		/** How long a file's thumbnails are kept for its next thumbnail */
+		static constexpr std::chrono::seconds thumbnailsKept{30};
+
 		/** How many requests are in flight at once at most (DSF answers many at once) */
 		static constexpr size_t maxInFlight = 4;
 
@@ -48,7 +54,7 @@ namespace Comm
 		 */
 		DsfLink(std::string host, std::string password, HttpRequester::Post post);
 
-		/** Close the socket and end the session */
+		/** Close the socket (without telling anyone: see close()) */
 		~DsfLink() override;
 
 		DsfLink(const DsfLink&) = delete;
@@ -70,6 +76,8 @@ namespace Comm
 		void writeFile(std::string_view file, std::string contents, Handler<void> handler) override;
 		void deleteFile(std::string_view file, Handler<void> handler) override;
 		void expire(Clock::time_point now) override;
+		std::optional<Clock::time_point> nextDue() const override;
+		void close() override;
 		Clock::time_point lastHeard() const override { return std::max(m_lastHeard, m_http.lastHeard()); }
 		bool failed() const override { return m_closed || m_http.unauthorised(); }
 		bool waiting() const override { return m_http.waiting(); }
@@ -87,6 +95,10 @@ namespace Comm
 		/** Send `text` on the socket */
 		void sendOnSocket(const std::string& text);
 
+		/** Fetch `file`'s information with every thumbnail's data in it, then give `thumbnails` its thumbnails */
+		void withThumbnails(const std::string& file,
+							std::function<void(std::expected<const OM::Node*, ReplyError>)> thumbnails);
+
 		/** The path of `file` (e.g. "0:/gcodes/a b.gcode") in a request after `prefix` (e.g. "/machine/file/") */
 		static std::string filePath(std::string_view prefix, std::string_view file);
 
@@ -98,7 +110,10 @@ namespace Comm
 		std::string m_sessionKey;					   // The session's key
 		Handler<void> m_opened;						   // Told once the whole model has arrived
 		bool m_modelReceived = false;				   // The whole model has arrived: later messages are patches
-		bool m_closed = false;						   // The socket closed
+		bool m_closed = false;						   // The socket closed, or close() was called
+		std::string m_thumbnailsFile;				   // The file whose thumbnails m_thumbnails holds
+		OM::Node m_thumbnails;						   // Its thumbnails, data included, kept for its next thumbnail
+		Clock::time_point m_thumbnailsFetched;		   // When they were fetched: kept only briefly, in case it changes
 		Clock::time_point m_lastHeard;				   // When the socket last received anything
 		Clock::time_point m_lastSent;				   // When anything was last sent on the socket
 	};

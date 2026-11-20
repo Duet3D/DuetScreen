@@ -9,7 +9,7 @@
 #include "Comm/Connection.h"
 #include "Comm/LineFramer.h"
 #include "Comm/Replies.h"
-#include "Comm/Usb.h"
+#include "Comm/UsbMode.h"
 #include "Configuration.h"
 #include "DeadlockDetector.h"
 #include "Debug.h"

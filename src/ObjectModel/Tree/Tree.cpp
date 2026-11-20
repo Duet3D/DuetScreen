@@ -304,6 +304,7 @@ namespace OM
 		std::lock_guard lock(m_wantsMutex);
 		const size_t id = m_nextWantId++;
 		m_wants.emplace(id, std::move(keys));
+		m_wantsVersion++;
 		return id;
 	}
 
@@ -311,7 +312,10 @@ namespace OM
 	{
 		ZoneScoped;
 		std::lock_guard lock(m_wantsMutex);
-		m_wants.erase(id);
+		if (m_wants.erase(id) > 0)
+		{
+			m_wantsVersion++;
+		}
 	}
 
 	std::set<std::string> Tree::wantedKeys() const

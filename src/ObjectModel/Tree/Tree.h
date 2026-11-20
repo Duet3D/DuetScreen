@@ -33,6 +33,7 @@
 #include "ChangeSet.h"
 #include "Node.h"
 #include "Patch.h"
+#include <atomic>
 #include <functional>
 #include <map>
 #include <mutex>
@@ -103,6 +104,9 @@ namespace OM
 		/** The top-level keys something wants, e.g. "heat" for "heat.heaters[1].current" */
 		std::set<std::string> wantedKeys() const;
 
+		/** A number that changes whenever what is wanted changes, so wantedKeys() is only read again when it has */
+		uint64_t wantsVersion() const { return m_wantsVersion.load(); }
+
 	  private:
 		/** Tell the listeners, if there are changes they haven't been told about */
 		void notify();
@@ -133,5 +137,6 @@ namespace OM
 		std::map<size_t, std::vector<std::string>> m_wants;	  // The top-level keys each want() asked for, by id
 		size_t m_nextWantId = 1;							  // Id of the next want()
 		mutable std::mutex m_wantsMutex;					  // Guards m_wants
+		std::atomic<uint64_t> m_wantsVersion{1};			  // Changes whenever m_wants does
 	};
 } // namespace OM

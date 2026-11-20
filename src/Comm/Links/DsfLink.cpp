@@ -24,14 +24,13 @@ namespace Comm
 		/** How long a file may take to come or go, seconds */
 		constexpr uint16_t fileTransferTimeout = 180;
 
-		/** A handler of a response that only says whether it worked */
-		HttpRequester::ResponseHandler succeeded(Handler<void> handler)
+		/** A handler of a response that tells `handler` whether its HTTP status says it worked */
+		HttpRequester::ResponseHandler httpSucceeded(Handler<void> handler)
 		{
-			ZoneScoped;
-			return [handler = std::move(handler)](const HttpResponsePtr& response)
+			return [handler = std::move(handler)](const HttpRequester::Response& response)
 			{
-				ZoneScopedN("succeeded_cb");
-				const auto text = HttpRequester::readText(response);
+				ZoneScopedN("httpSucceeded_cb");
+				const auto text = HttpRequester::text(response);
 				if (!text)
 				{
 					handler(std::unexpected(text.error()));
@@ -75,25 +74,27 @@ namespace Comm
 
 	DsfLink::~DsfLink()
 	{
-		ZoneScoped;
 		m_alive.reset();
 		if (m_socket)
 		{
 			m_socket->close();
-			m_socket.reset();
 		}
-		if (!m_sessionKey.empty() && !m_http.unauthorised())
+	}
+
+	void DsfLink::close()
+	{
+		ZoneScoped;
+		if (m_socket)
 		{
-			// Waited for (briefly), as the requester goes with the link
-			HttpRequest request;
-			request.method = HTTP_GET;
-			request.host = m_http.host();
-			request.path = "/machine/disconnect";
-			request.headers["X-Session-Key"] = m_sessionKey;
-			request.timeout = 1;
-			request.DumpUrl();
-			HttpResponse response;
-			hv::HttpClient().send(&request, &response);
+			m_socket->close();
+		}
+		m_closed = true;
+		m_http.close(m_sessionKey.empty() ? "" : "/machine/disconnect");
+		if (m_opened)
+		{
+			Handler<void> opened = std::move(m_opened);
+			m_opened = nullptr;
+			opened(std::unexpected(ReplyError{.message = "the connection closed"}));
 		}
 	}
 
@@ -227,29 +228,40 @@ namespace Comm
 	void DsfLink::sendGcode(std::string_view gcode)
 	{
 		ZoneScoped;
-		m_http.send(
-			HTTP_POST,
-			"/machine/code",
-			{},
-			codeTimeout,
-			[gcode = std::string(gcode)](const HttpResponsePtr& response)
-			{
-				ZoneScopedN("sendGcode_cb");
-				const auto reply = HttpRequester::readText(response);
-				if (!reply)
-				{
-					LOG_ERROR("Failed to send \"{:s}\": {:s}", gcode, reply.error().message);
-					return;
-				}
-				showResponse(*reply);
-			},
-			std::string(gcode));
+		m_http.send({.method = HTTP_POST,
+					 .path = "/machine/code",
+					 .timeout = codeTimeout,
+					 .lane = HttpRequester::Lane::slow,
+					 .body = std::string(gcode)},
+					[gcode = std::string(gcode)](const HttpRequester::Response& response)
+					{
+						ZoneScopedN("sendGcode_cb");
+						const auto reply = HttpRequester::text(response);
+						if (!reply)
+						{
+							LOG_ERROR("Failed to send \"{:s}\": {:s}", gcode, reply.error().message);
+							return;
+						}
+						showResponse(*reply);
+					});
 	}
 
 	void DsfLink::emergencyStop()
 	{
 		ZoneScoped;
-		sendGcode("M112\nM999");
+		m_http.send({.method = HTTP_POST,
+					 .path = "/machine/code",
+					 .timeout = HTTP_TIMEOUT,
+					 .lane = HttpRequester::Lane::urgent,
+					 .body = "M112\nM999"},
+					[](const HttpRequester::Response& response)
+					{
+						ZoneScopedN("emergencyStop_cb");
+						if (const auto reply = HttpRequester::text(response); !reply)
+						{
+							LOG_ERROR("The emergency stop wasn't taken: {:s}", reply.error().message);
+						}
+					});
 	}
 
 	void DsfLink::listFiles(std::string_view dir, size_t first, Handler<FileList> handler)
@@ -257,16 +269,16 @@ namespace Comm
 		ZoneScoped;
 		if (first > 0)
 		{
-			handler(FileList{.dir = std::string(dir),
-							 .first = first,
-							 .files = {},
-							 .next = 0}); // DSF lists a folder whole, in one page
+			handler(FileList{.dir = std::string(dir), .first = first, .files = {}, .next = 0}); // DSF lists it whole
 			return;
 		}
 		m_http.getJson(filePath("/machine/directory/", dir),
 					   {},
 					   [handler = std::move(handler), dir = std::string(dir)](std::expected<OM::Node, ReplyError> json)
-					   { handler(json.and_then([&dir](const OM::Node& list) { return FileList::read(list, dir); })); });
+					   {
+						   ZoneScopedN("listFiles_cb");
+						   handler(json.and_then([&dir](const OM::Node& list) { return FileList::read(list, dir); }));
+					   });
 	}
 
 	void DsfLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
@@ -275,69 +287,102 @@ namespace Comm
 		m_http.getJson(filePath("/machine/fileinfo/", file),
 					   {},
 					   [handler = std::move(handler)](std::expected<OM::Node, ReplyError> json)
-					   { handler(json.and_then([](const OM::Node& info) { return FileInfoReply::read(info); })); });
+					   {
+						   ZoneScopedN("fileInfo_cb");
+						   handler(json.and_then([](const OM::Node& info) { return FileInfoReply::read(info); }));
+					   });
 	}
 
 	void DsfLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)
 	{
 		ZoneScoped;
+		withThumbnails(std::string(file),
+					   [handler = std::move(handler), file = std::string(file), offset](
+						   std::expected<const OM::Node*, ReplyError> thumbnails)
+					   {
+						   ZoneScopedN("thumbnail_cb");
+						   if (!thumbnails)
+						   {
+							   handler(std::unexpected(thumbnails.error()));
+							   return;
+						   }
+						   for (size_t i = 0; i < (*thumbnails)->size(); i++)
+						   {
+							   const OM::Node& thumbnail = (**thumbnails)[i];
+							   if (thumbnail["offset"].integer(-1) == static_cast<int64_t>(offset))
+							   {
+								   // The whole thumbnail, in one piece
+								   handler(FileChunk{.fileName = file,
+													 .offset = offset,
+													 .data = std::string(thumbnail["data"].text()),
+													 .next = 0});
+								   return;
+							   }
+						   }
+						   handler(std::unexpected(
+							   ReplyError{.message = fmt::format("{:s} has no thumbnail at {:d}", file, offset)}));
+					   });
+	}
+
+	void DsfLink::withThumbnails(const std::string& file,
+								 std::function<void(std::expected<const OM::Node*, ReplyError>)> thumbnails)
+	{
+		ZoneScoped;
+		if (file == m_thumbnailsFile && Clock::now() - m_thumbnailsFetched < thumbnailsKept)
+		{
+			thumbnails(&m_thumbnails); // fetched for one of its other thumbnails
+			return;
+		}
 		hv::QueryParams query;
 		query["readThumbnailContent"] = "true";
-		m_http.getJson(
-			filePath("/machine/fileinfo/", file),
-			std::move(query),
-			[handler = std::move(handler), file = std::string(file), offset](std::expected<OM::Node, ReplyError> json)
-			{
-				ZoneScopedN("thumbnail_cb");
-				if (!json)
-				{
-					handler(std::unexpected(json.error()));
-					return;
-				}
-				const OM::Node& thumbnails = (*json)["thumbnails"];
-				for (size_t i = 0; i < thumbnails.size(); i++)
-				{
-					if (thumbnails[i]["offset"].integer(-1) == static_cast<int64_t>(offset))
-					{
-						// The whole thumbnail, in one piece
-						handler(FileChunk{.fileName = file,
-										  .offset = offset,
-										  .data = std::string(thumbnails[i]["data"].text()),
-										  .next = 0});
-						return;
-					}
-				}
-				handler(
-					std::unexpected(ReplyError{.message = fmt::format("{:s} has no thumbnail at {:d}", file, offset)}));
-			});
+		m_http.getJson(filePath("/machine/fileinfo/", file),
+					   std::move(query),
+					   [this, file, thumbnails = std::move(thumbnails)](std::expected<OM::Node, ReplyError> json)
+					   {
+						   ZoneScopedN("withThumbnails_cb");
+						   if (!json)
+						   {
+							   thumbnails(std::unexpected(json.error()));
+							   return;
+						   }
+						   m_thumbnailsFile = file;
+						   m_thumbnailsFetched = Clock::now();
+						   m_thumbnails = std::move(json->field("thumbnails"));
+						   thumbnails(&m_thumbnails);
+					   });
 	}
 
 	void DsfLink::readFile(std::string_view file, Handler<std::string> handler)
 	{
 		ZoneScoped;
-		m_http.send(HTTP_GET,
-					filePath("/machine/file/", file),
-					{},
-					fileTransferTimeout,
-					[handler = std::move(handler)](const HttpResponsePtr& response)
-					{ handler(HttpRequester::readText(response)); });
+		m_http.send({.path = filePath("/machine/file/", file),
+					 .timeout = fileTransferTimeout,
+					 .lane = HttpRequester::Lane::slow},
+					[handler = std::move(handler)](const HttpRequester::Response& response)
+					{
+						ZoneScopedN("readFile_cb");
+						handler(HttpRequester::text(response));
+					});
 	}
 
 	void DsfLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
 	{
 		ZoneScoped;
-		m_http.send(HTTP_PUT,
-					filePath("/machine/file/", file),
-					{},
-					fileTransferTimeout,
-					succeeded(std::move(handler)),
-					std::move(contents));
+		m_thumbnailsFile.clear(); // the file may be the one whose thumbnails are kept
+		m_http.send({.method = HTTP_PUT,
+					 .path = filePath("/machine/file/", file),
+					 .timeout = fileTransferTimeout,
+					 .lane = HttpRequester::Lane::slow,
+					 .body = std::move(contents)},
+					httpSucceeded(std::move(handler)));
 	}
 
 	void DsfLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
 		ZoneScoped;
-		m_http.send(HTTP_DELETE, filePath("/machine/file/", file), {}, HTTP_TIMEOUT, succeeded(std::move(handler)));
+		m_thumbnailsFile.clear();
+		m_http.send({.method = HTTP_DELETE, .path = filePath("/machine/file/", file), .timeout = HTTP_TIMEOUT},
+					httpSucceeded(std::move(handler)));
 	}
 
 	void DsfLink::expire(Clock::time_point now)
@@ -347,5 +392,14 @@ namespace Comm
 		{
 			sendOnSocket("PING\n");
 		}
+	}
+
+	std::optional<DsfLink::Clock::time_point> DsfLink::nextDue() const
+	{
+		if (!m_modelReceived)
+		{
+			return std::nullopt;
+		}
+		return m_lastSent + pingInterval;
 	}
 } // namespace Comm

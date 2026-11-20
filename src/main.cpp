@@ -8,7 +8,7 @@
  *********************/
 #include "Comm/Connection.h"
 #include "Comm/FileInfo.h"
-#include "Comm/Usb.h"
+#include "Comm/UsbMode.h"
 #include "Debug.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"

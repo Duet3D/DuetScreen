@@ -8,70 +8,115 @@
 #include "ObjectModel/Tree/Json.h"
 #include "tracy/Tracy.hpp"
 #include <fmt/format.h>
+#include <hv/requests.h>
+#include <vector>
 
 namespace Comm
 {
-	HttpRequester::HttpRequester(std::string host, Post post, size_t maxInFlight)
+	namespace
+	{
+		/** Why a request given up by close() has no response */
+		ReplyError closedError()
+		{
+			return ReplyError{.message = "the connection closed"};
+		}
+	} // namespace
+
+	HttpRequester::HttpRequester(std::string host, Post post, size_t maxNormal)
 		: m_host(std::move(host))
 		, m_post(std::move(post))
-		, m_maxInFlight(maxInFlight)
+		, m_maxNormal(maxNormal)
 		, m_alive(std::make_shared<bool>(true))
 		, m_lastHeard(std::chrono::steady_clock::now())
 	{
-		ZoneScoped;
 	}
 
 	HttpRequester::~HttpRequester()
 	{
-		ZoneScoped;
 		m_alive.reset();
 	}
 
-	void HttpRequester::send(http_method method,
-							 std::string_view path,
-							 hv::QueryParams query,
-							 uint16_t timeout,
-							 ResponseHandler handler,
-							 std::string body)
+	void HttpRequester::send(Request request, ResponseHandler handler)
 	{
 		ZoneScoped;
-		ZoneText(path.data(), path.size());
-		auto request = std::make_shared<HttpRequest>();
-		request->method = method;
-		request->host = m_host;
-		request->path = path;
-		request->query_params = std::move(query);
-		request->timeout = timeout;
-		request->body = std::move(body);
-		request->headers["Connection"] = "keep-alive";
-		for (const auto& [name, value] : m_headers)
+		ZoneText(request.path.data(), request.path.size());
+		if (m_closed)
 		{
-			request->headers[name] = value;
+			handler(std::unexpected(closedError()));
+			return;
 		}
-		request->DumpUrl(); // the URL, from the host, path and query
-		m_queue.push_back({.request = std::move(request), .handler = std::move(handler)});
+		Pending pending{.request = build(request), .lane = request.lane, .handler = std::move(handler)};
+		if (request.lane == Lane::urgent)
+		{
+			dispatch(std::move(pending)); // ahead of everything, whatever is in flight
+			return;
+		}
+		m_queue.push_back(std::move(pending));
 		sendQueued();
 	}
 
-	void HttpRequester::getJson(std::string_view path, hv::QueryParams query, JsonHandler handler)
+	void HttpRequester::getJson(std::string path, hv::QueryParams query, JsonHandler handler)
 	{
 		ZoneScoped;
-		send(HTTP_GET,
-			 path,
-			 std::move(query),
-			 HTTP_TIMEOUT,
-			 [handler = std::move(handler)](const HttpResponsePtr& response) { handler(readJson(response)); });
+		send(Request{.path = std::move(path), .query = std::move(query), .timeout = HTTP_TIMEOUT},
+			 [handler = std::move(handler)](const Response& response)
+			 {
+				 ZoneScopedN("getJson_cb");
+				 handler(text(response).and_then([](const std::string& body) { return json(body); }));
+			 });
 	}
 
-	std::expected<OM::Node, ReplyError> HttpRequester::readJson(const HttpResponsePtr& response)
+	void HttpRequester::close(std::string_view endSession)
 	{
 		ZoneScoped;
-		auto text = readText(response);
-		if (!text)
+		if (m_closed)
 		{
-			return std::unexpected(text.error());
+			return;
 		}
-		auto json = OM::parseJson(*text);
+		m_closed = true;
+		if (!endSession.empty() && !m_unauthorised)
+		{
+			// Not waited for: the printer may have stopped answering, and this link is going anyway
+			requests::async(build(Request{.path = std::string(endSession), .timeout = 1}),
+							[](const HttpResponsePtr&) {});
+		}
+		std::vector<ResponseHandler> handlers;
+		for (Pending& pending : m_queue)
+		{
+			handlers.push_back(std::move(pending.handler));
+		}
+		for (auto& [id, pending] : m_inFlight)
+		{
+			handlers.push_back(std::move(pending.handler)); // its answer, if one comes, finds nothing to give it to
+		}
+		m_queue.clear();
+		m_inFlight.clear();
+		TracyPlot("HTTP requests in flight", static_cast<int64_t>(0));
+		for (const ResponseHandler& handler : handlers)
+		{
+			handler(std::unexpected(closedError()));
+		}
+	}
+
+	std::expected<std::string, ReplyError> HttpRequester::text(const Response& response)
+	{
+		ZoneScoped;
+		if (!response)
+		{
+			return std::unexpected(response.error());
+		}
+		const HttpResponsePtr& http = *response;
+		if (http->status_code < HTTP_STATUS_OK || http->status_code >= 300)
+		{
+			return std::unexpected(ReplyError{.message = fmt::format("HTTP error {:d}", (int)http->status_code)});
+		}
+		return http->body;
+	}
+
+	std::expected<OM::Node, ReplyError> HttpRequester::json(std::string_view text)
+	{
+		ZoneScoped;
+		auto json = OM::parseJson(text);
 		if (!json)
 		{
 			return std::unexpected(
@@ -80,63 +125,106 @@ namespace Comm
 		return std::move(*json);
 	}
 
-	std::expected<std::string, ReplyError> HttpRequester::readText(const HttpResponsePtr& response)
+	HttpRequestPtr HttpRequester::build(const Request& request) const
 	{
 		ZoneScoped;
-		if (!response)
+		auto http = std::make_shared<HttpRequest>();
+		http->method = request.method;
+		http->host = m_host;
+		http->path = request.path;
+		http->query_params = request.query;
+		http->timeout = request.timeout;
+		http->body = request.body;
+		http->headers["Connection"] = "keep-alive";
+		for (const auto& [name, value] : m_headers)
 		{
-			return std::unexpected(ReplyError{.message = "no response from the printer"});
+			http->headers[name] = value;
 		}
-		if (response->status_code < HTTP_STATUS_OK || response->status_code >= 300)
+		http->DumpUrl(); // the URL, from the host, path and query
+		return http;
+	}
+
+	bool HttpRequester::hasRoom(Lane lane) const
+	{
+		size_t inLane = 0;
+		for (const auto& [id, pending] : m_inFlight)
 		{
-			return std::unexpected(ReplyError{.message = fmt::format("HTTP error {:d}", (int)response->status_code)});
+			inLane += pending.lane == lane ? 1 : 0;
 		}
-		return response->body;
+		return inLane < (lane == Lane::slow ? 1 : m_maxNormal);
 	}
 
 	void HttpRequester::sendQueued()
 	{
 		ZoneScoped;
-		while (m_inFlight < m_maxInFlight && !m_queue.empty())
+		// In turn within a lane; a slow request waiting doesn't hold up a normal one behind it
+		for (auto it = m_queue.begin(); it != m_queue.end() && !m_closed;)
 		{
-			Queued next = std::move(m_queue.front());
-			m_queue.pop_front();
-			m_inFlight++;
-			TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight));
-			LOG_DBG("HTTP {:s} {:s}", http_method_str(next.request->method), next.request->path);
-			m_client.sendAsync(
-				next.request,
-				[this, alive = std::weak_ptr<bool>(m_alive), post = m_post, handler = std::move(next.handler)](
-					const HttpResponsePtr& response)
-				{
-					ZoneScopedN("httpReceived_cb");
-					// On libhv's thread: everything else happens on the connection's
-					post(
-						[this, alive, handler, response]
+			if (!hasRoom(it->lane))
+			{
+				++it;
+				continue;
+			}
+			Pending pending = std::move(*it);
+			it = m_queue.erase(it);
+			dispatch(std::move(pending));
+		}
+	}
+
+	void HttpRequester::dispatch(Pending pending)
+	{
+		ZoneScoped;
+		const uint64_t id = m_nextId++;
+		const HttpRequestPtr request = pending.request;
+		LOG_DBG("HTTP {:s} {:s}", http_method_str(request->method), request->path);
+		m_inFlight.emplace(id, std::move(pending));
+		TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight.size()));
+		m_client.sendAsync(
+			request,
+			[this, id, alive = std::weak_ptr<bool>(m_alive), post = m_post](const HttpResponsePtr& response)
+			{
+				ZoneScopedN("httpReceived_cb"); // on libhv's thread: the rest happens on the connection's
+				post(
+					[this, id, alive, response]
+					{
+						ZoneScopedN("httpResponse_cb");
+						if (alive.lock())
 						{
-							ZoneScopedN("httpResponse_cb");
-							if (!alive.lock())
-							{
-								return; // the requester has gone
-							}
-							m_inFlight--;
-							TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight));
-							if (response)
-							{
-								m_lastHeard = std::chrono::steady_clock::now();
-								if (response->status_code == HTTP_STATUS_UNAUTHORIZED)
-								{
-									LOG_WARN("The printer no longer knows the session");
-									m_unauthorised = true;
-								}
-							}
-							handler(response);
-							if (alive.lock()) // the handler may have closed the link, and the requester with it
-							{
-								sendQueued();
-							}
-						});
-				});
+							finished(id, response);
+						}
+					});
+			});
+	}
+
+	void HttpRequester::finished(uint64_t id, const HttpResponsePtr& response)
+	{
+		ZoneScoped;
+		const auto it = m_inFlight.find(id);
+		if (it == m_inFlight.end())
+		{
+			return; // given up by close()
+		}
+		const std::weak_ptr<bool> alive = m_alive; // taken now: the handler may close the link, and this with it
+		ResponseHandler handler = std::move(it->second.handler);
+		m_inFlight.erase(it);
+		TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight.size()));
+		if (!response)
+		{
+			handler(std::unexpected(ReplyError{.message = "no response from the printer"}));
+		}
+		else
+		{
+			m_lastHeard = std::chrono::steady_clock::now();
+			if (response->status_code == HTTP_STATUS_UNAUTHORIZED)
+			{
+				LOG_WARN("The printer no longer knows the session");
+				m_unauthorised = true;
+			}
+			handler(response);
+		}
+		if (alive.lock())
+		{
+			sendQueued();
 		}
 	}
 } // namespace Comm

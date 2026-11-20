@@ -4,7 +4,7 @@
 
 #include "ConnectionSettings.h"
 #include "Comm/Connection.h"
-#include "Comm/Usb.h"
+#include "Comm/UsbMode.h"
 #include "UI/Xml/Data/SettingsSource.h"
 #include "i18n/i18n.h"
 #include <chrono>

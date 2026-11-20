@@ -68,10 +68,10 @@ namespace UI::DeveloperSettings
 								[](int32_t on)
 							{
 								StorageHelper::setData(ID_ENABLE_SECOND_USB_CHANNEL, on != 0);
-								if (on != 0 && Comm::Connection::get().type() == Comm::CommunicationType::usb &&
-									Comm::Connection::get().isConnected())
+								// The USB port chooses its channels as it opens
+								if (Comm::Connection::get().type() == Comm::CommunicationType::usb)
 								{
-									Comm::Connection::get().sendGcode("M575 P1 S0\n");
+									Comm::Connection::get().reconnect();
 								}
 							}});
 		Xml::Settings::add({.name = "system_logging",

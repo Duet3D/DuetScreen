@@ -64,17 +64,9 @@ namespace Comm
 		return "v";
 	}
 
-	void ModelSync::reset()
+	ModelSync::Clock::time_point ModelSync::nextPoll() const
 	{
-		ZoneScoped;
-		m_generation++;
-		m_lastPoll.reset();
-		m_liveAsked = false;
-		m_liveSeen = false;
-		m_fetching = false;
-		m_fetchSeq.reset();
-		m_keys.clear();
-		m_replySeq.reset();
+		return m_lastPoll ? *m_lastPoll + m_pollInterval : Clock::now();
 	}
 
 	void ModelSync::tick(Clock::time_point now)
@@ -103,13 +95,10 @@ namespace Comm
 		m_lastPoll = now;
 		m_link.requestModel("",
 							liveFlags,
-							[this, generation = m_generation](std::expected<OM::Node, ReplyError> reply)
+							[this](std::expected<OM::Node, ReplyError> reply)
 							{
 								ZoneScopedN("askLive_cb");
-								if (generation == m_generation)
-								{
-									liveArrived(std::move(reply));
-								}
+								liveArrived(std::move(reply));
 							});
 	}
 
@@ -142,6 +131,7 @@ namespace Comm
 		m_tree.apply(*patch);
 		readSeqs(patch->result()["seqs"]);
 		m_liveSeen = true;
+		m_fetchFailed = false; // the printer answers: fetching may start again
 		fetchNext();
 	}
 
@@ -167,12 +157,18 @@ namespace Comm
 	void ModelSync::fetchNext()
 	{
 		ZoneScoped;
-		if (m_fetching || !m_liveSeen)
+		if (m_fetching || !m_liveSeen || m_fetchFailed)
 		{
 			return;
 		}
+		if (m_wantsVersion != m_tree.wantsVersion())
+		{
+			m_wantsVersion = m_tree.wantsVersion();
+			const std::set<std::string> wanted = m_tree.wantedKeys();
+			m_wanted.assign(wanted.begin(), wanted.end());
+		}
 		std::vector<std::string> due;
-		for (const std::string& key : m_tree.wantedKeys())
+		for (const std::string& key : m_wanted)
 		{
 			if (key == liveOnlyKey)
 			{
@@ -208,13 +204,10 @@ namespace Comm
 		LOG_DBG("Fetching {:s} ({:s})", path, flags);
 		m_link.requestModel(path,
 							flags,
-							[this, key, path, generation = m_generation](std::expected<OM::Node, ReplyError> reply)
+							[this, key, path](std::expected<OM::Node, ReplyError> reply)
 							{
 								ZoneScopedN("fetch_cb");
-								if (generation == m_generation)
-								{
-									fetchArrived(key, path, std::move(reply));
-								}
+								fetchArrived(key, path, std::move(reply));
 							});
 	}
 
@@ -228,6 +221,7 @@ namespace Comm
 			// Tried again once the next live model has arrived
 			LOG_WARN("Fetching {:s} failed: {:s}", path, reply.error().message);
 			m_fetching = false;
+			m_fetchFailed = true;
 			return;
 		}
 		const auto patch = OM::Patch::fromReply(*reply);
@@ -235,6 +229,7 @@ namespace Comm
 		{
 			LOG_WARN("{:s} was asked for, but something else came: {:s}", path, reply->toJson());
 			m_fetching = false;
+			m_fetchFailed = true;
 			return;
 		}
 		m_tree.apply(*patch);

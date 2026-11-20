@@ -30,6 +30,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace Comm
 {
@@ -66,9 +67,6 @@ namespace Comm
 		 */
 		explicit ModelSync(ModelLink& link, OM::Tree& tree = OM::Tree::get());
 
-		/** Start again, as on connecting: nothing fetched yet, nothing in flight */
-		void reset();
-
 		/** How often the live model is asked for */
 		void setPollInterval(std::chrono::milliseconds interval) { m_pollInterval = interval; }
 
@@ -83,6 +81,12 @@ namespace Comm
 
 		/** Whether nothing is asked for and waiting for its reply */
 		bool idle() const { return !m_liveAsked && !m_fetching; }
+
+		/** Whether a live model has arrived: the printer answers, and its `seqs` are known */
+		bool hasLiveModel() const { return m_liveSeen; }
+
+		/** When tick() next has something to do: the next live poll */
+		Clock::time_point nextPoll() const;
 
 		/** The flags a detailed fetch of `key` uses */
 		static std::string_view detailFlags(std::string_view key);
@@ -127,10 +131,12 @@ namespace Comm
 		std::chrono::milliseconds m_pollInterval{250}; // How often the live model is asked for
 		std::optional<Clock::time_point> m_lastPoll;   // When the live model was last asked for
 		bool m_liveAsked = false;					   // The live model is asked for and not yet answered
-		bool m_liveSeen = false;					   // A live model has arrived since reset(): `seqs` are known
-		uint64_t m_generation = 0;					   // Counts reset()s, so a reply asked for before one is ignored
+		bool m_liveSeen = false;					   // A live model has arrived: `seqs` are known
 		bool m_fetching = false;					   // A detailed fetch is in flight
-		std::optional<int64_t> m_fetchSeq;			   // The fetched key's number when its fetch started
+		bool m_fetchFailed = false;		   // A fetch failed: none is asked for again until the next live model arrives
+		uint64_t m_wantsVersion = 0;	   // The tree's wantsVersion() when m_wanted was read
+		std::vector<std::string> m_wanted; // The keys the tree wants, as of m_wantsVersion
+		std::optional<int64_t> m_fetchSeq; // The fetched key's number when its fetch started
 		std::map<std::string, KeyState, std::less<>> m_keys; // What is known of each key
 		std::optional<int64_t> m_replySeq;					 // `seqs.reply` when last seen
 	};

@@ -4,6 +4,7 @@
 
 #include "SerialLink.h"
 #include "Comm/Gcode.h"
+#include "Comm/Lines.h"
 #include "Debug.h"
 #include "Duet3D/General/CRC16.h"
 #include "ObjectModel/Tree/Json.h"
@@ -29,32 +30,21 @@ namespace Comm
 			"M25",
 		};
 
+		/** A request whose small reply says every line sent before it has been dealt with */
+		constexpr std::string_view acknowledgement = R"(M409 K"state.status" F"v")";
+
 		/** Why a request still waiting when the link closed has no reply */
 		ReplyError closedError()
 		{
-			ZoneScoped;
 			return ReplyError{.message = "the connection closed"};
 		}
 	} // namespace
 
-	SerialLink::SerialLink(SerialPort& port, UnaskedHandler unasked, Options options)
+	SerialLink::SerialLink(SerialPort& port, UnaskedHandler unasked)
 		: m_port(port)
 		, m_unasked(std::move(unasked))
-		, m_options(options)
 		, m_lastHeard(Clock::now())
 	{
-		ZoneScoped;
-	}
-
-	SerialLink::~SerialLink()
-	{
-		ZoneScoped;
-		std::map<uint32_t, Pending> pending = std::move(m_pending);
-		m_pending.clear();
-		for (auto& [line, request] : pending)
-		{
-			request.handler(std::unexpected(closedError()));
-		}
 	}
 
 	void SerialLink::receive(size_t channel, std::string_view line)
@@ -73,29 +63,32 @@ namespace Comm
 			return;
 		}
 		const OM::Node& number = (*reply)["line"];
-		if (number.kind() == OM::Node::Kind::number)
+		if (number.kind() != OM::Node::Kind::number)
 		{
-			const auto it = m_pending.find(static_cast<uint32_t>(number.integer()));
-			if (it != m_pending.end())
+			m_unasked(*reply);
+			return;
+		}
+		const auto lineNumber = static_cast<uint32_t>(number.integer());
+		if (const auto it = m_pending.find(lineNumber); it != m_pending.end())
+		{
+			ReplyHandler handler = std::move(it->second.handler);
+			m_pending.erase(it);
+			TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
+			handler(std::move(*reply));
+			return;
+		}
+		// An error from a line of a file job fails the job; it is shown too, as any response is
+		if (const std::string_view response = (*reply)["resp"].text(); response.starts_with("Error"))
+		{
+			for (auto& [id, job] : m_jobs)
 			{
-				ReplyHandler handler = std::move(it->second.handler);
-				m_pending.erase(it);
-				TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
-				handler(std::move(*reply));
-				return;
+				if (lineNumber >= job.first && lineNumber <= job.last && !job.error)
+				{
+					job.error = ReplyError{.message = std::string(response)};
+				}
 			}
 		}
 		m_unasked(*reply);
-	}
-
-	std::optional<SerialLink::Clock::time_point> SerialLink::nextDeadline() const
-	{
-		ZoneScoped;
-		if (m_pending.empty())
-		{
-			return std::nullopt;
-		}
-		return std::ranges::min(m_pending | std::views::values | std::views::transform(&Pending::due));
 	}
 
 	void SerialLink::requestModel(std::string_view key, std::string_view flags, ModelHandler handler)
@@ -114,20 +107,7 @@ namespace Comm
 	void SerialLink::sendGcode(std::string_view gcode)
 	{
 		ZoneScoped;
-		while (!gcode.empty())
-		{
-			const size_t end = gcode.find('\n');
-			std::string_view line = gcode.substr(0, end);
-			if (!line.empty() && line.back() == '\r')
-			{
-				line.remove_suffix(1);
-			}
-			if (!line.empty()) // an empty line says nothing
-			{
-				sendLine(line);
-			}
-			gcode = end == std::string_view::npos ? std::string_view() : gcode.substr(end + 1);
-		}
+		forEachLine(gcode, EmptyLines::skip, [this](std::string_view line) { sendLine(line); });
 	}
 
 	void SerialLink::emergencyStop()
@@ -197,33 +177,87 @@ namespace Comm
 	void SerialLink::writeFile(std::string_view file, std::string contents, Handler<void> handler)
 	{
 		ZoneScoped;
-		if (contents.size() > m_options.maxUploadSize)
+		if (contents.size() > m_port.maxUploadSize())
 		{
 			handler(std::unexpected(
 				ReplyError{.message = fmt::format("{:d} bytes is too large to send this way (the limit is {:d})",
 												  contents.size(),
-												  m_options.maxUploadSize)}));
+												  m_port.maxUploadSize())}));
 			return;
 		}
-		// A line at a time: `echo >` starts the file, `echo >>` adds to it. (M559 would be quicker once DSF has it.)
-		std::string_view rest = contents;
-		bool first = true;
-		do
-		{
-			const size_t end = rest.find('\n');
-			sendLine(fmt::format(
-				"echo {:s}{:s} {:s}", first ? ">" : ">>", Comm::quoted(file), Comm::quoted(rest.substr(0, end))));
-			first = false;
-			rest = end == std::string_view::npos ? std::string_view() : rest.substr(end + 1);
-		} while (!rest.empty());
-		handler({});
+		// A line at a time: `echo >` starts the file, `echo >>` adds to it
+		std::vector<std::string> commands;
+		forEachLine(
+			contents,
+			EmptyLines::keep,
+			[&](std::string_view line)
+			{
+				commands.push_back(fmt::format(
+					"echo {:s}{:s} {:s}", commands.empty() ? ">" : ">>", Comm::quoted(file), Comm::quoted(line)));
+			});
+		runFileJob(commands, std::move(handler));
 	}
 
 	void SerialLink::deleteFile(std::string_view file, Handler<void> handler)
 	{
 		ZoneScoped;
-		sendLine(fmt::format("M30 {:s}", Comm::quoted(file)));
-		handler({});
+		runFileJob({fmt::format("M30 {:s}", Comm::quoted(file))}, std::move(handler));
+	}
+
+	void SerialLink::runFileJob(const std::vector<std::string>& commands, Handler<void> handler)
+	{
+		ZoneScoped;
+		if (m_closed)
+		{
+			handler(std::unexpected(closedError()));
+			return;
+		}
+		// Every line must fit before any is sent, so a file is never left half written for that
+		for (size_t i = 0; i < commands.size(); i++)
+		{
+			if (frame(m_nextLine + static_cast<uint32_t>(i), commands[i]).size() > maxLineLength)
+			{
+				handler(std::unexpected(ReplyError{
+					.message = fmt::format(
+						"line {:d} is longer than RepRapFirmware takes ({:d} characters)", i + 1, maxLineLength)}));
+				return;
+			}
+		}
+		// The acknowledgement goes on the job's channel: only there does its reply follow the job's lines
+		const size_t channel = commands.empty() ? 0 : channelFor(commands.front());
+		const uint64_t id = m_nextJob++;
+		FileJob job{.first = m_nextLine, .last = m_nextLine, .error = std::nullopt};
+		for (const std::string& command : commands)
+		{
+			sendLine(command, channel);
+		}
+		job.last = m_nextLine - 1;
+		m_jobs.emplace(id, job);
+		request(
+			acknowledgement,
+			[this, id, handler = std::move(handler)](std::expected<OM::Node, ReplyError> reply)
+			{
+				ZoneScopedN("runFileJob_cb");
+				const auto it = m_jobs.find(id);
+				const std::optional<ReplyError> error = it != m_jobs.end() ? it->second.error : std::nullopt;
+				if (it != m_jobs.end())
+				{
+					m_jobs.erase(it);
+				}
+				if (!reply)
+				{
+					handler(std::unexpected(reply.error()));
+				}
+				else if (error)
+				{
+					handler(std::unexpected(*error));
+				}
+				else
+				{
+					handler({});
+				}
+			},
+			channel);
 	}
 
 	void SerialLink::expire(Clock::time_point now)
@@ -242,10 +276,11 @@ namespace Comm
 				++it;
 			}
 		}
-		if (!expired.empty())
+		if (expired.empty())
 		{
-			TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
+			return;
 		}
+		TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
 		for (Pending& request : expired)
 		{
 			LOG_WARN("No reply to \"{:s}\"", request.command);
@@ -253,23 +288,53 @@ namespace Comm
 		}
 	}
 
-	void SerialLink::request(std::string_view command, ReplyHandler handler)
+	std::optional<SerialLink::Clock::time_point> SerialLink::nextDue() const
 	{
-		ZoneScoped;
-		ZoneText(command.data(), command.size());
-		const uint32_t line = sendLine(command);
-		TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size() + 1));
-		m_pending.emplace(line,
-						  Pending{.command = std::string(command),
-								  .due = Clock::now() + m_options.replyTimeout,
-								  .handler = std::move(handler)});
+		if (m_pending.empty())
+		{
+			return std::nullopt;
+		}
+		return std::ranges::min(m_pending | std::views::values | std::views::transform(&Pending::due));
 	}
 
-	uint32_t SerialLink::sendLine(std::string_view command)
+	void SerialLink::close()
+	{
+		ZoneScoped;
+		if (m_closed)
+		{
+			return;
+		}
+		m_closed = true;
+		std::map<uint32_t, Pending> pending = std::move(m_pending);
+		m_pending.clear();
+		m_jobs.clear();
+		TracyPlot("Serial requests waiting", static_cast<int64_t>(0));
+		for (auto& [line, request] : pending)
+		{
+			request.handler(std::unexpected(closedError()));
+		}
+	}
+
+	void SerialLink::request(std::string_view command, ReplyHandler handler, std::optional<size_t> channel)
 	{
 		ZoneScoped;
 		ZoneText(command.data(), command.size());
-		const uint32_t number = m_nextLine++;
+		const std::optional<uint32_t> line = sendLine(command, channel);
+		if (!line)
+		{
+			handler(std::unexpected(m_closed ? closedError()
+											 : ReplyError{.message = fmt::format("couldn't send {:s}", command)}));
+			return;
+		}
+		m_pending.emplace(*line,
+						  Pending{.command = std::string(command),
+								  .due = Clock::now() + m_port.replyTimeout(),
+								  .handler = std::move(handler)});
+		TracyPlot("Serial requests waiting", static_cast<int64_t>(m_pending.size()));
+	}
+
+	std::string SerialLink::frame(uint32_t number, std::string_view command) const
+	{
 		std::string line = fmt::format("N{:d} {:s}", number, command);
 		if (m_port.needsChecksums())
 		{
@@ -277,10 +342,29 @@ namespace Comm
 			crc.Update(line.data(), line.size());
 			line += fmt::format("*{:05d}", crc.Get());
 		}
+		return line;
+	}
+
+	std::optional<uint32_t> SerialLink::sendLine(std::string_view command, std::optional<size_t> channel)
+	{
+		ZoneScoped;
+		ZoneText(command.data(), command.size());
+		if (m_closed)
+		{
+			return std::nullopt;
+		}
+		const uint32_t number = m_nextLine;
+		std::string line = frame(number, command);
+		if (line.size() > maxLineLength)
+		{
+			LOG_ERROR("Not sending \"{:s}\": longer than RepRapFirmware takes", command);
+			return std::nullopt;
+		}
+		m_nextLine++;
+		LOG_DBG("Sending: {:s}", line);
 		line += '\n';
-		LOG_DBG("Sending: {:s}", std::string_view(line).substr(0, line.size() - 1));
 		// One write per line: a line sent in parts could be left half sent, and the next joined onto it
-		if (!m_port.write(channelFor(command), line))
+		if (!m_port.write(channel.value_or(channelFor(command)), line))
 		{
 			LOG_WARN("Couldn't send \"{:s}\"", command);
 			m_failed = true;
@@ -290,8 +374,7 @@ namespace Comm
 
 	size_t SerialLink::channelFor(std::string_view command) const
 	{
-		ZoneScoped;
-		if (m_port.channels() < 2 || !m_options.useStatusChannel)
+		if (m_port.channels() < 2)
 		{
 			return 0;
 		}
