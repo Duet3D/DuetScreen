@@ -556,19 +556,25 @@ Tracy can be used when simulating on PC or when running on the physical Duet3D s
 > [!NOTE]
 > Tracy support is only enabled in `Debug` builds by default. For remote deployment, use the `Release_with_profiling` build type in the `Push DuetScreen - SSH` task — this uses the `T113-Release_with_profiling` preset which enables both `DUETSCREEN_ENABLE_PROFILING` and `DUETSCREEN_ENABLE_LV_PROFILING`. To enable profiling manually in any other build, set those cmake cache variables to `ON`.
 
-#### Building tracy server
-A prebuilt tracy server binary for Windows can be downloaded from the [tracy releases page](https://github.com/wolfpld/tracy/releases), the version must match the tracy version used in this project. For simplicity a copy of the compatible tracy server binary for Windows is included in the [tools/win32/](../tools/win32/tracy-profiler.exe) directory.
+#### Running the tracy profiler
+The tracy profiler (the server that DuetScreen connects to) must be the same version as the tracy client built into DuetScreen, currently **0.15.0** (the [libraries/tracy/](../libraries/tracy/) submodule). Prebuilt copies of the matching profiler are included in [tools/](../tools/):
 
-The tracy server can be built from source for Linux and MacOS in the [libraries/tracy/](../libraries/tracy/) directory. Instructions for building the tracy server can be found in the [tracy repository](../libraries/tracy/manual/tracy.md#buildingserver)
+| Platform | Profiler |
+|---|---|
+| Windows | [tools/win32/tracy-profiler.exe](../tools/win32/tracy-profiler.exe) |
+| Linux (x86_64) | [tools/linux/tracy-profiler-x86_64.AppImage](../tools/linux/tracy-profiler-x86_64.AppImage) |
 
-To build on Ubuntu 24.04 LTS the following commands worked for me but your mileage may vary:
+On Linux run the AppImage directly:
+```bash
+./tools/linux/tracy-profiler-x86_64.AppImage
+```
+
+A macOS build, and the command line tools (`tracy-capture`, `tracy-csvexport`, ...), can be downloaded from the [tracy releases page](https://github.com/wolfpld/tracy/releases). When the submodule is updated, replace the binaries in [tools/](../tools/) with the ones from the matching release.
+
+The profiler can also be built from source in the [libraries/tracy/](../libraries/tracy/) directory, following the [tracy build instructions](../libraries/tracy/manual/tracy.md#buildingserver):
 ```bash
 cd libraries/tracy
 cmake -B ./profiler/build -S ./profiler -DCMAKE_BUILD_TYPE=Release -DLEGACY=1
 cmake --build ./profiler/build --config Release --parallel
-```
-
-Then run the tracy server using:
-```bash
-./libraries/tracy/profiler/build/tracy-profiler
+./profiler/build/tracy-profiler
 ```
