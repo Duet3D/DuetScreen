@@ -367,7 +367,14 @@ namespace OM::FileSystem
 					  bool runEveryTime)
 	{
 		ZoneScoped;
-		std::string full_path = fmt::format("{}{}", OM::Directories::GetDirectory(baseFolder), path);
+		const std::string base = OM::Directories::GetDirectory(baseFolder);
+		if (base.empty())
+		{
+			// The folders arrive after the board (whose id announces the printer): asking now would name no folder
+			LOG_DBG("Files: not requesting files in '{:s}' until the printer's folders are known", path);
+			return;
+		}
+		std::string full_path = fmt::format("{}{}", base, path);
 
 		FileListRequestPtr cached;
 		FileListRequestPtr reqPtr;

@@ -495,6 +495,9 @@ TEST_F(TestSimulatedMachine, FilesAndTheirInformation)
 	EXPECT_TRUE(machine.takeConfigChange());
 	EXPECT_EQ(machine.execute("M20 S3 P\"0:/gcodes\" R0")[0]["files"].size(), machine.config().files.size());
 	EXPECT_EQ(machine.config().files.size(), Sim::defaultConfig().files.size() - 1);
+
+	// As RepRapFirmware does, a folder must be named
+	EXPECT_NE(run("M20 S3 P\"\" R0").find("Error: M20: expected a non-empty string"), std::string::npos);
 }
 
 TEST_F(TestSimulatedMachine, ReconfiguringKeepsWhatStillApplies)

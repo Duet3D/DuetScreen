@@ -595,7 +595,15 @@ namespace Sim
 			break;
 		}
 		case 20:
-			replies.push_back(fileListReply(command.text('P'), command.integer('R').value_or(0)));
+			// RepRapFirmware refuses to list a folder that isn't named
+			if (command.has('P') && command.text('P').empty())
+			{
+				reply += "Error: M20: expected a non-empty string\n";
+			}
+			else
+			{
+				replies.push_back(fileListReply(command.text('P'), command.integer('R').value_or(0)));
+			}
 			break;
 		case 23:
 			if (const JobFile* file = findFile(command.file()))

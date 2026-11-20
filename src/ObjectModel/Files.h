@@ -203,6 +203,11 @@ namespace OM::FileSystem
 
 	void SortFilesBy(ItemList& items, std::function<bool(const ItemPtr&, const ItemPtr&)> sortFunc);
 	void SortFilesBy(ItemList& items, const SortBy sortBy, const bool descending);
+	/**
+	 * Ask the printer for the files in `path`, under the base folder `baseFolder`; `callback` is given them.
+	 * Nothing is asked until the printer has said where its base folder is (`directories` in its object model):
+	 * whoever wants files lists them again once it has.
+	 */
 	void RequestFiles(const OM::Directories::DirectoryType baseFolder,
 					  const std::string& path,
 					  request_files_cb_t callback,

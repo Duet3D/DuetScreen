@@ -153,7 +153,7 @@ namespace UI
 		Settings m_settings;					  // What is shown and where settings are kept
 		std::string m_folder;					  // Open folder below the base folder, e.g. "parts/"; "" for the base
 		std::string m_baseFolder;				  // The base folder, e.g. "0:/gcodes", noted on the UI's thread
-		Xml::OmWatch m_directoriesWatch;		  // Notes the base folder as the printer's folders change
+		Xml::OmWatch m_directoriesWatch;		  // Notes the base folder, and lists it, as the printer's folders change
 		Xml::OmWatch m_filesWatch;				  // Lists the folder again as the printer's files change
 		OM::FileSystem::ItemList m_items;		  // The open folder's contents, in shown order
 		SortBy m_sortBy = SortBy::DATE;			  // Order

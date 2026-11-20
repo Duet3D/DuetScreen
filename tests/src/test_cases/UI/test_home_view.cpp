@@ -6,6 +6,7 @@
  */
 
 #include "Debug.h"
+#include "ObjectModel/Files.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "Storage.h"
@@ -863,6 +864,31 @@ class TestHomeViewWithSimulator : public TestHomeView
 		deliverModelEvents();
 	}
 };
+
+TEST_F(TestHomeViewWithSimulator, ConnectingListsNoFilesBeforeTheFoldersAreKnown)
+{
+	// The board, which announces the printer, arrives before the folders: files asked for then would name no folder,
+	// which the printer refuses ("M20: expected a non-empty string")
+	auto replies = std::make_shared<std::vector<std::string>>();
+	Model::get().addEventListener<EventType::Response>([replies](ResponseType, const std::string& text)
+													   { replies->push_back(text); });
+	openFilesTab(1);	// a file browser open meanwhile
+	connectSimulator(); // connecting again forgets the folders
+	for (int round = 0; round < 40; round++)
+	{
+		pollSimulator(1);
+		deliverModelEvents(); // as the screen does, while the rest is still to come
+	}
+	for (const std::string& reply : *replies)
+	{
+		EXPECT_EQ(reply.find("M20"), std::string::npos) << reply;
+	}
+	// Once they are known, the files are listed, in the open browser too
+	EXPECT_FALSE(UI::Xml::PrinterModel::root().at("directories.gCodes").text().empty());
+	EXPECT_NE(OM::FileSystem::GetFileListRequest("0:/gcodes/"), nullptr);
+	runTimers();
+	EXPECT_NE(fileItem(page<UI::LvObj>("files_jobs").getRootPtr(), "benchy.gcode"), nullptr);
+}
 
 TEST_F(TestHomeViewWithSimulator, DashboardFollowsAJob)
 {

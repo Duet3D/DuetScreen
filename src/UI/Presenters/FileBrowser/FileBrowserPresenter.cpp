@@ -147,12 +147,20 @@ namespace UI
 		registerEventListener<EventType::FileInfo>(this, &FileBrowserPresenter::fileInfoReceived);
 		// A different printer has different folders
 		registerEventListener<EventType::PrinterUniqueId>([this]() { openFolder(""); });
-		// The base folder can arrive after the browser opens; it is noted here, on the UI's thread
+		// The base folder can arrive after the browser opens, and its files can't be asked for until then; it is noted
+		// here, on the UI's thread, and an open browser lists the folder again
 		m_directoriesWatch = Xml::OmWatch({"directories"},
 										  [this]
 										  {
-											  m_baseFolder = baseFolderPath();
-											  showCrumbs();
+											  if (isActive())
+											  {
+												  requestFiles(); // notes the base folder too
+											  }
+											  else
+											  {
+												  m_baseFolder = baseFolderPath();
+												  showCrumbs();
+											  }
 										  });
 		// The printer counts each volume's changes to its files: an upload or a deletion lists the folder again
 		m_filesWatch = Xml::OmWatch({"seqs.volChanges"},
