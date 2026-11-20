@@ -281,7 +281,7 @@ namespace Comm
 					   });
 	}
 
-	void DsfLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
+	void DsfLink::fileInfo(std::string_view file, Handler<FileInfo> handler)
 	{
 		ZoneScoped;
 		m_http.getJson(filePath("/machine/fileinfo/", file),
@@ -289,7 +289,7 @@ namespace Comm
 					   [handler = std::move(handler)](std::expected<OM::Node, ReplyError> json)
 					   {
 						   ZoneScopedN("fileInfo_cb");
-						   handler(json.and_then([](const OM::Node& info) { return FileInfoReply::read(info); }));
+						   handler(json.and_then([](const OM::Node& info) { return FileInfo::read(info); }));
 					   });
 	}
 

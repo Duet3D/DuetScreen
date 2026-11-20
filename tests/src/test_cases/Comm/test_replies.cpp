@@ -15,7 +15,7 @@
 #include <vector>
 
 using Comm::FileChunk;
-using Comm::FileInfoReply;
+using Comm::FileInfo;
 using Comm::FileList;
 using Comm::LineFramer;
 
@@ -105,7 +105,7 @@ TEST(Replies, AFolderListingIsRead)
 TEST(Replies, FileInformationIsRead)
 {
 	// A real Duet in SBC mode: DSF escapes the '+'
-	const auto info = FileInfoReply::read(
+	const auto info = FileInfo::read(
 		json(R"({"err":0,"fileName":"0:/gcodes/test.gcode","size":5910665,"lastModified":"2026-05-07T10:40:04",)"
 			 R"("height":22.45,"layerHeight":0.2,"numLayers":112,"printTime":3089,"filament":[3811.5,3269.7],)"
 			 R"("thumbnails":[{"width":32,"height":32,"format":"png","offset":104,"size":2404},)"
@@ -128,11 +128,11 @@ TEST(Replies, FileInformationIsRead)
 	EXPECT_EQ(info->thumbnails[1].offset, 2654u);
 	EXPECT_EQ(info->thumbnails[1].size, 65048u);
 
-	const auto bare = FileInfoReply::read(json(R"({"err":0,"fileName":"0:/gcodes/empty.gcode","size":0})"));
+	const auto bare = FileInfo::read(json(R"({"err":0,"fileName":"0:/gcodes/empty.gcode","size":0})"));
 	ASSERT_TRUE(bare) << "a file without a slicer's information still has information";
 	EXPECT_TRUE(bare->generatedBy.empty());
 
-	const auto notFound = FileInfoReply::read(json(R"({"err":1})"));
+	const auto notFound = FileInfo::read(json(R"({"err":1})"));
 	ASSERT_FALSE(notFound);
 	EXPECT_EQ(notFound.error().code, 1);
 }

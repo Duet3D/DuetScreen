@@ -37,6 +37,9 @@ class TestSuite : public ::testing::Test
 	 */
 	static std::filesystem::path configFile();
 
+	/** The file cache's folders for the test: its own, in the system's temporary folder */
+	static std::filesystem::path cacheFolder();
+
 	/** How many exchanges with the simulated Duet one poll may take, at most (a Duet that doesn't answer takes all) */
 	static constexpr int maxExchanges = 100;
 

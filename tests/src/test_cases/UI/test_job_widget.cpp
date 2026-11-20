@@ -5,7 +5,7 @@
  * ready to start (job_ready.xml), from source.job.* and source.files.*.
  */
 
-#include "Comm/Thumbnail.h"
+#include "Comm/FileInfoCache.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/Data/JobSource.h"
@@ -35,7 +35,7 @@ class TestJobWidget : public UiTestSuite
 	/** Give the job `file` the example thumbnail */
 	static void giveThumbnail(const char* file)
 	{
-		std::filesystem::path path = GetThumbnailPath(file);
+		std::filesystem::path path = Comm::FileInfoCache::get().thumbnailPath(file);
 		std::filesystem::create_directories(path.parent_path());
 		std::filesystem::remove(path);
 		std::filesystem::copy_file(UI::Themes::getFixedIconPath("examples", "print_thumbnail.png"), path);

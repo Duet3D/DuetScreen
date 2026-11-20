@@ -10,8 +10,9 @@
 #include "Files.h"
 
 #include "Comm/Connection.h"
-#include "Comm/FileInfo.h"
+#include "Comm/FileInfoCache.h"
 #include "Comm/Gcode.h"
+#include "Configuration.h"
 #include "Hardware/Usb.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
@@ -544,15 +545,7 @@ namespace OM::FileSystem
 				{
 					continue;
 				}
-				Comm::FileInfoPtr fileInfo = FILEINFO_CACHE->GetFileInfo(item->GetPath());
-				if (fileInfo == nullptr || !fileInfo->lastModified.Equals(item->GetDate().c_str()))
-				{
-					FILEINFO_CACHE->QueueFileInfoRequest(item->GetPath());
-				}
-				else if (!FILEINFO_CACHE->IsThumbnailCached(item->GetPath(), item->GetDate().c_str()))
-				{
-					FILEINFO_CACHE->QueueThumbnailRequest(item->GetPath());
-				}
+				Comm::FileInfoCache::get().refresh(item->GetPath(), item->GetDate());
 			}
 		}
 

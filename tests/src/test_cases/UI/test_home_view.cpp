@@ -856,10 +856,27 @@ class TestHomeViewWithData : public TestHomeView
 class TestHomeViewWithSimulator : public TestHomeView
 {
   protected:
+	/**
+	 * Let the temperature graph take two samples now, as it does every model tick, whatever time the test has taken:
+	 * two, so it draws a line
+	 */
+	static void sampleTemperatures()
+	{
+		for (int sample = 0; sample < 2; sample++)
+		{
+			Model::get().post<EventType::Tick>();
+			deliverModelEvents();
+		}
+	}
+
 	TestHomeViewWithSimulator()
 	{
 		setSetting("connected_message", 0); // So nothing covers the screen
 		connectSimulator();
+		pollSimulator();
+		deliverModelEvents();
+		// What the views asked for once connected (the jobs, their information and thumbnails), before any job
+		// starts: while one runs, the file cache asks only now and then
 		pollSimulator();
 		deliverModelEvents();
 	}
@@ -897,6 +914,7 @@ TEST_F(TestHomeViewWithSimulator, DashboardFollowsAJob)
 	simulate(std::chrono::seconds(300)); // warm
 	simulate(std::chrono::seconds(600)); // printing
 	deliverModelEvents();
+	sampleTemperatures();
 	runTimers();
 	EXPECT_EQ(UI::Xml::PrinterModel::root().at("state.status").text(), "processing");
 	EXPECT_GT(UI::Xml::PrinterModel::root().at("job.layer").integer(), 1);
@@ -908,6 +926,7 @@ TEST_F(TestHomeViewWithSimulator, TheJobPanelLeadsBackToTheJob)
 	sendToSimulator("M32 \"benchy.gcode\"");
 	simulate(std::chrono::seconds(300));
 	deliverModelEvents();
+	sampleTemperatures();
 	dashboardJobPages().open("ready"); // back to the jobs: the job running leads back to its status
 	runTimers();
 	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/job_panel.png")

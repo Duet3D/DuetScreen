@@ -59,7 +59,7 @@ namespace Comm
 	};
 
 	/** What the firmware knows about a G-code file: M36, rr_fileinfo or DSF's file info */
-	struct FileInfoReply
+	struct FileInfo
 	{
 		std::string fileName;				   // Full path on the printer
 		uint64_t size = 0;					   // Bytes
@@ -74,7 +74,7 @@ namespace Comm
 		std::vector<ThumbnailInfo> thumbnails; // The thumbnails it holds
 
 		/** Read file information */
-		static std::expected<FileInfoReply, ReplyError> read(const OM::Node& reply);
+		static std::expected<FileInfo, ReplyError> read(const OM::Node& reply);
 	};
 
 	/**

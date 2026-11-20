@@ -82,7 +82,7 @@ namespace Comm
 		return list;
 	}
 
-	std::expected<FileInfoReply, ReplyError> FileInfoReply::read(const OM::Node& reply)
+	std::expected<FileInfo, ReplyError> FileInfo::read(const OM::Node& reply)
 	{
 		ZoneScoped;
 		if (const auto error = firmwareError(reply))
@@ -93,7 +93,7 @@ namespace Comm
 		{
 			return std::unexpected(missing("File information", "fileName"));
 		}
-		FileInfoReply info;
+		FileInfo info;
 		info.fileName = reply["fileName"].text();
 		info.size = count<uint64_t>(reply["size"]);
 		info.lastModified = reply["lastModified"].text();

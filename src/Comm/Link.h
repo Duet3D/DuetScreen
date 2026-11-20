@@ -42,7 +42,7 @@ namespace Comm
 		virtual void listFiles(std::string_view dir, size_t first, Handler<FileList> handler) = 0;
 
 		/** What the firmware knows about the G-code file `file` */
-		virtual void fileInfo(std::string_view file, Handler<FileInfoReply> handler) = 0;
+		virtual void fileInfo(std::string_view file, Handler<FileInfo> handler) = 0;
 
 		/** The piece of a thumbnail in `file` starting at `offset` */
 		virtual void thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler) = 0;

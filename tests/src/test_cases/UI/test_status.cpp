@@ -5,7 +5,7 @@
  *      Author: Andy Everitt
  */
 
-#include "Comm/Thumbnail.h"
+#include "Comm/FileInfoCache.h"
 #include "Debug.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/View/XmlView.h"
@@ -44,7 +44,7 @@ TEST_F(TestStatus, Blank)
 
 TEST_F(TestStatus, ThumbnailGoesBesideTheNameWhereThereIsNoRoomAbove)
 {
-	std::filesystem::path thumbnailPath = GetThumbnailPath("test.gcode");
+	std::filesystem::path thumbnailPath = Comm::FileInfoCache::get().thumbnailPath("test.gcode");
 	std::filesystem::create_directories(thumbnailPath.parent_path());
 	std::filesystem::remove(thumbnailPath);
 	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
@@ -89,7 +89,7 @@ TEST_F(TestStatus, ThumbnailGoesBesideTheNameWhereThereIsNoRoomAbove)
 TEST_F(TestStatus, Header)
 {
 	// A job half way through (by time, the default progress source), with a thumbnail
-	std::filesystem::path thumbnailPath = GetThumbnailPath("test.gcode");
+	std::filesystem::path thumbnailPath = Comm::FileInfoCache::get().thumbnailPath("test.gcode");
 	std::filesystem::create_directories(thumbnailPath.parent_path());
 	std::filesystem::remove(thumbnailPath);
 	std::filesystem::copy_file(Themes::getFixedIconPath("examples", "print_thumbnail.png"), thumbnailPath);
@@ -164,7 +164,7 @@ TEST_F(TestStatus, Thumbnail)
 	load_model_data_from_file("tests/object_model/job/model_job_printing_layer_2.json");
 
 	std::string_view filename = "0:/gcodes/ROTO-VORON-HEATSINK-FAN-DUCT v4 (T0 0.6mm HF - Prusament PETG).gcode";
-	std::filesystem::path thumbnailPath = GetThumbnailPath(filename);
+	std::filesystem::path thumbnailPath = Comm::FileInfoCache::get().thumbnailPath(std::string(filename));
 	std::filesystem::create_directories(thumbnailPath.parent_path());
 	assert(std::filesystem::exists(thumbnailPath.parent_path()));
 	std::filesystem::remove(thumbnailPath);

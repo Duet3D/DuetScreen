@@ -3,7 +3,7 @@
  */
 
 #include "Connection.h"
-#include "Comm/FileInfo.h"
+#include "Comm/FileInfoCache.h"
 #include "Comm/LineFramer.h"
 #include "Comm/Links/DsfLink.h"
 #include "Comm/Links/HttpLink.h"
@@ -140,6 +140,7 @@ namespace Comm
 		{
 			std::lock_guard lock(m_queueMutex);
 			m_queue.clear();
+			m_timers.clear();
 		}
 		disconnect();
 		m_retryAt.reset();
@@ -305,12 +306,11 @@ namespace Comm
 			{ link.listFiles(dir, first, std::move(answer)); });
 	}
 
-	void Connection::fileInfo(std::string file, Handler<FileInfoReply> handler)
+	void Connection::fileInfo(std::string file, Handler<FileInfo> handler)
 	{
 		ZoneScoped;
 		ask(std::move(handler),
-			[file = std::move(file)](Link& link, Handler<FileInfoReply> answer)
-			{ link.fileInfo(file, std::move(answer)); });
+			[file = std::move(file)](Link& link, Handler<FileInfo> answer) { link.fileInfo(file, std::move(answer)); });
 	}
 
 	void Connection::thumbnail(std::string file, uint32_t offset, Handler<FileChunk> handler)
@@ -366,6 +366,16 @@ namespace Comm
 				beginConnecting();
 				connectSerial(std::move(*holder));
 			});
+	}
+
+	void Connection::after(std::chrono::milliseconds delay, std::function<void()> task)
+	{
+		ZoneScoped;
+		{
+			std::lock_guard lock(m_queueMutex);
+			m_timers.emplace(Clock::now() + delay, std::move(task));
+		}
+		m_queueChanged.notify_one();
 	}
 
 	void Connection::setManual(bool manual)
@@ -504,6 +514,13 @@ namespace Comm
 		{
 			noLaterThan(m_sync->nextPoll());
 		}
+		{
+			std::lock_guard lock(m_queueMutex);
+			if (!m_timers.empty())
+			{
+				noLaterThan(m_timers.begin()->first);
+			}
+		}
 		return std::max(wake, now);
 	}
 
@@ -512,11 +529,16 @@ namespace Comm
 		ZoneScoped;
 		while (true)
 		{
-			ZoneScoped;
 			std::deque<std::function<void()>> tasks;
 			{
 				std::lock_guard lock(m_queueMutex);
 				tasks.swap(m_queue);
+				const auto due = m_timers.upper_bound(Clock::now());
+				for (auto it = m_timers.begin(); it != due; ++it)
+				{
+					tasks.push_back(std::move(it->second));
+				}
+				m_timers.erase(m_timers.begin(), due);
 			}
 			TracyPlot("Connection tasks queued", static_cast<int64_t>(tasks.size()));
 			if (tasks.empty())
@@ -723,6 +745,11 @@ namespace Comm
 		const bool wasDisconnected = m_state == State::disconnected && !m_link && !m_port;
 		m_generation++;
 		m_serial = nullptr;
+		if (!wasDisconnected)
+		{
+			// Before the link closes: what the file cache asked for is forgotten, not answered "closed" and asked again
+			FileInfoCache::get().forget();
+		}
 		if (m_link)
 		{
 			m_link->close(); // whoever waits for an answer is told there is none
@@ -741,7 +768,6 @@ namespace Comm
 		}
 		LOG_INFO("Disconnected from the printer");
 		OM::RemoveAll();
-		FILEINFO_CACHE->ClearCache();
 		if (wasConnected)
 		{
 			Model::get().post<EventType::Disconnected>();

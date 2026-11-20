@@ -7,6 +7,7 @@
 
 #include "TestSuite.h"
 #include "Comm/Connection.h"
+#include "Comm/FileInfoCache.h"
 #include "Comm/LineFramer.h"
 #include "Comm/Replies.h"
 #include "Comm/UsbMode.h"
@@ -52,8 +53,11 @@ TestSuite::TestSuite()
 
 	OM::RemoveAll();
 
-	std::filesystem::remove_all("/tmp/thumbnails");
-	std::filesystem::create_directories("/tmp/thumbnails");
+	// The file cache's folders are the test's own: nothing kept from running the program, nor shared with tests
+	// running side by side
+	std::filesystem::remove_all(cacheFolder());
+	Comm::FileInfoCache::get().setFolders(cacheFolder() / "kept", cacheFolder() / "thumbnails");
+	Comm::FileInfoCache::get().forget();
 }
 
 TestSuite::~TestSuite()
@@ -70,8 +74,14 @@ TestSuite::~TestSuite()
 	Sim::Simulator::get().reset();
 #endif
 	OM::RemoveAll();
-	std::filesystem::remove_all("/tmp/thumbnails");
+	Comm::FileInfoCache::get().forget();
+	std::filesystem::remove_all(cacheFolder());
 	std::filesystem::remove(configFile());
+}
+
+std::filesystem::path TestSuite::cacheFolder()
+{
+	return std::filesystem::temp_directory_path() / fmt::format("duetscreen-tests-{:d}-cache", ::getpid());
 }
 
 std::filesystem::path TestSuite::configFile()

@@ -180,14 +180,14 @@ namespace Comm
 					   readAs(std::move(handler), [](const OM::Node& json) { return FileList::read(json); }));
 	}
 
-	void HttpLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
+	void HttpLink::fileInfo(std::string_view file, Handler<FileInfo> handler)
 	{
 		ZoneScoped;
 		hv::QueryParams query;
 		query["name"] = file;
 		m_http.getJson("/rr_fileinfo",
 					   std::move(query),
-					   readAs(std::move(handler), [](const OM::Node& json) { return FileInfoReply::read(json); }));
+					   readAs(std::move(handler), [](const OM::Node& json) { return FileInfo::read(json); }));
 	}
 
 	void HttpLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)

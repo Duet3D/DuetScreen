@@ -124,12 +124,12 @@ namespace Comm
 				{ handler(reply.and_then([](const OM::Node& json) { return FileList::read(json); })); });
 	}
 
-	void SerialLink::fileInfo(std::string_view file, Handler<FileInfoReply> handler)
+	void SerialLink::fileInfo(std::string_view file, Handler<FileInfo> handler)
 	{
 		ZoneScoped;
 		request(fmt::format("M36 {:s}", Comm::quoted(file)),
 				[handler = std::move(handler)](std::expected<OM::Node, ReplyError> reply)
-				{ handler(reply.and_then([](const OM::Node& json) { return FileInfoReply::read(json); })); });
+				{ handler(reply.and_then([](const OM::Node& json) { return FileInfo::read(json); })); });
 	}
 
 	void SerialLink::thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler)

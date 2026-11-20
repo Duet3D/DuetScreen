@@ -63,7 +63,7 @@ namespace Comm
 		void sendGcode(std::string_view gcode) override;
 		void emergencyStop() override;
 		void listFiles(std::string_view dir, size_t first, Handler<FileList> handler) override;
-		void fileInfo(std::string_view file, Handler<FileInfoReply> handler) override;
+		void fileInfo(std::string_view file, Handler<FileInfo> handler) override;
 		void thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler) override;
 		void readFile(std::string_view file, Handler<std::string> handler) override;
 		void writeFile(std::string_view file, std::string contents, Handler<void> handler) override;

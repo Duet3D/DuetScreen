@@ -4,8 +4,7 @@
 
 #include "FilesSource.h"
 #include "Comm/Connection.h"
-#include "Comm/FileInfo.h"
-#include "Comm/Thumbnail.h"
+#include "Comm/FileInfoCache.h"
 #include "Debug.h"
 #include "JobSource.h"
 #include "ObjectModel/Directories.h"
@@ -245,21 +244,22 @@ namespace UI::Xml
 		{
 			return shownDate(item.GetDate());
 		}
-		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(item.GetPath());
+		const std::optional<Comm::FileInfo> info = Comm::FileInfoCache::get().find(item.GetPath());
 		const uint32_t seconds = info ? std::max(info->printTime, info->simulatedTime) : 0;
 		if (seconds == 0)
 		{
 			return _("file.date_and_size", shownDate(item.GetDate()), item.GetReadableSize());
 		}
-		const float filament = std::accumulate(info->filament.begin(), info->filament.end(), 0.0f); // mm
-		return filament > 0 ? _("file.time_and_filament", JobSource::duration(seconds), filament / 1000.0f)
+		const double filament = std::accumulate(info->filament.begin(), info->filament.end(), 0.0); // mm
+		return filament > 0 ? _("file.time_and_filament", JobSource::duration(seconds), filament / 1000.0)
 							: JobSource::duration(seconds);
 	}
 
 	void FilesSource::showJob(RecentJobRow& row, const OM::FileSystem::FileSystemItem& item)
 	{
 		const std::string path = item.GetPath();
-		row.thumbnail.set(IsThumbnailCached(path) ? GetThumbnailPath(path).string() : std::string());
+		const Comm::FileInfoCache& cache = Comm::FileInfoCache::get();
+		row.thumbnail.set(cache.hasThumbnail(path) ? cache.thumbnailPath(path).string() : std::string());
 		row.detail.set(detail(item));
 	}
 
@@ -268,24 +268,23 @@ namespace UI::Xml
 		const std::string path = item.GetPath();
 		m_selected = path;
 		m_selectedName = item.GetName();
-		FILEINFO_CACHE->QueueLargeThumbnailRequest(path);
+		Comm::FileInfoCache::get().requestThumbnail(path, Comm::FileInfoCache::ThumbnailSize::large);
 
 		m_infoDate.set(shownDate(item.GetDate()));
 		m_infoSize.set(item.GetReadableSize());
-		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(path);
+		const std::optional<Comm::FileInfo> info = Comm::FileInfoCache::get().find(path);
 		m_infoShown.set(info ? 1 : 0);
 		if (info)
 		{
-			const auto& printTime = info->GetPrintTime();
-			m_infoGeneratedBy.set(info->generatedBy.c_str());
-			m_infoPrintTime.set(
-				fmt::format("{:02d}:{:02d}:{:02d}", printTime.tm_hour, printTime.tm_min, printTime.tm_sec));
+			m_infoGeneratedBy.set(info->generatedBy);
+			m_infoPrintTime.set(fmt::format(
+				"{:02d}:{:02d}:{:02d}", info->printTime / 3600, info->printTime / 60 % 60, info->printTime % 60));
 			m_infoHeight.set(fmt::format("{:g} {:s}", info->height, Units::getDisplayedDistanceUnit()));
 			m_infoLayerHeight.set(fmt::format("{:g} {:s}", info->layerHeight, Units::getDisplayedDistanceUnit()));
 		}
 
-		const bool hasImage = IsThumbnailCached(path);
-		m_dialogImage.set(hasImage ? GetThumbnailPath(path).string() : std::string());
+		const bool hasImage = Comm::FileInfoCache::get().hasThumbnail(path);
+		m_dialogImage.set(hasImage ? Comm::FileInfoCache::get().thumbnailPath(path).string() : std::string());
 		m_dialogHasImage.set(hasImage ? 1 : 0);
 		m_dialogTitle.set(_("file.start_print_title"));
 		m_dialogText.set(_("file.start_print.file", item.GetName()));
@@ -416,14 +415,14 @@ namespace UI::Xml
 		{
 			if (m_jobs[i]->GetPath() == path)
 			{
-				m_recent[i].thumbnail.set(GetThumbnailPath(path).string());
+				m_recent[i].thumbnail.set(Comm::FileInfoCache::get().thumbnailPath(path).string());
 				break;
 			}
 		}
 
 		if (m_dialog.get() == "start_print" && path == m_selected)
 		{
-			m_dialogImage.set(GetThumbnailPath(path).string());
+			m_dialogImage.set(Comm::FileInfoCache::get().thumbnailPath(path).string());
 			m_dialogHasImage.set(1);
 		}
 	}

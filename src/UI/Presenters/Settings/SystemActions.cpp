@@ -4,7 +4,7 @@
 
 #include "SystemActions.h"
 #include "Comm/Connection.h"
-#include "Comm/FileInfo.h"
+#include "Comm/FileInfoCache.h"
 #include "Configuration.h"
 #include "Debug.h"
 #include "Hardware/Reset.h"
@@ -51,7 +51,7 @@ namespace UI::SystemActions
 			{
 				std::filesystem::remove_all(NVS_FOLDER);
 			}
-			FILEINFO_CACHE->ClearCache();
+			Comm::FileInfoCache::get().clear();
 			if (auto* system = Xml::DataSources::find<Xml::SystemSource>())
 			{
 				system->update();

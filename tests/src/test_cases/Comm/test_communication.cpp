@@ -143,7 +143,7 @@ TEST_F(TestSerialLink, ARequestNotAnsweredInTimeIsGivenUp)
 	open(port);
 	std::optional<std::string> error;
 	link->fileInfo("0:/gcodes/a.gcode",
-				   [&error](std::expected<Comm::FileInfoReply, Comm::ReplyError> reply)
+				   [&error](std::expected<Comm::FileInfo, Comm::ReplyError> reply)
 				   { error = reply ? "" : reply.error().message; });
 	ASSERT_TRUE(link->nextDue());
 	link->expire(SerialLink::Clock::now());
@@ -170,7 +170,7 @@ TEST_F(TestSerialLink, RequestsStillWaitingAreToldWhenTheLinkCloses)
 	EXPECT_FALSE(error->empty());
 	error.reset();
 	link->fileInfo("0:/gcodes/a.gcode",
-				   [&error](std::expected<Comm::FileInfoReply, Comm::ReplyError> reply)
+				   [&error](std::expected<Comm::FileInfo, Comm::ReplyError> reply)
 				   { error = reply ? "" : reply.error().message; });
 	EXPECT_TRUE(error) << "asking a closed link is answered at once";
 	EXPECT_EQ(lines(port).size(), 1u) << "and sends nothing";
@@ -190,7 +190,7 @@ TEST_F(TestSerialLink, FileRequestsAreReadAsWhatTheyAskFor)
 
 	std::optional<Comm::ReplyError> error;
 	link->fileInfo("0:/gcodes/missing.gcode",
-				   [&error](std::expected<Comm::FileInfoReply, Comm::ReplyError> reply) { error = reply.error(); });
+				   [&error](std::expected<Comm::FileInfo, Comm::ReplyError> reply) { error = reply.error(); });
 	link->receive(0, R"({"err":1,"line":1})");
 	ASSERT_TRUE(error) << "an error without a file name still reaches its request";
 	EXPECT_EQ(error->code, 1);

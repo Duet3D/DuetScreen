@@ -7,7 +7,7 @@
  *      INCLUDES
  *********************/
 #include "Comm/Connection.h"
-#include "Comm/FileInfo.h"
+#include "Comm/FileInfoCache.h"
 #include "Comm/UsbMode.h"
 #include "Debug.h"
 #include "Hardware/Reset.h"
@@ -70,7 +70,6 @@ static int set_thread_priority(pthread_t thread_id, int policy, int priority);
  *  STATIC VARIABLES
  **********************/
 static std::thread s_responseThread;
-static std::thread s_thumbnailThread;
 static std::thread s_internetMonitorThread;
 
 /**********************
@@ -123,6 +122,7 @@ int main(int argc, char** argv)
 		std::filesystem::create_directories("/tmp/thumbnails");
 		std::filesystem::create_directories("/tmp/heightmaps");
 		OM::Followers::start();
+		Comm::FileInfoCache::get(); // made now, to hear which printer it is as soon as it is known
 		Comm::usbInit();
 	}
 
@@ -222,22 +222,6 @@ int main(int argc, char** argv)
 
 	// Connect to the printer, on the connection's own thread
 	Comm::Connection::get().start();
-
-	s_thumbnailThread = std::thread(
-		[]()
-		{
-			tracy::SetThreadName("FileInfo Cache Thread");
-#if SET_THREAD_PRIORITY
-			// Set low priority for thumbnail thread
-			set_thread_priority(pthread_self(), SCHED_RR, 70);
-#endif
-
-			while (1)
-			{
-				FILEINFO_CACHE->Spin();
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			}
-		});
 
 	// Screensaver task
 	DisplayHelper::setScreenSaverBrightness(0);

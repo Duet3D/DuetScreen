@@ -30,6 +30,7 @@
 #include <fmt/format.h>
 #include <functional>
 #include <magic_enum/magic_enum.hpp>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -137,7 +138,7 @@ namespace Comm
 		void listFiles(std::string dir, size_t first, Handler<FileList> handler);
 
 		/** What the firmware knows about the G-code file `file` */
-		void fileInfo(std::string file, Handler<FileInfoReply> handler);
+		void fileInfo(std::string file, Handler<FileInfo> handler);
 
 		/** The piece of a thumbnail in `file` starting at `offset` */
 		void thumbnail(std::string file, uint32_t offset, Handler<FileChunk> handler);
@@ -150,6 +151,9 @@ namespace Comm
 
 		/** Delete `file` */
 		void deleteFile(std::string file, Handler<void> handler = nullptr);
+
+		/** Run `task` on the connection's thread once `delay` has passed (connected or not) */
+		void after(std::chrono::milliseconds delay, std::function<void()> task);
 
 		// -- For tests
 		// --------------------------------------------------------------------------------------------------
@@ -201,7 +205,7 @@ namespace Comm
 		/** Stop the connection's thread: wait for it, unless this is it (the program ending from it) */
 		void stopThread();
 
-		/** Run what is queued (the queue's lock not held) */
+		/** Run what is queued, and the timers that are due (the queue's lock not held) */
 		void runQueued();
 
 		/** Do what is due at `now`: connect, poll, give up requests, notice a printer that stopped answering */
@@ -252,12 +256,13 @@ namespace Comm
 		Clock::time_point m_connectStarted;				 // When connecting started
 		std::optional<Clock::time_point> m_retryAt;		 // When to connect next, while disconnected
 
-		mutable TracyLockable(std::mutex, m_queueMutex); // Guards m_queue
-		std::condition_variable_any m_queueChanged;		 // Wakes the thread when something is queued
-		std::deque<std::function<void()>> m_queue;		 // Tasks for the connection's thread
-		bool m_manual = false;							 // Run by hand (tests)
-		std::atomic<bool> m_running{false};				 // The thread carries on
-		std::thread m_thread;							 // The connection's thread
+		mutable TracyLockable(std::mutex, m_queueMutex);				  // Guards m_queue
+		std::condition_variable_any m_queueChanged;						  // Wakes the thread when something is queued
+		std::deque<std::function<void()>> m_queue;						  // Tasks for the connection's thread
+		std::multimap<Clock::time_point, std::function<void()>> m_timers; // Tasks for later (after()), by when
+		bool m_manual = false;											  // Run by hand (tests)
+		std::atomic<bool> m_running{false};								  // The thread carries on
+		std::thread m_thread;											  // The connection's thread
 	};
 
 } // namespace Comm

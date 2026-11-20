@@ -3,7 +3,7 @@
  */
 
 #include "FileBrowserPresenter.h"
-#include "Comm/Thumbnail.h"
+#include "Comm/FileInfoCache.h"
 #include "Debug.h"
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/PrinterStatus.h"
@@ -256,8 +256,8 @@ namespace UI
 						 row.detail.set(Xml::FilesSource::detail(item));
 						 row.isFolder.set(isFolder ? 1 : 0);
 						 row.showPicture(isFolder,
-										 !isFolder && IsThumbnailCached(item.GetPath())
-											 ? GetThumbnailPath(item.GetPath()).string()
+										 !isFolder && Comm::FileInfoCache::get().hasThumbnail(item.GetPath())
+											 ? Comm::FileInfoCache::get().thumbnailPath(item.GetPath()).string()
 											 : std::string());
 					 });
 	}
@@ -347,7 +347,7 @@ namespace UI
 		UI_LOCK();
 		if (FileRow* row = rowOf(path))
 		{
-			row->showPicture(false, GetThumbnailPath(path).string());
+			row->showPicture(false, Comm::FileInfoCache::get().thumbnailPath(path).string());
 		}
 	}
 
