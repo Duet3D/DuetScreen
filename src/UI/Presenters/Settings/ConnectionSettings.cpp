@@ -3,8 +3,8 @@
  */
 
 #include "ConnectionSettings.h"
+#include "Comm/Connection.h"
 #include "Comm/Usb.h"
-#include "Hardware/Duet.h"
 #include "UI/Xml/Data/SettingsSource.h"
 #include "i18n/i18n.h"
 #include <chrono>
@@ -18,7 +18,7 @@ namespace UI::ConnectionSettings
 		/** Connect to the Duet by `type`, setting the USB-C port's mode to suit */
 		void connectBy(Comm::CommunicationType type)
 		{
-			Comm::DUET.SetCommunicationType(type);
+			Comm::Connection::get().setType(type);
 			switch (type)
 			{
 			case Comm::CommunicationType::uart:
@@ -39,13 +39,13 @@ namespace UI::ConnectionSettings
 		Xml::Settings::add({.name = "connection_method",
 							.description = "Index of how the screen connects to the Duet (USB, UART or network); "
 										   "choosing one sets the USB-C port's mode to suit",
-							.read = [] { return static_cast<int32_t>(Comm::DUET.GetCommunicationType()); },
+							.read = [] { return static_cast<int32_t>(Comm::Connection::get().type()); },
 							.write = [](int32_t index) { connectBy(static_cast<Comm::CommunicationType>(index)); },
 							.options =
 								[]
 							{
 								std::vector<std::string> names;
-								for (const auto& method : Comm::duetCommunicationTypeNames)
+								for (const auto& method : Comm::communicationTypeNames)
 								{
 									names.push_back(_(method.data()));
 								}
@@ -55,11 +55,11 @@ namespace UI::ConnectionSettings
 			{.name = "network_shown",
 			 .description = "1 if the Duet is reached over the network, so its IP address and password "
 							"apply",
-			 .read = [] { return Comm::DUET.GetCommunicationType() == Comm::CommunicationType::network ? 1 : 0; }});
+			 .read = [] { return Comm::Connection::get().type() == Comm::CommunicationType::network ? 1 : 0; }});
 		Xml::Settings::add(
 			{.name = "simulator_in_use",
 			 .description = "1 if the Duet connected to is the simulated one, so its page applies",
-			 .read = [] { return Comm::DUET.GetCommunicationType() == Comm::CommunicationType::simulator ? 1 : 0; }});
+			 .read = [] { return Comm::Connection::get().type() == Comm::CommunicationType::simulator ? 1 : 0; }});
 		Xml::Settings::add({.name = "usb_mode",
 							.description = "Index of the USB-C port's mode",
 							.read = [] { return static_cast<int32_t>(Comm::getUsbMode()); },
@@ -71,20 +71,21 @@ namespace UI::ConnectionSettings
 															 _("settings.usb_mode_device"),
 															 _("settings.usb_mode_internal_wifi")});
 							}});
-		Xml::Settings::add({.name = "poll_interval",
-							.description = "ms between polls of the Duet",
-							.read = [] { return static_cast<int32_t>(Comm::DUET.GetPollInterval().count()); },
-							.write = [](int32_t ms) { Comm::DUET.SetPollInterval(std::chrono::milliseconds(ms)); }});
 		Xml::Settings::add(
-			Xml::TextSetting{.name = "duet_ip",
-							 .description = "The Duet's IP address",
-							 .read = [] { return std::string(Comm::DUET.GetIPAddress()); },
-							 .write = [](std::string_view ip) { Comm::DUET.SetIPAddress(std::string(ip)); },
-							 .askHeader = [] { return _("settings.duet_ip_address_prompt"); }});
+			{.name = "poll_interval",
+			 .description = "ms between polls of the Duet",
+			 .read = [] { return static_cast<int32_t>(Comm::Connection::get().pollInterval().count()); },
+			 .write = [](int32_t ms) { Comm::Connection::get().setPollInterval(std::chrono::milliseconds(ms)); }});
+		Xml::Settings::add(Xml::TextSetting{.name = "duet_ip",
+											.description = "The Duet's IP address",
+											.read = [] { return std::string(Comm::Connection::get().ipAddress()); },
+											.write = [](std::string_view ip)
+											{ Comm::Connection::get().setIpAddress(std::string(ip)); },
+											.askHeader = [] { return _("settings.duet_ip_address_prompt"); }});
 		Xml::Settings::add(Xml::TextSetting{.name = "duet_password",
 											.description = "The Duet's password",
-											.read = [] { return std::string(Comm::DUET.GetPassword()); },
+											.read = [] { return std::string(Comm::Connection::get().password()); },
 											.write = [](std::string_view password)
-											{ Comm::DUET.SetPassword(std::string(password)); }});
+											{ Comm::Connection::get().setPassword(std::string(password)); }});
 	}
 } // namespace UI::ConnectionSettings

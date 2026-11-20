@@ -1,8 +1,9 @@
 /*
  * Simulator.h
  *
- * The simulated Duet, as a connection: Comm::Duet sends it G-code as it would a Duet on USB
- * (CommunicationType::simulator), and it answers as a Duet does, with JSON for the screen's decoder. Behind it is a
+ * The simulated Duet, as a connection: the screen's connection sends it numbered G-code lines as it would a Duet on
+ * USB (CommunicationType::simulator, through Comm::SimulatorPort), and it answers as a Duet does, a line of JSON per
+ * reply, numbered with the line it answers as RepRapFirmware 3.6.2 on does. Behind it is a
  * Machine (Machine.h), built from a Config the screen keeps with its settings and edits on Settings > Connection >
  * Simulated Duet.
  *

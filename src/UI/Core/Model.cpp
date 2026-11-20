@@ -1,8 +1,8 @@
 #include "Model.h"
-#include "Comm/Communication.h"
+#include "Comm/Connection.h"
 #include "Comm/Usb.h"
+#include "Configuration.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Usb.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "Presenter.h"
@@ -185,15 +185,6 @@ Model::Model()
 		LOG_WARN("LVGL not initialized, skipping model tick timer creation");
 		m_timers.tick = nullptr;
 	}
-
-#if !MULTITHREADED
-	m_timers.request =
-		lv_timer_create([](lv_timer_t* timer) { static_cast<Model*>(lv_timer_get_user_data(timer))->requestNewData(); },
-						Comm::DUET.GetScaledPollInterval(),
-						this);
-	m_timers.receive = lv_timer_create(
-		[](lv_timer_t* timer) { static_cast<Model*>(lv_timer_get_user_data(timer))->receiveNewUsbData(); }, 5, this);
-#endif
 
 	// USB drives coming and going, as an event: presenters come and go, so they can't each hold a callback
 	USB::UsbMonitor::getInstance().registerCallback([this](const std::string& path, bool mounted)
@@ -410,21 +401,6 @@ void Model::runEventLoop()
 			}
 		}
 	}
-}
-
-std::chrono::milliseconds Model::requestNewData()
-{
-	ZoneScoped;
-	bool seqAvailable = Comm::sendNext();
-#if 0
-	if (seqAvailable && Comm::DUET.GetCommunicationType() == Comm::CommunicationType::network)
-	{
-		return 50; // 50ms
-	}
-#else
-	UNUSED(seqAvailable);
-#endif
-	return Comm::DUET.GetScaledPollInterval();
 }
 
 void Model::connected()

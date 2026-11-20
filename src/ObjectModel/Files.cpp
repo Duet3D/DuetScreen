@@ -9,9 +9,9 @@
 
 #include "Files.h"
 
-#include "Comm/Communication.h"
+#include "Comm/Connection.h"
 #include "Comm/FileInfo.h"
-#include "Hardware/Duet.h"
+#include "Comm/Gcode.h"
 #include "Hardware/Usb.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
@@ -24,7 +24,6 @@ namespace OM::FileSystem
 {
 	static std::unordered_map<std::string, FileListRequestPtr> s_fileListRequests;
 
-	static FileContentsPtr s_fileContents;
 	static std::vector<std::string> s_filaments;
 
 	std::string FileSystemItem::GetPath() const
@@ -183,107 +182,11 @@ namespace OM::FileSystem
 		return elapsed > PRINTER_REQUEST_TIMEOUT;
 	}
 
-	static std::string GetLocalFilePath(std::string_view filename)
+	/** Ask for the page of the folder `dir` from item `first` on; it is handed to FileListArrived() */
+	static void RequestPage(const std::string& dir, size_t first)
 	{
-		ZoneScoped;
-		filename = filename.substr(filename.find_last_of('/') + 1); // Get the file name only
-		return fmt::format("/tmp/files/{}", filename);
-	}
-
-	FileContents::FileContents(std::string_view filename, request_file_contents_cb_t callback, bool runEveryTime)
-		: m_filename(filename)
-		, m_callback(callback)
-		, m_runEveryTime(runEveryTime)
-	{
-		ZoneScoped;
-		ClearData();
-	}
-
-	int FileContents::AppendData(std::string_view data)
-	{
-		ZoneScoped;
-		if (data.empty())
-		{
-			return 0;
-		}
-
-		const std::string fullPath = GetLocalFilePath(m_filename);
-		std::ofstream file(fullPath, std::ios::app | std::ios::binary);
-		if (!file.is_open())
-		{
-			LOG_ERROR("Failed to open file {} for appending data", fullPath);
-			return -1;
-		}
-
-		if (!file.write(data.data(), data.size()))
-		{
-			LOG_ERROR("Failed to write data to file {}", fullPath);
-			return -2;
-		}
-
-		return 0;
-	}
-
-	int FileContents::GetData(std::string& outData) const
-	{
-		ZoneScoped;
-		const std::string fullPath = GetLocalFilePath(m_filename);
-		std::ifstream file(fullPath, std::ios::binary);
-		if (!file.is_open())
-		{
-			LOG_ERROR("Failed to open file {} for reading", fullPath);
-			return -1;
-		}
-
-		outData.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		if (outData.empty() && !file.eof())
-		{
-			LOG_ERROR("Failed to read data from file {}", fullPath);
-			return -2;
-		}
-		return 0;
-	}
-
-	int FileContents::ClearData()
-	{
-		ZoneScoped;
-		const std::string fullPath = GetLocalFilePath(m_filename);
-		std::ofstream file(fullPath, std::ios::trunc | std::ios::binary);
-		if (!file.is_open())
-		{
-			LOG_ERROR("Failed to open file {} for clearing data", fullPath);
-			return -1;
-		}
-		return 0;
-	}
-
-	void FileContents::RunCallback()
-	{
-		ZoneScoped;
-		if (m_parseErr != 0)
-		{
-			LOG_ERROR("File {} has parse error: {}", m_filename, m_parseErr);
-			return;
-		}
-
-		if (m_next != 0 && !m_runEveryTime)
-		{
-			LOG_DBG("File {} has next offset: {}, not running callback", m_filename, m_next);
-			return;
-		}
-
-		if (m_callback)
-		{
-			std::string contents;
-			if (GetData(contents) == 0)
-			{
-				m_callback(contents);
-			}
-			else
-			{
-				LOG_ERROR("Failed to get data for callback from file {}", m_filename);
-			}
-		}
+		Comm::Connection::get().listFiles(
+			dir, first, [dir](std::expected<Comm::FileList, Comm::ReplyError> reply) { FileListArrived(dir, reply); });
 	}
 
 	FileListRequestPtr GetFileListRequest(const std::string& path)
@@ -404,7 +307,7 @@ namespace OM::FileSystem
 			callback(cached->GetItemsCopy());
 		}
 		LOG_INFO("Files: requesting files in {:s}", full_path);
-		Comm::DUET.RequestFileList(full_path, reqPtr->GetFirst());
+		RequestPage(full_path, reqPtr->GetFirst());
 	}
 
 	void RequestUsbFiles(const std::string& path)
@@ -455,7 +358,7 @@ namespace OM::FileSystem
 	void RunMacro(const std::string& path)
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcodef("M98 P\"{:s}\"\n", path);
+		Comm::Connection::get().sendGcodef("M98 P{:s}\n", Comm::quoted(path));
 	}
 
 	void UploadFile(const ItemPtr& file)
@@ -473,32 +376,32 @@ namespace OM::FileSystem
 		std::string contents;
 		if (!USB::ReadUsbFileContents(file->GetPath(), contents))
 			return;
-		Comm::DUET.UploadFile(fmt::format("/gcodes/{:s}", file->GetName()).c_str(), contents);
+		Comm::Connection::get().writeFile(fmt::format("/gcodes/{:s}", file->GetName()), std::move(contents));
 #endif
 	}
 
 	void StartPrint(const std::string& path)
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcodef("M32 \"{:s}\"\n", path);
+		Comm::Connection::get().sendGcodef("M32 {:s}\n", Comm::quoted(path));
 	}
 
 	void ResumePrint()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcode("M24\n");
+		Comm::Connection::get().sendGcode("M24\n");
 	}
 
 	void PausePrint()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcode("M25\n");
+		Comm::Connection::get().sendGcode("M25\n");
 	}
 
 	void StopPrint()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcode("M0\n");
+		Comm::Connection::get().sendGcode("M0\n");
 	}
 
 	void PrintAgain()
@@ -509,7 +412,7 @@ namespace OM::FileSystem
 			std::lock_guard lock(mutexModel);
 			lastFile = Tree::get().root()["job"]["lastFileName"].text();
 		}
-		Comm::DUET.SendGcodef("M23 \"{:s}\"\nM24\n", lastFile);
+		Comm::Connection::get().sendGcodef("M23 {:s}\nM24\n", Comm::quoted(lastFile));
 	}
 
 	void ClearFileSystem()
@@ -518,7 +421,6 @@ namespace OM::FileSystem
 		LOG_DBG("Clearing all file list requests");
 		MODEL_LOCK();
 		s_fileListRequests.clear();
-		s_fileContents.reset();
 	}
 
 	void ClearFileList(const std::string& path)
@@ -569,26 +471,22 @@ namespace OM::FileSystem
 
 	void RequestFileContents(const OM::Directories::DirectoryType baseFolder,
 							 std::string_view path,
-							 request_file_contents_cb_t callback,
-							 bool runEveryTime)
+							 request_file_contents_cb_t callback)
 	{
 		ZoneScoped;
-		LOG_INFO("Requesting file contents of {}", path);
 		std::string fullPath = fmt::format("{}{}", OM::Directories::GetDirectory(baseFolder), path);
-		if (Comm::DUET.GetCommunicationType() == Comm::CommunicationType::network)
-		{
-			std::string contents;
-			if (!Comm::DUET.DownloadFile(fullPath, callback))
+		LOG_INFO("Requesting file contents of {}", fullPath);
+		Comm::Connection::get().readFile(
+			fullPath,
+			[fullPath, callback = std::move(callback)](std::expected<std::string, Comm::ReplyError> contents)
 			{
-				LOG_ERROR("Failed to download file contents of {}", fullPath);
-				return;
-			}
-		}
-		else
-		{
-			s_fileContents = std::make_shared<FileContents>(fullPath, callback, runEveryTime);
-			Comm::DUET.SendGcodef("M36.2 P\"{:s}\" S0\n", fullPath);
-		}
+				if (!contents)
+				{
+					LOG_ERROR("Couldn't read {:s}: {:s}", fullPath, contents.error().message);
+					return;
+				}
+				callback(*contents);
+			});
 	}
 
 	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply)
@@ -654,32 +552,7 @@ namespace OM::FileSystem
 		request->RunCallback();
 		if (reply->next != 0)
 		{
-			Comm::DUET.RequestFileList(dir, reply->next);
-		}
-	}
-
-	void FileContentsArrived(const std::string& filepath, const std::expected<Comm::FileChunk, Comm::ReplyError>& reply)
-	{
-		ZoneScoped;
-		FileContentsPtr contents = s_fileContents;
-		if (!contents || contents->GetFilename() != filepath)
-		{
-			LOG_WARN("Not expecting to receive file contents data for \"{:s}\", ignoring", filepath);
-			return;
-		}
-		if (!reply)
-		{
-			LOG_ERROR("Couldn't read {:s}: {:s}", filepath, reply.error().message);
-			s_fileContents = nullptr;
-			return;
-		}
-		contents->SetOffset(reply->offset);
-		contents->AppendData(reply->data);
-		contents->SetNext(reply->next);
-		contents->RunCallback();
-		if (reply->next != 0)
-		{
-			Comm::DUET.SendGcodef("M36.2 P\"{:s}\" S{:d}\n", filepath, reply->next);
+			RequestPage(dir, reply->next);
 		}
 	}
 

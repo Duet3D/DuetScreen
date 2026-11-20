@@ -12,7 +12,9 @@
 #include "Tree/Tree.h"
 #include <mutex>
 
-#include "Hardware/Duet.h"
+#include "Comm/Connection.h"
+#include "Comm/Gcode.h"
+#include "Configuration.h"
 #include "ObjectModel/Directories.h"
 #include "utils/csv.h"
 #include <cmath>
@@ -438,7 +440,7 @@ namespace OM
 	{
 		ZoneScoped;
 		LOG_INFO("Loading heightmap {:s}", filename);
-		Comm::DUET.SendGcodef("G29 S1 P\"{:s}\"\n", filename);
+		Comm::Connection::get().sendGcodef("G29 S1 P{:s}\n", Comm::quoted(filename));
 	}
 
 	/* Sends command to Duet to unload the heightmap */
@@ -446,7 +448,7 @@ namespace OM
 	{
 		ZoneScoped;
 		LOG_INFO("Unloading heightmap");
-		Comm::DUET.SendGcode("G29 S2\n");
+		Comm::Connection::get().sendGcode("G29 S2\n");
 	}
 
 	void ToggleHeightmap(std::string_view filename)

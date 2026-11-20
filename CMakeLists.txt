@@ -315,7 +315,6 @@ else()
                                               TRUE)
 endif()
 
-target_compile_definitions(DuetScreen.lib PUBLIC MULTITHREADED)
 
 if(PROCESSOR STREQUAL "T113")
   pkg_check_modules(XKBCOMMON xkbcommon)

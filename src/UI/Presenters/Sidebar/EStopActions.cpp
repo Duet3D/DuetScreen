@@ -3,8 +3,8 @@
  */
 
 #include "EStopActions.h"
+#include "Comm/Connection.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/View/Actions.h"
 #include "i18n/i18n.h"
@@ -22,7 +22,7 @@ namespace UI::EStopActions
 			if (fraction >= 1.0f)
 			{
 				LOG_WARN("EStop Pressed!");
-				Comm::DUET.Estop();
+				Comm::Connection::get().emergencyStop();
 				Model::get().post<EventType::Response>(ResponseType::ERROR, _("estop.message"));
 			}
 			else if (fraction < TAP)

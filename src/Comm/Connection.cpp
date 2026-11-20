@@ -1,0 +1,668 @@
+/*
+ * Connection.cpp
+ */
+
+#include "Connection.h"
+#include "Comm/FileInfo.h"
+#include "Comm/LineFramer.h"
+#include "Comm/Links/HttpLink.h"
+#include "Comm/Ports/UartPort.h"
+#include "Comm/Ports/UsbPort.h"
+#include "Comm/Responses.h"
+#include "Configuration.h"
+#include "Debug.h"
+#include "Hardware/Reset.h"
+#include "ObjectModel/Followers.h"
+#include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Patch.h"
+#include "ObjectModel/Tree/Tree.h"
+#include "ObjectModel/Utils.h"
+#include "Storage.h"
+#include "UI/Core/Model.h"
+#include "nameof.hpp"
+#include "tracy/Tracy.hpp"
+#include "utils/StorageHelper.h"
+#if DUET_SIMULATOR
+#  include "Comm/Ports/SimulatorPort.h"
+#endif
+
+namespace Comm
+{
+	namespace
+	{
+		/** How often the connection's thread looks at what is due, when nothing is queued */
+		constexpr std::chrono::milliseconds threadTick{20};
+
+		/** How long a request over USB, or to the simulated Duet, waits for its reply */
+		constexpr std::chrono::milliseconds usbReplyTimeout{5000};
+
+		/** How long a request over UART waits for its reply: a large reply takes a while at a low baud rate */
+		constexpr std::chrono::milliseconds uartReplyTimeout{10000};
+
+		/** Act on a control command, which the firmware sends to update or restart the screen */
+		void controlCommand(std::string_view command)
+		{
+			if (command == "reset")
+			{
+				Restart(); // Does not return
+			}
+			else if (command == "eraseAndReset")
+			{
+				EraseAndRestart(); // Does not return
+			}
+			else
+			{
+				LOG_WARN("Unknown control command \"{:s}\"", command);
+			}
+		}
+
+		/** A handler that only notes a failure, for a request whose asker doesn't wait for the answer */
+		Handler<void> logFailure(std::string what)
+		{
+			return [what = std::move(what)](std::expected<void, ReplyError> result)
+			{
+				if (!result)
+				{
+					LOG_WARN("{:s} failed: {:s}", what, result.error().message);
+				}
+			};
+		}
+	} // namespace
+
+	Connection& Connection::get()
+	{
+		static Connection s_connection;
+		return s_connection;
+	}
+
+	Connection::Connection()
+		: m_pollInterval(DEFAULT_PRINTER_POLL_INTERVAL)
+	{
+	}
+
+	Connection::~Connection()
+	{
+		// Only the thread: the rest of the program may have gone already
+		m_running = false;
+		m_queueChanged.notify_all();
+		if (m_thread.joinable())
+		{
+			m_thread.join();
+		}
+	}
+
+	void Connection::start()
+	{
+		ZoneScoped;
+		{
+			std::lock_guard lock(m_settingsMutex);
+			m_ipAddress = StorageHelper::getData(ID_DUET_IP_ADDRESS);
+			m_password = StorageHelper::getData(ID_DUET_PASSWORD);
+		}
+		m_pollInterval = std::max(StorageHelper::getData(ID_DUET_POLL_INTERVAL), MIN_PRINTER_POLL_INTERVAL);
+		CommunicationType type = StorageHelper::getData(ID_DUET_COMMUNICATION_TYPE);
+#if !DUET_SIMULATOR
+		if (type == CommunicationType::simulator)
+		{
+			type = CommunicationType::usb; // a build without the simulated Duet
+		}
+#endif
+		m_type = type;
+		post([this] { m_retryAt = Clock::now(); });
+		if (!m_manual && !m_running)
+		{
+			m_running = true;
+			m_thread = std::thread(&Connection::run, this);
+		}
+	}
+
+	void Connection::stop()
+	{
+		if (m_running)
+		{
+			m_running = false;
+			m_queueChanged.notify_all();
+			if (m_thread.joinable())
+			{
+				m_thread.join();
+			}
+		}
+		{
+			std::lock_guard lock(m_queueMutex);
+			m_queue.clear();
+		}
+		disconnect();
+		m_retryAt.reset();
+	}
+
+	std::string_view Connection::typeName() const
+	{
+		return communicationTypeNames[static_cast<size_t>(type())];
+	}
+
+	void Connection::setType(CommunicationType type)
+	{
+#if !DUET_SIMULATOR
+		if (type == CommunicationType::simulator)
+		{
+			LOG_WARN("This build has no simulated Duet");
+			return;
+		}
+#endif
+		LOG_INFO("Connecting by {:s}", nameof::nameof_enum(type));
+		m_type = type;
+		StorageHelper::setData(ID_DUET_COMMUNICATION_TYPE, type);
+		reconnect();
+	}
+
+	void Connection::setPollInterval(std::chrono::milliseconds interval)
+	{
+		if (interval < MIN_PRINTER_POLL_INTERVAL)
+		{
+			LOG_WARN("Poll interval too low, setting to {}", MIN_PRINTER_POLL_INTERVAL);
+			interval = MIN_PRINTER_POLL_INTERVAL;
+		}
+		m_pollInterval = interval;
+		StorageHelper::setData(ID_DUET_POLL_INTERVAL, interval);
+		post(
+			[this, interval]
+			{
+				if (m_sync)
+				{
+					m_sync->setPollInterval(interval);
+				}
+			});
+	}
+
+	std::string Connection::ipAddress() const
+	{
+		std::lock_guard lock(m_settingsMutex);
+		return m_ipAddress;
+	}
+
+	void Connection::setIpAddress(std::string_view address)
+	{
+		{
+			std::lock_guard lock(m_settingsMutex);
+			if (m_ipAddress == address)
+			{
+				return;
+			}
+			m_ipAddress = address;
+		}
+		LOG_INFO("Setting IP address to {:s}", address);
+		StorageHelper::setData(ID_DUET_IP_ADDRESS, address);
+		if (type() == CommunicationType::network)
+		{
+			reconnect();
+		}
+	}
+
+	std::string Connection::password() const
+	{
+		std::lock_guard lock(m_settingsMutex);
+		return m_password;
+	}
+
+	void Connection::setPassword(std::string_view password)
+	{
+		{
+			std::lock_guard lock(m_settingsMutex);
+			m_password = password;
+		}
+		StorageHelper::setData(ID_DUET_PASSWORD, password);
+		if (type() == CommunicationType::network)
+		{
+			reconnect();
+		}
+	}
+
+	void Connection::reconnect()
+	{
+		post(
+			[this]
+			{
+				disconnect();
+				m_retryAt = Clock::now();
+			});
+	}
+
+	void Connection::sendGcode(std::string_view gcode)
+	{
+		post(
+			[this, gcode = std::string(gcode)]
+			{
+				if (m_state != State::connected || !m_link)
+				{
+					LOG_DBG("Not connected to the printer, not sending: {:s}", gcode);
+					return;
+				}
+				m_link->sendGcode(gcode);
+			});
+	}
+
+	void Connection::emergencyStop()
+	{
+		post(
+			[this]
+			{
+				if (!m_link)
+				{
+					LOG_WARN("Not connected to the printer: it can't be stopped");
+					return;
+				}
+				m_link->emergencyStop();
+				LOG_WARN("Emergency stop sent");
+			});
+	}
+
+	template <typename T, typename Ask>
+	void Connection::ask(Handler<T> handler, Ask ask)
+	{
+		post(
+			[this, handler = std::move(handler), ask = std::move(ask)]() mutable
+			{
+				if (m_state != State::connected || !m_link)
+				{
+					handler(std::unexpected(ReplyError{.message = "not connected to the printer"}));
+					return;
+				}
+				ask(*m_link, std::move(handler));
+			});
+	}
+
+	void Connection::listFiles(std::string dir, size_t first, Handler<FileList> handler)
+	{
+		ask(std::move(handler),
+			[dir = std::move(dir), first](Link& link, Handler<FileList> answer)
+			{ link.listFiles(dir, first, std::move(answer)); });
+	}
+
+	void Connection::fileInfo(std::string file, Handler<FileInfoReply> handler)
+	{
+		ask(std::move(handler),
+			[file = std::move(file)](Link& link, Handler<FileInfoReply> answer)
+			{ link.fileInfo(file, std::move(answer)); });
+	}
+
+	void Connection::thumbnail(std::string file, uint32_t offset, Handler<FileChunk> handler)
+	{
+		ask(std::move(handler),
+			[file = std::move(file), offset](Link& link, Handler<FileChunk> answer)
+			{ link.thumbnail(file, offset, std::move(answer)); });
+	}
+
+	void Connection::readFile(std::string file, Handler<std::string> handler)
+	{
+		ask(std::move(handler),
+			[file = std::move(file)](Link& link, Handler<std::string> answer)
+			{ link.readFile(file, std::move(answer)); });
+	}
+
+	void Connection::writeFile(std::string file, std::string contents, Handler<void> handler)
+	{
+		if (!handler)
+		{
+			handler = logFailure(fmt::format("Writing {:s}", file));
+		}
+		ask(std::move(handler),
+			[file = std::move(file), contents = std::move(contents)](Link& link, Handler<void> answer) mutable
+			{ link.writeFile(file, std::move(contents), std::move(answer)); });
+	}
+
+	void Connection::deleteFile(std::string file, Handler<void> handler)
+	{
+		if (!handler)
+		{
+			handler = logFailure(fmt::format("Deleting {:s}", file));
+		}
+		ask(std::move(handler),
+			[file = std::move(file)](Link& link, Handler<void> answer) { link.deleteFile(file, std::move(answer)); });
+	}
+
+	void Connection::connectThrough(std::unique_ptr<SerialPort> port)
+	{
+		// A task is copied, so the port is held where a copy shares it
+		auto holder = std::make_shared<std::unique_ptr<SerialPort>>(std::move(port));
+		post(
+			[this, holder]
+			{
+				disconnect();
+				m_retryAt.reset();
+				beginConnecting();
+				const bool checksums = (*holder)->needsChecksums();
+				connectSerial(std::move(*holder), checksums);
+			});
+	}
+
+	void Connection::setManual(bool manual)
+	{
+		if (manual && m_running)
+		{
+			m_running = false;
+			m_queueChanged.notify_all();
+			if (m_thread.joinable())
+			{
+				m_thread.join();
+			}
+		}
+		m_manual = manual;
+	}
+
+	void Connection::process()
+	{
+		runQueued();
+		step(Clock::now());
+		runQueued();
+	}
+
+	void Connection::pollNow()
+	{
+		post(
+			[this]
+			{
+				if (m_sync)
+				{
+					m_sync->pollNow();
+				}
+			});
+	}
+
+	bool Connection::busy() const
+	{
+		{
+			std::lock_guard lock(m_queueMutex);
+			if (!m_queue.empty())
+			{
+				return true;
+			}
+		}
+		return m_link && m_link->waiting();
+	}
+
+	void Connection::receiveUnasked(OM::Node& reply)
+	{
+		if (auto patch = OM::Patch::fromReply(reply))
+		{
+			if (m_sync)
+			{
+				m_sync->receiveUnasked(*patch);
+			}
+			else
+			{
+				OM::Tree::get().apply(*patch);
+			}
+		}
+		else if (reply["resp"].exists())
+		{
+			showResponse(reply["resp"].text());
+		}
+		else if (reply["message"].exists())
+		{
+			LOG_INFO("Message: {:s}", reply["message"].text());
+		}
+		else if (reply["controlCommand"].exists())
+		{
+			controlCommand(reply["controlCommand"].text());
+		}
+		else
+		{
+			LOG_DBG("A reply nothing is waiting for: {:s}", reply.toJson());
+		}
+	}
+
+	void Connection::post(std::function<void()> task)
+	{
+		{
+			std::lock_guard lock(m_queueMutex);
+			m_queue.push_back(std::move(task));
+		}
+		m_queueChanged.notify_one();
+	}
+
+	void Connection::run()
+	{
+		tracy::SetThreadName("Connection");
+		while (m_running)
+		{
+			{
+				std::unique_lock lock(m_queueMutex);
+				m_queueChanged.wait_for(lock, threadTick, [this] { return !m_queue.empty() || !m_running; });
+			}
+			runQueued();
+			step(Clock::now());
+		}
+	}
+
+	void Connection::runQueued()
+	{
+		while (true)
+		{
+			std::deque<std::function<void()>> tasks;
+			{
+				std::lock_guard lock(m_queueMutex);
+				tasks.swap(m_queue);
+			}
+			if (tasks.empty())
+			{
+				return;
+			}
+			for (auto& task : tasks)
+			{
+				ZoneScopedN("Connection task");
+				task();
+			}
+		}
+	}
+
+	void Connection::step(Clock::time_point now)
+	{
+		ZoneScoped;
+		switch (m_state.load())
+		{
+		case State::disconnected:
+			if (m_retryAt && now >= *m_retryAt)
+			{
+				m_retryAt.reset();
+				connect();
+			}
+			return;
+		case State::connecting:
+			if (now - m_connectStarted > PRINTER_REQUEST_TIMEOUT)
+			{
+				lost("the printer didn't answer");
+				return;
+			}
+			break;
+		case State::connected:
+			if (now - m_link->lastHeard() > PRINTER_REQUEST_TIMEOUT)
+			{
+				lost("the printer stopped answering");
+				return;
+			}
+			break;
+		}
+		if (!m_link)
+		{
+			return; // waiting for rr_connect
+		}
+		if (m_link->failed())
+		{
+			lost("the link to the printer failed");
+			return;
+		}
+		m_link->expire(now);
+		if (m_sync)
+		{
+			m_sync->tick(now);
+		}
+	}
+
+	void Connection::beginConnecting()
+	{
+		m_generation++;
+		m_state = State::connecting;
+		m_connectStarted = Clock::now();
+		OM::SetStatus(OM::PrinterStatus::connecting);
+	}
+
+	void Connection::connect()
+	{
+		ZoneScoped;
+		beginConnecting();
+		LOG_INFO("Connecting by {:s}", nameof::nameof_enum(type()));
+
+		switch (type())
+		{
+		case CommunicationType::usb:
+			connectSerial(std::make_unique<UsbPort>(), false);
+			break;
+		case CommunicationType::uart:
+			connectSerial(std::make_unique<UartPort>(DEFAULT_UART_PORT, StorageHelper::getData(ID_DUET_BAUD_RATE)),
+						  true);
+			break;
+		case CommunicationType::simulator:
+#if DUET_SIMULATOR
+			connectSerial(std::make_unique<SimulatorPort>(), false);
+#else
+			lost("this build has no simulated Duet");
+#endif
+			break;
+		case CommunicationType::network:
+		{
+			auto link = std::make_unique<HttpLink>(
+				ipAddress(),
+				password(),
+				[this](std::function<void()> task) { post(std::move(task)); },
+				[this](OM::Node& reply) { receiveUnasked(reply); });
+			HttpLink& http = *link;
+			m_link = std::move(link);
+			http.open(
+				[this, generation = m_generation](std::expected<HttpLink::Session, ReplyError> session)
+				{
+					if (generation != m_generation)
+					{
+						return;
+					}
+					if (!session)
+					{
+						lost(fmt::format("rr_connect failed: {:s}", session.error().message));
+						return;
+					}
+					if (session->sbc)
+					{
+						LOG_INFO("The Duet has an SBC");
+					}
+					OM::SetChannelIndex(0); // state.thisInput isn't sent by rr_model
+					m_sync = std::make_unique<ModelSync>(*m_link);
+					m_sync->setPollInterval(pollInterval());
+					connected();
+				});
+			break;
+		}
+		}
+	}
+
+	void Connection::connectSerial(std::unique_ptr<SerialPort> port, bool needsChecksums)
+	{
+		// Each channel's bytes are gathered into lines on the port's thread, and the lines handled on this one
+		auto framers = std::make_shared<std::array<std::unique_ptr<LineFramer>, 2>>();
+		for (size_t channel = 0; channel < framers->size(); channel++)
+		{
+			(*framers)[channel] = std::make_unique<LineFramer>(
+				[this, generation = m_generation, channel](std::string_view line)
+				{
+					post([this, generation, channel, line = std::string(line)]
+						 { lineReceived(generation, channel, line); });
+				});
+		}
+		const bool opened = port->open([framers](size_t channel, std::string_view bytes)
+									   { (*framers)[std::min(channel, framers->size() - 1)]->push(bytes); });
+		if (!opened)
+		{
+			lost("the port couldn't be opened");
+			return;
+		}
+		m_port = std::move(port);
+
+		const bool usb = type() == CommunicationType::usb;
+		auto link = std::make_unique<SerialLink>(
+			*m_port,
+			[this](OM::Node& reply) { receiveUnasked(reply); },
+			SerialLink::Options{
+				.replyTimeout = needsChecksums ? uartReplyTimeout : usbReplyTimeout,
+				.useStatusChannel = StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL),
+				.maxUploadSize = needsChecksums ? MAX_UART_UPLOAD_SIZE : SIZE_MAX,
+			});
+		m_serial = link.get();
+		m_link = std::move(link);
+		if (usb)
+		{
+			// JSON replies, without checksums (USB has its own error checking)
+			m_link->sendGcode("M575 P0 S0");
+			if (StorageHelper::getData(ID_ENABLE_SECOND_USB_CHANNEL) && m_port->channels() > 1)
+			{
+				m_link->sendGcode("M575 P1 S0");
+			}
+		}
+		m_sync = std::make_unique<ModelSync>(*m_link);
+		m_sync->setPollInterval(pollInterval());
+		m_sync->pollNow(); // its answer says the printer is there
+	}
+
+	void Connection::connected()
+	{
+		LOG_INFO("Connected to the printer");
+		m_state = State::connected;
+		OM::Followers::refresh(); // the printer's status, in place of "connecting"
+		Model::get().post<EventType::Connected>();
+	}
+
+	void Connection::disconnect()
+	{
+		ZoneScoped;
+		const bool wasConnected = m_state == State::connected;
+		const bool wasDisconnected = m_state == State::disconnected && !m_link && !m_port;
+		m_generation++;
+		m_serial = nullptr;
+		m_link.reset(); // tells whoever waits for an answer that there is none
+		m_sync.reset();
+		if (m_port)
+		{
+			m_port->close();
+			m_port.reset();
+		}
+		m_state = State::disconnected;
+		if (wasDisconnected)
+		{
+			return;
+		}
+		LOG_INFO("Disconnected from the printer");
+		OM::RemoveAll();
+		FILEINFO_CACHE->ClearCache();
+		if (wasConnected)
+		{
+			Model::get().post<EventType::Disconnected>();
+		}
+	}
+
+	void Connection::lost(std::string_view reason)
+	{
+		LOG_WARN("Connection lost: {:s}", reason);
+		disconnect();
+		m_retryAt = Clock::now() + retryDelay;
+	}
+
+	void Connection::lineReceived(uint64_t generation, size_t channel, std::string line)
+	{
+		if (generation != m_generation || m_serial == nullptr)
+		{
+			return; // from a port closed since
+		}
+		m_serial->receive(channel, line);
+		if (m_state == State::connecting)
+		{
+			connected();
+		}
+	}
+} // namespace Comm

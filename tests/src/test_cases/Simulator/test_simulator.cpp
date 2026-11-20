@@ -7,8 +7,7 @@
 
 #if DUET_SIMULATOR
 
-#  include "Comm/Communication.h"
-#  include "Hardware/Duet.h"
+#  include "Comm/Connection.h"
 #  include "ObjectModel/Tree/Tree.h"
 #  include "Simulator/Machine.h"
 #  include "Simulator/Simulator.h"
@@ -679,13 +678,15 @@ TEST_F(TestSimulator, UnpluggedItCantBeConnectedTo)
 	Sim::Behaviour behaviour = simulator.behaviour();
 	behaviour.pluggedIn = false;
 	simulator.setBehaviour(behaviour);
-	Comm::DUET.SetCommunicationType(Comm::CommunicationType::simulator);
-	EXPECT_FALSE(Comm::DUET.IsConnected());
+	Comm::Connection::get().setType(Comm::CommunicationType::simulator);
+	Comm::Connection::get().process();
+	EXPECT_FALSE(Comm::Connection::get().isConnected());
+	EXPECT_FALSE(Comm::Connection::get().isConnecting()) << "it waits to try again";
 
 	behaviour.pluggedIn = true;
 	simulator.setBehaviour(behaviour);
-	EXPECT_TRUE(Comm::DUET.Connect());
-	EXPECT_TRUE(Comm::DUET.IsConnected());
+	connectSimulator();
+	EXPECT_TRUE(Comm::Connection::get().isConnected());
 }
 
 TEST_F(TestSimulator, NotRespondingItAnswersNothing)
@@ -700,8 +701,8 @@ TEST_F(TestSimulator, NotRespondingItAnswersNothing)
 
 	behaviour.responding = true;
 	simulator.setBehaviour(behaviour);
-	Comm::Reconnect(); // as the screen does when it times out
-	simulator.process();
+	Comm::Connection::get().reconnect(); // as the screen does when the printer stops answering
+	Comm::Connection::get().process();
 	pollSimulator();
 	EXPECT_EQ(om("network.name").text(), "Simulated FFF");
 }

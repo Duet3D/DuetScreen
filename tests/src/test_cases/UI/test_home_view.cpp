@@ -1340,6 +1340,8 @@ TEST_F(TestHomeViewWithData, ConsoleFollowsNewLines)
 
 TEST_F(TestHomeViewWithData, BedMeshListsSavedMeshesShowsOneAndColoursIt)
 {
+	setSetting("connected_message", 0); // So nothing covers the screen
+	ScriptedPrinter& printer = connectScriptedPrinter();
 	load_model_data_from_file("tests/object_model/test_bench/model_directories_v.json");
 	deliverModelEvents();
 	// Opening the tab asks for the saved meshes; the printer answers one listing at a time, so it is opened last
@@ -1351,12 +1353,12 @@ TEST_F(TestHomeViewWithData, BedMeshListsSavedMeshesShowsOneAndColoursIt)
 
 	// The system folder's height maps (this printer's is 0:/sys/DuetScreen/) are the saved meshes: not other CSV
 	// files, such as the filaments'
-	load_model_data(
+	EXPECT_TRUE(printer.answer(
+		"M20 S3 P\"0:/sys/DuetScreen/\"",
 		R"({"dir":"0:/sys/DuetScreen/","first":0,"files":[{"type":"f","name":"config.g","size":100,"date":"2025-01-01T10:00:00"},)"
 		R"({"type":"f","name":"filaments.csv","size":10,"date":"2025-01-01T10:00:00"},)"
 		R"({"type":"f","name":"heightmap.csv","size":400,"date":"2025-01-02T10:00:00"},)"
-		R"({"type":"f","name":"textured.csv","size":400,"date":"2025-01-03T10:00:00"}],"next":0})"
-		"\n");
+		R"({"type":"f","name":"textured.csv","size":400,"date":"2025-01-03T10:00:00"}],"next":0})"));
 	deliverModelEvents();
 	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(page, "no_maps"), LV_OBJ_FLAG_HIDDEN));
 
@@ -1369,12 +1371,13 @@ TEST_F(TestHomeViewWithData, BedMeshListsSavedMeshesShowsOneAndColoursIt)
 	lv_obj_send_event(textured, LV_EVENT_CLICKED, nullptr);
 
 	// The printer sends the file, and the mesh, its name and its statistics are shown
-	load_model_data(R"({"fragment":{"fileName":"0:/sys/DuetScreen/textured.csv","offset":0,"data":")"
-					R"(RepRapFirmware height map file v2 generated at 2025-01-02 10:00, min error -0.100, max error )"
-					R"(0.150, mean 0.006, deviation 0.069\naxis0,axis1,min0,max0,min1,max1,radius,spacing0,spacing1,)"
-					R"(num0,num1\nX,Y,10.00,90.00,10.00,90.00,-1.00,40.00,40.00,3,3\n  0.000,  0.050,  0.100\n )"
-					R"(-0.050,  0.000,  0.050\n -0.100, -0.050,  0.150\n","next":0,"err":0}})"
-					"\n");
+	EXPECT_TRUE(printer.answer(
+		"M36.2 P\"0:/sys/DuetScreen/textured.csv\"",
+		R"({"fragment":{"fileName":"0:/sys/DuetScreen/textured.csv","offset":0,"data":")"
+		R"(RepRapFirmware height map file v2 generated at 2025-01-02 10:00, min error -0.100, max error )"
+		R"(0.150, mean 0.006, deviation 0.069\naxis0,axis1,min0,max0,min1,max1,radius,spacing0,spacing1,)"
+		R"(num0,num1\nX,Y,10.00,90.00,10.00,90.00,-1.00,40.00,40.00,3,3\n  0.000,  0.050,  0.100\n )"
+		R"(-0.050,  0.000,  0.050\n -0.100, -0.050,  0.150\n","next":0,"err":0}})"));
 	deliverModelEvents();
 	ASSERT_NE(lv_obj_find_by_name(page, "detail"), nullptr);
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "detail")), "textured.csv")

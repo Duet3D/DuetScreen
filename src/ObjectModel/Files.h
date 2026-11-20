@@ -165,39 +165,6 @@ namespace OM::FileSystem
 	using FileListRequestPtr = std::shared_ptr<FileListRequest>;
 	using FileListRequestWeakPtr = std::weak_ptr<FileListRequest>;
 
-	class FileContents
-	{
-	  public:
-		FileContents(std::string_view filename,
-					 request_file_contents_cb_t callback = nullptr,
-					 bool runEveryTime = false);
-
-		std::string_view GetFilename() const { return m_filename; }
-		int AppendData(std::string_view data);
-		int GetData(std::string& outData) const;
-		int ClearData();
-
-		void SetOffset(uint32_t offset) { m_offset = offset; }
-		uint32_t GetOffset() const { return m_offset; }
-
-		void SetNext(uint32_t next) { m_next = next; }
-		uint32_t GetNext() const { return m_next; }
-
-		void SetParseError(int16_t parseErr) { m_parseErr = parseErr; }
-		int16_t GetParseError() const { return m_parseErr; }
-
-		void RunCallback();
-
-	  private:
-		std::string m_filename; // Path to the file
-		request_file_contents_cb_t m_callback;
-		bool m_runEveryTime = false;
-		uint32_t m_offset = 0;
-		uint32_t m_next = 0;
-		int16_t m_parseErr = 0;
-	};
-
-	using FileContentsPtr = std::shared_ptr<FileContents>;
 
 	/* File List */
 
@@ -232,10 +199,11 @@ namespace OM::FileSystem
 
 	/* File Contents */
 
+	/** Read the file `path` in `baseFolder`, and give its contents to `callback` (on the connection's thread) */
 	void RequestFileContents(const OM::Directories::DirectoryType baseFolder,
 							 std::string_view path,
-							 request_file_contents_cb_t callback,
-							 bool runEveryTime = false);
+							 request_file_contents_cb_t callback);
+
 	/**
 	 * The firmware's answer to a folder listing request (M20 S3, rr_filelist): the page is added to the folder's request,
 	 * its G-code files' information asked for, and the next page asked for; or why there is none, which answers the
@@ -244,12 +212,6 @@ namespace OM::FileSystem
 	 */
 	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply);
 
-	/**
-	 * The firmware's answer to a file contents request over USB or UART (M36.2): the piece is added to the contents and
-	 * the next piece asked for; or why there is none, which ends the request
-	 * @param filepath The file asked for
-	 */
-	void FileContentsArrived(const std::string& filepath, const std::expected<Comm::FileChunk, Comm::ReplyError>& reply);
 
 	/* Misc */
 

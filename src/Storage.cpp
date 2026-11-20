@@ -9,10 +9,10 @@
 #include "Configuration.h"
 
 /* For types */
+#include "Comm/Connection.h"
 #include "Comm/Responses.h"
 #include "Comm/Usb.h"		   // Comm::UsbMode
 #include "Debug.h"			   // Log::DebugLevel
-#include "Hardware/Duet.h"	   // Comm::CommunicationType
 #include "ObjectModel/Files.h" // OM::FileSystem::SortBy
 #include "ObjectModel/JobProgressSource.h"
 #include "utils/DisplayHelper.h" // DisplayRotation

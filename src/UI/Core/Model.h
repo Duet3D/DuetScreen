@@ -129,8 +129,6 @@ class Model
 
 	void runEventLoop();
 
-	/* tasks */
-	std::chrono::milliseconds requestNewData();
 
   private:
 	Model();
@@ -160,8 +158,6 @@ class Model
 	struct
 	{
 		lv_timer_t* tick;
-		lv_timer_t* request;
-		lv_timer_t* receive;
 	} m_timers;
 
 	static std::atomic<bool> s_instanceInitialized;

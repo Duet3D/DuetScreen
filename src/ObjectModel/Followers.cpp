@@ -66,6 +66,14 @@ namespace OM::Followers
 		}
 	} // namespace
 
+	void refresh()
+	{
+		statusChanged();
+		boardChanged();
+		timeChanged();
+		inputChanged();
+	}
+
 	void start()
 	{
 		static bool s_started = false;
@@ -79,5 +87,7 @@ namespace OM::Followers
 		tree.watch({"boards"}, boardChanged);
 		tree.watch({"state.time"}, timeChanged);
 		tree.watch({"state.thisInput"}, inputChanged);
+		// The printer's folders: file paths are made from them (Directories.h), whatever the UI shows
+		tree.want({"directories"});
 	}
 } // namespace OM::Followers

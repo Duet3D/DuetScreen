@@ -3,6 +3,7 @@
 #include "tracy/Tracy.hpp"
 #include <cstring>
 #include <fcntl.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -185,6 +186,12 @@ bool UartController::setParameters(int dataBits, int stopBits, char parity)
 #endif
 }
 
+void UartController::setReceiveCallback(DataCallback callback)
+{
+	std::lock_guard<LockableBase(std::mutex)> lock(m_callbackMutex);
+	m_receiveCallback = std::move(callback);
+}
+
 void UartController::setBufferSize(size_t size)
 {
 	m_bufferSize = size;
@@ -216,7 +223,14 @@ ssize_t UartController::_send(const uint8_t* data, size_t length)
 		{
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 			{
-				continue;
+				// The UART's buffer is full: wait until it has room rather than spinning
+				pollfd writable{.fd = m_fd, .events = POLLOUT, .revents = 0};
+				if (::poll(&writable, 1, s_writeTimeoutMs) > 0)
+				{
+					continue;
+				}
+				LOG_ERROR("UART write timed out, written {}/{}", written, length);
+				return written;
 			}
 			LOG_ERROR("UART write error: {:s}, written {}/{}", strerror(errno), written, length);
 			return written;
@@ -233,17 +247,11 @@ void UartController::readLoop()
 	tracy::SetThreadName("UartController::readLoop");
 	std::vector<uint8_t> buffer(m_bufferSize);
 #if SIMULATION
+	// No UART to read: nothing is ever received
+	UNUSED(buffer);
 	while (m_running)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		if (m_receiveCallback)
-		{
-			// TODO simulate incoming data
-			const char* testData = "{\"key\": \"value\"}\n";
-			size_t len = strlen(testData);
-			memcpy(buffer.data(), testData, len);
-			m_receiveCallback(std::string_view(reinterpret_cast<char*>(buffer.data()), len));
-		}
 	}
 #else
 	fd_set readfds;

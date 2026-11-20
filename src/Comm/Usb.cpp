@@ -1,9 +1,6 @@
 #include "Usb.h"
-#include "Comm/Communication.h"
-#include "Comm/LineFramer.h"
-#include "Comm/Receive.h"
+#include "Comm/Connection.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Pins.h"
 #include "Storage.h"
 #include "nameof.hpp"
@@ -279,10 +276,6 @@ namespace Comm
 			LOG_ERROR("Failed to submit transfer: {:s}", libusb_error_name(r));
 			libusb_free_transfer(transfer);
 			delete transferData;
-			if (r == LIBUSB_ERROR_NO_DEVICE)
-			{
-				Reconnect();
-			}
 			return false;
 		}
 
@@ -954,10 +947,10 @@ namespace Comm
 		ZoneScoped;
 		std::lock_guard<LockableBase(std::recursive_mutex)> lock(s_usbMutex);
 		setUsbMode(StorageHelper::getData(ID_USB_MODE));
-		return libusb_init(&s_context);
+		return s_context != nullptr ? LIBUSB_SUCCESS : libusb_init(&s_context);
 	}
 
-	bool connectUsbDevice()
+	bool connectUsbDevice(receive_cb_t receive)
 	{
 		ZoneScoped;
 		std::lock_guard<LockableBase(std::recursive_mutex)> lock(s_usbMutex);
@@ -987,16 +980,7 @@ namespace Comm
 			goto finish;
 		}
 
-		s_currentUsbDevice.init(
-			device_name,
-			device,
-			[](unsigned char* buf, size_t len, size_t channelIndex)
-			{
-				ZoneScopedN("USB Receive Callback");
-				static std::array<LineFramer, UsbDevice::s_maxChannelCount> s_framers{LineFramer(receiveLine),
-																					  LineFramer(receiveLine)};
-				s_framers[channelIndex].push(std::string_view(reinterpret_cast<const char*>(buf), len));
-			});
+		s_currentUsbDevice.init(device_name, device, std::move(receive));
 
 		if (!s_currentUsbDevice.connect())
 		{

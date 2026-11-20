@@ -43,6 +43,8 @@ namespace Comm
 		void reset();
 		bool send(std::string_view data, std::size_t channelIndex = 0, unsigned int timeoutMs = 0);
 		bool isConnected() const { return m_handle != nullptr; }
+		/** How many data channels the device has: 1, or 2 for a Duet 3 */
+		std::size_t channelCount() const { return m_channelCount; }
 
 	  private:
 		int setDtr(bool state);
@@ -118,7 +120,11 @@ namespace Comm
 	};
 
 	int usbInit();
-	bool connectUsbDevice();
+	/**
+	 * Find a Duet on the USB host port and open it
+	 * @param receive Given what each channel receives, on the USB decode thread
+	 */
+	bool connectUsbDevice(receive_cb_t receive);
 	UsbDevice& getCurrentUsbDevice();
 	ssize_t sendUsbData(std::string_view data, std::size_t channelIndex = 0);
 

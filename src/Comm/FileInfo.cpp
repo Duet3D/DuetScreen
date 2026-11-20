@@ -10,8 +10,8 @@
 
 #include "FileInfo.h"
 
+#include "Comm/Connection.h"
 #include "Configuration.h"
-#include "Hardware/Duet.h"
 #include "ObjectModel/Files.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
@@ -688,6 +688,24 @@ namespace Comm
 		Model::get().post<EventType::FileInfo>(filepath);
 	}
 
+	/** Ask the printer about `filepath`; the answer goes to FileInfoCache::FileInfoArrived() */
+	static void RequestFileInfo(const std::string& filepath)
+	{
+		Connection::get().fileInfo(filepath,
+								   [filepath](std::expected<FileInfoReply, ReplyError> reply)
+								   { FILEINFO_CACHE->FileInfoArrived(filepath, reply); });
+	}
+
+	/** Ask the printer for the piece of `filepath`'s thumbnail at `offset`; it goes to
+	 * FileInfoCache::ThumbnailArrived() */
+	static void RequestThumbnailPiece(const std::string& filepath, uint32_t offset)
+	{
+		Connection::get().thumbnail(filepath,
+									offset,
+									[filepath](std::expected<FileChunk, ReplyError> reply)
+									{ FILEINFO_CACHE->ThumbnailArrived(filepath, reply); });
+	}
+
 	bool FileInfoCache::FileInfoRequest::RequestDataInner()
 	{
 		ZoneScoped;
@@ -698,7 +716,8 @@ namespace Comm
 		}
 
 		LOG_DBG("Requesting file info for \"{:s}\", ", m_data->filename.c_str());
-		return DUET.RequestFileInfo(m_data->filename.c_str());
+		RequestFileInfo(m_data->filename.c_str());
+		return true;
 	}
 
 	bool FileInfoCache::ThumbnailRequest::RequestDataInner()
@@ -730,7 +749,8 @@ namespace Comm
 		if (m_data->context.state == ThumbnailState::DataRequest)
 		{
 			m_data->context.state = ThumbnailState::DataWait;
-			return DUET.RequestThumbnail(m_data->filename.c_str(), m_data->context.next);
+			RequestThumbnailPiece(m_data->filename.c_str(), m_data->context.next);
+			return true;
 		}
 		else
 		{
@@ -746,7 +766,8 @@ namespace Comm
 			}
 			m_data->context.state = ThumbnailState::DataWait;
 			m_data->context.next = m_data->meta.offset;
-			return DUET.RequestThumbnail(m_data->filename.c_str(), m_data->meta.offset);
+			RequestThumbnailPiece(m_data->filename.c_str(), m_data->meta.offset);
+			return true;
 		}
 	}
 

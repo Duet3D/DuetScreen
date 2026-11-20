@@ -3,10 +3,10 @@
  */
 
 #include "FilesSource.h"
+#include "Comm/Connection.h"
 #include "Comm/FileInfo.h"
 #include "Comm/Thumbnail.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "JobSource.h"
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/PrinterStatus.h"
@@ -360,10 +360,7 @@ namespace UI::Xml
 								  [this, path = m_selected]
 							  {
 								  closeDialog();
-								  if (!Comm::DUET.DeleteFile(path))
-								  {
-									  LOG_WARN("Failed to delete file {:s}", path);
-								  }
+								  Comm::Connection::get().deleteFile(path);
 							  },
 							  .asker = asker});
 	}

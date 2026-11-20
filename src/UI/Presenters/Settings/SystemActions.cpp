@@ -3,10 +3,10 @@
  */
 
 #include "SystemActions.h"
+#include "Comm/Connection.h"
 #include "Comm/FileInfo.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "ObjectModel/Directories.h"
 #include "UI/Core/Model.h"
@@ -73,10 +73,15 @@ namespace UI::SystemActions
 		/** `actions.system.send_config` */
 		void sendConfig(const Xml::ActionArgs&)
 		{
-			const bool saved = Comm::DUET.UploadFile(
-				fmt::format("{:s}/duetscreen.json", OM::Directories::GetSystemDirectory()), StorageHelper::dump());
-			Model::get().post<EventType::Response>(saved ? ResponseType::SUCCESS : ResponseType::ERROR,
-												   saved ? _("settings.backup_saved") : _("settings.backup_failed"));
+			Comm::Connection::get().writeFile(
+				fmt::format("{:s}/duetscreen.json", OM::Directories::GetSystemDirectory()),
+				StorageHelper::dump(),
+				[](std::expected<void, Comm::ReplyError> saved)
+				{
+					Model::get().post<EventType::Response>(saved ? ResponseType::SUCCESS : ResponseType::ERROR,
+														   saved ? _("settings.backup_saved")
+																 : _("settings.backup_failed"));
+				});
 		}
 	} // namespace
 

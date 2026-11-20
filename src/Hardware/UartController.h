@@ -14,6 +14,7 @@ class UartController
 {
   public:
 	static constexpr size_t DEFAULT_BUFFER_SIZE = 4096;
+	static constexpr int s_writeTimeoutMs = 1000; // How long a write waits for room in the UART's buffer
 
 	using DataCallback = std::function<void(const std::string_view data)>;
 
@@ -32,7 +33,8 @@ class UartController
 
 	// Data handling
 	ssize_t send(std::string_view data);
-	void setReceiveCallback(DataCallback callback) { m_receiveCallback = callback; }
+	/** Give what is received to `callback` from now on, on the read thread */
+	void setReceiveCallback(DataCallback callback);
 
 	// Buffer management
 	void setBufferSize(size_t size);

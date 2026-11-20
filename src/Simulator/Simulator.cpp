@@ -7,11 +7,29 @@
 #include "Storage.h"
 #include "tracy/Tracy.hpp"
 #include "utils/StorageHelper.h"
+#include <charconv>
 
 using namespace std::chrono_literals;
 
 namespace Sim
 {
+	namespace
+	{
+		/** The number a line sent starts with (`N12 M409`), if it has one */
+		std::optional<int64_t> lineNumber(std::string_view line)
+		{
+			const size_t start = line.find_first_not_of(" \t");
+			if (start == std::string_view::npos || (line[start] != 'N' && line[start] != 'n'))
+			{
+				return std::nullopt;
+			}
+			int64_t number = 0;
+			const char* first = line.data() + start + 1;
+			const auto [end, error] = std::from_chars(first, line.data() + line.size(), number);
+			return error == std::errc() && end != first ? std::optional(number) : std::nullopt;
+		}
+	} // namespace
+
 	namespace
 	{
 		/** The configuration, kept with the screen's settings; the default preset until one is chosen */
@@ -226,8 +244,13 @@ namespace Sim
 		{
 			const std::string line = std::move(m_requests.front().line);
 			m_requests.pop_front();
-			for (const Json& reply : m_machine.execute(line))
+			const std::optional<int64_t> number = lineNumber(line);
+			for (Json reply : m_machine.execute(line))
 			{
+				if (number && reply.is_object())
+				{
+					reply["line"] = *number; // as RepRapFirmware 3.6.2 on does, so the screen can match the reply
+				}
 				replies.push_back(reply.dump() + "\n");
 			}
 		}

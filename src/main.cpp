@@ -6,13 +6,13 @@
 /*********************
  *      INCLUDES
  *********************/
-#include "Comm/Communication.h"
+#include "Comm/Connection.h"
 #include "Comm/FileInfo.h"
 #include "Comm/Usb.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
+#include "ObjectModel/Followers.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Presenters/Presenters.h"
@@ -70,7 +70,6 @@ static int set_thread_priority(pthread_t thread_id, int policy, int priority);
  *  STATIC VARIABLES
  **********************/
 static std::thread s_responseThread;
-static std::thread s_requestThread;
 static std::thread s_thumbnailThread;
 static std::thread s_internetMonitorThread;
 
@@ -121,8 +120,10 @@ int main(int argc, char** argv)
 
 	{
 		ZoneScopedN("Comm::init");
-		Comm::init();
-		Comm::DUET.Init();
+		std::filesystem::create_directories("/tmp/thumbnails");
+		std::filesystem::create_directories("/tmp/heightmaps");
+		OM::Followers::start();
+		Comm::usbInit();
 	}
 
 	/*Initialize the HAL (display, input devices, tick) for LVGL*/
@@ -219,33 +220,17 @@ int main(int argc, char** argv)
 			}
 		});
 
-	// Create a thread to handle requesting data from Duet
-#if MULTITHREADED
-	s_requestThread = std::thread(
-		[]()
-		{
-			tracy::SetThreadName("Request Thread");
-#  if SET_THREAD_PRIORITY
-			// Set high priority for request thread
-			set_thread_priority(pthread_self(), SCHED_RR, 90);
-#  endif
-
-			while (1)
-			{
-				// Request next section of the OM
-				std::chrono::milliseconds delay = Model::get().requestNewData();
-				std::this_thread::sleep_for(delay);
-			}
-		});
+	// Connect to the printer, on the connection's own thread
+	Comm::Connection::get().start();
 
 	s_thumbnailThread = std::thread(
 		[]()
 		{
 			tracy::SetThreadName("FileInfo Cache Thread");
-#  if SET_THREAD_PRIORITY
+#if SET_THREAD_PRIORITY
 			// Set low priority for thumbnail thread
 			set_thread_priority(pthread_self(), SCHED_RR, 70);
-#  endif
+#endif
 
 			while (1)
 			{
@@ -253,7 +238,6 @@ int main(int argc, char** argv)
 				std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			}
 		});
-#endif
 
 	// Screensaver task
 	DisplayHelper::setScreenSaverBrightness(0);
