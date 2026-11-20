@@ -2071,6 +2071,7 @@
 			<xs:enumeration value="tr.job.ended_took"/>
 			<xs:enumeration value="tr.job.extrusion"/>
 			<xs:enumeration value="tr.job.finished"/>
+			<xs:enumeration value="tr.job.in_progress"/>
 			<xs:enumeration value="tr.job.last_job"/>
 			<xs:enumeration value="tr.job.layer"/>
 			<xs:enumeration value="tr.job.layer_of"/>

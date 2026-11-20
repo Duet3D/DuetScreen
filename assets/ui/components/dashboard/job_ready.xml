@@ -1,5 +1,5 @@
 <!--
-  What is ready to start, the `job` widget's first page (dashboard_job.xml): while a job runs, it, highlighted, tapped
+  What is ready to start, the `job` widget's first page (dashboard_job.xml), headed "Job in progress" while a job runs: then it, highlighted, tapped
   to see its status; else the last job, to print again; every job, newest first, in a list that fills the room left and scrolls,
   each tapped to ask whether to start it (the dialog says
   why not while a job runs); and the macros, each tapped to ask whether to run it. All files opens the Files page's jobs; the refresh
@@ -23,16 +23,22 @@
 		  style_pad_right="14">
 		<style name="pad_zero"/>
 
-		<!-- What the machine is ready for, and every file -->
+		<!-- What the machine is ready for (or that a job runs), and every file -->
 		<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
 				style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0">
 			<lv_label name="ready_print" translation_tag="tr.job.ready_print" flex_grow="1" long_mode="dots">
 				<style name="text_header"/>
-				<bind_flag_if cond="om.state.machineMode|eq:CNC or om.state.machineMode|eq:Laser" flag="hidden"/>
+				<bind_flag_if cond="source.machine.job_active eq 1 or om.state.machineMode|eq:CNC or om.state.machineMode|eq:Laser"
+							  flag="hidden"/>
 			</lv_label>
 			<lv_label name="ready" translation_tag="tr.job.ready" flex_grow="1" long_mode="dots">
 				<style name="text_header"/>
-				<bind_flag_if cond="om.state.machineMode|eq:CNC eq 0 and om.state.machineMode|eq:Laser eq 0" flag="hidden"/>
+				<bind_flag_if cond="source.machine.job_active eq 1 or (om.state.machineMode|eq:CNC eq 0 and om.state.machineMode|eq:Laser eq 0)"
+							  flag="hidden"/>
+			</lv_label>
+			<lv_label name="in_progress" translation_tag="tr.job.in_progress" flex_grow="1" long_mode="dots">
+				<style name="text_header"/>
+				<bind_flag_if_eq subject="source.machine.job_active" flag="hidden" ref_value="0"/>
 			</lv_label>
 			<ds_button name="refresh" icon="refresh.png" width="40" height="38" style_pad_all="6"
 					   style_margin_right="8">

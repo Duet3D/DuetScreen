@@ -634,6 +634,7 @@
       "duration_hours": "{:d} u {:d} min",
       "ready_print": "Klaar om te printen",
       "ready": "Klaar",
+      "in_progress": "Taak bezig",
       "all_files": "Alle bestanden",
       "last_job": "Laatste taak",
       "recent": "Nieuwste",

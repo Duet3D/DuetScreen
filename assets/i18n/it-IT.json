@@ -635,6 +635,7 @@
       "duration_hours": "{:d} h {:d} min",
       "ready_print": "Pronto a stampare",
       "ready": "Pronto",
+      "in_progress": "Lavoro in corso",
       "all_files": "Tutti i file",
       "last_job": "Ultimo lavoro",
       "recent": "Recenti",

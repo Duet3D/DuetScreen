@@ -634,6 +634,7 @@
       "duration_hours": "{:d} h {:d} min",
       "ready_print": "Bereit zum Drucken",
       "ready": "Bereit",
+      "in_progress": "Auftrag läuft",
       "all_files": "Alle Dateien",
       "last_job": "Letzter Auftrag",
       "recent": "Neueste",
