@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pyright: strict
+# pyright: strict
 """
 Generate assets/object_model/schema.json, the object model's shape, from @duet3d/objectmodel: the typed object model
 Duet Web Control uses. Run it again for a new firmware release, with that release's package version.
@@ -18,7 +18,7 @@ A type has the fields of its whole family: every class derived from its topmost 
 whichever it has (e.g. `move.kinematics` is declared as one kinematics, but may be any).
 
 Usage:
-    python3 scripts/generate_om_schema.py [--version 3.6.4] [--out assets/object_model/schema.json]
+    scripts/generate_om_schema.py [--version 3.6.4] [--out assets/object_model/schema.json]
 """
 
 from __future__ import annotations
@@ -31,6 +31,9 @@ import sys
 import tarfile
 import urllib.request
 from pathlib import Path
+from typing import cast
+
+from common.project import ASSETS, complete, complete_files
 
 PACKAGE = "@duet3d/objectmodel"
 REGISTRY = "https://registry.npmjs.org/@duet3d/objectmodel/-/objectmodel-{version}.tgz"
@@ -43,6 +46,15 @@ ENUM_VALUE_RE = re.compile(r'^\s*\w+\s*=\s*"([^"]*)"\s*,?\s*$')
 FIELD_RE = re.compile(r"^\s*(?:readonly\s+)?(\w+)\??:\s*(.+?);\s*$")
 GETTER_RE = re.compile(r"^\s*get\s+(\w+)\(\):\s*(.+?);\s*$")
 
+Classes = dict[str, dict[str, str]]
+"""Each class's own fields, as TypeScript types, by its name"""
+Bases = dict[str, str]
+"""The class each class derives from"""
+Enums = dict[str, list[str]]
+"""Each enum's values"""
+Schema = dict[str, object]
+"""The schema, as it is written"""
+
 # Classes that aren't object model types: the containers, and the base every type derives from
 NOT_TYPES = {"ModelObject", "ModelCollection", "ModelDictionary", "ModelSet"}
 
@@ -51,26 +63,26 @@ def download(version: str) -> dict[str, str]:
     """The package's declaration files, by path"""
     with urllib.request.urlopen(REGISTRY.format(version=version), timeout=60) as response:
         data = response.read()
-    files = {}
+    files: dict[str, str] = {}
     with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as archive:
         for member in archive.getmembers():
-            if member.isfile() and member.name.endswith(".d.ts"):
-                files[member.name] = archive.extractfile(member).read().decode("utf-8")
+            if member.isfile() and member.name.endswith(".d.ts") and (f := archive.extractfile(member)):
+                files[member.name] = f.read().decode("utf-8")
     return files
 
 
-def parse(files: dict[str, str]) -> tuple[dict, dict, dict]:
+def parse(files: dict[str, str]) -> tuple[Classes, Bases, Enums]:
     """Classes (name -> fields, as TypeScript types), their bases, and enums (name -> values)"""
-    classes: dict[str, dict[str, str]] = {}
-    bases: dict[str, str] = {}
-    enums: dict[str, list[str]] = {}
+    classes: Classes = {}
+    bases: Bases = {}
+    enums: Enums = {}
     for text in files.values():
         lines = text.splitlines()
         i = 0
         while i < len(lines):
             line = lines[i]
             if m := ENUM_RE.match(line):
-                values = []
+                values: list[str] = []
                 i += 1
                 while i < len(lines) and not lines[i].strip().startswith("}"):
                     if v := ENUM_VALUE_RE.match(lines[i]):
@@ -98,7 +110,7 @@ def parse(files: dict[str, str]) -> tuple[dict, dict, dict]:
     return classes, bases, enums
 
 
-def convert(ts: str, classes: dict, enums: dict) -> str:
+def convert(ts: str, classes: Classes, enums: Enums) -> str:
     """A TypeScript type as a schema type (see the file comment)"""
     parts = [p.strip() for p in split_top(ts, "|") if p.strip() not in ("null", "undefined")]
     if not parts:
@@ -128,7 +140,8 @@ def convert(ts: str, classes: dict, enums: dict) -> str:
 
 def split_top(ts: str, separator: str) -> list[str]:
     """Split `ts` at `separator` outside angle brackets"""
-    parts, depth, start = [], 0, 0
+    parts: list[str] = []
+    depth, start = 0, 0
     for i, c in enumerate(ts):
         if c == "<":
             depth += 1
@@ -141,16 +154,17 @@ def split_top(ts: str, separator: str) -> list[str]:
     return parts
 
 
-def build(classes: dict, bases: dict, enums: dict, version: str) -> dict:
+def build(classes: Classes, bases: Bases, enums: Enums, version: str) -> Schema:
     """The schema"""
 
     def inherited(name: str) -> dict[str, str]:
         """A class's fields, its bases' included"""
         fields: dict[str, str] = {}
-        chain = []
-        while name and name not in NOT_TYPES:
-            chain.append(name)
-            name = bases.get(name)
+        chain: list[str] = []
+        base: str | None = name
+        while base and base not in NOT_TYPES:
+            chain.append(base)
+            base = bases.get(base)
         for cls in reversed(chain):
             fields.update(classes.get(cls, {}))
         return fields
@@ -166,7 +180,7 @@ def build(classes: dict, bases: dict, enums: dict, version: str) -> dict:
             name = bases[name]
         return name
 
-    types = {}
+    types: dict[str, dict[str, str]] = {}
     for name in classes:
         if name in NOT_TYPES:
             continue
@@ -185,20 +199,24 @@ def build(classes: dict, bases: dict, enums: dict, version: str) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Generate the object model schema from @duet3d/objectmodel")
+    """Write the schema of the package version asked for."""
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--version", default="3.6.4", help=f"{PACKAGE} version (default 3.6.4)")
-    parser.add_argument("--out", default="assets/object_model/schema.json", help="Schema file written")
+    complete_files(parser.add_argument("--out", type=Path, default=ASSETS / "object_model" / "schema.json",
+                                       help="Schema file written (default: assets/object_model/schema.json)"), ".json")
+    complete(parser)
     args = parser.parse_args(argv)
 
     classes, bases, enums = parse(download(args.version))
-    schema = build(classes, bases, enums, args.version)
-    if "ObjectModel" not in schema["types"]:
+    if "ObjectModel" not in classes:
         print("The package has no ObjectModel class; its layout has changed", file=sys.stderr)
         return 1
-    out = Path(args.out)
+    schema = build(classes, bases, enums, args.version)
+    out: Path = args.out
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(schema, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Wrote {out}: {len(schema['types'])} types, {len(schema['enums'])} enums")
+    print(f"Wrote {out}: {len(cast(dict[str, object], schema['types']))} types, "
+          f"{len(cast(dict[str, object], schema['enums']))} enums")
     return 0
 
 

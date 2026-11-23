@@ -1,9 +1,11 @@
 <!--
-  Browse a folder of jobs or macros. Along the top: Up, to the folder above; the open folder's path, starting from the
-  jobs or macros folder, whose folders can be tapped to go back to them; the order (by name, date or size: the one in
-  use, tapped again, reverses it); a list or tiles; and reading the folder again. Under it, the folder's files and
-  folders as a list or as tiles, or a line saying it is empty. Tapping a folder opens it; tapping a file asks whether to
-  start it (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml).
+  Browse a folder of jobs or macros, or of the USB drives plugged into the screen. Along the top: Up, to the folder
+  above; the open folder's path, starting from the jobs or macros folder (or the USB drive), whose folders can be
+  tapped to go back to them; the order (by name, date or size: the one in use, tapped again, reverses it); a list or
+  tiles; and reading the folder again. Under it, the folder's files and folders as a list or as tiles, or a line saying
+  it is empty (or that no USB drive is plugged in). Tapping a folder opens it; tapping a file asks whether to start it
+  (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml), or, on a USB drive, what to do with it
+  in the USB dialog (modals/usb_dialog.xml).
 
   Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
   e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Presenters/Presenters.cpp).
@@ -50,12 +52,18 @@
 			</ds_button>
 		</lv_obj>
 
+
 		<lv_obj name="list" width="100%" flex_grow="1" flex_flow="column" scrollable="false">
 			<style name="pad_zero"/>
 			<lv_label name="empty" translation_tag="tr.file.empty" width="100%" style_text_align="center"
 					  style_pad_ver="32">
 				<style name="text_muted"/>
 				<bind_flag_if_eq subject="presenter.empty" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<lv_label name="no_drive" translation_tag="tr.usb.no_drive" width="100%" style_text_align="center"
+					  style_pad_ver="32">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.no_drive" flag="hidden" ref_value="0"/>
 			</lv_label>
 			<ds_list name="rows" list="presenter.files" item="file_browser_row" windowed="true" item_height="64"
 					 width="100%" height="100%" flex_grow="1" scroll_dir="ver" style_pad_row="6">

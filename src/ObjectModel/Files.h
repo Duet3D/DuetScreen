@@ -8,10 +8,12 @@
 #ifndef JNI_OBJECTMODEL_FILES_HPP_
 #define JNI_OBJECTMODEL_FILES_HPP_
 
+#include "Comm/Replies.h"
 #include "ObjectModel/Directories.h"
 #include "tracy/Tracy.hpp"
 #include "utils/TimeHelper.h"
 #include <atomic>
+#include <expected>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -163,40 +165,6 @@ namespace OM::FileSystem
 	using FileListRequestPtr = std::shared_ptr<FileListRequest>;
 	using FileListRequestWeakPtr = std::weak_ptr<FileListRequest>;
 
-	class FileContents
-	{
-	  public:
-		FileContents(std::string_view filename,
-					 request_file_contents_cb_t callback = nullptr,
-					 bool runEveryTime = false);
-
-		std::string_view GetFilename() const { return m_filename; }
-		int AppendData(std::string_view data);
-		int GetData(std::string& outData) const;
-		int ClearData();
-
-		void SetOffset(uint32_t offset) { m_offset = offset; }
-		uint32_t GetOffset() const { return m_offset; }
-
-		void SetNext(uint32_t next) { m_next = next; }
-		uint32_t GetNext() const { return m_next; }
-
-		void SetParseError(int16_t parseErr) { m_parseErr = parseErr; }
-		int16_t GetParseError() const { return m_parseErr; }
-
-		void RunCallback();
-
-	  private:
-		std::string m_filename; // Path to the file
-		request_file_contents_cb_t m_callback;
-		bool m_runEveryTime = false;
-		uint32_t m_offset = 0;
-		uint32_t m_next = 0;
-		int16_t m_parseErr = 0;
-	};
-
-	using FileContentsPtr = std::shared_ptr<FileContents>;
-
 	/* File List */
 
 	FileListRequestPtr GetFileListRequest(const std::string& path);
@@ -212,10 +180,13 @@ namespace OM::FileSystem
 					  const std::string& path,
 					  request_files_cb_t callback,
 					  bool runEveryTime = false);
-	void RequestUsbFiles(const std::string& path);
+	/**
+	 * The files and folders in the folder `path` on the screen (on a USB drive), each with its size and date, at once;
+	 * or why it can't be read. Hidden ones (".Trashes", "._benchy.gcode") and "System Volume Information" are left out.
+	 */
+	std::expected<ItemList, std::string> ListLocalFolder(const std::string& path);
 	void RunFile(const ItemPtr& file);
 	void RunMacro(const std::string& path);
-	void UploadFile(const ItemPtr& file);
 	void StartPrint(const std::string& path);
 	void ResumePrint();
 	void PausePrint();
@@ -230,11 +201,18 @@ namespace OM::FileSystem
 
 	/* File Contents */
 
+	/** Read the file `path` in `baseFolder`, and give its contents to `callback` (on the connection's thread) */
 	void RequestFileContents(const OM::Directories::DirectoryType baseFolder,
 							 std::string_view path,
-							 request_file_contents_cb_t callback,
-							 bool runEveryTime = false);
-	FileContentsPtr GetCurrentFileRequestContents();
+							 request_file_contents_cb_t callback);
+
+	/**
+	 * The firmware's answer to a folder listing request (M20 S3, rr_filelist): the page is added to the folder's
+	 * request, its G-code files' information asked for, and the next page asked for; or why there is none, which
+	 * answers the request with no items
+	 * @param dir The folder asked for
+	 */
+	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply);
 
 	/* Misc */
 

@@ -4,9 +4,12 @@
  * Publishes the jobs and macros any view can offer: the newest jobs in the jobs folder, and the macros in the macros
  * folder. They are listed afresh on connecting, on coming back to the home screens, when a job ends, when asked
  * (actions.files.refresh), and whenever the printer counts a change to its files (seqs.volChanges; not every firmware
- * reports it). And the shared dialog that asks
- * before starting a job (with its details and thumbnail, and an offer to delete it) or running a macro, which the file
- * browser and the dashboard both open (assets/ui/components/modals/file_dialog.xml, hosted by the home screen).
+ * reports it). The filaments folder is listed with them, for actions.filament.choose (GetFilamentList()).
+ * And the shared dialog that asks before starting a job (with its details and thumbnail, and an offer to delete it) or
+ * running a macro, which the file browser and the dashboard both open (assets/ui/components/modals/file_dialog.xml,
+ * hosted by the home screen).
+ *
+ * And how writing a file to the printer is going (Comm::Connection::writeFile()), e.g. the screen's settings backed up.
  *
  * The global actions that open and answer the dialog are in Presenters/FileBrowser/FilesActions.h. The names it
  * publishes are declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
@@ -14,6 +17,8 @@
 
 #pragma once
 
+#include "Comm/FileInfoCache.h"
+#include "Comm/FileTransfer.h"
 #include "DataSource.h"
 #include "ObjectModel/Files.h"
 #include "UI/Xml/Binding/List.h"
@@ -32,10 +37,10 @@ namespace UI::Xml
 		/** Declare the row's fields */
 		void fields(FieldVisitor& f) override;
 
-		StringSubject<128> name;	   // File name
-		StringSubject<64> detail;	   // How long it takes and how much filament, else its date and size
-		StringSubject<256> thumbnail;  // Thumbnail path, or empty
-		std::string path;			   // The file's path, e.g. "0:/gcodes/benchy.gcode"; not shown
+		StringSubject<128> name;	  // File name
+		StringSubject<64> detail;	  // How long it takes and how much filament, else its date and size
+		StringSubject<256> thumbnail; // Thumbnail path, or empty
+		std::string path;			  // The file's path, e.g. "0:/gcodes/benchy.gcode"; not shown
 	};
 
 	/** One of the macros */
@@ -80,6 +85,9 @@ namespace UI::Xml
 		 * 1.2 MB". A folder's is when it was changed. */
 		static std::string detail(const OM::FileSystem::FileSystemItem& item);
 
+		/** The image to show for the file `path` at `size` (FileInfoCache::thumbnail()), or empty if there is none */
+		static std::string thumbnail(const std::string& path, Comm::FileInfoCache::ThumbnailSize size);
+
 		/** List the jobs and macros again */
 		void refresh();
 
@@ -106,7 +114,7 @@ namespace UI::Xml
 		void onInit() override;
 
 	  private:
-		/** Ask the printer for the jobs folder's and macros folder's files */
+		/** Ask the printer for the jobs, macros and filaments folders' files */
 		void requestFiles();
 
 		/** The printer sent the jobs folder's files: list the newest */
@@ -124,11 +132,17 @@ namespace UI::Xml
 		/** A thumbnail arrived: show it on its job, and in the dialog if it is about that job */
 		void thumbnailReceived(const std::string& path);
 
+		/** Show the dialog's job's large thumbnail, or the nearest kept while it is fetched */
+		void showDialogImage();
+
 		/** Show what the dialog allows now: no job starts while another runs, nor the one running is deleted */
 		void showAllowed();
 
 		/** Close the dialog */
 		void closeDialog();
+
+		/** Show how writing a file to the printer is going */
+		void transferReported(const Comm::FileTransfer& transfer);
 
 		OM::FileSystem::ItemList m_jobs;   // The jobs, newest first, as `recent` shows them
 		OM::FileSystem::ItemList m_macros; // The macros, as `macros` shows them
@@ -156,5 +170,8 @@ namespace UI::Xml
 		StringSubject<16> m_infoPrintTime;	 // `info_print_time`
 		StringSubject<16> m_infoHeight;		 // `info_height`
 		StringSubject<16> m_infoLayerHeight; // `info_layer_height`
+		IntSubject m_transferring;			 // `transferring`
+		StringSubject<128> m_transferFile;	 // `transfer_file`
+		IntSubject m_transferProgress;		 // `transfer_progress`
 	};
 } // namespace UI::Xml

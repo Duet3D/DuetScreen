@@ -34,6 +34,7 @@ Every name starts with where it comes from, so a reader knows where to look ([Na
 Every field of the printer's object model has a name, written as RepRapFirmware writes its path after `om.`: `om.heat.heaters[1].current`, `om.move.axes[0].userPosition`, `om.state.status`. The names need no code: a field a newer firmware adds can be used as soon as the printer sends it. Every field is listed in [XML_UI_OBJECT_MODEL.md](XML_UI_OBJECT_MODEL.md); see also [ObjectModel/Tree](../src/ObjectModel/Tree) and [src/UI/Xml/Om](../src/UI/Xml/Om).
 
 - A name binds before the printer has sent the field, and follows it: while the field isn't there (or is null) its subject holds empty text, or 0.
+- Only what is used is fetched: a top-level part of the object model (`heat`, `move`, `global`, …) is asked for once a name, list or watcher refers to it, and kept up to date while one does. Through an SBC (DSF), which sends the whole model, all of it is there.
 - An array is a list: `<ds_list list="om.heat.heaters" item="…">` makes a row per item, nulls included, so a row's `row.index` is the item's index (the heater number). Inside a row, the item's fields are `row.*`, `row.current` or `row.model.pid.p`, and its arrays are lists: `<ds_list list="row.heaters">` in a row of `om.tools`. The row around it is `parent.*`, so in a row of a tool's `heaters`, `parent.active[{row.index}]` is the tool's target for that heater.
 - An index can be another subject's value, written `{name}`, which joins one part of the object model to another: `om.heat.heaters[{row.value}].current` in a row of a tool's heaters, or `om.tools[{om.state.currentTool}].name`. The name follows when the index changes; nothing is rebuilt.
 - `<ds_scope path="om.…" item="…">` builds a component in a row of one item: its fields are `row.*`, as in a list row.
@@ -316,6 +317,9 @@ From [FilesSource.cpp](../src/UI/Xml/Data/FilesSource.cpp).
 | `source.files.info_print_time` | text | The job's estimated print time |
 | `source.files.info_height` | text | The object's height |
 | `source.files.info_layer_height` | text | The job's layer height |
+| `source.files.transferring` | int | 1 while a file is being written to the printer (e.g. the settings backed up), else 0. Over USB and UART nothing else is sent to the printer meanwhile |
+| `source.files.transfer_file` | text | The name of the file being written to the printer, or of the last one written |
+| `source.files.transfer_progress` | int | How much of that file has been sent, 0-100 |
 
 Each row of `source.files.recent`:
 
@@ -722,6 +726,29 @@ From [ThemeSource.cpp](../src/UI/Xml/Data/ThemeSource.cpp).
 | `source.theme.secondary` | colour | The theme's secondary colour |
 | `source.theme.customisable` | int | 1 if the theme's palette can be changed: between dark and light (source.settings.dark), and its hues |
 
+### usb
+
+From [UsbSource.cpp](../src/UI/Xml/Data/UsbSource.cpp).
+
+| Name | Type | Description |
+| --- | --- | --- |
+| `source.usb.drives` | int | How many USB drives are plugged into the screen |
+| `source.usb.dialog` | text | What the USB file dialog shows: "file" (what to do with it), "upload" (its upload going, or how it went); empty when it is closed |
+| `source.usb.dialog_title` | text | The dialog's title: the file's name |
+| `source.usb.file_size` | text | The file's size, e.g. "1.2 MB" |
+| `source.usb.file_date` | text | When the file was last changed, e.g. "2025-03-18 18:21" |
+| `source.usb.destination` | int | The printer's folder it is uploaded to: 0 jobs, 1 macros, 2 system, 3 firmware; its kind picks one at first (actions.usb.destination) |
+| `source.usb.upload` | int | Uploading it (actions.usb.upload): 1 disabled (see `upload_reason`: not connected, another file is being uploaded, or over USB or UART a job is active or the printer isn't idle), 2 usable |
+| `source.usb.upload_reason` | text | Why it can't be uploaded now, e.g. "The printer isn't connected"; empty if it can |
+| `source.usb.upload_state` | int | How the last upload is going: 0 reading it, 1 sending it (source.files.transfer_progress), 2 done, 3 failed, 4 cancelling, 5 cancelled |
+| `source.usb.cancellable` | int | 1 while the upload from a USB drive going can be cancelled (actions.usb.cancel_upload): while it is read, and while it is sent over the network; over USB and UART the printer takes the whole file once it has started. Else 0 |
+| `source.usb.upload_text` | text | What the last upload is doing, or how it went, e.g. "benchy.gcode is now in Jobs" |
+| `source.usb.update` | int | Updating the screen with it (actions.usb.install): 0 hidden (not a *.tar.gz), 1 disabled (being checked, or not installable: see `update_text`), 2 usable |
+| `source.usb.update_text` | text | What checking it as an update found; empty when `update` is hidden |
+| `source.usb.installing` | int | 1 while an update is installed: a dialog holds the screen until it restarts, or says why it couldn't |
+| `source.usb.install_text` | text | What installing the update is doing, or why it couldn't |
+| `source.usb.install_failed` | int | 1 if the update couldn't be installed, else 0 |
+
 ## Global actions
 
 Actions any view can raise with `<action name="actions.<group>.<action>">`, whatever its presenter. A group's actions are added in `<Group>Actions.cpp`. A presenter's own actions are written `presenter.<action>`.
@@ -805,6 +832,11 @@ Actions any view can raise with `<action name="actions.<group>.<action>">`, what
 | `actions.system.upgrade_from_github` | Upgrade to the latest release on GitHub, reporting an error if it fails to start | [SystemActions.cpp](../src/UI/Presenters/Settings/SystemActions.cpp) |
 | `actions.tool.show` | Show the tool numbered `arg` in detail in the dashboard's tools widget, without selecting it; the tool in use, or `auto`, follows the tool in use again | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
 | `actions.tool.toggle` | Select the tool numbered `arg`, or deselect it if selected, e.g. `arg="{row.index}"` in a row of `om.tools`. Offered to users for their widgets' action settings, as `tr.actions.tool_toggle`. | [ToolActions.cpp](../src/UI/Presenters/Control/Temperature/ToolActions.cpp) |
+| `actions.usb.cancel_upload` | Cancel the upload from a USB drive that is going (source.usb.uploading): what was written of it is deleted | [UsbActions.cpp](../src/UI/Presenters/FileBrowser/UsbActions.cpp) |
+| `actions.usb.destination` | Upload the USB file dialog's file to the folder `arg`: 0 jobs, 1 macros, 2 system, 3 firmware (source.usb.destination) | [UsbActions.cpp](../src/UI/Presenters/FileBrowser/UsbActions.cpp) |
+| `actions.usb.install` | Update the screen with the USB file dialog's file, an update archive found installable (source.usb.update); a dialog holds the screen until it restarts | [UsbActions.cpp](../src/UI/Presenters/FileBrowser/UsbActions.cpp) |
+| `actions.usb.show_upload` | Show the last upload from a USB drive in the USB file dialog: how it is going (with Cancel upload, while it can be), or how it went | [UsbActions.cpp](../src/UI/Presenters/FileBrowser/UsbActions.cpp) |
+| `actions.usb.upload` | Upload the USB file dialog's file to the folder chosen; the dialog shows how it goes (source.usb.upload_state), and the upload carries on if it is closed | [UsbActions.cpp](../src/UI/Presenters/FileBrowser/UsbActions.cpp) |
 
 An action runs when its widget raises its `trigger` (default `clicked`): `all`, `pressed`, `pressing`, `press_lost`, `short_clicked`, `single_clicked`, `double_clicked`, `triple_clicked`, `long_pressed`, `long_pressed_repeat`, `clicked`, `released`, `scroll_begin`, `scroll_throw_begin`, `scroll_end`, `scroll`, `gesture`, `key`, `rotary`, `focused`, `defocused`, `leave`, `hit_test`, `indev_reset`, `hover_over`, `hover_leave`, `cover_check`, `refr_ext_draw_size`, `draw_main_begin`, `draw_main`, `draw_main_end`, `draw_post_begin`, `draw_post`, `draw_post_end`, `draw_task_added`, `value_changed`, `insert`, `refresh`, `ready`, `cancel`, `state_changed`, `create`, `delete`, `child_changed`, `child_created`, `child_deleted`, `screen_unload_start`, `screen_load_start`, `screen_loaded`, `screen_unloaded`, `size_changed`, `style_changed`, `layout_changed`, `get_self_size`, `invalidate_area`, `resolution_changed`, `color_format_changed`, `refr_request`, `refr_start`, `refr_ready`, `render_start`, `render_ready`, `flush_start`, `flush_finish`, `flush_wait_start`, `flush_wait_finish`, `vsync`, `value_confirmed`, `dismissed`
 
@@ -887,7 +919,7 @@ Each row of `presenter.saved`:
 | `presenter.customise.toggle_setting` | Turn the on or off setting of the row the other way |
 | `presenter.customise.undo` | Undo the last change |
 
-### dashboard_jobs, dashboard_macros, files_jobs, files_macros
+### dashboard_jobs, dashboard_macros, files_jobs, files_macros, files_usb
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -900,6 +932,7 @@ Each row of `presenter.saved`:
 | `presenter.tiles` | int | 1 when files are shown as tiles, 0 as a list |
 | `presenter.in_subfolder` | int | 1 while a folder below the base folder is open (so there is one above) |
 | `presenter.empty` | int | 1 once the open folder has been read and has nothing in it, else 0 |
+| `presenter.no_drive` | int | 1 when the browser shows USB drives and none is plugged in, else 0 |
 
 Each row of `presenter.files`:
 
@@ -3186,7 +3219,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | [`dialog_number`](#dialog_number) | `dialog_number` |  |  | [dialog_number.xml](../assets/ui/components/dialogs/dialog_number.xml) |
 | `dialog_number_preset` |  |  | `dialog_number` | [dialog_number_preset.xml](../assets/ui/components/dialogs/dialog_number_preset.xml) |
 | [`dialog_question`](#dialog_question) | `dialog_question` |  |  | [dialog_question.xml](../assets/ui/components/dialogs/dialog_question.xml) |
-| `fact_row` |  | `title_tag`, `value` | `file_dialog`, `heightmap` | [fact_row.xml](../assets/ui/components/common/fact_row.xml) |
+| `fact_row` |  | `title_tag`, `value` | `file_dialog`, `heightmap`, `usb_dialog` | [fact_row.xml](../assets/ui/components/common/fact_row.xml) |
 | `factors` |  |  | `home` | [factors.xml](../assets/ui/components/modals/factors.xml) |
 | `factors_dialog` |  | `open`, `title`, `factors`, `all`, `all_shown` | `factors` | [factors_dialog.xml](../assets/ui/components/modals/factors_dialog.xml) |
 | `factors_preset` |  |  | `factors_row` | [factors_preset.xml](../assets/ui/components/modals/factors_preset.xml) |
@@ -3200,7 +3233,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `file_browser_tile` |  |  | `file_browser` | [file_browser_tile.xml](../assets/ui/components/file_browser/file_browser_tile.xml) |
 | `file_dialog` |  |  | `home` | [file_dialog.xml](../assets/ui/components/modals/file_dialog.xml) |
 | [`files`](#files) |  |  | `home` | [files.xml](../assets/ui/components/files/files.xml) |
-| `flex_pad` |  | `grow` | `dashboard_job_status`, `file_dialog`, `hardware_test`, `move`, `notifications`, `temperature_tool` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
+| `flex_pad` |  | `grow` | `dashboard_job_status`, `file_dialog`, `hardware_test`, `move`, `notifications`, `temperature_tool`, `usb_dialog` | [flex_pad.xml](../assets/ui/components/common/flex_pad.xml) |
 | `gauge_arc` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_arc`, `extrusion_arc`, `progress_arc`, `speed_arc` | [gauge_arc.xml](../assets/ui/components/gauge/gauge_arc.xml) |
 | `gauge_bar` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_bar`, `extrusion_bar`, `progress_bar`, `speed_bar` | [gauge_bar.xml](../assets/ui/components/gauge/gauge_bar.xml) |
 | `gauge_beds` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `bed_arc`, `bed_bar`, `bed_value` | [gauge_beds.xml](../assets/ui/components/gauge/gauge_beds.xml) |
@@ -3213,7 +3246,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `gauge_readout` |  | `text`, `unit`, `grow`, `detail` | `gauge_arc`, `gauge_value` | [gauge_readout.xml](../assets/ui/components/gauge/gauge_readout.xml) |
 | `gauge_sensors` |  | `key`, `match`, `look`, `flow`, `grow`, `portrait` | `sensor_arc`, `sensor_bar`, `sensor_gauges`, `sensor_value` | [gauge_sensors.xml](../assets/ui/components/gauge/gauge_sensors.xml) |
 | `gauge_tool` |  | `tool`, `key`, `match`, `look`, `flow`, `grow`, `portrait` | `tool_arc`, `tool_bar`, `tool_value` | [gauge_tool.xml](../assets/ui/components/gauge/gauge_tool.xml) |
-| `gauge_track` |  | `value`, `min`, `max`, `target`, `state` | `gauge_bar`, `heater_bar` | [gauge_track.xml](../assets/ui/components/gauge/gauge_track.xml) |
+| `gauge_track` |  | `value`, `min`, `max`, `target`, `state` | `gauge_bar`, `heater_bar`, `status_bar` | [gauge_track.xml](../assets/ui/components/gauge/gauge_track.xml) |
 | `gauge_value` |  | `shown`, `title`, `value`, `text`, `unit`, `min`, `max`, `target`, `detail`, `state`, `grow`, `portrait`, `frame`, `tap_action`, `tap_arg`, `hold_action`, `hold_arg` | `custom_value`, `extrusion_value`, `progress_value`, `speed_value` | [gauge_value.xml](../assets/ui/components/gauge/gauge_value.xml) |
 | [`hardware_test`](#hardware_test) | `hardware_test` |  |  | [hardware_test.xml](../assets/ui/components/hardware_test/hardware_test.xml) |
 | `hardware_test_answers` |  | `action`, `usable` | `hardware_test` | [hardware_test_answers.xml](../assets/ui/components/hardware_test/hardware_test_answers.xml) |
@@ -3257,7 +3290,7 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `object_cancel_key` |  | `title_tag`, `current`, `cancelled` | `object_cancel` | [object_cancel_key.xml](../assets/ui/components/control/object_cancel/object_cancel_key.xml) |
 | `object_cancel_outline` |  |  | `object_cancel` | [object_cancel_outline.xml](../assets/ui/components/control/object_cancel/object_cancel_outline.xml) |
 | `object_cancel_row` |  |  | `object_cancel` | [object_cancel_row.xml](../assets/ui/components/control/object_cancel/object_cancel_row.xml) |
-| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `file_browser`, `heightmap`, `settings_option`, `settings_simulator`, `settings_simulator_choice`, `settings_simulator_fan`, `settings_simulator_file`, `settings_simulator_heater`, `settings_simulator_spindle`, `tools_current`, `tools_spindle_preset`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
+| `option_button` |  | `subject`, `value`, `action`, `arg` | `factors_dialog`, `factors_preset`, `file_browser`, `heightmap`, `settings_option`, `settings_simulator`, `settings_simulator_choice`, `settings_simulator_fan`, `settings_simulator_file`, `settings_simulator_heater`, `settings_simulator_spindle`, `tools_current`, `tools_spindle_preset`, `usb_dialog`, `value_selector_choice` | [option_button.xml](../assets/ui/components/common/option_button.xml) |
 | [`settings`](#settings) |  |  | `home` | [settings.xml](../assets/ui/components/settings/settings.xml) |
 | `settings_button` |  | `label_tag`, `action`, `arg`, `danger` | `settings_developer`, `settings_display`, `settings_simulator`, `settings_system`, `settings_wifi` | [settings_button.xml](../assets/ui/components/settings/settings_button.xml) |
 | `settings_choice` |  | `title_tag`, `setting` | `settings_connection`, `settings_developer`, `settings_display`, `settings_general`, `settings_simulator` | [settings_choice.xml](../assets/ui/components/settings/settings_choice.xml) |
@@ -3308,6 +3341,8 @@ The components of the built-in bundle. A user bundle replaces one by giving its 
 | `tools_spindle_preset` |  |  | `tools_current` | [tools_spindle_preset.xml](../assets/ui/components/control/tools/tools_spindle_preset.xml) |
 | `tools_tool` |  | `compact` | `dashboard_current_tool`, `dashboard_tool_card`, `dashboard_tools`, `tools_list` | [tools_tool.xml](../assets/ui/components/control/tools/tools_tool.xml) |
 | `tools_tool_heater` |  | `compact` | `tools_tool` | [tools_tool_heater.xml](../assets/ui/components/control/tools/tools_tool_heater.xml) |
+| `transfer_progress` |  |  | `usb_dialog` | [transfer_progress.xml](../assets/ui/components/common/transfer_progress.xml) |
+| `usb_dialog` |  |  | `home` | [usb_dialog.xml](../assets/ui/components/modals/usb_dialog.xml) |
 | `value_button` |  | `title_tag`, `value`, `value_style` | `dashboard_job_status`, `heater_row`, `settings_simulator_axis`, `settings_simulator_file`, `settings_simulator_heater`, `settings_simulator_sensor`, `settings_simulator_spindle` | [value_button.xml](../assets/ui/components/common/value_button.xml) |
 | `value_selector` |  | `selector`, `title`, `value`, `choices` | `temperature_extrusion` | [value_selector.xml](../assets/ui/components/common/value_selector.xml) |
 | `value_selector_choice` |  | `format` | `value_selector_presets` | [value_selector_choice.xml](../assets/ui/components/common/value_selector_choice.xml) |

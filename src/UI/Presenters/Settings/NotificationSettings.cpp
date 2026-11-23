@@ -3,8 +3,8 @@
  */
 
 #include "NotificationSettings.h"
+#include "Comm/Responses.h"
 #include "Storage.h"
-#include "Subscribers/ResponseSubscribers.h"
 #include "UI/Xml/Data/SettingsSource.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"

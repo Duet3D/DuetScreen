@@ -9,13 +9,18 @@
 
 #include "Files.h"
 
-#include "Comm/Communication.h"
-#include "Hardware/Duet.h"
-#include "Hardware/Usb.h"
+#include "Comm/Connection.h"
+#include "Comm/FileInfoCache.h"
+#include "Comm/Gcode.h"
+#include "Configuration.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "utils/UnitSystem.h"
 #include <algorithm>
+#include <chrono>
+#include <ctime>
+#include <filesystem>
+#include <fmt/chrono.h>
 #include <fstream>
 #include <mutex>
 
@@ -23,7 +28,6 @@ namespace OM::FileSystem
 {
 	static std::unordered_map<std::string, FileListRequestPtr> s_fileListRequests;
 
-	static FileContentsPtr s_fileContents;
 	static std::vector<std::string> s_filaments;
 
 	std::string FileSystemItem::GetPath() const
@@ -165,12 +169,14 @@ namespace OM::FileSystem
 
 	bool FileListRequest::IsPending() const
 	{
+		ZoneScoped;
 		std::lock_guard<LockableBase(std::mutex)> lk(m_mutex);
 		return !m_done;
 	}
 
 	void FileListRequest::TakeCallbacksFrom(const FileListRequest& pending)
 	{
+		ZoneScoped;
 		std::scoped_lock lk(m_mutex, pending.m_mutex);
 		m_callbacks.insert(m_callbacks.begin(), pending.m_callbacks.begin(), pending.m_callbacks.end());
 	}
@@ -182,107 +188,12 @@ namespace OM::FileSystem
 		return elapsed > PRINTER_REQUEST_TIMEOUT;
 	}
 
-	static std::string GetLocalFilePath(std::string_view filename)
+	/** Ask for the page of the folder `dir` from item `first` on; it is handed to FileListArrived() */
+	static void RequestPage(const std::string& dir, size_t first)
 	{
 		ZoneScoped;
-		filename = filename.substr(filename.find_last_of('/') + 1); // Get the file name only
-		return fmt::format("/tmp/files/{}", filename);
-	}
-
-	FileContents::FileContents(std::string_view filename, request_file_contents_cb_t callback, bool runEveryTime)
-		: m_filename(filename)
-		, m_callback(callback)
-		, m_runEveryTime(runEveryTime)
-	{
-		ZoneScoped;
-		ClearData();
-	}
-
-	int FileContents::AppendData(std::string_view data)
-	{
-		ZoneScoped;
-		if (data.empty())
-		{
-			return 0;
-		}
-
-		const std::string fullPath = GetLocalFilePath(m_filename);
-		std::ofstream file(fullPath, std::ios::app | std::ios::binary);
-		if (!file.is_open())
-		{
-			LOG_ERROR("Failed to open file {} for appending data", fullPath);
-			return -1;
-		}
-
-		if (!file.write(data.data(), data.size()))
-		{
-			LOG_ERROR("Failed to write data to file {}", fullPath);
-			return -2;
-		}
-
-		return 0;
-	}
-
-	int FileContents::GetData(std::string& outData) const
-	{
-		ZoneScoped;
-		const std::string fullPath = GetLocalFilePath(m_filename);
-		std::ifstream file(fullPath, std::ios::binary);
-		if (!file.is_open())
-		{
-			LOG_ERROR("Failed to open file {} for reading", fullPath);
-			return -1;
-		}
-
-		outData.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-		if (outData.empty() && !file.eof())
-		{
-			LOG_ERROR("Failed to read data from file {}", fullPath);
-			return -2;
-		}
-		return 0;
-	}
-
-	int FileContents::ClearData()
-	{
-		ZoneScoped;
-		const std::string fullPath = GetLocalFilePath(m_filename);
-		std::ofstream file(fullPath, std::ios::trunc | std::ios::binary);
-		if (!file.is_open())
-		{
-			LOG_ERROR("Failed to open file {} for clearing data", fullPath);
-			return -1;
-		}
-		return 0;
-	}
-
-	void FileContents::RunCallback()
-	{
-		ZoneScoped;
-		if (m_parseErr != 0)
-		{
-			LOG_ERROR("File {} has parse error: {}", m_filename, m_parseErr);
-			return;
-		}
-
-		if (m_next != 0 && !m_runEveryTime)
-		{
-			LOG_DBG("File {} has next offset: {}, not running callback", m_filename, m_next);
-			return;
-		}
-
-		if (m_callback)
-		{
-			std::string contents;
-			if (GetData(contents) == 0)
-			{
-				m_callback(contents);
-			}
-			else
-			{
-				LOG_ERROR("Failed to get data for callback from file {}", m_filename);
-			}
-		}
+		Comm::Connection::get().listFiles(
+			dir, first, [dir](std::expected<Comm::FileList, Comm::ReplyError> reply) { FileListArrived(dir, reply); });
 	}
 
 	FileListRequestPtr GetFileListRequest(const std::string& path)
@@ -333,6 +244,7 @@ namespace OM::FileSystem
 			SortFilesBy(items,
 						[descending](const ItemPtr& L, const ItemPtr& R)
 						{
+							ZoneScopedN("SortFilesBy_cb");
 							if (L->GetType() == R->GetType())
 								return descending == (L->GetName() > R->GetName());
 							return L->GetType() < R->GetType();
@@ -342,6 +254,7 @@ namespace OM::FileSystem
 			SortFilesBy(items,
 						[descending](const ItemPtr& L, const ItemPtr& R)
 						{
+							ZoneScopedN("SortFilesBy_cb");
 							if (L->GetType() == R->GetType())
 								return descending == (L->GetDate() > R->GetDate());
 							return L->GetType() < R->GetType();
@@ -351,6 +264,7 @@ namespace OM::FileSystem
 			SortFilesBy(items,
 						[descending](const ItemPtr& L, const ItemPtr& R)
 						{
+							ZoneScopedN("SortFilesBy_cb");
 							if (L->GetType() == R->GetType())
 								return descending == (L->GetSize() > R->GetSize());
 							return L->GetType() < R->GetType();
@@ -403,36 +317,45 @@ namespace OM::FileSystem
 			callback(cached->GetItemsCopy());
 		}
 		LOG_INFO("Files: requesting files in {:s}", full_path);
-		Comm::DUET.RequestFileList(full_path, reqPtr->GetFirst());
+		RequestPage(full_path, reqPtr->GetFirst());
 	}
 
-	void RequestUsbFiles(const std::string& path)
+	std::expected<ItemList, std::string> ListLocalFolder(const std::string& path)
 	{
 		ZoneScoped;
-		LOG_DBG("Requesting USB files in path '{:s}'", path);
-#if 0
-		ClearFileSystem();
-		s_usbFolder = true;
-		s_currentDirPath = path;
-		std::vector<USB::FileInfo> files = USB::ListEntriesInDirectory(std::string("/mnt/usb1/") + path);
-		size_t index = 0;
-		for (auto& fileInfo : files)
+		std::error_code error;
+		std::filesystem::directory_iterator entries(path, error);
+		if (error)
 		{
-			if (fileInfo.d_type == DT_DIR)
-			{
-				Folder* folder = AddFolderAt(index);
-				folder->SetName(fileInfo.d_name);
-			}
-			else if (fileInfo.d_type == DT_REG)
-			{
-				File* file = AddFileAt(index);
-				file->SetName(fileInfo.d_name);
-				file->SetSize(fileInfo.st_size);
-				file->SetDate(fmt::format("{:d}", fileInfo.st_mtim));
-			}
-			index++;
+			return std::unexpected(error.message());
 		}
-#endif
+		ItemList items;
+		for (const std::filesystem::directory_entry& entry : entries)
+		{
+			const std::string name = entry.path().filename().string();
+			if (name.starts_with('.') || name == "System Volume Information")
+			{
+				continue;
+			}
+			const bool folder = entry.is_directory(error);
+			if (!folder && !entry.is_regular_file(error))
+			{
+				continue; // a link to nowhere, a device
+			}
+			auto item =
+				std::make_shared<FileSystemItem>(folder ? FileSystemItemType::folder : FileSystemItemType::file, name);
+			item->SetPath(path);
+			item->SetSize(folder ? 0 : static_cast<size_t>(entry.file_size(error)));
+			// As the printer gives dates: "2025-03-18T18:21:58", the screen's local time
+			const auto written = std::chrono::file_clock::to_sys(entry.last_write_time(error));
+			const std::time_t seconds = std::chrono::system_clock::to_time_t(
+				std::chrono::time_point_cast<std::chrono::system_clock::duration>(written));
+			std::tm local{};
+			localtime_r(&seconds, &local);
+			item->SetDate(fmt::format("{:%Y-%m-%dT%H:%M:%S}", local));
+			items.push_back(std::move(item));
+		}
+		return items;
 	}
 
 	void RunFile(const ItemPtr& file)
@@ -454,50 +377,31 @@ namespace OM::FileSystem
 	void RunMacro(const std::string& path)
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcodef("M98 P\"{:s}\"\n", path);
-	}
-
-	void UploadFile(const ItemPtr& file)
-	{
-		ZoneScoped;
-		// TODO upload file
-		LOG_DBG("Uploading file '{:s}'", file ? file->GetPath() : "null");
-#if 0
-		if (file == nullptr || file->GetType() != FileSystemItemType::file)
-		{
-			LOG_ERROR("Invalid file to upload");
-			return;
-		}
-
-		std::string contents;
-		if (!USB::ReadUsbFileContents(file->GetPath(), contents))
-			return;
-		Comm::DUET.UploadFile(fmt::format("/gcodes/{:s}", file->GetName()).c_str(), contents);
-#endif
+		Comm::Connection::get().sendGcodef("M98 P{:s}\n", Comm::quoted(path));
 	}
 
 	void StartPrint(const std::string& path)
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcodef("M32 \"{:s}\"\n", path);
+		Comm::Connection::get().sendGcodef("M32 {:s}\n", Comm::quoted(path));
 	}
 
 	void ResumePrint()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcode("M24\n");
+		Comm::Connection::get().sendGcode("M24\n");
 	}
 
 	void PausePrint()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcode("M25\n");
+		Comm::Connection::get().sendGcode("M25\n");
 	}
 
 	void StopPrint()
 	{
 		ZoneScoped;
-		Comm::DUET.SendGcode("M0\n");
+		Comm::Connection::get().sendGcode("M0\n");
 	}
 
 	void PrintAgain()
@@ -508,16 +412,16 @@ namespace OM::FileSystem
 			std::lock_guard lock(mutexModel);
 			lastFile = Tree::get().root()["job"]["lastFileName"].text();
 		}
-		Comm::DUET.SendGcodef("M23 \"{:s}\"\nM24\n", lastFile);
+		Comm::Connection::get().sendGcodef("M23 {:s}\nM24\n", Comm::quoted(lastFile));
 	}
 
 	void ClearFileSystem()
 	{
 		ZoneScoped;
-		LOG_DBG("Clearing all file list requests");
+		LOG_DBG("Clearing all file list requests and the filaments");
 		MODEL_LOCK();
 		s_fileListRequests.clear();
-		s_fileContents.reset();
+		s_filaments.clear();
 	}
 
 	void ClearFileList(const std::string& path)
@@ -540,6 +444,7 @@ namespace OM::FileSystem
 					 "",
 					 [](OM::FileSystem::ItemList files)
 					 {
+						 ZoneScopedN("RequestFilaments_cb");
 						 {
 							 ZoneScopedN("RequestFilaments Callback");
 							 MODEL_LOCK();
@@ -568,32 +473,82 @@ namespace OM::FileSystem
 
 	void RequestFileContents(const OM::Directories::DirectoryType baseFolder,
 							 std::string_view path,
-							 request_file_contents_cb_t callback,
-							 bool runEveryTime)
+							 request_file_contents_cb_t callback)
 	{
 		ZoneScoped;
-		LOG_INFO("Requesting file contents of {}", path);
 		std::string fullPath = fmt::format("{}{}", OM::Directories::GetDirectory(baseFolder), path);
-		if (Comm::DUET.GetCommunicationType() == Comm::CommunicationType::network)
-		{
-			std::string contents;
-			if (!Comm::DUET.DownloadFile(fullPath, callback))
+		LOG_INFO("Requesting file contents of {}", fullPath);
+		Comm::Connection::get().readFile(
+			fullPath,
+			[fullPath, callback = std::move(callback)](std::expected<std::string, Comm::ReplyError> contents)
 			{
-				LOG_ERROR("Failed to download file contents of {}", fullPath);
-				return;
-			}
-		}
-		else
-		{
-			s_fileContents = std::make_shared<FileContents>(fullPath, callback, runEveryTime);
-			Comm::DUET.SendGcodef("M36.2 P\"{:s}\" S0\n", fullPath);
-		}
+				ZoneScopedN("lambda_cb");
+				if (!contents)
+				{
+					LOG_ERROR("Couldn't read {:s}: {:s}", fullPath, contents.error().message);
+					return;
+				}
+				callback(*contents);
+			});
 	}
 
-	FileContentsPtr GetCurrentFileRequestContents()
+	void FileListArrived(const std::string& dir, const std::expected<Comm::FileList, Comm::ReplyError>& reply)
 	{
 		ZoneScoped;
-		return s_fileContents;
+		FileListRequestPtr request = GetFileListRequest(dir);
+		if (!request)
+		{
+			LOG_WARN("Not expecting to receive file list data for \"{:s}\", ignoring", dir);
+			return;
+		}
+		if (!reply)
+		{
+			LOG_WARN("Couldn't list {:s}: {:s}", dir, reply.error().message);
+			request->ClearItems();
+			request->SetNext(0);
+			request->RunCallback();
+			return;
+		}
+		if (reply->first != request->GetNext())
+		{
+			LOG_WARN(
+				"First index {:d} does not match expected next index {:d}, ignoring", reply->first, request->GetNext());
+			return;
+		}
+
+		if (reply->first == 0)
+		{
+			request->ClearItems();
+		}
+		request->SetFirst(reply->first);
+		for (const Comm::FileEntry& entry : reply->files)
+		{
+			ItemPtr item = entry.folder ? request->AddFolder() : request->AddFile();
+			item->SetName(entry.name);
+			item->SetPath(dir);
+			item->SetSize(static_cast<size_t>(entry.size));
+			item->SetDate(entry.date);
+		}
+
+		// The G-code files' information (and thumbnails) is kept; other folders' files have none
+		if (dir.find(OM::Directories::GetGcodesDirectory()) != std::string::npos)
+		{
+			for (const ItemPtr& item : request->GetItemsCopy())
+			{
+				if (item->GetType() == FileSystemItemType::folder)
+				{
+					continue;
+				}
+				Comm::FileInfoCache::get().refresh(item->GetPath(), item->GetDate());
+			}
+		}
+
+		request->SetNext(reply->next);
+		request->RunCallback();
+		if (reply->next != 0)
+		{
+			RequestPage(dir, reply->next);
+		}
 	}
 
 	std::string_view GetFileExtension(std::string_view filename)

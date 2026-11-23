@@ -3,9 +3,9 @@
  */
 
 #include "JobSource.h"
-#include "Comm/FileInfo.h"
-#include "Comm/Thumbnail.h"
+#include "Comm/FileInfoCache.h"
 #include "Debug.h"
+#include "FilesSource.h"
 #include "ObjectModel/JobProgressSource.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
@@ -412,14 +412,8 @@ namespace UI::Xml
 		{
 			return;
 		}
-		if (IsThumbnailCached(file))
-		{
-			thumbnailReceived(file);
-			return;
-		}
-		m_thumbnail.set("");
-		LOG_DBG("Requesting thumbnail for '{:s}'", file);
-		FILEINFO_CACHE->QueueThumbnailRequest(file, true);
+		m_thumbnail.set(FilesSource::thumbnail(file, Comm::FileInfoCache::ThumbnailSize::large));
+		Comm::FileInfoCache::get().requestThumbnail(file, Comm::FileInfoCache::ThumbnailSize::small); // unless kept
 	}
 
 	void JobSource::thumbnailReceived(const std::string& file)
@@ -428,6 +422,6 @@ namespace UI::Xml
 		{
 			return; // Not the latest job's
 		}
-		m_thumbnail.set(GetThumbnailPath(file).string());
+		m_thumbnail.set(FilesSource::thumbnail(file, Comm::FileInfoCache::ThumbnailSize::large));
 	}
 } // namespace UI::Xml

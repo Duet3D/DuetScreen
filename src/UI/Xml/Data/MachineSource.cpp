@@ -3,7 +3,7 @@
  */
 
 #include "MachineSource.h"
-#include "Hardware/Duet.h"
+#include "Comm/Connection.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
@@ -44,7 +44,10 @@ namespace UI::Xml
 	void MachineSource::onConnect()
 	{
 		update();
-		showState("connected");
+		if (OM::GetStatus() == OM::PrinterStatus::connecting)
+		{
+			showState("connected"); // until the printer says what it is doing
+		}
 	}
 
 	void MachineSource::clear()
@@ -64,7 +67,7 @@ namespace UI::Xml
 
 	void MachineSource::showState(std::string_view state)
 	{
-		m_connection.set(_(Comm::DUET.GetCommunicationTypeName()));
+		m_connection.set(_(Comm::Connection::get().typeName()));
 		m_state.set(_(fmt::format("state.{:s}", state)));
 		m_summary.set(fmt::format("{:s} - {:s}", m_connection.get(), m_state.get()));
 	}

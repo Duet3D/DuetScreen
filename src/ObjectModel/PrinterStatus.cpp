@@ -7,7 +7,7 @@
 
 #include "Debug.h"
 
-#include "Hardware/Duet.h"
+#include "Comm/Connection.h"
 #include "ObjectModel/Utils.h"
 #include "PrinterStatus.h"
 #include "UI/Core/Model.h"
@@ -89,7 +89,7 @@ namespace OM
 			s_status = newStatus;
 			if (s_status == OM::PrinterStatus::halted)
 			{
-				Comm::DUET.SendGcode("M999");
+				Comm::Connection::get().sendGcode("M999");
 				Model::get().post<EventType::Response>(ResponseType::INFO, _("estop.reset_message"));
 			}
 		}

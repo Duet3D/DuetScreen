@@ -1,11 +1,8 @@
 #pragma once
 
+#include "Comm/Responses.h"
 #include "Debug.h"
 #include "LockWrapper.h"
-#include "Subscribers/FileSubscribers.h"
-#include "Subscribers/ResponseSubscribers.h"
-#include "Subscribers/Subscribers.h"
-#include "Subscribers/ThumbnailSubscribers.h"
 #include "UI/Core/EventTypes.h"
 #include "lvgl/lvgl.h"
 #include "nameof.hpp"
@@ -132,22 +129,6 @@ class Model
 
 	void runEventLoop();
 
-	/* tasks */
-	std::chrono::milliseconds requestNewData();
-
-	/* Subscribers */
-
-	void runSubscribers(const char* key, Comm::JsonDecoder* decoder, const char* data, const size_t indices[]);
-	const std::vector<Subscriber>& getSubscribers(const char* key) { return SubscriberMap::getSubscribers(key); }
-	size_t getSubscriberCount(const char* key) { return SubscriberMap::getSubscriberCount(key); }
-
-	void runArrayEndSubscribers(const char* key, Comm::JsonDecoder* decoder, const size_t indices[]);
-	const std::vector<ArrayEndSubscriber>& getArrayEndSubscribers(const char* key)
-	{
-		return SubscriberMap::getArrayEndSubscribers(key);
-	}
-	size_t getArrayEndSubscriberCount(const char* key) { return SubscriberMap::getArrayEndSubscriberCount(key); }
-
   private:
 	Model();
 
@@ -158,9 +139,6 @@ class Model
 	void connected();
 	void disconnected();
 
-	FileSubscribers m_fileSubscribers;
-	ResponseSubscribers m_responseSubscribers;
-	ThumbnailSubscribers m_thumbnailSubscribers;
 	std::list<std::weak_ptr<UI::BasePresenter>> m_presenters;
 
 	// Optimized event dispatch: map event -> presenters subscribed to that event
@@ -179,8 +157,6 @@ class Model
 	struct
 	{
 		lv_timer_t* tick;
-		lv_timer_t* request;
-		lv_timer_t* receive;
 	} m_timers;
 
 	static std::atomic<bool> s_instanceInitialized;

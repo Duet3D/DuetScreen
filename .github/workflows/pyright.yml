@@ -1,0 +1,36 @@
+# Checks the scripts' types strictly (pyrightconfig.json), with the devcontainer's Python and pyright
+
+name: Check Script Types
+
+on:
+  pull_request:
+  push:
+    paths:
+      - 'scripts/**'
+      - 'pyrightconfig.json'
+      - 'requirements.txt'
+
+jobs:
+  image:
+    uses: ./.github/workflows/devcontainer.yml
+    permissions:
+      contents: read
+      packages: write
+
+  pyright:
+    needs: image
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run pyright
+        run: pyright

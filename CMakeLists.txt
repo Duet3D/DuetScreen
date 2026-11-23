@@ -119,7 +119,6 @@ set(PROCESSOR "T113" CACHE STRING "Target processor, 'T113' or 'Simulation'")
 option(DUETSCREEN_DEBUG_BORDERS "Enable debug borders" OFF)
 option(DUETSCREEN_LOG_TIMESTAMPS "Enable timestamps in log messages" ON)
 option(DUETSCREEN_LOG_THREAD "Enable logging thread id in log messages" OFF)
-option(DUETSCREEN_ASYNC_RR_MODEL "Enable asynchronous rr_model requests" OFF)
 option(DUETSCREEN_HARDWARE_TEST "Enable hardware test" OFF)
 set(DUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER "\"\"" CACHE STRING "Default serial number to use in hardware test mode")
 option(DUETSCREEN_BURNIN_TEST "Enable burnin test" OFF)
@@ -278,9 +277,10 @@ ${LIBRARIES_DIR}/Duet3D/**.cpp)
 target_sources(DuetScreen.lib PRIVATE ${DUET_LIB_SOURCES})
 
 # Update DuetScreen version.h
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_custom_target(
   update_version_h
-  COMMAND "${CMAKE_SOURCE_DIR}/scripts/update_version.sh"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/scripts/internal/update_version.py"
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Updating version.h"
 )
@@ -316,7 +316,6 @@ else()
                                               TRUE)
 endif()
 
-target_compile_definitions(DuetScreen.lib PUBLIC MULTITHREADED)
 
 if(PROCESSOR STREQUAL "T113")
   pkg_check_modules(XKBCOMMON xkbcommon)
@@ -487,6 +486,10 @@ target_link_libraries(
           spdlog::spdlog
           fmt::fmt
           Tracy::TracyClient)
+
+# zlib reads the screen's update archives (UpgradeHelper checks one before installing it)
+find_package(ZLIB REQUIRED)
+target_link_libraries(DuetScreen.lib PRIVATE ZLIB::ZLIB)
 
 if(PROCESSOR STREQUAL "T113")
   target_link_libraries(DuetScreen.lib PRIVATE gpiod wpa_client)

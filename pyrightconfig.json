@@ -1,0 +1,8 @@
+{
+  "include": ["scripts"],
+  "executionEnvironments": [
+    { "root": "scripts" }
+  ],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "strict"
+}

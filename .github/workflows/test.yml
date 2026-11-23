@@ -44,7 +44,7 @@ jobs:
 
             - name: Update Version
               run: |
-                ./scripts/update_version.sh "${{ github.ref_name }}"
+                scripts/internal/update_version.py "${{ github.ref_name }}"
                 echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
             - name: Configure project
@@ -149,11 +149,11 @@ jobs:
                 token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install dependencies
-              run: ./scripts/install_prerequisites.sh
+              run: scripts/install_prerequisites.py
 
             - name: Update Version
               run: |
-                ./scripts/update_version.sh "${{ github.ref_name }}"
+                scripts/internal/update_version.py "${{ github.ref_name }}"
                 echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
             - name: Configure project

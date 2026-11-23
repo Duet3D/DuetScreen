@@ -5,8 +5,8 @@
  * number, it runs each test in turn (touch, dead pixels, memory, WiFi, USB, buzzer and speaker), logs every result to
  * a file, and shows a summary. One stage of the screen is shown at a time, named by `stage`.
  *
- * A HARDWARE_TEST build shows it over the home screen from start-up (main.cpp); Settings > Developer > Hardware test opens it
- * too, skipping the serial number.
+ * A HARDWARE_TEST build shows it over the home screen from start-up (main.cpp); Settings > Developer > Hardware test
+ * opens it too, skipping the serial number.
  *
  * Its names and actions are declared in fields() and its constructor, and listed in the UI API reference
  * (docs/XML_UI_API.md).
@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "Comm/Usb.h"
+#include "Comm/UsbMode.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/View/XmlPresenter.h"
@@ -70,11 +70,11 @@ namespace UI
 		nlohmann::json output; // What the test found, logged and shown in the results
 
 	  private:
-		TestId m_id;									// Which test it is
-		std::function<void(TestProcedure&)> m_start;	// Starts it
-		std::function<bool(TestProcedure&)> m_judge;	// Says whether it passed
+		TestId m_id;								   // Which test it is
+		std::function<void(TestProcedure&)> m_start;   // Starts it
+		std::function<bool(TestProcedure&)> m_judge;   // Says whether it passed
 		std::function<void(TestProcedure&)> m_cleanup; // Tidies up after it, or null
-		bool m_failed = false;							// Failed when last judged
+		bool m_failed = false;						   // Failed when last judged
 	};
 
 	/** One finished test in the results */
@@ -190,7 +190,10 @@ namespace UI
 		void testUsb();
 
 		/** Ask the user to do `message`, then, when they press `button`, record `key` (on a thread) and go on */
-		void askUsb(std::string_view message, std::string_view button, std::string key, bool devicePresent,
+		void askUsb(std::string_view message,
+					std::string_view button,
+					std::string key,
+					bool devicePresent,
 					std::function<void(HardwareTestPresenter&)> next);
 
 		/** Ask for the USB-A port to be connected to a USB-C port, in device mode */
@@ -232,9 +235,9 @@ namespace UI
 		std::string m_serialNumber; // As entered, or "unknown"
 		std::string m_logFile;		// Path of the log file
 
-		std::vector<TestProcedure> m_tests;	   // Every test, in order
+		std::vector<TestProcedure> m_tests;		// Every test, in order
 		TestProcedure* m_currentTest = nullptr; // The test running, if any
-		size_t m_testIndex = 0;				   // Index of the next test to start
+		size_t m_testIndex = 0;					// Index of the next test to start
 
 		/** A target to tap and where it was tapped */
 		struct TouchPoint
@@ -243,7 +246,7 @@ namespace UI
 			lv_point_t recorded; // Where it was tapped
 		};
 		std::vector<TouchPoint> m_touchPoints; // The targets, for this screen's size
-		size_t m_touchIndex = 0;				 // The target showing
+		size_t m_touchIndex = 0;			   // The target showing
 
 		/** A colour the screen is filled with */
 		struct TestColour
@@ -254,27 +257,27 @@ namespace UI
 		static const std::vector<TestColour> COLOURS; // The colours, in order
 		size_t m_colourIndex = 0;					  // The colour showing
 
-		std::string m_usbMountPath;							  // The USB drive in use, or empty
+		std::string m_usbMountPath;								   // The USB drive in use, or empty
 		std::function<void(HardwareTestPresenter&)> m_onUsbButton; // What the USB button does now
-		Comm::UsbMode m_usbMode = Comm::UsbMode::Host;		  // USB mode to put back afterwards
-		std::function<void()> m_onExit;						  // Leaves the screen, or empty
+		Comm::UsbMode m_usbMode = Comm::UsbMode::Host;			   // USB mode to put back afterwards
+		std::function<void()> m_onExit;							   // Leaves the screen, or empty
 
-		Xml::StringSubject<16> m_stage;			  // `stage`
-		Xml::StringSubject<128> m_version;		  // `version`
-		Xml::StringSubject<32> m_serial;		  // `serial`
-		Xml::IntSubject m_serialInvalid;		  // `serial_invalid`
-		Xml::IntSubject m_targetX;				  // `target_x`
-		Xml::IntSubject m_targetY;				  // `target_y`
-		Xml::IntSubject m_colourShown;			  // `colour_shown`
-		Xml::ColorSubject m_colour;				  // `colour`
-		Xml::StringSubject<256> m_message;		  // `message`
-		Xml::StringSubject<16384> m_output;		  // `output`
-		Xml::StringSubject<512> m_usbDrives;	  // `usb_drives`
-		Xml::IntSubject m_usbButtonShown;		  // `usb_button_shown`
-		Xml::StringSubject<32> m_usbButton;		  // `usb_button`
-		Xml::IntSubject m_speakerAnswerable;	  // `speaker_answerable`
-		Xml::List<TestResultRow> m_passed;		  // `passed`
-		Xml::List<TestResultRow> m_failed;		  // `failed`
-		Xml::IntSubject m_exitShown;			  // `exit_shown`
+		Xml::StringSubject<16> m_stage;		 // `stage`
+		Xml::StringSubject<128> m_version;	 // `version`
+		Xml::StringSubject<32> m_serial;	 // `serial`
+		Xml::IntSubject m_serialInvalid;	 // `serial_invalid`
+		Xml::IntSubject m_targetX;			 // `target_x`
+		Xml::IntSubject m_targetY;			 // `target_y`
+		Xml::IntSubject m_colourShown;		 // `colour_shown`
+		Xml::ColorSubject m_colour;			 // `colour`
+		Xml::StringSubject<256> m_message;	 // `message`
+		Xml::StringSubject<16384> m_output;	 // `output`
+		Xml::StringSubject<512> m_usbDrives; // `usb_drives`
+		Xml::IntSubject m_usbButtonShown;	 // `usb_button_shown`
+		Xml::StringSubject<32> m_usbButton;	 // `usb_button`
+		Xml::IntSubject m_speakerAnswerable; // `speaker_answerable`
+		Xml::List<TestResultRow> m_passed;	 // `passed`
+		Xml::List<TestResultRow> m_failed;	 // `failed`
+		Xml::IntSubject m_exitShown;		 // `exit_shown`
 	};
 } // namespace UI

@@ -42,8 +42,9 @@ namespace UI
 
 		switch (code)
 		{
+		// Its own height is its label's, as one line, whatever its width: a height that followed the width would
+		// never settle where a flex layout tries widths in turn (a bar growing in a row starts at its base width)
 		case LV_EVENT_STYLE_CHANGED:
-		case LV_EVENT_SIZE_CHANGED:
 		{
 			self.refreshSelfSize();
 			break;
@@ -88,7 +89,7 @@ namespace UI
 							 label_dsc.font,
 							 label_dsc.letter_space,
 							 label_dsc.line_space,
-							 self.getWidth() - (indic_pad_left + indic_pad_right),
+							 LV_COORD_MAX, // one line
 							 label_dsc.flag);
 
 			const lv_coord_t label_height = txt_size.y + label_pad_top + label_pad_bottom;
@@ -153,7 +154,7 @@ namespace UI
 						 label_dsc.font,
 						 label_dsc.letter_space,
 						 label_dsc.line_space,
-						 self.getWidth() - (indic_pad_left + indic_pad_right),
+						 LV_COORD_MAX, // one line
 						 label_dsc.flag);
 
 		lv_area_t txt_area{.x1 = 0, .y1 = 0, .x2 = txt_size.x - 1, .y2 = txt_size.y - 1};

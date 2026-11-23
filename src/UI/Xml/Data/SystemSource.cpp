@@ -47,6 +47,12 @@ namespace UI::Xml
 				"1 if the build has the simulated Duet (a connection method, and its page in the settings)");
 	}
 
+	void SystemSource::onInit()
+	{
+		registerEventListener<EventType::FileInfo>([this](const std::string&) { update(); });
+		registerEventListener<EventType::ThumbnailData>([this](const std::string&) { update(); });
+	}
+
 	void SystemSource::update()
 	{
 		ZoneScoped;

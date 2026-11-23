@@ -2,10 +2,11 @@
  * MachineFiles.cpp
  *
  * The simulated machine's SD card: its jobs (with thumbnails, but for those set without), a few macros and
- * filaments, and heightmaps made for its bed: the replies to M20, M36, M36.1 and M36.2. Probing the bed for a
- * heightmap (G29) is in MachineGcode.cpp.
+ * filaments, heightmaps made for its bed, and the files written to it: the replies to M20, M36, M36.1 and M36.2, and
+ * files written with M559 (read back with M36.2). Probing the bed for a heightmap (G29) is in MachineGcode.cpp.
  */
 
+#include "Duet3D/General/CRC32.h"
 #include "Machine.h"
 #include "image/qoi.h"
 #include <algorithm>
@@ -47,6 +48,9 @@ namespace Sim
 
 		/** Characters of a thumbnail's base64 text sent in each reply to M36.1 */
 		constexpr size_t THUMBNAIL_CHUNK = 1024;
+
+		/** What ends a file written with M559 without a size, as RepRapFirmware's EOF_STRING */
+		constexpr std::string_view END_OF_FILE = "<!-- **EoF** -->";
 
 		/** `dir` without a trailing slash */
 		std::string_view withoutSlash(std::string_view dir)
@@ -446,7 +450,12 @@ namespace Sim
 	Json Machine::fileContentsReply(std::string_view path, uint32_t offset) const
 	{
 		std::string text;
-		if (const JobFile* file = findFile(path); file != nullptr && path.find("/gcodes") != std::string_view::npos)
+		if (const auto written = writtenFile(path))
+		{
+			text = *written;
+		}
+		else if (const JobFile* file = findFile(path);
+				 file != nullptr && path.find("/gcodes") != std::string_view::npos)
 		{
 			text = fmt::format("; {:s}, a job for the simulated Duet\nG28\nM190 S60\nM109 S210\nG1 Z0.2 F600\n",
 							   file->name);
@@ -468,5 +477,62 @@ namespace Sim
 		const std::string part = offset < text.size() ? text.substr(offset) : std::string();
 		return Json{
 			{"fragment", Json{{"fileName", path}, {"offset", offset}, {"data", part}, {"next", 0}, {"err", 0}}}};
+	}
+
+	std::string Machine::sdPath(std::string_view path)
+	{
+		if (path.starts_with("0:"))
+		{
+			return std::string(path);
+		}
+		if (path.starts_with('/'))
+		{
+			return fmt::format("0:{:s}", path);
+		}
+		return fmt::format("0:/sys/{:s}", path);
+	}
+
+	std::vector<Json> Machine::receiveFile(std::string& input)
+	{
+		Upload& upload = *m_upload;
+		if (upload.size > 0)
+		{
+			const size_t take = std::min(upload.size - upload.contents.size(), input.size());
+			upload.contents.append(input, 0, take);
+			input.erase(0, take);
+			if (upload.contents.size() < upload.size)
+			{
+				return {};
+			}
+		}
+		else
+		{
+			// Without a size, the file ends with the end-of-file marker, which isn't kept
+			upload.contents += input;
+			input.clear();
+			const size_t end = upload.contents.find(END_OF_FILE);
+			if (end == std::string::npos)
+			{
+				return {};
+			}
+			input = upload.contents.substr(end + END_OF_FILE.size());
+			upload.contents.resize(end);
+		}
+		Upload done = std::move(upload);
+		m_upload.reset();
+		CRC32 crc;
+		crc.Update(done.contents.data(), done.contents.size());
+		if (done.crc && *done.crc != crc.Get())
+		{
+			return {Json{{"resp", "Error: CRC32 checksum doesn't match\n"}}};
+		}
+		m_writtenFiles[done.path] = std::move(done.contents);
+		return {};
+	}
+
+	std::optional<std::string> Machine::writtenFile(std::string_view path) const
+	{
+		const auto it = m_writtenFiles.find(sdPath(path));
+		return it != m_writtenFiles.end() ? std::optional(it->second) : std::nullopt;
 	}
 } // namespace Sim

@@ -4,6 +4,7 @@
 
 #include "Tree.h"
 #include "LockWrapper.h"
+#include "tracy/Tracy.hpp"
 #include <algorithm>
 #include <fmt/format.h>
 #include <string>
@@ -153,12 +154,11 @@ namespace OM
 		m_root.makeObject();
 	}
 
-	void Tree::apply(Patch& patch)
+	void Tree::apply(const Patch& patch)
 	{
-		if (!patch.hasResult())
-		{
-			return;
-		}
+		ZoneScoped;
+		const std::string where = patch.root().str();
+		ZoneText(where.data(), where.size());
 		ChangeSet changes; // What this response changed
 		{
 			std::lock_guard lock(mutexModel);
@@ -172,14 +172,14 @@ namespace OM
 					changes.add(patch.root().str());
 					target.makeArray();
 				}
-				const size_t end = patch.first() + patch.count();
+				const size_t end = patch.first() + patch.result().size();
 				for (size_t i = patch.first(); i < end; i++)
 				{
 					if (i >= target.size())
 					{
 						changes.add(patch.root().str());
 					}
-					merger.assign(target.item(i), patch.result()[i], patch.root().index(i), false);
+					merger.assign(target.item(i), patch.result()[i - patch.first()], patch.root().index(i), false);
 				}
 				if (patch.last() && target.size() != end)
 				{
@@ -200,6 +200,7 @@ namespace OM
 
 	void Tree::deriveHeaterLists(ChangeSet& changes)
 	{
+		ZoneScoped;
 		static constexpr std::pair<std::string_view, std::string_view> LISTS[] = {
 			{"bedHeaterMapping", "bedHeaters"},
 			{"chamberHeaterMapping", "chamberHeaters"},
@@ -240,6 +241,7 @@ namespace OM
 
 	void Tree::clear()
 	{
+		ZoneScoped;
 		{
 			std::lock_guard lock(mutexModel);
 			if (m_root.isObject() && m_root.size() == 0)
@@ -258,20 +260,79 @@ namespace OM
 
 	size_t Tree::watch(std::vector<std::string> paths, Listener callback)
 	{
+		ZoneScoped;
+		const size_t wanted = want(paths);
 		std::lock_guard lock(m_listenersMutex);
 		const size_t id = m_nextListenerId++;
-		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback)});
+		m_watchers.push_back({.id = id, .paths = std::move(paths), .callback = std::move(callback), .want = wanted});
 		return id;
 	}
 
 	void Tree::unwatch(size_t id)
 	{
-		std::lock_guard lock(m_listenersMutex);
-		std::erase_if(m_watchers, [id](const Watcher& watcher) { return watcher.id == id; });
+		ZoneScoped;
+		size_t wanted = 0;
+		{
+			std::lock_guard lock(m_listenersMutex);
+			const auto it = std::ranges::find(m_watchers, id, &Watcher::id);
+			if (it == m_watchers.end())
+			{
+				return;
+			}
+			wanted = it->want;
+			m_watchers.erase(it);
+		}
+		unwant(wanted);
+	}
+
+	size_t Tree::want(const std::vector<std::string>& paths)
+	{
+		ZoneScoped;
+		std::vector<std::string> keys;
+		for (const std::string& text : paths)
+		{
+			const auto path = Path::parse(text);
+			if (!path || path->empty())
+			{
+				continue;
+			}
+			if (const auto* key = std::get_if<std::string>(&path->segments().front()))
+			{
+				keys.push_back(*key);
+			}
+		}
+		std::lock_guard lock(m_wantsMutex);
+		const size_t id = m_nextWantId++;
+		m_wants.emplace(id, std::move(keys));
+		m_wantsVersion++;
+		return id;
+	}
+
+	void Tree::unwant(size_t id)
+	{
+		ZoneScoped;
+		std::lock_guard lock(m_wantsMutex);
+		if (m_wants.erase(id) > 0)
+		{
+			m_wantsVersion++;
+		}
+	}
+
+	std::set<std::string> Tree::wantedKeys() const
+	{
+		ZoneScoped;
+		std::lock_guard lock(m_wantsMutex);
+		std::set<std::string> keys;
+		for (const auto& [id, wanted] : m_wants)
+		{
+			keys.insert(wanted.begin(), wanted.end());
+		}
+		return keys;
 	}
 
 	void Tree::tellWatchers(const ChangeSet& changes)
 	{
+		ZoneScoped;
 		// Called without the model lock, so a watcher may read the tree, and with a copy, so it may (un)watch
 		std::vector<Listener> told;
 		{
@@ -294,6 +355,7 @@ namespace OM
 
 	ChangeSet Tree::takeChanges()
 	{
+		ZoneScoped;
 		std::lock_guard lock(mutexModel);
 		ChangeSet changes = std::move(m_changes);
 		m_changes.clear();
@@ -303,6 +365,7 @@ namespace OM
 
 	size_t Tree::addListener(Listener listener)
 	{
+		ZoneScoped;
 		std::lock_guard lock(m_listenersMutex);
 		const size_t id = m_nextListenerId++;
 		m_listeners.emplace_back(id, std::move(listener));
@@ -311,12 +374,14 @@ namespace OM
 
 	void Tree::removeListener(size_t id)
 	{
+		ZoneScoped;
 		std::lock_guard lock(m_listenersMutex);
 		std::erase_if(m_listeners, [id](const auto& entry) { return entry.first == id; });
 	}
 
 	void Tree::notify()
 	{
+		ZoneScoped;
 		{
 			std::lock_guard lock(mutexModel);
 			if (m_changes.empty() || m_notified)

@@ -1,8 +1,10 @@
 /*
  * Simulator.h
  *
- * The simulated Duet, as a connection: Comm::Duet sends it G-code as it would a Duet on USB
- * (CommunicationType::simulator), and it answers as a Duet does, with JSON for the screen's decoder. Behind it is a
+ * The simulated Duet, as a connection: the screen's connection sends it numbered G-code lines as it would a Duet on
+ * USB (CommunicationType::simulator, through Comm::SimulatorPort), and it answers as a Duet does, a line of JSON per
+ * reply, numbered with the line it answers as RepRapFirmware 3.6.2 on does; a file written with M559 is taken from the
+ * bytes after its line, as a Duet takes it. Behind it is a
  * Machine (Machine.h), built from a Config the screen keeps with its settings and edits on Settings > Connection >
  * Simulated Duet.
  *
@@ -37,7 +39,7 @@ namespace Sim
 		int32_t replyDelayMs = 0; // Each request is answered this long after it was sent
 		bool responding = true;	  // Answers requests; if not, the screen times out and reconnects
 		bool pluggedIn = true;	  // Can be connected to; unplugged, it doesn't answer either
-		float noise = 0.3f;		  // Noise on a heater's readings while it holds its temperature, °C (standard deviation)
+		float noise = 0.3f; // Noise on a heater's readings while it holds its temperature, °C (standard deviation)
 	};
 
 	/** The simulated Duet. See the file comment. */
@@ -59,8 +61,11 @@ namespace Sim
 		/** Whether it is connected */
 		bool connected() const;
 
-		/** Send it G-code: one or more lines, each answered in turn */
-		void send(std::string_view gcode);
+		/**
+		 * Send it bytes: G-code lines, each answered in turn, or the bytes of a file being written (M559), which follow
+		 * its line and are taken as the file, as a Duet takes them. A line may come in pieces.
+		 */
+		void send(std::string_view bytes);
 
 		/** What it is */
 		Config config() const;
@@ -111,11 +116,11 @@ namespace Sim
 		Simulator(const Simulator&) = delete;
 		Simulator& operator=(const Simulator&) = delete;
 
-		/** A line sent, waiting to be answered */
-		struct Request
+		/** Bytes sent to it, waiting to be read */
+		struct Received
 		{
-			std::string line;							   // The line
-			std::chrono::steady_clock::time_point due;	   // When to answer it
+			std::string bytes;						   // What was sent: lines, or a file's bytes (M559)
+			std::chrono::steady_clock::time_point due; // When to read them
 		};
 
 		/** The thread's loop: time passes, requests are answered */
@@ -126,6 +131,9 @@ namespace Sim
 
 		/** Send `replies` to the receiver (the lock not held) */
 		void deliver(const std::vector<std::string>& replies);
+
+		/** Forget what was sent and not yet acted on, and any file being written (the lock held) */
+		void clearInput();
 
 		/** Keep the machine's configuration with the settings (the lock held) */
 		void save() const;
@@ -139,7 +147,9 @@ namespace Sim
 		mutable std::mutex m_lock;			// Guards everything below but the thread's flag
 		Machine m_machine;					// The machine behind it
 		Behaviour m_behaviour;				// How it behaves
-		std::deque<Request> m_requests;		// Lines waiting to be answered
+		std::deque<Received> m_received;	// Bytes sent, waiting to be read
+		std::string m_input;				// Bytes read but not yet acted on: part of a line, or of a file
+		std::optional<int64_t> m_fileLine;	// The line number of the M559 whose file is being written
 		Receiver m_receiver;				// Where replies go; empty while disconnected
 		bool m_manual = false;				// Driven by a test (process(), advance())
 		std::thread m_thread;				// Runs it, unless manual

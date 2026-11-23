@@ -3,8 +3,8 @@
  */
 
 #include "ConsoleActions.h"
+#include "Comm/Responses.h"
 #include "Debug.h"
-#include "Subscribers/ResponseSubscribers.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/ConsoleSource.h"
 #include "UI/Xml/Data/DataSources.h"

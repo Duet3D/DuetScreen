@@ -46,6 +46,12 @@ namespace OM
 		Node(const Node&) = delete;
 		Node& operator=(const Node&) = delete;
 
+		/** Take what `other` holds, children included; `other` is left null */
+		Node(Node&& other) noexcept;
+
+		/** Take what `other` holds, children included, instead of what this held; `other` is left null */
+		Node& operator=(Node&& other) noexcept;
+
 		/** The node every failed lookup gives: it reads as null and has no children */
 		static const Node& missing();
 
@@ -132,15 +138,14 @@ namespace OM
 		/** Remove the field `name` from an object; nothing happens if it isn't there */
 		void removeField(std::string_view name);
 
-
 	  private:
 		/** Drop children and value */
 		void reset();
 
-		Kind m_kind = Kind::null;									 // What the node holds
-		std::string m_text;											 // Value as text; empty for anything but a value
-		double m_number = 0;										 // A number's value
+		Kind m_kind = Kind::null; // What the node holds
+		std::string m_text;		  // Value as text; empty for anything but a value
+		double m_number = 0;	  // A number's value
 		std::map<std::string, std::unique_ptr<Node>, std::less<>> m_fields; // An object's fields
-		std::vector<std::unique_ptr<Node>> m_items;					 // An array's items
+		std::vector<std::unique_ptr<Node>> m_items;							// An array's items
 	};
 } // namespace OM

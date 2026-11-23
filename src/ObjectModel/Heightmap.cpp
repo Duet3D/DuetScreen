@@ -12,11 +12,12 @@
 #include "Tree/Tree.h"
 #include <mutex>
 
-#include "Hardware/Duet.h"
+#include "Comm/Connection.h"
+#include "Comm/Gcode.h"
+#include "Configuration.h"
 #include "ObjectModel/Directories.h"
 #include "utils/csv.h"
 #include <cmath>
-#include <fstream>
 #include <map>
 #include <sstream>
 
@@ -24,12 +25,6 @@ namespace OM
 {
 	static std::vector<HeightmapPtr> s_heightmapCache;
 	static std::string s_emptyStr = "";
-
-	static std::string GetLocalFilePath(std::string_view filename)
-	{
-		ZoneScoped;
-		return fmt::format("/tmp/heightmaps/{}", filename);
-	}
 
 	HeightmapMeta::HeightmapMeta()
 	{
@@ -160,18 +155,6 @@ namespace OM
 					LOG_WARN("CSV file \"{:s}\" not a heightmap", m_fileName);
 					return;
 				}
-
-				// Write the file to disk
-				std::string localFilePath = GetLocalFilePath(m_fileName);
-				std::ofstream file(localFilePath.c_str(), std::ios::out | std::ios::binary);
-				if (!file.is_open())
-				{
-					LOG_ERROR("Failed to open file {:s} for writing", localFilePath.c_str());
-					return;
-				}
-
-				LOG_INFO("Writing heightmap to {:s}", localFilePath.c_str());
-				file.write(csvContents.data(), csvContents.length());
 
 				if (!ParseMeta(csvContents))
 				{
@@ -438,7 +421,7 @@ namespace OM
 	{
 		ZoneScoped;
 		LOG_INFO("Loading heightmap {:s}", filename);
-		Comm::DUET.SendGcodef("G29 S1 P\"{:s}\"\n", filename);
+		Comm::Connection::get().sendGcodef("G29 S1 P{:s}\n", Comm::quoted(filename));
 	}
 
 	/* Sends command to Duet to unload the heightmap */
@@ -446,7 +429,7 @@ namespace OM
 	{
 		ZoneScoped;
 		LOG_INFO("Unloading heightmap");
-		Comm::DUET.SendGcode("G29 S2\n");
+		Comm::Connection::get().sendGcode("G29 S2\n");
 	}
 
 	void ToggleHeightmap(std::string_view filename)

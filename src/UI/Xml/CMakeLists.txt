@@ -48,6 +48,7 @@ target_sources(
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ThemeSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/SpindleSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Data/ToolSource.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Data/UsbSource.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Geometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/Layout.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Layout/LayoutEditor.cpp

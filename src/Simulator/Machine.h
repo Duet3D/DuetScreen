@@ -4,7 +4,7 @@
  * The simulated machine: built from a Config, it runs G-code (MachineGcode.cpp) and moves on with time (advance()):
  * heaters trend towards their targets, their readings a little noisy once there, axes travel to where they were sent, a job prints, a
  * pause or a cancel takes a moment. It reports itself as a Duet's object model (MachineModel.cpp), answers the
- * requests a Duet answers (M409, M20, M36, M36.1, M36.2) and counts a seq for each key of the object model that
+ * requests a Duet answers (M409, M20, M36, M36.1, M36.2), takes files written to it (M559) and counts a seq for each key of the object model that
  * changes, so the screen asks for what changed, as it does of a real Duet. Its SD card (MachineFiles.cpp) holds its
  * jobs, with thumbnails, a few macros and filaments, and heightmaps made for its bed.
  *
@@ -71,6 +71,21 @@ namespace Sim
 		 *         {"resp":"..."}
 		 */
 		std::vector<Json> execute(std::string_view gcode);
+
+		/** Whether a file is being written to it (M559): what is sent next is the file's bytes, not G-code */
+		bool receivingFile() const { return m_upload.has_value(); }
+
+		/**
+		 * Take the bytes of the file being written from the front of `input`, as many as it still needs
+		 * @return the replies once the file is whole (an error if its CRC is wrong); none until then
+		 */
+		std::vector<Json> receiveFile(std::string& input);
+
+		/** Stop taking a file being written: what it came over is gone */
+		void abandonFile() { m_upload.reset(); }
+
+		/** The file written to it (M559) at `path`, e.g. "0:/sys/duetscreen.json", if one was */
+		std::optional<std::string> writtenFile(std::string_view path) const;
 
 		/** The whole object model, every field */
 		Json objectModel() const;
@@ -293,6 +308,21 @@ namespace Sim
 		/** The reply to M36.2 for `path` from `offset`: a part of the file's text */
 		Json fileContentsReply(std::string_view path, uint32_t offset) const;
 
+		/** A file being written (M559) */
+		struct Upload
+		{
+			std::string path;			 // Where, e.g. "0:/sys/duetscreen.json"
+			size_t size = 0;			 // Its size; 0 if not given, when it ends with the end-of-file marker
+			std::optional<uint32_t> crc; // Its CRC-32, if given
+			std::string contents;		 // What has arrived of it
+		};
+
+		/** M559: take the bytes sent next as the file it names */
+		void startFile(const Command& command, std::string& reply);
+
+		/** `path` as a full path: on drive 0, and in 0:/sys/ if it names no folder, as RepRapFirmware takes M559's */
+		static std::string sdPath(std::string_view path);
+
 		/** The date every simulated file but a job has */
 		static constexpr const char* FILE_DATE = "2026-11-01T12:00:00";
 
@@ -360,5 +390,7 @@ namespace Sim
 		std::string m_heightmap{};					  // The heightmap in use (G29 S1), its file name; "" for none
 		int32_t m_probes = 0;						  // Times the bed was probed (G29), which varies heightmap.csv
 		std::vector<bool> m_pushedRelative{};			  // Relative modes pushed by M120, popped by M121
+		std::optional<Upload> m_upload{};				  // The file being written (M559), if any
+		std::map<std::string, std::string> m_writtenFiles{}; // Files written to it (M559), by full path
 	};
 } // namespace Sim

@@ -22,6 +22,7 @@
 #include "Dashboard/JobStatusPresenter.h"
 #include "FileBrowser/FileBrowserPresenter.h"
 #include "FileBrowser/FilesActions.h"
+#include "FileBrowser/UsbActions.h"
 #include "HardwareTest/HardwareTestPresenter.h"
 #include "Modals/FactorsActions.h"
 #include "Notifications/NotificationsPresenter.h"
@@ -72,6 +73,7 @@ namespace UI
 		ToolActions::registerAll();
 		FactorsActions::registerAll();
 		FilesActions::registerAll();
+		UsbActions::registerAll();
 		EStopActions::registerAll();
 		JobActions::registerAll();
 		BabystepActions::registerAll();
@@ -113,5 +115,10 @@ namespace UI
 						.sortBy = {"ui:home:file:jobs:sort_by", SortBy::DATE},
 						.sortDescending = {"ui:home:file:jobs:sort_descending", true},
 						.displayMode = {"ui:home:file:jobs:display_mode", Mode::Tile}});
+		addFileBrowser("files_usb",
+					   {.folder = Browser::BaseFolder::USB,
+						.sortBy = {"ui:home:file:usb:sort_by", SortBy::NAME},
+						.sortDescending = {"ui:home:file:usb:sort_descending", false},
+						.displayMode = {"ui:home:file:usb:display_mode", Mode::List}});
 	}
 } // namespace UI

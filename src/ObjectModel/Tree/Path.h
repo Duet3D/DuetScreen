@@ -4,16 +4,14 @@
  * The address of one node of the object model, as RepRapFirmware writes it: `heat.heaters[1].current`. A path is a
  * list of segments, each a field name or an array index. The empty path is the root.
  *
- * The same node can be reached from the JSON decoder's ids (`heat:heaters^:current` with the indices `[1]`), so a
- * path can be made from either. Its text form (str()) is the canonical name of the node: two paths to the same node
- * always give the same text, which is what OM bindings are keyed by.
+ * Its text form (str()) is the canonical name of the node: two paths to the same node always give the same text, which
+ * is what OM bindings are keyed by.
  */
 
 #pragma once
 
 #include <cstddef>
 #include <optional>
-#include <span>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -35,13 +33,6 @@ namespace OM
 		 * @return the path, or nothing if `text` isn't one (e.g. an unclosed bracket or an empty field name)
 		 */
 		static std::optional<Path> parse(std::string_view text);
-
-		/**
-		 * Make a path from a JSON decoder id, where ':' separates fields and each '^' stands for the next of `indices`,
-		 * e.g. `heat:heaters^:current` with `[1]`
-		 * @return the path, or nothing if the id has more '^' than `indices`
-		 */
-		static std::optional<Path> fromDecoderId(std::string_view id, std::span<const size_t> indices);
 
 		/** The segments, root first */
 		const std::vector<Segment>& segments() const { return m_segments; }

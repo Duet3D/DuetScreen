@@ -1,0 +1,17 @@
+<!--
+  How writing a file to the printer is going: the file's name, then a bar with its percentage. Shown in the USB file
+  dialog while its file is uploaded (the status bar has a slimmer one of its own, in one line). Give it a width.
+
+  Data:     source.files.transfer_file, source.files.transfer_progress (src/UI/Xml/Data/FilesSource.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<lv_label name="file" bind_text="source.files.transfer_file" width="100%" long_mode="dots">
+			<style name="setting_hint"/>
+		</lv_label>
+		<ds_bar name="progress" min="0" max="100" label_format="{}%" bind_value="source.files.transfer_progress"
+				width="100%" height="content"/>
+	</view>
+</component>

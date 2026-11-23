@@ -6,12 +6,13 @@
 /*********************
  *      INCLUDES
  *********************/
-#include "Comm/Communication.h"
-#include "Comm/Usb.h"
+#include "Comm/Connection.h"
+#include "Comm/FileInfoCache.h"
+#include "Comm/UsbMode.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
+#include "ObjectModel/Followers.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Presenters/Presenters.h"
@@ -69,8 +70,6 @@ static int set_thread_priority(pthread_t thread_id, int policy, int priority);
  *  STATIC VARIABLES
  **********************/
 static std::thread s_responseThread;
-static std::thread s_requestThread;
-static std::thread s_thumbnailThread;
 static std::thread s_internetMonitorThread;
 
 /**********************
@@ -120,8 +119,9 @@ int main(int argc, char** argv)
 
 	{
 		ZoneScopedN("Comm::init");
-		Comm::init();
-		Comm::DUET.Init();
+		std::filesystem::create_directories("/tmp/thumbnails");
+		OM::Followers::start();
+		Comm::usbInit();
 	}
 
 	/*Initialize the HAL (display, input devices, tick) for LVGL*/
@@ -161,37 +161,7 @@ int main(int argc, char** argv)
 
 	Model::get().startEventLoop();
 
-	USB::UsbMonitor::getInstance().registerCallback(
-		[](const std::string& path, bool mounted)
-		{
-			ZoneScopedN("Upgrade USB Callback");
-			if (mounted)
-			{
-				LOG_INFO("USB drive mounted: {:s}", path.c_str());
-				std::string upgradeFilePath = path + "/DuetScreen.tar.gz";
-				if (!std::filesystem::exists(upgradeFilePath))
-				{
-					return;
-				}
-
-				struct stat file_stat;
-				if (stat(upgradeFilePath.c_str(), &file_stat) != 0)
-				{
-					LOG_ERROR("Error getting file stats for {:s}", upgradeFilePath.c_str());
-					return;
-				}
-
-				time_t lastModified = file_stat.st_mtime;
-				time_t savedModified = StorageHelper::getData(ID_UPGRADE_FILE_LAST_MODIFIED);
-
-				if (lastModified == savedModified)
-				{
-					return;
-				}
-
-				Model::get().post<EventType::UpdateAvailable>(upgradeFilePath);
-			}
-		});
+	UpgradeHelper::offerUpdatesOnUsbDrives();
 	USB::UsbMonitor::getInstance().startMonitoring();
 	UpgradeHelper::startMonitoringUpgradeStatus();
 
@@ -218,41 +188,8 @@ int main(int argc, char** argv)
 			}
 		});
 
-	// Create a thread to handle requesting data from Duet
-#if MULTITHREADED
-	s_requestThread = std::thread(
-		[]()
-		{
-			tracy::SetThreadName("Request Thread");
-#  if SET_THREAD_PRIORITY
-			// Set high priority for request thread
-			set_thread_priority(pthread_self(), SCHED_RR, 90);
-#  endif
-
-			while (1)
-			{
-				// Request next section of the OM
-				std::chrono::milliseconds delay = Model::get().requestNewData();
-				std::this_thread::sleep_for(delay);
-			}
-		});
-
-	s_thumbnailThread = std::thread(
-		[]()
-		{
-			tracy::SetThreadName("FileInfo Cache Thread");
-#  if SET_THREAD_PRIORITY
-			// Set low priority for thumbnail thread
-			set_thread_priority(pthread_self(), SCHED_RR, 70);
-#  endif
-
-			while (1)
-			{
-				FILEINFO_CACHE->Spin();
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			}
-		});
-#endif
+	// Connect to the printer, on the connection's own thread
+	Comm::Connection::get().start();
 
 	// Screensaver task
 	DisplayHelper::setScreenSaverBrightness(0);

@@ -6,10 +6,11 @@
  */
 
 #include "UpgradeHelper.h"
+#include "Comm/Connection.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
+#include "Hardware/Usb.h"
 #include "UI/Core/Model.h"
 #include "utils/StorageHelper.h"
 #include "utils/SystemHelper.h"
@@ -18,8 +19,10 @@
 
 #include <hv/requests.h>
 #include <nlohmann/json.hpp>
+#include <zlib.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cctype>
 #include <cstdint>
@@ -33,7 +36,6 @@
 #include <unistd.h>
 #include <vector>
 
-#define USB_BASE_DIR "/media/usb"
 #define UPGRADE_EXT ".tar.gz"
 static constexpr size_t UPGRADE_EXT_SIZE = sizeof(UPGRADE_EXT) - 1;
 #define UPGRADE_FILE UPGRADE_FILE_NAME UPGRADE_EXT
@@ -389,6 +391,189 @@ namespace UpgradeHelper
 			postUpdateResultFromMessage(msg);
 		}
 
+		/** What scanning an update archive found */
+		struct ArchiveContents
+		{
+			bool readable = false;						 // It is a whole, readable tar.gz archive
+			bool hooks = false;							 // It holds an update's scripts (pre-update, post-update)
+			std::optional<std::string> buildrootVersion; // Its buildroot_version, if it has one
+		};
+
+		/** A tar header's number at `field`, `length` bytes: octal, or GNU's base-256 for a large one */
+		std::optional<uint64_t> tarNumber(const char* field, size_t length)
+		{
+			if ((static_cast<unsigned char>(field[0]) & 0x80) != 0)
+			{
+				uint64_t value = static_cast<unsigned char>(field[0]) & 0x7F;
+				for (size_t i = 1; i < length; i++)
+				{
+					value = (value << 8) | static_cast<unsigned char>(field[i]);
+				}
+				return value;
+			}
+			uint64_t value = 0;
+			size_t i = 0;
+			while (i < length && field[i] == ' ')
+			{
+				i++;
+			}
+			if (i == length || field[i] < '0' || field[i] > '7')
+			{
+				return std::nullopt;
+			}
+			for (; i < length && field[i] >= '0' && field[i] <= '7'; i++)
+			{
+				value = value * 8 + static_cast<uint64_t>(field[i] - '0');
+			}
+			return value;
+		}
+
+		/** Whether the 512-byte tar header `header` is whole: its checksum matches */
+		bool tarHeaderValid(const std::array<char, 512>& header)
+		{
+			const std::optional<uint64_t> stated = tarNumber(header.data() + 148, 8);
+			uint64_t sum = 0;
+			for (size_t i = 0; i < header.size(); i++)
+			{
+				sum += i >= 148 && i < 156 ? ' ' : static_cast<unsigned char>(header[i]);
+			}
+			return stated && *stated == sum;
+		}
+
+		/** A tar header's text field at `field`, up to `length` bytes or its terminating zero */
+		std::string tarText(const char* field, size_t length)
+		{
+			return std::string(field, strnlen(field, length));
+		}
+
+		/** Read the next `length` bytes of `archive`, or skip them (`into` null); false if it ends first */
+		bool readArchive(gzFile archive, uint64_t length, std::string* into)
+		{
+			std::array<char, 64 * 1024> buffer{};
+			while (length > 0)
+			{
+				const auto piece = static_cast<unsigned>(std::min<uint64_t>(length, buffer.size()));
+				if (gzread(archive, buffer.data(), piece) != static_cast<int>(piece))
+				{
+					return false;
+				}
+				if (into != nullptr)
+				{
+					into->append(buffer.data(), piece);
+				}
+				length -= piece;
+			}
+			return true;
+		}
+
+		/** What the tar.gz archive at `path` holds of an update; read all through, as its end shows it is whole */
+		ArchiveContents scanArchive(const std::filesystem::path& path)
+		{
+			ZoneScoped;
+			ArchiveContents contents;
+			gzFile archive = gzopen(path.c_str(), "rb");
+			if (archive == nullptr)
+			{
+				return contents;
+			}
+			gzbuffer(archive, 128 * 1024);
+			std::array<char, 512> header{};
+			std::string longName; // The next entry's name, from a GNU long name entry before it
+			while (gzread(archive, header.data(), header.size()) == static_cast<int>(header.size()))
+			{
+				if (std::all_of(header.begin(), header.end(), [](char c) { return c == 0; }))
+				{
+					contents.readable = true; // the end
+					break;
+				}
+				const std::optional<uint64_t> size = tarNumber(header.data() + 124, 12);
+				if (!tarHeaderValid(header) || !size)
+				{
+					break;
+				}
+				const uint64_t padded = (*size + 511) / 512 * 512;
+				const char type = header[156];
+				if (type == 'L')
+				{
+					std::string name;
+					if (!readArchive(archive, padded, &name))
+					{
+						break;
+					}
+					longName = tarText(name.data(), name.size());
+					continue;
+				}
+
+				std::string name = longName;
+				longName.clear();
+				if (name.empty())
+				{
+					const std::string prefix = tarText(header.data() + 345, 155);
+					name = tarText(header.data(), 100);
+					name = prefix.empty() ? name : prefix + "/" + name;
+				}
+				if (name.starts_with("./"))
+				{
+					name.erase(0, 2);
+				}
+				contents.hooks |= name == "pre-update" || name == "post-update";
+
+				const bool regular = type == '0' || type == '\0';
+				if (name == "buildroot_version" && regular)
+				{
+					std::string data;
+					if (!readArchive(archive, padded, &data))
+					{
+						break;
+					}
+					data.resize(static_cast<size_t>(*size));
+					std::erase_if(data, [](char c) { return c == '\r' || c == '\n'; });
+					contents.buildrootVersion = data;
+				}
+				else if (!readArchive(archive, padded, nullptr))
+				{
+					break;
+				}
+			}
+			gzclose(archive);
+			return contents;
+		}
+
+		/** The first `fields` dot-separated fields of `version`, as `cut -d. -f1,2` gives them for 2 */
+		std::string_view versionFields(std::string_view version, size_t fields)
+		{
+			size_t end = 0;
+			for (size_t i = 0; i < fields; i++)
+			{
+				end = version.find('.', i == 0 ? 0 : end + 1);
+				if (end == std::string_view::npos)
+				{
+					return version;
+				}
+			}
+			return version.substr(0, end);
+		}
+
+		/** The third dot-separated field of `version` (its patch), or empty */
+		std::string_view versionPatch(std::string_view version)
+		{
+			const std::string_view majorMinor = versionFields(version, 2);
+			if (majorMinor.size() >= version.size())
+			{
+				return {};
+			}
+			const std::string_view rest = version.substr(majorMinor.size() + 1);
+			return rest.substr(0, rest.find('.'));
+		}
+
+		/** Whether `path` is on a USB drive that is plugged in */
+		bool onUsbDrive(const std::string& path)
+		{
+			const std::vector<std::string> drives = USB::UsbMonitor::getInstance().getMountedDrives();
+			return std::any_of(drives.begin(),
+							   drives.end(),
+							   [&path](const std::string& drive) { return path.starts_with(drive + "/"); });
+		}
 	} // namespace
 
 	void startMonitoringUpgradeStatus()
@@ -560,14 +745,13 @@ namespace UpgradeHelper
 	static bool copyFileFromUsb(const std::string& filePath)
 	{
 		ZoneScoped;
-		if (filePath.rfind(USB_BASE_DIR, 0) != 0)
+		if (!onUsbDrive(filePath))
 		{
 			LOG_ERROR("File path {:s} is not on USB", filePath.c_str());
 			return false;
 		}
 
-		// Check if the file has the correct extension
-		if (filePath.size() < UPGRADE_EXT_SIZE || filePath.substr(filePath.size() - UPGRADE_EXT_SIZE) != UPGRADE_EXT)
+		if (!looksLikeUpdate(filePath))
 		{
 			LOG_ERROR("File {:s} does not have the required " UPGRADE_EXT " extension", filePath);
 			return false;
@@ -608,7 +792,7 @@ namespace UpgradeHelper
 	static bool createUpgradeCompleteFile(const std::string& usbPath)
 	{
 		ZoneScoped;
-		if (usbPath.rfind(USB_BASE_DIR, 0) != 0)
+		if (!onUsbDrive(usbPath + "/"))
 		{
 			LOG_ERROR("File path {:s} is not on USB", usbPath.c_str());
 			return false;
@@ -642,28 +826,116 @@ namespace UpgradeHelper
 		return SystemHelper::restartService(SystemHelper::Services::UPGRADE);
 	}
 
-	bool upgradeFromUSB(const std::string& filePath)
+	bool looksLikeUpdate(std::string_view name)
+	{
+		return name.size() > UPGRADE_EXT_SIZE && name.ends_with(UPGRADE_EXT);
+	}
+
+	UpdateCheck checkUpdate(const std::filesystem::path& path, std::string_view installed)
 	{
 		ZoneScoped;
-		LOG_INFO("Attempting upgrade from USB file {:s}", filePath.c_str());
-		if (!copyFileFromUsb(filePath))
+		UpdateCheck check;
+		check.installedBuildrootVersion = installed;
+		const ArchiveContents contents = scanArchive(path);
+		if (!contents.readable || !contents.hooks)
 		{
-			LOG_ERROR("Failed to copy file from USB");
-			return false;
+			LOG_INFO("{:s} isn't a screen update", path.string());
+			return check;
 		}
-
-		struct stat file_stat;
-		if (stat(filePath.c_str(), &file_stat) != 0)
+		check.updateBuildrootVersion = contents.buildrootVersion.value_or("");
+		const std::string_view update = check.updateBuildrootVersion;
+		if (update.empty() || installed.empty())
 		{
-			LOG_ERROR("Error getting file stats for {:s}", filePath.c_str());
-			return false;
+			check.verdict = UpdateCheck::Verdict::Installable; // as the update service: nothing to compare
 		}
+		else if (versionFields(update, 2) != versionFields(installed, 2))
+		{
+			check.verdict = UpdateCheck::Verdict::WrongSystem;
+		}
+		else
+		{
+			const std::string_view updatePatch = versionPatch(update);
+			const std::string_view installedPatch = versionPatch(installed);
+			check.verdict = !updatePatch.empty() && !installedPatch.empty() && updatePatch != installedPatch
+								? UpdateCheck::Verdict::PatchDiffers
+								: UpdateCheck::Verdict::Installable;
+		}
+		LOG_INFO("{:s} is a screen update for system {:s} (this screen's: {:s}): {:s}",
+				 path.string(),
+				 update,
+				 installed,
+				 nameof::nameof_enum(check.verdict));
+		return check;
+	}
 
-		time_t lastModified = file_stat.st_mtime;
-		StorageHelper::setData(ID_UPGRADE_FILE_LAST_MODIFIED, lastModified);
+	UpdateCheck checkUpdate(const std::filesystem::path& path)
+	{
+#if SIMULATION
+		return checkUpdate(path, "");
+#else
+		return checkUpdate(path, getBuildrootVersion());
+#endif
+	}
 
-		createUpgradeCompleteFile(filePath.substr(0, filePath.find_last_of('/')));
-		return upgradeFromTmp();
+	void installFromUsb(std::string path, std::function<void(std::string why)> failed)
+	{
+		ZoneScoped;
+		std::thread(
+			[path = std::move(path), failed = std::move(failed)]
+			{
+				tracy::SetThreadName("Update install");
+				LOG_INFO("Attempting upgrade from USB file {:s}", path);
+				const auto fail = [&failed](std::string why)
+				{
+					LOG_ERROR("Couldn't install the update: {:s}", why);
+					if (failed)
+					{
+						failed(std::move(why));
+					}
+				};
+				struct stat fileStat{};
+				if (stat(path.c_str(), &fileStat) != 0)
+				{
+					fail(fmt::format("{:s} can't be read", path));
+					return;
+				}
+				if (!copyFileFromUsb(path))
+				{
+					fail(fmt::format("{:s} couldn't be copied from the USB drive", path));
+					return;
+				}
+				StorageHelper::setData(ID_UPGRADE_FILE_LAST_MODIFIED, fileStat.st_mtime);
+				createUpgradeCompleteFile(path.substr(0, path.find_last_of('/')));
+				if (!upgradeFromTmp())
+				{
+					fail("the update service couldn't be started");
+				}
+			})
+			.detach();
+	}
+
+	void offerUpdatesOnUsbDrives()
+	{
+		USB::UsbMonitor::getInstance().registerCallback(
+			[](const std::string& drive, bool mounted)
+			{
+				ZoneScopedN("Upgrade USB Callback"); // on the monitor's thread
+				const std::string path = drive + "/" UPGRADE_FILE;
+				struct stat fileStat{};
+				if (!mounted || stat(path.c_str(), &fileStat) != 0)
+				{
+					return;
+				}
+				if (fileStat.st_mtime == StorageHelper::getData(ID_UPGRADE_FILE_LAST_MODIFIED))
+				{
+					return; // installed already
+				}
+				if (!checkUpdate(path).installable())
+				{
+					return;
+				}
+				Model::get().post<EventType::UpdateAvailable>(path);
+			});
 	}
 
 	bool upgradeFromDuet()
@@ -674,24 +946,25 @@ namespace UpgradeHelper
 		LOG_INFO("Attempting upgrade from Duet file {:s}", filePath.c_str());
 		removeTmpFile(); // Remove any previous upgrade file
 
-		if (!Comm::DUET.DownloadFile(filePath.c_str(),
-									 [](const std::string& contents)
-									 {
-										 std::ofstream file(TMP_FILEPATH, std::ios::binary);
-										 if (!file.is_open())
-										 {
-											 LOG_ERROR("Failed to create file \"" TMP_FILEPATH "\"");
-										 }
-										 file.write(contents.c_str(), contents.size());
-										 file.close();
-
-										 upgradeFromTmp();
-									 }))
-		{
-			LOG_ERROR("Failed to download file \"{:s}\" from Duet", filePath.c_str());
-			return false;
-		}
-
+		Comm::Connection::get().readFile(
+			filePath,
+			[filePath](std::expected<std::string, Comm::ReplyError> contents)
+			{
+				if (!contents)
+				{
+					LOG_ERROR("Failed to download file \"{:s}\" from Duet: {:s}", filePath, contents.error().message);
+					return;
+				}
+				std::ofstream file(TMP_FILEPATH, std::ios::binary);
+				if (!file.is_open())
+				{
+					LOG_ERROR("Failed to create file \"" TMP_FILEPATH "\"");
+					return;
+				}
+				file.write(contents->data(), static_cast<std::streamsize>(contents->size()));
+				file.close();
+				upgradeFromTmp();
+			});
 		return true;
 	}
 

@@ -7,8 +7,10 @@
  */
 
 #include "Reset.h"
+#include "Comm/Connection.h"
 #include "Debug.h"
 #include "UI/Xml/Runtime/XmlUi.h"
+#include "tracy/Tracy.hpp"
 #include "utils/NetworkHelper.h"
 #include "utils/SystemHelper.h"
 
@@ -27,6 +29,8 @@ extern "C"
 	 */
 	void Restart() noexcept
 	{
+		ZoneScoped;
+		Comm::Connection::get().stop(); // the port closed properly, everything waiting told
 #if SIMULATION
 		exit(EXIT_SUCCESS);
 #else
@@ -39,6 +43,8 @@ extern "C"
 	 */
 	void Reboot() noexcept
 	{
+		ZoneScoped;
+		Comm::Connection::get().stop(); // the port closed properly, everything waiting told
 #if !SIMULATION
 		reboot(RB_AUTOBOOT);
 #endif
@@ -50,6 +56,7 @@ extern "C"
 	 */
 	void EraseAndRestart() noexcept
 	{
+		ZoneScoped;
 #if SIMULATION
 		if (!std::filesystem::remove("config.json"))
 		{

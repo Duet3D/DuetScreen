@@ -80,36 +80,6 @@ namespace OM
 		return path;
 	}
 
-	std::optional<Path> Path::fromDecoderId(std::string_view id, std::span<const size_t> indices)
-	{
-		Path path;
-		size_t used = 0;
-		size_t i = 0;
-		while (i < id.size())
-		{
-			if (id[i] == ':')
-			{
-				i++;
-				continue;
-			}
-			if (id[i] == '^')
-			{
-				if (used == indices.size())
-				{
-					return std::nullopt;
-				}
-				path.m_segments.emplace_back(indices[used++]);
-				i++;
-				continue;
-			}
-			const size_t end = id.find_first_of(":^", i);
-			const size_t stop = end == std::string_view::npos ? id.size() : end;
-			path.m_segments.emplace_back(std::string(id.substr(i, stop - i)));
-			i = stop;
-		}
-		return path;
-	}
-
 	Path Path::field(std::string_view name) const
 	{
 		Path result = *this;

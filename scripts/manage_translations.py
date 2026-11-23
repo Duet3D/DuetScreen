@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: strict
 """
 Manage i18n translation files for DuetScreen.
 
@@ -9,7 +10,7 @@ Uses en-GB.json as the reference file. For each other translation file:
   4. Optionally prompts for translations of missing keys (--interactive).
 
 Usage:
-  python scripts/manage_translations.py [OPTIONS]
+  scripts/manage_translations.py [OPTIONS]
 
 Options:
   --show-missing    List every missing key per language file.
@@ -25,65 +26,25 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-I18N_DIR = Path(__file__).resolve().parent.parent / "assets" / "i18n"
-REFERENCE_FILE = "en-GB.json"
+from common import jsonc
+from common.project import complete, complete_with
 
-
-# ---------------------------------------------------------------------------
-# JSONC helpers
-# ---------------------------------------------------------------------------
-
-def strip_jsonc_comments(text: str) -> str:
-    """Remove /* ... */ and // ... comments from JSONC text."""
-    # Remove block comments (non-greedy, handles multiline)
-    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
-    # Remove line comments, but not inside strings.
-    # Simple heuristic: only strip // that appear outside of quoted strings.
-    result: list[str] = []
-    in_string = False
-    escape = False
-    i = 0
-    while i < len(text):
-        ch = text[i]
-        if escape:
-            result.append(ch)
-            escape = False
-            i += 1
-            continue
-        if ch == "\\" and in_string:
-            result.append(ch)
-            escape = True
-            i += 1
-            continue
-        if ch == '"':
-            in_string = not in_string
-            result.append(ch)
-            i += 1
-            continue
-        if not in_string and ch == "/" and i + 1 < len(text) and text[i + 1] == "/":
-            # Skip until end of line
-            while i < len(text) and text[i] != "\n":
-                i += 1
-            continue
-        result.append(ch)
-        i += 1
-    return "".join(result)
+I18N_DIR = jsonc.I18N
+REFERENCE_FILE = jsonc.REFERENCE_LANGUAGE + ".json"
 
 
-def load_jsonc(path: Path) -> dict:
-    """Load a JSONC file, stripping comments before parsing."""
-    raw = path.read_text(encoding="utf-8")
-    cleaned = strip_jsonc_comments(raw)
+def load_jsonc(path: Path) -> dict[str, Any] | None:
+    """Load a translation file, or None (having said why) if it is not valid JSONC."""
     try:
-        return json.loads(cleaned)
-    except json.decoder.JSONDecodeError as e:
-        print(f"\n[ERROR] Failed to parse JSON in '{path}': {e}\n", file=sys.stderr)
+        return jsonc.load(path)
+    except ValueError as e:
+        print(f"\n[ERROR] Failed to parse JSON in {e}\n", file=sys.stderr)
         return None
 
 
-def save_json(path: Path, data: dict) -> None:
+def save_json(path: Path, data: dict[str, Any]) -> None:
     """Write data as pretty-printed JSON (no comments)."""
     path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False) + "\n",
@@ -95,19 +56,19 @@ def save_json(path: Path, data: dict) -> None:
 # Key flattening / inflation helpers
 # ---------------------------------------------------------------------------
 
-def flatten_keys(d: dict, prefix: str = "") -> dict[str, Any]:
+def flatten_keys(d: dict[str, Any], prefix: str = "") -> dict[str, Any]:
     """Flatten a nested dict into dot-separated key -> value pairs."""
     items: dict[str, Any] = {}
     for k, v in d.items():
         full_key = f"{prefix}.{k}" if prefix else k
         if isinstance(v, dict):
-            items.update(flatten_keys(v, full_key))
+            items.update(flatten_keys(cast(dict[str, Any], v), full_key))
         else:
             items[full_key] = v
     return items
 
 
-def set_nested(d: dict, dotted_key: str, value: Any) -> None:
+def set_nested(d: dict[str, Any], dotted_key: str, value: Any) -> None:
     """Set a value in a nested dict using a dot-separated key."""
     parts = dotted_key.split(".")
     for part in parts[:-1]:
@@ -115,20 +76,20 @@ def set_nested(d: dict, dotted_key: str, value: Any) -> None:
     d[parts[-1]] = value
 
 
-def delete_nested(d: dict, dotted_key: str) -> bool:
+def delete_nested(d: dict[str, Any], dotted_key: str) -> bool:
     """Delete a value from a nested dict using a dot-separated key.
 
     Returns True if the key was found and deleted.
     Cleans up empty parent dicts afterwards.
     """
     parts = dotted_key.split(".")
-    parents: list[tuple[dict, str]] = []
-    node = d
+    parents: list[tuple[dict[str, Any], str]] = []
+    node: Any = d
     for part in parts[:-1]:
         if not isinstance(node, dict) or part not in node:
             return False
-        parents.append((node, part))
-        node = node[part]
+        parents.append((cast(dict[str, Any], node), part))
+        node = cast(dict[str, Any], node)[part]
     if not isinstance(node, dict) or parts[-1] not in node:
         return False
     del node[parts[-1]]
@@ -146,7 +107,7 @@ def delete_nested(d: dict, dotted_key: str) -> bool:
 _FMT_BRACE_RE = re.compile(r"\{[^}]*\}")
 
 
-def count_format_braces(value: str) -> int:
+def count_format_braces(value: object) -> int:
     """Count the number of {…} formatting placeholders in a string."""
     if not isinstance(value, str):
         return 0
@@ -278,9 +239,7 @@ def process_file(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Manage DuetScreen i18n translation files.",
-    )
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "-v",
         "--show-keys",
@@ -305,14 +264,15 @@ def main() -> int:
         action="store_true",
         help="Report changes without writing files.",
     )
-    parser.add_argument(
+    complete_with(parser.add_argument(
         "-f",
         "--file",
         type=str,
         default=None,
         metavar="LANG",
         help="Process only the specified language file (e.g. de-DE.json).",
-    )
+    ), lambda: sorted(p.name for p in I18N_DIR.glob("*.json")))
+    complete(parser)
     args = parser.parse_args()
 
     ref_path = I18N_DIR / REFERENCE_FILE
@@ -321,6 +281,8 @@ def main() -> int:
         return 1
 
     ref_data = load_jsonc(ref_path)
+    if ref_data is None:
+        return 1
     ref_flat = flatten_keys(ref_data.get("translations", {}))
 
     print(f"Reference: {REFERENCE_FILE} ({len(ref_flat)} keys)")
@@ -355,13 +317,16 @@ def main() -> int:
             if lang_path.name == REFERENCE_FILE:
                 continue
             lang_data = load_jsonc(lang_path)
+            if lang_data is None:
+                post_issues = True
+                continue
             translations = lang_data.get("translations", {})
             lang_flat = flatten_keys(translations)
             ref_keys = set(ref_flat.keys())
             lang_keys = set(lang_flat.keys())
             extra_keys = lang_keys - ref_keys
             missing_keys = ref_keys - lang_keys
-            brace_mismatches = []
+            brace_mismatches: list[tuple[str, int, int]] = []
             for key in ref_keys & lang_keys:
                 ref_count = count_format_braces(ref_flat[key])
                 lang_count = count_format_braces(lang_flat[key])

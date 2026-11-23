@@ -3,8 +3,8 @@
  */
 
 #include "Services.h"
+#include "Comm/Connection.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include <string>
 
 namespace UI::Xml::Services
@@ -26,7 +26,7 @@ namespace UI::Xml::Services
 			s_gcodeSender(line);
 			return;
 		}
-		Comm::DUET.SendGcode(line);
+		Comm::Connection::get().sendGcode(line);
 	}
 
 	void setGcodeSender(std::function<void(std::string_view)> sender)

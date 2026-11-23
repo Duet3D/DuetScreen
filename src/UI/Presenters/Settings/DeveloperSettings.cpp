@@ -3,9 +3,9 @@
  */
 
 #include "DeveloperSettings.h"
+#include "Comm/Connection.h"
 #include "Configuration.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Storage.h"
 #include "UI/Styles/Styles.h"
 #include "UI/Xml/Data/SettingsSource.h"
@@ -68,10 +68,10 @@ namespace UI::DeveloperSettings
 								[](int32_t on)
 							{
 								StorageHelper::setData(ID_ENABLE_SECOND_USB_CHANNEL, on != 0);
-								if (on != 0 && Comm::DUET.GetCommunicationType() == Comm::CommunicationType::usb &&
-									Comm::DUET.IsConnected())
+								// The USB port chooses its channels as it opens
+								if (Comm::Connection::get().type() == Comm::CommunicationType::usb)
 								{
-									Comm::DUET.SendGcode("M575 P1 S0\n", true);
+									Comm::Connection::get().reconnect();
 								}
 							}});
 		Xml::Settings::add({.name = "system_logging",

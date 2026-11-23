@@ -3,7 +3,7 @@
  */
 
 #include "ResponseSource.h"
-#include "Subscribers/ResponseSubscribers.h"
+#include "Comm/Responses.h"
 
 namespace UI::Xml
 {

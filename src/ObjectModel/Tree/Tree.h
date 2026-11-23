@@ -5,9 +5,9 @@
  * the shape the firmware sends it, so the UI can read any field by its RRF path (`heat.heaters[1].current`) without
  * code for that field.
  *
- *   JSON decoder ──Patch──▶ Tree::apply() ──changes──▶ listeners (the UI's OM bindings, …)
+ *   connection ──Patch──▶ Tree::apply() ──changes──▶ listeners (the UI's OM bindings, …)
  *
- * The decoder builds one Patch per response and gives it to apply() when the response is complete. apply() merges it
+ * The connection makes one Patch per response (see Patch.h) and gives it to apply(). apply() merges it
  * in and notes which paths changed; listeners are then told, once per response, and take the changes with
  * takeChanges().
  *
@@ -24,8 +24,8 @@
  * each bed's or chamber's first heater, so everything that reads it (views, and user bundles, as om.* is the UI's API)
  * works with 3.7 as with 3.6 and earlier, which send no mapping and whose own lists stand.
  *
- * Threads: the decoder applies patches on its own thread, and the UI reads from another, so reading the tree (root(),
- * and every Node it leads to) needs the model lock (MODEL_LOCK) held for as long as the nodes are used.
+ * Threads: the connection applies patches on its own thread, and the UI reads from another, so reading the tree
+ * (root(), and every Node it leads to) needs the model lock (MODEL_LOCK) held for as long as the nodes are used.
  */
 
 #pragma once
@@ -33,8 +33,11 @@
 #include "ChangeSet.h"
 #include "Node.h"
 #include "Patch.h"
+#include <atomic>
 #include <functional>
+#include <map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -53,11 +56,12 @@ namespace OM
 		/** An empty tree; normally only get()'s, but tests may make their own */
 		Tree();
 
-		/** The root of the object model, always an object. Hold the model lock while using it or anything it leads to. */
+		/** The root of the object model, always an object. Hold the model lock while using it or anything it leads to.
+		 */
 		const Node& root() const { return m_root; }
 
 		/** Merge a complete response into the tree (see the file comment) and tell the listeners if anything changed */
-		void apply(Patch& patch);
+		void apply(const Patch& patch);
 
 		/** Forget everything (e.g. when disconnected) and tell the listeners */
 		void clear();
@@ -86,6 +90,23 @@ namespace OM
 		/** Stop the watcher watch() returned `id` for */
 		void unwatch(size_t id);
 
+		/**
+		 * Ask for the object model at `paths` (e.g. "heat.heaters", "move") to be kept up to date: the connection only
+		 * fetches the top-level keys something wants (see Comm/ModelSync.h). Watching paths, here or through the UI's
+		 * bindings, wants them too.
+		 * @return what unwant() takes
+		 */
+		size_t want(const std::vector<std::string>& paths);
+
+		/** Stop wanting what want() returned `id` for */
+		void unwant(size_t id);
+
+		/** The top-level keys something wants, e.g. "heat" for "heat.heaters[1].current" */
+		std::set<std::string> wantedKeys() const;
+
+		/** A number that changes whenever what is wanted changes, so wantedKeys() is only read again when it has */
+		uint64_t wantsVersion() const { return m_wantsVersion.load(); }
+
 	  private:
 		/** Tell the listeners, if there are changes they haven't been told about */
 		void notify();
@@ -103,14 +124,19 @@ namespace OM
 			size_t id;						// What unwatch() takes
 			std::vector<std::string> paths; // Paths watched
 			Listener callback;				// Called after a change to one
+			size_t want;					// What want() gave for the paths
 		};
 
-		Node m_root;					 // The object model
-		ChangeSet m_changes;			 // Changed since the last takeChanges()
-		bool m_notified = false;		 // Whether listeners have been told about m_changes
+		Node m_root;										  // The object model
+		ChangeSet m_changes;								  // Changed since the last takeChanges()
+		bool m_notified = false;							  // Whether listeners have been told about m_changes
 		std::vector<std::pair<size_t, Listener>> m_listeners; // Told about changes, with their ids
-		size_t m_nextListenerId = 1;						   // Id of the next listener added
-		std::vector<Watcher> m_watchers;   // Called after the changes they watch
-		std::mutex m_listenersMutex;	 // Guards m_listeners and m_watchers
+		size_t m_nextListenerId = 1;						  // Id of the next listener added
+		std::vector<Watcher> m_watchers;					  // Called after the changes they watch
+		std::mutex m_listenersMutex;						  // Guards m_listeners and m_watchers
+		std::map<size_t, std::vector<std::string>> m_wants;	  // The top-level keys each want() asked for, by id
+		size_t m_nextWantId = 1;							  // Id of the next want()
+		mutable std::mutex m_wantsMutex;					  // Guards m_wants
+		std::atomic<uint64_t> m_wantsVersion{1};			  // Changes whenever m_wants does
 	};
 } // namespace OM

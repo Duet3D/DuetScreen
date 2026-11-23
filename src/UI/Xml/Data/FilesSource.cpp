@@ -3,10 +3,9 @@
  */
 
 #include "FilesSource.h"
-#include "Comm/FileInfo.h"
-#include "Comm/Thumbnail.h"
+#include "Comm/Connection.h"
+#include "Comm/FileInfoCache.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "JobSource.h"
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/PrinterStatus.h"
@@ -104,12 +103,21 @@ namespace UI::Xml
 		f.field("info_print_time", m_infoPrintTime, "The job's estimated print time");
 		f.field("info_height", m_infoHeight, "The object's height");
 		f.field("info_layer_height", m_infoLayerHeight, "The job's layer height");
+		f.field("transferring",
+				m_transferring,
+				"1 while a file is being written to the printer (e.g. the settings backed up), else 0. Over USB and "
+				"UART nothing else is sent to the printer meanwhile");
+		f.field("transfer_file",
+				m_transferFile,
+				"The name of the file being written to the printer, or of the last one written");
+		f.field("transfer_progress", m_transferProgress, "How much of that file has been sent, 0-100");
 	}
 
 	void FilesSource::onInit()
 	{
 		registerEventListener<EventType::ThumbnailData>(this, &FilesSource::thumbnailReceived);
 		registerEventListener<EventType::FileInfo>(this, &FilesSource::fileInfoReceived);
+		registerEventListener<EventType::FileTransfer>(this, &FilesSource::transferReported);
 		// A job starting or ending changes what the dialog allows
 		registerEventListener<EventType::Status>([this](OM::PrinterStatus) { showAllowed(); });
 		// A different printer has different files
@@ -149,6 +157,19 @@ namespace UI::Xml
 		m_macroRows.clear();
 		m_macroCount.set(0);
 		closeDialog();
+	}
+
+	void FilesSource::transferReported(const Comm::FileTransfer& transfer)
+	{
+		ZoneScoped;
+		m_transferring.set(transfer.finished ? 0 : 1);
+		if (transfer.finished)
+		{
+			return; // the name and progress stay as they were last
+		}
+		const size_t slash = transfer.file.find_last_of('/');
+		m_transferFile.set(slash == std::string::npos ? transfer.file : transfer.file.substr(slash + 1));
+		m_transferProgress.set(transfer.total == 0 ? 0 : static_cast<int32_t>(transfer.sent * 100 / transfer.total));
 	}
 
 	std::string_view FilesSource::shownName(std::string_view name, bool macro)
@@ -198,6 +219,8 @@ namespace UI::Xml
 											 static_cast<FilesSource&>(*source).receiveMacros(std::move(items));
 										 }
 									 });
+		// The filaments a tool can load (actions.filament.choose) are kept as fresh as the jobs and macros
+		OM::FileSystem::RequestFilaments();
 	}
 
 	void FilesSource::receiveJobs(OM::FileSystem::ItemList items)
@@ -245,21 +268,21 @@ namespace UI::Xml
 		{
 			return shownDate(item.GetDate());
 		}
-		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(item.GetPath());
+		const std::optional<Comm::FileInfo> info = Comm::FileInfoCache::get().find(item.GetPath());
 		const uint32_t seconds = info ? std::max(info->printTime, info->simulatedTime) : 0;
 		if (seconds == 0)
 		{
 			return _("file.date_and_size", shownDate(item.GetDate()), item.GetReadableSize());
 		}
-		const float filament = std::accumulate(info->filament.begin(), info->filament.end(), 0.0f); // mm
-		return filament > 0 ? _("file.time_and_filament", JobSource::duration(seconds), filament / 1000.0f)
+		const double filament = std::accumulate(info->filament.begin(), info->filament.end(), 0.0); // mm
+		return filament > 0 ? _("file.time_and_filament", JobSource::duration(seconds), filament / 1000.0)
 							: JobSource::duration(seconds);
 	}
 
 	void FilesSource::showJob(RecentJobRow& row, const OM::FileSystem::FileSystemItem& item)
 	{
 		const std::string path = item.GetPath();
-		row.thumbnail.set(IsThumbnailCached(path) ? GetThumbnailPath(path).string() : std::string());
+		row.thumbnail.set(thumbnail(path, Comm::FileInfoCache::ThumbnailSize::small));
 		row.detail.set(detail(item));
 	}
 
@@ -268,25 +291,22 @@ namespace UI::Xml
 		const std::string path = item.GetPath();
 		m_selected = path;
 		m_selectedName = item.GetName();
-		FILEINFO_CACHE->QueueLargeThumbnailRequest(path);
+		Comm::FileInfoCache::get().requestThumbnail(path, Comm::FileInfoCache::ThumbnailSize::large);
 
 		m_infoDate.set(shownDate(item.GetDate()));
 		m_infoSize.set(item.GetReadableSize());
-		Comm::FileInfoPtr info = FILEINFO_CACHE->GetFileInfo(path);
+		const std::optional<Comm::FileInfo> info = Comm::FileInfoCache::get().find(path);
 		m_infoShown.set(info ? 1 : 0);
 		if (info)
 		{
-			const auto& printTime = info->GetPrintTime();
-			m_infoGeneratedBy.set(info->generatedBy.c_str());
-			m_infoPrintTime.set(
-				fmt::format("{:02d}:{:02d}:{:02d}", printTime.tm_hour, printTime.tm_min, printTime.tm_sec));
+			m_infoGeneratedBy.set(info->generatedBy);
+			m_infoPrintTime.set(fmt::format(
+				"{:02d}:{:02d}:{:02d}", info->printTime / 3600, info->printTime / 60 % 60, info->printTime % 60));
 			m_infoHeight.set(fmt::format("{:g} {:s}", info->height, Units::getDisplayedDistanceUnit()));
 			m_infoLayerHeight.set(fmt::format("{:g} {:s}", info->layerHeight, Units::getDisplayedDistanceUnit()));
 		}
 
-		const bool hasImage = IsThumbnailCached(path);
-		m_dialogImage.set(hasImage ? GetThumbnailPath(path).string() : std::string());
-		m_dialogHasImage.set(hasImage ? 1 : 0);
+		showDialogImage();
 		m_dialogTitle.set(_("file.start_print_title"));
 		m_dialogText.set(_("file.start_print.file", item.GetName()));
 		m_dialog.set("start_print");
@@ -360,10 +380,7 @@ namespace UI::Xml
 								  [this, path = m_selected]
 							  {
 								  closeDialog();
-								  if (!Comm::DUET.DeleteFile(path))
-								  {
-									  LOG_WARN("Failed to delete file {:s}", path);
-								  }
+								  Comm::Connection::get().deleteFile(path);
 							  },
 							  .asker = asker});
 	}
@@ -411,6 +428,18 @@ namespace UI::Xml
 		}
 	}
 
+	std::string FilesSource::thumbnail(const std::string& path, Comm::FileInfoCache::ThumbnailSize size)
+	{
+		return Comm::FileInfoCache::get().thumbnail(path, size).value_or(std::filesystem::path()).string();
+	}
+
+	void FilesSource::showDialogImage()
+	{
+		const std::string image = thumbnail(m_selected, Comm::FileInfoCache::ThumbnailSize::large);
+		m_dialogImage.set(image);
+		m_dialogHasImage.set(image.empty() ? 0 : 1);
+	}
+
 	void FilesSource::thumbnailReceived(const std::string& path)
 	{
 		ZoneScoped;
@@ -419,15 +448,14 @@ namespace UI::Xml
 		{
 			if (m_jobs[i]->GetPath() == path)
 			{
-				m_recent[i].thumbnail.set(GetThumbnailPath(path).string());
+				m_recent[i].thumbnail.set(thumbnail(path, Comm::FileInfoCache::ThumbnailSize::small));
 				break;
 			}
 		}
 
 		if (m_dialog.get() == "start_print" && path == m_selected)
 		{
-			m_dialogImage.set(GetThumbnailPath(path).string());
-			m_dialogHasImage.set(1);
+			showDialogImage();
 		}
 	}
 } // namespace UI::Xml

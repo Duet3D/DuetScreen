@@ -13,15 +13,15 @@
 
 #pragma once
 
+#include "Comm/Responses.h"
 #include "ObjectModel/Alert.h"
-#include "Subscribers/ResponseSubscribers.h"
 #include "UI/Xml/Binding/List.h"
 #include "UI/Xml/Binding/Subjects.h"
 #include "UI/Xml/Dialogs/NumberPad.h"
 #include "UI/Xml/Om/OmWatch.h"
 #include "UI/Xml/View/XmlPresenter.h"
-#include "utils/UpgradeHelper.h"
 #include "lvgl/lvgl.h"
+#include "utils/UpgradeHelper.h"
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -135,44 +135,44 @@ namespace UI
 		Countdown m_alertCountdown;		  // The alert's countdown
 		lv_timer_t* m_timer = nullptr;	  // Drives the countdowns
 
-		OM::Alert m_alert;				  // The alert showing
-		std::string m_input;			  // The text typed into the alert
-		bool m_cancelSends = false;		  // Cancel answers the printer (the alert offers it)
-		std::string m_updateFile;		  // Update file offered from USB
-		std::function<void()> m_install;  // What update.confirm does
+		OM::Alert m_alert;				 // The alert showing
+		std::string m_input;			 // The text typed into the alert
+		bool m_cancelSends = false;		 // Cancel answers the printer (the alert offers it)
+		std::string m_updateFile;		 // Update file offered from USB
+		std::function<void()> m_install; // What update.confirm does
 
-		Xml::IntSubject m_responseOpen;				// 1 while a response shows
-		Xml::StringSubject<32> m_responseTitle;		// Its title
-		Xml::StringSubject<1024> m_responseText;	// Its text
-		Xml::IntSubject m_responseType;				// Its type
-		Xml::IntSubject m_responseProgress;			// Its time left, 0-100
+		Xml::IntSubject m_responseOpen;			 // 1 while a response shows
+		Xml::StringSubject<32> m_responseTitle;	 // Its title
+		Xml::StringSubject<1024> m_responseText; // Its text
+		Xml::IntSubject m_responseType;			 // Its type
+		Xml::IntSubject m_responseProgress;		 // Its time left, 0-100
 
-		Xml::IntSubject m_updateOpen;				// 1 while the update prompt shows
-		Xml::StringSubject<64> m_updateTitle;		// Its title
-		Xml::StringSubject<512> m_updateText;		// Its text
-		Xml::StringSubject<32> m_updateOkText;		// Its OK button text
-		Xml::IntSubject m_updateCanCancel;			// 1 if it can be declined
+		Xml::IntSubject m_updateOpen;		   // 1 while the update prompt shows
+		Xml::StringSubject<64> m_updateTitle;  // Its title
+		Xml::StringSubject<512> m_updateText;  // Its text
+		Xml::StringSubject<32> m_updateOkText; // Its OK button text
+		Xml::IntSubject m_updateCanCancel;	   // 1 if it can be declined
 
-		Xml::IntSubject m_alertOpen;				// 1 while the alert shows
-		Xml::StringSubject<64> m_alertTitle;		// Its title
-		Xml::StringSubject<256> m_alertText;		// Its text
-		Xml::IntSubject m_alertOk;					// OK: 0 hidden, 1 disabled, 2 usable
-		Xml::StringSubject<32> m_alertOkText;		// OK's text
-		Xml::IntSubject m_alertCancel;				// Cancel: 0 hidden, 2 usable
-		Xml::IntSubject m_alertFooterShown;			// 1 if OK or Cancel shows
-		Xml::List<AlertChoiceRow> m_alertChoices;	// Choices offered
-		Xml::IntSubject m_alertChoicesShown;		// 1 if choices are offered
-		Xml::List<AlertAxisRow> m_alertAxes;		// Axes to jog
-		Xml::IntSubject m_alertAxesShown;			// 1 if there are axes to jog
-		Xml::IntSubject m_alertTextShown;			// 1 if text is asked for, typed on the keyboard
-		Xml::StringSubject<256> m_alertInput;		// The text to start with
-		Xml::StringSubject<96> m_alertWarning;		// The length the text must be, while it isn't, or empty
-		Xml::IntSubject m_alertPadShown;			// 1 if a number is asked for, typed on the pad
-		Xml::NumberPad m_alertPad;					// `alert.pad`: the number typed
-		Xml::IntSubject m_alertProgress;			// Time left, 0-100
-		Xml::IntSubject m_alertProgressShown;		// 1 if the alert closes itself
-		std::optional<uint32_t> m_lastAlertSeq;		// Sequence number of the alert shown, or none
-		Xml::OmWatch m_alertWatch;					// Follows the message box
-		Xml::OmWatch m_axesWatch;					// Follows the axes the alert jogs
+		Xml::IntSubject m_alertOpen;			  // 1 while the alert shows
+		Xml::StringSubject<64> m_alertTitle;	  // Its title
+		Xml::StringSubject<256> m_alertText;	  // Its text
+		Xml::IntSubject m_alertOk;				  // OK: 0 hidden, 1 disabled, 2 usable
+		Xml::StringSubject<32> m_alertOkText;	  // OK's text
+		Xml::IntSubject m_alertCancel;			  // Cancel: 0 hidden, 2 usable
+		Xml::IntSubject m_alertFooterShown;		  // 1 if OK or Cancel shows
+		Xml::List<AlertChoiceRow> m_alertChoices; // Choices offered
+		Xml::IntSubject m_alertChoicesShown;	  // 1 if choices are offered
+		Xml::List<AlertAxisRow> m_alertAxes;	  // Axes to jog
+		Xml::IntSubject m_alertAxesShown;		  // 1 if there are axes to jog
+		Xml::IntSubject m_alertTextShown;		  // 1 if text is asked for, typed on the keyboard
+		Xml::StringSubject<256> m_alertInput;	  // The text to start with
+		Xml::StringSubject<96> m_alertWarning;	  // The length the text must be, while it isn't, or empty
+		Xml::IntSubject m_alertPadShown;		  // 1 if a number is asked for, typed on the pad
+		Xml::NumberPad m_alertPad;				  // `alert.pad`: the number typed
+		Xml::IntSubject m_alertProgress;		  // Time left, 0-100
+		Xml::IntSubject m_alertProgressShown;	  // 1 if the alert closes itself
+		std::optional<uint32_t> m_lastAlertSeq;	  // Sequence number of the alert shown, or none
+		Xml::OmWatch m_alertWatch;				  // Follows the message box
+		Xml::OmWatch m_axesWatch;				  // Follows the axes the alert jogs
 	};
 } // namespace UI

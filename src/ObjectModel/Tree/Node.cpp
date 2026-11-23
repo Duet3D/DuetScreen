@@ -37,6 +37,32 @@ namespace OM
 		setValue(kind, text);
 	}
 
+	Node::Node(Node&& other) noexcept
+		: m_kind(other.m_kind)
+		, m_text(std::move(other.m_text))
+		, m_number(other.m_number)
+		, m_fields(std::move(other.m_fields))
+		, m_items(std::move(other.m_items))
+	{
+		other.m_kind = Kind::null;
+		other.reset();
+	}
+
+	Node& Node::operator=(Node&& other) noexcept
+	{
+		if (this != &other)
+		{
+			m_kind = other.m_kind;
+			m_text = std::move(other.m_text);
+			m_number = other.m_number;
+			m_fields = std::move(other.m_fields);
+			m_items = std::move(other.m_items);
+			other.m_kind = Kind::null;
+			other.reset();
+		}
+		return *this;
+	}
+
 	const Node& Node::missing()
 	{
 		static const MissingNode s_missing;

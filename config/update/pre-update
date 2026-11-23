@@ -1,0 +1,6 @@
+#!/bin/sh
+
+/etc/init.d/S21DuetScreenMonitor stop
+/etc/init.d/20DuetScreen stop
+rm -rf /etc/assets
+rm -rf /var/lib/duetscreen

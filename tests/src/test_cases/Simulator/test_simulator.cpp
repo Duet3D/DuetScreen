@@ -7,8 +7,8 @@
 
 #if DUET_SIMULATOR
 
-#  include "Comm/Communication.h"
-#  include "Hardware/Duet.h"
+#  include "Comm/Connection.h"
+#  include "Duet3D/General/CRC32.h"
 #  include "ObjectModel/Tree/Tree.h"
 #  include "Simulator/Machine.h"
 #  include "Simulator/Simulator.h"
@@ -500,6 +500,39 @@ TEST_F(TestSimulatedMachine, FilesAndTheirInformation)
 	EXPECT_NE(run("M20 S3 P\"\" R0").find("Error: M20: expected a non-empty string"), std::string::npos);
 }
 
+TEST_F(TestSimulatedMachine, FilesWrittenWithM559AreKept)
+{
+	using namespace std::string_literals;
+	const std::string contents = "a line\n\0\xff and bytes"s;
+	CRC32 crc;
+	crc.Update(contents.data(), contents.size());
+	EXPECT_EQ(run(fmt::format("M559 P\"0:/sys/written.g\" S{:d} C{:d}", contents.size(), crc.Get())),
+			  "Writing to file: 0:/sys/written.g");
+	EXPECT_TRUE(machine.receivingFile());
+	std::string input = contents.substr(0, 5);
+	EXPECT_TRUE(machine.receiveFile(input).empty());
+	EXPECT_TRUE(input.empty()) << "every byte taken";
+	input = contents.substr(5) + "M115\n";
+	EXPECT_TRUE(machine.receiveFile(input).empty()) << "a right CRC is answered with nothing";
+	EXPECT_EQ(input, "M115\n") << "what follows the file is G-code again";
+	EXPECT_FALSE(machine.receivingFile());
+	EXPECT_EQ(machine.writtenFile("/sys/written.g"), contents);
+	EXPECT_EQ(machine.execute("M36.2 P\"0:/sys/written.g\" S0")[0]["fragment"]["data"], contents) << "and read back";
+
+	// No size: the end-of-file marker ends it
+	run("M559 P\"empty.g\"");
+	input = "<!-- **EoF** -->";
+	machine.receiveFile(input);
+	EXPECT_EQ(machine.writtenFile("0:/sys/empty.g"), "");
+
+	run("M559 P\"0:/sys/wrong.g\" S3 C1");
+	input = "abc";
+	const auto replies = machine.receiveFile(input);
+	ASSERT_EQ(replies.size(), 1u);
+	EXPECT_EQ(replies[0]["resp"], "Error: CRC32 checksum doesn't match\n");
+	EXPECT_FALSE(machine.writtenFile("0:/sys/wrong.g"));
+}
+
 TEST_F(TestSimulatedMachine, ReconfiguringKeepsWhatStillApplies)
 {
 	run("G28\nM140 S60");
@@ -660,6 +693,42 @@ TEST_F(TestSimulator, ChangesReachTheScreen)
 	EXPECT_EQ(om("tools[0].name").text(), "Renamed");
 }
 
+TEST_F(TestSimulator, AFileIsWrittenAndReadBack)
+{
+	connectSimulator();
+	pollSimulator();
+	std::string contents;
+	for (int i = 0; contents.size() < 3000; i++)
+	{
+		contents += fmt::format("M118 S\"line {:d}\"\n", i);
+	}
+	std::optional<std::expected<void, Comm::ReplyError>> written;
+	Comm::Connection::get().writeFile("0:/sys/backup.json",
+									  Comm::FileContents::bytes(contents),
+									  [&written](std::expected<void, Comm::ReplyError> result) { written = result; });
+	Comm::Connection::get().sendGcode("M117 \"after\"");
+	for (int exchange = 0; exchange < 20 && !written; exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+	}
+	ASSERT_TRUE(written);
+	EXPECT_TRUE(*written) << (*written ? "" : written->error().message);
+	EXPECT_EQ(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
+												{ return machine.writtenFile("0:/sys/backup.json"); }),
+			  contents);
+	pollSimulator();
+	EXPECT_EQ(om("state.displayMessage").text(), "after") << "what was asked meanwhile is sent after";
+
+	std::optional<std::string> read;
+	Comm::Connection::get().readFile("0:/sys/backup.json",
+									 [&read](std::expected<std::string, Comm::ReplyError> reply)
+									 { read = reply.value_or("failed"); });
+	pollSimulator();
+	EXPECT_EQ(read, contents);
+}
+
 TEST_F(TestSimulator, MoreThanFiveAxesAreAllRead)
 {
 	Sim::Config config = Sim::defaultConfig();
@@ -679,13 +748,15 @@ TEST_F(TestSimulator, UnpluggedItCantBeConnectedTo)
 	Sim::Behaviour behaviour = simulator.behaviour();
 	behaviour.pluggedIn = false;
 	simulator.setBehaviour(behaviour);
-	Comm::DUET.SetCommunicationType(Comm::CommunicationType::simulator);
-	EXPECT_FALSE(Comm::DUET.IsConnected());
+	Comm::Connection::get().setType(Comm::CommunicationType::simulator);
+	Comm::Connection::get().process();
+	EXPECT_FALSE(Comm::Connection::get().isConnected());
+	EXPECT_FALSE(Comm::Connection::get().isConnecting()) << "it waits to try again";
 
 	behaviour.pluggedIn = true;
 	simulator.setBehaviour(behaviour);
-	EXPECT_TRUE(Comm::DUET.Connect());
-	EXPECT_TRUE(Comm::DUET.IsConnected());
+	connectSimulator();
+	EXPECT_TRUE(Comm::Connection::get().isConnected());
 }
 
 TEST_F(TestSimulator, NotRespondingItAnswersNothing)
@@ -700,8 +771,8 @@ TEST_F(TestSimulator, NotRespondingItAnswersNothing)
 
 	behaviour.responding = true;
 	simulator.setBehaviour(behaviour);
-	Comm::Reconnect(); // as the screen does when it times out
-	simulator.process();
+	Comm::Connection::get().reconnect(); // as the screen does when the printer stops answering
+	Comm::Connection::get().process();
 	pollSimulator();
 	EXPECT_EQ(om("network.name").text(), "Simulated FFF");
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: strict
 """
 Generate the icon sets in assets/icons/<set>/: a white 90x90 PNG per icon, its shape in the alpha channel, which the
 screen recolours to the theme (src/UI/Widgets/Display/Icon.cpp).
@@ -14,9 +15,9 @@ The fonts are downloaded, at the pinned versions below, into a cache folder (out
 Their licences are copied beside the icons drawn from them (LICENSE.txt).
 
 Usage:
-  python3 scripts/generate_icons.py               # every set
-  python3 scripts/generate_icons.py --set material
-  python3 scripts/generate_icons.py --sheet out/icons.png   # also a contact sheet of every set, to look over
+  scripts/generate_icons.py               # every set
+  scripts/generate_icons.py --set material
+  scripts/generate_icons.py --sheet out/icons.png   # also a contact sheet of every set, to look over
 
 Needs only Pillow (requirements.txt), built with FreeType and Raqm for variable fonts.
 """
@@ -32,11 +33,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-ICONS_DIR = PROJECT_ROOT / "assets" / "icons"
-DEFAULT_CACHE = PROJECT_ROOT / "out" / "icon_fonts"
+from common.project import ASSETS, ROOT, complete, complete_files, complete_with
+
+ICONS_DIR = ASSETS / "icons"
+DEFAULT_CACHE = ROOT / "out" / "icon_fonts"
 
 SIZE = 90  # Pixels square, as the screen expects
 SUPERSAMPLE = 8  # Drawings are drawn this many times larger, then scaled down, for smooth edges
@@ -150,7 +152,9 @@ class Font:
         canvas = Image.new("L", (3 * SIZE, 3 * SIZE), 0)
         ImageDraw.Draw(canvas).text((SIZE, 2 * SIZE), chr(self.codepoints[self.source.reference_glyph]),
                                     font=self._font(SIZE), fill=255, anchor="ls")
-        left, top, _, _ = canvas.getbbox()
+        ink = canvas.getbbox()
+        assert ink is not None, "the reference glyph draws nothing"
+        left, top, _, _ = ink
         box = self.source.reference_box
         return box[0] * SIZE - (left - SIZE), box[1] * SIZE - (top - 2 * SIZE)
 
@@ -169,7 +173,7 @@ def parse_names(text: str) -> dict[str, int]:
     css = re.findall(r'\.ph-([a-z0-9-]+):before\s*\{\s*content:\s*"\\([0-9a-f]+)"', text)
     if css:
         return {name: int(code, 16) for name, code in css}
-    names = {}
+    names: dict[str, int] = {}
     for line in text.splitlines():
         parts = line.split()
         if len(parts) == 2:
@@ -225,12 +229,12 @@ class Canvas:
 
     def mask_image(self) -> Image.Image:
         """The drawing as an SIZE x SIZE mask"""
-        return self.mask.resize((SIZE, SIZE), Image.LANCZOS)
+        return ImageOps.fit(self.mask, (SIZE, SIZE), Image.Resampling.LANCZOS)  # square to square: a plain resize
 
 
 def rounded_rect(x0: float, y0: float, x1: float, y1: float, r: float, steps: int = 6) -> list[tuple[float, float]]:
     """The points of a rectangle with corners rounded to radius `r`"""
-    points = []
+    points: list[tuple[float, float]] = []
     for cx, cy, start in ((x1 - r, y0 + r, -90), (x1 - r, y1 - r, 0), (x0 + r, y1 - r, 90), (x0 + r, y0 + r, 180)):
         for i in range(steps + 1):
             a = math.radians(start + 90 * i / steps)
@@ -309,7 +313,7 @@ def draw_heightmap(c: Canvas) -> None:
 
     c.shape([back_left, back_right, front_right, front_left])
     # Lines across, closer together towards the back, and lines from front to back
-    lines = []
+    lines: list[list[tuple[float, float]]] = []
     for t in (0.3, 0.62):
         lines.append([lerp(back_left, front_left, t), lerp(back_right, front_right, t)])
     for t in (1 / 3, 2 / 3):
@@ -401,6 +405,7 @@ ICONS: dict[str, Icon] = {
     "refresh": Icon("Reading files again", "refresh", "arrows-clockwise"),
     "view_list": Icon("Files as a list", "view_list", "list"),
     "view_grid": Icon("Files as tiles", "grid_view", "grid-four"),
+    "usb": Icon("A USB drive plugged into the screen", "usb", "usb"),
     # Editing
     "increment": Icon("More; adding", "add", "plus"),
     "decrement": Icon("Less", "remove", "minus"),
@@ -475,7 +480,7 @@ def write_set(icon_set: IconSet, cache: Path) -> dict[str, Image.Image]:
     font = Font(icon_set.font, cache, icon_set.variation)
     folder = ICONS_DIR / icon_set.name
     folder.mkdir(parents=True, exist_ok=True)
-    images = {}
+    images: dict[str, Image.Image] = {}
     for name, icon in ICONS.items():
         images[name] = render(icon_set, name, icon, font)
         images[name].save(folder / f"{name}.png", optimize=True)
@@ -517,9 +522,11 @@ def write_sheet(path: Path, sets: dict[str, dict[str, Image.Image]], columns: in
 def main() -> int:
     """Generate the sets asked for"""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--set", action="append", help="Only this set (may be given more than once)")
-    parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE, help="Where the fonts are downloaded to")
-    parser.add_argument("--sheet", type=Path, help="Also write a contact sheet of the sets here")
+    complete_with(parser.add_argument("--set", action="append", help="Only this set (may be given more than once)"),
+                  lambda: [s.name for s in SETS])
+    complete_files(parser.add_argument("--cache", type=Path, default=DEFAULT_CACHE, help="Where the fonts are downloaded to"))
+    complete_files(parser.add_argument("--sheet", type=Path, help="Also write a contact sheet of the sets here"), ".png")
+    complete(parser)
     args = parser.parse_args()
 
     chosen = [s for s in SETS if args.set is None or s.name in args.set]

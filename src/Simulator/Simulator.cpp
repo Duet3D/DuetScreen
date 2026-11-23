@@ -7,11 +7,29 @@
 #include "Storage.h"
 #include "tracy/Tracy.hpp"
 #include "utils/StorageHelper.h"
+#include <charconv>
 
 using namespace std::chrono_literals;
 
 namespace Sim
 {
+	namespace
+	{
+		/** The number a line sent starts with (`N12 M409`), if it has one */
+		std::optional<int64_t> lineNumber(std::string_view line)
+		{
+			const size_t start = line.find_first_not_of(" \t");
+			if (start == std::string_view::npos || (line[start] != 'N' && line[start] != 'n'))
+			{
+				return std::nullopt;
+			}
+			int64_t number = 0;
+			const char* first = line.data() + start + 1;
+			const auto [end, error] = std::from_chars(first, line.data() + line.size(), number);
+			return error == std::errc() && end != first ? std::optional(number) : std::nullopt;
+		}
+	} // namespace
+
 	namespace
 	{
 		/** The configuration, kept with the screen's settings; the default preset until one is chosen */
@@ -50,7 +68,7 @@ namespace Sim
 				LOG_WARN("The simulated Duet is unplugged");
 				return false;
 			}
-			m_requests.clear();
+			clearInput();
 			m_receiver = std::move(receiver);
 			start();
 		}
@@ -63,7 +81,7 @@ namespace Sim
 		{
 			std::lock_guard lock(m_lock);
 			m_receiver = nullptr;
-			m_requests.clear();
+			clearInput();
 		}
 		stop();
 	}
@@ -74,30 +92,15 @@ namespace Sim
 		return m_receiver != nullptr;
 	}
 
-	void Simulator::send(std::string_view gcode)
+	void Simulator::send(std::string_view bytes)
 	{
 		std::lock_guard lock(m_lock);
-		if (!m_receiver)
+		if (!m_receiver || bytes.empty())
 		{
 			return;
 		}
 		const auto due = std::chrono::steady_clock::now() + std::chrono::milliseconds(m_behaviour.replyDelayMs);
-		size_t start = 0;
-		while (start < gcode.size())
-		{
-			const size_t end = gcode.find('\n', start);
-			const std::string_view line =
-				gcode.substr(start, end == std::string_view::npos ? std::string_view::npos : end - start);
-			if (!line.empty())
-			{
-				m_requests.push_back({.line = std::string(line), .due = due});
-			}
-			if (end == std::string_view::npos)
-			{
-				break;
-			}
-			start = end + 1;
-		}
+		m_received.push_back({.bytes = std::string(bytes), .due = due});
 	}
 
 	Config Simulator::config() const
@@ -126,7 +129,7 @@ namespace Sim
 		m_machine.setNoise(behaviour.noise);
 		if (!behaviour.responding || !behaviour.pluggedIn)
 		{
-			m_requests.clear();
+			clearInput();
 		}
 	}
 
@@ -178,7 +181,7 @@ namespace Sim
 			std::vector<std::string> replies;
 			{
 				std::lock_guard lock(m_lock);
-				if (m_requests.empty())
+				if (m_received.empty())
 				{
 					return;
 				}
@@ -219,16 +222,60 @@ namespace Sim
 		std::vector<std::string> replies;
 		if (!m_behaviour.responding || !m_behaviour.pluggedIn)
 		{
-			m_requests.clear();
+			clearInput();
 			return replies;
 		}
-		while (!m_requests.empty() && m_requests.front().due <= now)
+		while (!m_received.empty() && m_received.front().due <= now)
 		{
-			const std::string line = std::move(m_requests.front().line);
-			m_requests.pop_front();
-			for (const Json& reply : m_machine.execute(line))
+			m_input += m_received.front().bytes;
+			m_received.pop_front();
+		}
+		// As RepRapFirmware 3.6.2 on does, a reply is numbered with the line it answers, so the screen can match it
+		const auto numbered = [&replies](std::vector<Json> answers, std::optional<int64_t> number)
+		{
+			for (Json& reply : answers)
 			{
-				replies.push_back(reply.dump() + "\n");
+				if (number && reply.is_object())
+				{
+					reply["line"] = *number;
+				}
+				// A file written to it may hold anything: bytes that aren't UTF-8 are replaced, not thrown at
+				replies.push_back(reply.dump(-1, ' ', false, Json::error_handler_t::replace) + "\n");
+			}
+		};
+		while (true)
+		{
+			if (m_machine.receivingFile())
+			{
+				std::vector<Json> answers = m_machine.receiveFile(m_input);
+				if (m_machine.receivingFile())
+				{
+					break; // more of the file to come
+				}
+				numbered(std::move(answers), m_fileLine); // an error with the file names M559's line
+				m_fileLine.reset();
+				continue;
+			}
+			const size_t end = m_input.find('\n');
+			if (end == std::string::npos)
+			{
+				break; // the rest of the line to come
+			}
+			std::string line = m_input.substr(0, end);
+			m_input.erase(0, end + 1);
+			if (line.ends_with('\r'))
+			{
+				line.pop_back();
+			}
+			if (line.empty())
+			{
+				continue;
+			}
+			const std::optional<int64_t> number = lineNumber(line);
+			numbered(m_machine.execute(line), number);
+			if (m_machine.receivingFile())
+			{
+				m_fileLine = number;
 			}
 		}
 		if (m_machine.takeConfigChange())
@@ -254,6 +301,14 @@ namespace Sim
 			LOG_VERBOSE("Simulated Duet replies: {:s}", reply);
 			receiver(reply);
 		}
+	}
+
+	void Simulator::clearInput()
+	{
+		m_received.clear();
+		m_input.clear();
+		m_fileLine.reset();
+		m_machine.abandonFile();
 	}
 
 	void Simulator::save() const

@@ -74,6 +74,7 @@
 			<xs:enumeration value="presenter.network.ssid"/>
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.no"/>
+			<xs:enumeration value="presenter.no_drive"/>
 			<xs:enumeration value="presenter.number.confirmable"/>
 			<xs:enumeration value="presenter.number.decimal"/>
 			<xs:enumeration value="presenter.number.range"/>
@@ -296,6 +297,9 @@
 			<xs:enumeration value="source.files.macros"/>
 			<xs:enumeration value="source.files.recent"/>
 			<xs:enumeration value="source.files.recent_count"/>
+			<xs:enumeration value="source.files.transfer_file"/>
+			<xs:enumeration value="source.files.transfer_progress"/>
+			<xs:enumeration value="source.files.transferring"/>
 			<xs:enumeration value="source.job.cancel_control"/>
 			<xs:enumeration value="source.job.elapsed"/>
 			<xs:enumeration value="source.job.elapsed_text"/>
@@ -442,6 +446,22 @@
 			<xs:enumeration value="source.tool.shown"/>
 			<xs:enumeration value="source.tool.summary_auto"/>
 			<xs:enumeration value="source.tool.tiles"/>
+			<xs:enumeration value="source.usb.cancellable"/>
+			<xs:enumeration value="source.usb.destination"/>
+			<xs:enumeration value="source.usb.dialog"/>
+			<xs:enumeration value="source.usb.dialog_title"/>
+			<xs:enumeration value="source.usb.drives"/>
+			<xs:enumeration value="source.usb.file_date"/>
+			<xs:enumeration value="source.usb.file_size"/>
+			<xs:enumeration value="source.usb.install_failed"/>
+			<xs:enumeration value="source.usb.install_text"/>
+			<xs:enumeration value="source.usb.installing"/>
+			<xs:enumeration value="source.usb.update"/>
+			<xs:enumeration value="source.usb.update_text"/>
+			<xs:enumeration value="source.usb.upload"/>
+			<xs:enumeration value="source.usb.upload_reason"/>
+			<xs:enumeration value="source.usb.upload_state"/>
+			<xs:enumeration value="source.usb.upload_text"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="subject">
@@ -578,6 +598,11 @@
 			<xs:enumeration value="actions.system.upgrade_from_github"/>
 			<xs:enumeration value="actions.tool.show"/>
 			<xs:enumeration value="actions.tool.toggle"/>
+			<xs:enumeration value="actions.usb.cancel_upload"/>
+			<xs:enumeration value="actions.usb.destination"/>
+			<xs:enumeration value="actions.usb.install"/>
+			<xs:enumeration value="actions.usb.show_upload"/>
+			<xs:enumeration value="actions.usb.upload"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
 			<xs:enumeration value="presenter.alert.choose"/>
 			<xs:enumeration value="presenter.alert.dismissed"/>
@@ -752,6 +777,7 @@
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
+			<xs:enumeration value="files_usb"/>
 			<xs:enumeration value="gcode_reference"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
@@ -935,6 +961,8 @@
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="transfer_progress"/>
+			<xs:enumeration value="usb_dialog"/>
 			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
@@ -1113,6 +1141,8 @@
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="transfer_progress"/>
+			<xs:enumeration value="usb_dialog"/>
 			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
@@ -1352,6 +1382,8 @@
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="transfer_progress"/>
+			<xs:enumeration value="usb_dialog"/>
 			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
@@ -1739,6 +1771,7 @@
 			<xs:enumeration value="tr.file.start_print.size"/>
 			<xs:enumeration value="tr.file.start_print_title"/>
 			<xs:enumeration value="tr.file.time_and_filament"/>
+			<xs:enumeration value="tr.file.uploading"/>
 			<xs:enumeration value="tr.fine_tune.all_extruders"/>
 			<xs:enumeration value="tr.fine_tune.extruder"/>
 			<xs:enumeration value="tr.fine_tune.extruder_header"/>
@@ -1748,8 +1781,6 @@
 			<xs:enumeration value="tr.fine_tune.this_tool"/>
 			<xs:enumeration value="tr.gcodes.gcode_G0_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G10_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G10_temperature_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G10_workplace_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G11_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G17_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G18_desc"/>
@@ -1763,10 +1794,10 @@
 			<xs:enumeration value="tr.gcodes.gcode_G30_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G31_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G32_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G382_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G383_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G384_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G385_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G38_2_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G38_3_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G38_4_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G38_5_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G3_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G4_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G53_desc"/>
@@ -1775,9 +1806,9 @@
 			<xs:enumeration value="tr.gcodes.gcode_G56_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G57_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G58_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G591_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G592_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_G593_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G59_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G59_2_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_G59_3_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G59_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G60_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_G68_desc"/>
@@ -1809,7 +1840,6 @@
 			<xs:enumeration value="tr.gcodes.gcode_M120_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M121_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M122_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M135_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M140_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M141_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M143_desc"/>
@@ -1821,7 +1851,7 @@
 			<xs:enumeration value="tr.gcodes.gcode_M191_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M1_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M200_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2011_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M201_1_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M201_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M203_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M204_desc"/>
@@ -1838,13 +1868,13 @@
 			<xs:enumeration value="tr.gcodes.gcode_M23_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M24_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M25_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2601_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2602_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2603_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2604_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M260_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M260_2_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M260_3_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M260_4_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M260_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2611_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M2612_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M261_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M261_2_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M261_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M26_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M27_desc"/>
@@ -1856,10 +1886,8 @@
 			<xs:enumeration value="tr.gcodes.gcode_M29_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M2_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M300_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M301_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M302_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M303_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M304_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M305_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M307_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M308_desc"/>
@@ -1867,8 +1895,8 @@
 			<xs:enumeration value="tr.gcodes.gcode_M30_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M32_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M350_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M361_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M362_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M36_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M36_2_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M36_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M374_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M375_desc"/>
@@ -1880,8 +1908,6 @@
 			<xs:enumeration value="tr.gcodes.gcode_M400_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M401_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M402_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M404_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M408_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M409_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M425_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M42_desc"/>
@@ -1898,6 +1924,7 @@
 			<xs:enumeration value="tr.gcodes.gcode_M501_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M502_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M503_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M505_1_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M505_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M540_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M550_desc"/>
@@ -1908,9 +1935,10 @@
 			<xs:enumeration value="tr.gcodes.gcode_M555_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M556_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M557_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5581_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5582_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5583_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M558_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M558_2_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M558_3_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M558_4_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M558_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M559_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M560_desc"/>
@@ -1921,35 +1949,33 @@
 			<xs:enumeration value="tr.gcodes.gcode_M566_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M567_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M568_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5691_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5692_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5693_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5694_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5695_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5696_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5697_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5698_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5699_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_2_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_3_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_4_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_5_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_6_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_7_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_8_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M569_9_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M569_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M570_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M571_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M572_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M573_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M574_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M575_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M576_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M577_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M578_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M579_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M580_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M581_1_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M581_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M582_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M584_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M585_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5864_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M586_4_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M586_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5871_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M5872_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M587_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M587_2_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M587_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M588_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M589_desc"/>
@@ -1964,6 +1990,7 @@
 			<xs:enumeration value="tr.gcodes.gcode_M599_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M5_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M600_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M601_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M606_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M650_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M651_desc"/>
@@ -1993,14 +2020,12 @@
 			<xs:enumeration value="tr.gcodes.gcode_M81_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M82_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M83_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M84_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M851_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M905_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M906_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M911_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M912_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M913_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M914_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M915_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M916_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M917_desc"/>
@@ -2015,8 +2040,10 @@
 			<xs:enumeration value="tr.gcodes.gcode_M955_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M956_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M957_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M9701_desc"/>
-			<xs:enumeration value="tr.gcodes.gcode_M9702_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M959_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M970_1_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M970_2_desc"/>
+			<xs:enumeration value="tr.gcodes.gcode_M970_3_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M970_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M98_desc"/>
 			<xs:enumeration value="tr.gcodes.gcode_M997_desc"/>
@@ -2097,6 +2124,7 @@
 			<xs:enumeration value="tr.message.update_cancel"/>
 			<xs:enumeration value="tr.message.update_confirm"/>
 			<xs:enumeration value="tr.message.update_failed"/>
+			<xs:enumeration value="tr.message.update_install_failed"/>
 			<xs:enumeration value="tr.message.update_successful"/>
 			<xs:enumeration value="tr.message.update_successful_text"/>
 			<xs:enumeration value="tr.move.all_axes"/>
@@ -2554,6 +2582,31 @@
 			<xs:enumeration value="tr.units.mm_per_minute"/>
 			<xs:enumeration value="tr.units.mm_speed"/>
 			<xs:enumeration value="tr.units.rpm"/>
+			<xs:enumeration value="tr.usb.another_upload"/>
+			<xs:enumeration value="tr.usb.cancel_upload"/>
+			<xs:enumeration value="tr.usb.cancelled"/>
+			<xs:enumeration value="tr.usb.cancelling"/>
+			<xs:enumeration value="tr.usb.checking"/>
+			<xs:enumeration value="tr.usb.destination"/>
+			<xs:enumeration value="tr.usb.done"/>
+			<xs:enumeration value="tr.usb.failed"/>
+			<xs:enumeration value="tr.usb.firmware"/>
+			<xs:enumeration value="tr.usb.installing"/>
+			<xs:enumeration value="tr.usb.job_active"/>
+			<xs:enumeration value="tr.usb.no_drive"/>
+			<xs:enumeration value="tr.usb.no_folder"/>
+			<xs:enumeration value="tr.usb.not_connected"/>
+			<xs:enumeration value="tr.usb.not_idle"/>
+			<xs:enumeration value="tr.usb.not_update"/>
+			<xs:enumeration value="tr.usb.reading"/>
+			<xs:enumeration value="tr.usb.sending"/>
+			<xs:enumeration value="tr.usb.system"/>
+			<xs:enumeration value="tr.usb.title"/>
+			<xs:enumeration value="tr.usb.update_ok"/>
+			<xs:enumeration value="tr.usb.update_patch"/>
+			<xs:enumeration value="tr.usb.update_screen"/>
+			<xs:enumeration value="tr.usb.update_wrong_system"/>
+			<xs:enumeration value="tr.usb.upload"/>
 			<xs:enumeration value="tr.widget.align_center"/>
 			<xs:enumeration value="tr.widget.align_left"/>
 			<xs:enumeration value="tr.widget.align_right"/>
@@ -20409,6 +20462,22 @@
 			<xs:attribute name="standby" type="xs:string">
 				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="transfer_progress">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/transfer_progress.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="usb_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/usb_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

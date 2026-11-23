@@ -3,13 +3,13 @@
  */
 
 #include "XmlUi.h"
+#include "Comm/Responses.h"
 #include "Debug.h"
 #include "GcodeActions.h"
 #include "HotReload.h"
 #include "NavigationActions.h"
 #include "ReloadState.h"
 #include "Services.h"
-#include "Subscribers/ResponseSubscribers.h"
 #include "Translations.h"
 #include "UI/Core/Model.h"
 #include "UI/Styles/Styles.h"

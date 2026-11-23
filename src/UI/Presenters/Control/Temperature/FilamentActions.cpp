@@ -3,9 +3,9 @@
  */
 
 #include "FilamentActions.h"
+#include "Comm/Responses.h"
 #include "Debug.h"
 #include "ObjectModel/Files.h"
-#include "Subscribers/ResponseSubscribers.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Data/PrinterModel.h"
 #include "UI/Xml/Dialogs/Prompts.h"
@@ -87,7 +87,6 @@ namespace UI::FilamentActions
 				filaments = OM::FileSystem::GetFilamentList();
 				loaded = Xml::PrinterModel::filament(*tool);
 			}
-			OM::FileSystem::RequestFilaments(); // Fresh for next time
 			if (filaments.empty())
 			{
 				Model::get().post<EventType::Response>(ResponseType::WARNING, _("filament.none"));

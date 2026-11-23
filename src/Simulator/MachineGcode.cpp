@@ -56,6 +56,20 @@ namespace Sim
 			return value ? std::optional<int32_t>(static_cast<int32_t>(std::lround(*value))) : std::nullopt;
 		}
 
+		/** Parameter `p` as an exact whole number of 32 bits, e.g. a size or a CRC, if it is one */
+		std::optional<uint32_t> unsignedInteger(char p) const
+		{
+			const auto it = params.find(p);
+			if (it == params.end())
+			{
+				return std::nullopt;
+			}
+			uint32_t value = 0;
+			const std::string& text = it->second;
+			const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+			return error == std::errc() && end == text.data() + text.size() ? std::optional(value) : std::nullopt;
+		}
+
 		/** Parameter `p` as numbers separated by colons, e.g. G10's S210:200 */
 		std::vector<float> numbers(char p) const
 		{
@@ -929,6 +943,9 @@ namespace Sim
 				reply += fmt::format("Error: M{:d}: no tool with an extruder is selected\n", command.code);
 			}
 			break;
+		case 559:
+			startFile(command, reply);
+			break;
 		case 999:
 		{
 			// A reset: the machine starts again, cold, unhomed and idle
@@ -937,7 +954,9 @@ namespace Sim
 			const int32_t replySeq = m_replySeq;
 			const int32_t boxSeq = m_messageBoxSeq;
 			const float noise = m_noise;
+			auto writtenFiles = std::move(m_writtenFiles); // on its SD card
 			*this = Machine(config);
+			m_writtenFiles = std::move(writtenFiles);
 			m_seqs = seqs;
 			m_replySeq = replySeq;
 			m_messageBoxSeq = boxSeq;
@@ -952,6 +971,24 @@ namespace Sim
 			LOG_DBG("Simulated Duet: M{:d} ignored", command.code);
 			break;
 		}
+	}
+
+	void Machine::startFile(const Command& command, std::string& reply)
+	{
+		if (command.text('P').empty())
+		{
+			reply += "Error: M559: missing parameter 'P'\n";
+			return;
+		}
+		m_upload = Upload{.path = sdPath(command.text('P')),
+						  .size = command.unsignedInteger('S').value_or(0),
+						  .crc = command.unsignedInteger('C'),
+						  .contents = {}};
+		if (m_upload->crc == 0u)
+		{
+			m_upload->crc.reset(); // as RepRapFirmware takes C0: no CRC
+		}
+		reply += fmt::format("Writing to file: {:s}\n", command.text('P'));
 	}
 
 	void Machine::move(const Command& command, std::string& reply)

@@ -64,15 +64,15 @@ The image installs the Python requirements into `/opt/venv`, which the image put
 
 If a folder named `buildroot-duetscreen` exists in the parent directory of this repository, the devcontainer setup automatically bind mounts it at `/workspaces/buildroot-duetscreen`.
 
-This allows the existing T113 tasks that use `${config:buildroot_path}` to work from inside the container with `buildroot_path` set to `/workspaces/buildroot-duetscreen`.
+The scripts find it there (the image sets `BUILDROOT_WORKSPACE`), and the remote debug configurations through `${config:buildroot_path}`, which is set to `/workspaces/buildroot-duetscreen`.
 
 If the sibling checkout is missing, `buildroot_path` still points at `/workspaces/buildroot-duetscreen`, which will not exist. The T113 build, deploy and remote debug tasks then fail with an error about a missing working directory. The post-create step prints a warning when this happens — clone `buildroot-duetscreen` next to this repository and rebuild the devcontainer to fix it.
 
-You do not need to run `scripts/install_prerequisites.sh` or `scripts/install_gcc15.sh` when using the devcontainer.
+You do not need to run `scripts/install_prerequisites.py` when using the devcontainer. It also sets up tab completion of the scripts in bash, zsh and fish (see [Scripts](#scripts)).
 
 ### Working outside the devcontainer
 
-The VS Code tasks and launch configurations that target the physical screen reference `${config:buildroot_path}`. The devcontainer sets this automatically; outside the container you must set it yourself or the tasks abort with an unresolvable-variable error. Create `.vscode/settings.json` with at least:
+The scripts look for Buildroot beside this repository, or where `BUILDROOT_WORKSPACE` says. The launch configurations that debug the physical screen reference `${config:buildroot_path}`. The devcontainer sets this automatically; outside the container you must set it yourself or they abort with an unresolvable-variable error. Create `.vscode/settings.json` with at least:
 
 ```json
 {
@@ -80,9 +80,29 @@ The VS Code tasks and launch configurations that target the physical screen refe
 }
 ```
 
-The tasks and presets call `python3` and `cmake` from `PATH`. Outside the container, create the virtualenv with [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh) and activate it (`source env/bin/activate`) before starting VS Code, so they resolve to it.
+The tasks and presets call `python3` and `cmake` from `PATH`. Outside the container, create the virtualenv with [scripts/install_prerequisites.py](../scripts/install_prerequisites.py) and activate it (`source env/bin/activate`) before starting VS Code, so they resolve to it.
 
-The screen's IP address is no longer a setting — the tasks and launch configurations prompt for it when they run.
+The screen's IP address is no longer a setting — the tasks and launch configurations prompt for it when they run, and remember it.
+
+## Scripts
+
+Everything is done with the Python scripts in [scripts/](../scripts); the VS Code tasks run them. Each explains itself with `--help`.
+
+| Script | What it does |
+| --- | --- |
+| `build.py` | Builds a CMake preset: the simulator and test presets here, the screen's (`T113-*`) with Buildroot, `--image` its SD card image. `--deploy <ip>` puts it on a screen |
+| `screen.py` | Starts and stops DuetScreen on a screen, runs it under gdbserver, pushes the assets or a configuration file |
+| `run_tests.py` | Builds and runs the tests, then reviews the screenshots they changed (see [Testing](#testing)) |
+| `filter_logs.py` | Shows the logs, filtered, from the simulator or a screen (see [Filtering logs](#filtering-logs)) |
+| `format.py` | Formats the code with clang-format, or LVGL's with `--lvgl` |
+| `create_upgrade.py` | Makes the update archive `out/DuetScreen.tar.gz` |
+| `release_notes.py` | Prints a release's notes |
+| `manage_translations.py` | Checks the translations against `en-GB.json` |
+| `generate_*.py` | Make the icon sets, the LVGL wrappers, the object model schema and the console's G-codes |
+| `get_object_model_data.py` | Saves a Duet's object model for the tests |
+| `install_prerequisites.py` | Installs what is needed outside the devcontainer |
+
+What more than one script uses is in `scripts/common/`, and what the build runs, not a person, is in `scripts/internal/`. All of them are checked by pyright in strict mode (`pyright`, as CI does). With [argcomplete](https://github.com/kislyuk/argcomplete), installed with `requirements.txt`, the scripts tab-complete their options and values, such as the presets: source the file for your shell from its startup file, `scripts/completions/duetscreen.bash` from `.bashrc`, `scripts/completions/duetscreen.zsh` from `.zshrc` after `compinit`, or `scripts/completions/duetscreen.fish` from `config.fish`. The devcontainer does this for all three.
 
 ## Simulating
 
@@ -131,23 +151,17 @@ The device must exist on the host when the container starts; devices plugged in 
 
 A number of CMake presets are provided for different configurations. The 2 main ones for simulation are: `Simulation` and `Simulation-Release`. If you want to have breakpoint debugging and performance/memory overlays enabled, use the `Simulation` preset, otherwise use the `Simulation-Release` preset.
 
+`scripts/build.py` chooses the preset from its options, and configures it the first time it builds it (`--fresh` configures it again from scratch). `--debug` builds `Simulation`:
 ```bash
-cmake --preset Simulation
+scripts/build.py --debug
 ```
-or use the release configuration to remove performance and memory overlays (breakpoint debugging won't work):
+or, without it, the release configuration `Simulation-Release`, without performance and memory overlays (breakpoint debugging won't work):
 ```bash
-cmake --preset Simulation-Release
+scripts/build.py
 ```
 
 ### Build the project:
-Use the same preset name as used for configuration:
-```bash
-cmake --build --preset Simulation
-```
-or
-```bash
-cmake --build --preset Simulation-Release
-```
+Building is the same command, also the `Build` task, which builds the active CMake preset (`--preset <preset>`). `cmake --preset <preset>` and `cmake --build --preset <preset>` do the same by hand.
 
 ### Run the simulation:
 The built binary can be found in the `out/build/<preset_name>/` directory. Run it using:
@@ -162,8 +176,7 @@ or
 If you are intentionally building outside the devcontainer, install the native dependencies first:
 
 ```bash
-./scripts/install_prerequisites.sh
-./scripts/install_gcc15.sh
+scripts/install_prerequisites.py
 ```
 
 ### The simulated Duet
@@ -179,17 +192,22 @@ It is built only with the `DUETSCREEN_DUET_SIMULATOR` CMake option, which is on 
 2. Checkout the `master` branch.
 3. Reopen `DuetScreen` in the devcontainer so the sibling buildroot checkout is mounted automatically.
 4. Build buildroot at least once. The post-create step only runs `make duet3d_duetscreen_defconfig`; the cross toolchain itself (including `output/host/bin/arm-none-linux-gnueabihf-gdb`, which the `Remote Debug DuetScreen` configuration uses) does not exist until buildroot has been built.
-    - From a terminal in the container:
+    - From a terminal in the container, build the SD card image, which builds everything:
       ```bash
-      make -C /workspaces/buildroot-duetscreen
+      scripts/build.py --image
       ```
     - This takes a long time on the first run.
 5. Enable SSH on the Duet3D screen.
   - You can enable SSH by adding a file called `ssh` to the root of the microSD card on first boot and setting a password or `authorized_keys` file. https://github.com/Duet3D/buildroot-duetscreen/blob/master/BOOT.md#ssh
-6. In vscode, run the `Push DuetScreen - SSH` task.
-  - This will prompt for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address, then build the project and push the binary to the Duet3D screen.
-7. The code will not automatically start running on the Duet3D screen. You can run the `Start DuetScreen on remote` task to start the code.
-8. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
+6. Build and deploy:
+    ```bash
+    scripts/build.py --deploy <ip_address>
+    ```
+  - Or run the `Deploy DuetScreen - SSH` task, which prompts for the build type (`Release`, `Release_with_profiling`, or `Debug`) and the screen's IP address.
+  - `--debug` builds it as Debug (`T113-Debug`), `--profiling` as Release with profiling (`T113-Release_with_profiling`); without either it is `T113-Release`. `--screen` builds it without deploying it.
+  - It builds DuetScreen with Buildroot, then copies it, without its debug symbols, and the assets to the screen, and restarts DuetScreen there. Only the files that differ from the screen's are copied, and assets that are no longer in `assets/` are removed from it.
+  - `--no-start` leaves DuetScreen stopped; `scripts/screen.py <ip_address> start` starts it.
+7. Alternatively, you can start a remote debug session using the `Remote Debug DuetScreen` configuration. This will start the code and attach gdb to it.
 
 ## Software Bill of Materials (SBOM)
 
@@ -222,7 +240,7 @@ Notes:
 - This needs CMake 4.3 or newer. The pinned version is in [requirements.txt](../requirements.txt)
   and the presets use whichever `cmake` is first on `PATH`: `/opt/venv/bin/cmake` in the
   devcontainer, or `env/bin/cmake` outside it once the virtualenv created by
-  [scripts/install_prerequisites.sh](../scripts/install_prerequisites.sh) is activated. On CMake 4.3 and 4.4
+  [scripts/install_prerequisites.py](../scripts/install_prerequisites.py) is activated. On CMake 4.3 and 4.4
   the commands sit behind an experimental feature gate, so configuring prints a
   `CMake Warning (experimental)` per document; `-Wno-experimental` silences them.
 - Only dependency **licences** are stated by hand, in
@@ -263,7 +281,7 @@ VSCode has been configured for both of these scenarios.
 - To debug the simulation, select the `Debug DuetScreen` configuration in VSCode and start debugging.
 - To debug the code running on the physical hardware, select the `Remote Debug DuetScreen` configuration in VSCode and start debugging.
   - This will start the code and attach gdb to it.
-  - If the code is already running, you need to kill it first. This can be done by pushing a new build to the Duet3D screen with the `Push DuetScreen - SSH` task (select the `Debug` build type).
+  - Deploy a `Debug` build first (`scripts/build.py --deploy <ip_address> --debug`). The configuration stops the code running on the screen before it starts it under gdbserver.
 
 ## Commit messages
 Commit messages should be in the following format:
@@ -322,8 +340,10 @@ Where:
 > [!NOTE]
 > The language files are loaded at runtime without need to be compiled into the binary. When simulating on PC, the language files are loaded from the `assets/i18n/` directory in the project. When running on the Duet3D screen, the language files are loaded from the `/etc/assets/i18n/` directory.
 
-Running `python scripts/manage_translations.py` will check for missing translation keys in the language files and prompt the user to enter translations for any missing keys. This can be used to easily keep the language files up to date with the code.
-Use `python scripts/manage_translations.py --help` for more information on how to use the script.
+Running `scripts/manage_translations.py` will check for missing translation keys in the language files and prompt the user to enter translations for any missing keys. This can be used to easily keep the language files up to date with the code.
+Use `scripts/manage_translations.py --help` for more information on how to use the script.
+
+The console's G-codes and their descriptions (`gcodes` in the language files) are made by `scripts/generate_gcodes.py` from [MonacoTokens](https://github.com/Duet3D/MonacoTokens), the G-code dictionary of Duet Web Control's editor. It keeps a language's own translation of a description.
 
 ### Icons and icon sets
 - Icon sets are the subdirectories of `assets/icons/` (other than `examples/` and `hardware_test/`). The user chooses one
@@ -351,13 +371,9 @@ Use `python scripts/manage_translations.py --help` for more information on how t
 ### Adding assets to the DuetScreen
 The above sections describe how to add assets to the project which will then be included in the `DuetScreen.tar.gz` file in the next release or manual build. If you want to add or update assets at runtime without needing to rebuild the project, you can do any of the following:
 1. Remove the SD card from the DuetScreen and insert it into a PC that is capable of reading ext4 file systems. Then copy the new/updated assets to the appropriate directories under `/etc/assets/` on the SD card. Reinsert the SD card into the DuetScreen and reboot.
-2. Use SCP to copy the assets to the screen over the network.
+2. Sync the assets to the screen over the network with `scripts/screen.py <duetscreen_ip> push assets`, which copies only the changed files and restarts DuetScreen.
     - This requires SSH to be enabled on the DuetScreen.
-    - Example command to copy a new language file:
-      ```bash
-      scp path/to/new_language.json root@<duetscreen_ip>:/etc/assets/i18n/
-      ```
-3. Create a `DuetScreen.tar.gz` file with `./scripts/create_upgrade.sh --skip-binary`, and use it to update the screen via the GUI upgrade process.
+3. Create a `DuetScreen.tar.gz` file with `scripts/create_upgrade.py --skip-binary`, and use it to update the screen via the GUI upgrade process.
     - This will only update the assets and not the binary.
     - Note that this process will first delete all existing assets on the screen before copying the new ones.
 
@@ -408,13 +424,14 @@ You can run the tests via VS Code or from the terminal.
 - VS Code task: Terminal > Run Task… > `Run Tests`
 - CLI:
 ```bash
-python3 scripts/run_tests.py
+scripts/run_tests.py
+scripts/run_tests.py --filter 'XmlUi.*' --skip-configure
 ```
 
 The script will:
 1) Delete any existing `*_err.*` files in `tests/ref_imgs/`
-2) Configure CMake if needed (default preset: `Simulation`)
-3) Build the test binary (`DuetScreen.tests`)
+2) Configure CMake (preset `Test`, or `--preset`), unless `--skip-configure`
+3) Build the test binary (`DuetScreen.tests`), unless `--skip-build`
 4) Run the tests (via `ctest`)
 5) If the run created any reference images or produced any `*_err` images, open a review page in your browser
 
@@ -433,12 +450,7 @@ To answer in the terminal instead, for example over SSH or from an agent, pass `
 - Build tools: cmake, ninja, SDL2, etc. (see Simulating section above)
 - Pillow, for the difference images. It is in `requirements.txt` and installed in the devcontainer; without it the page shows only the reference and the new screenshot.
 
-#### Environment variables (optional)
-- `DUETSCREEN_CMAKE_PRESET` — CMake preset to configure (default: `Simulation`)
-- `DUETSCREEN_BUILD_DIR` — Use a specific build directory (otherwise auto-detected under `out/build`)
-
 #### Troubleshooting
-- If no build directory is found, the script runs `cmake --preset <preset>` automatically.
 - If tests fail to run, check that `DuetScreen.tests` exists in `out/build/<preset>/tests/` and that `ctest` is available in PATH.
 - If no browser opens, open the address the script prints. Over SSH, forward the port first (fix it with `--review-port`), or use `--compare-mode cli`.
 
@@ -483,7 +495,7 @@ A version of the UI which boots straight into the hardware tests can be created 
 > [!NOTE]
 > `ccmake <path_to_build_dir>` can be used to change the CMake cache variables.
 > Or `cmake -DDUETSCREEN_HARDWARE_TEST=ON --preset <preset_name>` can be used to set the variable.
-> When building through buildroot, pass it via `DUETSCREEN_EXTRA_CONF_OPTS="-DDUETSCREEN_HARDWARE_TEST=ON"`.
+> When building for the screen, `scripts/build.py --image --hardware-test <serial_prefix>` sets both.
 
 A hardware test `sdcard.img` and `DuetScreen.tar.gz` can also be built in CI by manually running the **Build Hardware Test** GitHub Action (`.github/workflows/build-hardware-test.yml`).
 
@@ -522,17 +534,17 @@ This script works for both the simulation and code running on the Duet3D screen.
 
 Arguments:
 - `--follow`, `-f`: Follow the log file. This will show new log messages as they are added to the file. The code will not exit until the user presses `Ctrl+C`.
-- `--remote`, `-r`: The IP address of a Duet3D screen to get the log file from. This will use SSH to copy the log file to the local machine and then filter it. If `--follow` is used the log file is monitored without copying it to the local machine.
+- `--remote`, `-r`: The IP address of a Duet3D screen to read the log files from, over SSH.
 - `--output`, `-o`: An optional output file. If not specified, the output will be printed to the console.
 - `filters`: all remaining arguments are used as filters. Multiple filters can be used. The filters are case insensitive and space separated. To use a filter with spaces, use quotes. For example: `"My Filter"`.
 
 Examples:
 ```bash
 # Follow the log file from a Duet3D screen with IP address 192.168.0.20, filter the logs for "My Filter" and "Another Filter", and output to a file called filtered.log
-python scripts/filter_logs.py --follow --remote 192.168.0.20 --output filtered.log "My Filter" "Another Filter"
+scripts/filter_logs.py --follow --remote 192.168.0.20 --output filtered.log "My Filter" "Another Filter"
 
 # Filter the local log files for "My Filter" and "Another Filter", output just to the console
-python scripts/filter_logs.py "My Filter" "Another Filter"
+scripts/filter_logs.py "My Filter" "Another Filter"
 ```
 
 ### Download logs from the Duet3D screen
@@ -554,21 +566,27 @@ Tracy can be used when simulating on PC or when running on the physical Duet3D s
 > The screen must be connected to the same network as the machine running the tracy server.
 
 > [!NOTE]
-> Tracy support is only enabled in `Debug` builds by default. For remote deployment, use the `Release_with_profiling` build type in the `Push DuetScreen - SSH` task — this uses the `T113-Release_with_profiling` preset which enables both `DUETSCREEN_ENABLE_PROFILING` and `DUETSCREEN_ENABLE_LV_PROFILING`. To enable profiling manually in any other build, set those cmake cache variables to `ON`.
+> Tracy support is only enabled in `Debug` builds by default. For remote deployment, use the `Release_with_profiling` build type in the `Deploy DuetScreen - SSH` task — this uses the `T113-Release_with_profiling` preset which enables both `DUETSCREEN_ENABLE_PROFILING` and `DUETSCREEN_ENABLE_LV_PROFILING`. To enable profiling manually in any other build, set those cmake cache variables to `ON`.
 
-#### Building tracy server
-A prebuilt tracy server binary for Windows can be downloaded from the [tracy releases page](https://github.com/wolfpld/tracy/releases), the version must match the tracy version used in this project. For simplicity a copy of the compatible tracy server binary for Windows is included in the [tools/win32/](../tools/win32/tracy-profiler.exe) directory.
+#### Running the tracy profiler
+The tracy profiler (the server that DuetScreen connects to) must be the same version as the tracy client built into DuetScreen, currently **0.15.0** (the [libraries/tracy/](../libraries/tracy/) submodule). Prebuilt copies of the matching profiler are included in [tools/](../tools/):
 
-The tracy server can be built from source for Linux and MacOS in the [libraries/tracy/](../libraries/tracy/) directory. Instructions for building the tracy server can be found in the [tracy repository](../libraries/tracy/manual/tracy.md#buildingserver)
+| Platform | Profiler |
+|---|---|
+| Windows | [tools/win32/tracy-profiler.exe](../tools/win32/tracy-profiler.exe) |
+| Linux (x86_64) | [tools/linux/tracy-profiler-x86_64.AppImage](../tools/linux/tracy-profiler-x86_64.AppImage) |
 
-To build on Ubuntu 24.04 LTS the following commands worked for me but your mileage may vary:
+On Linux run the AppImage directly:
+```bash
+./tools/linux/tracy-profiler-x86_64.AppImage
+```
+
+A macOS build, and the command line tools (`tracy-capture`, `tracy-csvexport`, ...), can be downloaded from the [tracy releases page](https://github.com/wolfpld/tracy/releases). When the submodule is updated, replace the binaries in [tools/](../tools/) with the ones from the matching release.
+
+The profiler can also be built from source in the [libraries/tracy/](../libraries/tracy/) directory, following the [tracy build instructions](../libraries/tracy/manual/tracy.md#buildingserver):
 ```bash
 cd libraries/tracy
 cmake -B ./profiler/build -S ./profiler -DCMAKE_BUILD_TYPE=Release -DLEGACY=1
 cmake --build ./profiler/build --config Release --parallel
-```
-
-Then run the tracy server using:
-```bash
-./libraries/tracy/profiler/build/tracy-profiler
+./profiler/build/tracy-profiler
 ```

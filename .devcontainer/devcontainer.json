@@ -9,7 +9,11 @@
   "initializeCommand": "bash \"${localWorkspaceFolder}/.devcontainer/scripts/generate-buildroot-compose.sh\" \"${localWorkspaceFolder}\"",
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
   "postStartCommand": {
-    "claude": ".devcontainer/scripts/claude-persist.sh"
+    "claude": ".devcontainer/scripts/claude-persist.sh",
+    // Tab completion of the scripts (scripts/completions), in each shell
+    "fish": "mkdir -p ~/.config/fish/conf.d && ln -sf ${containerWorkspaceFolder}/scripts/completions/duetscreen.fish ~/.config/fish/conf.d/duetscreen.fish",
+    "zsh": "grep -qs scripts/completions/duetscreen.zsh ~/.zshrc || echo 'source ${containerWorkspaceFolder}/scripts/completions/duetscreen.zsh' >> ~/.zshrc",
+    "bash": "grep -qs scripts/completions/duetscreen.bash ~/.bashrc || echo 'source ${containerWorkspaceFolder}/scripts/completions/duetscreen.bash' >> ~/.bashrc"
   },
   "customizations": {
     "vscode": {

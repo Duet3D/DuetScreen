@@ -30,8 +30,8 @@
 #include "UI/Xml/Binding/Resolver.h"
 #include <functional>
 #include <map>
-#include <optional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -41,6 +41,13 @@ namespace UI::Xml
 	class OmBindings : public Resolver
 	{
 	  public:
+		OmBindings() = default;
+		OmBindings(const OmBindings&) = delete;
+		OmBindings& operator=(const OmBindings&) = delete;
+
+		/** Stop wanting the object model the names and watchers made wanted (see OM::Tree::want()) */
+		~OmBindings() override;
+
 		/**
 		 * The subject for `path` read through the converter `converter` (see Converters.h), made and filled the first
 		 * time it is asked for
@@ -119,7 +126,7 @@ namespace UI::Xml
 
 		std::map<std::string, std::unique_ptr<OmField>, std::less<>> m_fields; // By path and converter, e.g. "a.b|int"
 		std::map<std::string, std::unique_ptr<OmList>, std::less<>> m_lists;   // By path
-		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_forwards;	// Forwarders made outside any scope
+		std::map<std::string, std::unique_ptr<Subject>, std::less<>> m_forwards; // Forwarders made outside any scope
 		std::map<std::string, std::unique_ptr<ListBase>, std::less<>> m_forwardLists; // As m_forwards, for lists
 
 		/** One watch() */
@@ -128,8 +135,10 @@ namespace UI::Xml
 			size_t id;						// What unwatch() takes
 			std::vector<std::string> paths; // Paths watched
 			std::function<void()> callback; // Called after a flush changing one
+			size_t want;					// What OM::Tree::want() gave for the paths
 		};
 		std::vector<Watcher> m_watchers; // Told about changes
 		size_t m_nextWatcher = 1;		 // Id of the next watcher
+		std::vector<size_t> m_wants;	 // What OM::Tree::want() gave for each field and list made, kept with them
 	};
 } // namespace UI::Xml

@@ -3,17 +3,20 @@
  */
 
 #include "FileBrowserPresenter.h"
-#include "Comm/Thumbnail.h"
+#include "Comm/FileInfoCache.h"
 #include "Debug.h"
+#include "Hardware/Usb.h"
 #include "ObjectModel/Directories.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "UI/Core/Navigation.h"
 #include "UI/Xml/Data/DataSources.h"
 #include "UI/Xml/Data/FilesSource.h"
+#include "UI/Xml/Data/UsbSource.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
+#include <filesystem>
 
 namespace UI
 {
@@ -139,10 +142,22 @@ namespace UI
 		f.field(
 			"in_subfolder", m_inSubfolder, "1 while a folder below the base folder is open (so there is one above)");
 		f.field("empty", m_empty, "1 once the open folder has been read and has nothing in it, else 0");
+		f.field("no_drive", m_noDrive, "1 when the browser shows USB drives and none is plugged in, else 0");
 	}
 
 	void FileBrowserPresenter::onInit()
 	{
+		m_sortBy = StorageHelper::getData(m_settings.sortBy);
+		m_sortDescending = StorageHelper::getData(m_settings.sortDescending);
+		showSort();
+		setDisplayMode(StorageHelper::getData(m_settings.displayMode));
+
+		if (onUsb())
+		{
+			// Drives coming and going change what is at the top: start there again
+			registerEventListener<EventType::UsbDrive>([this](const std::string&, bool) { openFolder(""); });
+			return;
+		}
 		registerEventListener<EventType::ThumbnailData>(this, &FileBrowserPresenter::thumbnailReceived);
 		registerEventListener<EventType::FileInfo>(this, &FileBrowserPresenter::fileInfoReceived);
 		// A different printer has different folders
@@ -171,16 +186,11 @@ namespace UI
 											requestFiles();
 										}
 									});
-
-		m_sortBy = StorageHelper::getData(m_settings.sortBy);
-		m_sortDescending = StorageHelper::getData(m_settings.sortDescending);
-		showSort();
-		setDisplayMode(StorageHelper::getData(m_settings.displayMode));
 	}
 
 	void FileBrowserPresenter::onActivate()
 	{
-		if (!OM::GetPrinterUniqueId().empty())
+		if (onUsb() || !OM::GetPrinterUniqueId().empty())
 		{
 			requestFiles();
 		}
@@ -188,6 +198,10 @@ namespace UI
 
 	void FileBrowserPresenter::onDisconnect()
 	{
+		if (onUsb())
+		{
+			return; // the drives are the screen's
+		}
 		UI_LOCK();
 		m_items.clear();
 		m_files.clear();
@@ -210,6 +224,11 @@ namespace UI
 	void FileBrowserPresenter::requestFiles()
 	{
 		ZoneScoped;
+		if (onUsb())
+		{
+			listUsb();
+			return;
+		}
 		// The listing arrives on the connection's thread, where the object model can't be read under the UI lock:
 		// note the base folder now, for its path, which shows while the folder is listed
 		m_baseFolder = baseFolderPath();
@@ -229,6 +248,42 @@ namespace UI
 			true);
 	}
 
+	void FileBrowserPresenter::listUsb()
+	{
+		ZoneScoped;
+		m_baseFolder = baseFolderPath();
+		const std::vector<std::string> drives = USB::UsbMonitor::getInstance().getMountedDrives();
+		m_noDrive.set(drives.empty() ? 1 : 0);
+		OM::FileSystem::ItemList items;
+		if (drives.size() > 1 && m_folder.empty())
+		{
+			// Each drive is a folder at the top
+			for (const std::string& drive : drives)
+			{
+				const std::filesystem::path path(drive);
+				auto folder = std::make_shared<OM::FileSystem::FileSystemItem>(
+					OM::FileSystem::FileSystemItemType::folder, path.filename().string());
+				folder->SetPath(path.parent_path().string());
+				items.push_back(std::move(folder));
+			}
+		}
+		else if (!drives.empty())
+		{
+			auto listed = OM::FileSystem::ListLocalFolder(m_baseFolder + "/" + m_folder);
+			if (!listed)
+			{
+				LOG_WARN("Couldn't list {:s}{:s}: {:s}", m_baseFolder, m_folder, listed.error());
+			}
+			items = listed.value_or(OM::FileSystem::ItemList());
+		}
+		m_items.clear();
+		receiveFiles(std::move(items));
+		if (drives.empty())
+		{
+			m_empty.set(0); // no drive says so instead
+		}
+	}
+
 	void FileBrowserPresenter::receiveFiles(OM::FileSystem::ItemList items)
 	{
 		ZoneScoped;
@@ -246,20 +301,21 @@ namespace UI
 		UI_LOCK();
 		OM::FileSystem::SortFilesBy(m_items, m_sortBy, m_sortDescending);
 		showSort();
-		m_files.sync(m_items.size(),
-					 [this](FileRow& row, size_t i)
-					 {
-						 const auto& item = *m_items[i];
-						 const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
-						 row.name.set(
-							 Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
-						 row.detail.set(Xml::FilesSource::detail(item));
-						 row.isFolder.set(isFolder ? 1 : 0);
-						 row.showPicture(isFolder,
-										 !isFolder && IsThumbnailCached(item.GetPath())
-											 ? GetThumbnailPath(item.GetPath()).string()
-											 : std::string());
-					 });
+		m_files.sync(
+			m_items.size(),
+			[this](FileRow& row, size_t i)
+			{
+				const auto& item = *m_items[i];
+				const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
+				row.name.set(Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
+				row.detail.set(Xml::FilesSource::detail(item));
+				row.isFolder.set(isFolder ? 1 : 0);
+				// Only the printer's jobs have thumbnails
+				row.showPicture(isFolder,
+								isFolder || onUsb() ? std::string()
+													: Xml::FilesSource::thumbnail(
+														  item.GetPath(), Comm::FileInfoCache::ThumbnailSize::small));
+			});
 	}
 
 	void FileBrowserPresenter::showCrumbs()
@@ -268,7 +324,10 @@ namespace UI
 		std::vector<std::pair<std::string, std::string>> crumbs; // Name and path below the base folder
 		if (!m_baseFolder.empty())
 		{
-			crumbs.emplace_back(_(m_settings.folder == BaseFolder::MACROS ? "file.macros" : "file.jobs"), "");
+			crumbs.emplace_back(_(onUsb()									? "usb.title"
+								  : m_settings.folder == BaseFolder::MACROS ? "file.macros"
+																			: "file.jobs"),
+								"");
 			std::string path;
 			size_t start = 0;
 			while (start < m_folder.size())
@@ -320,11 +379,20 @@ namespace UI
 		{
 			// The folder's path below the base folder
 			std::string path = item.GetPath();
-			const std::string base = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
+			const std::string base =
+				onUsb() ? m_baseFolder + "/" : OM::Directories::GetDirectory(directoryOf(m_settings.folder));
 			openFolder(path.starts_with(base) ? path.substr(base.size()) : path);
 			return;
 		}
 
+		if (onUsb())
+		{
+			if (auto* usb = Xml::DataSources::find<Xml::UsbSource>())
+			{
+				usb->ask(item);
+			}
+			return;
+		}
 		auto* files = Xml::DataSources::find<Xml::FilesSource>();
 		if (files == nullptr)
 		{
@@ -347,7 +415,7 @@ namespace UI
 		UI_LOCK();
 		if (FileRow* row = rowOf(path))
 		{
-			row->showPicture(false, GetThumbnailPath(path).string());
+			row->showPicture(false, Xml::FilesSource::thumbnail(path, Comm::FileInfoCache::ThumbnailSize::large));
 		}
 	}
 
@@ -375,6 +443,15 @@ namespace UI
 
 	std::string FileBrowserPresenter::baseFolderPath() const
 	{
+		if (onUsb())
+		{
+			const std::vector<std::string> drives = USB::UsbMonitor::getInstance().getMountedDrives();
+			if (drives.empty())
+			{
+				return {};
+			}
+			return drives.size() == 1 ? drives.front() : std::filesystem::path(drives.front()).parent_path().string();
+		}
 		std::string path = OM::Directories::GetDirectory(directoryOf(m_settings.folder));
 		if (!path.empty() && path.back() == '/')
 		{
