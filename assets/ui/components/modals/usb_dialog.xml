@@ -5,8 +5,10 @@
     file    the file's size and date, the printer's folder to upload it to (its kind picks one at first), and a line
             saying why it can't be uploaded now, if it can't. For an update archive (*.tar.gz), what checking it found,
             and Update screen, on the left, once it is found installable. Upload sends it.
-    upload  how its upload is going (source.files.transfer_*), then how it went. Cancel upload stops it (what was
-            written of it is deleted); closing it leaves the upload going, still cancellable from the file browser.
+    upload  how its upload is going (source.files.transfer_*), then how it went. Cancel upload stops it, while it
+            is read, and while it is sent over the network (what was written of it is deleted; over USB and UART the
+            printer takes the whole file once it has started). Closing it leaves the upload going, still
+            cancellable from the file browser.
 
   Installing an update has a dialog of its own, which holds the screen (blocking) until the update service restarts it,
   or says why it couldn't be installed.
@@ -80,8 +82,7 @@
 					<style name="dialog_button"/>
 					<style name="danger_btn"/>
 					<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="upload"/>
-					<bind_flag_if_eq subject="source.usb.uploading" flag="hidden" ref_value="0"/>
-					<bind_state_if_eq subject="source.usb.upload_state" state="disabled" ref_value="4"/>
+					<bind_flag_if_eq subject="source.usb.cancellable" flag="hidden" ref_value="0"/>
 					<action trigger="clicked" name="actions.usb.cancel_upload"/>
 				</ds_button>
 				<flex_pad name="spacer"/>

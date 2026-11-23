@@ -741,7 +741,7 @@ From [UsbSource.cpp](../src/UI/Xml/Data/UsbSource.cpp).
 | `source.usb.upload` | int | Uploading it (actions.usb.upload): 1 disabled (see `upload_reason`), 2 usable |
 | `source.usb.upload_reason` | text | Why it can't be uploaded now, e.g. "The printer isn't connected"; empty if it can |
 | `source.usb.upload_state` | int | How its upload is going: 0 reading it, 1 sending it (source.files.transfer_progress), 2 done, 3 failed, 4 cancelling, 5 cancelled |
-| `source.usb.uploading` | int | 1 while a file from a USB drive is being uploaded (read or sent), so it can be cancelled (actions.usb.cancel_upload), else 0 |
+| `source.usb.cancellable` | int | 1 while the upload from a USB drive going can be cancelled (actions.usb.cancel_upload): while it is read, and while it is sent over the network; over USB and UART the printer takes the whole file once it has started. Else 0 |
 | `source.usb.upload_text` | text | What its upload is doing, or how it went, e.g. "benchy.gcode is now in Jobs" |
 | `source.usb.update` | int | Updating the screen with it (actions.usb.install): 0 hidden (not a *.tar.gz), 1 disabled (being checked, or not installable: see `update_text`), 2 usable |
 | `source.usb.update_text` | text | What checking it as an update found; empty when `update` is hidden |

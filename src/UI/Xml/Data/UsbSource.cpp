@@ -90,10 +90,12 @@ namespace UI::Xml
 			m_uploadState,
 			"How its upload is going: 0 reading it, 1 sending it (source.files.transfer_progress), 2 done, 3 failed, "
 			"4 cancelling, 5 cancelled");
-		f.field("uploading",
-				m_uploadingSubject,
-				"1 while a file from a USB drive is being uploaded (read or sent), so it can be cancelled "
-				"(actions.usb.cancel_upload), else 0");
+		f.field(
+			"cancellable",
+			m_cancellable,
+			"1 while the upload from a USB drive going can be cancelled (actions.usb.cancel_upload): while it is "
+			"read, and while it is sent over the network; over USB and UART the printer takes the whole file once it "
+			"has started. Else 0");
 		f.field("upload_text",
 				m_uploadText,
 				"What its upload is doing, or how it went, e.g. \"benchy.gcode is now in Jobs\"");
@@ -268,7 +270,7 @@ namespace UI::Xml
 		const std::string target = folderOf(destination) + name;
 		const uint64_t generation = m_generation;
 		m_cancel = std::make_shared<std::atomic_bool>(false);
-		setUploading(true);
+		setUploading(true, true); // nothing is sent while it is read
 		m_uploadState.set(static_cast<int32_t>(UploadState::Reading));
 		m_uploadText.set(_("usb.reading", name));
 		m_dialog.set("upload");
@@ -286,6 +288,16 @@ namespace UI::Xml
 					if (auto source = self.lock())
 					{
 						static_cast<UsbSource&>(*source).uploadEnded(generation, contents.error().message);
+					}
+					return;
+				}
+				if (cancel->load())
+				{
+					// Cancelled as it was read through: nothing to send
+					if (auto source = self.lock())
+					{
+						static_cast<UsbSource&>(*source).uploadEnded(generation,
+																	 Comm::FileContents::cancelledError().message);
 					}
 					return;
 				}
@@ -318,6 +330,7 @@ namespace UI::Xml
 		{
 			return; // still cancelling
 		}
+		setUploading(true, Comm::Connection::get().cancelsWrites());
 		const std::string name(m_dialogTitle.get());
 		m_uploadState.set(static_cast<int32_t>(UploadState::Sending));
 		m_uploadText.set(_("usb.sending", name, destinationName(static_cast<Destination>(m_destination.get()))));
@@ -327,7 +340,7 @@ namespace UI::Xml
 	{
 		ZoneScoped;
 		UI_LOCK();
-		setUploading(false);
+		setUploading(false, false);
 		showAllowed();
 		if (generation != m_generation)
 		{
@@ -354,21 +367,22 @@ namespace UI::Xml
 		}
 	}
 
-	void UsbSource::setUploading(bool uploading)
+	void UsbSource::setUploading(bool uploading, bool cancellable)
 	{
 		m_uploading = uploading;
-		m_uploadingSubject.set(uploading ? 1 : 0);
+		m_cancellable.set(uploading && cancellable ? 1 : 0);
 	}
 
 	void UsbSource::cancelUpload()
 	{
 		ZoneScoped;
-		if (!m_uploading || m_cancel->load())
+		if (m_cancellable.get() == 0)
 		{
-			return;
+			return; // none going, already cancelled, or over USB or UART once it has started
 		}
 		LOG_INFO("Cancelling the upload of {:s}", m_path);
 		m_cancel->store(true); // the file's contents share it, so stop being read
+		m_cancellable.set(0);
 		m_uploadState.set(static_cast<int32_t>(UploadState::Cancelling));
 		m_uploadText.set(_("usb.cancelling", m_dialogTitle.get()));
 	}

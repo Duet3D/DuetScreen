@@ -4,7 +4,7 @@
   use, tapped again, reverses it); a list or tiles; and reading the folder again. Under it, the folder's files and
   folders as a list or as tiles, or a line saying it is empty (or that no USB drive is plugged in). While a file is
   written to the printer (an upload), how it is going shows above them, with a button to cancel an upload from a USB
-  drive. Tapping a folder opens it; tapping a file asks
+  drive while it can be (source.usb.cancellable). Tapping a folder opens it; tapping a file asks
   whether to start it (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml), or, on a USB drive,
   what to do with it in the USB dialog (modals/usb_dialog.xml).
 
@@ -61,8 +61,7 @@
 			<transfer_progress name="progress" width="1" flex_grow="1"/>
 			<ds_button name="cancel_upload" icon="close.png" width="48" height="40">
 				<style name="danger_btn"/>
-				<bind_flag_if_eq subject="source.usb.uploading" flag="hidden" ref_value="0"/>
-				<bind_state_if_eq subject="source.usb.upload_state" state="disabled" ref_value="4"/>
+				<bind_flag_if_eq subject="source.usb.cancellable" flag="hidden" ref_value="0"/>
 				<action trigger="clicked" name="actions.usb.cancel_upload"/>
 			</ds_button>
 		</lv_obj>

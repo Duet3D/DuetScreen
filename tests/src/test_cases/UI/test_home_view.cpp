@@ -1217,10 +1217,12 @@ TEST_F(TestHomeViewWithSimulator, AFileOnAUsbDriveIsUploadedWithItsProgressShown
 	EXPECT_TRUE(isHidden(browser, "transfer"));
 }
 
-TEST_F(TestHomeViewWithSimulator, AnUploadFromAUsbDriveCanBeCancelled)
+TEST_F(TestHomeViewWithSimulator, AnUploadOverASerialLinkCantBeCancelledOnceItIsSent)
 {
+	// The simulated Duet is reached as over USB: the printer takes the whole file once it has started (M559)
 	const std::filesystem::path drive = plugInUsbDrive();
-	std::ofstream(drive / "benchy.gcode") << std::string(20 * 1024, 'g');
+	const std::string contents(20 * 1024, 'g');
+	std::ofstream(drive / "benchy.gcode") << contents;
 	lv_obj_t* browser = openUsbBrowser();
 	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
 	TestDialogs::tap("upload");
@@ -1233,14 +1235,14 @@ TEST_F(TestHomeViewWithSimulator, AnUploadFromAUsbDriveCanBeCancelled)
 	}
 	deliverModelEvents();
 	runTimers();
-
-	// From the file browser, the dialog closed
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel_upload"), LV_OBJ_FLAG_HIDDEN)) << "in the dialog";
 	TestDialogs::tap("close");
-	ASSERT_FALSE(isHidden(browser, "cancel_upload")) << "the browser offers to cancel it";
+	EXPECT_FALSE(isHidden(browser, "transfer"));
+	EXPECT_TRUE(isHidden(browser, "cancel_upload")) << "nor in the file browser";
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_upload_in_browser.png");
-	lv_obj_send_event(lv_obj_find_by_name(browser, "cancel_upload"), LV_EVENT_CLICKED, nullptr);
 
-	// The printer is sent filler for the rest, refuses it, and what there is of it is deleted
+	// Asked anyway, it carries on
+	UI::Xml::Actions::dispatch(browser, "actions.usb.cancel_upload", "");
 	for (int exchange = 0; exchange < 200 && !isHidden(browser, "transfer"); exchange++)
 	{
 		Comm::Connection::get().process();
@@ -1249,17 +1251,9 @@ TEST_F(TestHomeViewWithSimulator, AnUploadFromAUsbDriveCanBeCancelled)
 		deliverModelEvents();
 		runTimers();
 	}
-	pollSimulator();
-	deliverModelEvents();
-	runTimers();
-	EXPECT_TRUE(isHidden(browser, "transfer"));
-	EXPECT_FALSE(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
-												   { return machine.writtenFile("0:/gcodes/benchy.gcode"); }));
-
-	// Opened again, the dialog says how it went
-	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(isHidden(browser, "cancel_upload"));
-	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED)) << "it can be uploaded again";
+	EXPECT_EQ(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
+												{ return machine.writtenFile("0:/gcodes/benchy.gcode"); }),
+			  contents);
 }
 #endif
 

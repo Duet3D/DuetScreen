@@ -446,6 +446,7 @@
 			<xs:enumeration value="source.tool.shown"/>
 			<xs:enumeration value="source.tool.summary_auto"/>
 			<xs:enumeration value="source.tool.tiles"/>
+			<xs:enumeration value="source.usb.cancellable"/>
 			<xs:enumeration value="source.usb.destination"/>
 			<xs:enumeration value="source.usb.dialog"/>
 			<xs:enumeration value="source.usb.dialog_title"/>
@@ -461,7 +462,6 @@
 			<xs:enumeration value="source.usb.upload_reason"/>
 			<xs:enumeration value="source.usb.upload_state"/>
 			<xs:enumeration value="source.usb.upload_text"/>
-			<xs:enumeration value="source.usb.uploading"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="subject">

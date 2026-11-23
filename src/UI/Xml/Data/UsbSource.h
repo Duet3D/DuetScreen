@@ -10,7 +10,8 @@
  *     it is checked as the dialog opens, and the dialog says why not if it can't be.
  *
  * Uploading carries on if the dialog is closed; one file at a time. It can be cancelled (cancelUpload()), from the
- * dialog or the file browser, while it is read or sent: what was written of it is deleted. Installing an update holds the screen in a dialog
+ * dialog or the file browser, while it is read, and while it is sent over the network (what was written of it is
+ * deleted); over USB and UART the printer takes the whole file once it has started (Connection::cancelsWrites()). Installing an update holds the screen in a dialog
  * of its own until the update service restarts it, or says why it couldn't.
  *
  * The global actions that answer the dialog are in Presenters/FileBrowser/UsbActions.h. The names it publishes are
@@ -115,8 +116,8 @@ namespace UI::Xml
 		/** The upload `generation` ended: the printer has it, or `error` says why not */
 		void uploadEnded(uint64_t generation, std::string error);
 
-		/** Note whether a file is being uploaded */
-		void setUploading(bool uploading);
+		/** Note whether a file is being uploaded, and whether it can be cancelled now */
+		void setUploading(bool uploading, bool cancellable);
 
 		std::string m_path;				  // The dialog's file, on its drive
 		size_t m_size = 0;				  // Its size
@@ -134,7 +135,7 @@ namespace UI::Xml
 		IntSubject m_upload;			   // `upload`: a FilesSource::Control
 		StringSubject<128> m_uploadReason; // `upload_reason`
 		IntSubject m_uploadState;		   // `upload_state`: an UploadState
-		IntSubject m_uploadingSubject;	   // `uploading`
+		IntSubject m_cancellable;		   // `cancellable`
 		StringSubject<256> m_uploadText;   // `upload_text`
 		IntSubject m_update;			   // `update`: a FilesSource::Control
 		StringSubject<384> m_updateText;   // `update_text`
