@@ -2161,11 +2161,11 @@ Each widget is a component (with its props) and a widget file beside it, which s
 
 **Axis positions**: Where each axis is
 
-In Motion; placed in `dashboard`; component `move_positions_card` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a free layout it is 365×89 px, and at least 272×89 px.
+In Motion; placed in `dashboard`; component `move_positions_card` ([axes.json](../assets/ui/widgets/motion/axes.json)). In a free layout it is 365×89 px, and at least 100×60 px.
 
 ![axes](../tests/ref_imgs/xml_ui_api/widgets/axes.png)
 
-At its smallest, 272×89 px:
+At its smallest, 100×60 px:
 
 ![axes at its smallest](../tests/ref_imgs/xml_ui_api/widgets/axes_smallest.png)
 
@@ -2173,11 +2173,11 @@ At its smallest, 272×89 px:
 
 **Babystepping**: Move Z by small steps while printing
 
-In Motion; placed in `dashboard`; component `card_view` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a free layout it is 272×372 px, and at least 180×278 px.
+In Motion; placed in `dashboard`; component `card_view` ([babystep.json](../assets/ui/widgets/motion/babystep.json)). In a free layout it is 272×372 px, and at least 134×231 px.
 
 ![babystep](../tests/ref_imgs/xml_ui_api/widgets/babystep.png)
 
-At its smallest, 180×278 px:
+At its smallest, 134×231 px:
 
 ![babystep at its smallest](../tests/ref_imgs/xml_ui_api/widgets/babystep_smallest.png)
 
@@ -2301,11 +2301,11 @@ At its smallest, 134×89 px:
 
 **Console**: The console: send G-code and read the replies
 
-In Console; placed in `dashboard`; component `console` ([console.json](../assets/ui/widgets/console/console.json)). In a free layout it is 642×467 px, and at least 458×278 px.
+In Console; placed in `dashboard`; component `console` ([console.json](../assets/ui/widgets/console/console.json)). In a free layout it is 642×467 px, and at least 272×184 px.
 
 ![console](../tests/ref_imgs/xml_ui_api/widgets/console.png)
 
-At its smallest, 458×278 px:
+At its smallest, 272×184 px:
 
 ![console at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_smallest.png)
 
@@ -2337,11 +2337,11 @@ At its smallest, 200×40 px:
 
 **Console log**: The printer's latest replies; tap to open the console
 
-In Console; placed in `dashboard`; component `console_log` ([console_log.json](../assets/ui/widgets/console/console_log.json)). In a free layout it is 458×278 px, and at least 272×136 px.
+In Console; placed in `dashboard`; component `console_log` ([console_log.json](../assets/ui/widgets/console/console_log.json)). In a free layout it is 458×278 px, and at least 200×136 px.
 
 ![console_log](../tests/ref_imgs/xml_ui_api/widgets/console_log.png)
 
-At its smallest, 272×136 px:
+At its smallest, 200×136 px:
 
 ![console_log at its smallest](../tests/ref_imgs/xml_ui_api/widgets/console_log_smallest.png)
 
@@ -2349,9 +2349,13 @@ At its smallest, 272×136 px:
 
 **Current tool**: The tool in use, with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_current_tool` ([current_tool.json](../assets/ui/widgets/temperature/current_tool.json)). In a free layout it is 458×184 px, and at least 458×184 px.
+In Temperatures; placed in `dashboard`; component `dashboard_current_tool` ([current_tool.json](../assets/ui/widgets/temperature/current_tool.json)). In a free layout it is 458×184 px, and at least 240×130 px.
 
 ![current_tool](../tests/ref_imgs/xml_ui_api/widgets/current_tool.png)
+
+At its smallest, 240×130 px:
+
+![current_tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/current_tool_smallest.png)
 
 #### custom_arc
 
@@ -2472,11 +2476,11 @@ In Safety; placed in `sidebar`, `dashboard`; component `sidebar_estop` ([estop.j
 
 **Extrude**: Extrude or retract with the selected tool
 
-In Motion; placed in `dashboard`; component `card_view` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a free layout it is 319×420 px, and at least 272×372 px.
+In Motion; placed in `dashboard`; component `card_view` ([extrude.json](../assets/ui/widgets/motion/extrude.json)). In a free layout it is 319×420 px, and at least 226×420 px.
 
 ![extrude](../tests/ref_imgs/xml_ui_api/widgets/extrude.png)
 
-At its smallest, 272×372 px:
+At its smallest, 226×420 px:
 
 ![extrude at its smallest](../tests/ref_imgs/xml_ui_api/widgets/extrude_smallest.png)
 
@@ -2520,11 +2524,11 @@ At its smallest, 134×89 px:
 
 **Fan**: One fan's speed, to change it
 
-In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a free layout it is 458×89 px, and at least 365×89 px.
+In Fans; placed in `dashboard`; component `dashboard_fan` ([fan.json](../assets/ui/widgets/fans/fan.json)). In a free layout it is 458×89 px, and at least 319×89 px.
 
 ![fan](../tests/ref_imgs/xml_ui_api/widgets/fan.png)
 
-At its smallest, 365×89 px:
+At its smallest, 319×89 px:
 
 ![fan at its smallest](../tests/ref_imgs/xml_ui_api/widgets/fan_smallest.png)
 
@@ -2699,9 +2703,13 @@ At its smallest, 272×89 px:
 
 **Status**: The job's progress, times and controls
 
-In Jobs; placed in `dashboard`; component `card_view` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a free layout it is 365×372 px, and at least 365×372 px.
+In Jobs; placed in `dashboard`; component `card_view` ([job_status.json](../assets/ui/widgets/jobs/job_status.json)). In a free layout it is 365×372 px, and at least 272×278 px.
 
 ![job_status](../tests/ref_imgs/xml_ui_api/widgets/job_status.png)
+
+At its smallest, 272×278 px:
+
+![job_status at its smallest](../tests/ref_imgs/xml_ui_api/widgets/job_status_smallest.png)
 
 #### jobs
 
@@ -2719,9 +2727,13 @@ At its smallest, 272×184 px:
 
 **Jog distance and speed**: How far and how fast every jog goes; hold one to change it
 
-In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a free layout it is 642×136 px, and at least 642×136 px.
+In Motion; placed in `dashboard`; component `move_jog_choices` ([jog_choices.json](../assets/ui/widgets/motion/jog_choices.json)). In a free layout it is 642×136 px, and at least 458×136 px.
 
 ![jog_choices](../tests/ref_imgs/xml_ui_api/widgets/jog_choices.png)
+
+At its smallest, 458×136 px:
+
+![jog_choices at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_choices_smallest.png)
 
 #### jog_xy
 
@@ -2739,11 +2751,11 @@ At its smallest, 180×184 px:
 
 **Z jog**: Jog Z up and down, home it, or move it to a position
 
-In Motion; placed in `dashboard`; component `move_z_card` ([jog_z.json](../assets/ui/widgets/motion/jog_z.json)). In a free layout it is 134×278 px, and at least 88×231 px.
+In Motion; placed in `dashboard`; component `move_z_card` ([jog_z.json](../assets/ui/widgets/motion/jog_z.json)). In a free layout it is 134×278 px, and at least 88×184 px.
 
 ![jog_z](../tests/ref_imgs/xml_ui_api/widgets/jog_z.png)
 
-At its smallest, 88×231 px:
+At its smallest, 88×184 px:
 
 ![jog_z at its smallest](../tests/ref_imgs/xml_ui_api/widgets/jog_z_smallest.png)
 
@@ -2763,11 +2775,11 @@ At its smallest, 272×184 px:
 
 **Move**: The Move tab: jog and home every axis, babystep, and choose the jog distance and speed
 
-In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a free layout it is 920×527 px, and at least 920×480 px.
+In Motion; placed in `dashboard`; component `move` ([move.json](../assets/ui/widgets/motion/move.json)). In a free layout it is 920×527 px, and at least 600×480 px.
 
 ![move](../tests/ref_imgs/xml_ui_api/widgets/move.png)
 
-At its smallest, 920×480 px:
+At its smallest, 600×480 px:
 
 ![move at its smallest](../tests/ref_imgs/xml_ui_api/widgets/move_smallest.png)
 
@@ -3057,11 +3069,11 @@ At its smallest, 272×184 px:
 
 **Temperatures**: The Temperature tab: every tool, bed and chamber, filament, and the extruder
 
-In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a free layout it is 920×561 px, and at least 735×467 px.
+In Temperatures; placed in `dashboard`; component `temperature` ([temperatures.json](../assets/ui/widgets/temperature/temperatures.json)). In a free layout it is 920×561 px, and at least 642×467 px.
 
 ![temperatures](../tests/ref_imgs/xml_ui_api/widgets/temperatures.png)
 
-At its smallest, 735×467 px:
+At its smallest, 642×467 px:
 
 ![temperatures at its smallest](../tests/ref_imgs/xml_ui_api/widgets/temperatures_smallest.png)
 
@@ -3089,11 +3101,11 @@ At its smallest, 88×42 px:
 
 **Tool**: One tool with its heaters' temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 458×184 px.
+In Temperatures; placed in `dashboard`; component `dashboard_tool_card` ([tool.json](../assets/ui/widgets/temperature/tool.json)). In a free layout it is 550×184 px, and at least 240×130 px.
 
 ![tool](../tests/ref_imgs/xml_ui_api/widgets/tool.png)
 
-At its smallest, 458×184 px:
+At its smallest, 240×130 px:
 
 ![tool at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tool_smallest.png)
 
@@ -3156,11 +3168,11 @@ At its smallest, 134×89 px:
 
 **Tools and heaters**: Every tool, bed and chamber with its temperatures
 
-In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 458×184 px.
+In Temperatures; placed in `dashboard`; component `dashboard_tools` ([tools.json](../assets/ui/widgets/temperature/tools.json)). In a free layout it is 550×278 px, and at least 240×130 px.
 
 ![tools](../tests/ref_imgs/xml_ui_api/widgets/tools.png)
 
-At its smallest, 458×184 px:
+At its smallest, 240×130 px:
 
 ![tools at its smallest](../tests/ref_imgs/xml_ui_api/widgets/tools_smallest.png)
 
