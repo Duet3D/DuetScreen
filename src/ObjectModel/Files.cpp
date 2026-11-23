@@ -13,11 +13,14 @@
 #include "Comm/FileInfoCache.h"
 #include "Comm/Gcode.h"
 #include "Configuration.h"
-#include "Hardware/Usb.h"
 #include "ObjectModel/Tree/Tree.h"
 #include "UI/Core/Model.h"
 #include "utils/UnitSystem.h"
 #include <algorithm>
+#include <chrono>
+#include <ctime>
+#include <filesystem>
+#include <fmt/chrono.h>
 #include <fstream>
 #include <mutex>
 
@@ -317,33 +320,42 @@ namespace OM::FileSystem
 		RequestPage(full_path, reqPtr->GetFirst());
 	}
 
-	void RequestUsbFiles(const std::string& path)
+	std::expected<ItemList, std::string> ListLocalFolder(const std::string& path)
 	{
 		ZoneScoped;
-		LOG_DBG("Requesting USB files in path '{:s}'", path);
-#if 0
-		ClearFileSystem();
-		s_usbFolder = true;
-		s_currentDirPath = path;
-		std::vector<USB::FileInfo> files = USB::ListEntriesInDirectory(std::string("/mnt/usb1/") + path);
-		size_t index = 0;
-		for (auto& fileInfo : files)
+		std::error_code error;
+		std::filesystem::directory_iterator entries(path, error);
+		if (error)
 		{
-			if (fileInfo.d_type == DT_DIR)
-			{
-				Folder* folder = AddFolderAt(index);
-				folder->SetName(fileInfo.d_name);
-			}
-			else if (fileInfo.d_type == DT_REG)
-			{
-				File* file = AddFileAt(index);
-				file->SetName(fileInfo.d_name);
-				file->SetSize(fileInfo.st_size);
-				file->SetDate(fmt::format("{:d}", fileInfo.st_mtim));
-			}
-			index++;
+			return std::unexpected(error.message());
 		}
-#endif
+		ItemList items;
+		for (const std::filesystem::directory_entry& entry : entries)
+		{
+			const std::string name = entry.path().filename().string();
+			if (name.starts_with('.') || name == "System Volume Information")
+			{
+				continue;
+			}
+			const bool folder = entry.is_directory(error);
+			if (!folder && !entry.is_regular_file(error))
+			{
+				continue; // a link to nowhere, a device
+			}
+			auto item =
+				std::make_shared<FileSystemItem>(folder ? FileSystemItemType::folder : FileSystemItemType::file, name);
+			item->SetPath(path);
+			item->SetSize(folder ? 0 : static_cast<size_t>(entry.file_size(error)));
+			// As the printer gives dates: "2025-03-18T18:21:58", the screen's local time
+			const auto written = std::chrono::file_clock::to_sys(entry.last_write_time(error));
+			const std::time_t seconds = std::chrono::system_clock::to_time_t(
+				std::chrono::time_point_cast<std::chrono::system_clock::duration>(written));
+			std::tm local{};
+			localtime_r(&seconds, &local);
+			item->SetDate(fmt::format("{:%Y-%m-%dT%H:%M:%S}", local));
+			items.push_back(std::move(item));
+		}
+		return items;
 	}
 
 	void RunFile(const ItemPtr& file)
@@ -366,25 +378,6 @@ namespace OM::FileSystem
 	{
 		ZoneScoped;
 		Comm::Connection::get().sendGcodef("M98 P{:s}\n", Comm::quoted(path));
-	}
-
-	void UploadFile(const ItemPtr& file)
-	{
-		ZoneScoped;
-		// TODO upload file
-		LOG_DBG("Uploading file '{:s}'", file ? file->GetPath() : "null");
-#if 0
-		if (file == nullptr || file->GetType() != FileSystemItemType::file)
-		{
-			LOG_ERROR("Invalid file to upload");
-			return;
-		}
-
-		std::string contents;
-		if (!USB::ReadUsbFileContents(file->GetPath(), contents))
-			return;
-		Comm::Connection::get().writeFile(fmt::format("/gcodes/{:s}", file->GetName()), std::move(contents));
-#endif
 	}
 
 	void StartPrint(const std::string& path)

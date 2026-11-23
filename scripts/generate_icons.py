@@ -405,6 +405,7 @@ ICONS: dict[str, Icon] = {
     "refresh": Icon("Reading files again", "refresh", "arrows-clockwise"),
     "view_list": Icon("Files as a list", "view_list", "list"),
     "view_grid": Icon("Files as tiles", "grid_view", "grid-four"),
+    "usb": Icon("A USB drive plugged into the screen", "usb", "usb"),
     # Editing
     "increment": Icon("More; adding", "add", "plus"),
     "decrement": Icon("Less", "remove", "minus"),

@@ -28,6 +28,7 @@
 #include "ToolSource.h"
 #include "UI/Core/Model.h"
 #include "UI/Xml/Binding/Globals.h"
+#include "UsbSource.h"
 #include <memory>
 #include <vector>
 
@@ -111,7 +112,7 @@ namespace UI::Xml::DataSources
 			std::make_shared<ResponseSource>(),	  std::make_shared<SettingsSource>(),
 			std::make_shared<SimulatorSource>(),  std::make_shared<SpindleSource>(),
 			std::make_shared<SystemSource>(),	  std::make_shared<TemperatureSource>(),
-			std::make_shared<ThemeSource>(),
+			std::make_shared<ThemeSource>(),	  std::make_shared<UsbSource>(),
 		};
 
 		for (auto& source : s_sources)

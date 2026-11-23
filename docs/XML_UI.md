@@ -227,6 +227,7 @@ what several places show is one component there, which they all use. Each file s
 | `fact_row` | what a fact is, muted, and its value at the end of the line |
 | `list_header` | a list's title on the header colour |
 | `thumbnail_box` | a job's thumbnail, fitted and centred in a box of a set size |
+| `transfer_progress` | how writing a file to the printer is going: its name over a bar with its percentage |
 | `card_view` | a view filling a card, for a placed widget showing a piece of a page |
 | `heater_row`, `heater_bar` | a heater as a row with its state and targets; its temperature as a thin bar (a `gauge_track`) |
 | `settings_toggle`, `settings_choice`, `settings_option`, `settings_button`, `settings_value` | a setting's row: a switch, a choice from a list, one of a few values, an action, a value shown |
@@ -329,7 +330,7 @@ A page opened from another in the same place, such as Settings › Display › C
 
 A value chosen from a row of presets, such as the extruder's feed distance, the jog distance or the babystep size, is a `ValueSelector` a data source owns ([ValueSelector.h](../src/UI/Xml/View/ValueSelector.h)), which also stores the presets; `value_selector.xml` shows it with - and +, `value_selector_presets` its presets in a row, and `value_selector_choice` is one preset, checked while it is in use. The global `actions.selector.*` change it. A preset is an `option_button`, as every one of a few options is (a setting's, the bed mesh's colours, a spindle's direction): checked while its `subject` has its `value`, and running its `action` when tapped; a setting's is a `settings_option`.
 
-A dialog the whole UI shares is hosted once by the home screen, from `modals/`, and opened with a global action, so any view, and any widget the user places, can open it: the speed and extrusion factors (`actions.factors.speed`, `actions.factors.extrusion`) and babystepping (`actions.babystep.open`). Cancelling the job asks first (`actions.job.ask_cancel`).
+A dialog the whole UI shares is hosted once by the home screen, from `modals/`, and opened with a global action, so any view, and any widget the user places, can open it: the speed and extrusion factors (`actions.factors.speed`, `actions.factors.extrusion`) and babystepping (`actions.babystep.open`). The file browser opens the file dialog for a job or macro, and the USB dialog (`source.usb.*`) for a file on a USB drive, to upload it or update the screen with it. Cancelling the job asks first (`actions.job.ask_cancel`).
 
 ### Actions
 

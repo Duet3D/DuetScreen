@@ -12,6 +12,9 @@
 #include <chrono>
 #include <filesystem>
 #include <gtest/gtest.h>
+#include <string>
+#include <utility>
+#include <vector>
 #if DUET_SIMULATOR
 #  include "Simulator/Config.h"
 #endif
@@ -46,6 +49,23 @@ class TestSuite : public ::testing::Test
 
 	/** The file cache's folders for the test: its own, in the system's temporary folder */
 	static std::filesystem::path cacheFolder();
+
+	/**
+	 * Plug in USB drive `number` (0 to 7): an empty folder of the test's own, standing in for /media/usb<number>,
+	 * which the USB monitor finds at once (its events are posted, for deliverModelEvents()). Every test starts with
+	 * none.
+	 */
+	static std::filesystem::path plugInUsbDrive(int number = 0);
+
+	/** Take out USB drive `number`, and everything on it */
+	static void takeOutUsbDrive(int number = 0);
+
+	/**
+	 * Write a tar.gz archive at `path` holding `files` (name, contents), as scripts/create_upgrade.py does: a name
+	 * longer than a tar header holds goes in a GNU long name entry before it
+	 */
+	static void writeArchive(const std::filesystem::path& path,
+							 const std::vector<std::pair<std::string, std::string>>& files);
 
 	/** How many exchanges with the simulated Duet one poll may take, at most (a Duet that doesn't answer takes all) */
 	static constexpr int maxExchanges = 100;

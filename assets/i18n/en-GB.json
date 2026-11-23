@@ -118,6 +118,31 @@
       "confirm_unload_title": "Unload {:s}?",
       "confirm_unload_text": "{:s} unloads {:s}."
     },
+    "usb": { /* USB drives: the Files page's USB tab and dialog */
+      "title": "USB drive",
+      "no_drive": "Plug a USB drive into the screen to see its files",
+      "destination": "Upload to",
+      "system": "System",
+      "firmware": "Firmware",
+      "upload": "Upload",
+      "update_screen": "Update screen",
+      "not_connected": "The printer isn't connected",
+      "no_folder": "The printer hasn't said where that folder is yet",
+      "another_upload": "Another file is being uploaded",
+      "reading": "Reading {:s}…",
+      "sending": "Uploading {:s} to {:s}…",
+      "done": "{:s} is now in {:s}",
+      "failed": "{:s} couldn't be uploaded: {:s}",
+      "checking": "Checking whether this updates the screen…",
+      "update_ok": "An update for this screen: installing it restarts the screen.",
+      "update_patch": "An update for this screen, made for system {:s} (this screen has {:s}): it can be installed, but flashing the SD card with the latest image is recommended.",
+      "update_wrong_system": "An update made for system {:s}, but this screen has {:s}: flash the SD card with the latest image instead.",
+      "not_update": "Not an update for this screen.",
+      "installing": "Installing the update… The screen restarts once it is installed.",
+      "cancel_upload": "Cancel upload",
+      "cancelling": "Cancelling the upload of {:s}…",
+      "cancelled": "The upload of {:s} was cancelled"
+    },
     "file": { /* File screen */
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
@@ -220,7 +245,8 @@
       "update_failed": "Update Failed",
       "update_buildroot_error_text": "Incompatible buildroot version. Please reflash the SD card.\nCurrent buildroot version: {:s}\nRequired buildroot version: {:s}",
       "update_buildroot_warning": "Update Buildroot",
-      "update_buildroot_warning_text": "Update successful.\nDuetScreen version: {:s}\n\nThere is a buildroot patch available, it is recommended that you reflash the SD card with the latest sdcard.img\nCurrent buildroot version: {:s}\nRecommended buildroot version: {:s}"
+      "update_buildroot_warning_text": "Update successful.\nDuetScreen version: {:s}\n\nThere is a buildroot patch available, it is recommended that you reflash the SD card with the latest sdcard.img\nCurrent buildroot version: {:s}\nRecommended buildroot version: {:s}",
+      "update_install_failed": "The update couldn't be installed: {:s}"
     },
     "msgbox": { /* Generic message box */
       "response_success": "Success",

@@ -1,0 +1,123 @@
+<!--
+  The shared USB file dialog, hosted once by the home screen; the file browser opens it for a file tapped on a USB
+  drive. Open while source.usb.dialog is set:
+
+    file    the file's size and date, the printer's folder to upload it to (its kind picks one at first), and a line
+            saying why it can't be uploaded now, if it can't. For an update archive (*.tar.gz), what checking it found,
+            and Update screen, on the left, once it is found installable. Upload sends it.
+    upload  how its upload is going (source.files.transfer_*), then how it went. Cancel upload stops it (what was
+            written of it is deleted); closing it leaves the upload going, still cancellable from the file browser.
+
+  Installing an update has a dialog of its own, which holds the screen (blocking) until the update service restarts it,
+  or says why it couldn't be installed.
+
+  Data:     source.usb.* (src/UI/Xml/Data/UsbSource.h), source.files.transfer_* (src/UI/Xml/Data/FilesSource.h)
+  Actions:  usb.destination, usb.upload, usb.cancel_upload, usb.install (global:
+            src/UI/Presenters/FileBrowser/UsbActions.h), dialog.close
+-->
+<component>
+	<!-- Takes no room: its dialogs open on the dialog surface -->
+	<view extends="lv_obj" width="0" height="0" floating="true">
+		<ds_dialog name="usb_dialog" bind_open="source.usb.dialog" bind_title="source.usb.dialog_title"
+				   flex_flow="column">
+
+			<!-- What to do with the file -->
+			<lv_obj name="file_step" width="100%" height="content" flex_flow="column" scrollable="false">
+				<style name="pad_zero"/>
+				<style name="pad_gap"/>
+				<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="file"/>
+				<fact_row name="size" title_tag="tr.file.start_print.size" value="source.usb.file_size"/>
+				<fact_row name="date" title_tag="tr.file.start_print.date" value="source.usb.file_date"/>
+
+				<lv_label name="destination_title" translation_tag="tr.usb.destination" width="100%">
+					<style name="text_muted"/>
+				</lv_label>
+				<lv_obj name="destination">
+					<style name="setting_options"/>
+					<option_button name="jobs" translation_tag="tr.file.jobs" subject="source.usb.destination"
+								   value="0" action="actions.usb.destination" arg="0"/>
+					<option_button name="macros" translation_tag="tr.file.macros" subject="source.usb.destination"
+								   value="1" action="actions.usb.destination" arg="1"/>
+					<option_button name="system" translation_tag="tr.usb.system" subject="source.usb.destination"
+								   value="2" action="actions.usb.destination" arg="2"/>
+					<option_button name="firmware" translation_tag="tr.usb.firmware" subject="source.usb.destination"
+								   value="3" action="actions.usb.destination" arg="3"/>
+				</lv_obj>
+				<!-- Why it can't be uploaded now, while that is so -->
+				<lv_label name="upload_reason" bind_text="source.usb.upload_reason" width="100%">
+					<style name="text_warning"/>
+					<bind_flag_if_eq subject="source.usb.upload_reason" flag="hidden" ref_value=""/>
+				</lv_label>
+				<!-- What checking it as an update found, for an update archive -->
+				<lv_label name="update_text" bind_text="source.usb.update_text" width="100%">
+					<style name="text_muted"/>
+					<bind_flag_if_eq subject="source.usb.update" flag="hidden" ref_value="0"/>
+				</lv_label>
+			</lv_obj>
+
+			<!-- How its upload is going, or how it went -->
+			<lv_obj name="upload_step" width="100%" height="content" flex_flow="column" scrollable="false">
+				<style name="pad_zero"/>
+				<style name="pad_gap"/>
+				<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="upload"/>
+				<lv_label name="upload_text" bind_text="source.usb.upload_text" width="100%"/>
+				<transfer_progress name="progress">
+					<bind_flag_if_not_eq subject="source.usb.upload_state" flag="hidden" ref_value="1"/>
+				</transfer_progress>
+			</lv_obj>
+
+			<ds_dialog_footer name="footer">
+				<!-- Updating, apart from uploading, on the left -->
+				<ds_button name="install" translation_tag="tr.usb.update_screen">
+					<style name="dialog_button"/>
+					<bind_flag_if_eq subject="source.usb.update" flag="hidden" ref_value="0"/>
+					<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="file"/>
+					<bind_state_if_not_eq subject="source.usb.update" state="disabled" ref_value="2"/>
+					<action trigger="clicked" name="actions.usb.install"/>
+				</ds_button>
+				<!-- Cancelling the upload, apart from closing the dialog, on the left -->
+				<ds_button name="cancel_upload" translation_tag="tr.usb.cancel_upload">
+					<style name="dialog_button"/>
+					<style name="danger_btn"/>
+					<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="upload"/>
+					<bind_flag_if_eq subject="source.usb.uploading" flag="hidden" ref_value="0"/>
+					<bind_state_if_eq subject="source.usb.upload_state" state="disabled" ref_value="4"/>
+					<action trigger="clicked" name="actions.usb.cancel_upload"/>
+				</ds_button>
+				<flex_pad name="spacer"/>
+				<ds_button name="cancel" translation_tag="tr.common.cancel">
+					<style name="dialog_button"/>
+					<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="file"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
+				</ds_button>
+				<ds_button name="upload" translation_tag="tr.usb.upload">
+					<style name="dialog_button"/>
+					<style name="action_btn"/>
+					<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="file"/>
+					<bind_state_if_not_eq subject="source.usb.upload" state="disabled" ref_value="2"/>
+					<action trigger="clicked" name="actions.usb.upload"/>
+				</ds_button>
+				<ds_button name="close" translation_tag="tr.common.close">
+					<style name="dialog_button"/>
+					<style name="action_btn"/>
+					<bind_flag_if_not_eq subject="source.usb.dialog" flag="hidden" ref_value="upload"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
+				</ds_button>
+			</ds_dialog_footer>
+		</ds_dialog>
+
+		<!-- Installing an update: nothing else until the screen restarts, or it says why it couldn't -->
+		<ds_dialog name="usb_install_dialog" bind_open="source.usb.installing" title_tag="tr.usb.update_screen"
+				   blocking="true" flex_flow="column">
+			<lv_label name="install_text" bind_text="source.usb.install_text" width="100%"/>
+			<ds_dialog_footer name="footer">
+				<bind_flag_if_eq subject="source.usb.install_failed" flag="hidden" ref_value="0"/>
+				<ds_button name="ok" translation_tag="tr.common.ok">
+					<style name="dialog_button"/>
+					<style name="action_btn"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
+				</ds_button>
+			</ds_dialog_footer>
+		</ds_dialog>
+	</view>
+</component>

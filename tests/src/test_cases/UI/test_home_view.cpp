@@ -5,7 +5,9 @@
  *      Author: Andy Everitt
  */
 
+#include "Comm/Connection.h"
 #include "Debug.h"
+#include "Hardware/Usb.h"
 #include "ObjectModel/Files.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "ObjectModel/Tree/Tree.h"
@@ -29,15 +31,22 @@
 #include "UI/Xml/View/Actions.h"
 #include "UI/Xml/View/XmlView.h"
 #include "helix_xml.h"
+#if DUET_SIMULATOR
+#  include "Simulator/Simulator.h"
+#endif
 #include "i18n/i18n.h"
 #include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
 #include <algorithm>
+#include <chrono>
+#include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
+#include <functional>
 #include <gtest/gtest.h>
+#include <thread>
 
 namespace
 {
@@ -163,7 +172,7 @@ class TestHomeView : public UiTestSuite
 		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
 	}
 
-	/** Open the Files page on tab `tab` (0 macros, 1 jobs) */
+	/** Open the Files page on tab `tab` (0 macros, 1 jobs, 2 USB drives) */
 	static void openFilesTab(size_t tab)
 	{
 		UI::openScreen(std::string_view("files"), false);
@@ -204,6 +213,45 @@ class TestHomeView : public UiTestSuite
 			}
 		}
 		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
+	}
+
+	/** The Files page's USB drive browser, listed afresh, as opening its tab does; what is on the drives dated alike */
+	static lv_obj_t* openUsbBrowser()
+	{
+		for (const std::string& drive : USB::UsbMonitor::getInstance().getMountedDrives())
+		{
+			stampDates(drive);
+		}
+		deliverModelEvents(); // the drives that came or went
+		openFilesTab(2);
+		runTimers();
+		return page<UI::LvObj>("files_usb").getRootPtr();
+	}
+
+	/** Date everything on the drive `drive` 2025-03-18 18:21, so pictures of it don't change from day to day */
+	static void stampDates(const std::filesystem::path& drive)
+	{
+		using namespace std::chrono;
+		const auto when = clock_cast<file_clock>(sys_days{2025y / March / 18} + 18h + 21min);
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(drive))
+		{
+			std::filesystem::last_write_time(entry.path(), when);
+		}
+	}
+
+	/** The USB file dialog, if it is the step shown, or nullptr */
+	static lv_obj_t* openUsbDialog() { return TestDialogs::shownNamed("usb_dialog"); }
+
+	/** Run the UI's timers until `done`, for at most 10 s, while a thread of the screen's works (reading a file) */
+	static bool waitFor(const std::function<bool()>& done)
+	{
+		for (int i = 0; i < 1000 && !done(); i++)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			deliverModelEvents();
+			runTimers();
+		}
+		return done();
 	}
 
 	/** The shared file dialog, if it is the step shown, or nullptr */
@@ -826,6 +874,117 @@ TEST_F(TestHomeView, AlertS7)
 	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
+TEST_F(TestHomeView, TheUsbTabSaysWhenNoDriveIsPluggedIn)
+{
+	lv_obj_t* browser = openUsbBrowser();
+	EXPECT_FALSE(isHidden(browser, "no_drive"));
+	EXPECT_TRUE(isHidden(browser, "empty")) << "one line says why there is nothing";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_no_drive.png");
+
+	// Plugged in, its files show at once
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << "G28\n";
+	browser = openUsbBrowser();
+	EXPECT_TRUE(isHidden(browser, "no_drive"));
+	EXPECT_NE(fileItem(browser, "benchy.gcode"), nullptr);
+
+	// Taken out, they go
+	takeOutUsbDrive();
+	browser = openUsbBrowser();
+	EXPECT_FALSE(isHidden(browser, "no_drive"));
+	EXPECT_THROW(fileItem(browser, "benchy.gcode"), std::runtime_error);
+}
+
+TEST_F(TestHomeView, AUsbDrivesFilesAndFoldersAreBrowsed)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << std::string(1500, 'g');
+	std::ofstream(drive / "Preheat PLA.g") << "M140 S60\n";
+	std::filesystem::create_directories(drive / "parts");
+	std::ofstream(drive / "parts" / "bracket.gcode") << "G28\n";
+	lv_obj_t* browser = openUsbBrowser();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_files.png");
+
+	lv_obj_send_event(fileItem(browser, "parts"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_NE(fileItem(browser, "bracket.gcode"), nullptr);
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_folder.png");
+
+	// With a second drive, each is a folder at the top
+	const std::filesystem::path second = plugInUsbDrive(1);
+	std::ofstream(second / "other.gcode") << "G28\n";
+	browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "usb1"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_NE(fileItem(browser, "other.gcode"), nullptr);
+}
+
+TEST_F(TestHomeView, AUsbFileIsOfferedForUploadToTheFolderItsKindGoesIn)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << std::string(1500, 'g');
+	std::ofstream(drive / "Preheat PLA.g") << "M140 S60\n";
+	lv_obj_t* browser = openUsbBrowser();
+
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "benchy.gcode");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("jobs"), LV_STATE_CHECKED)) << "a job goes in the jobs";
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED)) << "no printer to send it to";
+	EXPECT_EQ(TestDialogs::text("upload_reason"), "The printer isn't connected");
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("install"), LV_OBJ_FLAG_HIDDEN)) << "it is no update";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_file_dialog.png");
+
+	TestDialogs::tap("firmware");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("firmware"), LV_STATE_CHECKED));
+	TestDialogs::tap("cancel");
+	EXPECT_EQ(openUsbDialog(), nullptr);
+
+	lv_obj_send_event(fileItem(browser, "Preheat PLA.g"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("macros"), LV_STATE_CHECKED)) << "a macro goes in the macros";
+
+	// Its drive taken out, there is nothing to upload
+	takeOutUsbDrive();
+	deliverModelEvents();
+	runTimers();
+	EXPECT_EQ(openUsbDialog(), nullptr);
+}
+
+TEST_F(TestHomeView, AScreenUpdateOnAUsbDriveIsCheckedAndInstalled)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	writeArchive(drive / "DuetScreen.tar.gz", {{"pre-update", "#!/bin/sh\n"}, {"post-update", "#!/bin/sh\n"}});
+	writeArchive(drive / "photos.tar.gz", {{"holiday.jpg", "jpeg"}});
+	lv_obj_t* browser = openUsbBrowser();
+
+	// Not an update: said so, and it can't be installed
+	lv_obj_send_event(fileItem(browser, "photos.tar.gz"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	ASSERT_TRUE(waitFor([] { return TestDialogs::text("update_text") != _("usb.checking"); }));
+	EXPECT_EQ(TestDialogs::text("update_text"), "Not an update for this screen.");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("install"), LV_STATE_DISABLED));
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_not_an_update.png");
+	TestDialogs::tap("cancel");
+
+	// An update: installed, holding the screen until it restarts (the simulation says it succeeded instead)
+	lv_obj_send_event(fileItem(browser, "DuetScreen.tar.gz"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	ASSERT_TRUE(waitFor([] { return !lv_obj_has_state(TestDialogs::find("install"), LV_STATE_DISABLED); }));
+	EXPECT_EQ(TestDialogs::text("update_text"), "An update for this screen: installing it restarts the screen.");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_update.png");
+
+	bool updated = false;
+	Model::get().addEventListener<EventType::UpdateResult>([&updated](const UpgradeHelper::UpgradeInfo&)
+														   { updated = true; });
+	TestDialogs::tap("install");
+	ASSERT_NE(TestDialogs::shownNamed("usb_install_dialog"), nullptr);
+	EXPECT_EQ(TestDialogs::find("close"), nullptr) << "nothing else until the screen restarts";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_installing.png");
+	EXPECT_TRUE(waitFor([&updated] { return updated; }));
+	EXPECT_TRUE(std::filesystem::exists(drive / "upgraded")) << "left beside it, as when offered on plugging in";
+}
+
 class TestHomeViewWithData : public TestHomeView
 {
   protected:
@@ -1004,6 +1163,103 @@ TEST_F(TestHomeViewWithSimulator, BedMeshProbedIsShown)
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "detail")), "heightmap.csv");
 	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(page, "points"), "value")), "121");
 	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/heightmap.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, AFileOnAUsbDriveIsUploadedWithItsProgressShown)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::string contents;
+	for (int i = 0; contents.size() < 20 * 1024; i++)
+	{
+		contents += fmt::format("G1 X{:d} Y{:d}\n", i % 200, i % 150);
+	}
+	std::ofstream(drive / "benchy.gcode") << contents;
+	lv_obj_t* browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED))
+		<< TestDialogs::text("upload_reason");
+	TestDialogs::tap("upload");
+
+	// Read through for its size and CRC, then sent a piece at a time
+	ASSERT_TRUE(waitFor([] { return TestDialogs::text("upload_text") == "Uploading benchy.gcode to Jobs…"; }));
+	bool pictured = false;
+	for (int exchange = 0; exchange < 200 && TestDialogs::text("upload_text") != "benchy.gcode is now in Jobs";
+		 exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+		deliverModelEvents();
+		runTimers();
+		lv_obj_t* progress = TestDialogs::find("progress");
+		if (progress != nullptr && !lv_obj_check_type(progress, &lv_bar_class))
+		{
+			progress = lv_obj_find_by_name(progress, "progress");
+		}
+		ASSERT_NE(progress, nullptr);
+		const int32_t percent = lv_bar_get_value(progress);
+		if (!pictured && percent >= 40 && percent <= 60)
+		{
+			pictured = true;
+			EXPECT_FALSE(isHidden(browser, "transfer")) << "the browser shows it too, once the dialog is closed";
+			EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_uploading.png");
+		}
+	}
+	EXPECT_TRUE(pictured) << "its progress was shown as it went";
+	EXPECT_EQ(TestDialogs::text("upload_text"), "benchy.gcode is now in Jobs");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_uploaded.png");
+	EXPECT_EQ(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
+												{ return machine.writtenFile("0:/gcodes/benchy.gcode"); }),
+			  contents);
+	TestDialogs::tap("close");
+	EXPECT_EQ(openUsbDialog(), nullptr);
+	EXPECT_TRUE(isHidden(browser, "transfer"));
+}
+
+TEST_F(TestHomeViewWithSimulator, AnUploadFromAUsbDriveCanBeCancelled)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << std::string(20 * 1024, 'g');
+	lv_obj_t* browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::tap("upload");
+	ASSERT_TRUE(waitFor([] { return TestDialogs::text("upload_text") == "Uploading benchy.gcode to Jobs…"; }));
+	for (int exchange = 0; exchange < 6; exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+	}
+	deliverModelEvents();
+	runTimers();
+
+	// From the file browser, the dialog closed
+	TestDialogs::tap("close");
+	ASSERT_FALSE(isHidden(browser, "cancel_upload")) << "the browser offers to cancel it";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_upload_in_browser.png");
+	lv_obj_send_event(lv_obj_find_by_name(browser, "cancel_upload"), LV_EVENT_CLICKED, nullptr);
+
+	// The printer is sent filler for the rest, refuses it, and what there is of it is deleted
+	for (int exchange = 0; exchange < 200 && !isHidden(browser, "transfer"); exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+		deliverModelEvents();
+		runTimers();
+	}
+	pollSimulator();
+	deliverModelEvents();
+	runTimers();
+	EXPECT_TRUE(isHidden(browser, "transfer"));
+	EXPECT_FALSE(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
+												   { return machine.writtenFile("0:/gcodes/benchy.gcode"); }));
+
+	// Opened again, the dialog says how it went
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(isHidden(browser, "cancel_upload"));
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED)) << "it can be uploaded again";
 }
 #endif
 

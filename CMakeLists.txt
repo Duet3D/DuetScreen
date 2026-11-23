@@ -487,6 +487,10 @@ target_link_libraries(
           fmt::fmt
           Tracy::TracyClient)
 
+# zlib reads the screen's update archives (UpgradeHelper checks one before installing it)
+find_package(ZLIB REQUIRED)
+target_link_libraries(DuetScreen.lib PRIVATE ZLIB::ZLIB)
+
 if(PROCESSOR STREQUAL "T113")
   target_link_libraries(DuetScreen.lib PRIVATE gpiod wpa_client)
 endif()

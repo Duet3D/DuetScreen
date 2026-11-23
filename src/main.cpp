@@ -161,37 +161,7 @@ int main(int argc, char** argv)
 
 	Model::get().startEventLoop();
 
-	USB::UsbMonitor::getInstance().registerCallback(
-		[](const std::string& path, bool mounted)
-		{
-			ZoneScopedN("Upgrade USB Callback");
-			if (mounted)
-			{
-				LOG_INFO("USB drive mounted: {:s}", path.c_str());
-				std::string upgradeFilePath = path + "/DuetScreen.tar.gz";
-				if (!std::filesystem::exists(upgradeFilePath))
-				{
-					return;
-				}
-
-				struct stat file_stat;
-				if (stat(upgradeFilePath.c_str(), &file_stat) != 0)
-				{
-					LOG_ERROR("Error getting file stats for {:s}", upgradeFilePath.c_str());
-					return;
-				}
-
-				time_t lastModified = file_stat.st_mtime;
-				time_t savedModified = StorageHelper::getData(ID_UPGRADE_FILE_LAST_MODIFIED);
-
-				if (lastModified == savedModified)
-				{
-					return;
-				}
-
-				Model::get().post<EventType::UpdateAvailable>(upgradeFilePath);
-			}
-		});
+	UpgradeHelper::offerUpdatesOnUsbDrives();
 	USB::UsbMonitor::getInstance().startMonitoring();
 	UpgradeHelper::startMonitoringUpgradeStatus();
 

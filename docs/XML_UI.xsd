@@ -74,6 +74,7 @@
 			<xs:enumeration value="presenter.network.ssid"/>
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.no"/>
+			<xs:enumeration value="presenter.no_drive"/>
 			<xs:enumeration value="presenter.number.confirmable"/>
 			<xs:enumeration value="presenter.number.decimal"/>
 			<xs:enumeration value="presenter.number.range"/>
@@ -445,6 +446,22 @@
 			<xs:enumeration value="source.tool.shown"/>
 			<xs:enumeration value="source.tool.summary_auto"/>
 			<xs:enumeration value="source.tool.tiles"/>
+			<xs:enumeration value="source.usb.destination"/>
+			<xs:enumeration value="source.usb.dialog"/>
+			<xs:enumeration value="source.usb.dialog_title"/>
+			<xs:enumeration value="source.usb.drives"/>
+			<xs:enumeration value="source.usb.file_date"/>
+			<xs:enumeration value="source.usb.file_size"/>
+			<xs:enumeration value="source.usb.install_failed"/>
+			<xs:enumeration value="source.usb.install_text"/>
+			<xs:enumeration value="source.usb.installing"/>
+			<xs:enumeration value="source.usb.update"/>
+			<xs:enumeration value="source.usb.update_text"/>
+			<xs:enumeration value="source.usb.upload"/>
+			<xs:enumeration value="source.usb.upload_reason"/>
+			<xs:enumeration value="source.usb.upload_state"/>
+			<xs:enumeration value="source.usb.upload_text"/>
+			<xs:enumeration value="source.usb.uploading"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="subject">
@@ -581,6 +598,10 @@
 			<xs:enumeration value="actions.system.upgrade_from_github"/>
 			<xs:enumeration value="actions.tool.show"/>
 			<xs:enumeration value="actions.tool.toggle"/>
+			<xs:enumeration value="actions.usb.cancel_upload"/>
+			<xs:enumeration value="actions.usb.destination"/>
+			<xs:enumeration value="actions.usb.install"/>
+			<xs:enumeration value="actions.usb.upload"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
 			<xs:enumeration value="presenter.alert.choose"/>
 			<xs:enumeration value="presenter.alert.dismissed"/>
@@ -755,6 +776,7 @@
 			<xs:enumeration value="dialog_question"/>
 			<xs:enumeration value="files_jobs"/>
 			<xs:enumeration value="files_macros"/>
+			<xs:enumeration value="files_usb"/>
 			<xs:enumeration value="gcode_reference"/>
 			<xs:enumeration value="hardware_test"/>
 			<xs:enumeration value="heightmap"/>
@@ -938,6 +960,8 @@
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="transfer_progress"/>
+			<xs:enumeration value="usb_dialog"/>
 			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
@@ -1116,6 +1140,8 @@
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="transfer_progress"/>
+			<xs:enumeration value="usb_dialog"/>
 			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
@@ -1355,6 +1381,8 @@
 			<xs:enumeration value="tools_spindle_preset"/>
 			<xs:enumeration value="tools_tool"/>
 			<xs:enumeration value="tools_tool_heater"/>
+			<xs:enumeration value="transfer_progress"/>
+			<xs:enumeration value="usb_dialog"/>
 			<xs:enumeration value="value_button"/>
 			<xs:enumeration value="value_selector"/>
 			<xs:enumeration value="value_selector_choice"/>
@@ -2094,6 +2122,7 @@
 			<xs:enumeration value="tr.message.update_cancel"/>
 			<xs:enumeration value="tr.message.update_confirm"/>
 			<xs:enumeration value="tr.message.update_failed"/>
+			<xs:enumeration value="tr.message.update_install_failed"/>
 			<xs:enumeration value="tr.message.update_successful"/>
 			<xs:enumeration value="tr.message.update_successful_text"/>
 			<xs:enumeration value="tr.move.all_axes"/>
@@ -2551,6 +2580,29 @@
 			<xs:enumeration value="tr.units.mm_per_minute"/>
 			<xs:enumeration value="tr.units.mm_speed"/>
 			<xs:enumeration value="tr.units.rpm"/>
+			<xs:enumeration value="tr.usb.another_upload"/>
+			<xs:enumeration value="tr.usb.cancel_upload"/>
+			<xs:enumeration value="tr.usb.cancelled"/>
+			<xs:enumeration value="tr.usb.cancelling"/>
+			<xs:enumeration value="tr.usb.checking"/>
+			<xs:enumeration value="tr.usb.destination"/>
+			<xs:enumeration value="tr.usb.done"/>
+			<xs:enumeration value="tr.usb.failed"/>
+			<xs:enumeration value="tr.usb.firmware"/>
+			<xs:enumeration value="tr.usb.installing"/>
+			<xs:enumeration value="tr.usb.no_drive"/>
+			<xs:enumeration value="tr.usb.no_folder"/>
+			<xs:enumeration value="tr.usb.not_connected"/>
+			<xs:enumeration value="tr.usb.not_update"/>
+			<xs:enumeration value="tr.usb.reading"/>
+			<xs:enumeration value="tr.usb.sending"/>
+			<xs:enumeration value="tr.usb.system"/>
+			<xs:enumeration value="tr.usb.title"/>
+			<xs:enumeration value="tr.usb.update_ok"/>
+			<xs:enumeration value="tr.usb.update_patch"/>
+			<xs:enumeration value="tr.usb.update_screen"/>
+			<xs:enumeration value="tr.usb.update_wrong_system"/>
+			<xs:enumeration value="tr.usb.upload"/>
 			<xs:enumeration value="tr.widget.align_center"/>
 			<xs:enumeration value="tr.widget.align_left"/>
 			<xs:enumeration value="tr.widget.align_right"/>
@@ -20406,6 +20458,22 @@
 			<xs:attribute name="standby" type="xs:string">
 				<xs:annotation><xs:documentation>Prop `standby` (string)</xs:documentation></xs:annotation>
 			</xs:attribute>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="transfer_progress">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/common/transfer_progress.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
+			<xs:attributeGroup ref="lv_obj.attributes"/>
+			<xs:anyAttribute processContents="lax"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="usb_dialog">
+		<xs:annotation><xs:documentation>Component from assets/ui/components/modals/usb_dialog.xml.</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:group ref="anyContent"/>
 			<xs:attributeGroup ref="lv_obj.attributes"/>
 			<xs:anyAttribute processContents="lax"/>
 		</xs:complexType>

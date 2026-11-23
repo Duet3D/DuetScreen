@@ -1,5 +1,5 @@
 <!--
-  The Files page: macros and jobs in tabs. While there is a job the Jobs tab is disabled, so the job can't be replaced.
+  The Files page: macros, jobs, and the USB drives plugged into the screen, in tabs. While there is a job the Jobs tab is disabled, so the job can't be replaced.
 
   Each tab is a file browser with settings of its own (src/UI/Presenters/Presenters.cpp).
 -->
@@ -13,6 +13,9 @@
 			</ds_tabs-tab>
 			<ds_tabs-tab name="jobs" icon="job.png" title_tag="tr.file.jobs" bind_disabled="source.machine.job_active">
 				<ds_view name="files_jobs" view="file_browser" presenter="files_jobs" shown="true"/>
+			</ds_tabs-tab>
+			<ds_tabs-tab name="usb" icon="usb.png" title_tag="tr.usb.title">
+				<ds_view name="files_usb" view="file_browser" presenter="files_usb" shown="true"/>
 			</ds_tabs-tab>
 		</ds_tabs>
 	</view>

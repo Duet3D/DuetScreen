@@ -30,6 +30,8 @@ The screenshots below are taken from the repository test references in [tests/re
 | Capability | Screenshot |
 | --- | --- |
 | Macro listing | ![Macro list](tests/ref_imgs/home_view/files_view/macros.png) |
+| USB drive: upload a file to the printer | ![Uploading from a USB drive](tests/ref_imgs/home_view/files_view/usb_uploading.png) |
+| USB drive: update the screen | ![Screen update on a USB drive](tests/ref_imgs/home_view/files_view/usb_update.png) |
 
 ### Console
 
@@ -173,6 +175,7 @@ Several methods are available to update the Duet3D screen.
     - In the GUI you will be prompted to update the screen.
     - If the update is successful, the screen will automatically reboot. This will appear as a brief flash and the GUI will return to the home screen.
     - The update will create an empty file called `upgraded` in the root directory of the USB flash drive. This file is used to indicate that the update was successful.
+    - An update file anywhere on the drive, under any name ending `.tar.gz`, can also be installed from **Files › USB drive**: tap it, then **Update screen**. The screen checks it first, as the update service does, and says if it was made for a different system image (Buildroot version), when the SD card must be flashed instead.
 
     The screen will automatically check for updates when if it connects to the internet. If an update is available, you will be asked if you want to install the update. Installing will typically take a couple seconds and the screen will automatically restart if the update is successful.
 

@@ -474,7 +474,17 @@ namespace UI
 	void NotificationsPresenter::newUpdateAvailable(const std::string& file)
 	{
 		m_updateFile = file;
-		offerUpdate(_("message.update_available_text"), [this]() { UpgradeHelper::upgradeFromUSB(m_updateFile); });
+		offerUpdate(_("message.update_available_text"),
+					[this]()
+					{
+						UpgradeHelper::installFromUsb(m_updateFile,
+													  [](const std::string& why)
+													  {
+														  Model::get().post<EventType::Response>(
+															  ResponseType::ERROR,
+															  _("message.update_install_failed", why));
+													  });
+					});
 	}
 
 	void NotificationsPresenter::newGithubUpdateAvailable(const std::string& latestVersion)

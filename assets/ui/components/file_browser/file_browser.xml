@@ -1,9 +1,12 @@
 <!--
-  Browse a folder of jobs or macros. Along the top: Up, to the folder above; the open folder's path, starting from the
+  Browse a folder of jobs or macros, or of the USB drives plugged into the screen. Along the top: Up, to the folder above; the open folder's path, starting from the
   jobs or macros folder, whose folders can be tapped to go back to them; the order (by name, date or size: the one in
   use, tapped again, reverses it); a list or tiles; and reading the folder again. Under it, the folder's files and
-  folders as a list or as tiles, or a line saying it is empty. Tapping a folder opens it; tapping a file asks whether to
-  start it (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml).
+  folders as a list or as tiles, or a line saying it is empty (or that no USB drive is plugged in). While a file is
+  written to the printer (an upload), how it is going shows above them, with a button to cancel an upload from a USB
+  drive. Tapping a folder opens it; tapping a file asks
+  whether to start it (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml), or, on a USB drive,
+  what to do with it in the USB dialog (modals/usb_dialog.xml).
 
   Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
   e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Presenters/Presenters.cpp).
@@ -50,12 +53,31 @@
 			</ds_button>
 		</lv_obj>
 
+		<lv_obj name="transfer" width="100%" height="content" flex_flow="row" scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<bind_flag_if_eq subject="source.files.transferring" flag="hidden" ref_value="0"/>
+			<transfer_progress name="progress" width="1" flex_grow="1"/>
+			<ds_button name="cancel_upload" icon="close.png" width="48" height="40">
+				<style name="danger_btn"/>
+				<bind_flag_if_eq subject="source.usb.uploading" flag="hidden" ref_value="0"/>
+				<bind_state_if_eq subject="source.usb.upload_state" state="disabled" ref_value="4"/>
+				<action trigger="clicked" name="actions.usb.cancel_upload"/>
+			</ds_button>
+		</lv_obj>
+
 		<lv_obj name="list" width="100%" flex_grow="1" flex_flow="column" scrollable="false">
 			<style name="pad_zero"/>
 			<lv_label name="empty" translation_tag="tr.file.empty" width="100%" style_text_align="center"
 					  style_pad_ver="32">
 				<style name="text_muted"/>
 				<bind_flag_if_eq subject="presenter.empty" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<lv_label name="no_drive" translation_tag="tr.usb.no_drive" width="100%" style_text_align="center"
+					  style_pad_ver="32">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.no_drive" flag="hidden" ref_value="0"/>
 			</lv_label>
 			<ds_list name="rows" list="presenter.files" item="file_browser_row" windowed="true" item_height="64"
 					 width="100%" height="100%" flex_grow="1" scroll_dir="ver" style_pad_row="6">

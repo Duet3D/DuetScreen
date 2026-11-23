@@ -1,11 +1,14 @@
 /*
  * FileBrowserPresenter.h
  *
- * Behaviour for the file browser (assets/ui/components/file_browser/file_browser.xml): browse the jobs or macros
- * folder, up and down its folders, sort it, and show it as a list or as tiles. Each file says how long its job takes
- * and the filament it uses once the printer has said, else its date and size (FilesSource::detail). Tapping a job or
- * macro opens the shared file dialog (UI/Xml/Data/FilesSource.h), which asks whether to start or run it, or delete
- * it; the folder is listed again whenever the printer's files change.
+ * Behaviour for the file browser (assets/ui/components/file_browser/file_browser.xml): browse the printer's jobs or
+ * macros folder, or the USB drives plugged into the screen, up and down their folders, sort them, and show them as a
+ * list or as tiles. Each job says how long it takes and the filament it uses once the printer has said, else its date
+ * and size (FilesSource::detail). Tapping a job or macro opens the shared file dialog (UI/Xml/Data/FilesSource.h),
+ * which asks whether to start or run it, or delete it; the folder is listed again whenever the printer's files change.
+ * Tapping a file on a USB drive opens the shared USB dialog (UI/Xml/Data/UsbSource.h), which uploads it to the printer
+ * or updates the screen with it; the drive is listed again whenever a drive comes or goes. With one drive, its files
+ * are at the top; with several, each is a folder there.
  *
  * The browser is shown in several places, each with its own folder and remembered settings, so each placement
  * registers a presenter of its own (see Presenters/Presenters.cpp) and names it: `<ds_view view="file_browser"
@@ -72,7 +75,8 @@ namespace UI
 		enum class BaseFolder
 		{
 			GCODES, // Jobs
-			MACROS	// Macros
+			MACROS, // Macros
+			USB		// The USB drives plugged into the screen
 		};
 
 		/** How files are shown; stored, so the values must not change */
@@ -146,9 +150,16 @@ namespace UI
 		/** The row showing the file at `path`, or nullptr if it isn't shown */
 		FileRow* rowOf(const std::string& path);
 
-		/** The base folder's path, e.g. "0:/gcodes". It reads the object model, so call it only on the UI's thread,
-		 * not from a reply's callback (see m_baseFolder). */
+		/** The base folder's path, e.g. "0:/gcodes"; for USB drives, the one drive's ("/media/usb0"), or where they
+		 * all are ("/media"). It reads the object model, so call it only on the UI's thread, not from a reply's
+		 * callback (see m_baseFolder). */
 		std::string baseFolderPath() const;
+
+		/** Whether the browser shows the USB drives, not the printer's files */
+		bool onUsb() const { return m_settings.folder == BaseFolder::USB; }
+
+		/** List the open folder of the USB drives, at once */
+		void listUsb();
 
 		Settings m_settings;					  // What is shown and where settings are kept
 		std::string m_folder;					  // Open folder below the base folder, e.g. "parts/"; "" for the base
@@ -168,5 +179,6 @@ namespace UI
 		Xml::IntSubject m_tiles;				  // 1 when showing tiles
 		Xml::IntSubject m_inSubfolder;			  // 1 while a folder below the base folder is open
 		Xml::IntSubject m_empty;				  // 1 once the open folder is read and has nothing in it
+		Xml::IntSubject m_noDrive;				  // 1 when browsing USB drives and none is plugged in
 	};
 } // namespace UI

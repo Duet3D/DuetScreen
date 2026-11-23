@@ -15,6 +15,7 @@
 #include "Configuration.h"
 #include "DeadlockDetector.h"
 #include "Debug.h"
+#include "Hardware/Usb.h"
 #include "ObjectModel/Files.h"
 #include "ObjectModel/Followers.h"
 #include "ObjectModel/Tree/Json.h"
@@ -27,12 +28,17 @@ extern "C"
 {
 #include "image/base64.h"
 }
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <cstring>
 #include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
 #include <iterator>
 #include <nlohmann/json.hpp>
 #include <unistd.h>
+#include <zlib.h>
 #if DUET_SIMULATOR
 #  include "Simulator/Simulator.h"
 #endif
@@ -66,6 +72,8 @@ TestSuite::TestSuite()
 	std::filesystem::remove_all(cacheFolder());
 	Comm::FileInfoCache::get().setFolders(cacheFolder() / "kept", cacheFolder() / "thumbnails");
 	Comm::FileInfoCache::get().forget();
+	// No USB drive, whatever is plugged into the machine running the tests
+	USB::UsbMonitor::getInstance().setRoot(cacheFolder() / "media");
 }
 
 TestSuite::~TestSuite()
@@ -90,6 +98,59 @@ TestSuite::~TestSuite()
 std::filesystem::path TestSuite::cacheFolder()
 {
 	return std::filesystem::temp_directory_path() / fmt::format("duetscreen-tests-{:d}-cache", ::getpid());
+}
+
+std::filesystem::path TestSuite::plugInUsbDrive(int number)
+{
+	const std::filesystem::path drive = cacheFolder() / "media" / fmt::format("usb{:d}", number);
+	std::filesystem::create_directories(drive);
+	USB::UsbMonitor::getInstance().scan();
+	return drive;
+}
+
+void TestSuite::takeOutUsbDrive(int number)
+{
+	std::filesystem::remove_all(cacheFolder() / "media" / fmt::format("usb{:d}", number));
+	USB::UsbMonitor::getInstance().scan();
+}
+
+void TestSuite::writeArchive(const std::filesystem::path& path,
+							 const std::vector<std::pair<std::string, std::string>>& files)
+{
+	gzFile archive = gzopen(path.c_str(), "wb");
+	ASSERT_NE(archive, nullptr);
+	// One entry: a 512-byte header, then the data padded to a whole number of 512-byte blocks
+	const auto entry = [archive](const std::string& name, char type, const std::string& data)
+	{
+		std::array<char, 512> header{};
+		std::memcpy(header.data(), name.data(), std::min<size_t>(name.size(), 100));
+		std::snprintf(header.data() + 100, 8, "%07o", 0644);
+		std::snprintf(header.data() + 124, 12, "%011zo", data.size());
+		header[156] = type;
+		std::memcpy(header.data() + 257, "ustar  ", 8); // GNU's magic and version
+		std::memset(header.data() + 148, ' ', 8);
+		unsigned sum = 0;
+		for (char c : header)
+		{
+			sum += static_cast<unsigned char>(c);
+		}
+		std::snprintf(header.data() + 148, 8, "%06o", sum);
+		gzwrite(archive, header.data(), header.size());
+		gzwrite(archive, data.data(), static_cast<unsigned>(data.size()));
+		const std::string padding((512 - data.size() % 512) % 512, '\0');
+		gzwrite(archive, padding.data(), static_cast<unsigned>(padding.size()));
+	};
+	for (const auto& [name, contents] : files)
+	{
+		if (name.size() > 99)
+		{
+			entry("././@LongLink", 'L', name + '\0');
+		}
+		entry(name, '0', contents);
+	}
+	const std::string end(1024, '\0');
+	gzwrite(archive, end.data(), static_cast<unsigned>(end.size()));
+	gzclose(archive);
 }
 
 std::filesystem::path TestSuite::configFile()

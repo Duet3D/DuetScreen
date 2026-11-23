@@ -6,85 +6,49 @@
  */
 
 #include "Usb.h"
-#include "sys/stat.h"
 #include "tracy/Tracy.hpp"
-#include "utils/utils.h"
 #include <algorithm>
 #include <chrono>
-#include <cstring>
 #include <fstream>
 #include <sstream>
 
 namespace USB
 {
-#if 1
-	std::vector<FileInfo> ListEntriesInDirectory(const std::string& directoryPath)
+	namespace
 	{
-		ZoneScoped;
-		std::vector<FileInfo> files;
+		/** How many drives the system mounts: /media/usb0 to /media/usb7 */
+		constexpr int maxDrives = 8;
 
-		// Open the directory
-		DIR* dir = opendir(directoryPath.c_str());
-		if (dir == nullptr)
+		/** Where the system mounts drives, or the folder standing in for it in the simulation */
+		std::filesystem::path defaultRoot()
 		{
-			LOG_ERROR("Error opening directory {:s}", directoryPath.c_str());
-			return files;
+#if SIMULATION
+			return "./var/media";
+#else
+			return "/media";
+#endif
 		}
 
-		// Read the directory entries
-		dirent* entry;
-		while ((entry = readdir(dir)) != nullptr)
+		/** The mount points in /proc/mounts */
+		std::vector<std::string> mountPoints()
 		{
-			std::string name = entry->d_name;
-			if (name == "." || name == ".." || name == "System Volume Information")
+			std::vector<std::string> points;
+			std::ifstream mounts("/proc/mounts");
+			std::string line;
+			while (std::getline(mounts, line))
 			{
-				continue;
-			}
-
-			// Add files to the vector
-			if (entry->d_type == DT_REG || entry->d_type == DT_DIR)
-			{ // Regular file or folder
-				FileInfo info;
-				struct stat sb;
-				if (stat((directoryPath + "/" + entry->d_name).c_str(), &sb) == -1)
+				// "<device> <mount point> <type> <options> 0 0"
+				std::istringstream fields(line);
+				std::string device;
+				std::string point;
+				if (fields >> device >> point)
 				{
-					LOG_ERROR("Failed to get file stats for {:s}", (directoryPath + entry->d_name).c_str());
+					points.push_back(point);
 				}
-				strncpy(info.d_name, entry->d_name, 256);
-				info.d_type = entry->d_type;
-				info.st_size = sb.st_size;
-				info.st_blksize = sb.st_blksize;
-				info.st_blocks = sb.st_blocks;
-#  ifndef __APPLE__
-				info.st_atim = sb.st_atim;
-				info.st_ctim = sb.st_ctim;
-				info.st_mtim = sb.st_mtim;
-#  endif
-				files.push_back(info);
 			}
+			return points;
 		}
-
-		// Close the directory
-		closedir(dir);
-
-		return files;
-	}
-
-	bool ReadUsbFileContents(const std::string& filePath, std::string& contents)
-	{
-		ZoneScoped;
-		std::string fullPath;
-		if (filePath.rfind("/mnt/usb") == 0)
-		{
-			fullPath = filePath;
-		}
-		else
-		{
-			fullPath = std::string("/mnt/usb0/") + filePath;
-		}
-
-		return ReadFileContents(fullPath, contents);
-	}
+	} // namespace
 
 	bool ReadFileContents(const std::string& filePath, std::string& contents)
 	{
@@ -116,7 +80,12 @@ namespace USB
 		LOG_DBG("Read {:d} bytes", contents.size());
 		return true;
 	}
-#endif
+
+	UsbMonitor::UsbMonitor()
+		: m_root(defaultRoot())
+		, m_mountPointsOnly(!SIMULATION)
+	{
+	}
 
 	UsbMonitor::~UsbMonitor()
 	{
@@ -127,35 +96,32 @@ namespace USB
 	void UsbMonitor::startMonitoring()
 	{
 		ZoneScoped;
-		if (!running)
+		if (!m_running.exchange(true))
 		{
-			running = true;
-			monitor_thread = std::thread(&UsbMonitor::monitorThread, this);
+			m_thread = std::thread(&UsbMonitor::monitorThread, this);
 		}
 	}
 
 	void UsbMonitor::stopMonitoring()
 	{
 		ZoneScoped;
-		if (running)
+		if (m_running.exchange(false) && m_thread.joinable())
 		{
-			running = false;
-			if (monitor_thread.joinable())
-			{
-				monitor_thread.join();
-			}
+			m_thread.join();
 		}
 	}
 
 	void UsbMonitor::registerCallback(UsbDriveCallback callback, bool initialNotify)
 	{
 		ZoneScoped;
-		std::lock_guard<LockableBase(std::mutex)> lock(callback_mutex);
-		callbacks.push_back(callback);
-
-		if (running && initialNotify)
+		std::vector<std::string> mounts;
 		{
-			const auto mounts = getMountedDrives();
+			std::lock_guard<LockableBase(std::mutex)> lock(m_mutex);
+			m_callbacks.push_back(callback);
+			mounts = m_mounts;
+		}
+		if (initialNotify)
+		{
 			for (const auto& mount : mounts)
 			{
 				callback(mount, true);
@@ -165,41 +131,91 @@ namespace USB
 
 	std::vector<std::string> UsbMonitor::getMountedDrives() const
 	{
-		ZoneScoped;
-		return current_mounts;
+		std::lock_guard<LockableBase(std::mutex)> lock(m_mutex);
+		return m_mounts;
 	}
 
-	std::vector<std::string> UsbMonitor::getUsbMounts()
+	void UsbMonitor::setRoot(std::filesystem::path root)
 	{
 		ZoneScoped;
-		std::vector<std::string> mounts;
-		FILE* fp = popen("grep \"/media/usb\" /proc/mounts | awk '{print $2}'", "r");
-		if (fp == nullptr)
+		std::lock_guard<LockableBase(std::mutex)> scanning(m_scanMutex);
+		std::vector<std::string> forgotten;
 		{
-			LOG_ERROR("Failed to run mount point detection command");
-			return mounts;
+			std::lock_guard<LockableBase(std::mutex)> lock(m_mutex);
+			m_root = std::move(root);
+			m_mountPointsOnly = false;
+			forgotten = std::move(m_mounts);
+			m_mounts.clear();
 		}
-
-		char path[256];
-		while (fgets(path, sizeof(path), fp) != nullptr)
+		for (const auto& mount : forgotten)
 		{
-			// Remove newline if present
-			size_t len = strlen(path);
-			if (len > 0 && path[len - 1] == '\n')
+			notifyCallbacks(mount, false);
+		}
+	}
+
+	std::vector<std::string> UsbMonitor::findDrives() const
+	{
+		ZoneScoped;
+		std::filesystem::path root;
+		bool mountPointsOnly = true;
+		{
+			std::lock_guard<LockableBase(std::mutex)> lock(m_mutex);
+			root = m_root;
+			mountPointsOnly = m_mountPointsOnly;
+		}
+		const std::vector<std::string> points = mountPointsOnly ? mountPoints() : std::vector<std::string>();
+		std::vector<std::string> drives;
+		for (int i = 0; i < maxDrives; i++)
+		{
+			const std::string drive = (root / fmt::format("usb{:d}", i)).string();
+			std::error_code error;
+			const bool found = mountPointsOnly ? std::ranges::find(points, drive) != points.end()
+											   : std::filesystem::is_directory(drive, error);
+			if (found)
 			{
-				path[len - 1] = '\0';
+				drives.push_back(drive);
 			}
-			mounts.push_back(path);
 		}
+		return drives;
+	}
 
-		pclose(fp);
-		return mounts;
+	void UsbMonitor::scan()
+	{
+		ZoneScoped;
+		std::lock_guard<LockableBase(std::mutex)> scanning(m_scanMutex);
+		const std::vector<std::string> found = findDrives();
+		std::vector<std::string> known;
+		{
+			std::lock_guard<LockableBase(std::mutex)> lock(m_mutex);
+			known = m_mounts;
+			m_mounts = found;
+		}
+		for (const auto& mount : found)
+		{
+			if (std::ranges::find(known, mount) == known.end())
+			{
+				LOG_INFO("USB drive mounted at: {:s}", mount);
+				notifyCallbacks(mount, true);
+			}
+		}
+		for (const auto& mount : known)
+		{
+			if (std::ranges::find(found, mount) == found.end())
+			{
+				LOG_INFO("USB drive unmounted from: {:s}", mount);
+				notifyCallbacks(mount, false);
+			}
+		}
 	}
 
 	void UsbMonitor::notifyCallbacks(const std::string& path, bool connected)
 	{
 		ZoneScoped;
-		std::lock_guard<LockableBase(std::mutex)> lock(callback_mutex);
+		std::vector<UsbDriveCallback> callbacks;
+		{
+			std::lock_guard<LockableBase(std::mutex)> lock(m_mutex);
+			callbacks = m_callbacks;
+		}
 		for (const auto& callback : callbacks)
 		{
 			callback(path, connected);
@@ -210,44 +226,11 @@ namespace USB
 	{
 		tracy::SetThreadName("USB Monitor Thread");
 		LOG_VERBOSE("USB monitor thread started");
-
-		while (running)
+		while (m_running)
 		{
-			{
-				ZoneScoped;
-				auto new_mounts = getUsbMounts();
-
-				const auto old_mounts = getMountedDrives();
-				{
-					std::lock_guard<LockableBase(std::mutex)> lock(callback_mutex);
-					current_mounts = new_mounts;
-				}
-
-				// Find new mounts
-				for (const auto& mount : new_mounts)
-				{
-					if (std::find(old_mounts.begin(), old_mounts.end(), mount) == old_mounts.end())
-					{
-						LOG_INFO("USB drive mounted at: {:s}", mount.c_str());
-						notifyCallbacks(mount, true);
-					}
-				}
-
-				// Find removed mounts
-				for (const auto& mount : old_mounts)
-				{
-					if (std::find(new_mounts.begin(), new_mounts.end(), mount) == new_mounts.end())
-					{
-						LOG_INFO("USB drive unmounted from: {:s}", mount.c_str());
-						notifyCallbacks(mount, false);
-					}
-				}
-			}
-
-			// Sleep for a bit to avoid excessive CPU usage
+			scan();
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
-
 		LOG_VERBOSE("USB monitor thread stopped");
 	}
 } // namespace USB

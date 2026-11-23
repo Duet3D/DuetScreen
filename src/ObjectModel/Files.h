@@ -180,10 +180,13 @@ namespace OM::FileSystem
 					  const std::string& path,
 					  request_files_cb_t callback,
 					  bool runEveryTime = false);
-	void RequestUsbFiles(const std::string& path);
+	/**
+	 * The files and folders in the folder `path` on the screen (on a USB drive), each with its size and date, at once;
+	 * or why it can't be read. Hidden ones (".Trashes", "._benchy.gcode") and "System Volume Information" are left out.
+	 */
+	std::expected<ItemList, std::string> ListLocalFolder(const std::string& path);
 	void RunFile(const ItemPtr& file);
 	void RunMacro(const std::string& path);
-	void UploadFile(const ItemPtr& file);
 	void StartPrint(const std::string& path);
 	void ResumePrint();
 	void PausePrint();
