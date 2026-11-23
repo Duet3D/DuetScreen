@@ -148,6 +148,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Dieser Ordner ist leer",
+      "search_placeholder": "Diesen Ordner durchsuchen",
+      "no_match": "Nichts in diesem Ordner passt zur Suche",
       "uploading": "Hochladen",
       "delete": "Löschen",
       "running_another": "Ein anderer Auftrag läuft: dieser kann starten, sobald er beendet ist",

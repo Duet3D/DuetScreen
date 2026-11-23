@@ -611,6 +611,87 @@ TEST_F(TestHomeView, FileBrowserGoesUpSaysWhatAFileIsAndWhenAFolderIsEmpty)
 	EXPECT_TRUE(lv_obj_has_state(up, LV_STATE_DISABLED));
 }
 
+TEST_F(TestHomeView, SearchShowsOnlyTheFilesWhoseNamesHoldWhatIsTyped)
+{
+	// With an input group, as the screen has, so the search line takes the focus from the button that opens it
+	lv_group_t* group = lv_group_create();
+	lv_group_set_default(group);
+	lv_indev_t* pointer = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	lv_indev_set_group(pointer, group);
+	UI::Xml::reload();
+	const auto tap = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
+
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_send_event(lv_obj_find_by_name(browser, "list_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_t* search = lv_obj_find_by_name(browser, "search");
+	lv_obj_t* input = lv_obj_find_by_name(browser, "search_input");
+	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
+	ASSERT_NE(keyboard, nullptr);
+	EXPECT_TRUE(isHidden(browser, "search_line")) << "closed until search is tapped";
+
+	// Opened, it is ready to type into
+	tap(search);
+	EXPECT_FALSE(isHidden(browser, "search_line"));
+	EXPECT_TRUE(lv_obj_has_state(search, LV_STATE_CHECKED));
+	EXPECT_TRUE(lv_obj_has_state(input, LV_STATE_FOCUSED));
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "the keyboard comes up at once";
+	EXPECT_EQ(lv_keyboard_get_textarea(keyboard), input);
+
+	// Only the names holding what is typed, whatever its case
+	lv_textarea_set_text(input, "TEST");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_NE(fileItem(browser, "test.gcode"), nullptr);
+	EXPECT_THROW(fileItem(browser, "Folder"), std::runtime_error);
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/search.png");
+
+	// Nothing found says so, not that the folder is empty
+	lv_textarea_set_text(input, "benchy");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_FALSE(isHidden(browser, "no_match"));
+	EXPECT_TRUE(isHidden(browser, "empty"));
+	EXPECT_THROW(fileItem(browser, "test.gcode"), std::runtime_error);
+	lv_obj_send_event(input, LV_EVENT_READY, nullptr); // the keyboard's OK key puts it away
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/search_no_match.png");
+
+	// Emptied, everything shows again
+	tap(lv_obj_find_by_name(browser, "clear_search"));
+	EXPECT_STREQ(lv_textarea_get_text(input), "");
+	EXPECT_TRUE(isHidden(browser, "no_match"));
+	EXPECT_NE(fileItem(browser, "Folder"), nullptr);
+	EXPECT_NE(fileItem(browser, "test.gcode"), nullptr);
+
+	// A folder found opens unsearched
+	lv_textarea_set_text(input, "fold");
+	tap(fileItem(browser, "Folder"));
+	EXPECT_TRUE(isHidden(browser, "search_line"));
+	EXPECT_FALSE(lv_obj_has_state(search, LV_STATE_CHECKED));
+	EXPECT_STREQ(lv_textarea_get_text(input), "");
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// Search tapped again closes the line and shows everything
+	lv_obj_send_event(lv_obj_find_by_name(browser, "up"), LV_EVENT_CLICKED, nullptr);
+	tap(search);
+	lv_textarea_set_text(input, "fold");
+	EXPECT_THROW(fileItem(browser, "test.gcode"), std::runtime_error);
+	tap(search);
+	EXPECT_TRUE(isHidden(browser, "search_line"));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_NE(fileItem(browser, "test.gcode"), nullptr);
+
+	lv_test_mouse_release();
+	lv_indev_set_group(pointer, nullptr);
+	lv_group_set_default(nullptr);
+	lv_group_delete(group);
+}
+
 TEST_F(TestHomeView, BlankStatusView)
 {
 	showJobStatus();

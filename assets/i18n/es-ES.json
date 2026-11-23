@@ -148,6 +148,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Esta carpeta está vacía",
+      "search_placeholder": "Buscar en esta carpeta",
+      "no_match": "Nada en esta carpeta coincide con la búsqueda",
       "uploading": "Subiendo",
       "delete": "Eliminar",
       "running_another": "Hay otro trabajo en curso: este podrá empezar cuando termine",

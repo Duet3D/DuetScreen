@@ -28,8 +28,9 @@ namespace UI::Xml
 	  private:
 		/**
 		 * The user pressed outside the box while editing: watch the presses from now on, and end the edit on the first
-		 * that is a tap outside it (see leftReleasedCb). LVGL tells the box only of the first press elsewhere, so a scroll
-		 * that keeps the edit going is followed by presses it would not hear of. Without a press to watch, end it now.
+		 * that is a tap outside it (see leftReleasedCb). LVGL tells the box only of the first press elsewhere, so a
+		 * scroll that keeps the edit going is followed by presses it would not hear of. Without a press to watch, end
+		 * it now.
 		 */
 		void leftByPress();
 
@@ -64,6 +65,15 @@ namespace UI::Xml
 		/** `bind_keyboard_mode` observer */
 		static void keyboardModeObserverCb(lv_observer_t* observer, lv_subject_t* subject);
 
+		/** `bind_editing` observer: start the edit as the subject turns non-zero, end it as it turns 0 */
+		static void editingObserverCb(lv_observer_t* observer, lv_subject_t* subject);
+
+		/** Start an edit as tapping the box does: focus it in its group, bringing up the keyboard */
+		void startEdit();
+
+		/** End the edit, if there is one, as the keyboard's close key does */
+		void endEdit();
+
 		/**
 		 * Focus and editing events: bring up or put away the keyboard. Tapping outside the box (LEAVE) ends the edit
 		 * like losing focus, and tapping the box while the keyboard is away starts it again.
@@ -88,7 +98,8 @@ namespace UI::Xml
 		bool m_hideOnReady = true;								 // Put the keyboard away on its OK key
 		bool m_hideOnDefocus = true;							 // Put the keyboard away when focus leaves
 		bool m_settingQuietly = false;							 // True while `bind_text` writes the text
+		int32_t m_editing = 0;									 // `bind_editing`'s last value, to see it change
 		lv_obj_t* m_shownKeyboard = nullptr;					 // The keyboard shown for this box, if it is up
-		lv_indev_t* m_leavingIndev = nullptr;					 // The input device watched since the box was left, if any
+		lv_indev_t* m_leavingIndev = nullptr; // The input device watched since the box was left, if any
 	};
 } // namespace UI::Xml

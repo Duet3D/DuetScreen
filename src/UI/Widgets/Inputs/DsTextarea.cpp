@@ -142,6 +142,11 @@ namespace UI::Xml
 				   "The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same "
 				   "view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box "
 				   "edited another way, such as a number pad"},
+				  {"bind_editing",
+				   "Follow an integer subject: turning non-zero starts an edit, as tapping the box does (e.g. a box "
+				   "shown by a button, ready to type into), and turning 0 ends it. Only changes count, not the value "
+				   "when the box is made, and the box's own taps start and end edits as usual",
+				   AttributeKind::Subject},
 				  {"hide_keyboard_on_ready", "Put the keyboard away when its OK key is pressed (default true)"},
 				  {"hide_keyboard_on_defocus",
 				   "Put the keyboard away when the box loses focus or something outside it is tapped (default true)"},
@@ -203,6 +208,12 @@ namespace UI::Xml
 		{
 			lv_subject_add_observer_obj(subject, textObserverCb, root, &textarea);
 		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_editing"))
+		{
+			// Its value now is no change, so it starts nothing
+			textarea.m_editing = lv_subject_get_int(subject);
+			lv_subject_add_observer_obj(subject, editingObserverCb, root, &textarea);
+		}
 	}
 
 	void DsTextarea::textObserverCb(lv_observer_t* observer, lv_subject_t* subject)
@@ -232,6 +243,51 @@ namespace UI::Xml
 	{
 		static_cast<DsTextarea*>(lv_observer_get_user_data(observer))->m_mode =
 			keyboardMode(lv_subject_get_string(subject));
+	}
+
+	void DsTextarea::editingObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* textarea = static_cast<DsTextarea*>(lv_observer_get_user_data(observer));
+		const int32_t editing = lv_subject_get_int(subject);
+		if ((editing != 0) == (textarea->m_editing != 0))
+		{
+			textarea->m_editing = editing;
+			return;
+		}
+		textarea->m_editing = editing;
+		if (editing != 0)
+		{
+			textarea->startEdit();
+		}
+		else
+		{
+			textarea->endEdit();
+		}
+	}
+
+	void DsTextarea::startEdit()
+	{
+		lv_obj_t* root = getRootPtr();
+		lv_group_t* group = lv_obj_get_group(root);
+		if (group != nullptr && lv_group_get_focused(group) != root)
+		{
+			lv_group_focus_obj(root); // raises FOCUSED, which brings up the keyboard
+			return;
+		}
+		// Already focused (or in no group), it raises no FOCUSED: start the edit as a tap on it then does
+		lv_obj_send_event(root, LV_EVENT_FOCUSED, nullptr);
+	}
+
+	void DsTextarea::endEdit()
+	{
+		if (m_shownKeyboard == nullptr)
+		{
+			return;
+		}
+		lv_keyboard_set_textarea(m_shownKeyboard, nullptr);
+		showKeyboard(m_shownKeyboard, false);
+		// The edit ends, so whatever moved out of the keyboard's way can move back
+		lv_obj_send_event(getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
 	}
 
 	lv_obj_t* DsTextarea::findKeyboard() const

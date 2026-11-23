@@ -3,12 +3,12 @@
  *
  * Behaviour for the file browser (assets/ui/components/file_browser/file_browser.xml): browse the printer's jobs or
  * macros folder, or the USB drives plugged into the screen, up and down their folders, sort them, and show them as a
- * list or as tiles. Each job says how long it takes and the filament it uses once the printer has said, else its date
- * and size (FilesSource::detail). Tapping a job or macro opens the shared file dialog (UI/Xml/Data/FilesSource.h),
- * which asks whether to start or run it, or delete it; the folder is listed again whenever the printer's files change.
- * Tapping a file on a USB drive opens the shared USB dialog (UI/Xml/Data/UsbSource.h), which uploads it to the printer
- * or updates the screen with it; the drive is listed again whenever a drive comes or goes. With one drive, its files
- * are at the top; with several, each is a folder there.
+ * list or as tiles, and search the open folder for files and folders by name. Each job says how long it takes and the
+ * filament it uses once the printer has said, else its date and size (FilesSource::detail). Tapping a job or macro
+ * opens the shared file dialog (UI/Xml/Data/FilesSource.h), which asks whether to start or run it, or delete it; the
+ * folder is listed again whenever the printer's files change. Tapping a file on a USB drive opens the shared USB dialog
+ * (UI/Xml/Data/UsbSource.h), which uploads it to the printer or updates the screen with it; the drive is listed again
+ * whenever a drive comes or goes. With one drive, its files are at the top; with several, each is a folder there.
  *
  * The browser is shown in several places, each with its own folder and remembered settings, so each placement
  * registers a presenter of its own (see Presenters/Presenters.cpp) and names it: `<ds_view view="file_browser"
@@ -126,8 +126,17 @@ namespace UI
 		/** The printer sent the open folder's contents */
 		void receiveFiles(OM::FileSystem::ItemList items);
 
-		/** Sort the files and show them */
+		/** Sort the files, and show those the search finds */
 		void showFiles();
+
+		/** Look for `text` in the names of the open folder's files and folders ("" shows them all) */
+		void setSearch(std::string_view text);
+
+		/** Open the search line, or close it and stop searching */
+		void showSearch(bool shown);
+
+		/** Whether the search finds `item`: its shown name holds what is looked for, whatever the letters' case */
+		bool found(const OM::FileSystem::FileSystemItem& item) const;
 
 		/** Show the open folder's path */
 		void showCrumbs();
@@ -161,24 +170,29 @@ namespace UI
 		/** List the open folder of the USB drives, at once */
 		void listUsb();
 
-		Settings m_settings;					  // What is shown and where settings are kept
-		std::string m_folder;					  // Open folder below the base folder, e.g. "parts/"; "" for the base
-		std::string m_baseFolder;				  // The base folder, e.g. "0:/gcodes", noted on the UI's thread
-		Xml::OmWatch m_directoriesWatch;		  // Notes the base folder, and lists it, as the printer's folders change
-		Xml::OmWatch m_filesWatch;				  // Lists the folder again as the printer's files change
-		OM::FileSystem::ItemList m_items;		  // The open folder's contents, in shown order
-		SortBy m_sortBy = SortBy::DATE;			  // Order
-		bool m_sortDescending = true;			  // Direction
+		Settings m_settings;			  // What is shown and where settings are kept
+		std::string m_folder;			  // Open folder below the base folder, e.g. "parts/"; "" for the base
+		std::string m_baseFolder;		  // The base folder, e.g. "0:/gcodes", noted on the UI's thread
+		Xml::OmWatch m_directoriesWatch;  // Notes the base folder, and lists it, as the printer's folders change
+		Xml::OmWatch m_filesWatch;		  // Lists the folder again as the printer's files change
+		OM::FileSystem::ItemList m_items; // The open folder's contents, in shown order
+		OM::FileSystem::ItemList m_shown; // Those the search finds, in shown order: one per row of m_files
+		std::string m_search;			  // What is looked for, in lower case; "" for everything
+		SortBy m_sortBy = SortBy::DATE;	  // Order
+		bool m_sortDescending = true;	  // Direction
 
-		Xml::List<FileRow> m_files;				  // Shown files
-		Xml::List<CrumbRow> m_crumbs;			  // Open folder's path
-		Xml::IntSubject m_sort;					  // Order: 0 name, 1 date, 2 size
-		Xml::StringSubject<32> m_sortName;		  // Name-order button text
-		Xml::StringSubject<32> m_sortDate;		  // Date-order button text
-		Xml::StringSubject<32> m_sortSize;		  // Size-order button text
-		Xml::IntSubject m_tiles;				  // 1 when showing tiles
-		Xml::IntSubject m_inSubfolder;			  // 1 while a folder below the base folder is open
-		Xml::IntSubject m_empty;				  // 1 once the open folder is read and has nothing in it
-		Xml::IntSubject m_noDrive;				  // 1 when browsing USB drives and none is plugged in
+		Xml::List<FileRow> m_files;			  // Shown files
+		Xml::List<CrumbRow> m_crumbs;		  // Open folder's path
+		Xml::IntSubject m_sort;				  // Order: 0 name, 1 date, 2 size
+		Xml::StringSubject<32> m_sortName;	  // Name-order button text
+		Xml::StringSubject<32> m_sortDate;	  // Date-order button text
+		Xml::StringSubject<32> m_sortSize;	  // Size-order button text
+		Xml::IntSubject m_tiles;			  // 1 when showing tiles
+		Xml::IntSubject m_inSubfolder;		  // 1 while a folder below the base folder is open
+		Xml::IntSubject m_empty;			  // 1 once the open folder is read and has nothing in it
+		Xml::IntSubject m_noDrive;			  // 1 when browsing USB drives and none is plugged in
+		Xml::IntSubject m_searching;		  // 1 while the search line is open
+		Xml::StringSubject<128> m_searchText; // What is typed into the search line
+		Xml::IntSubject m_noMatch;			  // 1 when the open folder has files but the search finds none
 	};
 } // namespace UI

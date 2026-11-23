@@ -149,6 +149,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "This folder is empty",
+      "search_placeholder": "Search this folder",
+      "no_match": "Nothing in this folder matches the search",
       "uploading": "Uploading",
       "delete": "Delete",
       "running_another": "Another job is running: this one can start once it has ended",

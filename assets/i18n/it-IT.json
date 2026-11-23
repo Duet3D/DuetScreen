@@ -148,6 +148,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Questa cartella è vuota",
+      "search_placeholder": "Cerca in questa cartella",
+      "no_match": "Niente in questa cartella corrisponde alla ricerca",
       "uploading": "Caricamento",
       "delete": "Elimina",
       "running_another": "È in corso un altro lavoro: questo potrà partire quando sarà terminato",

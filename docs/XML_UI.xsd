@@ -75,6 +75,7 @@
 			<xs:enumeration value="presenter.networks"/>
 			<xs:enumeration value="presenter.no"/>
 			<xs:enumeration value="presenter.no_drive"/>
+			<xs:enumeration value="presenter.no_match"/>
 			<xs:enumeration value="presenter.number.confirmable"/>
 			<xs:enumeration value="presenter.number.decimal"/>
 			<xs:enumeration value="presenter.number.range"/>
@@ -100,6 +101,7 @@
 			<xs:enumeration value="presenter.save_problem"/>
 			<xs:enumeration value="presenter.saved"/>
 			<xs:enumeration value="presenter.search"/>
+			<xs:enumeration value="presenter.searching"/>
 			<xs:enumeration value="presenter.secondary.chroma"/>
 			<xs:enumeration value="presenter.secondary.lightness"/>
 			<xs:enumeration value="presenter.secondary_hue"/>
@@ -635,10 +637,13 @@
 			<xs:enumeration value="presenter.dialog.back"/>
 			<xs:enumeration value="presenter.dialog.close"/>
 			<xs:enumeration value="presenter.dialog.outside"/>
+			<xs:enumeration value="presenter.files.clear_search"/>
 			<xs:enumeration value="presenter.files.crumb"/>
+			<xs:enumeration value="presenter.files.find"/>
 			<xs:enumeration value="presenter.files.mode"/>
 			<xs:enumeration value="presenter.files.open"/>
 			<xs:enumeration value="presenter.files.refresh"/>
+			<xs:enumeration value="presenter.files.search"/>
 			<xs:enumeration value="presenter.files.sort"/>
 			<xs:enumeration value="presenter.files.up"/>
 			<xs:enumeration value="presenter.hardware_test.buzzer_heard"/>
@@ -1755,10 +1760,12 @@
 			<xs:enumeration value="tr.file.folder"/>
 			<xs:enumeration value="tr.file.jobs"/>
 			<xs:enumeration value="tr.file.macros"/>
+			<xs:enumeration value="tr.file.no_match"/>
 			<xs:enumeration value="tr.file.run_macro_message"/>
 			<xs:enumeration value="tr.file.run_macro_title"/>
 			<xs:enumeration value="tr.file.running_another"/>
 			<xs:enumeration value="tr.file.running_this"/>
+			<xs:enumeration value="tr.file.search_placeholder"/>
 			<xs:enumeration value="tr.file.sort_by_date"/>
 			<xs:enumeration value="tr.file.sort_by_name"/>
 			<xs:enumeration value="tr.file.sort_by_size"/>
@@ -4107,6 +4114,9 @@
 		</xs:attribute>
 		<xs:attribute name="keyboard" type="xs:string">
 			<xs:annotation><xs:documentation>The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box edited another way, such as a number pad</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="bind_editing" type="subject">
+			<xs:annotation><xs:documentation>Follow an integer subject: turning non-zero starts an edit, as tapping the box does (e.g. a box shown by a button, ready to type into), and turning 0 ends it. Only changes count, not the value when the box is made, and the box's own taps start and end edits as usual</xs:documentation></xs:annotation>
 		</xs:attribute>
 		<xs:attribute name="hide_keyboard_on_ready" type="xs:string">
 			<xs:annotation><xs:documentation>Put the keyboard away when its OK key is pressed (default true)</xs:documentation></xs:annotation>

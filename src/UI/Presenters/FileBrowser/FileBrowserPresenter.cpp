@@ -16,7 +16,9 @@
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
+#include <iterator>
 
 namespace UI
 {
@@ -37,6 +39,17 @@ namespace UI
 				return _(key);
 			}
 			return fmt::format("{:s} {:s}", descending ? LV_SYMBOL_DOWN : LV_SYMBOL_UP, _(key));
+		}
+
+		/** `text` with its letters in lower case, so names can be compared whatever their case */
+		std::string lowerCase(std::string_view text)
+		{
+			std::string lower(text);
+			std::transform(lower.begin(),
+						   lower.end(),
+						   lower.begin(),
+						   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+			return lower;
 		}
 	} // namespace
 
@@ -126,6 +139,16 @@ namespace UI
 			   [this](const Xml::ActionArgs& args)
 			   { setDisplayMode(args.arg == "tiles" ? DisplayMode::Tile : DisplayMode::List); });
 		action("files.refresh", "Read the folder again", [this](const Xml::ActionArgs&) { requestFiles(); });
+		action("files.search",
+			   "Open the search line, or close it and show every file again",
+			   [this](const Xml::ActionArgs&) { showSearch(m_searching.get() == 0); });
+		action("files.find",
+			   "Show only the files and folders whose names hold the search line's text (`value_changed` on it), "
+			   "whatever the letters' case",
+			   [this](const Xml::ActionArgs& args) { setSearch(args.text()); });
+		action("files.clear_search",
+			   "Empty the search line, showing every file again",
+			   [this](const Xml::ActionArgs&) { setSearch(""); });
 	}
 
 	void FileBrowserPresenter::fields(Xml::FieldVisitor& f)
@@ -143,6 +166,9 @@ namespace UI
 			"in_subfolder", m_inSubfolder, "1 while a folder below the base folder is open (so there is one above)");
 		f.field("empty", m_empty, "1 once the open folder has been read and has nothing in it, else 0");
 		f.field("no_drive", m_noDrive, "1 when the browser shows USB drives and none is plugged in, else 0");
+		f.field("searching", m_searching, "1 while the search line is open, else 0");
+		f.field("search", m_searchText, "What is typed into the search line; `files` holds only what it finds");
+		f.field("no_match", m_noMatch, "1 when the open folder has files and folders but the search finds none");
 	}
 
 	void FileBrowserPresenter::onInit()
@@ -204,12 +230,16 @@ namespace UI
 		}
 		UI_LOCK();
 		m_items.clear();
+		m_shown.clear();
 		m_files.clear();
 		m_empty.set(0);
+		m_noMatch.set(0);
 	}
 
 	void FileBrowserPresenter::openFolder(std::string_view folder)
 	{
+		// The search was for the folder left
+		showSearch(false);
 		m_folder = folder;
 		if (!m_folder.empty() && m_folder.back() != '/')
 		{
@@ -301,11 +331,17 @@ namespace UI
 		UI_LOCK();
 		OM::FileSystem::SortFilesBy(m_items, m_sortBy, m_sortDescending);
 		showSort();
+		m_shown.clear();
+		std::copy_if(m_items.begin(),
+					 m_items.end(),
+					 std::back_inserter(m_shown),
+					 [this](const OM::FileSystem::ItemPtr& item) { return found(*item); });
+		m_noMatch.set(!m_items.empty() && m_shown.empty() ? 1 : 0);
 		m_files.sync(
-			m_items.size(),
+			m_shown.size(),
 			[this](FileRow& row, size_t i)
 			{
-				const auto& item = *m_items[i];
+				const auto& item = *m_shown[i];
 				const bool isFolder = item.GetType() == OM::FileSystem::FileSystemItemType::folder;
 				row.name.set(Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS));
 				row.detail.set(Xml::FilesSource::detail(item));
@@ -316,6 +352,37 @@ namespace UI
 													: Xml::FilesSource::thumbnail(
 														  item.GetPath(), Comm::FileInfoCache::ThumbnailSize::small));
 			});
+	}
+
+	void FileBrowserPresenter::setSearch(std::string_view text)
+	{
+		m_searchText.set(std::string(text));
+		const std::string search = lowerCase(text);
+		if (search == m_search)
+		{
+			return;
+		}
+		m_search = search;
+		showFiles();
+	}
+
+	void FileBrowserPresenter::showSearch(bool shown)
+	{
+		if (!shown)
+		{
+			setSearch("");
+		}
+		m_searching.set(shown ? 1 : 0);
+	}
+
+	bool FileBrowserPresenter::found(const OM::FileSystem::FileSystemItem& item) const
+	{
+		if (m_search.empty())
+		{
+			return true;
+		}
+		return lowerCase(Xml::FilesSource::shownName(item.GetName(), m_settings.folder == BaseFolder::MACROS))
+				   .find(m_search) != std::string::npos;
 	}
 
 	void FileBrowserPresenter::showCrumbs()
@@ -370,11 +437,11 @@ namespace UI
 		ZoneScoped;
 		MODEL_LOCK();
 		const auto index = static_cast<size_t>(row.index.get());
-		if (index >= m_items.size())
+		if (index >= m_shown.size())
 		{
 			return;
 		}
-		const auto& item = *m_items[index];
+		const auto& item = *m_shown[index];
 		if (item.GetType() == OM::FileSystem::FileSystemItemType::folder)
 		{
 			// The folder's path below the base folder
@@ -425,15 +492,15 @@ namespace UI
 		UI_LOCK();
 		if (FileRow* row = rowOf(path))
 		{
-			row->detail.set(Xml::FilesSource::detail(*m_items[static_cast<size_t>(row->index.get())]));
+			row->detail.set(Xml::FilesSource::detail(*m_shown[static_cast<size_t>(row->index.get())]));
 		}
 	}
 
 	FileRow* FileBrowserPresenter::rowOf(const std::string& path)
 	{
-		for (size_t i = 0; i < m_items.size() && i < m_files.size(); i++)
+		for (size_t i = 0; i < m_shown.size() && i < m_files.size(); i++)
 		{
-			if (m_items[i]->GetPath() == path)
+			if (m_shown[i]->GetPath() == path)
 			{
 				return &m_files[i];
 			}

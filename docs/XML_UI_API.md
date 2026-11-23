@@ -933,6 +933,9 @@ Each row of `presenter.saved`:
 | `presenter.in_subfolder` | int | 1 while a folder below the base folder is open (so there is one above) |
 | `presenter.empty` | int | 1 once the open folder has been read and has nothing in it, else 0 |
 | `presenter.no_drive` | int | 1 when the browser shows USB drives and none is plugged in, else 0 |
+| `presenter.searching` | int | 1 while the search line is open, else 0 |
+| `presenter.search` | text | What is typed into the search line; `files` holds only what it finds |
+| `presenter.no_match` | int | 1 when the open folder has files and folders but the search finds none |
 
 Each row of `presenter.files`:
 
@@ -955,10 +958,13 @@ Each row of `presenter.crumbs`:
 
 | Action | Description |
 | --- | --- |
+| `presenter.files.clear_search` | Empty the search line, showing every file again |
 | `presenter.files.crumb` | Open that folder. From a row of `crumbs`. |
+| `presenter.files.find` | Show only the files and folders whose names hold the search line's text (`value_changed` on it), whatever the letters' case |
 | `presenter.files.mode` | Show the files as a `list` or as `tiles`, as `arg` says. Remembered. |
 | `presenter.files.open` | Open the folder, or ask to start the job or run the macro. From a row of `files`. |
 | `presenter.files.refresh` | Read the folder again |
+| `presenter.files.search` | Open the search line, or close it and show every file again |
 | `presenter.files.sort` | Sort by `arg`: `name`, `date` or `size`; choosing the order in use reverses it. Remembered. |
 | `presenter.files.up` | Open the folder above the open one |
 
@@ -2060,6 +2066,7 @@ Also takes every `lv_obj` attribute.
 | `keyboard_mode` | Keyboard layout to show: `text` (default), `text_upper` or `number` |
 | `bind_keyboard_mode` | Follow a text subject for the keyboard layout, as `keyboard_mode` |
 | `keyboard` | The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box edited another way, such as a number pad |
+| `bind_editing` | Follow an integer subject: turning non-zero starts an edit, as tapping the box does (e.g. a box shown by a button, ready to type into), and turning 0 ends it. Only changes count, not the value when the box is made, and the box's own taps start and end edits as usual |
 | `hide_keyboard_on_ready` | Put the keyboard away when its OK key is pressed (default true) |
 | `hide_keyboard_on_defocus` | Put the keyboard away when the box loses focus or something outside it is tapped (default true) |
 | `one_line` | "true" for a single line of text |

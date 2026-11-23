@@ -148,6 +148,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Deze map is leeg",
+      "search_placeholder": "Zoeken in deze map",
+      "no_match": "Niets in deze map komt overeen met de zoekopdracht",
       "uploading": "Uploaden",
       "delete": "Verwijderen",
       "running_another": "Er loopt een andere taak: deze kan starten zodra die klaar is",

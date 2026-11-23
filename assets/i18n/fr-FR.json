@@ -148,6 +148,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Ce dossier est vide",
+      "search_placeholder": "Rechercher dans ce dossier",
+      "no_match": "Rien dans ce dossier ne correspond à la recherche",
       "uploading": "Envoi",
       "delete": "Supprimer",
       "running_another": "Un autre travail est en cours : celui-ci pourra démarrer une fois qu'il sera terminé",

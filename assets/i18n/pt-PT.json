@@ -148,6 +148,8 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Esta pasta está vazia",
+      "search_placeholder": "Pesquisar nesta pasta",
+      "no_match": "Nada nesta pasta corresponde à pesquisa",
       "uploading": "A enviar",
       "delete": "Eliminar",
       "running_another": "Está a decorrer outro trabalho: este pode começar quando ele terminar",

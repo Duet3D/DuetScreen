@@ -403,6 +403,7 @@ ICONS: dict[str, Icon] = {
     "file": Icon("A file with no thumbnail", "draft", "file"),
     "open": Icon("Opening something saved", "folder_open", "folder-open"),
     "refresh": Icon("Reading files again", "refresh", "arrows-clockwise"),
+    "search": Icon("Searching the files in a folder", "search", "magnifying-glass"),
     "view_list": Icon("Files as a list", "view_list", "list"),
     "view_grid": Icon("Files as tiles", "grid_view", "grid-four"),
     "usb": Icon("A USB drive plugged into the screen", "usb", "usb"),
