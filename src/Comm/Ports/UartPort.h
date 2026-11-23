@@ -38,7 +38,6 @@ namespace Comm
 		bool needsChecksums() const override { return true; }
 		bool failed() const override { return m_failed.load(); }
 		std::chrono::milliseconds replyTimeout() const override;
-		size_t maxUploadSize() const override;
 
 		/** Bits per second for the termios code `code` (e.g. 115200 for B115200), or 0 if it isn't one */
 		static unsigned int bitsPerSecond(speed_t code);

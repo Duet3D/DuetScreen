@@ -67,7 +67,7 @@ namespace Comm
 
 		/**
 		 * @param port Where lines go and replies come from; open, and kept open while the link is used. What talking
-		 * over it takes (reply timeout, channels, largest upload) comes from it
+		 * over it takes (reply timeout, channels) comes from it
 		 * @param unasked Given each reply that answers nothing waiting
 		 */
 		SerialLink(SerialPort& port, UnaskedHandler unasked);

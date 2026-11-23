@@ -45,7 +45,6 @@ namespace
 		size_t channels() const override { return m_channels; }
 		bool needsChecksums() const override { return m_checksums; }
 		std::chrono::milliseconds replyTimeout() const override { return timeout; }
-		size_t maxUploadSize() const override { return maxUpload; }
 
 		/** One write */
 		struct Write
@@ -57,7 +56,6 @@ namespace
 		std::vector<Write> written;				 // Everything written, oldest first
 		bool writable = true;					 // Whether writes work
 		std::chrono::milliseconds timeout{5000}; // How long a request waits for its reply
-		size_t maxUpload = SIZE_MAX;			 // The largest file written
 
 	  private:
 		size_t m_channels; // How many channels it has
@@ -514,19 +512,10 @@ TEST_F(TestSerialLink, AnEmptyFileEndsWithTheEndOfFileMarker)
 	EXPECT_EQ(port.written[2].bytes, "<!-- **EoF** -->");
 }
 
-TEST_F(TestSerialLink, AFileTooLargeOrNamedTooLongIsntSent)
+TEST_F(TestSerialLink, AFileNamedTooLongIsntSent)
 {
 	FakePort port;
-	port.maxUpload = 64;
 	open(port);
-	link->writeFile("0:/sys/big.g",
-					Comm::FileContents::bytes(std::string(65, 'x')),
-					nullptr,
-					[this](auto result) { written = result; });
-	ASSERT_TRUE(written);
-	EXPECT_FALSE(*written);
-
-	written.reset();
 	link->writeFile("0:/sys/" + std::string(SerialLink::maxLineLength, 'x'),
 					Comm::FileContents::bytes("x"),
 					nullptr,

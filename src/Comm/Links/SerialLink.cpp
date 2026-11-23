@@ -208,14 +208,6 @@ namespace Comm
 			handler(std::unexpected(closedError()));
 			return;
 		}
-		if (contents.size() > m_port.maxUploadSize())
-		{
-			handler(std::unexpected(
-				ReplyError{.message = fmt::format("{:d} bytes is too large to send this way (the limit is {:d})",
-												  contents.size(),
-												  m_port.maxUploadSize())}));
-			return;
-		}
 		// Checked with the longest line number: an emergency stop may go ahead of M559 while the channel is waited for
 		if (frame(UINT32_MAX, fmt::format("M559 P{:s} S{:d} C{:d}", Comm::quoted(file), contents.size(), UINT32_MAX))
 				.size() > maxLineLength)

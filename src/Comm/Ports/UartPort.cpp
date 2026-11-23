@@ -86,11 +86,6 @@ namespace Comm
 		return answerTime + std::chrono::milliseconds(largestReply * 1000 / bytesPerSecond);
 	}
 
-	size_t UartPort::maxUploadSize() const
-	{
-		return MAX_UART_UPLOAD_SIZE;
-	}
-
 	bool UartPort::open(Receiver receiver)
 	{
 		ZoneScoped;

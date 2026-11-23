@@ -56,11 +56,5 @@ namespace Comm
 
 		/** How long a request may wait for its reply over this port */
 		virtual std::chrono::milliseconds replyTimeout() const { return std::chrono::milliseconds(5000); }
-
-		/**
-		 * The largest file a SerialLink writes over this port (M559). Nothing else is sent while it is, and a UART
-		 * can't tell the printer to wait, so a slow UART takes only a little.
-		 */
-		virtual size_t maxUploadSize() const { return SIZE_MAX; }
 	};
 } // namespace Comm

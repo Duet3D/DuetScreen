@@ -52,7 +52,6 @@ constexpr std::string_view DEFAULT_IP_ADDRESS = "192.168.0.";
 constexpr std::string DEFAULT_UART_PORT = "/dev/ttyS5";
 constexpr const int DEFAULT_BAUD_RATE = B115200;
 constexpr std::chrono::milliseconds TIME_SYNC_INTERVAL = 10000ms; // Interval to resynchronize time with the Duet
-constexpr size_t MAX_UART_UPLOAD_SIZE = 1024;
 constexpr std::string_view DEFAULT_FILAMENTS_FILE = "filaments.csv";
 constexpr std::string_view DEFAULT_HEIGHTMAPS_FILE = "heightmaps.csv";
 
