@@ -345,11 +345,17 @@ namespace Comm
 			handler = logFailure(fmt::format("Writing {:s}", file));
 		}
 		const size_t total = contents.size();
-		// The UI is told it ended, however it went
-		Handler<void> answer = [file, total, handler = std::move(handler)](std::expected<void, ReplyError> result)
+		// The UI is told it ended, however it went; cancelled, what was written of it is deleted
+		Handler<void> answer =
+			[this, file, total, contents, handler = std::move(handler)](std::expected<void, ReplyError> result)
 		{
 			ZoneScopedN("writeFile_cb");
 			reportTransfer(FileTransfer{.file = file, .sent = 0, .total = total, .finished = true});
+			if (!result && contents.cancelled())
+			{
+				LOG_INFO("Writing {:s} was cancelled: deleting what was written", file);
+				deleteFile(file, [](std::expected<void, ReplyError>) {}); // perhaps nothing was
+			}
 			handler(std::move(result));
 		};
 		ask(std::move(answer),

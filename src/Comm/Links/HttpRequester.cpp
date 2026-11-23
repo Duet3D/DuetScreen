@@ -247,6 +247,11 @@ namespace Comm
 						});
 				};
 
+				if (contents.cancelled())
+				{
+					answer(std::unexpected(FileContents::cancelledError()));
+					return;
+				}
 				hv::HttpClient client;
 				if (client.sendHeader(request.get()) != 0)
 				{

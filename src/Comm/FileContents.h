@@ -6,11 +6,15 @@
  * held whole. Its size and CRC-32 are known before anything is sent, as M559 needs them first.
  *
  * Copies share what they read: a link sends the pieces in order from one of them.
+ *
+ * It can be cancelled, from any thread: from then on nothing more of it can be read, so the write fails, and
+ * Connection::writeFile() deletes what was written of it.
  */
 
 #pragma once
 
 #include "Comm/Replies.h"
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -30,11 +34,26 @@ namespace Comm
 		/** `bytes`, held in memory */
 		static FileContents bytes(std::string bytes);
 
+		/** Set to cancel contents (cancel()): shared by their copies, and made before them by file()'s caller */
+		using CancelFlag = std::shared_ptr<std::atomic_bool>;
+
 		/**
 		 * The file at `path` on the screen, or why it can't be read. It is read through once, for its size and
 		 * CRC-32, so for a large file call it away from the UI's and the connection's threads.
+		 * @param cancelFlag Its cancel flag, if the caller may cancel it before it is made: set, the reading through
+		 * stops too, as cancelled
 		 */
-		static std::expected<FileContents, ReplyError> file(const std::filesystem::path& path);
+		static std::expected<FileContents, ReplyError> file(const std::filesystem::path& path,
+															CancelFlag cancelFlag = nullptr);
+
+		/** Why contents that were cancelled can't be read */
+		static ReplyError cancelledError();
+
+		/** Cancel them, from any thread: nothing more of them can be read */
+		void cancel() const;
+
+		/** Whether they were cancelled */
+		bool cancelled() const;
 
 		/** How many bytes there are */
 		size_t size() const;
@@ -44,7 +63,7 @@ namespace Comm
 
 		/**
 		 * Up to `length` bytes from `offset` on: fewer only at the end. Or why they can't be read, e.g. the USB drive
-		 * the file is on was taken out, or the file is shorter than it was.
+		 * the file is on was taken out, the file is shorter than it was, or they were cancelled.
 		 */
 		std::expected<std::string, ReplyError> read(size_t offset, size_t length) const;
 

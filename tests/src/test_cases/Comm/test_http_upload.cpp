@@ -163,3 +163,27 @@ TEST(TestHttpUpload, AFileThatCantBeSentFails)
 	EXPECT_FALSE(*response);
 	EXPECT_FALSE(requester.waiting());
 }
+
+TEST(TestHttpUpload, AFileCancelledIsNotSent)
+{
+	UploadServer server;
+	Tasks tasks;
+	Comm::HttpRequester requester(
+		fmt::format("127.0.0.1:{:d}", UploadServer::port()),
+		[&tasks](std::function<void()> task) { tasks.post(std::move(task)); },
+		2);
+	const Comm::FileContents contents = Comm::FileContents::bytes(std::string(100 * 1000, 'x'));
+	contents.cancel();
+	std::optional<Comm::HttpRequester::Response> response;
+	requester.send({.method = HTTP_POST,
+					.path = "/rr_upload",
+					.timeout = 10,
+					.lane = Comm::HttpRequester::Lane::slow,
+					.upload = contents},
+				   [&response](const Comm::HttpRequester::Response& answer) { response = answer; });
+	tasks.runUntil([&response] { return response.has_value(); });
+	ASSERT_TRUE(response);
+	ASSERT_FALSE(*response);
+	EXPECT_EQ(response->error().message, "cancelled");
+	EXPECT_TRUE(server.received().empty());
+}

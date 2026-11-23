@@ -25,7 +25,9 @@
  *
  * From the first request until the last byte is written, nothing else is sent: whatever is asked meanwhile is held,
  * and sent in the order asked once the bytes are. The printer takes the next <size> bytes on that channel as the file,
- * whatever they are, and nothing can stop it once it has started. An emergency stop goes at once on a second channel
+ * whatever they are, and nothing can stop it once it has started. So a file that can't be read any more once its bytes
+ * have started (cancelled, or its USB drive taken out) is finished with filler: its CRC doesn't match, the printer
+ * refuses it, and the write fails as the file couldn't be read. Cancelled before M559, nothing of it is sent. An emergency stop goes at once on a second channel
  * if there is one; otherwise it goes first once the file's bytes are sent (or at once, before M559 is sent).
  *
  * With two channels (a Duet 3 over USB), requests for the printer's state and emergency commands go on the second,
@@ -133,6 +135,7 @@ namespace Comm
 			size_t size = 0;	   // The file's size
 			size_t written = 0;	   // How much of `bytes` has been written
 			uint32_t line = 0;	   // M559's line number, which an error the printer finds with the file names
+			std::optional<ReplyError> unreadable; // Why the rest can't be read, once it can't: filler is sent instead
 			Progress progress;	   // Told as pieces are written
 			Handler<void> handler; // Told once the printer has dealt with the file, or why it can't
 		};

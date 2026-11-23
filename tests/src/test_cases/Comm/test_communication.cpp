@@ -9,6 +9,7 @@
 #include "Comm/Links/SerialLink.h"
 #include "Duet3D/General/CRC32.h"
 #include "ObjectModel/Tree/Json.h"
+#include <atomic>
 #include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
@@ -346,9 +347,10 @@ TEST_F(TestSerialLink, AFileOnTheScreenIsReadAPieceAtATimeAsItIsSent)
 	EXPECT_EQ(port.written[2].bytes + port.written[3].bytes, contents);
 }
 
-TEST_F(TestSerialLink, AFileThatCantBeReadAnyMoreMeansConnectingAgain)
+TEST_F(TestSerialLink, AFileThatCantBeReadAnyMoreIsFinishedWithFillerAndFails)
 {
-	const std::filesystem::path path = scratchFile("pulled.gcode", std::string(2 * SerialLink::filePieceSize, 'x'));
+	const std::filesystem::path path =
+		scratchFile("pulled.gcode", std::string(2 * SerialLink::filePieceSize + 10, 'x'));
 	auto file = Comm::FileContents::file(path);
 	ASSERT_TRUE(file) << file.error().message;
 	FakePort port;
@@ -357,9 +359,50 @@ TEST_F(TestSerialLink, AFileThatCantBeReadAnyMoreMeansConnectingAgain)
 	link->tick(SerialLink::Clock::now());
 	std::filesystem::resize_file(path, 10); // as good as its drive taken out
 	link->tick(SerialLink::Clock::now());
+	link->tick(SerialLink::Clock::now());
+	ASSERT_EQ(port.written.size(), 6u) << "two lines, three pieces, the acknowledgement";
+	EXPECT_EQ(port.written[3].bytes, std::string(SerialLink::filePieceSize, ' '))
+		<< "the printer still waits for the rest, and would take whatever is sent next as it";
+	EXPECT_EQ(port.written[4].bytes, std::string(10, ' '));
+	EXPECT_FALSE(written) << "not until the printer has dealt with it";
+	link->receive(0, R"({"seq":2,"resp":"Error: CRC32 checksum doesn't match\n","line":1})");
+	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":2})");
+	ASSERT_TRUE(written);
+	ASSERT_FALSE(*written);
+	EXPECT_NE(written->error().message.find("can't be read"), std::string::npos) << written->error().message;
+	EXPECT_FALSE(link->failed()) << "the printer is in step: nothing to connect again for";
+}
+
+TEST_F(TestSerialLink, AFileCancelledWhileItIsSentIsFinishedWithFiller)
+{
+	const Comm::FileContents contents = Comm::FileContents::bytes(std::string(2 * SerialLink::filePieceSize, 'x'));
+	FakePort port;
+	open(port);
+	startWriting(port, "0:/gcodes/big.gcode", contents);
+	link->tick(SerialLink::Clock::now());
+	contents.cancel();
+	link->tick(SerialLink::Clock::now());
+	ASSERT_EQ(port.written.size(), 5u);
+	EXPECT_EQ(port.written[3].bytes, std::string(SerialLink::filePieceSize, ' '));
+	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":2})");
+	ASSERT_TRUE(written);
+	ASSERT_FALSE(*written);
+	EXPECT_EQ(written->error().message, "cancelled");
+}
+
+TEST_F(TestSerialLink, AFileCancelledBeforeItStartsSendsNothing)
+{
+	const Comm::FileContents contents = Comm::FileContents::bytes("G28\n");
+	FakePort port;
+	open(port);
+	link->writeFile("0:/gcodes/f.gcode", contents, nullptr, [this](auto result) { written = result; });
+	contents.cancel();
+	link->sendGcode("M115");
+	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":0})");
 	ASSERT_TRUE(written);
 	EXPECT_FALSE(*written);
-	EXPECT_TRUE(link->failed()) << "the printer still waits for the rest, and would take whatever is sent next as it";
+	EXPECT_EQ(lines(port), (std::vector<std::string>{R"(N0 M409 K"state.status" F"v")", "N1 M115"}))
+		<< "no M559; what was held goes";
 }
 
 TEST(TestFileContents, BytesAndAFileAreReadAlike)
@@ -378,6 +421,14 @@ TEST(TestFileContents, BytesAndAFileAreReadAlike)
 		EXPECT_EQ(contents->read(text.size(), 4), "") << "nothing after it";
 	}
 	EXPECT_FALSE(Comm::FileContents::file(path.parent_path() / "missing.g"));
+
+	// Cancelled, nothing more can be read, from any copy
+	const Comm::FileContents copy = *file;
+	file->cancel();
+	EXPECT_TRUE(copy.cancelled());
+	EXPECT_FALSE(copy.read(0, 4));
+	auto flag = std::make_shared<std::atomic_bool>(true);
+	EXPECT_FALSE(Comm::FileContents::file(path, flag)) << "cancelled before it was read through";
 }
 
 TEST_F(TestSerialLink, NothingElseIsSentWhileAFileIs)

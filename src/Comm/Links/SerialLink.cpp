@@ -224,6 +224,7 @@ namespace Comm
 						  .size = size,
 						  .written = 0,
 						  .line = 0,
+						  .unreadable = std::nullopt,
 						  .progress = std::move(progress),
 						  .handler = std::move(handler)};
 		requestNow(
@@ -245,6 +246,11 @@ namespace Comm
 			return;
 		}
 		Upload& upload = *m_upload;
+		if (upload.bytes.cancelled())
+		{
+			uploadFailed(FileContents::cancelledError()); // nothing sent yet, so nothing to finish
+			return;
+		}
 		upload.stage = Upload::Stage::opening;
 		std::string command;
 		if (upload.size == 0)
@@ -290,14 +296,23 @@ namespace Comm
 	{
 		ZoneScoped;
 		Upload& upload = *m_upload;
-		const std::expected<std::string, ReplyError> piece = upload.bytes.read(upload.written, filePieceSize);
-		if (!piece)
+		std::expected<std::string, ReplyError> piece = std::unexpected(ReplyError{});
+		if (!upload.unreadable)
 		{
-			// The printer takes the next bytes as the file, whatever they are: only connecting again is safe
-			LOG_ERROR("Couldn't read the next piece of {:s}: {:s}", upload.file, piece.error().message);
-			m_failed = true;
-			uploadFailed(piece.error());
-			return;
+			piece = upload.bytes.read(upload.written, filePieceSize);
+			if (!piece)
+			{
+				// The printer takes the next bytes as the file, whatever they are: filler keeps it in step, and its
+				// CRC won't match, so the printer refuses the file
+				LOG_WARN("Couldn't read the next piece of {:s} ({:s}): sending the rest as filler",
+						 upload.file,
+						 piece.error().message);
+				upload.unreadable = piece.error();
+			}
+		}
+		if (upload.unreadable)
+		{
+			piece = std::string(std::min(filePieceSize, upload.bytes.size() - upload.written), ' ');
 		}
 		const size_t length = piece->size();
 		ZoneValue(length);
@@ -321,7 +336,14 @@ namespace Comm
 		}
 		Upload sent = std::move(*m_upload);
 		m_upload.reset();
-		acknowledge(sent.line, sent.line, fileChannel, std::move(sent.handler));
+		Handler<void> handler = std::move(sent.handler);
+		if (sent.unreadable)
+		{
+			// The printer refuses it; why is that it couldn't be read
+			handler = [handler = std::move(handler), why = *sent.unreadable](std::expected<void, ReplyError>)
+			{ handler(std::unexpected(why)); };
+		}
+		acknowledge(sent.line, sent.line, fileChannel, std::move(handler));
 		releaseHeld();
 	}
 

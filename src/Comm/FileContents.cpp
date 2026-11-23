@@ -19,6 +19,7 @@ namespace Comm
 		std::filesystem::path path; // Else the file they are read from
 		size_t size = 0;			// How many there are
 		uint32_t crc = 0;			// Their CRC-32
+		CancelFlag cancelled;		// Set once they are cancelled
 		std::mutex mutex;			// Guards `stream`: a link may read on a thread of its own
 		std::ifstream stream;		// The file, opened on the first read
 	};
@@ -32,6 +33,7 @@ namespace Comm
 	{
 		ZoneScoped;
 		auto source = std::make_shared<Source>();
+		source->cancelled = std::make_shared<std::atomic_bool>(false);
 		CRC32 crc;
 		crc.Update(bytes.data(), bytes.size());
 		source->crc = crc.Get();
@@ -40,7 +42,7 @@ namespace Comm
 		return FileContents(std::move(source));
 	}
 
-	std::expected<FileContents, ReplyError> FileContents::file(const std::filesystem::path& path)
+	std::expected<FileContents, ReplyError> FileContents::file(const std::filesystem::path& path, CancelFlag cancelFlag)
 	{
 		ZoneScoped;
 		std::ifstream stream(path, std::ios::binary);
@@ -50,10 +52,15 @@ namespace Comm
 		}
 		auto source = std::make_shared<Source>();
 		source->path = path;
+		source->cancelled = cancelFlag ? std::move(cancelFlag) : std::make_shared<std::atomic_bool>(false);
 		CRC32 crc;
 		std::array<char, 64 * 1024> buffer{};
 		while (stream)
 		{
+			if (source->cancelled->load())
+			{
+				return std::unexpected(cancelledError());
+			}
 			stream.read(buffer.data(), buffer.size());
 			const auto read = static_cast<size_t>(stream.gcount());
 			crc.Update(buffer.data(), read);
@@ -65,6 +72,21 @@ namespace Comm
 		}
 		source->crc = crc.Get();
 		return FileContents(std::move(source));
+	}
+
+	ReplyError FileContents::cancelledError()
+	{
+		return ReplyError{.message = "cancelled"};
+	}
+
+	void FileContents::cancel() const
+	{
+		m_source->cancelled->store(true);
+	}
+
+	bool FileContents::cancelled() const
+	{
+		return m_source->cancelled->load();
 	}
 
 	size_t FileContents::size() const
@@ -81,6 +103,10 @@ namespace Comm
 	{
 		ZoneScoped;
 		Source& source = *m_source;
+		if (source.cancelled->load())
+		{
+			return std::unexpected(cancelledError());
+		}
 		length = std::min(length, source.size - std::min(offset, source.size));
 		if (source.path.empty())
 		{
