@@ -10,11 +10,11 @@
  *   - update the screen with it, when it is an update archive (*.tar.gz) the screen's update service would install:
  *     it is checked as the dialog opens, and the dialog says why not if it can't be.
  *
- * Uploading carries on if the dialog is closed; one file at a time. It can be cancelled (cancelUpload()), from the
- * dialog or the file browser, while it is read, and while it is sent over the network (what was written of it is
- * deleted); over USB and UART the printer takes the whole file once it has started (Connection::writesFilesAlongside()).
- * Installing an update holds the screen in a dialog of its own until the update service restarts it, or says why it
- * couldn't.
+ * Uploading carries on if the dialog is closed, its progress in the status bar, which shows it in the dialog again
+ * (showUpload()); one file at a time. It can be cancelled (cancelUpload()) from the dialog while it is read, and while
+ * it is sent over the network (what was written of it is deleted); over USB and UART the printer takes the whole file
+ * once it has started (Connection::writesFilesAlongside()). Installing an update holds the screen in a dialog of its
+ * own until the update service restarts it, or says why it couldn't.
  *
  * The global actions that answer the dialog are in Presenters/FileBrowser/UsbActions.h. The names it publishes are
  * declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
@@ -88,6 +88,9 @@ namespace UI::Xml
 		/** Cancel the upload going, if one is */
 		void cancelUpload();
 
+		/** Show the last upload in the dialog: how it is going, or how it went */
+		void showUpload();
+
 		/** Install the dialog's file, an update, holding the screen until it restarts */
 		void install();
 
@@ -112,20 +115,23 @@ namespace UI::Xml
 		/** The archive check of the dialog's file `generation` ended with `check` */
 		void updateChecked(uint64_t generation, const UpgradeHelper::UpdateCheck& check);
 
-		/** The upload of the dialog's file `generation` was read, and is being sent */
-		void uploadStarted(uint64_t generation);
+		/** The upload was read through, and is being sent */
+		void uploadStarted();
 
-		/** The upload `generation` ended: the printer has it, or `error` says why not */
-		void uploadEnded(uint64_t generation, std::string error);
+		/** The upload ended: the printer has it, or `error` says why not */
+		void uploadEnded(std::string error);
 
 		/** Note whether a file is being uploaded, and whether it can be cancelled now */
 		void setUploading(bool uploading, bool cancellable);
 
 		std::string m_path;				  // The dialog's file, on its drive
 		size_t m_size = 0;				  // Its size
-		uint64_t m_generation = 0;		  // Counts the files the dialog has been about, so late answers are known
+		uint64_t m_generation = 0;		  // Counts the files the dialog has been about, so late update checks are known
 		bool m_updateInstallable = false; // The dialog's file is an update the screen can install
 		bool m_uploading = false;		  // A file is being read or sent; only one at a time
+		std::string m_uploadName;		  // The last upload's file name, or empty if there has been none
+		std::string m_uploadPath;		  // Its path, on its drive
+		std::string m_uploadFolder;		  // The name of the printer's folder it goes to, e.g. "Jobs"
 		Comm::FileContents::CancelFlag m_cancel; // Cancels the upload going
 
 		IntSubject m_drives;			   // `drives`

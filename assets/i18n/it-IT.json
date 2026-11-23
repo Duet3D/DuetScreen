@@ -148,6 +148,7 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Questa cartella è vuota",
+      "uploading": "Caricamento",
       "delete": "Elimina",
       "running_another": "È in corso un altro lavoro: questo potrà partire quando sarà terminato",
       "running_this": "Questo è il lavoro in corso: non può essere riavviato né eliminato finché non termina",

@@ -148,6 +148,7 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Ce dossier est vide",
+      "uploading": "Envoi",
       "delete": "Supprimer",
       "running_another": "Un autre travail est en cours : celui-ci pourra démarrer une fois qu'il sera terminé",
       "running_this": "C'est le travail en cours : il ne peut être relancé ni supprimé avant sa fin",

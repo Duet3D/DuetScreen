@@ -148,6 +148,7 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Esta pasta está vazia",
+      "uploading": "A enviar",
       "delete": "Eliminar",
       "running_another": "Está a decorrer outro trabalho: este pode começar quando ele terminar",
       "running_this": "Este é o trabalho em curso: não pode ser reiniciado nem eliminado até terminar",

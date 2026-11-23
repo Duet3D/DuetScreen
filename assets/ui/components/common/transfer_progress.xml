@@ -1,6 +1,6 @@
 <!--
-  How writing a file to the printer is going: the file's name, then a bar with its percentage. Shown in the file
-  browser while a file is written, and in the USB file dialog while its file is uploaded. Give it a width.
+  How writing a file to the printer is going: the file's name, then a bar with its percentage. Shown in the USB file
+  dialog while its file is uploaded (the status bar has a slimmer one of its own, in one line). Give it a width.
 
   Data:     source.files.transfer_file, source.files.transfer_progress (src/UI/Xml/Data/FilesSource.h)
 -->

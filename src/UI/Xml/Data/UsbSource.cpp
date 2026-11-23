@@ -90,11 +90,11 @@ namespace UI::Xml
 		f.field("upload_reason",
 				m_uploadReason,
 				"Why it can't be uploaded now, e.g. \"The printer isn't connected\"; empty if it can");
-		f.field(
-			"upload_state",
-			m_uploadState,
-			"How its upload is going: 0 reading it, 1 sending it (source.files.transfer_progress), 2 done, 3 failed, "
-			"4 cancelling, 5 cancelled");
+		f.field("upload_state",
+				m_uploadState,
+				"How the last upload is going: 0 reading it, 1 sending it (source.files.transfer_progress), 2 done, 3 "
+				"failed, "
+				"4 cancelling, 5 cancelled");
 		f.field(
 			"cancellable",
 			m_cancellable,
@@ -103,7 +103,7 @@ namespace UI::Xml
 			"has started. Else 0");
 		f.field("upload_text",
 				m_uploadText,
-				"What its upload is doing, or how it went, e.g. \"benchy.gcode is now in Jobs\"");
+				"What the last upload is doing, or how it went, e.g. \"benchy.gcode is now in Jobs\"");
 		f.field("update",
 				m_update,
 				"Updating the screen with it (actions.usb.install): 0 hidden (not a *.tar.gz), 1 disabled (being "
@@ -284,105 +284,99 @@ namespace UI::Xml
 			return;
 		}
 		const auto destination = static_cast<Destination>(m_destination.get());
-		const std::string name(m_dialogTitle.get());
-		const std::string target = folderOf(destination) + name;
-		const uint64_t generation = m_generation;
+		m_uploadName = m_dialogTitle.get();
+		m_uploadPath = m_path;
+		m_uploadFolder = destinationName(destination);
+		const std::string target = folderOf(destination) + m_uploadName;
 		m_cancel = std::make_shared<std::atomic_bool>(false);
 		setUploading(true, true); // nothing is sent while it is read
 		m_uploadState.set(static_cast<int32_t>(UploadState::Reading));
-		m_uploadText.set(_("usb.reading", name));
+		m_uploadText.set(_("usb.reading", m_uploadName));
 		m_dialog.set("upload");
 		showAllowed();
 
-		// A large file takes a while to read through for its size and CRC: not on the UI's thread
+		// A large file takes a while to read through for its size and CRC: not on the UI's thread. One upload at a
+		// time, so what is told is about this one
 		std::weak_ptr<DataSource> self = weak_from_this();
 		std::thread(
-			[self, generation, path = m_path, target, cancel = m_cancel]
+			[self, path = m_uploadPath, target, cancel = m_cancel]
 			{
 				tracy::SetThreadName("Upload read");
 				std::expected<Comm::FileContents, Comm::ReplyError> contents = Comm::FileContents::file(path, cancel);
-				if (!contents)
+				if (!contents || cancel->load())
 				{
+					// Unreadable, or cancelled as it was read through: nothing to send
 					if (auto source = self.lock())
 					{
-						static_cast<UsbSource&>(*source).uploadEnded(generation, contents.error().message);
-					}
-					return;
-				}
-				if (cancel->load())
-				{
-					// Cancelled as it was read through: nothing to send
-					if (auto source = self.lock())
-					{
-						static_cast<UsbSource&>(*source).uploadEnded(generation,
-																	 Comm::FileContents::cancelledError().message);
+						static_cast<UsbSource&>(*source).uploadEnded(
+							contents ? Comm::FileContents::cancelledError().message : contents.error().message);
 					}
 					return;
 				}
 				if (auto source = self.lock())
 				{
-					static_cast<UsbSource&>(*source).uploadStarted(generation);
+					static_cast<UsbSource&>(*source).uploadStarted();
 				}
 				Comm::Connection::get().writeFile(target,
 												  std::move(*contents),
-												  [self, generation](std::expected<void, Comm::ReplyError> written)
+												  [self](std::expected<void, Comm::ReplyError> written)
 												  {
 													  if (auto source = self.lock())
 													  {
 														  static_cast<UsbSource&>(*source).uploadEnded(
-															  generation, written ? "" : written.error().message);
+															  written ? "" : written.error().message);
 													  }
 												  });
 			})
 			.detach();
 	}
 
-	void UsbSource::uploadStarted(uint64_t generation)
+	void UsbSource::uploadStarted()
 	{
 		UI_LOCK();
-		if (generation != m_generation)
-		{
-			return;
-		}
 		if (m_cancel->load())
 		{
 			return; // still cancelling
 		}
 		setUploading(true, Comm::Connection::get().writesFilesAlongside());
-		const std::string name(m_dialogTitle.get());
 		m_uploadState.set(static_cast<int32_t>(UploadState::Sending));
-		m_uploadText.set(_("usb.sending", name, destinationName(static_cast<Destination>(m_destination.get()))));
+		m_uploadText.set(_("usb.sending", m_uploadName, m_uploadFolder));
 	}
 
-	void UsbSource::uploadEnded(uint64_t generation, std::string error)
+	void UsbSource::uploadEnded(std::string error)
 	{
 		ZoneScoped;
 		UI_LOCK();
 		setUploading(false, false);
 		showAllowed();
-		if (generation != m_generation)
-		{
-			return; // the dialog has been opened for another file since
-		}
-		const std::string name(m_dialogTitle.get());
 		if (!error.empty() && m_cancel->load())
 		{
-			LOG_INFO("Uploading {:s} was cancelled", m_path);
+			LOG_INFO("Uploading {:s} was cancelled", m_uploadPath);
 			m_uploadState.set(static_cast<int32_t>(UploadState::Cancelled));
-			m_uploadText.set(_("usb.cancelled", name));
+			m_uploadText.set(_("usb.cancelled", m_uploadName));
 		}
 		else if (error.empty())
 		{
-			LOG_INFO("Uploaded {:s}", m_path);
+			LOG_INFO("Uploaded {:s}", m_uploadPath);
 			m_uploadState.set(static_cast<int32_t>(UploadState::Done));
-			m_uploadText.set(_("usb.done", name, destinationName(static_cast<Destination>(m_destination.get()))));
+			m_uploadText.set(_("usb.done", m_uploadName, m_uploadFolder));
 		}
 		else
 		{
-			LOG_WARN("Couldn't upload {:s}: {:s}", m_path, error);
+			LOG_WARN("Couldn't upload {:s}: {:s}", m_uploadPath, error);
 			m_uploadState.set(static_cast<int32_t>(UploadState::Failed));
-			m_uploadText.set(_("usb.failed", name, error));
+			m_uploadText.set(_("usb.failed", m_uploadName, error));
 		}
+	}
+
+	void UsbSource::showUpload()
+	{
+		if (m_uploadName.empty())
+		{
+			return; // none yet
+		}
+		m_dialogTitle.set(m_uploadName);
+		m_dialog.set("upload");
 	}
 
 	void UsbSource::setUploading(bool uploading, bool cancellable)
@@ -398,11 +392,11 @@ namespace UI::Xml
 		{
 			return; // none going, already cancelled, or over USB or UART once it has started
 		}
-		LOG_INFO("Cancelling the upload of {:s}", m_path);
+		LOG_INFO("Cancelling the upload of {:s}", m_uploadPath);
 		m_cancel->store(true); // the file's contents share it, so stop being read
 		m_cancellable.set(0);
 		m_uploadState.set(static_cast<int32_t>(UploadState::Cancelling));
-		m_uploadText.set(_("usb.cancelling", m_dialogTitle.get()));
+		m_uploadText.set(_("usb.cancelling", m_uploadName));
 	}
 
 	void UsbSource::install()

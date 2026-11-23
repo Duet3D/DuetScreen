@@ -1,6 +1,7 @@
 <!--
-  The status bar across the top of the screen: connection and state on the left, the printer's name in the middle,
-  and on the right the status bar's buttons, then the current tool's temperatures. The buttons are the widgets of its
+  The status bar across the top of the screen: connection and state on the left, the printer's name in the middle
+  (while a file is written to the printer, its name and progress instead: tap it to see an upload from a USB drive in
+  its dialog), and on the right the status bar's buttons, then the current tool's temperatures. The buttons are the widgets of its
   layout (layouts/status_bar.json, none by default), which the user can change.
 
   The name is at most 40% wide and centred, and the right side (buttons and temperatures) at most 30% wide, so they
@@ -8,7 +9,9 @@
   fonts.
 
   Data:     source.machine.summary (src/UI/Xml/Data/MachineSource.h); the printer's name, om.network.name; source.tool.current.*
-            (src/UI/Xml/Data/ToolSource.h)
+            (src/UI/Xml/Data/ToolSource.h); source.files.transferring, transfer_file, transfer_progress
+            (src/UI/Xml/Data/FilesSource.h)
+  Actions:  usb.show_upload (global: src/UI/Presenters/FileBrowser/UsbActions.h)
 -->
 <component>
 	<styles>
@@ -24,7 +27,25 @@
 
 		<!-- Long names scroll -->
 		<lv_label name="name" bind_text="om.network.name" align="center" long_mode="scroll_circular"
-				  style_max_width="40%" style_text_align="center"/>
+				  style_max_width="40%" style_text_align="center">
+			<bind_flag_if_eq subject="source.files.transferring" flag="hidden" ref_value="1"/>
+		</lv_label>
+
+		<!-- In its place, while a file is written: "Uploading" and its name, a thin bar, and how much has been sent -->
+		<lv_obj name="transfer" align="center" width="40%" height="content" flex_flow="row" scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center" style_pad_column="#pad_small">
+			<style name="pad_zero"/>
+			<bind_flag_if_eq subject="source.files.transferring" flag="hidden" ref_value="0"/>
+			<action trigger="clicked" name="actions.usb.show_upload"/>
+			<lv_label name="transfer_title" translation_tag="tr.file.uploading" clickable="false">
+				<style name="text_muted"/>
+			</lv_label>
+			<lv_label name="transfer_file" bind_text="source.files.transfer_file" width="1" flex_grow="1"
+					  long_mode="dots" clickable="false"/>
+			<gauge_track name="transfer_bar" value="source.files.transfer_progress" max="100" width="25%" height="4"/>
+			<lv_label name="transfer_percent" bind_text="source.files.transfer_progress" bind_text-fmt="%d%%"
+					  clickable="false"/>
+		</lv_obj>
 
 		<lv_obj name="right" align="right_mid" width="content" height="content" style_max_width="30%"
 				scrollable="false" overflow_visible="true" ext_draw_size="8" flex_flow="row"

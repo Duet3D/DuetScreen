@@ -148,6 +148,7 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Esta carpeta está vacía",
+      "uploading": "Subiendo",
       "delete": "Eliminar",
       "running_another": "Hay otro trabajo en curso: este podrá empezar cuando termine",
       "running_this": "Este es el trabajo en curso: no se puede volver a empezar ni eliminar hasta que termine",

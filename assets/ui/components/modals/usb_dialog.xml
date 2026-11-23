@@ -7,14 +7,14 @@
             and Update screen, on the left, once it is found installable. Upload sends it.
     upload  how its upload is going (source.files.transfer_*), then how it went. Cancel upload stops it, while it
             is read, and while it is sent over the network (what was written of it is deleted; over USB and UART the
-            printer takes the whole file once it has started). Closing it leaves the upload going, still
-            cancellable from the file browser.
+            printer takes the whole file once it has started). Closing it leaves the upload going: its progress shows
+            in the status bar, which opens this again when tapped (actions.usb.show_upload).
 
   Installing an update has a dialog of its own, which holds the screen (blocking) until the update service restarts it,
   or says why it couldn't be installed.
 
   Data:     source.usb.* (src/UI/Xml/Data/UsbSource.h), source.files.transfer_* (src/UI/Xml/Data/FilesSource.h)
-  Actions:  usb.destination, usb.upload, usb.cancel_upload, usb.install (global:
+  Actions:  usb.destination, usb.upload, usb.cancel_upload, usb.install, and usb.show_upload, which opens it (global:
             src/UI/Presenters/FileBrowser/UsbActions.h), dialog.close
 -->
 <component>

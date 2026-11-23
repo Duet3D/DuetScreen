@@ -601,6 +601,7 @@
 			<xs:enumeration value="actions.usb.cancel_upload"/>
 			<xs:enumeration value="actions.usb.destination"/>
 			<xs:enumeration value="actions.usb.install"/>
+			<xs:enumeration value="actions.usb.show_upload"/>
 			<xs:enumeration value="actions.usb.upload"/>
 			<xs:enumeration value="presenter.alert.cancel"/>
 			<xs:enumeration value="presenter.alert.choose"/>
@@ -1770,6 +1771,7 @@
 			<xs:enumeration value="tr.file.start_print.size"/>
 			<xs:enumeration value="tr.file.start_print_title"/>
 			<xs:enumeration value="tr.file.time_and_filament"/>
+			<xs:enumeration value="tr.file.uploading"/>
 			<xs:enumeration value="tr.fine_tune.all_extruders"/>
 			<xs:enumeration value="tr.fine_tune.extruder"/>
 			<xs:enumeration value="tr.fine_tune.extruder_header"/>

@@ -149,6 +149,7 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "This folder is empty",
+      "uploading": "Uploading",
       "delete": "Delete",
       "running_another": "Another job is running: this one can start once it has ended",
       "running_this": "This is the job running: it can't be started again or deleted until it has ended",

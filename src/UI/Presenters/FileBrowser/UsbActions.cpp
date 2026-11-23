@@ -61,6 +61,16 @@ namespace UI::UsbActions
 										source->cancelUpload();
 									}
 								});
+		Xml::Actions::addGlobal("usb.show_upload",
+								"Show the last upload from a USB drive in the USB file dialog: how it is going (with "
+								"Cancel upload, while it can be), or how it went",
+								[](const Xml::ActionArgs&)
+								{
+									if (auto* source = usb())
+									{
+										source->showUpload();
+									}
+								});
 		Xml::Actions::addGlobal("usb.install",
 								"Update the screen with the USB file dialog's file, an update archive found "
 								"installable (source.usb.update); a dialog holds the screen until it restarts",

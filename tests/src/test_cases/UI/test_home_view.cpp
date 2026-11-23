@@ -1202,7 +1202,7 @@ TEST_F(TestHomeViewWithSimulator, AFileOnAUsbDriveIsUploadedWithItsProgressShown
 		if (!pictured && percent >= 40 && percent <= 60)
 		{
 			pictured = true;
-			EXPECT_FALSE(isHidden(browser, "transfer")) << "the browser shows it too, once the dialog is closed";
+			EXPECT_FALSE(isHidden(page<UI::LvObj>("status_bar").getRootPtr(), "transfer")) << "the status bar too";
 			EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_uploading.png");
 		}
 	}
@@ -1214,7 +1214,8 @@ TEST_F(TestHomeViewWithSimulator, AFileOnAUsbDriveIsUploadedWithItsProgressShown
 			  contents);
 	TestDialogs::tap("close");
 	EXPECT_EQ(openUsbDialog(), nullptr);
-	EXPECT_TRUE(isHidden(browser, "transfer"));
+	EXPECT_TRUE(isHidden(page<UI::LvObj>("status_bar").getRootPtr(), "transfer"));
+	EXPECT_FALSE(isHidden(page<UI::LvObj>("status_bar").getRootPtr(), "name")) << "the printer's name, again";
 }
 
 TEST_F(TestHomeViewWithSimulator, FilesAreUploadedOnlyWhileThePrinterIsIdle)
@@ -1271,15 +1272,25 @@ TEST_F(TestHomeViewWithSimulator, AnUploadOverASerialLinkCantBeCancelledOnceItIs
 	}
 	deliverModelEvents();
 	runTimers();
-	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel_upload"), LV_OBJ_FLAG_HIDDEN)) << "in the dialog";
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel_upload"), LV_OBJ_FLAG_HIDDEN));
+
+	// Closed, the status bar shows it, in place of the printer's name; tapped, the dialog shows it again
 	TestDialogs::tap("close");
-	EXPECT_FALSE(isHidden(browser, "transfer"));
-	EXPECT_TRUE(isHidden(browser, "cancel_upload")) << "nor in the file browser";
-	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_upload_in_browser.png");
+	lv_obj_t* statusBar = page<UI::LvObj>("status_bar").getRootPtr();
+	EXPECT_FALSE(isHidden(statusBar, "transfer"));
+	EXPECT_TRUE(isHidden(statusBar, "name"));
+	EXPECT_EQ(labelText(statusBar, "transfer_title"), "Uploading");
+	EXPECT_EQ(labelText(statusBar, "transfer_file"), "benchy.gcode");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_upload_in_status_bar.png");
+	lv_obj_send_event(lv_obj_find_by_name(statusBar, "transfer"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "benchy.gcode");
+	EXPECT_EQ(TestDialogs::text("upload_text"), "Uploading benchy.gcode to Jobs…");
+	TestDialogs::tap("close");
 
 	// Asked anyway, it carries on
 	UI::Xml::Actions::dispatch(browser, "actions.usb.cancel_upload", "");
-	for (int exchange = 0; exchange < 200 && !isHidden(browser, "transfer"); exchange++)
+	for (int exchange = 0; exchange < 200 && !isHidden(statusBar, "transfer"); exchange++)
 	{
 		Comm::Connection::get().process();
 		Sim::Simulator::get().process();

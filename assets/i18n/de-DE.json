@@ -148,6 +148,7 @@
       "time_and_filament": "{:s} · {:.1f} m",
       "date_and_size": "{:s} · {:s}",
       "empty": "Dieser Ordner ist leer",
+      "uploading": "Hochladen",
       "delete": "Löschen",
       "running_another": "Ein anderer Auftrag läuft: dieser kann starten, sobald er beendet ist",
       "running_this": "Dies ist der laufende Auftrag: er kann erst nach seinem Ende erneut gestartet oder gelöscht werden",
