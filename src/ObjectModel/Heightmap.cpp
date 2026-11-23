@@ -8,26 +8,23 @@
 #include "Debug.h"
 
 #include "Heightmap.h"
+#include "LockWrapper.h"
+#include "Tree/Tree.h"
+#include <mutex>
 
-#include "Hardware/Duet.h"
+#include "Comm/Connection.h"
+#include "Comm/Gcode.h"
+#include "Configuration.h"
 #include "ObjectModel/Directories.h"
 #include "utils/csv.h"
 #include <cmath>
-#include <fstream>
 #include <map>
 #include <sstream>
 
 namespace OM
 {
-	static std::string s_currentHeightmapName;
 	static std::vector<HeightmapPtr> s_heightmapCache;
 	static std::string s_emptyStr = "";
-
-	static std::string GetLocalFilePath(std::string_view filename)
-	{
-		ZoneScoped;
-		return fmt::format("/tmp/heightmaps/{}", filename);
-	}
 
 	HeightmapMeta::HeightmapMeta()
 	{
@@ -99,16 +96,11 @@ namespace OM
 		}
 	}
 
-	std::shared_ptr<Move::Axis> HeightmapMeta::GetAxis(size_t index) const
+	char HeightmapMeta::GetAxisLetter(size_t index) const
 	{
 		ZoneScoped;
 		const std::string& label = m_axis[index];
-		auto axis = Move::GetAxisByLetter(label[0]);
-		if (axis == nullptr)
-		{
-			LOG_ERROR("Axis {:s} not found", label.c_str());
-		}
-		return axis;
+		return label.empty() ? '\0' : label[0];
 	}
 
 	void HeightmapMeta::CheckValidity()
@@ -163,18 +155,6 @@ namespace OM
 					LOG_WARN("CSV file \"{:s}\" not a heightmap", m_fileName);
 					return;
 				}
-
-				// Write the file to disk
-				std::string localFilePath = GetLocalFilePath(m_fileName);
-				std::ofstream file(localFilePath.c_str(), std::ios::out | std::ios::binary);
-				if (!file.is_open())
-				{
-					LOG_ERROR("Failed to open file {:s} for writing", localFilePath.c_str());
-					return;
-				}
-
-				LOG_INFO("Writing heightmap to {:s}", localFilePath.c_str());
-				file.write(csvContents.data(), csvContents.length());
 
 				if (!ParseMeta(csvContents))
 				{
@@ -436,33 +416,12 @@ namespace OM
 		return true;
 	}
 
-	void SetCurrentHeightmap(std::string_view filename)
-	{
-		ZoneScoped;
-		size_t pos = filename.find_last_of('/');
-		if (pos != std::string::npos)
-		{
-			s_currentHeightmapName = filename.substr(pos + 1);
-		}
-		else
-		{
-			s_currentHeightmapName = filename;
-		}
-		LOG_DBG("Set current heightmap to \"{:s}\" ({:s})", s_currentHeightmapName, filename);
-	}
-
-	void ClearCurrentHeightmap()
-	{
-		ZoneScoped;
-		s_currentHeightmapName = "";
-	}
-
 	/* Sends command to Duet to use the heightmap called `filename` */
 	void LoadHeightmap(std::string_view filename)
 	{
 		ZoneScoped;
 		LOG_INFO("Loading heightmap {:s}", filename);
-		Comm::DUET.SendGcodef("G29 S1 P\"{:s}\"\n", filename);
+		Comm::Connection::get().sendGcodef("G29 S1 P{:s}\n", Comm::quoted(filename));
 	}
 
 	/* Sends command to Duet to unload the heightmap */
@@ -470,25 +429,27 @@ namespace OM
 	{
 		ZoneScoped;
 		LOG_INFO("Unloading heightmap");
-		Comm::DUET.SendGcode("G29 S2\n");
+		Comm::Connection::get().sendGcode("G29 S2\n");
 	}
 
 	void ToggleHeightmap(std::string_view filename)
 	{
 		ZoneScoped;
-		if (s_currentHeightmapName != filename)
+		if (GetCurrentHeightmap() != filename)
 		{
 			LoadHeightmap(filename);
 			return;
 		}
 		UnloadHeightmap();
-		ClearCurrentHeightmap();
 	}
 
-	std::string_view GetCurrentHeightmap()
+	std::string GetCurrentHeightmap()
 	{
 		ZoneScoped;
-		return s_currentHeightmapName;
+		std::lock_guard lock(mutexModel);
+		const std::string_view path = Tree::get().root().at("move.compensation.file").text();
+		const size_t slash = path.find_last_of('/');
+		return std::string(slash == std::string_view::npos ? path : path.substr(slash + 1));
 	}
 
 	HeightmapPtr GetHeightmapData(std::string_view filename)

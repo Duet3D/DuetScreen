@@ -1,0 +1,254 @@
+/*
+ * XmlView.cpp
+ */
+
+#include "XmlView.h"
+#include "Debug.h"
+#include "UI/Core/Model.h"
+#include "UI/Xml/Binding/Names.h"
+#include "UI/Xml/Layout/PlacementScope.h"
+#include "UI/Xml/Runtime/XmlUi.h"
+#include "helix_xml.h"
+#include <vector>
+
+namespace UI::Xml
+{
+	namespace
+	{
+		/** The presenter name in the loaded definition of `component`; empty if none */
+		std::string presenterNameOf(const std::string& component)
+		{
+			const ComponentInfo* info = findComponent(component);
+			return info ? info->presenter : std::string();
+		}
+
+		/** A new presenter for `component`, or nullptr if it names none or an unknown one */
+		std::shared_ptr<XmlPresenter> createPresenterFor(const std::string& component)
+		{
+			const std::string name = presenterNameOf(component);
+			if (name.empty())
+			{
+				return nullptr;
+			}
+			auto presenter = Presenters::create(name);
+			if (!presenter)
+			{
+				LOG_ERROR("Component '{:s}' names unknown presenter '{:s}'", component, name);
+			}
+			return presenter;
+		}
+	} // namespace
+
+	detail::XmlViewState::XmlViewState(std::string componentName,
+									   std::string name,
+									   std::shared_ptr<XmlPresenter> given,
+									   std::map<std::string, std::string> givenProps,
+									   const Scope* outerScope)
+		: component(std::move(componentName))
+		, objName(std::move(name))
+		, presenter(std::move(given))
+		, presenterGiven(presenter != nullptr)
+		, props(std::move(givenProps))
+		, outer(outerScope)
+	{
+		prepare();
+	}
+
+	void detail::XmlViewState::prepare()
+	{
+		if (!presenterGiven)
+		{
+			const std::string wanted = presenterNameOf(component);
+			const std::string current = presenter ? std::string(presenter->getName()) : std::string();
+			if (!presenter || wanted != current)
+			{
+				presenter = createPresenterFor(component);
+			}
+		}
+
+		// A screen is self-contained: its names are its presenter's, then its place's (a placed widget's, else a
+		// page's), then the globals
+		scope = std::make_unique<Scope>(outer ? outer->context() : PlacementScope::page().getScope().context());
+		if (presenter)
+		{
+			ScopeBinder binder(*scope, Names::PRESENTER);
+			presenter->fields(binder);
+		}
+	}
+
+	XmlView::XmlView(const std::string& name, LvObj& parent, std::string componentName)
+		: XmlView(name, parent.getRootPtr(), std::move(componentName))
+	{
+	}
+
+	XmlView::XmlView(const std::string& name,
+					 LvObj& parent,
+					 std::string componentName,
+					 std::shared_ptr<XmlPresenter> givenPresenter)
+		: XmlView(name, parent.getRootPtr(), std::move(componentName), std::move(givenPresenter))
+	{
+	}
+
+	XmlView::XmlView(const std::string& name, lv_obj_t* parent, std::string componentName)
+		: XmlView(name, parent, std::move(componentName), nullptr)
+	{
+	}
+
+	XmlView::XmlView(const std::string& name,
+					 lv_obj_t* parent,
+					 std::string componentName,
+					 std::shared_ptr<XmlPresenter> givenPresenter,
+					 std::map<std::string, std::string> givenProps,
+					 const Scope* outerScope)
+		: XmlViewState(std::move(componentName), name, std::move(givenPresenter), std::move(givenProps), outerScope)
+		, LvObj([this](lv_obj_t* p) { return build(p, *this); }, name, parent)
+	{
+		ZoneScoped;
+		registerActions();
+		addView(this);
+	}
+
+	XmlView::~XmlView()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		removeView(this);
+		if (presenter)
+		{
+			Model::get().unbind(presenter);
+		}
+		// ~LvObj deletes the widgets next; the presenter and scope (members of the base) outlive them
+		if (getRootPtr() != nullptr)
+		{
+			removeFromInputGroups(getRootPtr());
+		}
+	}
+
+	lv_obj_t* XmlView::build(lv_obj_t* parent, detail::XmlViewState& state)
+	{
+		ZoneScoped;
+		// The props as the engine takes attributes: name, value, …, then two nulls
+		std::vector<const char*> attrs;
+		for (const auto& [name, value] : state.props)
+		{
+			attrs.push_back(name.c_str());
+			attrs.push_back(value.c_str());
+		}
+		attrs.push_back(nullptr);
+		attrs.push_back(nullptr);
+		auto* obj = static_cast<lv_obj_t*>(
+			lv_xml_create_with_ctx(parent, state.component.c_str(), attrs.data(), state.scope->context()));
+		std::string problem = "couldn't be loaded";
+		if (obj != nullptr && lv_obj_get_user_data(obj) != nullptr)
+		{
+			// The root is a widget with a C++ object of its own (a ds_button, a ds_graph, …), which finds itself
+			// through the widget, as the view would: they can't share it
+			LOG_ERROR("UI component '{:s}' can't be a view: its root is a DuetScreen widget; put it in an lv_obj",
+					  state.component);
+			lv_obj_delete(obj);
+			obj = nullptr;
+			problem = "can't be a view: its root must be an lv_obj";
+		}
+		if (obj != nullptr)
+		{
+			return obj;
+		}
+
+		// Never leave a hole: say what's wrong where the view should be
+		LOG_ERROR("Couldn't build UI component '{:s}'", state.component);
+		obj = lv_obj_create(parent);
+		lv_obj_set_size(obj, LV_PCT(100), LV_PCT(100));
+		lv_obj_t* label = lv_label_create(obj);
+		lv_label_set_text_fmt(label, "UI component '%s' %s", state.component.c_str(), problem.c_str());
+		lv_obj_center(label);
+		return obj;
+	}
+
+	void XmlView::registerActions()
+	{
+		Actions::setHandlers(getRootPtr(), presenter ? &presenter->getActions() : nullptr);
+	}
+
+	void XmlView::rebuild()
+	{
+		takeDown();
+		buildAgain();
+	}
+
+	void XmlView::takeDown()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		lv_obj_t* old = getRootPtr();
+		if (old == nullptr)
+		{
+			return;
+		}
+
+		m_placement = Placement{.parent = lv_obj_get_parent(old),
+								.index = lv_obj_get_index(old),
+								.hidden = lv_obj_has_flag(old, LV_OBJ_FLAG_HIDDEN)};
+
+		// The widgets may be bound to the scope (and presenter) about to be replaced.
+		// Deleting the root nulls m_root (LvObj registers lv_obj_null_on_delete).
+		disconnectPresenter();
+		removeFromInputGroups(old);
+		lv_obj_delete(old);
+	}
+
+	void XmlView::buildAgain()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (getRootPtr() != nullptr || !m_placement)
+		{
+			return;
+		}
+		const Placement placement = *m_placement;
+		m_placement.reset();
+
+		prepare();
+		m_root = build(placement.parent, *this);
+		lv_obj_move_to_index(m_root, placement.index);
+		lv_obj_set_flag(m_root, LV_OBJ_FLAG_HIDDEN, placement.hidden);
+		lv_obj_set_name(m_root, objName.c_str());
+		lv_obj_set_user_data(m_root, static_cast<LvObj*>(this));
+		lv_obj_null_on_delete(&m_root);
+		registerActions();
+
+		if (!placement.hidden)
+		{
+			connectPresenter();
+		}
+	}
+
+	void XmlView::showInner()
+	{
+		connectPresenter();
+		LvObj::showInner();
+	}
+
+	void XmlView::hideInner()
+	{
+		disconnectPresenter();
+		LvObj::hideInner();
+	}
+
+	void XmlView::connectPresenter()
+	{
+		if (presenter)
+		{
+			presenter->activate();
+			Model::get().bind(presenter);
+		}
+	}
+
+	void XmlView::disconnectPresenter()
+	{
+		if (presenter)
+		{
+			presenter->deactivate();
+			Model::get().unbind(presenter);
+		}
+	}
+} // namespace UI::Xml

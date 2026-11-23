@@ -1,0 +1,30 @@
+<!--
+  Work zero, for a CNC: the workplace in use (G54 to G59), and making the current position zero, for one axis or all.
+
+  Data:     om.move.workplaceNumber; source.axes.all (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.workplace, actions.move.zero (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<view extends="ds_setting_group" title_tag="tr.move.work_zero" width="100%">
+		<!-- Two rows of three, so each name fits -->
+		<lv_obj name="workplaces" height="content" scrollable="false" style_layout="grid"
+				style_grid_column_dsc_array="fr(1) fr(1) fr(1)" style_grid_row_dsc_array="content content">
+			<style name="setting_row"/>
+			<move_workplace name="g54" text="G54" number="1" column="0" row="0"/>
+			<move_workplace name="g55" text="G55" number="2" column="1" row="0"/>
+			<move_workplace name="g56" text="G56" number="3" column="2" row="0"/>
+			<move_workplace name="g57" text="G57" number="4" column="0" row="1"/>
+			<move_workplace name="g58" text="G58" number="5" column="1" row="1"/>
+			<move_workplace name="g59" text="G59" number="6" column="2" row="1"/>
+		</lv_obj>
+		<lv_obj name="zero" height="content" flex_flow="row_wrap" scrollable="false">
+			<style name="setting_row"/>
+			<ds_list name="axes" list="source.axes.all" item="move_zero_axis" height="content" flex_grow="1"
+					 flex_flow="row_wrap" style_pad_all="0" style_pad_row="#pad" style_pad_column="#pad"/>
+			<ds_button name="all" translation_tag="tr.move.all_axes" height="content" style_min_height="40">
+				<style name="action_btn"/>
+				<action trigger="clicked" name="actions.move.zero" arg="all"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

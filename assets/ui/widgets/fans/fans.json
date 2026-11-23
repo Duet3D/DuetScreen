@@ -1,0 +1,20 @@
+{
+  "component": "fans",
+  "title_tag": "tr.widget.fans",
+  "description_tag": "tr.widget.fans_desc",
+  "category_tag": "tr.widget.category_fans",
+  "icon": "fan.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      458,
+      278
+    ],
+    "min": [
+      365,
+      184
+    ]
+  }
+}

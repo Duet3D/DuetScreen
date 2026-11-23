@@ -1,0 +1,21 @@
+<!--
+  A view in a card, filling it: a placed widget showing a piece of a page (the jobs, the macros, the job's status,
+  babystepping, the extruder panel). The widget file names the view, and the presenter to show it with if not its
+  own; a placed widget's root can't be the view itself, a DuetScreen widget (see XmlView.h).
+
+      {"component": "card_view", "props": {"view": "file_browser", "presenter": "dashboard_jobs"}}
+
+  Props:    view       the component shown
+            presenter  a registered presenter to show it with (src/UI/Presenters/Presenters.cpp); empty for the
+                       component's own
+-->
+<component>
+	<api>
+		<prop name="view" type="string"/>
+		<prop name="presenter" type="string" default=""/>
+	</api>
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="card"/>
+		<ds_view view="$view" presenter="$presenter" shown="true" width="100%" height="100%"/>
+	</view>
+</component>

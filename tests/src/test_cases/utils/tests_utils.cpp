@@ -49,3 +49,25 @@ TEST(Utils, Format)
 	EXPECT_EQ(fmt::format("Named arg: {name:s}, {value:d}", fmt::arg("name", "Count"), fmt::arg("value", 5)),
 			  "Named arg: Count, 5");
 }
+
+TEST(Utils, FormatFloat)
+{
+	EXPECT_EQ(utils::formatFloat(100.0, 0), "100");
+	EXPECT_EQ(utils::formatFloat(120.0), "120");
+	EXPECT_EQ(utils::formatFloat(0.1), "0.1");
+	EXPECT_EQ(utils::formatFloat(2.50, 2), "2.5");
+	EXPECT_EQ(utils::formatFloat(3.0, 2), "3");
+	EXPECT_EQ(utils::formatFloat(0.0, 0), "0");
+	EXPECT_EQ(utils::formatFloat(1.26, 1), "1.3");
+}
+
+TEST(Utils, ToUpper)
+{
+	EXPECT_EQ(utils::toUpper("Language and keyboard"), "LANGUAGE AND KEYBOARD");
+	EXPECT_EQ(utils::toUpper("Écran d'accueil"), "ÉCRAN D'ACCUEIL");
+	EXPECT_EQ(utils::toUpper("Gesichert, äöü"), "GESICHERT, ÄÖÜ");
+	EXPECT_EQ(utils::toUpper("Configuração"), "CONFIGURAÇÃO");
+	EXPECT_EQ(utils::toUpper("niño, œuvre, łódź"), "NIÑO, ŒUVRE, ŁÓDŹ");
+	EXPECT_EQ(utils::toUpper("Straße 2 °C"), "STRAßE 2 °C") << "ß has no capital here";
+	EXPECT_EQ(utils::toUpper("日本"), "日本") << "other scripts are left as they are";
+}

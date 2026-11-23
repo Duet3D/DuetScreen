@@ -52,7 +52,6 @@ constexpr std::string_view DEFAULT_IP_ADDRESS = "192.168.0.";
 constexpr std::string DEFAULT_UART_PORT = "/dev/ttyS5";
 constexpr const int DEFAULT_BAUD_RATE = B115200;
 constexpr std::chrono::milliseconds TIME_SYNC_INTERVAL = 10000ms; // Interval to resynchronize time with the Duet
-constexpr size_t MAX_UART_UPLOAD_SIZE = 1024;
 constexpr std::string_view DEFAULT_FILAMENTS_FILE = "filaments.csv";
 constexpr std::string_view DEFAULT_HEIGHTMAPS_FILE = "heightmaps.csv";
 
@@ -62,13 +61,6 @@ constexpr size_t MAX_THUMBNAIL_CACHE_PIXELS = 64; // Largest pixel width/height 
 constexpr std::chrono::milliseconds BACKGROUND_FILE_CACHE_POLL_INTERVAL = 500ms;
 constexpr size_t MAX_FILEINFO_REQUESTS = 1;
 constexpr size_t MAX_THUMBNAIL_REQUESTS = 1;
-
-/* Json Decoder */
-constexpr size_t MAX_ARRAY_NESTING = 4;
-constexpr size_t MAX_JSON_ID_LENGTH = 200;
-// 4096 is the largest needed for a Duet in standalone mode. But in
-// SBC mode, network responses can be much larger. This is most evident with `rr_thumbnail`
-constexpr size_t MAX_JSON_VALUE_LENGTH = 4096 * 20;
 
 /* Network */
 // Duet 2 seems to only support 3 concurrent connections. We need 1 connection for synchronous requests, so we can

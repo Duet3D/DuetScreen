@@ -1,0 +1,29 @@
+<!--
+  A sidebar button with an icon and a label that runs the actions it is given when tapped and when held: the
+  sidebar's `sidebar_button` widget, which the user sets up, and `sidebar_gcode`, which sends G-code
+  (widgets/commands/). It sits in a plain container like the page buttons (sidebar_page_button.xml).
+
+  Props:    label, icon  the button's text and image
+            tap_action, tap_arg, hold_action, hold_arg  the actions run when it is tapped and held (none if empty)
+-->
+<component>
+	<api>
+		<prop name="label" type="string" default=""/>
+		<prop name="icon" type="string" default="send.png"/>
+		<prop name="tap_action" type="string" default=""/>
+		<prop name="tap_arg" type="string" default=""/>
+		<prop name="hold_action" type="string" default=""/>
+		<prop name="hold_arg" type="string" default=""/>
+	</api>
+
+	<view extends="lv_obj" width="100%" style_min_width="content" flex_grow="1" scrollable="false"
+		  overflow_visible="true" ext_draw_size="400">
+		<style name="pad_zero"/>
+		<ds_button name="button" text="$label" icon="$icon" width="100%" height="100%" style_min_width="content"
+				   long_mode="clip">
+			<style name="sidebar_btn"/>
+			<action trigger="short_clicked" name="$tap_action" arg="$tap_arg"/>
+			<action trigger="long_pressed" name="$hold_action" arg="$hold_arg"/>
+		</ds_button>
+	</view>
+</component>

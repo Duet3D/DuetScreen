@@ -1,0 +1,25 @@
+<!--
+  The sidebar down the left of the screen: a button per page and the drag-to-stop E-stop, placed by the sidebar's
+  layout (layouts/sidebar.json) so the user can add, remove and reorder them. The Settings button and the E-stop are
+  locked: they can be moved but not removed.
+
+  Each page button (sidebar_page_button.xml) opens a page by the name home.xml registers it under, and is checked
+  while that page is open (source.navigation.screen is empty on the home screen). A page of a user bundle gets a button by giving it
+  a widget file the same way (widgets/navigation/page_*.json).
+
+  The sidebar and its buttons draw beyond their own area so the E-stop stays visible while it is dragged (and
+  button shadows aren't clipped at the edge).
+-->
+<component>
+	<view extends="lv_obj" scrollable="false" overflow_visible="true" ext_draw_size="1024">
+		<style name="sidebar"/>
+		<style name="pad_zero"/>
+
+		<!-- The buttons are the widgets of the sidebar's layout (layouts/sidebar.json), which the user can change -->
+		<ds_layout name="buttons" slot="sidebar" width="100%" height="100%" style_min_width="content" scrollable="false"
+				   overflow_visible="true" ext_draw_size="400" flex_flow="column" style_flex_main_place="start"
+				   style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="bg_dark"/>
+		</ds_layout>
+	</view>
+</component>

@@ -1,0 +1,109 @@
+{
+  "component": "sidebar_button",
+  "title_tag": "tr.widget.gcode_button",
+  "description_tag": "tr.widget.sidebar_gcode_desc",
+  "category_tag": "tr.widget.category_commands",
+  "icon": "send.png",
+  "slots": [
+    "sidebar"
+  ],
+  "props": {
+    "tap_action": "actions.gcode.send"
+  },
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_label",
+      "default": "Home",
+      "max_length": 32
+    },
+    {
+      "name": "icon",
+      "kind": "choice",
+      "title_tag": "tr.widget.setting_icon",
+      "default": "send.png",
+      "options": [
+        {
+          "value": "send.png",
+          "title": "send"
+        },
+        {
+          "value": "home_axis.png",
+          "title": "home axes"
+        },
+        {
+          "value": "macros.png",
+          "title": "macros"
+        },
+        {
+          "value": "move.png",
+          "title": "move"
+        },
+        {
+          "value": "extrude.png",
+          "title": "extrude"
+        },
+        {
+          "value": "retract.png",
+          "title": "retract"
+        },
+        {
+          "value": "temperature.png",
+          "title": "temperature"
+        },
+        {
+          "value": "bed.png",
+          "title": "bed"
+        },
+        {
+          "value": "tools.png",
+          "title": "tools"
+        },
+        {
+          "value": "fan.png",
+          "title": "fan"
+        },
+        {
+          "value": "heightmap.png",
+          "title": "bed mesh"
+        },
+        {
+          "value": "babystep.png",
+          "title": "babystep"
+        },
+        {
+          "value": "disable_motors.png",
+          "title": "motors off"
+        },
+        {
+          "value": "pause.png",
+          "title": "pause"
+        },
+        {
+          "value": "resume.png",
+          "title": "resume"
+        },
+        {
+          "value": "cancel.png",
+          "title": "cancel"
+        },
+        {
+          "value": "print_again.png",
+          "title": "print again"
+        },
+        {
+          "value": "info.png",
+          "title": "info"
+        }
+      ]
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_gcode",
+      "default": "G28",
+      "max_length": 120
+    }
+  ]
+}

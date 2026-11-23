@@ -1,0 +1,21 @@
+<!--
+  A gauge for each analog sensor, or with `key`, the sensors whose key is `match` (one sensor): its reading, named
+  for the sensor (else "Sensor <n>"), on a scale up to the next hundred above it.
+
+  Props:    key, match, look, flow, grow, portrait  as gauge_list.xml
+  Fields:   rows of om.sensors.analog
+-->
+<component>
+	<api>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+	</api>
+
+	<view extends="gauge_list" list="om.sensors.analog" key="$key" match="$match" look="$look" flow="$flow"
+		  grow="$grow" portrait="$portrait" shown="row.exists" title="row.name|default:tr.widget.gauge_sensor" value="row.lastReading|int"
+		  text="row.lastReading|fixed:1" unit="'°C'" max="row.lastReading|scale_top:100"/>
+</component>

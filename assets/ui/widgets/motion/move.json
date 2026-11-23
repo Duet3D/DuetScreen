@@ -1,0 +1,20 @@
+{
+  "component": "move",
+  "title_tag": "tr.control.move_tab",
+  "description_tag": "tr.widget.move_desc",
+  "category_tag": "tr.widget.category_motion",
+  "icon": "move.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      920,
+      527
+    ],
+    "min": [
+      600,
+      480
+    ]
+  }
+}

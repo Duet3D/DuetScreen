@@ -1,0 +1,62 @@
+<!--
+  The home screen: the status bar across the top, the sidebar down the left, and the main window, which shows one
+  page at a time (the dashboard when nothing else is open).
+
+  Pages are <ds_view>s showing XML components. Each is registered with Navigation under its name, which the sidebar
+  and <action name="actions.navigation.open" arg="…"/> use. Dialogs open on the dialog surface over the main window
+  (<ds_dialog_host>), so the sidebar and the E-stop stay usable.
+
+  The console can sit beside the main window instead of being a page: give the grid a third column (fr(5)) and move
+  the console's <ds_view> out of main_window with style_grid_cell_column_pos="2".
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%"
+		  style_layout="grid" style_grid_column_dsc_array="content fr(9)" style_grid_row_dsc_array="content fr(1)">
+		<style name="text"/>
+		<style name="bg_dark"/>
+		<style name="pad_zero"/>
+
+		<ds_view name="status_bar" view="status_bar" shown="true" height="content"
+				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
+				 style_grid_cell_y_align="start" style_grid_cell_row_pos="0" style_grid_cell_row_span="1"/>
+
+		<ds_view name="main_window" view="home_main_window" shown="true" height="100%" flex_grow="1"
+				 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
+				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1">
+			<ds_view name="dashboard" view="dashboard" home="true"/>
+			<ds_view name="console" view="console"/>
+			<ds_view name="control" view="control"/>
+			<ds_view name="files" view="files"/>
+			<ds_view name="settings" view="settings"/>
+		</ds_view>
+
+		<!-- After the main window, so a dragged E-stop passes over it -->
+		<ds_view name="sidebar" view="sidebar" shown="true" width="content"
+				 style_grid_cell_x_align="start" style_grid_cell_column_pos="0" style_grid_cell_column_span="1"
+				 style_grid_cell_y_align="stretch" style_grid_cell_row_pos="0" style_grid_cell_row_span="2"/>
+
+		<!-- While the user customises the screen: its toolbar, over the pages, sidebar and status bar -->
+		<ds_view name="customise" view="customise" shown="true"/>
+
+		<!-- Every dialog, one step at a time, over the main window (and the customise toolbar) -->
+		<ds_dialog_host name="dialogs"
+						style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
+						style_grid_cell_y_align="stretch" style_grid_cell_row_pos="1" style_grid_cell_row_span="1"/>
+
+		<!-- The shared dialogs, which open on the dialog surface -->
+		<ds_view name="factors" view="factors" shown="true"/>
+		<ds_view name="babystep_dialog" view="babystep_dialog" shown="true"/>
+		<ds_view name="file_dialog" view="file_dialog" shown="true"/>
+		<ds_view name="usb_dialog" view="usb_dialog" shown="true"/>
+
+		<!-- Over everything: responses, alerts and update prompts, then the keyboard -->
+		<ds_view name="notifications" view="notifications" shown="true"/>
+		<!--
+		  The shared keyboard: a ds_textarea in any page or dialog finds it by its name, and brings it up. Last, so it is
+		  over the alerts too, but in the main window's grid cell (not floating), so it leaves the sidebar uncovered.
+		-->
+		<ds_keyboard name="keyboard" hidden="true" height="40%"
+					 style_grid_cell_x_align="stretch" style_grid_cell_column_pos="1" style_grid_cell_column_span="1"
+					 style_grid_cell_y_align="end" style_grid_cell_row_pos="1" style_grid_cell_row_span="1"/>
+	</view>
+</component>

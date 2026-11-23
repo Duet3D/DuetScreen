@@ -7,20 +7,27 @@
 
 #include "UnitSystem.h"
 #include "Debug.h"
-#include "ObjectModel/Axis.h"
+#include "LockWrapper.h"
+#include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "i18n/i18n.h"
 #include "utils/StorageHelper.h"
+#include <mutex>
 
 namespace Units
 {
 	/**
-	 * @brief Get the current unit system used by the Duet as set with `G20` or `G21`
+	 * @brief Get the current unit system used by the Duet as set with `G20` or `G21`: the distance unit of the input
+	 * channel the screen uses (inputs[channel].distanceUnit), metric until the printer says otherwise
 	 * @return the current unit system used by the Duet
 	 */
 	UnitSystem getCurrentDuetUnitSystem()
 	{
 		ZoneScoped;
-		return OM::Move::GetCurrentDistanceUnit();
+		const size_t channel = OM::GetChannelIndex();
+		std::lock_guard lock(mutexModel);
+		const auto unit = OM::Tree::get().root()["inputs"][channel]["distanceUnit"].text();
+		return unit == "in" ? UnitSystem::Imperial : UnitSystem::Metric;
 	}
 
 	/**

@@ -1,0 +1,28 @@
+<!--
+  One of the job's objects in the Objects tab's list: its name, struck through once cancelled, and "Now" while it is
+  being printed or "Cancelled". Tinted while chosen. Tap it to choose it.
+
+  Fields and actions: an objects row (src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" height="content" flex_flow="row" scrollable="false" style_flex_cross_place="center"
+		  style_min_height="46">
+		<style name="setting_row"/>
+		<style name="pressed" selector="pressed"/>
+		<bind_style name="btn_checked" subject="row.chosen" ref_value="1"/>
+		<action trigger="clicked" name="presenter.object_cancel.choose"/>
+
+		<lv_label name="name" bind_text="row.name" flex_grow="1" long_mode="wrap">
+			<bind_style name="object_name_cancelled" subject="row.cancelled" ref_value="1"/>
+		</lv_label>
+		<lv_label name="now" translation_tag="tr.object_cancel.now">
+			<style name="chip"/>
+			<style name="chip_accent"/>
+			<bind_flag_if_eq subject="row.current" flag="hidden" ref_value="0"/>
+		</lv_label>
+		<lv_label name="cancelled" translation_tag="tr.object_cancel.cancelled">
+			<style name="chip"/>
+			<bind_flag_if_eq subject="row.cancelled" flag="hidden" ref_value="0"/>
+		</lv_label>
+	</view>
+</component>

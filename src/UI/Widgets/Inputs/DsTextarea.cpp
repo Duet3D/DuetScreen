@@ -1,0 +1,404 @@
+/*
+ * DsTextarea.cpp
+ */
+
+#include "DsTextarea.h"
+#include "KeyboardRoom.h"
+#include "UI/Core/Navigation.h"
+#include "UI/Widgets/WidgetSupport.h"
+#include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Runtime/Translations.h"
+#include "i18n/i18n.h"
+#include "src/xml/parsers/lv_xml_obj_parser.h"
+
+namespace UI::Xml
+{
+	using namespace WidgetSupport;
+
+	DsTextarea::DsTextarea(const std::string& name, lv_obj_t* parent)
+		: DsTextarea(name, LvObjRef(parent))
+	{
+	}
+
+	namespace
+	{
+		/** The keyboard layout called `mode` */
+		lv_keyboard_mode_t keyboardMode(std::string_view mode)
+		{
+			if (mode == "number")
+			{
+				return LV_KEYBOARD_MODE_NUMBER;
+			}
+			return mode == "text_upper" ? LV_KEYBOARD_MODE_TEXT_UPPER : LV_KEYBOARD_MODE_TEXT_LOWER;
+		}
+	} // namespace
+
+	DsTextarea::~DsTextarea()
+	{
+		stopWatchingLeave();
+		// Deleted while typed into (its row rebuilt, its dialog gone): nothing would put the keyboard away
+		if (m_shownKeyboard != nullptr && lv_obj_is_valid(m_shownKeyboard) &&
+			lv_keyboard_get_textarea(m_shownKeyboard) == getRootPtr())
+		{
+			lv_keyboard_set_textarea(m_shownKeyboard, nullptr);
+			showKeyboard(m_shownKeyboard, false);
+		}
+	}
+
+	void DsTextarea::leftByPress()
+	{
+		lv_indev_t* indev = lv_indev_active();
+		if (indev == nullptr || lv_indev_get_state(indev) != LV_INDEV_STATE_PRESSED)
+		{
+			lv_obj_send_event(getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+			return;
+		}
+		if (m_leavingIndev == indev)
+		{
+			return; // Already watched, since a press that scrolled
+		}
+		stopWatchingLeave();
+		m_leavingIndev = indev;
+		lv_indev_add_event_cb(indev, leftReleasedCb, LV_EVENT_RELEASED, this);
+	}
+
+	void DsTextarea::leftReleasedCb(lv_event_t* e)
+	{
+		auto* textarea = static_cast<DsTextarea*>(lv_event_get_user_data(e));
+		auto* pressed = static_cast<lv_obj_t*>(lv_event_get_param(e));
+		// The object scrolled is still set as the press is let go
+		if (lv_indev_get_scroll_obj(textarea->m_leavingIndev) != nullptr || pressed == nullptr ||
+			!lv_obj_has_flag(pressed, LV_OBJ_FLAG_CLICK_FOCUSABLE))
+		{
+			return;
+		}
+		textarea->stopWatchingLeave();
+		const bool onTheBox = pressed == textarea->getRootPtr() || lv_obj_get_parent(pressed) == textarea->getRootPtr();
+		if (!onTheBox)
+		{
+			lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+		}
+	}
+
+	void DsTextarea::stopWatchingLeave()
+	{
+		if (m_leavingIndev != nullptr)
+		{
+			lv_indev_remove_event_cb_with_user_data(m_leavingIndev, leftReleasedCb, this);
+			m_leavingIndev = nullptr;
+		}
+	}
+
+	DsTextarea::DsTextarea(const std::string& name, LvObjRef&& parent)
+		: LvTextarea(name, parent)
+	{
+		for (lv_event_code_t code :
+			 {LV_EVENT_FOCUSED, LV_EVENT_DEFOCUSED, LV_EVENT_LEAVE, LV_EVENT_CLICKED, LV_EVENT_READY, LV_EVENT_CANCEL})
+		{
+			lv_obj_add_event_cb(getRootPtr(), keyboardEventCb, code, this);
+		}
+		// Added before any <action>, so it can keep them from seeing a value that isn't an edit
+		lv_obj_add_event_cb(getRootPtr(), quietChangeCb, LV_EVENT_VALUE_CHANGED, this);
+	}
+
+	void DsTextarea::quietChangeCb(lv_event_t* e)
+	{
+		if (static_cast<DsTextarea*>(lv_event_get_user_data(e))->m_settingQuietly)
+		{
+			lv_event_stop_processing(e);
+		}
+	}
+
+	void DsTextarea::registerXml()
+	{
+		Widgets::add(
+			{.name = "ds_textarea",
+			 .extends = "lv_obj",
+			 .description =
+				 "A text box that brings up an on-screen keyboard while it is being edited. The keyboard's own close "
+				 "key always puts it away. Raises `focused`, `defocused`, `ready` and `cancel` as the edit starts and "
+				 "ends, and `value_changed` on every edit; handlers read the text with ActionArgs::text(). Text "
+				 "written by `bind_text` is not an edit and raises nothing, so a handler can store each edit in the "
+				 "subject the box shows.",
+			 .example =
+				 R"(<ds_textarea name="input" one_line="true" bind_text="presenter.alert.input" bind_keyboard_mode="presenter.alert.keyboard_mode"
+			 width="300">
+	<action trigger="value_changed" name="presenter.alert.input"/>
+</ds_textarea>)",
+			 .attributes =
+				 {{"bind_text",
+				   "Follow a text subject: the box shows its value whenever it changes to something other than what is "
+				   "in the box, so a presenter that keeps the subject equal to the edits can replace the text at any "
+				   "time",
+				   AttributeKind::Subject},
+				  {"bind_accepted_chars",
+				   "Follow a text subject for the characters that may be typed; empty for any",
+				   AttributeKind::Subject},
+				  {"keyboard_mode", "Keyboard layout to show: `text` (default), `text_upper` or `number`"},
+				  {"bind_keyboard_mode",
+				   "Follow a text subject for the keyboard layout, as `keyboard_mode`",
+				   AttributeKind::Subject},
+				  {"keyboard",
+				   "The keyboard to use: the nearest lv_keyboard of that name around the box (e.g. one in the same "
+				   "view), else a C++ view of that name (default `keyboard`, the home screen's); `none` for a box "
+				   "edited another way, such as a number pad"},
+				  {"bind_editing",
+				   "Follow an integer subject: turning non-zero starts an edit, as tapping the box does (e.g. a box "
+				   "shown by a button, ready to type into), and turning 0 ends it. Only changes count, not the value "
+				   "when the box is made, and the box's own taps start and end edits as usual",
+				   AttributeKind::Subject},
+				  {"hide_keyboard_on_ready", "Put the keyboard away when its OK key is pressed (default true)"},
+				  {"hide_keyboard_on_defocus",
+				   "Put the keyboard away when the box loses focus or something outside it is tapped (default true)"},
+				  {"one_line", "\"true\" for a single line of text"},
+				  {"password_mode", "\"true\" to show dots for the characters, e.g. for a password"},
+				  {"placeholder", "Text shown while the box is empty"},
+				  {"placeholder_tag",
+				   "Translation key for the placeholder, instead of `placeholder`",
+				   AttributeKind::Translation}},
+			 .exampleSubjects = {{"presenter.alert.input", "string", "M115"},
+								 {"presenter.alert.keyboard_mode", "string", "text"}}},
+			xmlCreate,
+			xmlApply);
+	}
+
+	void* DsTextarea::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
+	{
+		auto* textarea = new DsTextarea(attrOr(attrs, "name", "textarea"), parentOf(state));
+		deleteWith(textarea->getRootPtr(), textarea);
+		return textarea->getRootPtr();
+	}
+
+	void DsTextarea::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
+	{
+		lv_xml_obj_apply(state, attrs);
+
+		lv_obj_t* root = itemOf(state);
+		auto& textarea = static_cast<DsTextarea&>(*LvObj::fromPtr(root));
+		if (const char* oneLine = lv_xml_get_value_of(attrs, "one_line"))
+		{
+			lv_textarea_set_one_line(root, lv_xml_to_bool(oneLine));
+		}
+		if (const char* password = lv_xml_get_value_of(attrs, "password_mode"))
+		{
+			lv_textarea_set_password_mode(root, lv_xml_to_bool(password));
+		}
+		if (const char* tag = lv_xml_get_value_of(attrs, "placeholder_tag"))
+		{
+			lv_textarea_set_placeholder_text(root, Xml::Translations::translate(tag).c_str());
+		}
+		else if (const char* placeholder = lv_xml_get_value_of(attrs, "placeholder"))
+		{
+			lv_textarea_set_placeholder_text(root, placeholder);
+		}
+		textarea.m_mode = keyboardMode(attrOr(attrs, "keyboard_mode", "text"));
+		textarea.m_keyboard = attrOr(attrs, "keyboard", "keyboard");
+		textarea.m_hideOnReady = lv_xml_to_bool(attrOr(attrs, "hide_keyboard_on_ready", "true"));
+		textarea.m_hideOnDefocus = lv_xml_to_bool(attrOr(attrs, "hide_keyboard_on_defocus", "true"));
+
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_accepted_chars"))
+		{
+			lv_subject_add_observer_obj(subject, acceptedObserverCb, root, &textarea);
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_keyboard_mode"))
+		{
+			lv_subject_add_observer_obj(subject, keyboardModeObserverCb, root, &textarea);
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_text"))
+		{
+			lv_subject_add_observer_obj(subject, textObserverCb, root, &textarea);
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_editing"))
+		{
+			// Its value now is no change, so it starts nothing
+			textarea.m_editing = lv_subject_get_int(subject);
+			lv_subject_add_observer_obj(subject, editingObserverCb, root, &textarea);
+		}
+	}
+
+	void DsTextarea::textObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		lv_obj_t* textarea = lv_observer_get_target_obj(observer);
+		const char* text = lv_subject_get_string(subject);
+		// Already showing it, e.g. the edit that the presenter is echoing: don't move the cursor
+		if (std::string_view(lv_textarea_get_text(textarea)) != text)
+		{
+			// Set a character at a time when only some are accepted, each raising value_changed
+			auto* box = static_cast<DsTextarea*>(lv_observer_get_user_data(observer));
+			box->m_settingQuietly = true;
+			lv_textarea_set_text(textarea, text);
+			box->m_settingQuietly = false;
+		}
+	}
+
+	void DsTextarea::acceptedObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* textarea = static_cast<DsTextarea*>(lv_observer_get_user_data(observer));
+		textarea->m_accepted = lv_subject_get_string(subject);
+		lv_textarea_set_accepted_chars(textarea->getRootPtr(),
+									   textarea->m_accepted.empty() ? nullptr : textarea->m_accepted.c_str());
+	}
+
+	void DsTextarea::keyboardModeObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		static_cast<DsTextarea*>(lv_observer_get_user_data(observer))->m_mode =
+			keyboardMode(lv_subject_get_string(subject));
+	}
+
+	void DsTextarea::editingObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* textarea = static_cast<DsTextarea*>(lv_observer_get_user_data(observer));
+		const int32_t editing = lv_subject_get_int(subject);
+		if ((editing != 0) == (textarea->m_editing != 0))
+		{
+			textarea->m_editing = editing;
+			return;
+		}
+		textarea->m_editing = editing;
+		if (editing != 0)
+		{
+			textarea->startEdit();
+		}
+		else
+		{
+			textarea->endEdit();
+		}
+	}
+
+	void DsTextarea::startEdit()
+	{
+		lv_obj_t* root = getRootPtr();
+		lv_group_t* group = lv_obj_get_group(root);
+		if (group != nullptr && lv_group_get_focused(group) != root)
+		{
+			lv_group_focus_obj(root); // raises FOCUSED, which brings up the keyboard
+			return;
+		}
+		// Already focused (or in no group), it raises no FOCUSED: start the edit as a tap on it then does
+		lv_obj_send_event(root, LV_EVENT_FOCUSED, nullptr);
+	}
+
+	void DsTextarea::endEdit()
+	{
+		if (m_shownKeyboard == nullptr)
+		{
+			return;
+		}
+		lv_keyboard_set_textarea(m_shownKeyboard, nullptr);
+		showKeyboard(m_shownKeyboard, false);
+		// The edit ends, so whatever moved out of the keyboard's way can move back
+		lv_obj_send_event(getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+	}
+
+	lv_obj_t* DsTextarea::findKeyboard() const
+	{
+		if (m_keyboard == "none")
+		{
+			return nullptr;
+		}
+		// The nearest one of that name: in the same view before any other
+		for (lv_obj_t* scope = lv_obj_get_parent(getRootPtr()); scope != nullptr; scope = lv_obj_get_parent(scope))
+		{
+			lv_obj_t* found = lv_obj_find_by_name(scope, m_keyboard.c_str());
+			if (found != nullptr && lv_obj_check_type(found, &lv_keyboard_class))
+			{
+				return found;
+			}
+		}
+		LvObj* view = findView(m_keyboard);
+		return view != nullptr && lv_obj_check_type(view->getRootPtr(), &lv_keyboard_class) ? view->getRootPtr()
+																							: nullptr;
+	}
+
+	void DsTextarea::showKeyboard(lv_obj_t* keyboard, bool show)
+	{
+		if (show)
+		{
+			lv_keyboard_set_mode(keyboard, m_mode);
+			lv_keyboard_set_textarea(keyboard, getRootPtr());
+			lv_obj_remove_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
+			lv_obj_move_foreground(keyboard);
+			m_shownKeyboard = keyboard;
+			KeyboardRoom::make(keyboard, getRootPtr());
+			return;
+		}
+		m_shownKeyboard = nullptr;
+		stopWatchingLeave();
+		if (!lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN))
+		{
+			KeyboardRoom::giveBack();
+		}
+		lv_obj_add_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
+	}
+
+	bool DsTextarea::handingOn(lv_obj_t* keyboard) const
+	{
+		// While a tap moves the focus, the object it is on is the active one
+		lv_obj_t* tapped = lv_indev_active() != nullptr ? lv_indev_get_active_obj() : nullptr;
+		if (tapped == nullptr || tapped == getRootPtr() || lv_obj_get_user_data(tapped) == nullptr)
+		{
+			return false;
+		}
+		const auto* next = dynamic_cast<const DsTextarea*>(LvObj::fromPtr(tapped));
+		return next != nullptr && next->m_hideOnDefocus && next->findKeyboard() == keyboard;
+	}
+
+	void DsTextarea::keyboardEventCb(lv_event_t* e)
+	{
+		auto* textarea = static_cast<DsTextarea*>(lv_event_get_user_data(e));
+		lv_obj_t* keyboard = textarea->findKeyboard();
+		if (keyboard == nullptr)
+		{
+			return;
+		}
+
+		switch (lv_event_get_code(e))
+		{
+		case LV_EVENT_FOCUSED:
+			textarea->showKeyboard(keyboard, true);
+			break;
+		case LV_EVENT_DEFOCUSED:
+			if (textarea->m_hideOnDefocus)
+			{
+				textarea->stopWatchingLeave();
+				if (textarea->handingOn(keyboard))
+				{
+					break;
+				}
+				lv_keyboard_set_textarea(keyboard, nullptr);
+				textarea->showKeyboard(keyboard, false);
+			}
+			break;
+		case LV_EVENT_LEAVE:
+			// A tap on something outside the input group, such as a page's background, leaves the box focused in its
+			// group and only raises this; it still ends the edit, so treat it as losing focus, once it is a tap
+			if (textarea->m_hideOnDefocus)
+			{
+				textarea->leftByPress();
+			}
+			break;
+		case LV_EVENT_CLICKED:
+			// Tapped again while its group still has it focused (after a LEAVE, or the keyboard's close key), the box
+			// raises no FOCUSED, so start the edit again here
+			if (lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN) ||
+				lv_keyboard_get_textarea(keyboard) != textarea->getRootPtr())
+			{
+				lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_FOCUSED, nullptr);
+			}
+			break;
+		case LV_EVENT_READY:
+			if (textarea->m_hideOnReady)
+			{
+				textarea->showKeyboard(keyboard, false);
+			}
+			break;
+		case LV_EVENT_CANCEL:
+			textarea->showKeyboard(keyboard, false);
+			// Closing the keyboard ends the edit, so whatever moved out of its way can move back
+			lv_obj_send_event(textarea->getRootPtr(), LV_EVENT_DEFOCUSED, nullptr);
+			break;
+		default:
+			break;
+		}
+	}
+} // namespace UI::Xml

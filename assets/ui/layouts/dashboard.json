@@ -1,0 +1,36 @@
+/* The dashboard: the tools and temperature graph on the left, the job on the right: what is ready to start, or its status.
+   A free layout of the dashboard's area on a 1024x600 screen; the user's own layout (made on the screen) can change it. */
+{
+  "format": 1,
+  "slot": "dashboard",
+  "kind": "free",
+  "width": 920,
+  "height": 561,
+  "snap": true,
+  "items": [
+    {
+      "id": "tools",
+      "widget": "tools",
+      "x": 0,
+      "y": 0,
+      "w": 548,
+      "h": 277
+    },
+    {
+      "id": "temperature_graph",
+      "widget": "temperature_graph",
+      "x": 0,
+      "y": 282,
+      "w": 548,
+      "h": 279
+    },
+    {
+      "id": "job",
+      "widget": "job",
+      "x": 553,
+      "y": 0,
+      "w": 367,
+      "h": 561
+    }
+  ]
+}

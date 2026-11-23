@@ -1,0 +1,59 @@
+<!--
+  One tool on the Temperature tab, outlined while selected: its name, which selects it, its state, its extrusion
+  factors, its filament, and a row per heater (temperature_tool_heater.xml).
+
+  Tap the filament to choose one to load (actions.filament.choose). Nothing that would change the job can be pressed
+  while printing.
+
+  Fields and actions: a row of presenter.tools (src/UI/Presenters/Control/Temperature/TemperaturePresenter.h), with
+  the tool's name, state, extruders and heaters from its om.tools[{row.number}]; actions.tool.toggle
+  (src/UI/Presenters/Control/Temperature/ToolActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="column">
+		<style name="card"/>
+		<style name="tool_selected" selector="checked"/>
+		<bind_state_if_eq subject="om.tools[{row.number}].state|eq:active" state="checked" ref_value="1"/>
+
+		<lv_obj name="line" width="100%" height="content" flex_flow="row_wrap"
+				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+			<ds_button name="name" bind_text="om.tools[{row.number}].name|default:tr.temperature.default_tool_name" width="content" height="content">
+				<style name="action_btn"/>
+				<bind_state_if_eq subject="om.tools[{row.number}].state|eq:active" state="checked" ref_value="1"/>
+				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="actions.tool.toggle" arg="{row.number}"/>
+			</ds_button>
+			<lv_label name="state" bind_text="om.tools[{row.number}].state|translate:tr.temperature.status" width="content" height="content"/>
+			<flex_pad name="spacer"/>
+
+			<lv_obj name="extrusion_factors" width="content" height="content" style_pad_all="0" flex_flow="column">
+				<ds_list name="list" list="om.tools[{row.number}].extruders" item="temperature_extruder" width="content" height="content"
+						 flex_flow="row"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="filament_select" width="content" height="content" style_min_width="content" flex_grow="1"
+					flex_flow="row">
+				<bind_flag_if_eq subject="row.filament_shown" flag="hidden" ref_value="0"/>
+				<ds_button name="filament_choice" bind_text="row.filament_text" height="content"
+						   style_min_width="content" flex_grow="1">
+					<style name="input"/>
+					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="actions.filament.choose" arg="{row.number}"/>
+				</ds_button>
+				<ds_button name="unload" translation_tag="tr.filament.unload" width="content" height="100%">
+					<style name="action_btn"/>
+					<bind_state_if_eq subject="row.filament_loaded" state="disabled" ref_value="0"/>
+					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="actions.filament.unload" arg="{row.number}"/>
+				</ds_button>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_obj name="heaters" width="100%" height="content" flex_flow="column">
+			<ds_list name="list" list="om.tools[{row.number}].heaters" item="temperature_tool_heater" width="100%" height="content"
+					 flex_flow="column"
+					 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+		</lv_obj>
+	</view>
+</component>

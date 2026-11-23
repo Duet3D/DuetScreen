@@ -1,0 +1,45 @@
+<!--
+  The General settings page: the language and USB keyboard layout, and how the screen works the machine. Each setting
+  is a row (ds_setting) in a group, stored as soon as it is changed.
+
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/GeneralSettings.cpp)
+  Actions:  actions.settings.set
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<style name="setting_page"/>
+
+		<ds_setting_group name="language_keyboard" title_tag="tr.settings.groups.language_keyboard">
+			<settings_choice name="language" title_tag="tr.settings.language" hint_tag="tr.settings.hints.language"
+							 setting="language"/>
+			<settings_choice name="keyboard_layout" title_tag="tr.settings.keyboard_layout" setting="keyboard_layout"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="machine" title_tag="tr.settings.groups.machine">
+			<settings_toggle name="show_confirmation_dialogs" title_tag="tr.settings.show_confirmation_dialogs"
+							 hint_tag="tr.settings.hints.confirmations" setting="confirmations"/>
+			<!-- One of a few: the chosen one is checked -->
+			<ds_setting name="units" title_tag="tr.settings.units" hint_tag="tr.settings.hints.units">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<settings_option name="mm" translation_tag="tr.settings.units_options.mm"
+									 setting="units" value="0"/>
+					<settings_option name="inches" translation_tag="tr.settings.units_options.inches"
+									 setting="units" value="1"/>
+				</lv_obj>
+			</ds_setting>
+			<ds_setting name="job_progress_source" title_tag="tr.settings.job_progress_source"
+						hint_tag="tr.settings.hints.job_progress">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<settings_option name="duration" translation_tag="tr.settings.job_progress_source_options.duration"
+									 setting="progress_source" value="0"/>
+					<settings_option name="file" translation_tag="tr.settings.job_progress_source_options.file"
+									 setting="progress_source" value="1"/>
+				</lv_obj>
+			</ds_setting>
+		</ds_setting_group>
+	</view>
+</component>

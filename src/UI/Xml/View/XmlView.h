@@ -1,0 +1,150 @@
+/*
+ * XmlView.h
+ *
+ * Hosts an XML component as an ordinary LvObj, so it can be used anywhere a C++ view is (tabs, navigation, the app
+ * drawer). The component's root widget *is* this LvObj's root, so the widget tree has the same shape as a C++ view's.
+ *
+ * The view owns the component's presenter (if it names one, or the one it is given) and a top-level scope holding the
+ * presenter's fields, as `presenter.*` (see Binding/Names.h). Giving a view a presenter by name lets C++ show one
+ * component with different data in different places, e.g. the file browser's jobs and macros.
+ * Like a C++ View, it activates the presenter and connects it to the Model while shown, and disconnects it while
+ * hidden.
+ *
+ * The component's root must be a plain widget (an `lv_obj`, `lv_label`, …): a DuetScreen widget such as a ds_button
+ * has a C++ object of its own, found through the widget the way the view is. A component whose root is one is shown
+ * as a placeholder saying so; wrap it in an `lv_obj`.
+ *
+ * A view can be given props, the values of the component's `<api><prop>`s, e.g. the settings of a widget placed by
+ * `<ds_layout>`, and an outer scope, whose names are found after the presenter's and before the globals: a placed
+ * widget's size (see UI/Xml/Layout/PlacementScope.h). Without one, a view has a page's room (PlacementScope::page()).
+ */
+
+#pragma once
+
+#include "UI/Lvgl/LvObj.h"
+#include "UI/Xml/Binding/Scope.h"
+#include "XmlPresenter.h"
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+
+namespace UI::Xml
+{
+	namespace detail
+	{
+		/**
+		 * The parts of an XmlView that must exist before its widgets are built. XmlView inherits this *before* LvObj,
+		 * whose constructor builds the widgets, so C++ construction order guarantees the presenter and scope are
+		 * ready in time.
+		 */
+		struct XmlViewState
+		{
+			/**
+			 * Create the presenter `component` names (or use `given`), and a scope holding its fields, searched before
+			 * `outer` (if not nullptr), which must outlive the view's widgets
+			 */
+			XmlViewState(std::string component,
+						  std::string objName,
+						  std::shared_ptr<XmlPresenter> given = nullptr,
+						  std::map<std::string, std::string> props = {},
+						  const Scope* outer = nullptr);
+
+			/** (Re)create the presenter if the component's definition names a different one, and a fresh scope */
+			void prepare();
+
+			std::string component;					// Name of the component shown
+			std::string objName;					// Name given to the root widget
+			std::shared_ptr<XmlPresenter> presenter; // The component's presenter, or nullptr if it names none
+			bool presenterGiven = false;			 // The presenter was given, not named by the component
+			std::unique_ptr<Scope> scope;			 // Names the component's widgets bind to
+			std::map<std::string, std::string> props; // Values of the component's props
+			const Scope* outer = nullptr;			  // Searched after the presenter's names; nullptr for a page's room
+		};
+	} // namespace detail
+
+	class XmlView : private detail::XmlViewState, public LvObj
+	{
+	  public:
+		/**
+		 * Build `component` inside `parent`
+		 * @param name Name of the root widget
+		 * @param parent Parent view
+		 * @param component Name of a loaded XML component
+		 */
+		XmlView(const std::string& name, LvObj& parent, std::string component);
+
+		/** Build `component` inside a widget that has no C++ view, e.g. one created from XML */
+		XmlView(const std::string& name, lv_obj_t* parent, std::string component);
+
+		/** Build `component` inside `parent` with `presenter` instead of the one the component names */
+		XmlView(const std::string& name, LvObj& parent, std::string component, std::shared_ptr<XmlPresenter> presenter);
+
+		/**
+		 * Build `component` inside a widget that has no C++ view, with `presenter` instead of the one it names (or
+		 * its own if nullptr), these values of its props, and `outer`'s names after the presenter's (if not nullptr;
+		 * it must outlive the view's widgets)
+		 */
+		XmlView(const std::string& name,
+				lv_obj_t* parent,
+				std::string component,
+				std::shared_ptr<XmlPresenter> presenter,
+				std::map<std::string, std::string> props = {},
+				const Scope* outer = nullptr);
+
+		/** Disconnect the presenter; the widgets are deleted by ~LvObj */
+		~XmlView() override;
+
+		/** Name of the component shown */
+		const std::string& getComponent() const { return component; }
+
+		/** The presenter the component names, or nullptr */
+		XmlPresenter* getPresenter() const { return presenter.get(); }
+
+		/**
+		 * Rebuild from the component's current definition. The presenter, and so the current state, is kept unless
+		 * the new definition names a different one.
+		 */
+		void rebuild();
+
+		/**
+		 * The first half of rebuild(): delete the widgets, remembering where they were. Call before the component's
+		 * definition is replaced: its styles are freed with the old definition, so its widgets must go first.
+		 * Until buildAgain(), the view has no widgets.
+		 */
+		void takeDown();
+
+		/** The second half of rebuild(): build the component's current definition where takeDown() removed it */
+		void buildAgain();
+
+	  protected:
+		/** Activate the presenter and connect it to the Model, then show */
+		void showInner() override;
+
+		/** Deactivate the presenter and disconnect it from the Model, then hide */
+		void hideInner() override;
+
+	  private:
+		/** Where the view's widgets were before takeDown() */
+		struct Placement
+		{
+			lv_obj_t* parent; // Parent widget
+			int32_t index;	  // Position among the parent's children
+			bool hidden;	  // Whether the view was hidden
+		};
+
+		/** Build the component inside `parent`, or a placeholder saying it couldn't be loaded */
+		static lv_obj_t* build(lv_obj_t* parent, detail::XmlViewState& state);
+
+		/** Point actions raised inside the view at the presenter */
+		void registerActions();
+
+		/** Connect the presenter to the Model and activate it */
+		void connectPresenter();
+
+		/** Deactivate the presenter and disconnect it from the Model */
+		void disconnectPresenter();
+
+		std::optional<Placement> m_placement; // Set between takeDown() and buildAgain()
+	};
+} // namespace UI::Xml

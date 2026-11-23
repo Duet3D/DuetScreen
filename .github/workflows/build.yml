@@ -188,7 +188,7 @@ jobs:
             echo "Buildroot: [${BUILDROOT_TAG}](https://github.com/Duet3D/buildroot-duetscreen/releases/tag/${BUILDROOT_TAG}) (commit: [${BUILDROOT_SHA}](https://github.com/Duet3D/buildroot-duetscreen/commit/${BUILDROOT_SHA}))" | tee -a $GITHUB_ENV >> $GITHUB_OUTPUT
           fi
           echo "" | tee -a $GITHUB_ENV >> $GITHUB_OUTPUT
-          ./scripts/release_notes.sh | tee -a $GITHUB_ENV >> $GITHUB_OUTPUT
+          scripts/release_notes.py | tee -a $GITHUB_ENV >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_OUTPUT
       
@@ -234,7 +234,7 @@ jobs:
           cp ./buildroot-duetscreen/output/images/sdcard.img ./artifacts/
           cp ./buildroot-duetscreen/output/images/update.tar.gz ./artifacts/nand_update.tar.gz
           cd DuetScreen
-          ./scripts/create_upgrade.sh
+          scripts/create_upgrade.py
           cp ./out/DuetScreen.tar.gz ../artifacts/
 
       - name: Build DuetScreen with profiling
@@ -247,7 +247,7 @@ jobs:
         shell: bash
         run: |
           cd DuetScreen
-          ./scripts/create_upgrade.sh
+          scripts/create_upgrade.py
           cp ./out/DuetScreen.tar.gz ../artifacts/DuetScreen-T113-Release_with_profiling.tar.gz
 
       - name: Upload artifacts

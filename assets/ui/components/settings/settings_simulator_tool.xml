@@ -1,0 +1,60 @@
+<!--
+  A tool of the simulated Duet, a row (ds_setting) of its page: its name, its spindle, and which heaters, extruders
+  and fans it has (each a chip, settings_simulator_choice.xml; its first extruder takes its filament), and a button to
+  remove it.
+
+  Fields:   a row of source.simulator.tools (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.toggle, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<ds_textarea name="name" bind_text="row.name" one_line="true" width="150" height="content">
+				<action trigger="ready" name="actions.simulator.set" arg="name"/>
+			</ds_textarea>
+			<ds_choice name="spindle" title_tag="tr.simulator.fields.spindle"
+					   bind_options="source.simulator.spindle_options" bind_selected="row.spindle">
+				<style name="setting_value"/>
+				<action trigger="value_confirmed" name="actions.simulator.set" arg="spindle"/>
+			</ds_choice>
+			<!-- Each title with its chips, so they wrap together; not shown if the machine has none -->
+			<lv_obj name="heaters_group" width="content" height="content" flex_flow="row" clickable="false"
+					scrollable="false" style_pad_all="0" style_pad_column="8" style_flex_cross_place="center">
+				<bind_flag_if_eq subject="source.simulator.heater_count" flag="hidden" ref_value="0"/>
+				<lv_label name="title" translation_tag="tr.simulator.fields.heaters" clickable="false">
+					<style name="text_muted"/>
+				</lv_label>
+				<ds_list name="heaters" list="row.heaters" item="settings_simulator_choice" width="content"
+						 height="content" flow="row">
+					<style name="setting_options"/>
+				</ds_list>
+			</lv_obj>
+			<lv_obj name="extruders_group" width="content" height="content" flex_flow="row" clickable="false"
+					scrollable="false" style_pad_all="0" style_pad_column="8" style_flex_cross_place="center">
+				<bind_flag_if_eq subject="source.simulator.extruder_count" flag="hidden" ref_value="0"/>
+				<lv_label name="title" translation_tag="tr.simulator.fields.extruders" clickable="false">
+					<style name="text_muted"/>
+				</lv_label>
+				<ds_list name="extruders" list="row.extruders" item="settings_simulator_choice" width="content"
+						 height="content" flow="row">
+					<style name="setting_options"/>
+				</ds_list>
+			</lv_obj>
+			<lv_obj name="fans_group" width="content" height="content" flex_flow="row" clickable="false"
+					scrollable="false" style_pad_all="0" style_pad_column="8" style_flex_cross_place="center">
+				<bind_flag_if_eq subject="source.simulator.fan_count" flag="hidden" ref_value="0"/>
+				<lv_label name="title" translation_tag="tr.simulator.fields.fans" clickable="false">
+					<style name="text_muted"/>
+				</lv_label>
+				<ds_list name="fans" list="row.fans" item="settings_simulator_choice" width="content"
+						 height="content" flow="row">
+					<style name="setting_options"/>
+				</ds_list>
+			</lv_obj>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

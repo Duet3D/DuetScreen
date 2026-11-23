@@ -6,13 +6,17 @@
  */
 
 #include "Styles.h"
+#include "Configuration.h"
 #include "Debug.h"
 #include "UI/Core/View.h"
 #include "lvgl/src/lvgl_private.h"
 #include "utils/StorageHelper.h"
+#include <algorithm>
 #include <array>
+#include <functional>
 #include <map>
 #include <memory>
+#include <utility>
 
 namespace UI::Themes
 {
@@ -21,12 +25,6 @@ namespace UI::Themes
 	static std::vector<Style*>& uninitializedStyles()
 	{
 		static std::vector<Style*> v;
-		return v;
-	}
-
-	static auto& themes()
-	{
-		static std::map<std::string_view, Theme*> v; // Ordered map to ensure consistent theme order
 		return v;
 	}
 
@@ -41,8 +39,6 @@ namespace UI::Themes
 	static std::unique_ptr<ComponentStyles> s_componentStyles;
 
 	static Fonts s_fonts;
-
-	static Theme* s_currentTheme = nullptr;
 
 	Style::Style()
 		: name(nullptr)
@@ -138,17 +134,6 @@ namespace UI::Themes
 		return *s_lvglStyles;
 	}
 
-	void setLvglStyles(const LvglStyles& styles)
-	{
-		ZoneScoped;
-		LOG_DBG("Setting lvgl styles");
-		if (!s_lvglStyles)
-		{
-			s_lvglStyles = std::make_unique<LvglStyles>();
-		}
-		*s_lvglStyles = styles;
-	}
-
 	const ComponentStyles& getComponentStyles()
 	{
 		ZoneScoped;
@@ -159,15 +144,295 @@ namespace UI::Themes
 		return *s_componentStyles;
 	}
 
-	void setComponentStyles(const ComponentStyles& styles)
+	/* Every style by name, for forEachStyle(). The name is the member name; XML and themes use it. */
+	static constexpr std::pair<const char*, Style LvglStyles::*> s_lvglStyleNames[] = {
+		{"base", &LvglStyles::base},
+		{"bg_dark", &LvglStyles::bg_dark},
+		{"bg", &LvglStyles::bg},
+		{"bg_light", &LvglStyles::bg_light},
+		{"bg_color_primary", &LvglStyles::bg_color_primary},
+		{"bg_color_primary_muted", &LvglStyles::bg_color_primary_muted},
+		{"bg_color_secondary", &LvglStyles::bg_color_secondary},
+		{"bg_color_secondary_muted", &LvglStyles::bg_color_secondary_muted},
+		{"bg_color_success", &LvglStyles::bg_color_success},
+		{"bg_color_warning", &LvglStyles::bg_color_warning},
+		{"bg_color_error", &LvglStyles::bg_color_error},
+		{"bg_color_header", &LvglStyles::bg_color_header},
+		{"bg_color_list_item", &LvglStyles::bg_color_list_item},
+		{"text", &LvglStyles::text},
+		{"text_muted", &LvglStyles::text_muted},
+		{"text_emphasis", &LvglStyles::text_emphasis},
+		{"text_header", &LvglStyles::text_header},
+		{"text_warning", &LvglStyles::text_warning},
+		{"border", &LvglStyles::border},
+		{"border_muted", &LvglStyles::border_muted},
+		{"border_highlight", &LvglStyles::border_highlight},
+		{"border_color_primary", &LvglStyles::border_color_primary},
+		{"border_color_secondary", &LvglStyles::border_color_secondary},
+		{"border_color_card", &LvglStyles::border_color_card},
+		{"screen", &LvglStyles::screen},
+		{"scrollbar", &LvglStyles::scrollbar},
+		{"scrollbar_scrolled", &LvglStyles::scrollbar_scrolled},
+		{"card", &LvglStyles::card},
+		{"tab_card", &LvglStyles::tab_card},
+		{"btn", &LvglStyles::btn},
+		{"btn_checked", &LvglStyles::btn_checked},
+		{"icon", &LvglStyles::icon},
+		{"icon_recolor", &LvglStyles::icon_recolor},
+		{"pressed", &LvglStyles::pressed},
+		{"disabled", &LvglStyles::disabled},
+		{"pad_base", &LvglStyles::pad_base},
+		{"pad_zero", &LvglStyles::pad_zero},
+		{"pad_tiny", &LvglStyles::pad_tiny},
+		{"pad_small", &LvglStyles::pad_small},
+		{"pad_normal", &LvglStyles::pad_normal},
+		{"pad_large", &LvglStyles::pad_large},
+		{"pad_gap", &LvglStyles::pad_gap},
+		{"line_space_large", &LvglStyles::line_space_large},
+		{"text_align_center", &LvglStyles::text_align_center},
+		{"outline_primary", &LvglStyles::outline_primary},
+		{"outline_secondary", &LvglStyles::outline_secondary},
+		{"circle", &LvglStyles::circle},
+		{"no_radius", &LvglStyles::no_radius},
+		{"no_border", &LvglStyles::no_border},
+		{"clip_corner", &LvglStyles::clip_corner},
+		{"rotary_scroll", &LvglStyles::rotary_scroll},
+		{"grow", &LvglStyles::grow},
+		{"transition_delayed", &LvglStyles::transition_delayed},
+		{"transition_normal", &LvglStyles::transition_normal},
+		{"anim", &LvglStyles::anim},
+		{"anim_fast", &LvglStyles::anim_fast},
+		{"action_btn", &LvglStyles::action_btn},
+		{"danger_btn", &LvglStyles::danger_btn},
+		{"danger_outline_btn", &LvglStyles::danger_outline_btn},
+		{"input", &LvglStyles::input},
+		{"long_press", &LvglStyles::long_press},
+		{"draggable", &LvglStyles::draggable},
+		{"dragging", &LvglStyles::dragging},
+		{"drag_complete", &LvglStyles::drag_complete},
+		{"knob", &LvglStyles::knob},
+#if LV_USE_ARC
+		{"arc_indic", &LvglStyles::arc_indic},
+		{"arc_indic_primary", &LvglStyles::arc_indic_primary},
+#endif
+#if LV_USE_BAR
+		{"bar", &LvglStyles::bar},
+		{"bar_indic", &LvglStyles::bar_indic},
+#endif
+#if LV_USE_BUTTONMATRIX
+		{"btnm_bg", &LvglStyles::btnm_bg},
+		{"btnm_btn", &LvglStyles::btnm_btn},
+		{"btnm_btn_checked", &LvglStyles::btnm_btn_checked},
+#endif
+#if LV_USE_CHART
+		{"chart_series", &LvglStyles::chart_series},
+		{"chart_indic", &LvglStyles::chart_indic},
+		{"chart_bg", &LvglStyles::chart_bg},
+#endif
+#if LV_USE_DROPDOWN
+		{"dropdown", &LvglStyles::dropdown},
+		{"dropdown_list", &LvglStyles::dropdown_list},
+#endif
+#if LV_USE_CHECKBOX
+		{"cb_marker", &LvglStyles::cb_marker},
+		{"cb_marker_checked", &LvglStyles::cb_marker_checked},
+#endif
+#if LV_USE_SWITCH
+		{"bg_switch", &LvglStyles::bg_switch},
+		{"switch_knob", &LvglStyles::switch_knob},
+#endif
+#if LV_USE_LINE
+		{"line", &LvglStyles::line},
+#endif
+#if LV_USE_TABLE
+		{"table", &LvglStyles::table},
+		{"table_cell", &LvglStyles::table_cell},
+#endif
+#if LV_USE_TEXTAREA
+		{"text_area", &LvglStyles::text_area},
+		{"ta_cursor", &LvglStyles::ta_cursor},
+		{"ta_placeholder", &LvglStyles::ta_placeholder},
+#endif
+#if LV_USE_CALENDAR
+		{"calendar_btnm_bg", &LvglStyles::calendar_btnm_bg},
+		{"calendar_btnm_day", &LvglStyles::calendar_btnm_day},
+		{"calendar_header", &LvglStyles::calendar_header},
+#endif
+#if LV_USE_CANVAS
+		{"canvas", &LvglStyles::canvas},
+#endif
+#if LV_USE_MENU
+		{"menu_bg", &LvglStyles::menu_bg},
+		{"menu_cont", &LvglStyles::menu_cont},
+		{"menu_sidebar_cont", &LvglStyles::menu_sidebar_cont},
+		{"menu_main_cont", &LvglStyles::menu_main_cont},
+		{"menu_page", &LvglStyles::menu_page},
+		{"menu_header_cont", &LvglStyles::menu_header_cont},
+		{"menu_header_btn", &LvglStyles::menu_header_btn},
+		{"menu_section", &LvglStyles::menu_section},
+		{"menu_pressed", &LvglStyles::menu_pressed},
+		{"menu_separator", &LvglStyles::menu_separator},
+#endif
+#if LV_USE_MSGBOX
+		{"msgbox_backdrop_bg", &LvglStyles::msgbox_backdrop_bg},
+#endif
+#if LV_USE_KEYBOARD
+		{"keyboard_button", &LvglStyles::keyboard_button},
+		{"keyboard_button_checked_bg", &LvglStyles::keyboard_button_checked_bg},
+#endif
+#if LV_USE_LIST
+		{"list_bg", &LvglStyles::list_bg},
+		{"list_btn", &LvglStyles::list_btn},
+		{"list_item_grow", &LvglStyles::list_item_grow},
+#endif
+#if LV_USE_TABVIEW
+		{"tab_bg_focus", &LvglStyles::tab_bg_focus},
+		{"tab_btn", &LvglStyles::tab_btn},
+#endif
+#if LV_USE_LED
+		{"led", &LvglStyles::led},
+#endif
+#if LV_USE_SCALE
+		{"scale", &LvglStyles::scale},
+#endif
+#if LV_USE_SLIDER
+		{"slider", &LvglStyles::slider},
+		{"slider_indic", &LvglStyles::slider_indic},
+		{"slider_knob", &LvglStyles::slider_knob},
+#endif
+	};
+
+	static constexpr std::pair<const char*, Style ComponentStyles::*> s_componentStyleNames[] = {
+		{"sidebar", &ComponentStyles::sidebar},
+		{"sidebar_btn", &ComponentStyles::sidebar_btn},
+		{"console_btn_anim", &ComponentStyles::console_btn_anim},
+		{"estop", &ComponentStyles::estop},
+		{"file", &ComponentStyles::file},
+		{"folder", &ComponentStyles::folder},
+		{"folder_icon", &ComponentStyles::folder_icon},
+		{"file_crumb", &ComponentStyles::file_crumb},
+		{"file_crumb_current", &ComponentStyles::file_crumb_current},
+		{"console_line", &ComponentStyles::console_line},
+		{"console_line_command", &ComponentStyles::console_line_command},
+		{"console_line_success", &ComponentStyles::console_line_success},
+		{"console_line_warning", &ComponentStyles::console_line_warning},
+		{"console_line_error", &ComponentStyles::console_line_error},
+		{"console_time", &ComponentStyles::console_time},
+		{"unhomed", &ComponentStyles::unhomed},
+		{"axis_tile", &ComponentStyles::axis_tile},
+		{"axis_tile_unhomed", &ComponentStyles::axis_tile_unhomed},
+		{"axis_tile_letter", &ComponentStyles::axis_tile_letter},
+		{"axis_tile_not_homed", &ComponentStyles::axis_tile_not_homed},
+		{"jog_step", &ComponentStyles::jog_step},
+		{"tool_tile", &ComponentStyles::tool_tile},
+		{"tool_tile_active", &ComponentStyles::tool_tile_active},
+		{"tool_tile_standby", &ComponentStyles::tool_tile_standby},
+		{"tool_tile_fault", &ComponentStyles::tool_tile_fault},
+		{"reading", &ComponentStyles::reading},
+		{"reading_large", &ComponentStyles::reading_large},
+		{"temperature_bar", &ComponentStyles::temperature_bar},
+		{"temperature_bar_indic", &ComponentStyles::temperature_bar_indic},
+		{"tool_list", &ComponentStyles::tool_list},
+		{"tool_list_tool", &ComponentStyles::tool_list_tool},
+		{"tool_list_heater", &ComponentStyles::tool_list_heater},
+		{"tool_selected", &ComponentStyles::tool_selected},
+		{"heater_standby", &ComponentStyles::heater_standby},
+		{"heater_off", &ComponentStyles::heater_off},
+		{"heater_fault", &ComponentStyles::heater_fault},
+		{"tab_button", &ComponentStyles::tab_button},
+		{"tab_bar_side", &ComponentStyles::tab_bar_side},
+		{"tab_button_side", &ComponentStyles::tab_button_side},
+		{"tab_button_top", &ComponentStyles::tab_button_top},
+		{"slider_buttons", &ComponentStyles::slider_buttons},
+		{"list_header", &ComponentStyles::list_header},
+		{"list_title", &ComponentStyles::list_title},
+		{"list_pages", &ComponentStyles::list_pages},
+		{"list_page_dot", &ComponentStyles::list_page_dot},
+		{"list_page_dot_current", &ComponentStyles::list_page_dot_current},
+		{"graph_legend", &ComponentStyles::graph_legend},
+		{"graph_legend_item", &ComponentStyles::graph_legend_item},
+		{"graph_legend_item_shown", &ComponentStyles::graph_legend_item_shown},
+		{"graph_legend_swatch", &ComponentStyles::graph_legend_swatch},
+		{"graph_legend_swatch_shown", &ComponentStyles::graph_legend_swatch_shown},
+		{"graph_legend_value", &ComponentStyles::graph_legend_value},
+		{"bar_label_bg", &ComponentStyles::bar_label_bg},
+		{"bar_label", &ComponentStyles::bar_label},
+		{"widget_title", &ComponentStyles::widget_title},
+		{"widget_value", &ComponentStyles::widget_value},
+		{"widget_value_large", &ComponentStyles::widget_value_large},
+		{"widget_value_huge", &ComponentStyles::widget_value_huge},
+		{"widget_detail", &ComponentStyles::widget_detail},
+		{"dialog", &ComponentStyles::dialog},
+		{"dialog_backdrop", &ComponentStyles::dialog_backdrop},
+		{"dialog_header", &ComponentStyles::dialog_header},
+		{"dialog_title", &ComponentStyles::dialog_title},
+		{"dialog_from", &ComponentStyles::dialog_from},
+		{"dialog_icon_button", &ComponentStyles::dialog_icon_button},
+		{"dialog_body", &ComponentStyles::dialog_body},
+		{"dialog_footer", &ComponentStyles::dialog_footer},
+		{"dialog_button", &ComponentStyles::dialog_button},
+		{"dialog_row", &ComponentStyles::dialog_row},
+		{"dialog_row_chosen", &ComponentStyles::dialog_row_chosen},
+		{"setting_page", &ComponentStyles::setting_page},
+		{"setting_section", &ComponentStyles::setting_section},
+		{"setting_group", &ComponentStyles::setting_group},
+		{"setting_group_title", &ComponentStyles::setting_group_title},
+		{"setting_group_danger", &ComponentStyles::setting_group_danger},
+		{"setting_list", &ComponentStyles::setting_list},
+		{"setting_row", &ComponentStyles::setting_row},
+		{"setting_row_compact", &ComponentStyles::setting_row_compact},
+		{"setting_title", &ComponentStyles::setting_title},
+		{"setting_hint", &ComponentStyles::setting_hint},
+		{"setting_badge", &ComponentStyles::setting_badge},
+		{"chip", &ComponentStyles::chip},
+		{"chip_accent", &ComponentStyles::chip_accent},
+		{"setting_control", &ComponentStyles::setting_control},
+		{"setting_value", &ComponentStyles::setting_value},
+		{"setting_controls", &ComponentStyles::setting_controls},
+		{"setting_options", &ComponentStyles::setting_options},
+		{"setting_option", &ComponentStyles::setting_option},
+		{"numpad", &ComponentStyles::numpad},
+		{"numpad_readout", &ComponentStyles::numpad_readout},
+		{"numpad_value", &ComponentStyles::numpad_value},
+		{"numpad_unit", &ComponentStyles::numpad_unit},
+		{"numpad_key", &ComponentStyles::numpad_key},
+		{"numpad_key_side", &ComponentStyles::numpad_key_side},
+		{"gauge_arc", &ComponentStyles::gauge_arc},
+		{"gauge_arc_indic", &ComponentStyles::gauge_arc_indic},
+		{"gauge_arc_target", &ComponentStyles::gauge_arc_target},
+		{"gauge_bar", &ComponentStyles::gauge_bar},
+		{"gauge_bar_indic", &ComponentStyles::gauge_bar_indic},
+		{"gauge_bar_target", &ComponentStyles::gauge_bar_target},
+		{"gauge_standby", &ComponentStyles::gauge_standby},
+		{"gauge_standby_target", &ComponentStyles::gauge_standby_target},
+		{"gauge_off", &ComponentStyles::gauge_off},
+		{"gauge_fault", &ComponentStyles::gauge_fault},
+		{"customise_frame", &ComponentStyles::customise_frame},
+		{"customise_frame_selected", &ComponentStyles::customise_frame_selected},
+		{"customise_handle", &ComponentStyles::customise_handle},
+		{"customise_guide", &ComponentStyles::customise_guide},
+		{"customise_place", &ComponentStyles::customise_place},
+		{"object_shape", &ComponentStyles::object_shape},
+		{"object_shape_now", &ComponentStyles::object_shape_now},
+		{"object_shape_cancelled", &ComponentStyles::object_shape_cancelled},
+		{"object_cross", &ComponentStyles::object_cross},
+		{"object_shape_chosen", &ComponentStyles::object_shape_chosen},
+		{"object_name_cancelled", &ComponentStyles::object_name_cancelled},
+		{"debug_borders", &ComponentStyles::debug_borders},
+	};
+
+	void forEachStyle(const std::function<void(std::string_view name, Style& style)>& fn)
 	{
-		ZoneScoped;
-		LOG_DBG("Setting component styles");
-		if (!s_componentStyles)
+		auto& lvgl = const_cast<LvglStyles&>(getLvglStyles());
+		auto& components = const_cast<ComponentStyles&>(getComponentStyles());
+		for (const auto& [name, member] : s_lvglStyleNames)
 		{
-			s_componentStyles = std::make_unique<ComponentStyles>();
+			fn(name, lvgl.*member);
 		}
-		*s_componentStyles = styles;
+		for (const auto& [name, member] : s_componentStyleNames)
+		{
+			fn(name, components.*member);
+		}
 	}
 
 	const Fonts& getFonts()
@@ -176,145 +441,10 @@ namespace UI::Themes
 		return s_fonts;
 	}
 
-	static void setFonts(const ThemeFonts& fonts)
+	void setFonts(const Fonts& fonts)
 	{
 		ZoneScoped;
-		LOG_DBG("Setting fonts");
-		s_fonts.header = *fonts.header.get();
-		s_fonts.normal = *fonts.normal.get();
-		s_fonts.emphasis = *fonts.emphasis.get();
-		s_fonts.subdued = *fonts.subdued.get();
-	}
-
-	static bool themeExists(std::string_view name)
-	{
-		ZoneScoped;
-		auto& t = themes();
-		return t.find(name) != t.end();
-	}
-
-	Theme::Theme(std::string_view name, FontConfigSet fontConfigSet, std::function<void(Theme* theme)> initFunc)
-		: m_name(name)
-		, m_fontConfigSet(fontConfigSet)
-		, m_initFunc(initFunc)
-	{
-		ZoneScoped;
-		if (themeExists(name))
-		{
-			LOG_FATAL_THROW("Theme with name {:s} already exists", name);
-			return;
-		}
-		themes()[name] = this;
-		LOG_INFO("Theme {:s} created", name);
-	}
-
-	Theme::~Theme()
-	{
-		ZoneScoped;
-		LOG_INFO("Destroying theme: {:s}", m_name);
-		themes().erase(m_name);
-	}
-
-	void Theme::init()
-	{
-		ZoneScoped;
-		UI_LOCK();
-		LOG_INFO("Initializing theme: {:s}", m_name);
-
-		m_lvgl = std::make_unique<LvglStyles>();
-		m_components = std::make_unique<ComponentStyles>();
-
-		onInit();
-
-		if (m_initFunc)
-		{
-			m_initFunc(this);
-		}
-	}
-
-	void Theme::setThemeActive()
-	{
-		ZoneScoped;
-		LOG_INFO("Applying theme: {:s}", m_name);
-
-		// Lazy-initialize the theme if it hasn't been initialized yet
-		if (!m_lvgl || !m_components)
-		{
-			init();
-		}
-
-		lv_enable_style_refresh(false);
-		setLvglStyles(getLvglStyles());
-		setComponentStyles(getComponentStyles());
-		setTypeface(FontManager::getActiveTypefaceName());
-
-		s_currentTheme = const_cast<Theme*>(this);
-
-		lv_enable_style_refresh(true);
-		{
-			ZoneScopedN("Refreshing styles");
-			lv_obj_report_style_change(NULL);
-		}
-		lv_obj_invalidate(lv_screen_active());
-	}
-
-	const LvglStyles& Theme::getLvglStyles() const
-	{
-		ZoneScoped;
-		if (!m_lvgl)
-		{
-			LOG_FATAL_THROW("LVGL styles not initialized");
-		}
-		return *m_lvgl;
-	}
-
-	const ComponentStyles& Theme::getComponentStyles() const
-	{
-		ZoneScoped;
-		if (!m_components)
-		{
-			LOG_FATAL_THROW("Component styles not initialized");
-		}
-		return *m_components;
-	}
-
-	LvglStyles& Theme::getLvglStyles()
-	{
-		ZoneScoped;
-		if (!m_lvgl)
-		{
-			m_lvgl = std::make_unique<LvglStyles>();
-		}
-		return *m_lvgl;
-	}
-
-	ComponentStyles& Theme::getComponentStyles()
-	{
-		ZoneScoped;
-		if (!m_components)
-		{
-			m_components = std::make_unique<ComponentStyles>();
-		}
-		return *m_components;
-	}
-
-	void Theme::setTypeface(const std::string& typeface)
-	{
-		ZoneScoped;
-		LOG_INFO("Setting typeface to {:s}", typeface);
-
-		/* This will release any previously held font resources */
-		m_fonts.header =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.header.size, m_fontConfigSet.header.style);
-		m_fonts.normal =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.normal.size, m_fontConfigSet.normal.style);
-		m_fonts.emphasis =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.emphasis.size, m_fontConfigSet.emphasis.style);
-		m_fonts.subdued =
-			UI::FontManager::createFont(typeface, m_fontConfigSet.subdued.size, m_fontConfigSet.subdued.style);
-
-		/* Copy by value to the static fonts which the styles use the addresses of */
-		setFonts(m_fonts);
+		s_fonts = fonts;
 	}
 
 	/**
@@ -1019,9 +1149,6 @@ namespace UI::Themes
 		s_lvglStyles.reset();
 		s_componentStyles.reset();
 
-		// Defer theme initialization: only the active theme is initialized now.
-		// Other themes are lazy-initialized when first activated via setThemeActive().
-
 		// lv_theme_t* baseTheme = lv_theme_default_init(display,
 		// 											  lv_palette_main(LV_PALETTE_BLUE),
 		// 											  lv_palette_main(LV_PALETTE_RED),
@@ -1041,20 +1168,7 @@ namespace UI::Themes
 
 		lv_theme_apply(lv_screen_active());
 
-		Theme* theme = getThemeByName(StorageHelper::getData(ID_THEME));
-		if (theme == nullptr)
-		{
-			LOG_INFO("Theme not found, using default theme");
-			theme = getDefaultTheme();
-			if (theme != nullptr)
-			{
-				StorageHelper::setData(ID_THEME, theme->getName());
-			}
-		}
-		if (theme != nullptr)
-		{
-			theme->setThemeActive();
-		}
+		// The styles are built when the XML UI loads the themes (see Theme.h)
 
 		/* Set icon folder */
 		std::string_view iconFolder = StorageHelper::getData(ID_ICON_FOLDER);
@@ -1064,90 +1178,6 @@ namespace UI::Themes
 		bool debugBordersEnabeled = StorageHelper::getData(ID_DEBUG_BORDERS);
 		showDebugBorders(lv_screen_active(), debugBordersEnabeled);
 #endif
-	}
-
-	const std::map<std::string_view, Theme*>& getThemes()
-	{
-		ZoneScoped;
-		return themes();
-	}
-
-	Theme* getCurrentTheme()
-	{
-		ZoneScoped;
-		return s_currentTheme;
-	}
-
-	Theme* getTheme(const size_t index)
-	{
-		ZoneScoped;
-		if (index >= getThemeCount())
-		{
-			LOG_ERROR("Theme with index {:d} not found", index);
-			return nullptr;
-		}
-		auto it = themes().begin();
-		std::advance(it, index);
-		return it->second;
-	}
-
-	Theme* getThemeByName(std::string_view name)
-	{
-		ZoneScoped;
-		auto it = themes().find(name);
-		if (it != themes().end())
-		{
-			return it->second;
-		}
-		LOG_ERROR("Theme with name {:s} not found", name);
-		return nullptr;
-	}
-
-	Theme* getDefaultTheme()
-	{
-		ZoneScoped;
-		Theme* theme = getThemeByName(ID_THEME.default_value);
-		if (theme == nullptr)
-		{
-			LOG_ERROR("Default theme not found, using first available theme");
-			theme = getTheme(0);
-		}
-
-		return theme;
-	}
-
-	size_t getThemeCount()
-	{
-		ZoneScoped;
-		return themes().size();
-	}
-
-	bool refreshCurrentTheme()
-	{
-		ZoneScoped;
-		UI_LOCK();
-		if (s_currentTheme)
-		{
-			s_currentTheme->setThemeActive();
-			return true;
-		}
-		else
-		{
-			LOG_ERROR("No current theme set");
-			return false;
-		}
-	}
-
-	const std::vector<std::string_view> getThemeNames()
-	{
-		ZoneScoped;
-		std::vector<std::string_view> names(getThemeCount());
-		size_t i = 0;
-		for (const auto& [name, theme] : themes())
-		{
-			names[i++] = name;
-		}
-		return names;
 	}
 
 	static std::string s_iconFolder(DEFAULT_ICON_SET);
@@ -1199,6 +1229,15 @@ namespace UI::Themes
 				continue;
 			sets.push_back(entry.path().filename().string());
 		}
+		// The default first, then the others by name: directories are listed in no particular order
+		std::sort(sets.begin(),
+				  sets.end(),
+				  [](const std::string& a, const std::string& b)
+				  {
+					  const bool aDefault = a == DEFAULT_ICON_SET;
+					  const bool bDefault = b == DEFAULT_ICON_SET;
+					  return aDefault != bDefault ? aDefault : a < b;
+				  });
 		return sets;
 	}
 

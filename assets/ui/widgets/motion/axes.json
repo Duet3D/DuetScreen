@@ -1,0 +1,20 @@
+{
+  "component": "move_positions_card",
+  "title_tag": "tr.widget.axes",
+  "description_tag": "tr.widget.axes_desc",
+  "category_tag": "tr.widget.category_motion",
+  "icon": "move.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      365,
+      89
+    ],
+    "min": [
+      100,
+      60
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "component": "dashboard_files",
+  "title_tag": "tr.widget.files",
+  "description_tag": "tr.widget.files_desc",
+  "category_tag": "tr.widget.category_jobs",
+  "icon": "files.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      365,
+      561
+    ],
+    "min": [
+      272,
+      278
+    ]
+  }
+}

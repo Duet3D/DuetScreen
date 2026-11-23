@@ -1,0 +1,80 @@
+<!--
+  One fan, a row of <ds_list list="om.fans">: its name, and the tools it cools, then its speed. A fan you set has a
+  slider (tap its value, a percentage, to type one) with one button beside it: Off while it turns, Max while it doesn't,
+  which a narrow widget leaves out. A fan the firmware runs by temperature (thermostatic) says when it comes on, and
+  shows its speed as a reading. A gap in the fan numbers has no fan.
+
+  Props:    automatic  1 to show the fan only if the firmware runs it by temperature, 0 only if you set it
+            (fans.xml lists the fans twice, a group each)
+  Fields:   a row of om.fans: row.index (the fan number), row.name, row.requestedValue, row.actualValue,
+            row.thermostatic.lowTemperature; the tools it cools, om.fans[{row.index}]|tools_using:fans
+  Actions:  actions.fan.set_speed (src/UI/Presenters/Control/Fans/FanActions.h)
+-->
+<component>
+	<api>
+		<prop name="automatic" type="string" default="0"/>
+	</api>
+	<!-- Where there isn't room for the slider beside the name, it goes under it, as wide as the row -->
+	<view extends="lv_obj" height="content" flex_flow="row_wrap" scrollable="false"
+		  style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="setting_row"/>
+		<bind_flag_if_eq subject="row.exists" flag="hidden" ref_value="0"/>
+		<bind_flag_if cond="not (row.thermostatic.lowTemperature|exists eq ${automatic})" flag="hidden"/>
+
+		<lv_obj name="titles" height="content" flex_grow="1" style_min_width="140" flex_flow="column"
+				scrollable="false">
+			<style name="pad_zero"/>
+			<lv_label name="title" bind_text="row.name|default:tr.fan.header:{row.index}" width="100%"
+					  long_mode="dots">
+				<style name="setting_title"/>
+			</lv_label>
+			<lv_label name="hint" bind_text="row.thermostatic.lowTemperature|format:tr.fan.automatic" width="100%">
+				<style name="setting_hint"/>
+				<bind_flag_if cond="row.thermostatic.lowTemperature|exists eq 0" flag="hidden"/>
+			</lv_label>
+			<!-- The tools it cools, if any -->
+			<lv_label name="tools" bind_text="om.fans[{row.index}]|tools_using:fans" width="100%" long_mode="dots">
+				<style name="setting_hint"/>
+				<bind_flag_if_eq subject="om.fans[{row.index}]|tools_using:fans" flag="hidden" ref_value=""/>
+			</lv_label>
+		</lv_obj>
+
+		<!-- Set by hand -->
+		<lv_obj name="controls" width="62%" height="content" flex_grow="1" style_min_width="280" flex_flow="row"
+				scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<bind_flag_if cond="row.thermostatic.lowTemperature|exists eq 1" flag="hidden"/>
+			<!-- Its name heads the number pad; the row shows it already -->
+			<ds_slider name="slider" bind_label="row.name|default:tr.fan.header:{row.index}" label_shown="false"
+					   bind_value="row.requestedValue|percent" min="0" max="100" increment="5" unit="%" numberpad="true"
+					   flex_grow="1" height="content" style_pad_all="0">
+				<style name="no_border"/>
+				<action trigger="value_confirmed" name="actions.fan.set_speed"/>
+			</ds_slider>
+			<!-- Off while it turns, Max while it doesn't; the slider needs the room more, in all but a wide widget -->
+			<ds_button name="off" translation_tag="tr.fan.off" height="content" style_min_height="40" width="64">
+				<bind_flag_if cond="widget.width_class lt 2 or row.requestedValue|percent eq 0" flag="hidden"/>
+				<action trigger="clicked" name="actions.fan.set_speed" arg="0"/>
+			</ds_button>
+			<ds_button name="max" translation_tag="tr.fan.max" height="content" style_min_height="40" width="64">
+				<bind_flag_if cond="widget.width_class lt 2 or row.requestedValue|percent gt 0" flag="hidden"/>
+				<action trigger="clicked" name="actions.fan.set_speed" arg="100"/>
+			</ds_button>
+		</lv_obj>
+
+		<!-- Run by temperature: its speed, a percentage -->
+		<lv_obj name="reading" width="content" height="content" flex_flow="row" scrollable="false"
+				style_flex_cross_place="end" style_flex_track_place="end">
+			<style name="pad_zero"/>
+			<bind_flag_if cond="row.thermostatic.lowTemperature|exists eq 0" flag="hidden"/>
+			<lv_label name="value" bind_text="row.actualValue|percent">
+				<style name="reading"/>
+			</lv_label>
+			<lv_label name="unit" text=" %">
+				<style name="text_muted"/>
+			</lv_label>
+		</lv_obj>
+	</view>
+</component>

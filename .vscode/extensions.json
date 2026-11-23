@@ -3,6 +3,7 @@
         "trevornesbitt.smart-file-templates",
         "ms-vscode.cpptools",
         "ms-vscode.cmake-tools",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "redhat.vscode-xml"
     ]
 }

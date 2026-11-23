@@ -1,0 +1,32 @@
+<!--
+  A job on the simulated Duet's SD card, a row (ds_setting) of its page: its file name, how long it takes and how many
+  layers it has (asked for on the number pad), whether it has thumbnails, and a button to remove it.
+
+  Fields:   a row of source.simulator.files (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<ds_textarea name="name" bind_text="row.name" one_line="true" width="200" height="content">
+				<action trigger="ready" name="actions.simulator.set" arg="name"/>
+			</ds_textarea>
+			<value_button name="print_time" title_tag="tr.simulator.fields.print_time" value="row.print_time"
+						  width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="print_time"/>
+			</value_button>
+			<value_button name="layers" title_tag="tr.simulator.fields.layers" value="row.layers" width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="layers"/>
+			</value_button>
+			<lv_obj name="flags">
+				<style name="setting_options"/>
+				<option_button name="thumbnail" translation_tag="tr.simulator.fields.thumbnail" subject="row.thumbnail"
+							   action="actions.simulator.set" arg="thumbnail"/>
+			</lv_obj>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

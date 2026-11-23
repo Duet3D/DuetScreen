@@ -1,0 +1,10 @@
+target_sources(
+  DuetScreen.lib
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/ExtruderActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/FilamentActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/HeaterActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SpindleActions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/TemperaturePresenter.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ToolActions.cpp
+)

@@ -1,0 +1,18 @@
+<!--
+  One axis an M291 alert lets the user jog: three steps back, its position, three steps forward. The steps are
+  disabled until the axis is homed.
+
+  Fields:   a presenter.alert.axes row: row.label, row.homed (src/UI/Presenters/Notifications/NotificationsPresenter.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_pad_all="2" style_pad_column="2"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<notifications_alert_jog name="back_2" step="-2"/>
+		<notifications_alert_jog name="back_0_2" step="-0.2"/>
+		<notifications_alert_jog name="back_0_02" step="-0.02"/>
+		<lv_label name="label" bind_text="row.label" flex_grow="3" style_text_align="center"/>
+		<notifications_alert_jog name="forward_0_02" step="0.02"/>
+		<notifications_alert_jog name="forward_0_2" step="0.2"/>
+		<notifications_alert_jog name="forward_2" step="2"/>
+	</view>
+</component>

@@ -1,7 +1,8 @@
 #include "Navigation.h"
 #include "Debug.h"
-#include "UI/Components/LVGL/Transitions.h"
+#include "UI/Lvgl/Transitions.h"
 #include <algorithm>
+#include <map>
 #include <vector>
 
 namespace UI
@@ -12,7 +13,9 @@ namespace UI
 	static ViewList_t s_homeScreens;
 	static ViewList_t s_openScreens;
 	static ViewList_t s_returnableScreens;
-	static ViewList_t s_openModals;
+	static std::map<std::string, LvObjPtr, std::less<>> s_namedViews; // Views by name
+	static DialogLayer* s_dialogs = nullptr;						  // The dialog surface, if there is one
+	static ViewList_t s_backLayers;									  // See addBackLayer(), the latest last
 
 	static bool inVector(ViewList_t& vec, LvObjPtr item)
 	{
@@ -46,7 +49,8 @@ namespace UI
 	{
 		ZoneScoped;
 		Model::get().post<EventType::NavigationHomeEnable>(s_openScreens.size() > 0);
-		Model::get().post<EventType::NavigationBackEnable>(s_openScreens.size() > 0 || s_openModals.size() > 0);
+		Model::get().post<EventType::NavigationBackEnable>(s_openScreens.size() > 0 ||
+														   (s_dialogs != nullptr && s_dialogs->isOpen()));
 		LvObj* currentScreen = s_openScreens.empty() ? nullptr : s_openScreens.back();
 		Model::get().post<EventType::NavigationCurrentScreen>(currentScreen);
 	}
@@ -58,13 +62,16 @@ namespace UI
 	 *
 	 * 1. Logs the back button press event.
 	 *
-	 * 2. Retrieves the current screen. If there is no current screen, logs a warning and returns.
+	 * 2. Goes back a step of the open dialog, or else of the latest back layer on screen (addBackLayer()), if either
+	 * can.
 	 *
-	 * 3. If the current screen handles the back action, returns.
+	 * 3. Retrieves the current screen. If there is no current screen, logs a warning and returns.
 	 *
-	 * 4. If there are open screens, closes the last open screen.
+	 * 4. If the current screen handles the back action, returns.
 	 *
-	 * 5. If there are returnable screens, opens the last returnable screen.
+	 * 5. If there are open screens, closes the last open screen.
+	 *
+	 * 6. If there are returnable screens, opens the last returnable screen.
 	 */
 	void back()
 	{
@@ -72,9 +79,16 @@ namespace UI
 		UI_LOCK();
 		LOG_INFO("Back button pressed");
 
-		if (closeLastModal())
+		if (s_dialogs != nullptr && s_dialogs->back())
 		{
 			return;
+		}
+		for (auto it = s_backLayers.rbegin(); it != s_backLayers.rend(); ++it)
+		{
+			if ((*it)->isShownOnScreen() && (*it)->back())
+			{
+				return;
+			}
 		}
 
 		LvObjPtr currentScreen = getCurrentScreen();
@@ -105,7 +119,7 @@ namespace UI
 		ZoneScoped;
 		UI_LOCK();
 		LOG_INFO("Returning to home screen");
-		closeAllModals();
+		closeDialogs();
 
 		if (!s_openScreens.empty())
 		{
@@ -128,7 +142,6 @@ namespace UI
 			}
 		}
 
-		s_openModals.clear();
 		s_openScreens.clear();
 		s_returnableScreens.clear();
 		notifySideBar();
@@ -223,7 +236,7 @@ namespace UI
 			}
 			s_homeScreens.push_back(view);
 
-			if (removed && s_openScreens.empty() && s_openModals.empty())
+			if (removed && s_openScreens.empty())
 			{
 				/* Home screen was previously visible so it should remain visible */
 				home();
@@ -277,12 +290,12 @@ namespace UI
 			if (closePrevious && !s_openScreens.empty() && s_openScreens.back() == view && view->isVisible())
 			{
 				LOG_DBG("Screen '{:s}' is already the current screen", view->getName());
-				closeAllModals();
+				closeDialogs();
 				notifySideBar();
 				return;
 			}
 
-			closeAllModals();
+			closeDialogs();
 
 			if (closePrevious)
 			{
@@ -327,7 +340,7 @@ namespace UI
 				return false;
 			}
 
-			closeAllModals();
+			closeDialogs();
 
 			if (view->isVisible())
 			{
@@ -350,94 +363,166 @@ namespace UI
 			notifySideBar();
 			return removed;
 		}
-
-		void openModalImpl(LvObj* view)
-		{
-			ZoneScoped;
-			UI_LOCK();
-			if (view == nullptr)
-			{
-				LOG_WARN("Trying to open a nullptr modal screen");
-				return;
-			}
-
-			LOG_INFO("Opening modal '{:s}'", view->getName());
-
-			addToVector(s_openModals, view);
-			view->show(true);
-			notifySideBar();
-		}
-
-		bool closeModalImpl(LvObj* view)
-		{
-			ZoneScoped;
-			UI_LOCK();
-			if (view == nullptr)
-			{
-				LOG_WARN("Trying to close a nullptr modal");
-				return false;
-			}
-
-			if (s_openModals.empty())
-			{
-				LOG_DBG("No open modals");
-				return false;
-			}
-
-			if (!removeFromVector(s_openModals, view))
-			{
-				LOG_WARN("Modal '{:s}' not found in open modals", view->getName());
-				return false;
-			}
-
-			LOG_INFO("Closing modal '{:s}'", view->getName());
-			view->hide();
-			notifySideBar();
-			return true;
-		}
 	} // namespace detail
 
-	void closeAllModals()
+	void addBackLayer(LvObj* layer)
 	{
-		ZoneScoped;
 		UI_LOCK();
-		LOG_INFO("Closing all modals");
-		for (auto modal : s_openModals)
-		{
-			LOG_INFO("Closing modal '{:s}'", modal->getName());
-			modal->hide();
-		}
-		s_openModals.clear();
+		removeFromVector(s_backLayers, layer);
+		s_backLayers.push_back(layer);
+	}
+
+	void removeBackLayer(LvObj* layer)
+	{
+		UI_LOCK();
+		removeFromVector(s_backLayers, layer);
+	}
+
+	void setDialogLayer(DialogLayer* layer)
+	{
+		UI_LOCK();
+		s_dialogs = layer;
 		notifySideBar();
 	}
 
-	bool closeLastModal()
+	void dialogsChanged()
+	{
+		notifySideBar();
+	}
+
+	void closeDialogs()
 	{
 		ZoneScoped;
 		UI_LOCK();
-		if (s_openModals.empty())
+		if (s_dialogs != nullptr)
 		{
-			LOG_DBG("No open modals to close");
-			return false;
+			s_dialogs->closeAll();
+		}
+	}
+
+	void closeDialogsNotAround(lv_obj_t* obj)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (s_dialogs != nullptr)
+		{
+			s_dialogs->closeNotAround(obj);
+		}
+	}
+
+	void registerView(std::string name, LvObj* view)
+	{
+		UI_LOCK();
+		s_namedViews[std::move(name)] = view;
+	}
+
+	void forgetView(LvObj* view)
+	{
+		UI_LOCK();
+		std::erase_if(s_namedViews, [view](const auto& entry) { return entry.second == view; });
+		const bool changed = removeFromVector(s_homeScreens, view) | removeFromVector(s_openScreens, view) |
+							 removeFromVector(s_returnableScreens, view);
+		if (changed)
+		{
+			notifySideBar();
+		}
+	}
+
+	LvObj* findView(std::string_view name)
+	{
+		UI_LOCK();
+		auto it = s_namedViews.find(name);
+		return it == s_namedViews.end() ? nullptr : it->second;
+	}
+
+	std::string_view getCurrentScreenName()
+	{
+		UI_LOCK();
+		return s_openScreens.empty() ? std::string_view() : getViewName(s_openScreens.back());
+	}
+
+	std::string_view getViewName(const LvObj* view)
+	{
+		UI_LOCK();
+		for (const auto& [name, v] : s_namedViews)
+		{
+			if (v == view)
+			{
+				return name;
+			}
+		}
+		return {};
+	}
+
+	namespace
+	{
+		/** The names `views` are registered under, skipping any with no name */
+		std::vector<std::string> namesOf(const ViewList_t& views)
+		{
+			std::vector<std::string> names;
+			for (LvObjPtr view : views)
+			{
+				if (std::string_view name = getViewName(view); !name.empty())
+				{
+					names.emplace_back(name);
+				}
+			}
+			return names;
+		}
+	} // namespace
+
+	NavigationState saveNavigationState()
+	{
+		UI_LOCK();
+		return NavigationState{.open = namesOf(s_openScreens), .returnable = namesOf(s_returnableScreens)};
+	}
+
+	void restoreNavigationState(const NavigationState& state)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		for (const std::string& name : state.returnable)
+		{
+			if (LvObjPtr view = findView(name))
+			{
+				addToVector(s_returnableScreens, view);
+			}
 		}
 
-		LOG_DBG("Closing last modal");
-		LvObj* lastModal = s_openModals.back();
-		while (!lastModal->isVisible())
+		ViewList_t screens;
+		for (const std::string& name : state.open)
 		{
-			LOG_DBG("Last modal '{:s}' is not visible, removing from list", lastModal->getName());
-			s_openModals.pop_back();
-			if (s_openModals.empty())
+			LvObjPtr view = findView(name);
+			if (view != nullptr && !inVector(s_homeScreens, view))
 			{
-				LOG_DBG("No more modals to close");
-				return false;
+				screens.push_back(view);
 			}
-			lastModal = s_openModals.back();
 		}
-		LOG_INFO("Closing modal '{:s}'", lastModal->getName());
-		lastModal->hide();
-		s_openModals.pop_back();
+		if (!screens.empty())
+		{
+			for (LvObjPtr home : s_homeScreens)
+			{
+				home->hide();
+			}
+		}
+		for (LvObjPtr view : screens)
+		{
+			removeFromVector(s_returnableScreens, view);
+			addToVector(s_openScreens, view);
+			view->show(true);
+		}
 		notifySideBar();
+	}
+
+	bool openScreen(std::string_view name, bool closePrevious)
+	{
+		LvObj* view = findView(name);
+		if (view == nullptr)
+		{
+			LOG_WARN("No view called '{:s}' to open", name);
+			return false;
+		}
+		detail::openScreenImpl(view, closePrevious);
 		return true;
 	}
 } // namespace UI

@@ -1,0 +1,43 @@
+{
+  "component": "gauge_tool",
+  "title_tag": "tr.widget.tool_arc",
+  "description_tag": "tr.widget.tool_gauge_desc",
+  "category_tag": "tr.widget.category_temperature",
+  "icon": "temperature.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      180,
+      184
+    ],
+    "min": [
+      134,
+      136
+    ]
+  },
+  "props": {
+    "key": "row.index",
+    "look": "arc"
+  },
+  "settings": [
+    {
+      "name": "tool",
+      "kind": "row",
+      "title_tag": "tr.widget.setting_tool",
+      "default": 0,
+      "list": "om.tools",
+      "key": "row.index",
+      "label": "row.name|default:tr.temperature.default_tool_name"
+    },
+    {
+      "name": "match",
+      "kind": "int",
+      "title_tag": "tr.widget.setting_tool_heater",
+      "default": 0,
+      "min": 0,
+      "max": 7
+    }
+  ]
+}

@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/Input/Slider.h"
+#include "UI/Widgets/Inputs/Slider.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 

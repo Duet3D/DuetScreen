@@ -1,0 +1,13 @@
+<!--
+  A chevron as a button, as plain as a setting's value: the way into what a settings row is about, such as the theme's
+  colours or a WiFi network. Give it the action it runs.
+
+      <chevron_button name="open">
+          <action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
+      </chevron_button>
+-->
+<component>
+	<view extends="ds_button" text="&#xF054;">
+		<style name="setting_value"/>
+	</view>
+</component>

@@ -1,0 +1,12 @@
+<!--
+  A quick speed of the spindle of the tool in use (tools_current.xml), an option (option_button.xml) checked while the
+  tool starts its spindle at it. Tap it to start at it from now on. The four share the row equally, however narrow
+  the panel.
+
+  Fields:   a row of source.spindle.presets: row.text, row.chosen (src/UI/Xml/Data/SpindleSource.h)
+  Actions:  actions.spindle.preset (src/UI/Presenters/Control/Temperature/SpindleActions.h)
+-->
+<component>
+	<view extends="option_button" subject="row.chosen" action="actions.spindle.preset" bind_text="row.text" width="1"
+		  height="content" flex_grow="1" style_pad_hor="2" style_min_width="0"/>
+</component>

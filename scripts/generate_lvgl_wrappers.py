@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
+# pyright: strict
 """
 Generate/update C++ LVGL wrapper classes from LVGL widget headers.
 
 - Scans `libraries/lvgl/src/widgets/**/lv_*.h` for widgets
 - Parses function prototypes prefixed with the widget name (e.g., lv_chart_*())
-- Emits generated wrappers into `src/UI/Components/LVGL/generated/` as `Lv<Widget>.gen.h/.gen.cpp`
+- Emits generated wrappers into `src/UI/Lvgl/generated/` as `Lv<Widget>.gen.h/.gen.cpp`
 - Generated class names are suffixed with `Gen` (e.g., `LvLabelGen`)
-- Also creates a thin non-generated header `src/UI/Components/LVGL/Lv<Widget>.h` if missing,
+- Also creates a thin non-generated header `src/UI/Lvgl/Lv<Widget>.h` if missing,
     defining `class Lv<Widget> : public Lv<Widget>Gen` with inherited constructors for manual overrides
-- Updates `src/UI/Components/LVGL/CMakeLists.txt` to include new generated `.gen.cpp` files
+- Updates `src/UI/Lvgl/CMakeLists.txt` to include new generated `.gen.cpp` files
 
 Usage:
-    python scripts/generate_lvgl_wrappers.py --all
-    python scripts/generate_lvgl_wrappers.py --widget chart
-    python scripts/generate_lvgl_wrappers.py --widgets chart,table,roller
+    scripts/generate_lvgl_wrappers.py --all
+    scripts/generate_lvgl_wrappers.py --widget chart
+    scripts/generate_lvgl_wrappers.py --widgets chart,table,roller
 
 Notes:
 - Naming heuristic uses PascalCase of the widget token: 'chart' -> 'Chart', 'imgbtn' -> 'Imgbtn', 'buttonmatrix' -> 'Buttonmatrix'.
@@ -34,9 +35,13 @@ import shutil
 from datetime import datetime
 from typing import List, Tuple, Dict, Optional
 
-ROOT = Path(__file__).resolve().parents[1]
+from common.project import ROOT, complete, complete_with
+
+Prototype = Tuple[str, str, str, str, List[Tuple[str, str, bool]], Optional[str], List[str]]
+"""A C function: return type, name, name less the widget's prefix, arguments as written, arguments as
+(type, name, is_array), its Doxygen comment and the preprocessor conditions it is declared under"""
 WIDGETS_DIR = ROOT / "libraries" / "lvgl" / "src" / "widgets"
-OUTPUT_DIR = ROOT / "src" / "UI" / "Components" / "LVGL"
+OUTPUT_DIR = ROOT / "src" / "UI" / "Lvgl"
 OUTPUT_GEN_DIR = OUTPUT_DIR / "generated"
 GEN_CMAKE_FILE = OUTPUT_GEN_DIR / "CMakeLists.txt"
 CMAKE_FILE = OUTPUT_DIR / "CMakeLists.txt"
@@ -168,14 +173,14 @@ def _active_macros_at_pos(text: str, pos: int) -> List[str]:
     return [mac for mac in macros_stack if mac.startswith("LV_")]
 
 
-def parse_prototypes(header_path: Path, widget_token: str) -> List[Tuple[str, str, str, str, List[Tuple[str, str, bool]], Optional[str], List[str]]]:
+def parse_prototypes(header_path: Path, widget_token: str) -> List[Prototype]:
     """
     Return list of (ret_type, full_c_name, suffix, args_str, args[(type,name),...], docstr)
     for functions lv_<widget>_<suffix>();
     """
     raw = header_path.read_text(encoding="utf-8", errors="ignore")
 
-    out = []
+    out: List[Prototype] = []
     for m in PROTO_WITH_DOC_RE.finditer(raw):
         doc = m.group('doc') or None
         ret_type = WS_RE.sub(" ", (m.group('ret') or '').strip())
@@ -231,7 +236,8 @@ class MethodMeta:
         self.name = to_camel(suffix)
         self.is_const = self.name.startswith("get") or self.name.startswith("is") or self.name.startswith("has")
         self.has_varargs = any(t.strip() == "..." for (t, _, _) in args)
-        self.vfmt_full = None  # optional: C symbol for vfmt counterpart
+        self.vfmt_full: Optional[str] = None  # optional: C symbol for vfmt counterpart
+        self.doc: Optional[str] = None  # The C function's Doxygen comment
         self.guards: List[str] = []
         # Map array index -> count index when pattern matches (e.g., size/count)
         self.array_count_pairs: Dict[int, int] = {}
@@ -240,7 +246,7 @@ class MethodMeta:
 
         # Detect array + count param patterns
         for i in range(1, len(self.args)):
-            t_i, n_i, is_arr = self.args[i]
+            _, _, is_arr = self.args[i]
             if not is_arr:
                 continue
             j = i + 1
@@ -262,7 +268,7 @@ class MethodMeta:
         return self.ret_type
 
     def decl_args_str(self) -> str:
-        items = []
+        items: List[str] = []
         for idx in range(1, len(self.args)):
             (t, n, is_arr) = self.args[idx]
             t_s = t.strip()
@@ -292,7 +298,7 @@ class MethodMeta:
         Args string for source definitions: no default values.
         Default arguments belong only in the declaration (header).
         """
-        items = []
+        items: List[str] = []
         for idx in range(1, len(self.args)):
             (t, n, is_arr) = self.args[idx]
             t_s = t.strip()
@@ -315,7 +321,7 @@ class MethodMeta:
         return ", ".join(items)
 
     def call_args_str(self) -> str:
-        call_parts = []
+        call_parts: List[str] = []
         # Iterate preserving original C argument order
         for idx in range(1, len(self.args)):
             (t, n, is_arr) = self.args[idx]
@@ -336,10 +342,10 @@ class MethodMeta:
         return ", ".join(call_parts)
 
 
-def build_methods(widget_token: str, protos: List[Tuple[str, str, str, str, List[Tuple[str, str, bool]], Optional[str], List[str]]]) -> List[MethodMeta]:
+def build_methods(widget_token: str, protos: List[Prototype]) -> List[MethodMeta]:
     methods: List[MethodMeta] = []
     # Map suffix -> proto for lookup (e.g., find _vfmt counterpart)
-    proto_by_suffix: Dict[str, Tuple[str, str, str, str, List[Tuple[str, str, bool]], Optional[str], List[str]]] = {}
+    proto_by_suffix: Dict[str, Prototype] = {}
     for p in protos:
         proto_by_suffix[p[2]] = p
     for ret_type, full_c, suffix, _args_str, args, doc, guards in protos:
@@ -425,7 +431,7 @@ def emit_header_gen(
     lines.extend(banner_lines(f"{class_base_name}.gen.h"))
     lines.append("#pragma once")
     lines.append("")
-    lines.append("#include \"UI/Components/LVGL/LvObj.h\"")
+    lines.append("#include \"UI/Lvgl/LvObj.h\"")
     # Include <span> if any method uses std::span
     if any(m.array_count_pairs or any(is_arr for (_, _, is_arr) in m.args[1:]) for m in methods):
         lines.append("#include <span>")
@@ -438,7 +444,7 @@ def emit_header_gen(
     base_methods_tmpl = None
     if base_widget_token:
         base_class_base = f"Lv{to_pascal(base_widget_token)}"
-        lines.append(f"#include \"UI/Components/LVGL/generated/{base_class_base}.gen.h\"")
+        lines.append(f"#include \"UI/Lvgl/generated/{base_class_base}.gen.h\"")
         lines.append("")
 
     lines.append("namespace UI")
@@ -446,9 +452,9 @@ def emit_header_gen(
     lines.append(f"    {MARKER}")
     # Determine class-wide guards present on all methods
     if methods:
-        class_guards = sorted(set.intersection(*(set(m.guards) for m in methods)))
+        class_guards = sorted(set[str].intersection(*(set(m.guards) for m in methods)))
     else:
-        class_guards = []
+        class_guards: List[str] = []
 
     if class_guards:
         lines.append("")
@@ -485,7 +491,7 @@ def emit_header_gen(
             if extra_guards:
                 lines.append("")
             active_method_guards = extra_guards
-        if getattr(m, 'doc', None):
+        if m.doc:
             for dl in sanitize_doc(m.doc).splitlines():
                 lines.append("        " + dl)
         const_str = " const" if m.is_const else ""
@@ -563,18 +569,13 @@ def emit_header_gen(
     return "\n".join(lines)
 
 
-def emit_source_gen(*args, **kwargs) -> str:
-    # No longer generating .gen.cpp; constructor is inline in header.
-    return ""
-
-
 def emit_derived_header_if_missing(class_base_name: str) -> Optional[str]:
     """Return text for a thin derived header if it does not already exist, else None."""
     # Do not mark with AUTO-GENERATED marker; this is intended for manual overrides later.
     lines: List[str] = []
     lines.append("#pragma once")
     lines.append("")
-    lines.append(f"#include \"UI/Components/LVGL/generated/{class_base_name}.gen.h\"")
+    lines.append(f"#include \"UI/Lvgl/generated/{class_base_name}.gen.h\"")
     lines.append("")
     lines.append("namespace UI")
     lines.append("{")
@@ -617,7 +618,7 @@ def ensure_parent_references_generated() -> None:
 
 def update_generated_cmake(new_gen_cpp_files: List[str]) -> None:
     """
-    Maintain src/UI/Components/LVGL/generated/CMakeLists.txt with the list of generated sources.
+    Maintain src/UI/Lvgl/generated/CMakeLists.txt with the list of generated sources.
     Entries should be of the form: ${CMAKE_CURRENT_SOURCE_DIR}/Lv<Widget>.gen.cpp
     """
     # Normalize to basenames within generated dir
@@ -644,8 +645,8 @@ def run_clang_format(files: List[Path]) -> None:
         print("[fmt] clang-format not found in PATH; skipping formatting")
         return
     # Deduplicate and ensure absolute paths
-    unique_files = []
-    seen = set()
+    unique_files: List[str] = []
+    seen: set[str] = set()
     for f in files:
         p = str(Path(f).resolve())
         if p not in seen:
@@ -674,12 +675,15 @@ def discover_widget_headers() -> Dict[str, Path]:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Generate LVGL C++ wrappers")
+    """Generate the wrappers asked for."""
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--all", action="store_true", help="Generate for all discovered widgets")
-    ap.add_argument("--widget", help="Single widget token (e.g., chart)")
+    complete_with(ap.add_argument("--widget", help="Single widget token (e.g., chart)"),
+                  lambda: sorted(discover_widget_headers()))
     ap.add_argument("--widgets", help="Comma-separated widget tokens")
     ap.add_argument("--map", help="Comma-separated explicit name mappings token:Class (e.g., buttonmatrix:ButtonMatrix)")
     ap.add_argument("--force-overwrite", action="store_true", help="Overwrite existing files, even manual ones")
+    complete(ap)
     args = ap.parse_args()
 
     mappings: Dict[str, str] = {}
@@ -724,15 +728,12 @@ def main() -> None:
         base_widget = discover_widget_base(token)
 
         header_text = emit_header_gen(class_base, class_gen, token, methods, base_widget)
-        # source_text = emit_source_gen()
 
         # Generated paths
         gen_h_rel = f"generated/{class_base}.gen.h"
-        gen_cpp_rel = None
         gen_h_path = OUTPUT_DIR / gen_h_rel
 
         wrote_h = write_if_allowed(gen_h_path, header_text, args.force_overwrite)
-        wrote_cpp = False
 
         if wrote_h:
             print(f"[gen] {class_gen} -> {gen_h_rel}")

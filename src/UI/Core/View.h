@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Model.h"
-#include "UI/Components/Containers/Card.h"
-#include "UI/Components/LVGL/LvContainer.h"
+#include "UI/Lvgl/LvContainer.h"
 #include "lvgl/src/osal/lv_os.h"
 #include <fmt/ostream.h>
 #include <memory>

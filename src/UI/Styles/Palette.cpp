@@ -1,0 +1,254 @@
+/*
+ * Palette.cpp
+ */
+
+#include "Palette.h"
+#include <algorithm>
+#include <charconv>
+#include <cmath>
+
+namespace UI::Themes
+{
+	static constexpr float s_minColorChroma = 0.12f; // Accents are never fully grey, nor dull
+	static constexpr float s_mutedChroma = 0.6f;	 // A muted accent's chroma, as a share of its accent's
+	static constexpr float s_seriesChroma = 0.14f;	 // A graph series' chroma: colourful, whatever the theme's
+	static constexpr float s_maxLineChroma = 0.04f;	 // Text and lines are only tinted: colourful text is hard to read
+
+	void forEachColor(ThemeColors& colors, const std::function<void(std::string_view name, Color& color)>& fn)
+	{
+		fn("bg_dark", colors.bg_dark);
+		fn("bg", colors.bg);
+		fn("bg_light", colors.bg_light);
+		fn("primary", colors.primary);
+		fn("primary_muted", colors.primary_muted);
+		fn("secondary", colors.secondary);
+		fn("secondary_muted", colors.secondary_muted);
+		fn("text", colors.text);
+		fn("text_muted", colors.text_muted);
+		fn("text_header", colors.text_header);
+		fn("border", colors.border);
+		fn("border_muted", colors.border_muted);
+		fn("highlight", colors.highlight);
+		fn("shadow", colors.shadow);
+		fn("success", colors.success);
+		fn("warning", colors.warning);
+		fn("error", colors.error);
+		static constexpr std::array<std::string_view, SERIES_COLOR_COUNT> seriesNames = {
+			"series_1", "series_2", "series_3", "series_4", "series_5", "series_6", "series_7", "series_8"};
+		for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+		{
+			fn(seriesNames[i], colors.series[i]);
+		}
+	}
+
+	float ColorAdjustment::Change::apply(float value) const
+	{
+		switch (op)
+		{
+		case Op::Add:
+			return value + amount;
+		case Op::Multiply:
+			return value * amount;
+		case Op::Set:
+		default:
+			return amount;
+		}
+	}
+
+	std::optional<ColorAdjustment::Change> ColorAdjustment::Change::parse(std::string_view text)
+	{
+		Change change;
+		if (text.starts_with('+'))
+		{
+			change.op = Op::Add;
+			text.remove_prefix(1);
+		}
+		else if (text.starts_with('*'))
+		{
+			change.op = Op::Multiply;
+			text.remove_prefix(1);
+		}
+		else if (text.starts_with('-'))
+		{
+			change.op = Op::Add; // "-0.1" adds a negative amount
+		}
+
+		const char* end = text.data() + text.size();
+		auto [ptr, ec] = std::from_chars(text.data(), end, change.amount);
+		if (text.empty() || ec != std::errc() || ptr != end)
+		{
+			return std::nullopt;
+		}
+		return change;
+	}
+
+	/** How far apart two hues are, degrees (0 to 180) */
+	static float hueDistance(float a, float b)
+	{
+		const float d = std::fmod(std::fabs(a - b), 360.0f);
+		return std::min(d, 360.0f - d);
+	}
+
+	/**
+	 * Hues for a graph's series: the primary hue, then the secondary, then, from hues spaced evenly round the circle
+	 * from the primary, each time the one farthest from those already chosen
+	 */
+	static std::array<float, SERIES_COLOR_COUNT> seriesHues(float primaryHue, float secondaryHue)
+	{
+		std::array<float, SERIES_COLOR_COUNT> candidates;
+		for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+		{
+			candidates[i] = std::fmod(primaryHue + 360.0f * static_cast<float>(i) / SERIES_COLOR_COUNT, 360.0f);
+		}
+		std::array<float, SERIES_COLOR_COUNT> hues;
+		std::array<bool, SERIES_COLOR_COUNT> used{};
+		hues[0] = primaryHue;
+		hues[1] = secondaryHue;
+		used[0] = true;
+		// The candidate the secondary hue stands in for
+		size_t nearest = 1;
+		for (size_t i = 2; i < SERIES_COLOR_COUNT; i++)
+		{
+			if (hueDistance(candidates[i], secondaryHue) < hueDistance(candidates[nearest], secondaryHue))
+			{
+				nearest = i;
+			}
+		}
+		used[nearest] = true;
+		for (size_t n = 2; n < SERIES_COLOR_COUNT; n++)
+		{
+			size_t best = 0;
+			float bestDistance = -1.0f;
+			for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+			{
+				if (used[i])
+				{
+					continue;
+				}
+				float distance = 180.0f;
+				for (size_t j = 0; j < n; j++)
+				{
+					distance = std::min(distance, hueDistance(candidates[i], hues[j]));
+				}
+				if (distance > bestDistance)
+				{
+					best = i;
+					bestDistance = distance;
+				}
+			}
+			used[best] = true;
+			hues[n] = candidates[best];
+		}
+		return hues;
+	}
+
+	/**
+	 * The palette before adjustments. Each colour's lightness is chosen for its role, so text stays readable on
+	 * whatever it is drawn on whatever the hues and chroma:
+	 * - Surfaces step away from the screen: the screen (bg_dark), a card on it (bg), a control on a card (bg_light).
+	 * - Accents are filled behind body text (#text), so they keep a contrast of about 4.5:1 with it in both modes.
+	 * - Muted accents sit between their accent and the background: darker in dark mode, a pale tint in light mode.
+	 * - The state colours (success, warning, error) work both as a fill behind body text and as text on a card.
+	 * - The highlight is a track or a grid line: plainly visible on a card, quieter than a border.
+	 */
+	static ThemeColors generateBase(PaletteInputs in)
+	{
+		ThemeColors colors;
+		in.primaryHue = std::clamp<uint16_t>(in.primaryHue, 0u, 360u);
+		in.secondaryHue = std::clamp<uint16_t>(in.secondaryHue, 0u, 360u);
+		in.chroma = std::clamp<float>(in.chroma, 0.0f, 0.2f);
+
+		const float bgChroma = in.chroma / 2;
+		const float lineChroma = std::min(in.chroma, s_maxLineChroma);
+		const float colorChroma = std::max(s_minColorChroma, in.chroma);
+		const float mutedChroma = colorChroma * s_mutedChroma;
+		const float colorL = in.dark ? 0.55f : 0.68f;
+		const float mutedL = in.dark ? 0.38f : 0.87f;
+
+		colors.bg_dark = Color(in.dark ? 0.16f : 0.93f, bgChroma, in.primaryHue);
+		colors.bg = Color(in.dark ? 0.205f : 0.985f, bgChroma, in.primaryHue);
+		colors.bg_light = Color(in.dark ? 0.28f : 1.0f, bgChroma, in.primaryHue);
+
+		colors.primary = Color(colorL, colorChroma, in.primaryHue);
+		colors.primary_muted = Color(mutedL, mutedChroma, in.primaryHue);
+		colors.secondary = Color(colorL, colorChroma, in.secondaryHue);
+		colors.secondary_muted = Color(mutedL, mutedChroma, in.secondaryHue);
+
+		colors.text = Color(in.dark ? 0.96f : 0.2f, lineChroma, in.primaryHue);
+		colors.text_muted = Color(in.dark ? 0.76f : 0.42f, lineChroma, in.primaryHue);
+		colors.text_header = Color(in.dark ? 1.0f : 0.1f, lineChroma, in.primaryHue);
+
+		colors.border = Color(in.dark ? 0.42f : 0.72f, lineChroma, in.primaryHue);
+		colors.border_muted = Color(in.dark ? 0.31f : 0.86f, lineChroma, in.primaryHue);
+		colors.highlight = Color(in.dark ? 0.36f : 0.84f, lineChroma, in.primaryHue);
+		colors.shadow = Color(in.dark ? 0.08f : 0.4f, bgChroma, in.primaryHue);
+
+		const float stateL = in.dark ? 0.56f : 0.64f;
+		colors.success = Color(stateL, std::max(0.14f, in.chroma), 150);
+		colors.warning = Color(in.dark ? 0.6f : 0.76f, std::max(0.14f, in.chroma), 75); // Amber is only amber if light
+		colors.error = Color(stateL, std::max(0.18f, in.chroma), 27);
+
+		// Lines on a card: light on a dark one, darker on a light one
+		const auto hues = seriesHues(in.primaryHue, in.secondaryHue);
+		for (size_t i = 0; i < SERIES_COLOR_COUNT; i++)
+		{
+			colors.series[i] = Color(in.dark ? 0.74f : 0.58f, s_seriesChroma, hues[i]);
+		}
+		return colors;
+	}
+
+	/** The colour called `name`, or nullptr */
+	static Color* findColor(ThemeColors& colors, std::string_view name)
+	{
+		Color* found = nullptr;
+		forEachColor(colors,
+					 [&](std::string_view n, Color& c)
+					 {
+						 if (n == name)
+						 {
+							 found = &c;
+						 }
+					 });
+		return found;
+	}
+
+	ThemeColors generatePalette(const PaletteInputs& inputs,
+								const std::vector<ColorAdjustment>& adjustments,
+								std::vector<std::string>* errors)
+	{
+		ThemeColors colors = generateBase(inputs);
+		for (const auto& adjustment : adjustments)
+		{
+			if ((adjustment.when == ColorAdjustment::When::Dark && !inputs.dark) ||
+				(adjustment.when == ColorAdjustment::When::Light && inputs.dark))
+			{
+				continue;
+			}
+
+			Color* target = findColor(colors, adjustment.color);
+			const Color* from = adjustment.from.empty() ? target : findColor(colors, adjustment.from);
+			if (target == nullptr || from == nullptr)
+			{
+				if (errors)
+				{
+					errors->push_back("unknown palette colour '" +
+									  (target == nullptr ? adjustment.color : adjustment.from) + "'");
+				}
+				continue;
+			}
+
+			// Read both from the starting colour before changing anything
+			const float lightness = from->getL();
+			const float chroma = from->getC();
+			if (adjustment.lightness)
+			{
+				target->setL(std::clamp(adjustment.lightness->apply(lightness), 0.0f, 1.0f));
+			}
+			if (adjustment.chroma)
+			{
+				target->setC(std::max(adjustment.chroma->apply(chroma), 0.0f));
+			}
+		}
+		return colors;
+	}
+} // namespace UI::Themes

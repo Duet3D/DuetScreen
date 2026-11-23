@@ -9,7 +9,11 @@
   "initializeCommand": "bash \"${localWorkspaceFolder}/.devcontainer/scripts/generate-buildroot-compose.sh\" \"${localWorkspaceFolder}\"",
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
   "postStartCommand": {
-    "claude": ".devcontainer/scripts/claude-persist.sh"
+    "claude": ".devcontainer/scripts/claude-persist.sh",
+    // Tab completion of the scripts (scripts/completions), in each shell
+    "fish": "mkdir -p ~/.config/fish/conf.d && ln -sf ${containerWorkspaceFolder}/scripts/completions/duetscreen.fish ~/.config/fish/conf.d/duetscreen.fish",
+    "zsh": "grep -qs scripts/completions/duetscreen.zsh ~/.zshrc || echo 'source ${containerWorkspaceFolder}/scripts/completions/duetscreen.zsh' >> ~/.zshrc",
+    "bash": "grep -qs scripts/completions/duetscreen.bash ~/.bashrc || echo 'source ${containerWorkspaceFolder}/scripts/completions/duetscreen.bash' >> ~/.bashrc"
   },
   "customizations": {
     "vscode": {
@@ -19,7 +23,10 @@
         "TrevorNesbitt.smart-file-templates",
         "vadimcn.vscode-lldb",
         "rioj7.command-variable",
-        "GitHub.vscode-pull-request-github"
+        "GitHub.vscode-pull-request-github",
+        "redhat.vscode-xml",
+        "ms-python.python",
+        "ms-python.autopep8"
       ],
       "settings": {
         "buildroot_path": "/workspaces/buildroot-duetscreen",
@@ -32,7 +39,11 @@
         "cmake.ctest.testSuiteDelimiter": "\\.",
         "cmake.ctest.testExplorerIntegrationEnabled": true,
         "cmake.ctest.debugLaunchTarget": "Debug GTest - CMake Tools",
-        "smartTemplates.jsonConfigurationFile": ".vscode/file_templates.json"
+        "smartTemplates.jsonConfigurationFile": ".vscode/file_templates.json",
+        "xml.fileAssociations": [
+          { "pattern": "**/assets/ui/components/**/*.xml", "systemId": "${workspaceFolder}/docs/XML_UI.xsd" },
+          { "pattern": "**/var/ui/*/components/**/*.xml", "systemId": "${workspaceFolder}/docs/XML_UI.xsd" }
+        ]
       }
     }
   },

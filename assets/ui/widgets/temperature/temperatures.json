@@ -1,0 +1,20 @@
+{
+  "component": "temperature",
+  "title_tag": "tr.widget.temperatures",
+  "description_tag": "tr.widget.temperatures_desc",
+  "category_tag": "tr.widget.category_temperature",
+  "icon": "temperature.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      920,
+      561
+    ],
+    "min": [
+      642,
+      467
+    ]
+  }
+}

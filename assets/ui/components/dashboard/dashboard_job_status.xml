@@ -1,0 +1,118 @@
+<!--
+  The job, as it runs (or as it last ran): its thumbnail, as large as the room left lets it be, or beside its name where
+  that shows it larger; its name and what it is doing; while it runs, its progress, large, over a bar, and its layer,
+  times and when it should be done; the overrides, each tapped to change it in its shared dialog (speed, and on a
+  printer extrusion and Z offset); and pause, resume or print again, and Cancel, which asks first, while it runs. Once
+  it has ended, what it is doing says how it ended (finished, cancelled, …).
+
+  Data:     source.job.* (src/UI/Xml/Data/JobSource.h): the latest job, its progress, times, thumbnail and controls;
+            source.machine.job_active (src/UI/Xml/Data/MachineSource.h): whether it runs;
+            source.move.* (src/UI/Xml/Data/MoveSource.h): the overrides and babystep
+  Actions:  job.pause, job.resume, job.print_again (global: src/UI/Presenters/Dashboard/JobActions.h), job.ask_cancel,
+            factors.speed, factors.extrusion and babystep.open (global: the shared dialogs, src/UI/Presenters/Modals/)
+  Presenter: job_status (src/UI/Presenters/Dashboard/JobStatusPresenter.h): where the thumbnail goes, above or beside
+            the name, from the room the job's card leaves it
+-->
+<component presenter="job_status">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<style name="bg_dark"/>
+
+		<!-- The job fills the height the overrides and controls leave. Where that is too little, its rows start at the
+			 top and the details are cut off at the bottom: the overrides and controls always show. Each time it is
+			 laid out, the presenter measures the room it leaves its thumbnail, and so where the thumbnail goes -->
+		<lv_obj name="job" width="100%" height="1" flex_grow="1" flex_flow="column" scrollable="false">
+			<style name="card"/>
+			<style name="pad_gap"/>
+			<bind_flag_if_eq subject="source.job.name" flag="hidden" ref_value=""/>
+			<action trigger="layout_changed" name="presenter.job_status.layout" arg="{source.job.thumbnail}"/>
+			<!-- Without the thumbnail above, the room it would take, so the rows sit at the bottom as they do with it -->
+			<flex_pad name="spacer">
+				<bind_flag_if_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="1"/>
+			</flex_pad>
+			<!-- Its thumbnail above, where there is room for it at least as large as beside the name: it takes the
+				 room the rest leaves, centred, as tall as that room and no wider (scaled to fit) -->
+			<thumbnail_box name="picture" src="source.job.thumbnail" width="100%" height="1" flex_grow="1">
+				<bind_flag_if_not_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="1"/>
+			</thumbnail_box>
+			<!-- What it is, with the thumbnail beside it where there isn't room above -->
+			<lv_obj name="header" width="100%" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0">
+				<!-- No larger than 56 x 56, so it never makes the row taller than its two lines -->
+				<thumbnail_box name="beside" src="source.job.thumbnail" width="56" height="56" style_margin_right="12">
+					<bind_flag_if_not_eq subject="presenter.thumbnail_place" flag="hidden" ref_value="2"/>
+				</thumbnail_box>
+				<lv_obj name="titles" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+						style_pad_all="0">
+					<lv_label name="filename" bind_text="source.job.name" width="100%" long_mode="dots">
+						<style name="text_emphasis"/>
+					</lv_label>
+					<lv_label name="state" bind_text="source.job.state" width="100%">
+						<style name="text_muted"/>
+					</lv_label>
+				</lv_obj>
+			</lv_obj>
+			<!-- How far it has got, while it runs: a finished job has only its name and Print again, no job nothing -->
+			<lv_obj name="progress_line" width="100%" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="end" style_flex_track_place="end" style_pad_all="0" style_pad_column="4">
+				<bind_flag_if_eq subject="source.machine.job_active" flag="hidden" ref_value="0"/>
+				<lv_label name="percent" bind_text="source.job.progress" bind_text-fmt="%d">
+					<style name="reading_large"/>
+				</lv_label>
+				<lv_label name="unit" text="%">
+					<style name="text_muted"/>
+				</lv_label>
+			</lv_obj>
+			<ds_bar name="progress" min="0" max="100" label_format="" bind_value="source.job.progress" width="100%"
+					height="8">
+				<bind_flag_if_eq subject="source.machine.job_active" flag="hidden" ref_value="0"/>
+				<style name="gauge_bar"/>
+				<style name="gauge_bar_indic" selector="indicator"/>
+			</ds_bar>
+			<!-- Its layer and times, each shown while it is known -->
+			<lv_obj name="details" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
+					style_pad_all="0" style_pad_column="16" style_pad_row="8" style_flex_main_place="space_between">
+				<bind_flag_if_eq subject="source.machine.job_active" flag="hidden" ref_value="0"/>
+				<job_detail name="layer" title_tag="tr.job.layer" value="source.job.layer"/>
+				<job_detail name="elapsed" title_tag="tr.job.elapsed" value="source.job.elapsed"/>
+				<job_detail name="left" title_tag="tr.job.left" value="source.job.remaining"/>
+				<job_detail name="done_at" title_tag="tr.job.done_at" value="source.job.finish_at"/>
+			</lv_obj>
+		</lv_obj>
+
+		<!-- The overrides (value_button.xml), each tapped to change it; extrusion and Z offset only on a printer -->
+		<lv_obj name="overrides" width="100%" height="content" flex_flow="row" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<value_button name="speed_override" title_tag="tr.job.speed" value="source.move.speed_factor"
+						  value_style="text_emphasis" width="1" flex_grow="1">
+				<action trigger="clicked" name="actions.factors.speed"/>
+			</value_button>
+			<value_button name="extrusion_override" title_tag="tr.job.extrusion" value="source.move.extrusion_factor"
+						  value_style="text_emphasis" width="1" flex_grow="1">
+				<bind_flag_if cond="not (om.state.machineMode|eq:FFF)" flag="hidden"/>
+				<action trigger="clicked" name="actions.factors.extrusion"/>
+			</value_button>
+			<value_button name="z_offset_override" title_tag="tr.job.z_offset" value="source.move.babystep"
+						  value_style="text_emphasis" width="1" flex_grow="1">
+				<bind_flag_if cond="not (om.state.machineMode|eq:FFF)" flag="hidden"/>
+				<action trigger="clicked" name="actions.babystep.open"/>
+			</value_button>
+		</lv_obj>
+
+		<!-- Job controls: each is hidden (0), disabled (1) or usable (2) (job_control.xml) -->
+		<lv_obj name="controls" width="100%" height="content" flex_flow="row" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<job_control name="pause" translation_tag="tr.status.pause" icon="pause.png"
+						 control="source.job.pause_control" action="actions.job.pause"/>
+			<job_control name="resume" translation_tag="tr.status.resume" icon="resume.png"
+						 control="source.job.resume_control" action="actions.job.resume"/>
+			<job_control name="print_again" translation_tag="tr.status.print_again" icon="print_again.png"
+						 control="source.job.print_again_control" action="actions.job.print_again"/>
+			<job_control name="cancel" translation_tag="tr.job.cancel" control="source.job.cancel_control"
+						 action="actions.job.ask_cancel" look="danger_outline_btn"/>
+		</lv_obj>
+	</view>
+</component>

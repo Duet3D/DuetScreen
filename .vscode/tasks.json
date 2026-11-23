@@ -1,44 +1,53 @@
 {
+	// Every task runs a script in scripts/; run one with --help to see what else it can do
 	"version": "2.0.0",
 	"inputs": [
 		{
 			"id": "test_filters",
 			"type": "promptString",
-			"description": "Test filters"
+			"description": "Test filter (a CTest regular expression, empty for all)"
 		},
 		{
 			"id": "lvgl_test_filters",
 			"type": "promptString",
-			"description": "Test filters"
+			"description": "LVGL test suite (empty for all)"
 		},
 		{
 			"id": "duetscreen_ip_address",
-			"type": "promptString",
-			"description": "IP address for DuetScreen"
+			"type": "command",
+			"command": "extension.commandvariable.promptStringRemember",
+			"args": {
+				"key": "duetscreen_ip_address",
+				"description": "IP address for DuetScreen"
+			}
 		},
 		{
+			// Resolves to build.py's option for the build type
 			"id": "build_type",
-			"type": "pickString",
-			"description": "Build type for DuetScreen",
-			"options": [
-				"Release",
-				"Release_with_profiling",
-				"Debug",
-			],
-			"default": "Release"
+			"type": "command",
+			"command": "extension.commandvariable.pickStringRemember",
+			"args": {
+				"description": "Build type for DuetScreen",
+				"options": [
+					["Release", ""],
+					["Release_with_profiling", "--profiling"],
+					["Debug", "--debug"]
+				],
+				"default": ""
+			}
 		},
 		{
-			// Resolves to the CMake options; the serial number is only prompted for when ON is picked
+			// Resolves to build.py's option; the serial number is only prompted for when ON is picked
 			"id": "hardware_test",
 			"type": "command",
 			"command": "extension.commandvariable.pickStringRemember",
 			"args": {
 				"description": "Build DuetScreen as a hardware test image?",
 				"options": [
-					["OFF", "-DDUETSCREEN_HARDWARE_TEST=OFF"],
-					["ON", "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER='\"${promptStringRemember:serial}\"'"]
+					["OFF", ""],
+					["ON", "--hardware-test '${promptStringRemember:serial}'"]
 				],
-				"default": "-DDUETSCREEN_HARDWARE_TEST=OFF",
+				"default": "",
 				"promptStringRemember": {
 					"serial": {
 						"key": "hardware_test_serial",
@@ -51,153 +60,67 @@
 	],
 	"tasks": [
 		{
-			"type": "cmake",
-			"label": "CMake: configure",
-			"command": "configure",
-			"preset": "${command:cmake.activeConfigurePresetName}",
-			"problemMatcher": [],
-			"detail": "CMake template configure task",
-			"group": "build"
-		},
-		{
-			"type": "cmake",
-			"label": "CMake: build",
-			"command": "build",
-			"targets": [
-				"DuetScreen"
-			],
-			"preset": "${command:cmake.activeBuildPresetName}",
-			"problemMatcher": [],
-			"detail": "CMake template build task",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"dependsOn": []
-		},
-		{
-			"type": "cmake",
-			"label": "CMake: build tests",
-			"command": "build",
-			"targets": [
-				"DuetScreen.tests"
-			],
-			"preset": "${command:cmake.activeBuildPresetName}",
-			"problemMatcher": [],
-			"detail": "CMake template build task",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"dependsOn": []
-		},
-		{
+			"label": "Build",
 			"type": "shell",
+			"command": "scripts/build.py --preset ${command:cmake.activeConfigurePresetName}",
+			"problemMatcher": ["$gcc"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Builds DuetScreen with the active CMake preset"
+		},
+		{
+			"label": "Build Tests",
+			"type": "shell",
+			"command": "scripts/build.py --preset ${command:cmake.activeConfigurePresetName} --target DuetScreen.tests",
+			"problemMatcher": ["$gcc"],
+			"group": "build",
+			"detail": "Builds the tests with the active CMake preset"
+		},
+		{
 			"label": "Clang Format",
-			"command": "find src/ -iname '*.h' -o -iname '*.cpp' -print | xargs clang-format -i",
-			"problemMatcher": [],
-			"group": {
-				"kind": "none",
-				"isDefault": false
-			}
+			"type": "shell",
+			"command": "scripts/format.py",
+			"problemMatcher": []
 		},
 		{
-			"type": "shell",
 			"label": "LVGL Format",
-			"command": "python3 scripts/code-format.py",
-			"options": {
-				"cwd": "${workspaceFolder}/libraries/lvgl"
-			},
-			"problemMatcher": [],
-			"group": {
-				"kind": "none",
-				"isDefault": false
-			}
-		},
-		{
-			"label": "Clean DuetScreen for Remote",
 			"type": "shell",
-			"command": "rm -rf output/build/duetscreen-HEAD; rm -rf dl/duetscreen",
-			"args": [],
-			"options": {
-				"cwd": "${config:buildroot_path}"
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [],
-			"detail": "Cleans the DuetScreen build directory for remote debugging"
+			"command": "scripts/format.py --lvgl",
+			"problemMatcher": []
 		},
 		{
 			"label": "Build DuetScreen for Remote",
 			"type": "shell",
-			"command": "echo \"Building ${input:build_type}...\"; make duetscreen-reconfigure",
-			"args": [],
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"env": {
-					"DUETSCREEN_SRC": "${workspaceFolder}",
-					"DUETSCREEN_PRESET": "T113-${input:build_type}",
-					// "DUETSCREEN_EXTRA_CONF_OPTS": "-DDUETSCREEN_HARDWARE_TEST=ON -DDUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER=\"AC-04-01_\"",
-					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-				}
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"detail": "Builds DuetScreen for remote debugging"
+			"command": "scripts/build.py --screen ${input:build_type} --duet-simulator",
+			"problemMatcher": ["$gcc"],
+			"group": "build",
+			"detail": "Builds DuetScreen for the screen with Buildroot, with the simulated Duet"
+		},
+		{
+			"label": "Rebuild DuetScreen for Remote from Clean",
+			"type": "shell",
+			"command": "scripts/build.py --screen ${input:build_type} --duet-simulator --clean",
+			"problemMatcher": ["$gcc"],
+			"group": "build",
+			"detail": "Removes Buildroot's build of DuetScreen, then builds it again"
 		},
 		{
 			"label": "Build Buildroot sdcard.img",
 			"type": "shell",
-			"command": "echo \"Building sdcard.img (${input:build_type}, $DUETSCREEN_EXTRA_CONF_OPTS)...\"; [ -f .config ] || make duet3d_duetscreen_defconfig; make duetscreen-reconfigure && make && echo \"Image: ${config:buildroot_path}/output/images/sdcard.img\"",
-			"args": [],
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"env": {
-					"DUETSCREEN_SRC": "${workspaceFolder}",
-					"DUETSCREEN_PRESET": "T113-${input:build_type}",
-					"DUETSCREEN_EXTRA_CONF_OPTS": "${input:hardware_test}",
-					"PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-				}
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"detail": "Builds the full buildroot image (output/images/sdcard.img) with the local DuetScreen source"
+			"command": "scripts/build.py --image ${input:build_type} ${input:hardware_test}",
+			"problemMatcher": ["$gcc"],
+			"group": "build",
+			"detail": "Builds the screen's whole firmware with the local DuetScreen, as output/images/sdcard.img in Buildroot"
 		},
 		{
-			"label": "Push DuetScreen - SSH",
+			"label": "Deploy DuetScreen - SSH",
 			"type": "shell",
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"command": "./scripts/push_duetscreen_ssh.sh ${input:duetscreen_ip_address}",
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": [],
-			"detail": "Push the DuetScreen binary to the screen",
-			"dependsOn": [
-				"Build DuetScreen for Remote"
-			],
+			"command": "scripts/build.py --deploy ${input:duetscreen_ip_address} ${input:build_type} --duet-simulator",
+			"problemMatcher": ["$gcc"],
+			"group": "build",
+			"detail": "Builds DuetScreen for the screen, copies it and the assets to the screen, and restarts it",
 			"runOptions": {
 				"instanceLimit": 1
 			}
@@ -205,220 +128,89 @@
 		{
 			"label": "Push Assets - SSH",
 			"type": "shell",
-			"command": "ssh root@${input:duetscreen_ip_address} 'rm -rf /etc/assets; mkdir -p /etc/assets'; scp -r assets root@${input:duetscreen_ip_address}:/etc/",
-			"options": {
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
+			"command": "scripts/screen.py ${input:duetscreen_ip_address} push assets",
 			"problemMatcher": [],
-			"detail": "Push the DuetScreen assets to the screen",
-			"dependsOn": [],
+			"detail": "Replaces the screen's assets with assets/, and restarts DuetScreen",
 			"runOptions": {
 				"instanceLimit": 1
 			}
-		},
-		{
-			"label": "Push Libraries - SSH",
-			"type": "shell",
-			"options": {
-				"cwd": "${config:buildroot_path}",
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"command": "scp output/target/usr/lib/*lvgl* root@${input:duetscreen_ip_address}:/usr/lib",
-			"group": {
-				"kind": "build",
-				"isDefault": false
-			},
-			"problemMatcher": [],
-			"detail": "Push the DuetScreen libraries to the screen",
-			"dependsOn": [],
-			"runOptions": {
-				"instanceLimit": 1
-			}
-		},
-		{
-			"label": "Start DuetScreen on remote",
-			"type": "shell",
-			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen; /etc/init.d/20DuetScreen start'",
-			"options": {
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"problemMatcher": [],
-			"isBackground": true
-		},
-		{
-			"label": "Start DuetScreenMonitor on remote",
-			"type": "shell",
-			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen; /etc/init.d/S21DuetScreenMonitor start'",
-			"options": {
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"problemMatcher": [],
-			"isBackground": true
-		},
-		{
-			"label": "Stop DuetScreen on remote",
-			"type": "shell",
-			"command": "ssh root@${input:duetscreen_ip_address} '/etc/init.d/S21DuetScreenMonitor stop; start-stop-daemon -K -n DuetScreen'",
-			"options": {
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"problemMatcher": [],
-			"isBackground": true
-		},
-		{
-			"label": "Start gdbserver on DuetScreen",
-			"type": "shell",
-			"command": "ssh root@${input:duetscreen_ip_address} 'gdbserver :3000 DuetScreen'",
-			"options": {
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
-			"problemMatcher": [],
-			"isBackground": true
 		},
 		{
 			"label": "Upload config.json",
 			"type": "shell",
-			"command": "scp config.json root@${input:duetscreen_ip_address}:/etc/duetscreen.json",
-			"options": {
-				"shell": {
-					"executable": "/bin/bash",
-					"args": [
-						"-i",
-						"-c"
-					]
-				}
-			},
+			"command": "scripts/screen.py ${input:duetscreen_ip_address} push config",
 			"problemMatcher": []
+		},
+		{
+			"label": "Start DuetScreen on remote",
+			"type": "shell",
+			"command": "scripts/screen.py ${input:duetscreen_ip_address} start --no-monitor",
+			"problemMatcher": []
+		},
+		{
+			"label": "Start DuetScreenMonitor on remote",
+			"type": "shell",
+			"command": "scripts/screen.py ${input:duetscreen_ip_address} start",
+			"problemMatcher": []
+		},
+		{
+			"label": "Stop DuetScreen on remote",
+			"type": "shell",
+			"command": "scripts/screen.py ${input:duetscreen_ip_address} stop",
+			"problemMatcher": []
+		},
+		{
+			"label": "Start gdbserver on DuetScreen",
+			"type": "shell",
+			"command": "scripts/screen.py ${input:duetscreen_ip_address} gdbserver",
+			"problemMatcher": [],
+			"isBackground": true
 		},
 		{
 			"label": "Create update.tar.gz",
 			"type": "shell",
-			"command": "./scripts/create_upgrade.sh",
+			"command": "scripts/create_upgrade.py",
 			"problemMatcher": [],
-			"detail": "Create a tar.gz file for the update",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"dependsOn": [
-				"Build DuetScreen for Remote - Release"
-			]
+			"detail": "Makes out/DuetScreen.tar.gz from what Buildroot last built"
 		},
 		{
 			"label": "Print Release Notes",
 			"type": "shell",
-			"command": "./scripts/release_notes.sh",
+			"command": "scripts/release_notes.py",
 			"problemMatcher": []
-		},
-		{
-			"type": "cmake",
-			"label": "CMake: configure Tests",
-			"command": "configure",
-			"preset": "Test",
-			"problemMatcher": [],
-			"group": "build"
 		},
 		{
 			"label": "Run Tests",
 			"type": "shell",
-			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}' --skip_configure",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
+			"command": "scripts/run_tests.py --filter '${input:test_filters}' --skip-configure",
+			"group": "test",
 			"problemMatcher": []
 		},
 		{
 			"label": "Run LVGL Tests",
 			"type": "shell",
-			"command": "python3 scripts/run_tests.py --test_filter='${input:lvgl_test_filters}' --lvgl-tests",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
-			"problemMatcher": [],
-			"dependsOn": [
-				// "LVGL Format"
-			]
+			"command": "scripts/run_tests.py --lvgl --filter '${input:lvgl_test_filters}'",
+			"group": "test",
+			"problemMatcher": []
 		},
 		{
 			"label": "Configure & Run Tests",
 			"type": "shell",
-			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}'",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
+			"command": "scripts/run_tests.py --filter '${input:test_filters}'",
+			"group": "test",
 			"problemMatcher": []
 		},
 		{
 			"label": "Run Test Coverage",
 			"type": "shell",
-			"command": "python3 scripts/run_tests.py --test_filter='${input:test_filters}' --coverage",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
+			"command": "scripts/run_tests.py --filter '${input:test_filters}' --coverage",
+			"group": "test",
 			"problemMatcher": []
 		},
 		{
 			"label": "Verify i18n translations",
 			"type": "shell",
-			"command": "python3 scripts/manage_translations.py",
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
+			"command": "scripts/manage_translations.py",
 			"problemMatcher": []
 		}
 	]

@@ -1,0 +1,79 @@
+<!--
+  The Display settings page: the screen (brightness, screensaver, rotation, animations), its appearance (the theme,
+  dark mode, the way to the theme's colours, the font and icons) and customising the home screen (the global action
+  customise.start, src/UI/Presenters/Customise/CustomiseActions.h). The colours are a page of their own
+  (settings_theme_preview.xml), opened in place. Each setting is a row (ds_setting) in a group, applied as soon as it is
+  changed.
+
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/DisplaySettings.cpp)
+  Actions:  actions.settings.set; numbers are typed on the shared number pad
+            source.theme.* (src/UI/Xml/Data/ThemeSource.h): the theme's colours, and whether it has a dark mode
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<style name="setting_page"/>
+
+		<ds_setting_group name="screen" title_tag="tr.settings.groups.screen">
+			<ds_setting name="brightness" title_tag="tr.settings.brightness">
+				<ds_slider name="slider" label_tag="tr.settings.brightness" label_shown="false" numberpad="true" min="0"
+						   max="100" decimals="0" unit="%" bind_value="source.settings.brightness" send="change" width="55%"
+						   height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="brightness"/>
+				</ds_slider>
+			</ds_setting>
+			<ds_setting name="screensaver_timeout" title_tag="tr.settings.screensaver_timeout"
+						hint_tag="tr.settings.hints.screensaver">
+				<ds_slider name="slider" label_tag="tr.settings.screensaver_timeout" label_shown="false" numberpad="true"
+						   min="0" max="300" increment="10" decimals="0" unit="s" out_of_range="upper"
+						   bind_value="source.settings.screensaver_timeout" width="55%" height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="screensaver_timeout"/>
+				</ds_slider>
+			</ds_setting>
+			<!-- One of a few: the chosen one is checked -->
+			<ds_setting name="screen_rotation" title_tag="tr.settings.screen_rotation">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<settings_option name="rotation_0" translation_tag="tr.settings.screen_rotation_options.rotation_0"
+									 setting="rotation" value="0"/>
+					<settings_option name="rotation_180" translation_tag="tr.settings.screen_rotation_options.rotation_180"
+									 setting="rotation" value="1"/>
+				</lv_obj>
+			</ds_setting>
+			<settings_toggle name="enable_animations" title_tag="tr.settings.enable_animations" setting="animations"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="appearance" title_tag="tr.settings.groups.appearance">
+			<settings_choice name="theme" title_tag="tr.settings.theme" setting="theme"/>
+			<!-- For a theme whose palette can be changed -->
+			<settings_toggle name="dark_mode" title_tag="tr.theme.dark_mode" setting="dark">
+				<bind_flag_if_eq subject="source.theme.customisable" flag="hidden" ref_value="0"/>
+			</settings_toggle>
+			<ds_setting name="colours" title_tag="tr.settings.colours" hint_tag="tr.settings.hints.colours">
+				<!-- The theme's accents -->
+				<lv_obj name="swatches" width="content" height="content" flex_flow="row" clickable="false"
+						style_pad_all="0" style_pad_column="6">
+					<lv_obj name="primary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
+						<style name="border"/>
+						<bind_style_prop prop="bg_color" subject="source.theme.primary"/>
+					</lv_obj>
+					<lv_obj name="secondary" width="22" height="22" clickable="false" style_bg_opa="255" style_radius="4">
+						<style name="border"/>
+						<bind_style_prop prop="bg_color" subject="source.theme.secondary"/>
+					</lv_obj>
+				</lv_obj>
+				<chevron_button name="open">
+					<action trigger="clicked" name="actions.navigation.open_page" arg="colours"/>
+				</chevron_button>
+			</ds_setting>
+			<settings_choice name="font" title_tag="tr.settings.font" setting="font"/>
+			<settings_choice name="icons" title_tag="tr.settings.icons" setting="icon_set"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="home" title_tag="tr.settings.groups.home">
+			<settings_button name="customise" title_tag="tr.settings.customise" hint_tag="tr.settings.hints.customise"
+							 label_tag="tr.settings.customise_start" action="actions.customise.start"/>
+		</ds_setting_group>
+	</view>
+</component>

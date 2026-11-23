@@ -1,9 +1,9 @@
 #include "Model.h"
-#include "Comm/JsonDecoder.h"
-#include "Comm/Usb.h"
+#include "Comm/Connection.h"
+#include "Comm/UsbMode.h"
+#include "Configuration.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
-#include "ObjectModel/Job.h"
+#include "Hardware/Usb.h"
 #include "ObjectModel/PrinterStatus.h"
 #include "Presenter.h"
 #include "View.h"
@@ -23,8 +23,8 @@
 #include <utility>
 
 // Ensure ResponseType and OM types are complete for payload sizing in this TU
-#include "ObjectModel/Alert.h"
-#include "Subscribers/ResponseSubscribers.h"
+#include "Comm/FileTransfer.h"
+#include "Comm/Responses.h"
 #include "utils/UpgradeHelper.h"
 
 // Define common payload storage privately in this TU to avoid
@@ -187,14 +187,9 @@ Model::Model()
 		m_timers.tick = nullptr;
 	}
 
-#if !MULTITHREADED
-	m_timers.request =
-		lv_timer_create([](lv_timer_t* timer) { static_cast<Model*>(lv_timer_get_user_data(timer))->requestNewData(); },
-						Comm::DUET.GetScaledPollInterval(),
-						this);
-	m_timers.receive = lv_timer_create(
-		[](lv_timer_t* timer) { static_cast<Model*>(lv_timer_get_user_data(timer))->receiveNewUsbData(); }, 5, this);
-#endif
+	// USB drives coming and going, as an event: presenters come and go, so they can't each hold a callback
+	USB::UsbMonitor::getInstance().registerCallback([this](const std::string& path, bool mounted)
+													{ post<EventType::UsbDrive>(path, mounted); });
 
 	addEventListener<EventType::Connected>(this, &Model::connected);
 	addEventListener<EventType::Disconnected>(this, &Model::disconnected);
@@ -405,51 +400,6 @@ void Model::runEventLoop()
 			{
 				LOG_VERBOSE("No handler for event type {:s}", nameof::nameof_enum(event.type));
 			}
-		}
-	}
-}
-
-std::chrono::milliseconds Model::requestNewData()
-{
-	ZoneScoped;
-	bool seqAvailable = Comm::sendNext();
-#if 0
-	if (seqAvailable && Comm::DUET.GetCommunicationType() == Comm::CommunicationType::network)
-	{
-		return 50; // 50ms
-	}
-#else
-	UNUSED(seqAvailable);
-#endif
-	return Comm::DUET.GetScaledPollInterval();
-}
-
-void Model::runSubscribers(const char* key, Comm::JsonDecoder* decoder, const char* data, const size_t indices[])
-{
-	ZoneScoped;
-	auto& subscribers = getSubscribers(key);
-	if (subscribers.size() != 0)
-	{
-		LOG_DBG("found {:d} subscribers for '{:s}'", subscribers.size(), key);
-		for (auto& subscriber : subscribers)
-		{
-			ZoneScopedN("Running subscriber");
-			subscriber.run(decoder, data, indices);
-		}
-	}
-}
-
-void Model::runArrayEndSubscribers(const char* key, Comm::JsonDecoder* decoder, const size_t indices[])
-{
-	ZoneScoped;
-	auto& subscribers = getArrayEndSubscribers(key);
-	if (subscribers.size() != 0)
-	{
-		LOG_DBG("found {:d} array end subscribers for '{:s}'", subscribers.size(), key);
-		for (auto& subscriber : subscribers)
-		{
-			ZoneScopedN("Running subscriber");
-			subscriber.run(decoder, indices);
 		}
 	}
 }

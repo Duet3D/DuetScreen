@@ -1,0 +1,24 @@
+<!--
+  A fact on a line: what it is, muted, then its value at the end of the line, wrapping if it is long. A column of them
+  is a table of facts, as the file dialog's job details and the bed mesh's statistics are.
+
+      <fact_row name="points" title_tag="tr.heightmap.points" value="presenter.stats.points"/>
+
+  Props:    title_tag  the translation key of what it is
+            value      the name of its value
+-->
+<component>
+	<api>
+		<prop name="title_tag" type="string"/>
+		<prop name="value" type="string"/>
+	</api>
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" scrollable="false"
+		  style_flex_cross_place="start" style_flex_track_place="start">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<lv_label name="title" translation_tag="$title_tag">
+			<style name="text_muted"/>
+		</lv_label>
+		<lv_label name="value" bind_text="$value" width="1" flex_grow="1" style_text_align="right"/>
+	</view>
+</component>

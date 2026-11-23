@@ -6,16 +6,22 @@
 /*********************
  *      INCLUDES
  *********************/
-#include "Comm/Communication.h"
-#include "Comm/Usb.h"
+#include "Comm/Connection.h"
+#include "Comm/FileInfoCache.h"
+#include "Comm/UsbMode.h"
 #include "Debug.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Reset.h"
 #include "Hardware/Usb.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "ObjectModel/Followers.h"
+#include "ObjectModel/PrinterStatus.h"
+#include "UI/Core/Navigation.h"
+#include "UI/Presenters/Presenters.h"
 #include "UI/Styles/Font.h"
 #include "UI/Styles/Styles.h"
-#include "UI/Widgets/HardwareTest/HardwareTest.h"
+#include "UI/Widgets/Layout/TabView.h"
+#include "UI/Xml/Runtime/HotReload.h"
+#include "UI/Xml/Runtime/XmlUi.h"
+#include "UI/Xml/View/XmlView.h"
 #include "glob.h"
 #include "hv/requests.h"
 #include "i18n/i18n.h"
@@ -64,8 +70,6 @@ static int set_thread_priority(pthread_t thread_id, int policy, int priority);
  *  STATIC VARIABLES
  **********************/
 static std::thread s_responseThread;
-static std::thread s_requestThread;
-static std::thread s_thumbnailThread;
 static std::thread s_internetMonitorThread;
 
 /**********************
@@ -115,8 +119,9 @@ int main(int argc, char** argv)
 
 	{
 		ZoneScopedN("Comm::init");
-		Comm::init();
-		Comm::DUET.Init();
+		std::filesystem::create_directories("/tmp/thumbnails");
+		OM::Followers::start();
+		Comm::usbInit();
 	}
 
 	/*Initialize the HAL (display, input devices, tick) for LVGL*/
@@ -127,50 +132,36 @@ int main(int argc, char** argv)
 		ZoneScopedN("Themes::init");
 		UI::Themes::init(display);
 	}
+	{
+		ZoneScopedN("Xml::init");
+		UI::registerPresenters();
+		UI::Xml::init();
+#if SIMULATION
+		// Edit assets/ui/ or var/ui/ and the running UI rebuilds
+		UI::Xml::HotReload::setPeriod(1000);
+#endif
+	}
 
 	DisplayHelper::setRotation(StorageHelper::getData(ID_DISPLAY_ROTATION));
 
-	UI::HomeView& home = UI::HomeView::instance();
+	// The whole UI: assets/ui/components/home/home.xml
+	lv_obj_set_style_pad_all(lv_screen_active(), 0, LV_PART_MAIN);
+	lv_enable_style_refresh(false); // One style refresh for the whole tree, below
+	UI::Xml::XmlView home("home", lv_screen_active(), "home");
+	lv_enable_style_refresh(true);
+	lv_obj_refresh_style(home.getRootPtr(), LV_PART_ANY, LV_STYLE_PROP_ANY);
 	home.show();
+	UI::Xml::focusFirstShown();
 
 #if HARDWARE_TEST
-	UI::HardwareTest hw_test;
-	hw_test.show(true);
+	// The factory hardware test, over the home screen, from start-up: assets/ui/components/hardware_test/
+	UI::Xml::XmlView hardwareTest("hardware_test", lv_screen_active(), "hardware_test");
+	hardwareTest.show(true);
 #endif
 
 	Model::get().startEventLoop();
 
-	USB::UsbMonitor::getInstance().registerCallback(
-		[](const std::string& path, bool mounted)
-		{
-			ZoneScopedN("Upgrade USB Callback");
-			if (mounted)
-			{
-				LOG_INFO("USB drive mounted: {:s}", path.c_str());
-				std::string upgradeFilePath = path + "/DuetScreen.tar.gz";
-				if (!std::filesystem::exists(upgradeFilePath))
-				{
-					return;
-				}
-
-				struct stat file_stat;
-				if (stat(upgradeFilePath.c_str(), &file_stat) != 0)
-				{
-					LOG_ERROR("Error getting file stats for {:s}", upgradeFilePath.c_str());
-					return;
-				}
-
-				time_t lastModified = file_stat.st_mtime;
-				time_t savedModified = StorageHelper::getData(ID_UPGRADE_FILE_LAST_MODIFIED);
-
-				if (lastModified == savedModified)
-				{
-					return;
-				}
-
-				Model::get().post<EventType::UpdateAvailable>(upgradeFilePath);
-			}
-		});
+	UpgradeHelper::offerUpdatesOnUsbDrives();
 	USB::UsbMonitor::getInstance().startMonitoring();
 	UpgradeHelper::startMonitoringUpgradeStatus();
 
@@ -197,41 +188,8 @@ int main(int argc, char** argv)
 			}
 		});
 
-	// Create a thread to handle requesting data from Duet
-#if MULTITHREADED
-	s_requestThread = std::thread(
-		[]()
-		{
-			tracy::SetThreadName("Request Thread");
-#  if SET_THREAD_PRIORITY
-			// Set high priority for request thread
-			set_thread_priority(pthread_self(), SCHED_RR, 90);
-#  endif
-
-			while (1)
-			{
-				// Request next section of the OM
-				std::chrono::milliseconds delay = Model::get().requestNewData();
-				std::this_thread::sleep_for(delay);
-			}
-		});
-
-	s_thumbnailThread = std::thread(
-		[]()
-		{
-			tracy::SetThreadName("FileInfo Cache Thread");
-#  if SET_THREAD_PRIORITY
-			// Set low priority for thumbnail thread
-			set_thread_priority(pthread_self(), SCHED_RR, 70);
-#  endif
-
-			while (1)
-			{
-				FILEINFO_CACHE->Spin();
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			}
-		});
-#endif
+	// Connect to the printer, on the connection's own thread
+	Comm::Connection::get().start();
 
 	// Screensaver task
 	DisplayHelper::setScreenSaverBrightness(0);
@@ -246,53 +204,91 @@ int main(int argc, char** argv)
 				[](lv_timer_t* timer)
 				{
 					static size_t index = 0;
-					auto& home = UI::HomeView::instance();
+					// Every page in turn, by the names home.xml registers them under
+					// The tabs called `tabs` on the page called `page`
+					auto tabsOn = [](const char* page, const char* tabs) -> UI::TabView*
+					{
+						UI::LvObj* view = UI::findView(page);
+						lv_obj_t* obj = view ? lv_obj_find_by_name(view->getRootPtr(), tabs) : nullptr;
+						return obj ? dynamic_cast<UI::TabView*>(UI::LvObj::fromPtr(obj)) : nullptr;
+					};
+					auto control = [=] { return tabsOn("control", "tabs"); };
+					auto files = [=] { return tabsOn("files", "tabs"); };
+					auto settings = [=] { return tabsOn("settings", "tabs"); };
+					auto dashboard = [=] { return tabsOn("dashboard", "dashboard_tabs"); };
 					static const std::function<void()> cbs[] = {
-						[&]()
+						[=]()
 						{
 							UI::home();
-							home.getDashboard().showJobsTab();
+							if (auto* d = dashboard())
+								d->setActiveTab(0); // Jobs
 						},
-						[&]()
+						[=]()
 						{
 							UI::home();
-							home.getDashboard().showStatusTab();
+							if (auto* d = dashboard())
+								d->setActiveTab(2); // Status
 						},
-						[&]()
+						[=]()
 						{
-							UI::openScreen(&home.getControlView(), true);
-							home.getControlView().showMoveView();
+							UI::openScreen("control", true);
+							if (auto* c = control())
+								c->setActiveTab(0); // Move
 						},
-						[&]() { home.getControlView().showTemperatureView(); },
-						[&]() { home.getControlView().showHeightmapView(); },
-						[&]() { home.getControlView().showFanView(); },
-						[&]()
+						[=]()
 						{
-							UI::openScreen(&home.getFileView(), true);
-							home.getFileView().setActiveTab(0);
+							if (auto* c = control())
+								c->setActiveTab(1); // Temperature
 						},
-						[&]() { home.getFileView().setActiveTab(1); },
-						[&]() { UI::openScreen(&home.getConsoleView(), true); },
-#  if SIDE_BAR_APP_DRAWER
-						[&]() { UI::openScreen(&home.getMoveView(), true); },
-						[&]() { UI::openScreen(&home.getTemperatureView(), true); },
-						[&]() { UI::openScreen(&home.getFineTuneView(), true); },
-						[&]() { UI::openScreen(&home.getHeightmapView(), true); },
-#  endif
-						[&]()
+						[=]()
 						{
-							UI::openScreen(&home.getSettingsView(), true);
-							home.getSettingsView().showGeneralSettings();
+							if (auto* c = control())
+								c->setActiveTab(2); // Height map
 						},
-						[&]() { home.getSettingsView().showConnectionSettings(); },
-						[&]() { home.getSettingsView().showDisplaySettings(); },
-						[&]() { home.getSettingsView().showDeveloperSettings(); },
+						[=]()
+						{
+							if (auto* c = control())
+								c->setActiveTab(4); // Fans
+						},
+						[=]()
+						{
+							UI::openScreen("files", true);
+							if (auto* f = files())
+								f->setActiveTab(0);
+						},
+						[=]()
+						{
+							if (auto* f = files())
+								f->setActiveTab(1);
+						},
+						[]() { UI::openScreen("console", true); },
+						[=]()
+						{
+							UI::openScreen("settings", true);
+							if (auto* v = settings())
+								v->setActiveTab(0); // General
+						},
+						[=]()
+						{
+							if (auto* v = settings())
+								v->setActiveTab(1); // Connection
+						},
+						[=]()
+						{
+							if (auto* v = settings())
+								v->setActiveTab(2); // Display
+						},
+						[=]()
+						{
+							if (auto* v = settings())
+								v->setActiveTab(3); // Developer
+						},
 					};
 
 					std::invoke(cbs[index]);
 					index = (index + 1) % std::size(cbs);
 				},
-				StorageHelper::getData(ID_BURNIN_FREQUENCY),
+				static_cast<uint32_t>(StorageHelper::getData(ID_BURNIN_FREQUENCY).count()),
 				NULL);
 			if (first_run)
 			{

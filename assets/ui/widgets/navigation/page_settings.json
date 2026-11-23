@@ -1,0 +1,16 @@
+{
+  "component": "sidebar_page_button",
+  "title_tag": "tr.side_bar.settings",
+  "description_tag": "tr.widget.page_settings_desc",
+  "category_tag": "tr.widget.category_navigation",
+  "icon": "settings.png",
+  "slots": [
+    "sidebar"
+  ],
+  "props": {
+    "page": "settings",
+    "action": "actions.navigation.open",
+    "label_tag": "tr.side_bar.settings",
+    "icon": "settings.png"
+  }
+}

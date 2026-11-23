@@ -1,0 +1,491 @@
+<!--
+  The base theme: every style the UI uses. The other themes extend it and change what they need.
+
+  Colour carries meaning, so the screen stays calm and what matters stands out:
+    - Surfaces: the screen (#bg_dark), cards on it (#bg), and controls on those (#bg_light), each a step apart.
+    - Buttons are neutral controls (btn). A button that acts on the machine is filled with the accent (action_btn).
+      A chosen option, the open page and the selected tab are tinted with the muted accent and edged in the accent
+      (btn_checked, tab_btn), so a choice never looks like an action.
+    - State colours mean the same everywhere: a heater active is the accent, on standby the secondary accent, off
+      neutral, and at fault the error colour (heater_*, gauge_*); #success, #warning and #error report outcomes.
+    - Borders are thin and quiet (#border_muted); text is #text, or #text_muted for what is less important.
+
+  How a theme is built, and the values it can use (#name, dpx, lighten(), …): src/UI/Styles/Theme.h
+  Palette colours (#bg, #primary, #text, …) and how they are generated:        src/UI/Styles/Palette.h
+  Style names are the members of LvglStyles and ComponentStyles:               src/UI/Styles/Styles.h
+-->
+<theme name="base" abstract="true">
+	<palette primary_hue="245" secondary_hue="50" chroma="0.02" dark="true" customisable="true"/>
+
+	<fonts>
+		<font name="header" size="18" weight="700" style="bold"/>
+		<!-- A name to read first, a step under a heading: a setting's, a category's -->
+		<font name="title" size="16" weight="500" style="normal"/>
+		<font name="normal" size="14" weight="400" style="normal"/>
+		<font name="emphasis" size="14" weight="700" style="bold"/>
+		<font name="subdued" size="12" weight="400" style="normal"/>
+		<!-- For widgets' text and values: the text widget's sizes, and gauges' readings -->
+		<font name="small" size="12" weight="400" style="normal"/>
+		<font name="large" size="22" weight="600" style="bold"/>
+		<font name="xlarge" size="30" weight="700" style="bold"/>
+		<font name="huge" size="44" weight="700" style="bold"/>
+	</fonts>
+
+	<consts>
+		<const name="border_width" value="1"/>
+		<const name="outline_width" value="2"/>
+		<const name="radius" value="6"/>
+		<const name="pad_large" value="10"/>
+		<const name="pad" value="5"/>
+		<const name="pad_small" value="2"/>
+		<const name="pad_tiny" value="1"/>
+		<const name="shadow_offset" value="3"/>
+		<const name="transition_time" value="80"/>
+		<!-- Size classes of a placed widget's place (see src/UI/Xml/Layout/PlacementScope.h): narrower or shorter
+			 than widget_regular_min is compact, from widget_expanded_min expanded. Pixels, like the fonts they
+			 follow: a theme with larger fonts raises them. -->
+		<const name="widget_regular_min" value="180"/>
+		<const name="widget_expanded_min" value="400"/>
+		<!-- The gap the screen leaves between widgets it places in a free layout, and which a dragged widget snaps to
+			 (see src/UI/Xml/Layout/Geometry.h) -->
+		<const name="widget_gap" value="5"/>
+		<!-- How data is coloured where colour shows a value, e.g. a heightmap: `colour` (blue to red) or `grey` (dark to
+			 light). A graph's lines take the palette's series colours (#series_1, …). -->
+		<const name="data_colours" value="colour"/>
+	</consts>
+
+	<styles>
+		<!-- Backgrounds -->
+		<style name="bg_dark" bg_color="#bg_dark" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg" bg_color="#bg" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_light" bg_color="#bg_light" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_primary" bg_color="#primary" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_primary_muted" bg_color="#primary_muted" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_secondary" bg_color="#secondary" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_secondary_muted" bg_color="#secondary_muted" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_success" bg_color="#success" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_warning" bg_color="#warning" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_error" bg_color="#error" bg_opa="100%" bg_grad_dir="none"/>
+		<style name="bg_color_header" bg_color="#bg_light" bg_opa="100%"/>
+		<style name="bg_color_list_item" bg_color="#bg" bg_opa="100%" bg_grad_color="#bg_light"/>
+
+		<!-- Dialogs: one card over a dimmed backdrop (components/dialogs/dialog_host.xml). The backdrop's padding is the
+			 room the card keeps from the edges; the header holds the back button, the titles and the close button. A
+			 step's own buttons go in its <ds_dialog_footer>, a dialog_footer row kept under the body, right-aligned, its
+			 main one last with action_btn. -->
+		<style name="dialog_backdrop" bg_color="#bg_dark" bg_opa="75%" pad_all="#pad_large"/>
+		<style name="dialog" pad_all="0" pad_row="0" clip_corner="true" border_color="#border" shadow_width="32"
+			   shadow_spread="2" shadow_offset_y="6" shadow_color="0x000000" shadow_opa="40%"/>
+		<style name="dialog_header" bg_color="#bg_light" bg_opa="100%" pad_ver="8" pad_left="14" pad_right="8"
+			   pad_column="10"/>
+		<style name="dialog_title" text_color="#text_header" text_font="font_header"/>
+		<style name="dialog_from" text_color="#text_muted" text_font="font_subdued"/>
+		<style name="dialog_icon_button" width="40" height="40" pad_all="8"/>
+		<style name="dialog_body" pad_hor="14" pad_ver="12"/>
+		<style name="dialog_footer" width="100%" height="content" layout="flex" flex_flow="row" flex_main_place="end"
+			   pad_hor="14" pad_top="0" pad_bottom="12" pad_column="8"/>
+		<style name="dialog_button" min_width="120" min_height="40" pad_hor="16"/>
+		<!-- A list in a dialog reads as rows, a rule under each, rather than as a stack of buttons -->
+		<style name="dialog_row" min_height="44" pad_hor="4" pad_ver="4" pad_column="10" radius="0" bg_opa="0"
+			   border_side="bottom" border_width="1" border_color="#border_muted" border_opa="100%"/>
+		<style name="dialog_row_chosen" text_color="#primary"/>
+
+		<!-- Settings: a page (setting_page) of groups (ds_setting_group: setting_section, its title over its box) of
+			 rows (ds_setting). A group's background shows in the gaps between its rows, as the rules between them. A
+			 row is tall enough to tap anywhere on, a shade lighter than the page. -->
+		<style name="setting_page" pad_all="16" pad_row="16"/>
+		<style name="setting_section" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
+			   pad_row="6" bg_opa="0" border_width="0"/>
+		<style name="setting_group" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
+			   pad_row="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
+		<style name="setting_group_title" text_color="#text_muted" text_font="font_emphasis" text_letter_space="1"
+			   pad_left="4"/>
+		<!-- A group whose actions can't be undone: edged, and ruled, in the error colour -->
+		<style name="setting_group_danger" bg_color="#error" border_color="#error"/>
+		<!-- Rows listed in a group's box (a ds_list): ruled as the box's own rows are -->
+		<style name="setting_list" width="100%" height="content" layout="flex" flex_flow="column" pad_all="0"
+			   pad_row="#border_width" bg_opa="0" border_width="0"/>
+		<style name="setting_row" width="100%" min_height="56" pad_hor="14" pad_ver="8" pad_column="16" radius="0"
+			   bg_color="lighten(#bg, 0.025)" bg_opa="100%" border_width="0"/>
+		<!-- A row where room is short, such as on the dashboard: lower and less padded -->
+		<style name="setting_row_compact" min_height="40" pad_hor="10" pad_ver="4"/>
+		<style name="setting_title" text_color="#text" text_font="font_title"/>
+		<style name="setting_hint" text_color="#text_muted" text_font="font_subdued"/>
+		<!-- A word after a row's title saying what sort of setting it is, e.g. "Advanced": a small tag -->
+		<style name="setting_badge" text_color="#text_muted" text_font="font_small" text_letter_space="1" pad_hor="6"
+			   pad_ver="1" radius="#radius" border_color="#border" border_width="#border_width" border_opa="100%"/>
+		<!-- A word saying what state a row is in: a small pill, plain ("Cancelled") or tinted and edged in the accent, as
+			 a chosen option is, for the state that matters now ("In use", "Now") -->
+		<style name="chip" text_color="#text_muted" text_font="font_small" radius="circle" pad_hor="10" pad_ver="2"
+			   border_color="#border" border_width="#border_width" border_opa="100%"/>
+		<style name="chip_accent" text_color="#text" bg_color="#primary_muted" bg_opa="100%" border_width="0"
+			   outline_color="#primary" outline_width="1" outline_opa="100%" outline_pad="-1"/>
+		<!-- A row's button: big enough to tap -->
+		<style name="setting_control" min_height="40" min_width="64" pad_hor="12"/>
+		<!-- A row's choice, or its way into more (a page, a dialog): the value, if any, and a chevron, plain on the row,
+			 which is tapped to open it -->
+		<style name="setting_value" min_height="40" pad_hor="4" pad_column="8" bg_opa="0" border_width="0"
+			   shadow_width="0" outline_width="0" text_color="#text_muted"/>
+		<!-- A row's several controls, side by side at its end, onto more lines when short of room: e.g. a row of a list
+			 that edits its item. Taps on the row between them do nothing. -->
+		<style name="setting_controls" width="70%" height="content" layout="flex" flex_flow="row_wrap"
+			   flex_main_place="end" flex_cross_place="center" flex_track_place="end" pad_all="0" pad_row="8"
+			   pad_column="8" bg_opa="0" border_width="0"/>
+		<!-- One of a few options: buttons joined in a box, the chosen one checked -->
+		<style name="setting_options" width="content" height="content" layout="flex" flex_flow="row" pad_all="0"
+			   pad_column="#border_width" bg_color="#border_muted" bg_opa="100%" radius="#radius" clip_corner="true"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
+		<style name="setting_option" min_height="40" min_width="64" pad_hor="14" radius="0" border_width="0"
+			   shadow_width="0"/>
+
+		<!-- The number pad: what is typed, large, in a box edged in the accent, over keys a size apart; the keys that
+			 edit rather than type are a step darker -->
+		<style name="numpad" pad_row="8" pad_column="8"/>
+		<style name="numpad_readout" bg_color="#bg_dark" bg_opa="100%" border_color="#primary" border_width="1"
+			   border_opa="100%" radius="#radius" pad_hor="12" pad_ver="6" pad_column="12"/>
+		<style name="numpad_value" text_color="#text" text_font="font_xlarge"/>
+		<style name="numpad_unit" text_color="#text_muted" text_font="font_large" pad_left="6"/>
+		<style name="numpad_key" text_font="font_large" pad_all="0"/>
+		<style name="numpad_key_side" bg_color="#bg"/>
+
+		<!-- Text -->
+		<style name="text" text_color="#text" text_font="font_normal"/>
+		<style name="text_muted" text_color="#text_muted" text_font="font_subdued"/>
+		<style name="text_emphasis" text_color="#text" text_font="font_emphasis"/>
+		<style name="text_header" text_color="#text_header" text_font="font_header"/>
+		<style name="text_warning" text_color="#error" text_font="font_emphasis"/>
+		<style name="line_space_large" text_line_space="20dpx"/>
+		<style name="text_align_center" text_align="center"/>
+
+		<!-- Borders -->
+		<style name="border" border_color="#border" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_muted" border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_highlight" border_color="#highlight" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_color_primary" border_color="#primary" border_width="#border_width" border_opa="100%" border_side="full"/>
+		<style name="border_color_secondary" border_color="#secondary" border_width="#border_width" border_opa="100%" border_side="full"/>
+
+		<!-- Outlines -->
+		<style name="outline_primary" outline_color="#primary" outline_width="#outline_width" outline_pad="#outline_width" outline_opa="50%"/>
+		<style name="outline_secondary" outline_color="#secondary" outline_width="#outline_width" outline_opa="50%"/>
+
+		<!-- Scrollbar -->
+		<style name="scrollbar" bg_color="#border" border_width="0" radius="circle" pad_all="7dpx" width="4dpx"
+			   bg_opa="50%"/>
+		<style name="scrollbar_scrolled" bg_opa="100%"/>
+
+		<!-- Base, applied to every widget -->
+		<style name="base" bg_opa="0" border_post="true"/>
+
+		<style name="screen" bg_color="#bg_dark" bg_opa="100%"/>
+
+		<style name="card" radius="#radius" pad_all="#pad" pad_row="#pad_small" pad_column="#pad_small"
+			   bg_opa="100%" bg_color="#bg"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"/>
+
+		<!-- Buttons: a neutral control, edged so it shows on a light card -->
+		<style name="btn" radius="#radius" bg_opa="100%" bg_color="#bg_light" text_color="#text"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%" border_side="full"
+			   min_width="25" min_height="25"/>
+		<!-- Checked (a chosen option, the open page): tinted, and edged in the accent by an outline drawn inside the
+			 edge, which (unlike a border) takes no layout space, so a content-sized button doesn't grow when checked -->
+		<style name="btn_checked" bg_color="#primary_muted" bg_opa="100%" bg_grad_dir="none" outline_color="#primary"
+			   outline_width="#outline_width" outline_pad="-#outline_width" outline_opa="100%"/>
+		<!-- Acts on the machine: filled with the accent -->
+		<style name="action_btn" bg_opa="100%" bg_color="#primary" border_color="#primary"/>
+		<!-- Can't be undone, such as erasing every setting: filled with the error colour -->
+		<style name="danger_btn" bg_opa="100%" bg_color="#error" border_color="#error"/>
+		<!-- Drastic but undoable, such as cancelling an object: edged and lettered in the error colour -->
+		<style name="danger_outline_btn" border_color="#error" border_width="2" border_opa="100%" text_color="#error"/>
+
+		<!-- Icons -->
+		<style name="icon_recolor" recolor="#text" recolor_opa="100%"/>
+
+		<!-- Modifiers -->
+		<style name="pressed" recolor="0x000000" recolor_opa="35"/>
+		<style name="disabled" recolor="#bg" recolor_opa="50%"/>
+		<style name="clip_corner" clip_corner="true" border_post="true"/>
+
+		<!-- Padding -->
+		<style name="pad_large" pad_all="#pad_large" pad_row="#pad_large" pad_column="#pad_large"/>
+		<style name="pad_normal" pad_all="#pad" pad_row="#pad" pad_column="#pad"/>
+		<style name="pad_small" pad_all="#pad_small" pad_gap="#pad_small"/>
+		<style name="pad_gap" pad_row="10dpx" pad_column="10dpx"/>
+		<style name="pad_base" pad_all="#pad" pad_row="#pad" pad_column="#pad"/>
+		<style name="pad_zero" pad_all="0" pad_row="0" pad_column="0"/>
+		<style name="pad_tiny" pad_all="#pad_tiny" pad_row="#pad_tiny" pad_column="#pad_tiny"/>
+
+		<style name="circle" radius="circle"/>
+		<style name="no_radius" radius="0"/>
+		<style name="no_border" border_width="0"/>
+
+		<!-- dpi / 4 * 256 at LVGL's 130 dpi -->
+		<style name="rotary_scroll" rotary_sensitivity="8192"/>
+
+		<style name="grow" transform_width="3dpx" transform_height="3dpx"/>
+		<style name="knob" bg_color="#primary" bg_opa="100%" pad_all="6dpx" radius="circle"/>
+		<style name="anim" anim_duration="200"/>
+		<style name="anim_fast" anim_duration="120"/>
+		<style name="input" border_color="#border" border_width="1" pad_hor="20" pad_ver="0" text_align="center"/>
+
+		<!-- Drag to E-stop -->
+		<style name="draggable" transition_props="transform_width transform_height" transition_duration="200ms"
+			   transition_easing="ease_in_out" transition_delay="100ms"/>
+		<!-- The dragging style animates outline_width, the property drag_complete changes. (The C++ theme this
+			 replaces also defined a transform/border transition for it, which was immediately overwritten.) -->
+		<style name="dragging" transform_width="20" transform_height="20" border_color="0xffffff" border_opa="30%"
+			   border_width="20" transition_props="outline_width" transition_duration="#transition_time"
+			   transition_easing="ease_in_out"/>
+		<style name="drag_complete" outline_color="0xffffff" outline_width="3"/>
+
+		<!-- Arc -->
+		<style name="arc_indic" arc_color="#highlight" arc_width="12dpx" arc_rounded="true"/>
+		<style name="arc_indic_primary" arc_color="#primary"/>
+
+		<!-- Bar -->
+		<style name="bar" bg_color="#highlight" bg_opa="100%" radius="circle"/>
+		<style name="bar_indic" radius="circle" text_color="#text"/>
+
+		<!-- Button matrix -->
+		<style name="btnm_btn" bg_color="#bg_light" bg_grad_dir="none" merge="border_muted" shadow_width="0" radius="#radius"/>
+		<style name="btnm_btn_checked" bg_color="#primary" bg_opa="100%" text_color="#text"/>
+
+		<!-- Dropdown; the list's height is two inches at LVGL's 130 dpi -->
+		<style name="dropdown" pad_ver="#pad"/>
+		<style name="dropdown_list" max_height="260"/>
+
+		<!-- Checkbox -->
+		<style name="cb_marker" pad_all="3dpx" border_width="2" border_color="#primary" bg_color="#bg"
+			   bg_opa="100%" radius="3"/>
+		<style name="cb_marker_checked" bg_image_src="symbol_ok"/>
+
+		<!-- Switch -->
+		<style name="bg_switch" bg_color="#highlight" bg_opa="100%" radius="circle"/>
+		<!-- The knob is white, edged and with a shadow to lift it off a light track -->
+		<style name="switch_knob" pad_all="-4dpx" bg_color="0xffffff" radius="circle" shadow_width="4" shadow_offset_y="1"
+			   shadow_color="0x000000" shadow_opa="30%" border_color="#border" border_width="#border_width"
+			   border_opa="100%"/>
+
+		<!-- Line -->
+		<style name="line" line_width="1" line_color="#highlight"/>
+
+		<!-- Chart -->
+		<style name="chart_bg" border_width="#border_width" border_color="#border_muted" border_opa="100%"
+			   border_post="false" pad_column="10dpx" line_color="#highlight" line_opa="60%"/>
+		<style name="chart_series" line_width="3dpx" radius="3dpx" width="8dpx" height="8dpx" pad_column="2dpx"/>
+		<style name="chart_indic" radius="circle" width="8dpx" height="8dpx" bg_color="#primary" bg_opa="100%"/>
+
+		<!-- Menu -->
+		<style name="menu_bg" pad_all="0" pad_gap="0" radius="0" clip_corner="true" border_side="none"/>
+		<style name="menu_section" radius="#radius" clip_corner="true" bg_opa="100%" bg_color="#bg" text_color="#text"/>
+		<style name="menu_cont" pad_hor="#pad_small" pad_ver="#pad_small" pad_gap="#pad_small" border_width="1dpx"
+			   border_opa="10%" border_color="#text" border_side="none"/>
+		<style name="menu_sidebar_cont" pad_all="0" pad_gap="0" border_width="1dpx" border_opa="10%"
+			   border_color="#text" border_side="right"/>
+		<style name="menu_main_cont" pad_all="0" pad_gap="0"/>
+		<style name="menu_header_cont" pad_hor="#pad_small" pad_ver="#pad_tiny" pad_gap="#pad_small"/>
+		<style name="menu_header_btn" pad_hor="#pad_tiny" pad_ver="#pad_tiny" shadow_opa="0" bg_opa="0" text_color="#text"/>
+		<style name="menu_page" pad_hor="0" pad_gap="0"/>
+		<style name="menu_pressed" bg_opa="20%" bg_color="#bg_light"/>
+		<style name="menu_separator" bg_opa="0" pad_ver="#pad_tiny"/>
+
+		<!-- Table -->
+		<style name="table" radius="0"/>
+		<style name="table_cell" bg_color="#bg" bg_opa="100%" text_color="#text" border_width="1dpx"
+			   border_color="#border_muted" border_side="top|bottom"/>
+
+		<!-- Text area -->
+		<style name="text_area" pad_all="#pad"/>
+		<style name="ta_cursor" border_color="#text" border_width="2dpx" pad_left="-1dpx" border_side="left" anim_duration="400"/>
+		<style name="ta_placeholder" text_color="#text_muted"/>
+
+		<!-- Calendar -->
+		<style name="calendar_btnm_bg" pad_all="#pad_small" pad_gap="1"/>
+		<style name="calendar_btnm_day" border_width="1dpx" border_color="#highlight" bg_color="#bg" bg_opa="20%"/>
+		<style name="calendar_header" pad_hor="#pad_small" pad_top="#pad_small" pad_bottom="#pad_tiny" pad_gap="#pad_small"/>
+
+		<!-- Canvas -->
+		<style name="canvas" merge="bg border"/>
+
+		<!-- Keyboard -->
+		<style name="keyboard_button" bg_color="#bg_light" merge="border_muted" shadow_width="0" radius="#radius"/>
+		<style name="keyboard_button_checked_bg" bg_color="#primary" bg_opa="100%" text_color="#text"/>
+
+		<!-- Tabs: the selected one (as a checked button, tinted) is underlined in the accent, instead of edged -->
+		<style name="tab_btn" border_color="#primary" border_width="3" border_side="bottom" outline_width="0"/>
+		<!-- Tabs down a side (ds_tabs side="left"): a panel of their own; each flat until it is the one selected, which
+		is checked (btn_checked) -->
+		<style name="tab_button" merge="tab_btn"/>
+		<style name="tab_bar_side" bg_color="#bg" bg_opa="100%" radius="#radius" pad_all="8" pad_row="4"
+			   border_color="#border_muted" border_width="#border_width" border_opa="100%"/>
+		<style name="tab_button_top" merge="text_header" width="15%" height="100%" min_width="content" min_height="content"/>
+		<style name="tab_button_side" width="100%" height="content" min_width="content" min_height="52" pad_hor="12" pad_ver="8" pad_column="12" bg_opa="0"
+			   border_width="0" shadow_width="0" text_color="#text" text_font="font_title"/>
+		<style name="tab_bg_focus" outline_pad="-#border_width"/>
+
+		<!-- List -->
+		<style name="list_bg" pad_hor="#pad" pad_ver="0" pad_gap="0" clip_corner="true"/>
+		<style name="list_btn" border_width="1" border_color="#border_muted" border_side="bottom" pad_all="#pad_small"
+			   pad_column="#pad_small"/>
+		<style name="list_item_grow" transform_width="#pad"/>
+
+		<!-- LED -->
+		<style name="led" bg_opa="100%" bg_color="0xffffff" bg_grad_color="#bg_dark" radius="circle"
+			   shadow_width="15dpx" shadow_color="0xffffff" shadow_spread="5dpx"/>
+
+		<!-- Scale -->
+		<style name="scale" line_color="#text" line_width="2dpx" arc_color="#text" arc_width="2dpx" length="6dpx"/>
+
+		<!-- Slider -->
+		<style name="slider" height="16" bg_color="#highlight" bg_opa="100%" radius="circle"/>
+		<style name="slider_indic" bg_color="#primary" radius="circle"/>
+		<style name="slider_knob" radius="circle" bg_color="0xffffff" border_color="#primary" border_width="3"/>
+
+		<!-- DuetScreen components -->
+		<style name="console_btn_anim" recolor="#secondary"/>
+
+		<!-- Console: a line is its time, then its text. Every line has an edge on the left, so their text lines up;
+			 it shows on a line that reports an outcome, in its colour (#success, #warning, #error), and warnings and
+			 errors are tinted too, so they stand out in a long log -->
+		<style name="console_line" bg_opa="0" radius="0" border_side="left" border_width="3" border_opa="0"
+			   shadow_width="0" outline_width="0" pad_left="5" pad_right="#pad" pad_ver="#pad_small"
+			   pad_column="#pad_large"/>
+		<style name="console_line_command" text_font="font_emphasis"/>
+		<style name="console_line_success" border_side="left" border_width="3" border_color="#success"
+			   border_opa="100%"/>
+		<style name="console_line_warning" border_side="left" border_width="3" border_color="#warning"
+			   border_opa="100%" bg_color="#warning" bg_opa="12%"/>
+		<style name="console_line_error" border_side="left" border_width="3" border_color="#error" border_opa="100%"
+			   bg_color="#error" bg_opa="15%"/>
+		<style name="console_time" text_color="#text_muted" text_font="font_subdued" pad_top="1"/>
+
+		<!-- E-stop: LVGL's palette red -->
+		<style name="estop" bg_color="0xf44336" text_color="0xffffff" radius="circle"/>
+
+		<!-- Files are neutral items; a folder is edged in the accent, with its icon in the accent too, and so is each
+			 folder in the path above them (file_crumb), which is tapped to go back to it -->
+		<style name="file" merge="btn bg_light border"/>
+		<style name="folder" copy="btn" border_color="#primary" border_width="#border_width" border_opa="100%"
+			   border_side="full"/>
+		<style name="folder_icon" recolor="#primary" recolor_opa="100%"/>
+		<style name="file_crumb" bg_color="#bg" bg_opa="100%" border_color="#primary" border_width="#border_width"
+			   border_opa="100%" border_side="full" pad_all="#pad"/>
+		<!-- The open folder, last in the path: plain text, as tall as a folder before it, so the path stays one height
+			 whether or not there are folders to go back to -->
+		<style name="file_crumb_current" pad_all="#pad" border_width="#border_width" border_opa="0" border_side="full"/>
+
+		<!-- An axis that isn't homed: in the secondary accent, which no action uses, so it stands out among the move
+			 buttons -->
+		<style name="unhomed" bg_color="#secondary" border_color="#secondary"/>
+		<!-- An axis' position as a tile, as the Move tab and the axes widget show them. One that isn't homed is
+			 outlined in the unhomed colour, inside its edge so it doesn't move, and says so -->
+		<style name="axis_tile" bg_color="#bg_light" bg_opa="100%" radius="#radius" border_color="#border_muted"
+			   border_width="#border_width" border_opa="100%" pad_hor="#pad_large" pad_ver="#pad" pad_row="#pad_small"/>
+		<style name="axis_tile_unhomed" outline_color="#secondary" outline_width="#outline_width"
+			   outline_pad="-#outline_width" outline_opa="100%"/>
+		<style name="axis_tile_letter" text_color="#text_muted" text_font="font_emphasis"/>
+		<style name="axis_tile_not_homed" text_color="#secondary" text_font="font_small"/>
+		<!-- A value read at a glance, such as an axis' position or a heater's temperature -->
+		<style name="reading" text_color="#text" text_font="font_large"/>
+		<!-- The one value a panel is about, such as how fast a spindle turns -->
+		<style name="reading_large" text_color="#text" text_font="font_xlarge"/>
+		<!-- The jog step, in the middle of the XY pad -->
+		<style name="jog_step" bg_opa="0" border_color="#border_muted" border_width="#border_width"
+			   border_opa="100%" radius="#radius" text_color="#text_muted" text_font="font_subdued"/>
+
+		<!-- Blue to red (LVGL's palette) -->
+		<style name="temperature_bar" bg_opa="100%" bg_color="0x2196f3" bg_grad_color="0xf44336" bg_grad_dir="hor"/>
+		<style name="temperature_bar_indic" bg_color="#border" bg_opa="100%"/>
+
+		<style name="tool_list_tool" copy="card"/>
+		<style name="tool_list_heater" pad_all="0"/>
+		<!-- A tool's tile on the dashboard: a small card whose left edge says its state, coloured as a heater's is -->
+		<style name="tool_tile" bg_color="#bg_light" bg_opa="100%" radius="#radius" pad_all="#pad" pad_row="2"
+			   border_width="4" border_side="left" border_color="#border_muted" border_opa="100%"/>
+		<style name="tool_tile_active" border_color="#primary"/>
+		<style name="tool_tile_standby" border_color="#secondary"/>
+		<style name="tool_tile_fault" border_color="#error"/>
+		<style name="tool_selected" border_color="#primary" outline_color="#primary" outline_opa="100%"
+			   outline_width="1" outline_pad="0"/>
+
+		<!-- A heater's state button (an action button, so the accent while active) in its other states -->
+		<style name="heater_standby" bg_color="#secondary" border_color="#secondary"/>
+		<style name="heater_off" bg_color="#bg_light" border_color="#border_muted" text_color="#text"/>
+		<style name="heater_fault" bg_color="#error" border_color="#error"/>
+
+		<style name="list_title" merge="text_emphasis"/>
+
+		<!-- A list shown a page at a time (ds_list flow="pages"): a dot per item below it, the shown item's in the
+			 accent. A dot's height must be in pixels: the list works out from it how much room the dots take. -->
+		<style name="list_pages" pad_top="#pad" pad_column="#pad"/>
+		<style name="list_page_dot" width="8" height="8" radius="circle" bg_color="#border_muted" bg_opa="100%"/>
+		<style name="list_page_dot_current" bg_color="#primary"/>
+
+		<style name="slider_buttons" width="40" height="40"/>
+
+		<!-- Graph legend, beside the plot: an entry per series, a neutral button (it shows and hides the series) with
+			 the series' colour key, its name and its latest value. While the series is hidden its key is hollow and
+			 its text muted. The key's colour is the series' (#series_1, #series_2, …). -->
+		<style name="graph_legend" width="30%" min_width="130" max_width="220" pad_all="0" pad_row="#pad"/>
+		<style name="graph_legend_item" pad_all="#pad" pad_column="#pad" text_color="#text_muted"/>
+		<style name="graph_legend_item_shown" text_color="#text"/>
+		<style name="graph_legend_swatch" width="12" height="12" radius="3" border_width="2" border_opa="100%"
+			   bg_opa="0"/>
+		<style name="graph_legend_swatch_shown" bg_opa="100%"/>
+		<style name="graph_legend_value" text_font="font_emphasis"/>
+
+		<!-- A bar's value: on its own background beside a short indicator (bar_label_bg, bar_label), or on the indicator in
+			 the text colour the indicator has (bar_indic) -->
+		<style name="bar_label_bg" bg_color="#bg" bg_opa="80%" radius="#radius" pad_hor="#pad"/>
+		<style name="bar_label" text_color="#text"/>
+
+		<!-- A job's objects on the bed: still to print in the button colour, the one being printed in the accent, and a
+			 cancelled one hollow and crossed out (not red: red means a fault). The one chosen to cancel or resume is
+			 outlined in the text colour. -->
+		<style name="object_shape" bg_color="#bg_light" bg_opa="100%" border_color="#border" border_width="1"
+			   border_opa="100%" radius="3"/>
+		<style name="object_shape_now" bg_color="#primary" border_color="#primary"/>
+		<style name="object_shape_cancelled" bg_opa="0" border_color="#border_muted"/>
+		<!-- The X (a ds_cross) on a cancelled object, inset from its edges -->
+		<style name="object_cross" line_color="#text_muted" line_width="2" line_opa="100%" line_rounded="true"
+			   pad_all="4"/>
+		<style name="object_shape_chosen" outline_color="#text" outline_width="2" outline_opa="100%" outline_pad="1"/>
+		<style name="object_name_cancelled" text_color="#text_muted" text_decor="strikethrough"/>
+
+		<!-- Placed widgets (assets/ui/widgets): each is a card, headed by its title, its main value large and
+			 anything else in the detail style. The value is larger in a regular widget (widget_value_large) and
+			 larger still in an expanded one (widget_value_huge): see PlacementScope.h. -->
+		<style name="widget_title" text_color="#text_muted" text_font="font_emphasis"/>
+		<style name="widget_value" text_color="#text" text_font="font_large"/>
+		<style name="widget_value_large" text_font="font_xlarge"/>
+		<style name="widget_value_huge" text_font="font_huge"/>
+		<style name="widget_detail" text_color="#text_muted" text_font="font_small"/>
+
+		<!-- Gauges: a track, the target filled in muted colour and the value over it. The value's colour says the
+			 heater's state: primary when active, secondary on standby (its target muted secondary), muted when off,
+			 error on a fault. -->
+		<style name="gauge_arc" arc_color="#bg_light" arc_width="10dpx" arc_rounded="true" bg_opa="0" pad_all="0"/>
+		<style name="gauge_arc_indic" arc_color="#primary" arc_width="10dpx" arc_rounded="true"/>
+		<style name="gauge_arc_target" arc_color="#primary_muted"/>
+		<style name="gauge_bar" bg_color="#bg_light" bg_opa="100%" radius="#radius" pad_all="0"/>
+		<style name="gauge_bar_indic" bg_color="#primary" bg_opa="100%" radius="#radius"/>
+		<style name="gauge_bar_target" bg_color="#primary_muted"/>
+		<style name="gauge_standby" arc_color="#secondary" bg_color="#secondary"/>
+		<style name="gauge_standby_target" arc_color="#secondary_muted" bg_color="#secondary_muted"/>
+		<style name="gauge_off" arc_color="#text_muted" bg_color="#text_muted"/>
+		<style name="gauge_fault" arc_color="#error" bg_color="#error"/>
+
+		<!-- Customising the screen: in the accent, which stands out from any widget, light or dark. Each widget is
+			 tinted and edged, the selected one more strongly, with solid handles; snap guides are in the text colour,
+			 which contrasts with everything, the handles too. -->
+		<style name="customise_frame" bg_color="#primary" bg_opa="12%" radius="#radius" border_color="#primary"
+			   border_opa="60%" border_width="#border_width" border_side="full"/>
+		<style name="customise_frame_selected" bg_opa="22%" border_opa="100%" border_width="2"/>
+		<style name="customise_handle" bg_color="#primary" bg_opa="100%" radius="0" pad_all="0" border_width="0"/>
+		<style name="customise_guide" bg_color="#text" bg_opa="100%" radius="0" border_width="0" pad_all="0"/>
+		<style name="customise_place" bg_color="#primary" bg_opa="25%" radius="#radius" border_color="#primary"
+			   border_width="2" border_opa="100%" border_side="full"/>
+
+		<style name="debug_borders" outline_color="#text" outline_width="1" outline_opa="100%"/>
+	</styles>
+</theme>

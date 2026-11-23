@@ -1,0 +1,29 @@
+<!--
+  A gauge for each row of a list of heater numbers, as the beds (om.heat.bedHeaters), the chambers
+  (om.heat.chamberHeaters) and a tool's heaters (om.tools[n].heaters) are, or with `key`, the rows whose key is
+  `match`: the heater's temperature heading for its target. A slot without a heater (-1) isn't shown. Tap it to set
+  the target. gauge_beds.xml, gauge_chambers.xml and gauge_tool.xml say which list and how it is named.
+
+  Props:    list   the list of heater numbers      title  each gauge's title (a name, in the row)
+            key, match, look, flow, grow, portrait  as gauge_list.xml
+  Fields:   rows holding a heater's number         Actions: actions.heater.set_target
+-->
+<component>
+	<api>
+		<prop name="list" type="string" default="om.heat.bedHeaters"/>
+		<prop name="title" type="string" default="''"/>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+	</api>
+
+	<view extends="gauge_list" list="$list" key="$key" match="$match" look="$look" flow="$flow" grow="$grow" portrait="$portrait"
+		  shown="row.value|int ge 0" title="$title" value="om.heat.heaters[{row.value}].current|int"
+		  text="om.heat.heaters[{row.value}].current|fixed:1" unit="'°C'"
+		  min="om.heat.heaters[{row.value}].min|atleast:0" max="om.heat.heaters[{row.value}].max|int"
+		  target="om.heat.heaters[{row.value}]|heater_target" detail="om.heat.heaters[{row.value}]|heater_detail"
+		  state="om.heat.heaters[{row.value}].state" tap_action="actions.heater.set_target"/>
+</component>

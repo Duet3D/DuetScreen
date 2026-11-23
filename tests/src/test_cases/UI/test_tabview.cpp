@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/Containers/TabView.h"
+#include "UI/Widgets/Layout/TabView.h"
 #include "test_utils/UiTestSuite.h"
 #include <gtest/gtest.h>
 
@@ -436,6 +436,31 @@ TEST_F(TestTabview, TabBarLeft)
 	tab2.addStyle(bg_blue);
 
 	EXPECT_EQUAL_SCREENSHOT("tabview/bar_left.png");
+}
+
+TEST_F(TestTabview, TabBarLeftMaxWidth)
+{
+	TabView tv("tv", screen);
+	tv.setSize(LV_PCT(100), LV_PCT(100));
+	tv.setTabBarPosition(LV_DIR_LEFT);
+	tv.setTabMaxWidth(200);
+	auto& tab0 = tv.addTab("Tab 1");
+	auto& tab1 = tv.addTab("Tab 2 - a name far too long for the bar");
+	auto& tab2 = tv.addTab("Tab 3");
+	EXPECT_TRUE(tv.setTabIcon(0, "settings_general.png"));
+	EXPECT_TRUE(tv.setTabIcon(1, "settings_display.png"));
+
+	tab0.addStyle(bg_red);
+	tab1.addStyle(bg_green);
+	tab2.addStyle(bg_blue);
+	lv_obj_update_layout(screen.getRootPtr());
+
+	// Every tab, the one with the long title included, keeps within the limit, its title cut short
+	for (size_t i = 0; i < tv.getTabCount(); i++)
+	{
+		EXPECT_LE(tv.getTabButton(i)->getWidth(), 200);
+	}
+	EXPECT_EQUAL_SCREENSHOT("tabview/bar_left_max_width.png");
 }
 
 TEST_F(TestTabview, TabBarRight)

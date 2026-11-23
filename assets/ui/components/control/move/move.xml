@@ -1,0 +1,85 @@
+<!--
+  The Move tab. On the left: every axis' position (tap one to move to a position), X and Y on a pad, Z in a column,
+  and one more column for any other axis (chosen beside it, if there are two or more), then the jog step and speed, and whether positions are the
+  workplace's or the machine's (G53). On the right: homing; the Z offset on a printer, or work zero on a CNC; and the
+  speed factor, which scales jogging too.
+
+  Data:     source.axes.* (src/UI/Xml/Data/AxesSource.h), source.jog.* (src/UI/Xml/Data/JogSource.h),
+            source.machine.connected, om.state.machineMode
+  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h); the pieces' own
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="row" scrollable="false">
+		<style name="bg_dark"/>
+
+		<lv_obj name="jog_card" height="100%" flex_grow="1" flex_flow="column" scrollable="false">
+			<style name="card"/>
+			<bind_state_if_eq subject="source.machine.connected" state="disabled" ref_value="0"/>
+
+			<move_positions name="positions" width="100%"/>
+
+			<!-- X and Y on a pad, Z in a column, then any other axes. The pad narrows (to 168 at least) before
+				 anything scrolls, so every axis' column fits beside it; the spacers centre them while there is room
+				 over. On a narrow screen they take no room, so the row starts at its left and scrolls sideways -->
+			<lv_obj name="jog" width="100%" flex_grow="1" flex_flow="row" scroll_dir="hor"
+					style_flex_cross_place="center" style_flex_track_place="center">
+				<style name="pad_zero"/>
+				<style name="pad_gap"/>
+
+				<flex_pad grow="1"/>
+
+				<!-- As wide and tall as there is room for, at most 300: it takes the room before the spacers do -->
+				<move_xy name="xy_control" width="1" flex_grow="20" height="100%" style_min_width="168"
+						 style_max_width="300" style_max_height="300"/>
+				<move_axis name="z_control" letter="'Z'" axis="source.axes.z" plus="Z+" minus="Z-"
+						   style_max_height="300"/>
+				<flex_pad>
+					<bind_flag_if_eq subject="source.axes.others_shown" flag="hidden" ref_value="0"/>
+				</flex_pad>
+				<!-- Any other axes: the one chosen beside it is jogged, so there is never more than one more column; with
+					 only one, there is nothing to choose -->
+				<lv_obj name="others" width="content" height="100%" style_max_height="300" flex_flow="row"
+						scrollable="false">
+					<style name="pad_zero"/>
+					<style name="pad_gap"/>
+					<bind_flag_if_eq subject="source.axes.others_shown" flag="hidden" ref_value="0"/>
+					<ds_list name="choices" list="source.axes.others" item="move_axis_choice" width="content"
+							 height="100%" flex_flow="column_wrap" style_pad_all="0" style_pad_row="#pad"
+							 style_pad_column="#pad" scrollable="false">
+						<bind_flag_if_eq subject="source.axes.others_choice_shown" flag="hidden" ref_value="0"/>
+					</ds_list>
+					<!-- A gap twice the usual between the choices and the column they jog -->
+					<flex_pad grow="0">
+						<bind_flag_if_eq subject="source.axes.others_choice_shown" flag="hidden" ref_value="0"/>
+					</flex_pad>
+					<move_axis name="other_control" letter="source.axes.other.letter"
+							   axis="source.axes.other" plus="other+" minus="other-"/>
+				</lv_obj>
+
+				<flex_pad grow="1"/>
+			</lv_obj>
+
+			<move_jog_choices name="jog_choices" width="100%"/>
+			<move_coordinates name="coordinates" width="100%"/>
+		</lv_obj>
+
+		<lv_obj name="side" width="30%" height="100%" flex_flow="column" scroll_dir="ver">
+			<style name="card"/>
+			<style name="pad_gap"/>
+			<move_homing name="homing"/>
+			<!-- A printer's Z offset; a CNC's work zero -->
+			<ds_setting_group name="z_offset" title_tag="tr.move.z_offset" width="100%">
+				<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="1"/>
+				<lv_obj name="row" height="content" scrollable="false">
+					<style name="setting_row"/>
+					<babystep name="babystep" hide_title="true" width="100%" height="content"/>
+				</lv_obj>
+			</ds_setting_group>
+			<move_work_zero name="work_zero">
+				<bind_flag_if_eq subject="om.state.machineMode|eq:CNC" flag="hidden" ref_value="0"/>
+			</move_work_zero>
+			<flex_pad/>
+			<move_overrides name="overrides"/>
+		</lv_obj>
+	</view>
+</component>

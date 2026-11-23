@@ -1,0 +1,29 @@
+{
+  "component": "status_bar_button",
+  "title_tag": "tr.widget.gcode_button",
+  "description_tag": "tr.widget.status_gcode_desc",
+  "category_tag": "tr.widget.category_commands",
+  "icon": "send.png",
+  "slots": [
+    "status_bar"
+  ],
+  "props": {
+    "tap_action": "actions.gcode.send"
+  },
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_label",
+      "default": "G28",
+      "max_length": 32
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_gcode",
+      "default": "G28",
+      "max_length": 120
+    }
+  ]
+}

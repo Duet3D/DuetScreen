@@ -1,0 +1,23 @@
+<!--
+  A yes or no question: its text, then a button that doesn't agree and one that does (the main one). Code asks it
+  with Prompts::askQuestion() (src/UI/Xml/Dialogs/Prompts.h); the question's title is the step's.
+
+  Fields and actions: src/UI/Xml/Dialogs/PromptPresenters.h (QuestionPrompt)
+-->
+<component presenter="dialog_question">
+	<view extends="lv_obj" width="400" height="content" flex_flow="column" scrollable="false">
+		<style name="pad_zero"/>
+		<lv_label name="text" bind_text="presenter.text" width="100%" long_mode="wrap"/>
+		<ds_dialog_footer name="footer">
+			<ds_button name="no" bind_text="presenter.no">
+				<style name="dialog_button"/>
+				<action trigger="clicked" name="presenter.question.no"/>
+			</ds_button>
+			<ds_button name="yes" bind_text="presenter.yes">
+				<style name="dialog_button"/>
+				<style name="action_btn"/>
+				<action trigger="clicked" name="presenter.question.yes"/>
+			</ds_button>
+		</ds_dialog_footer>
+	</view>
+</component>

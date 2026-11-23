@@ -1,0 +1,571 @@
+/*
+ * NotificationsPresenter.cpp
+ */
+
+#include "NotificationsPresenter.h"
+#include "Debug.h"
+#include "UI/Core/Model.h"
+#include "UI/Core/Navigation.h"
+#include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Runtime/Services.h"
+#include "i18n/i18n.h"
+#include "utils/StorageHelper.h"
+#include "version.h"
+#include <algorithm>
+#include <climits>
+#include <cmath>
+#include <cstdlib>
+#include <regex>
+
+namespace UI
+{
+	namespace
+	{
+		constexpr uint32_t TICK_MS = 50; // How often the countdowns are shown
+
+		/** A control's state, as published */
+		enum Control : int32_t
+		{
+			Hidden = 0,
+			Disabled = 1,
+			Usable = 2
+		};
+
+		/** The title of a response of `type` */
+		std::string responseTitle(ResponseType type)
+		{
+			switch (type)
+			{
+			case ResponseType::SUCCESS:
+				return _("msgbox.response_success");
+			case ResponseType::WARNING:
+				return _("msgbox.response_warning");
+			case ResponseType::ERROR:
+				return _("msgbox.response_error");
+			case ResponseType::INFO:
+			default:
+				return _("msgbox.response_info");
+			}
+		}
+	} // namespace
+
+	void AlertChoiceRow::fields(Xml::FieldVisitor& f)
+	{
+		f.field("text", text, "The choice");
+	}
+
+	void AlertAxisRow::fields(Xml::FieldVisitor& f)
+	{
+		f.field("label", label, "Axis and position, e.g. \"X = 0.00\"");
+		f.field("homed", homed, "1 if the axis can be jogged");
+	}
+
+	NotificationsPresenter::NotificationsPresenter()
+		: XmlPresenter("notifications")
+		, m_alertPad(*this, "alert.pad")
+	{
+		// OK only for a number within the alert's limits
+		m_alertPad.setOnChange([this] { m_alertOk.set(m_alertPad.confirmable() ? Usable : Disabled); });
+		m_timer = lv_timer_create(tickCb, TICK_MS, this);
+		lv_timer_pause(m_timer);
+
+		action("response.close",
+			   "Close the response showing and show the next",
+			   [this](const Xml::ActionArgs&) { closeResponse(); });
+		action("response.open_console",
+			   "Forget every response and open the console",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_responses.clear();
+				   m_responseOpen.set(0);
+				   openScreen("console");
+			   });
+
+		action("update.confirm",
+			   "Install the update offered (nothing when a result is showing), and close",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   m_updateOpen.set(0);
+				   if (m_install)
+				   {
+					   m_install();
+				   }
+			   });
+		action("alert.ok",
+			   "Answer the alert with OK (M292), with the value typed if one was asked for, and close it; nothing "
+			   "while OK can't be used (what is typed isn't valid), e.g. from the keyboard's OK key",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   if (m_alertOk.get() != Usable)
+				   {
+					   return;
+				   }
+				   const uint32_t seq = m_alert.seq;
+				   switch (m_alert.mode)
+				   {
+				   case OM::Alert::Mode::NumberInt:
+					   Xml::Services::sendGcode(fmt::format(
+						   "M292 R{{{:d}}} S{:d}", static_cast<int32_t>(std::lround(m_alertPad.value())), seq));
+					   break;
+				   case OM::Alert::Mode::NumberFloat:
+					   Xml::Services::sendGcode(fmt::format("M292 R{{{:g}}} S{:d}", m_alertPad.value(), seq));
+					   break;
+				   case OM::Alert::Mode::Text:
+				   {
+					   // Quotes are doubled inside a G-code string
+					   std::string text = std::regex_replace(m_input, std::regex("\""), "\"\"");
+					   text = std::regex_replace(text, std::regex("'"), "''");
+					   Xml::Services::sendGcode(fmt::format("M292 R{{\"{:s}\"}} S{:d}", text, seq));
+					   break;
+				   }
+				   default:
+					   Xml::Services::sendGcode(fmt::format("M292 S{:d}", seq));
+					   break;
+				   }
+				   closeAlert();
+			   });
+		action("alert.cancel",
+			   "Answer the alert with Cancel (M292 P1) if it can be cancelled, and close it",
+			   [this](const Xml::ActionArgs&)
+			   {
+				   if (m_cancelSends)
+				   {
+					   Xml::Services::sendGcode(fmt::format("M292 P1 S{:d}", m_alert.seq));
+				   }
+				   closeAlert();
+			   });
+		action("alert.choose",
+			   "Answer the alert with the choice, and close it. From a row of `alert.choices`.",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   if (const auto* row = args.row<AlertChoiceRow>())
+				   {
+					   Xml::Services::sendGcode(fmt::format("M292 R{{{:d}}} S{:d}", row->index.get(), m_alert.seq));
+				   }
+				   closeAlert();
+			   });
+		action("alert.jog",
+			   "Move the axis by the edited value, or else `arg`, in mm. From a row of `alert.axes`.",
+			   [](const Xml::ActionArgs& args)
+			   {
+				   const auto* row = args.row<AlertAxisRow>();
+				   const auto distance = args.value();
+				   if (row == nullptr || !distance)
+				   {
+					   return;
+				   }
+				   Xml::Services::sendGcode(fmt::format("M120\nG91\nG1 {:c}{:g} F300\nM121", row->letter, *distance));
+			   });
+		action("alert.input",
+			   "The text edited (`value_changed` on its text box): keep it, and set `alert.warning` and `alert.ok`",
+			   [this](const Xml::ActionArgs& args)
+			   {
+				   // Kept in the subject too, so the next alert's text replaces it
+				   m_alertInput.set(args.text());
+				   validateInput(args.text());
+			   });
+		action("alert.dismissed",
+			   "Close the alert without an answer, e.g. on `dismissed` from its `<ds_dialog>`",
+			   [this](const Xml::ActionArgs&) { closeAlert(); });
+	}
+
+	NotificationsPresenter::~NotificationsPresenter()
+	{
+		if (m_timer != nullptr && lv_is_initialized())
+		{
+			lv_timer_delete(m_timer);
+		}
+	}
+
+	void NotificationsPresenter::fields(Xml::FieldVisitor& f)
+	{
+		f.field("response.open", m_responseOpen, "1 while a response is showing");
+		f.field("response.title", m_responseTitle, "\"Info\", \"Success\", \"Warning\" or \"Error\"");
+		f.field("response.text", m_responseText, "The response");
+		f.field("response.type", m_responseType, "0 info, 1 success, 2 warning, 3 error");
+		f.field("response.progress", m_responseProgress, "Time left before it closes itself, 0-100");
+
+		f.field("update.open", m_updateOpen, "1 while an update is offered or its result shown");
+		f.field("update.title", m_updateTitle, "Title");
+		f.field("update.text", m_updateText, "Text");
+		f.field("update.ok_text", m_updateOkText, "OK button text");
+		f.field("update.can_cancel", m_updateCanCancel, "1 if the update can be declined");
+
+		f.field("alert.open", m_alertOpen, "1 while an M291 alert is showing");
+		f.field("alert.title", m_alertTitle, "Title");
+		f.field("alert.text", m_alertText, "Text");
+		f.field("alert.ok", m_alertOk, "The OK button: 0 hidden, 1 disabled (the input isn't valid), 2 usable");
+		f.field("alert.ok_text", m_alertOkText, "\"Ok\", or \"Close\" for a message that only needs closing");
+		f.field("alert.cancel", m_alertCancel, "The Cancel button: 0 hidden, 2 usable");
+		f.field("alert.footer_shown", m_alertFooterShown, "1 if there is an OK or Cancel button");
+		f.list("alert.choices", m_alertChoices, "The choices offered, each with `text`");
+		f.field("alert.choices_shown", m_alertChoicesShown, "1 if choices are offered");
+		f.list("alert.axes", m_alertAxes, "The axes the user may jog, each with `label` and `homed`");
+		f.field("alert.axes_shown", m_alertAxesShown, "1 if there are axes to jog");
+		f.field("alert.text_shown", m_alertTextShown, "1 if text is asked for, typed on the keyboard");
+		f.field("alert.input", m_alertInput, "The text to start with");
+		f.field("alert.pad_shown", m_alertPadShown, "1 if a number is asked for, typed on the pad (`alert.pad`)");
+		m_alertPad.fields(f);
+		f.field("alert.warning", m_alertWarning, "The length the text must be, while it isn't; empty once it is");
+		f.field("alert.progress", m_alertProgress, "Time left before the alert closes itself, 0-100");
+		f.field("alert.progress_shown", m_alertProgressShown, "1 if the alert closes itself");
+	}
+
+	void NotificationsPresenter::onInit()
+	{
+		registerEventListener<EventType::Response>(this, &NotificationsPresenter::newResponse);
+		m_alertWatch = Xml::OmWatch({"state.messageBox"}, [this] { messageBoxChanged(); });
+		m_axesWatch = Xml::OmWatch({"move.axes"}, [this] { updateAlertAxes(); });
+		registerEventListener<EventType::UpdateAvailable>(this, &NotificationsPresenter::newUpdateAvailable);
+		registerEventListener<EventType::GithubUpdateAvailable>(this,
+																&NotificationsPresenter::newGithubUpdateAvailable);
+		registerEventListener<EventType::UpdateResult>(this, &NotificationsPresenter::handleUpdateResult);
+		registerEventListener<EventType::UsbDrive>(
+			[this](const std::string& path, bool mounted)
+			{
+				// The update offered was on the drive just removed
+				if (!mounted && !m_updateFile.empty() && m_updateFile.starts_with(path))
+				{
+					m_updateFile.clear();
+					m_updateOpen.set(0);
+				}
+			});
+	}
+
+	void NotificationsPresenter::onActivate()
+	{
+		updateAlertAxes();
+	}
+
+	void NotificationsPresenter::onDisconnect()
+	{
+		UI_LOCK();
+		m_responses.clear();
+		m_responseOpen.set(0);
+		m_alertAxes.clear();
+	}
+
+	void NotificationsPresenter::newResponse(const ResponseType type, const std::string& response)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		// The console shows responses itself
+		if (response.empty() || getCurrentScreenName() == "console" ||
+			type < StorageHelper::getData(ID_NOTIFICATION_LEVEL))
+		{
+			return;
+		}
+
+		m_responses.push_back({type, response});
+		if (m_responses.size() == 1)
+		{
+			showFirstResponse();
+		}
+	}
+
+	void NotificationsPresenter::showFirstResponse()
+	{
+		if (m_responses.empty() || m_alertOpen.get() != 0)
+		{
+			m_responseOpen.set(0);
+			return;
+		}
+
+		const Response& response = m_responses.front();
+		m_responseTitle.set(responseTitle(response.type));
+		m_responseText.set(response.text);
+		m_responseType.set(static_cast<int32_t>(response.type));
+
+		// Errors stay until closed, unless the user wants those to close themselves too
+		const bool closes =
+			response.type != ResponseType::ERROR || StorageHelper::getData(ID_NOTIFICATION_AUTO_CLOSE_ERROR);
+		const auto timeout = StorageHelper::getData(ID_NOTIFICATION_TIMEOUT);
+		m_responseCountdown = {.start = lv_tick_get(), .duration = closes ? static_cast<uint32_t>(timeout.count()) : 0};
+		m_responseProgress.set(remaining(m_responseCountdown));
+		m_responseOpen.set(1);
+		lv_timer_resume(m_timer);
+	}
+
+	void NotificationsPresenter::closeResponse()
+	{
+		if (!m_responses.empty())
+		{
+			m_responses.pop_front();
+		}
+		m_responseCountdown = {};
+		m_responseOpen.set(0);
+		showFirstResponse();
+	}
+
+	void NotificationsPresenter::newAlertData(const OM::Alert& alert)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (alert.mode == OM::Alert::Mode::None)
+		{
+			if (m_alertOpen.get() != 0)
+			{
+				closeAlert();
+			}
+			return;
+		}
+
+		using Mode = OM::Alert::Mode;
+		m_alert = alert;
+		m_alertTitle.set(alert.title.c_str());
+		m_alertText.set(alert.text.c_str());
+
+		// Buttons
+		const bool input = alert.mode == Mode::NumberInt || alert.mode == Mode::NumberFloat || alert.mode == Mode::Text;
+		// Every message can be acknowledged, even one the printer sends without buttons (Info)
+		const bool ok = alert.mode == Mode::Info || alert.mode == Mode::InfoClose || alert.mode == Mode::InfoConfirm ||
+						alert.mode == Mode::ConfirmCancel || input;
+		m_alertOkText.set(alert.mode == Mode::InfoClose ? _("common.close") : _("common.ok"));
+		m_alertOk.set(ok ? Usable : Hidden);
+		m_cancelSends = alert.cancelButton;
+		m_alertCancel.set(alert.mode == Mode::ConfirmCancel || alert.cancelButton ? Usable : Hidden);
+		m_alertFooterShown.set(m_alertOk.get() != Hidden || m_alertCancel.get() != Hidden ? 1 : 0);
+
+		// Choices
+		m_alertChoices.sync(alert.mode == Mode::Choices ? alert.choices_count : 0,
+							[&](AlertChoiceRow& row, size_t i) { row.text.set(alert.choices[i].c_str()); });
+		m_alertChoicesShown.set(alert.mode == Mode::Choices ? 1 : 0);
+
+		// A number to type on the pad, or text on the keyboard
+		m_alertWarning.set("");
+		m_alertPadShown.set(alert.mode == Mode::NumberInt || alert.mode == Mode::NumberFloat ? 1 : 0);
+		m_alertTextShown.set(alert.mode == Mode::Text ? 1 : 0);
+		switch (alert.mode)
+		{
+		case Mode::NumberInt:
+		{
+			const auto& limits = alert.limits.numberInt;
+			m_alertPad.askNumber(static_cast<float>(limits.min),
+								 static_cast<float>(limits.max),
+								 static_cast<float>(limits.valueDefault),
+								 true);
+			break;
+		}
+		case Mode::NumberFloat:
+		{
+			const auto& limits = alert.limits.numberFloat;
+			m_alertPad.askNumber(limits.min, limits.max, limits.valueDefault);
+			break;
+		}
+		case Mode::Text:
+		{
+			const std::string value = alert.limits.text.valueDefault.c_str();
+			m_alertInput.set(value);
+			validateInput(value);
+			break;
+		}
+		default:
+			break;
+		}
+
+		// Axes to jog
+		std::vector<char> letters;
+		if (alert.flags.IsBitSet(OM::Alert::GotControls))
+		{
+			MODEL_LOCK();
+			const OM::Node& axes = Xml::PrinterModel::root()["move"]["axes"];
+			for (size_t i = 0; i < MAX_TOTAL_AXES && i < axes.size(); ++i)
+			{
+				const std::string_view letter = axes[i]["letter"].text();
+				if ((alert.controls & (1u << i)) != 0 && !letter.empty())
+				{
+					letters.push_back(letter.front());
+				}
+			}
+		}
+		m_alertAxes.sync(letters.size(), [&](AlertAxisRow& row, size_t i) { row.letter = letters[i]; });
+		m_alertAxesShown.set(letters.empty() ? 0 : 1);
+		updateAlertAxes();
+
+		// A countdown, if it closes itself
+		m_alertCountdown = {.start = lv_tick_get(), .duration = static_cast<uint32_t>(alert.timeout.count())};
+		m_alertProgress.set(remaining(m_alertCountdown));
+		m_alertProgressShown.set(m_alertCountdown.duration > 0 ? 1 : 0);
+		if (m_alertCountdown.duration > 0)
+		{
+			lv_timer_resume(m_timer);
+		}
+
+		// Responses wait until the alert is answered
+		m_responseOpen.set(0);
+		m_alertOpen.set(1);
+	}
+
+	void NotificationsPresenter::closeAlert()
+	{
+		m_alertCountdown = {};
+		m_alertOpen.set(0);
+		showFirstResponse();
+	}
+
+	void NotificationsPresenter::validateInput(std::string_view text)
+	{
+		m_input = text;
+		const auto& limits = m_alert.limits.text;
+		const auto length = static_cast<int32_t>(m_input.length());
+		const bool valid = length >= limits.min && length <= limits.max;
+		// What it takes, while it isn't met: a limit of 0 or INT32_MAX is none
+		const bool hasMin = limits.min > 0;
+		const bool hasMax = limits.max < INT32_MAX;
+		std::string needed;
+		if (!valid)
+		{
+			needed = hasMin && hasMax ? _("msgbox.text_length_range", limits.min, limits.max)
+					 : hasMin		  ? _("msgbox.text_length_min", limits.min)
+									  : _("msgbox.text_length_max", limits.max);
+		}
+		m_alertWarning.set(needed);
+		m_alertOk.set(valid ? Usable : Disabled);
+	}
+
+	void NotificationsPresenter::messageBoxChanged()
+	{
+		OM::Alert alert;
+		{
+			MODEL_LOCK();
+			alert = OM::Alert::fromObjectModel(Xml::PrinterModel::root()["state"]["messageBox"]);
+		}
+		// No box closes the alert; a box is a new alert only when its sequence number changes, as other fields of
+		// the same box (e.g. axis positions) come and go
+		if (alert.mode == OM::Alert::Mode::None)
+		{
+			m_lastAlertSeq.reset();
+			newAlertData(alert);
+			return;
+		}
+		if (m_lastAlertSeq == alert.seq)
+		{
+			return;
+		}
+		m_lastAlertSeq = alert.seq;
+		newAlertData(alert);
+	}
+
+	void NotificationsPresenter::updateAlertAxes()
+	{
+		for (size_t i = 0; i < m_alertAxes.size(); i++)
+		{
+			AlertAxisRow& row = m_alertAxes[i];
+			MODEL_LOCK();
+			if (const OM::Node& axis = Xml::PrinterModel::axis(row.letter); axis.exists())
+			{
+				row.label.set(
+					fmt::format("{:c} = {:.2f}", row.letter, static_cast<float>(axis["userPosition"].number())));
+				row.homed.set(axis["homed"].boolean() ? 1 : 0);
+			}
+		}
+	}
+
+	void NotificationsPresenter::offerUpdate(std::string text, std::function<void()> install)
+	{
+		m_updateTitle.set(_("message.update_available"));
+		m_updateText.set(text);
+		m_updateOkText.set(_("message.update_confirm"));
+		m_updateCanCancel.set(1);
+		m_install = std::move(install);
+		m_updateOpen.set(1);
+	}
+
+	void NotificationsPresenter::newUpdateAvailable(const std::string& file)
+	{
+		m_updateFile = file;
+		offerUpdate(_("message.update_available_text"),
+					[this]()
+					{
+						UpgradeHelper::installFromUsb(m_updateFile,
+													  [](const std::string& why)
+													  {
+														  Model::get().post<EventType::Response>(
+															  ResponseType::ERROR,
+															  _("message.update_install_failed", why));
+													  });
+					});
+	}
+
+	void NotificationsPresenter::newGithubUpdateAvailable(const std::string& latestVersion)
+	{
+		offerUpdate(_("message.update_available_github_text", latestVersion, FIRMWARE_VERSION),
+					[]() { UpgradeHelper::upgradeFromGithubLatest(); });
+	}
+
+	void NotificationsPresenter::handleUpdateResult(const UpgradeHelper::UpgradeInfo& info)
+	{
+		ZoneScoped;
+		switch (info.result)
+		{
+		case UpgradeHelper::UpgradeResult::Success:
+			m_updateTitle.set(_("message.update_successful"));
+			m_updateText.set(_("message.update_successful_text", info.currentVersion, info.currentBuildrootVersion));
+			break;
+		case UpgradeHelper::UpgradeResult::BuildrootVersionError:
+			m_updateTitle.set(_("message.update_failed"));
+			m_updateText.set(
+				_("message.update_buildroot_error_text", info.currentBuildrootVersion, info.updateBuildrootVersion));
+			break;
+		case UpgradeHelper::UpgradeResult::BuildrootVersionWarning:
+			m_updateTitle.set(_("message.update_buildroot_warning"));
+			m_updateText.set(_("message.update_buildroot_warning_text",
+							   info.currentVersion,
+							   info.currentBuildrootVersion,
+							   info.updateBuildrootVersion));
+			break;
+		}
+		m_updateOkText.set(_("common.ok"));
+		m_updateCanCancel.set(0);
+		m_install = nullptr;
+		m_updateOpen.set(1);
+	}
+
+	void NotificationsPresenter::tickCb(lv_timer_t* timer)
+	{
+		UI_LOCK();
+		auto& self = *static_cast<NotificationsPresenter*>(lv_timer_get_user_data(timer));
+
+		if (self.m_responseOpen.get() != 0 && self.m_responseCountdown.duration > 0)
+		{
+			self.m_responseProgress.set(remaining(self.m_responseCountdown));
+			if (self.m_responseProgress.get() == 0)
+			{
+				self.closeResponse();
+			}
+		}
+		if (self.m_alertOpen.get() != 0 && self.m_alertCountdown.duration > 0)
+		{
+			self.m_alertProgress.set(remaining(self.m_alertCountdown));
+			if (self.m_alertProgress.get() == 0)
+			{
+				// As if cancelled
+				if (self.m_cancelSends)
+				{
+					Xml::Services::sendGcode(fmt::format("M292 P1 S{:d}", self.m_alert.seq));
+				}
+				self.closeAlert();
+			}
+		}
+
+		// Nothing counting down: rest until something is
+		const bool responseCounting = self.m_responseOpen.get() != 0 && self.m_responseCountdown.duration > 0;
+		const bool alertCounting = self.m_alertOpen.get() != 0 && self.m_alertCountdown.duration > 0;
+		if (!responseCounting && !alertCounting)
+		{
+			lv_timer_pause(timer);
+		}
+	}
+
+	int32_t NotificationsPresenter::remaining(const Countdown& countdown)
+	{
+		if (countdown.duration == 0)
+		{
+			return 0;
+		}
+		const uint32_t elapsed = lv_tick_elaps(countdown.start);
+		return elapsed >= countdown.duration
+				   ? 0
+				   : static_cast<int32_t>(100 * (countdown.duration - elapsed) / countdown.duration);
+	}
+} // namespace UI

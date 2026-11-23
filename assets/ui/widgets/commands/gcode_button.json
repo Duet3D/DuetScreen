@@ -1,0 +1,39 @@
+{
+  "component": "dashboard_button",
+  "title_tag": "tr.widget.gcode_button",
+  "description_tag": "tr.widget.gcode_button_desc",
+  "category_tag": "tr.widget.category_commands",
+  "icon": "send.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      180,
+      89
+    ],
+    "min": [
+      88,
+      89
+    ]
+  },
+  "props": {
+    "tap_action": "actions.gcode.send"
+  },
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_label",
+      "default": "Home",
+      "max_length": 32
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_gcode",
+      "default": "G28",
+      "max_length": 120
+    }
+  ]
+}

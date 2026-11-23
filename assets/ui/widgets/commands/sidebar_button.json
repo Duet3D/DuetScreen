@@ -1,0 +1,125 @@
+{
+  "component": "sidebar_button",
+  "title_tag": "tr.widget.button",
+  "description_tag": "tr.widget.sidebar_button_desc",
+  "category_tag": "tr.widget.category_commands",
+  "icon": "button.png",
+  "slots": [
+    "sidebar"
+  ],
+  "settings": [
+    {
+      "name": "label",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_label",
+      "default": "Babystep",
+      "max_length": 32
+    },
+    {
+      "name": "icon",
+      "kind": "choice",
+      "title_tag": "tr.widget.setting_icon",
+      "default": "babystep.png",
+      "options": [
+        {
+          "value": "send.png",
+          "title": "send"
+        },
+        {
+          "value": "home_axis.png",
+          "title": "home axes"
+        },
+        {
+          "value": "macros.png",
+          "title": "macros"
+        },
+        {
+          "value": "move.png",
+          "title": "move"
+        },
+        {
+          "value": "extrude.png",
+          "title": "extrude"
+        },
+        {
+          "value": "retract.png",
+          "title": "retract"
+        },
+        {
+          "value": "temperature.png",
+          "title": "temperature"
+        },
+        {
+          "value": "bed.png",
+          "title": "bed"
+        },
+        {
+          "value": "tools.png",
+          "title": "tools"
+        },
+        {
+          "value": "fan.png",
+          "title": "fan"
+        },
+        {
+          "value": "heightmap.png",
+          "title": "bed mesh"
+        },
+        {
+          "value": "babystep.png",
+          "title": "babystep"
+        },
+        {
+          "value": "disable_motors.png",
+          "title": "motors off"
+        },
+        {
+          "value": "pause.png",
+          "title": "pause"
+        },
+        {
+          "value": "resume.png",
+          "title": "resume"
+        },
+        {
+          "value": "cancel.png",
+          "title": "cancel"
+        },
+        {
+          "value": "print_again.png",
+          "title": "print again"
+        },
+        {
+          "value": "info.png",
+          "title": "info"
+        }
+      ]
+    },
+    {
+      "name": "tap_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_tap",
+      "default": "actions.babystep.open"
+    },
+    {
+      "name": "tap_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_tap_arg",
+      "default": "",
+      "max_length": 120
+    },
+    {
+      "name": "hold_action",
+      "kind": "action",
+      "title_tag": "tr.widget.setting_hold",
+      "default": ""
+    },
+    {
+      "name": "hold_arg",
+      "kind": "text",
+      "title_tag": "tr.widget.setting_hold_arg",
+      "default": "",
+      "max_length": 120
+    }
+  ]
+}

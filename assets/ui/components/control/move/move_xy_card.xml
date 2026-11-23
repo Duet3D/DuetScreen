@@ -1,0 +1,15 @@
+<!--
+  X and Y on a pad, in a card: the `jog_xy` widget (widgets/motion/jog_xy.json). It jogs by the distance and speed
+  chosen in any view (the global source.jog.*), and asks before homing as the Move tab does.
+
+  Data:     source.axes.* (src/UI/Xml/Data/AxesSource.h), source.machine.connected
+  Actions:  actions.move.* (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="card"/>
+		<style name="pad_zero"/>
+		<bind_state_if_eq subject="source.machine.connected" state="disabled" ref_value="0"/>
+		<move_xy name="xy_control" width="100%" height="100%"/>
+	</view>
+</component>

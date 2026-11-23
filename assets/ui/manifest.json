@@ -1,0 +1,19 @@
+{
+  /* The built-in UI. User bundles in the user UI folder can replace any component or theme here by giving it the
+     same name. See src/UI/Xml/Runtime/Bundles.h.
+
+     components/ has a folder for each part of the UI, holding its page (named after the part) and the pieces only it
+     uses (named <part>_<piece>), the way src/UI/Presenters/ holds their presenters; common/ holds small pieces used in
+     several parts. See "Naming" in docs/XML_UI.md.
+
+     widgets/ holds the widgets the user can place, a file each, grouped by what they are for; layouts/ holds the layout
+     of each slot (a <ds_layout>). See "Layouts and widgets" in docs/XML_UI.md. */
+  "id": "duetscreen",
+  "name": "DuetScreen",
+  "version": "1.0.0",
+  "ui_api": "1.0",
+  "components": ["components/**/*.xml"],
+  "themes": ["themes/*.xml"],
+  "widgets": ["widgets/**/*.json"],
+  "layouts": ["layouts/*.json"]
+}

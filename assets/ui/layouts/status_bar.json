@@ -1,0 +1,7 @@
+/* The status bar's buttons, between the state and the temperatures: none until the user adds some. */
+{
+  "format": 1,
+  "slot": "status_bar",
+  "kind": "strip",
+  "items": []
+}

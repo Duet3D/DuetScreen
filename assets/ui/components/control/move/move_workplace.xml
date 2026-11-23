@@ -1,0 +1,22 @@
+<!--
+  Choosing a CNC's workplace, in the work zero group's grid (move_work_zero.xml): a button, checked while the workplace
+  is in use. Give it its name, e.g. text="G54".
+
+      <move_workplace name="g54" text="G54" number="1" column="0" row="0"/>
+
+  Props:    number  the workplace's number, 1 (G54) to 6 (G59); om.move.workplaceNumber counts from 0
+            column, row  its cell in the grid
+  Actions:  actions.move.workplace (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<api>
+		<prop name="number" type="int" default="1"/>
+		<prop name="column" type="int" default="0"/>
+		<prop name="row" type="int" default="0"/>
+	</api>
+	<view extends="ds_button" height="content" style_min_height="40" style_grid_cell_column_pos="$column"
+		  style_grid_cell_x_align="stretch" style_grid_cell_row_pos="$row" style_grid_cell_y_align="stretch">
+		<bind_state_if cond="om.move.workplaceNumber|int eq ${number} - 1" state="checked"/>
+		<action trigger="clicked" name="actions.move.workplace" arg="$number"/>
+	</view>
+</component>

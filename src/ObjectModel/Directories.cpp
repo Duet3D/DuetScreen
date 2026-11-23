@@ -7,109 +7,55 @@
 
 #include "Directories.h"
 #include "Debug.h"
+#include "LockWrapper.h"
+#include "Tree/Tree.h"
+#include <mutex>
 
 namespace OM::Directories
 {
-	static std::string s_filaments;
-	static std::string s_firmware;
-	static std::string s_gcodes;
-	static std::string s_macros;
-	static std::string s_menu;
-	static std::string s_system;
-	static std::string s_web;
-
-	static std::string s_emptyStr = "";
-
-	std::string_view GetDirectory(DirectoryType type)
+	std::string GetDirectory(DirectoryType type)
 	{
+		const char* field = nullptr;
 		switch (type)
 		{
 		case DirectoryType::FILAMENTS:
-			return GetFilamentsDirectory();
+			field = "filaments";
+			break;
 		case DirectoryType::FIRMWARE:
-			return GetFirmwareDirectory();
+			field = "firmware";
+			break;
 		case DirectoryType::GCODES:
-			return GetGcodesDirectory();
+			field = "gCodes";
+			break;
 		case DirectoryType::MACROS:
-			return GetMacrosDirectory();
+			field = "macros";
+			break;
 		case DirectoryType::MENU:
-			return GetMenuDirectory();
+			field = "menu";
+			break;
 		case DirectoryType::SYSTEM:
-			return GetSystemDirectory();
+			field = "system";
+			break;
 		case DirectoryType::WEB:
-			return GetWebDirectory();
-		default:
-			LOG_ERROR("Invalid directory type");
-			return s_emptyStr;
+			field = "web";
+			break;
 		}
+		if (field == nullptr)
+		{
+			LOG_ERROR("Invalid directory type");
+			return "";
+		}
+		std::lock_guard lock(mutexModel);
+		return std::string(Tree::get().root()["directories"][field].text());
 	}
 
-	std::string_view GetFilamentsDirectory()
+	std::string GetGcodesDirectory()
 	{
-		return s_filaments;
-	}
-	std::string_view GetFirmwareDirectory()
-	{
-		return s_firmware;
-	}
-	std::string_view GetGcodesDirectory()
-	{
-		return s_gcodes;
-	}
-	std::string_view GetMacrosDirectory()
-	{
-		return s_macros;
-	}
-	std::string_view GetMenuDirectory()
-	{
-		return s_menu;
-	}
-	std::string_view GetSystemDirectory()
-	{
-		return s_system;
-	}
-	std::string_view GetWebDirectory()
-	{
-		return s_web;
+		return GetDirectory(DirectoryType::GCODES);
 	}
 
-	void SetFilamentsDirectory(std::string_view dir)
+	std::string GetSystemDirectory()
 	{
-		s_filaments = dir;
-	}
-	void SetFirmwareDirectory(std::string_view dir)
-	{
-		s_firmware = std::string(dir);
-	}
-	void SetGcodesDirectory(std::string_view dir)
-	{
-		s_gcodes = std::string(dir);
-	}
-	void SetMacrosDirectory(std::string_view dir)
-	{
-		s_macros = std::string(dir);
-	}
-	void SetMenuDirectory(std::string_view dir)
-	{
-		s_menu = std::string(dir);
-	}
-	void SetSystemDirectory(std::string_view dir)
-	{
-		s_system = std::string(dir);
-	}
-	void SetWebDirectory(std::string_view dir)
-	{
-		s_web = std::string(dir);
-	}
-
-	void Reset()
-	{
-		s_filaments = "0:/filaments/";
-		s_firmware = "0:/firmware/";
-		s_gcodes = "0:/gcodes/";
-		s_macros = "0:/macros/";
-		s_menu = "0:/menu/";
-		s_system = "0:/sys/";
-		s_web = "0:/www/";
+		return GetDirectory(DirectoryType::SYSTEM);
 	}
 } // namespace OM::Directories

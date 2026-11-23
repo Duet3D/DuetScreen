@@ -1,0 +1,12 @@
+<!--
+  A chevron, muted, at the end of something that opens what it is about: a row opening the job's status, a button
+  opening the Files page, a setting's value opening the next step. For a chevron that is itself the button, see
+  chevron_button.xml.
+
+      <chevron name="chevron"/>
+-->
+<component>
+	<view extends="lv_label" text="&#xF054;">
+		<style name="text_muted"/>
+	</view>
+</component>

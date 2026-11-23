@@ -1,0 +1,35 @@
+<!--
+  A bar gauge's bar: the target filled in muted colour under the value, both coloured by `state` (standby, off and
+  fault are). The bar gauge's (gauge_bar.xml), and a heater's thin bar (heater_bar.xml). Give it a size.
+
+      <gauge_track value="row.current|int" max="row.max|int" target="row.value|heater_target" state="row.state"/>
+
+  Props:    value, min, max, target (ints), state  names (or constants) of what it shows; `state` is a heater's
+-->
+<component>
+	<api>
+		<prop name="value" type="string" default="0"/>
+		<prop name="min" type="string" default="0"/>
+		<prop name="max" type="string" default="100"/>
+		<prop name="target" type="string" default="0"/>
+		<prop name="state" type="string" default="''"/>
+	</api>
+	<view extends="lv_obj" scrollable="false" clickable="false">
+		<style name="pad_zero"/>
+		<ds_bar name="target" bind_value="$target" bind_min="$min" bind_max="$max" label_format="" width="100%"
+				height="100%">
+			<style name="gauge_bar"/>
+			<style name="gauge_bar_indic" selector="indicator"/>
+			<style name="gauge_bar_target" selector="indicator"/>
+			<bind_style_if_eq name="gauge_standby_target" subject="$state" ref_value="standby" selector="indicator"/>
+		</ds_bar>
+		<!-- Over the target, with no track of its own -->
+		<ds_bar name="value" bind_value="$value" bind_min="$min" bind_max="$max" label_format="" width="100%"
+				height="100%" style_bg_opa="0">
+			<style name="gauge_bar_indic" selector="indicator"/>
+			<bind_style_if_eq name="gauge_standby" subject="$state" ref_value="standby" selector="indicator"/>
+			<bind_style_if_eq name="gauge_off" subject="$state" ref_value="off" selector="indicator"/>
+			<bind_style_if_eq name="gauge_fault" subject="$state" ref_value="fault" selector="indicator"/>
+		</ds_bar>
+	</view>
+</component>

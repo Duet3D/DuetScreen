@@ -1,0 +1,147 @@
+<!--
+  The simulated Duet's page (Settings > Connection > Simulated Duet, a page of its own, opened in place), in builds that
+  have it (source.system.simulator_shown): the machine as a whole (the preset it starts from, its name, its mode, a
+  status to force), how it behaves as a connection (answering, plugged in, replying late, the noise on its
+  temperatures), a message box to show, then a group for each of its parts, each part a row to edit or remove, and a
+  row to add one. Each change applies at once, and is kept with the settings.
+
+  Data:     source.settings.simulator_* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/SimulatorSettings.cpp)
+            source.simulator.* (src/UI/Xml/Data/SimulatorSource.h): its parts
+  Actions:  actions.settings.set; actions.simulator.* (src/UI/Presenters/Settings/SimulatorActions.h). Numbers are
+            typed on the shared number pad, names on the shared keyboard.
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<style name="setting_page"/>
+
+		<ds_setting_group name="machine" title_tag="tr.simulator.groups.machine">
+			<settings_choice name="preset" title_tag="tr.simulator.preset" hint_tag="tr.simulator.hints.preset"
+							 setting="simulator_preset"/>
+			<ds_setting name="name" title_tag="tr.simulator.name">
+				<ds_textarea name="field" bind_text="source.settings.simulator_name" one_line="true" width="45%"
+							 height="content">
+					<action trigger="ready" name="actions.settings.set" arg="simulator_name"/>
+				</ds_textarea>
+			</ds_setting>
+			<!-- One of a few, in the order of Sim::MachineMode: the chosen one is checked -->
+			<ds_setting name="mode" title_tag="tr.simulator.mode">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<settings_option name="fff" translation_tag="tr.simulator.modes.fff" setting="simulator_mode"
+									 value="0"/>
+					<settings_option name="cnc" translation_tag="tr.simulator.modes.cnc" setting="simulator_mode"
+									 value="1"/>
+					<settings_option name="laser" translation_tag="tr.simulator.modes.laser" setting="simulator_mode"
+									 value="2"/>
+				</lv_obj>
+			</ds_setting>
+			<settings_choice name="status" title_tag="tr.simulator.status" hint_tag="tr.simulator.hints.status"
+							 setting="simulator_status"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="connection" title_tag="tr.simulator.groups.connection">
+			<settings_toggle name="responding" title_tag="tr.simulator.responding"
+							 hint_tag="tr.simulator.hints.responding" setting="simulator_responding"/>
+			<settings_toggle name="plugged_in" title_tag="tr.simulator.plugged_in"
+							 hint_tag="tr.simulator.hints.plugged_in" setting="simulator_plugged_in"/>
+			<ds_setting name="reply_delay" title_tag="tr.simulator.reply_delay">
+				<ds_slider name="slider" label_tag="tr.simulator.reply_delay" label_shown="false" numberpad="true"
+						   min="0" max="5000" increment="50" decimals="0" unit="ms" out_of_range="upper"
+						   bind_value="source.settings.simulator_reply_delay" width="55%" height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="simulator_reply_delay"/>
+				</ds_slider>
+			</ds_setting>
+			<ds_setting name="noise" title_tag="tr.simulator.noise">
+				<ds_slider name="slider" label_tag="tr.simulator.noise" label_shown="false" numberpad="true" min="0"
+						   max="5" increment="0.1" decimals="1" unit="°C" bind_value="source.settings.simulator_noise"
+						   value_scale="10" width="55%" height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="simulator_noise"/>
+				</ds_slider>
+			</ds_setting>
+		</ds_setting_group>
+
+		<ds_setting_group name="messages" title_tag="tr.simulator.groups.messages">
+			<!-- A box of each mode, as M291 S0 to S7 shows -->
+			<ds_setting name="message_box" title_tag="tr.simulator.message_box"
+						hint_tag="tr.simulator.hints.message_box">
+				<lv_obj name="modes">
+					<style name="setting_options"/>
+					<option_button name="mode_0" text="0" action="actions.simulator.message" arg="0"/>
+					<option_button name="mode_1" text="1" action="actions.simulator.message" arg="1"/>
+					<option_button name="mode_2" text="2" action="actions.simulator.message" arg="2"/>
+					<option_button name="mode_3" text="3" action="actions.simulator.message" arg="3"/>
+					<option_button name="mode_4" text="4" action="actions.simulator.message" arg="4"/>
+					<option_button name="mode_5" text="5" action="actions.simulator.message" arg="5"/>
+					<option_button name="mode_6" text="6" action="actions.simulator.message" arg="6"/>
+					<option_button name="mode_7" text="7" action="actions.simulator.message" arg="7"/>
+				</lv_obj>
+			</ds_setting>
+		</ds_setting_group>
+
+		<ds_setting_group name="axes" title_tag="tr.simulator.groups.axes">
+			<ds_list name="list" list="source.simulator.axes" item="settings_simulator_axis">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_axis" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="axes"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="heaters" title_tag="tr.simulator.groups.heaters">
+			<ds_list name="list" list="source.simulator.heaters" item="settings_simulator_heater">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_heater" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="heaters"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="extruders" title_tag="tr.simulator.groups.extruders">
+			<ds_list name="list" list="source.simulator.extruders" item="settings_simulator_extruder">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_extruder" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="extruders"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="tools" title_tag="tr.simulator.groups.tools">
+			<ds_list name="list" list="source.simulator.tools" item="settings_simulator_tool">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_tool" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="tools"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="fans" title_tag="tr.simulator.groups.fans">
+			<ds_list name="list" list="source.simulator.fans" item="settings_simulator_fan">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_fan" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="fans"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="sensors" title_tag="tr.simulator.groups.sensors">
+			<ds_list name="list" list="source.simulator.sensors" item="settings_simulator_sensor">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_sensor" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="sensors"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="spindles" title_tag="tr.simulator.groups.spindles">
+			<ds_list name="list" list="source.simulator.spindles" item="settings_simulator_spindle">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_spindle" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="spindles"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="files" title_tag="tr.simulator.groups.files">
+			<ds_list name="list" list="source.simulator.files" item="settings_simulator_file">
+				<style name="setting_list"/>
+			</ds_list>
+			<settings_button name="add" title_tag="tr.simulator.add_file" label_tag="tr.simulator.add"
+							 action="actions.simulator.add" arg="files"/>
+		</ds_setting_group>
+	</view>
+</component>

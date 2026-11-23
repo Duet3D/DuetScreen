@@ -1,0 +1,19 @@
+<!--
+  One preset of a value selector, an option (option_button.xml) checked while it is the value chosen. Tap to use it;
+  hold to change it. The presets sit side by side, joined, in a value_selector_presets list.
+
+  Fields:   a source.<selector>.choices row: row.text, row.selected (src/UI/Xml/View/ValueSelector.h)
+  Actions:  actions.selector.pick, actions.selector.edit_choice (src/UI/Xml/View/SelectorActions.h)
+-->
+<component>
+	<api>
+		<!-- How the preset is written, e.g. "%s mm" (item.format on the list) -->
+		<prop name="format" type="string" default="%s"/>
+	</api>
+	<!-- At least as wide as its text, not the settings' least width, so a few fit where there is little room -->
+	<view extends="option_button" subject="row.selected" action="actions.selector.pick" bind_text="row.text"
+		  bind_text-fmt="$format" height="content" flex_grow="1" style_min_width="content">
+		<style name="long_press"/>
+		<action trigger="long_pressed" name="actions.selector.edit_choice"/>
+	</view>
+</component>

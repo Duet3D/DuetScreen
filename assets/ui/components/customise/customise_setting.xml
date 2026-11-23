@@ -1,0 +1,30 @@
+<!--
+  One setting of the selected widget, a row of the settings (a ds_setting): its name and its value. Text is typed in
+  place, on the shared keyboard; on or off settings are a switch; tapping the value of any other (marked with a
+  chevron), or the row, opens what changes it as the dialog's next step (a number pad, or a choice of values).
+
+  Fields:   a settings row: row.name, row.title, row.kind, row.control, row.value, row.on (src/UI/Presenters/Customise/CustomisePresenter.h)
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<style name="dialog_row"/>
+		<ds_button name="value" bind_text="row.value" width="50%" long_mode="dots">
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="button"/>
+			<action trigger="clicked" name="presenter.customise.edit_setting"/>
+		</ds_button>
+		<ds_textarea name="text" bind_text="row.value" one_line="true" width="50%">
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="text"/>
+			<action trigger="ready" name="presenter.customise.set_text"/>
+			<action trigger="defocused" name="presenter.customise.set_text"/>
+		</ds_textarea>
+		<!-- A value that opens a step -->
+		<chevron name="chevron">
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="button"/>
+		</chevron>
+		<ds_toggle name="toggle">
+			<bind_flag_if_not_eq subject="row.control" flag="hidden" ref_value="switch"/>
+			<bind_state_if_eq subject="row.on" state="checked" ref_value="1"/>
+			<action trigger="value_changed" name="presenter.customise.toggle_setting"/>
+		</ds_toggle>
+	</view>
+</component>

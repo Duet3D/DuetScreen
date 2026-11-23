@@ -1,0 +1,30 @@
+{
+  "component": "gauge_value",
+  "title_tag": "tr.widget.speed_value",
+  "description_tag": "tr.widget.speed_gauge_desc",
+  "category_tag": "tr.widget.category_motion",
+  "icon": "speed.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      180,
+      89
+    ],
+    "min": [
+      134,
+      89
+    ]
+  },
+  "props": {
+    "frame": "card",
+    "title": "tr.widget.status_speed",
+    "value": "om.move.speedFactor|percent",
+    "text": "om.move.speedFactor|percent",
+    "unit": "'%'",
+    "max": "200",
+    "tap_action": "actions.factors.speed"
+  },
+  "settings": []
+}

@@ -1,0 +1,18 @@
+<!--
+  A small status bar button showing an override (`value`, e.g. source.move.speed_factor) that opens its dialog
+  (`action`, e.g. actions.factors.speed): the `status_speed` and `status_extrusion` widgets.
+-->
+<component>
+	<api>
+		<prop name="value" type="string" default="source.move.speed_factor"/>
+		<prop name="action" type="string" default="actions.factors.speed"/>
+	</api>
+
+	<view extends="lv_obj" width="content" height="content" scrollable="false">
+		<style name="pad_zero"/>
+		<ds_button name="button" bind_text="$value" width="content" height="content">
+			<style name="pad_tiny"/>
+			<action trigger="clicked" name="$action"/>
+		</ds_button>
+	</view>
+</component>

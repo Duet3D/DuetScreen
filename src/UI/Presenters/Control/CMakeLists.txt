@@ -1,0 +1,5 @@
+add_subdirectory(Fans)
+add_subdirectory(Heightmap)
+add_subdirectory(Move)
+add_subdirectory(ObjectCancel)
+add_subdirectory(Temperature)

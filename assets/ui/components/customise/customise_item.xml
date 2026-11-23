@@ -1,0 +1,17 @@
+<!--
+  The edit overlay <ds_layout> puts over each widget of a strip while the user customises the screen: it takes the
+  widget's touches (a tap selects it, a drag moves it along the strip) and shows whether it is selected. `key` is the
+  value customise.selected has while it is (see src/UI/Xml/Data/CustomiseSource.h). The theme draws it
+  (customise_frame, customise_frame_selected).
+-->
+<component>
+	<api>
+		<prop name="key" type="string"/>
+	</api>
+
+	<view extends="lv_obj" scrollable="false">
+		<style name="customise_frame"/>
+		<style name="customise_frame_selected" selector="checked"/>
+		<bind_state_if_eq subject="source.customise.selected" state="checked" ref_value="$key"/>
+	</view>
+</component>

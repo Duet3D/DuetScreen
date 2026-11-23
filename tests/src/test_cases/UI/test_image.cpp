@@ -6,7 +6,7 @@
  */
 
 #include "Debug.h"
-#include "UI/Components/LVGL/LvImage.h"
+#include "UI/Lvgl/LvImage.h"
 #include "UI/Styles/Styles.h"
 #include "test_utils/UiTestSuite.h"
 #include <fstream>

@@ -7,7 +7,11 @@
  */
 
 #include "Reset.h"
+#include "Comm/Connection.h"
 #include "Debug.h"
+#include "UI/Xml/Runtime/XmlUi.h"
+#include "tracy/Tracy.hpp"
+#include "utils/NetworkHelper.h"
 #include "utils/SystemHelper.h"
 
 #include <cstdlib>
@@ -25,6 +29,8 @@ extern "C"
 	 */
 	void Restart() noexcept
 	{
+		ZoneScoped;
+		Comm::Connection::get().stop(); // the port closed properly, everything waiting told
 #if SIMULATION
 		exit(EXIT_SUCCESS);
 #else
@@ -37,16 +43,20 @@ extern "C"
 	 */
 	void Reboot() noexcept
 	{
+		ZoneScoped;
+		Comm::Connection::get().stop(); // the port closed properly, everything waiting told
 #if !SIMULATION
 		reboot(RB_AUTOBOOT);
 #endif
 	}
 
 	/**
-	 * @brief Reset any user customizations and reset the hardware
+	 * @brief Erase every setting, the WiFi networks the screen has joined and the layouts made or saved on it, then
+	 * restart
 	 */
 	void EraseAndRestart() noexcept
 	{
+		ZoneScoped;
 #if SIMULATION
 		if (!std::filesystem::remove("config.json"))
 		{
@@ -58,6 +68,8 @@ extern "C"
 		LOG_ERROR("Failed to remove /etc/duetscreen.json file");
 	}
 #endif
+		NetworkHelper::forgetAllNetworks();
+		UI::Xml::eraseUserLayouts();
 
 		Restart();
 	}

@@ -1,0 +1,20 @@
+{
+  "component": "heightmap",
+  "title_tag": "tr.control.heightmap_tab",
+  "description_tag": "tr.widget.heightmap_desc",
+  "category_tag": "tr.widget.category_motion",
+  "icon": "heightmap.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      642,
+      467
+    ],
+    "min": [
+      550,
+      372
+    ]
+  }
+}

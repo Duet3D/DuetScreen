@@ -1,0 +1,24 @@
+{
+  "component": "card_view",
+  "title_tag": "tr.file.jobs",
+  "description_tag": "tr.widget.jobs_desc",
+  "category_tag": "tr.widget.category_jobs",
+  "icon": "job.png",
+  "slots": [
+    "dashboard"
+  ],
+  "props": {
+    "view": "file_browser",
+    "presenter": "dashboard_jobs"
+  },
+  "size": {
+    "default": [
+      365,
+      372
+    ],
+    "min": [
+      272,
+      184
+    ]
+  }
+}

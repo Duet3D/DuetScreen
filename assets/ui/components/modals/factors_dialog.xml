@@ -1,0 +1,39 @@
+<!--
+  A dialog of percentages, such as the speed factor or each extruder's extrusion factor (factors_row.xml): each with
+  a slider, its value (tap it to type it on a number pad, the dialog's next step) and quick values. The extrusion
+  dialog, opened for a tool that doesn't use every extruder, can show that tool's or every extruder's.
+
+      <factors_dialog open="source.factors.speed.open" title="source.factors.speed.title"
+                      factors="source.factors.speed.factors"/>
+
+  Props:    open, title, factors: the names of its fields, published by FactorsSource
+            (src/UI/Xml/Data/FactorsSource.h, src/UI/Xml/View/FactorDialog.h)
+            all: the name of whether it shows every extruder (1) or only the tool's (0)
+            all_shown: an expression: it can show every extruder or only the tool's (default 0: no choice)
+  Actions:  actions.factors.extrusion_all (src/UI/Presenters/Modals/FactorsActions.h)
+
+  Closed by the user, it empties its `open` subject itself.
+-->
+<component>
+	<api>
+		<prop name="open" type="string"/>
+		<prop name="title" type="string"/>
+		<prop name="factors" type="string"/>
+		<prop name="all" type="string" default="0"/>
+		<prop name="all_shown" type="string" default="0"/>
+	</api>
+
+	<view extends="ds_dialog" bind_open="$open" bind_title="$title" width="70%" flex_flow="column" scroll_dir="ver"
+		  style_pad_row="20">
+		<lv_obj name="scope" width="100%" height="content">
+			<style name="setting_options"/>
+			<bind_flag_if cond="not (${all_shown})" flag="hidden"/>
+			<option_button name="tool" translation_tag="tr.fine_tune.this_tool" height="content" flex_grow="1"
+						   subject="$all" value="0" action="actions.factors.extrusion_all" arg="0"/>
+			<option_button name="all" translation_tag="tr.fine_tune.all_extruders" height="content" flex_grow="1"
+						   subject="$all" value="1" action="actions.factors.extrusion_all" arg="1"/>
+		</lv_obj>
+		<ds_list name="list" list="$factors" item="factors_row" width="100%" height="content" flex_flow="column"
+				 style_pad_row="24"/>
+	</view>
+</component>

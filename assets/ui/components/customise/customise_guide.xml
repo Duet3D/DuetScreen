@@ -1,0 +1,9 @@
+<!--
+  A line showing what a widget the user drags has snapped to (an edge of another widget, or of the area), while
+  customising a free layout. <ds_layout> places and sizes it (see src/UI/Xml/Layout/Snap.h); the theme draws it (customise_guide).
+-->
+<component>
+	<view extends="lv_obj" clickable="false" scrollable="false">
+		<style name="customise_guide"/>
+	</view>
+</component>

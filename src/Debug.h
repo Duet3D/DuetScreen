@@ -50,12 +50,17 @@ namespace Log
 
 	std::shared_ptr<spdlog::logger> GetLogger();
 
+	/**
+	 * The logger every LOG_* macro writes to: DuetScreen's once Init() has run, spdlog's default before. It is never
+	 * destroyed, so destructors of static objects can still log while the program exits.
+	 */
+	spdlog::logger* Logger();
+
 	/* This is needed so we get compiler errors if the format string is invalid */
 	template <typename... Args>
 	void log(spdlog::source_loc loc, spdlog::level::level_enum lvl, fmt::format_string<Args...> fmt, Args&&... args)
 	{
-		spdlog::default_logger_raw()->log(
-			loc, lvl, std::forward<fmt::format_string<Args...>>(fmt), std::forward<Args>(args)...);
+		Logger()->log(loc, lvl, std::forward<fmt::format_string<Args...>>(fmt), std::forward<Args>(args)...);
 	}
 } // namespace Log
 

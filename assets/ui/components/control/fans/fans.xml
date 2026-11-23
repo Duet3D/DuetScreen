@@ -1,0 +1,27 @@
+<!--
+  The Fans tab, and the `fans` widget: the fans you control, each with a slider (fan_row.xml), then the fans the firmware
+  runs by temperature, each with its speed. A group shows while it has a fan.
+
+  Data:     the object model's fans (om.fans). Each fan_row binds to its own fan's fields.
+  Actions:  actions.fan.set_speed (src/UI/Presenters/Control/Fans/FanActions.h)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
+		<style name="bg_dark"/>
+		<style name="card"/>
+		<style name="pad_gap"/>
+		<ds_setting_group name="fans" title_tag="tr.fan.controllable" width="100%">
+			<bind_flag_if cond="om.fans|count_lacking:thermostatic.lowTemperature lt 1" flag="hidden"/>
+			<ds_list name="list" list="om.fans" item="fan_row" item.automatic="0">
+				<style name="setting_list"/>
+			</ds_list>
+		</ds_setting_group>
+		<ds_setting_group name="automatic" title_tag="tr.fan.automatic_group" note_tag="tr.fan.automatic_note"
+						  width="100%">
+			<bind_flag_if cond="om.fans|count_having:thermostatic.lowTemperature lt 1" flag="hidden"/>
+			<ds_list name="list" list="om.fans" item="fan_row" item.automatic="1">
+				<style name="setting_list"/>
+			</ds_list>
+		</ds_setting_group>
+	</view>
+</component>

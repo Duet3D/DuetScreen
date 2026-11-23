@@ -1,0 +1,41 @@
+<!--
+  A heater of the simulated Duet, a row (ds_setting) of its page: its name, what it heats, its highest temperature and
+  how fast it heats and cools (asked for on the number pad), whether it is in fault, and a button to remove it.
+
+  Fields:   a row of source.simulator.heaters (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<ds_textarea name="name" bind_text="row.name" one_line="true" width="150" height="content">
+				<action trigger="ready" name="actions.simulator.set" arg="name"/>
+			</ds_textarea>
+			<ds_choice name="role" title_tag="tr.simulator.fields.role" bind_options="source.simulator.heater_roles"
+					   bind_selected="row.role">
+				<style name="setting_value"/>
+				<action trigger="value_confirmed" name="actions.simulator.set" arg="role"/>
+			</ds_choice>
+			<value_button name="max" title_tag="tr.simulator.fields.max" value="row.max" width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="max"/>
+			</value_button>
+			<value_button name="heating_rate" title_tag="tr.simulator.fields.heating_rate" value="row.heating_rate"
+						  width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="heating_rate"/>
+			</value_button>
+			<value_button name="cooling_rate" title_tag="tr.simulator.fields.cooling_rate" value="row.cooling_rate"
+						  width="96">
+				<action trigger="clicked" name="actions.simulator.set" arg="cooling_rate"/>
+			</value_button>
+			<lv_obj name="flags">
+				<style name="setting_options"/>
+				<option_button name="fault" translation_tag="tr.simulator.fields.fault" subject="row.fault"
+							   action="actions.simulator.set" arg="fault"/>
+			</lv_obj>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

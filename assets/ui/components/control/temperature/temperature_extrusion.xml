@@ -1,0 +1,43 @@
+<!--
+  The extruder panel: extrude or retract with the current tool, by the feed distance and at the feed rate chosen
+  below. The buttons are disabled while the tool is too cold or a job is running.
+
+  Data:     source.extruder.* (src/UI/Xml/Data/ExtruderSource.h), shared by every extruder panel
+  Actions:  actions.extruder.extrude, actions.extruder.retract; actions.selector.* for the values, typed on the shared
+            number pad
+-->
+<component>
+	<view extends="lv_obj" flex_flow="column"
+		  style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start">
+		<!-- What it is in pads it: the card it is in, or (on the Temperature tab) the card it is styled as -->
+		<style name="pad_zero"/>
+		<lv_obj name="controls" width="100%" flex_grow="1" style_layout="grid"
+				style_grid_column_dsc_array="fr(1) fr(1)" style_grid_row_dsc_array="fr(3) fr(5) fr(5)">
+			<ds_button name="retract" translation_tag="tr.extrude.retract" icon="retract.png"
+					   style_grid_cell_column_pos="0" style_grid_cell_x_align="stretch"
+					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+				<style name="action_btn"/>
+				<bind_state_if_eq subject="source.extruder.retract_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="actions.extruder.retract"/>
+			</ds_button>
+			<ds_button name="extrude" translation_tag="tr.extrude.extrude" icon="extrude.png"
+					   style_grid_cell_column_pos="1" style_grid_cell_x_align="stretch"
+					   style_grid_cell_row_pos="0" style_grid_cell_y_align="stretch">
+				<style name="action_btn"/>
+				<bind_state_if_eq subject="source.extruder.extrude_usable" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="actions.extruder.extrude"/>
+			</ds_button>
+
+			<value_selector name="distance_selector" selector="extruder.distance" title="source.extruder.distance.title"
+							value="source.extruder.distance.value" choices="source.extruder.distance.choices"
+							style_grid_cell_column_pos="0" style_grid_cell_column_span="2"
+							style_grid_cell_x_align="stretch"
+							style_grid_cell_row_pos="1" style_grid_cell_y_align="stretch"/>
+			<value_selector name="feedrate_selector" selector="extruder.feedrate" title="source.extruder.feedrate.title"
+							value="source.extruder.feedrate.value" choices="source.extruder.feedrate.choices"
+							style_grid_cell_column_pos="0" style_grid_cell_column_span="2"
+							style_grid_cell_x_align="stretch"
+							style_grid_cell_row_pos="2" style_grid_cell_y_align="stretch"/>
+		</lv_obj>
+	</view>
+</component>

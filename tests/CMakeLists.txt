@@ -57,19 +57,8 @@ target_link_libraries(DuetScreen.tests PRIVATE
     GTest::gtest_main
 )
 
-# Link tests with core library and force-load only theme registration archive.
-if(APPLE)
-  target_link_libraries(DuetScreen.tests PRIVATE DuetScreen.lib DuetScreen.themes)
-  target_link_options(DuetScreen.tests PRIVATE "-Wl,-force_load,$<TARGET_FILE:DuetScreen.themes>")
-elseif(MSVC)
-  target_link_libraries(DuetScreen.tests PRIVATE DuetScreen.lib DuetScreen.themes)
-  target_link_options(DuetScreen.tests PRIVATE "/WHOLEARCHIVE:$<TARGET_FILE:DuetScreen.themes>")
-else()
-  target_link_libraries(DuetScreen.tests PRIVATE
-      DuetScreen.lib
-      -Wl,--whole-archive DuetScreen.themes -Wl,--no-whole-archive
-  )
-endif()
+# Link tests with the core library.
+target_link_libraries(DuetScreen.tests PRIVATE DuetScreen.lib)
 
 # Use compiler-provided __BASE_FILE__ which expands to the primary source file.
 # Also remap the project source prefix to produce relative paths in macros.

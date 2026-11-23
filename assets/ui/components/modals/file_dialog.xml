@@ -1,0 +1,82 @@
+<!--
+  The shared file dialog, hosted once by the home screen: start a job (with its details and thumbnail, and an offer to
+  delete it instead: a question, the next step), or run a macro. While a job runs, another can't start, nor the one
+  running be deleted: OK or Delete is disabled, and a line says why. Open while source.files.dialog is set. The file
+  browser opens it for the file tapped; any view opens it for a row of source.files.recent or source.files.macros with
+  the global actions `actions.files.ask_start` and `actions.files.ask_run`.
+
+  Data:     source.files.dialog, dialog_*, info_* (src/UI/Xml/Data/FilesSource.h)
+  Actions:  files.confirm, files.ask_delete (global: src/UI/Presenters/FileBrowser/FilesActions.h), dialog.close
+-->
+<component>
+	<styles>
+		<!-- With a thumbnail beside it, the text lines up on the left -->
+		<style name="beside_image" text_align="left"/>
+	</styles>
+
+	<!-- Takes no room: its dialog opens on the dialog surface -->
+	<view extends="lv_obj" width="0" height="0" floating="true">
+		<ds_dialog name="file_dialog" bind_open="source.files.dialog" bind_title="source.files.dialog_title"
+				   flex_flow="column">
+
+			<lv_obj name="body" width="100%" height="content" flex_flow="column">
+				<lv_obj name="body_top" width="100%" height="content" flex_flow="row" style_pad_all="0">
+					<lv_obj name="body_text" height="content" flex_grow="1" flex_flow="column" style_text_align="center"
+							style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+						<bind_style name="beside_image" subject="source.files.dialog_has_image" ref_value="1"/>
+						<lv_label name="text" bind_text="source.files.dialog_text" width="100%"/>
+
+						<!-- The job's details -->
+						<lv_obj name="details" width="100%" height="content" flex_flow="column" scrollable="false">
+							<bind_flag_if_eq subject="source.files.info_shown" flag="hidden" ref_value="0"/>
+							<fact_row name="date" title_tag="tr.file.start_print.date" value="source.files.info_date"/>
+							<fact_row name="size" title_tag="tr.file.start_print.size" value="source.files.info_size"/>
+							<fact_row name="generated_by" title_tag="tr.file.start_print.generated_by"
+									  value="source.files.info_generated_by"/>
+							<fact_row name="print_time" title_tag="tr.file.start_print.print_time"
+									  value="source.files.info_print_time"/>
+							<fact_row name="height" title_tag="tr.file.start_print.height" value="source.files.info_height"/>
+							<fact_row name="layer_height" title_tag="tr.file.start_print.layer_height"
+									  value="source.files.info_layer_height"/>
+						</lv_obj>
+					</lv_obj>
+
+					<lv_image name="image" bind_src="source.files.dialog_image" inner_align="contain" width="50%" height="200"
+							  style_min_width="50" style_max_width="300" style_min_height="50" style_max_height="300">
+						<bind_flag_if_eq subject="source.files.dialog_has_image" flag="hidden" ref_value="0"/>
+					</lv_image>
+				</lv_obj>
+				<!-- Why it can't be started or deleted now, while that is so -->
+				<lv_label name="reason" bind_text="source.files.dialog_reason" width="100%" style_text_align="center">
+					<style name="text_warning"/>
+					<bind_flag_if_eq subject="source.files.dialog_reason" flag="hidden" ref_value=""/>
+				</lv_label>
+			</lv_obj>
+
+			<ds_dialog_footer name="footer">
+				<!-- Deleting, apart from what the dialog is for, on the left -->
+				<ds_button name="delete" translation_tag="tr.file.delete">
+					<style name="dialog_button"/>
+					<style name="danger_btn"/>
+					<bind_flag_if_eq subject="source.files.dialog_delete" flag="hidden" ref_value="0"/>
+					<bind_state_if_not_eq subject="source.files.dialog_delete" state="disabled" ref_value="2"/>
+					<action trigger="clicked" name="actions.files.ask_delete"/>
+				</ds_button>
+				<!-- Pushes the delete button left; it goes with it, so the buttons on the right keep to the edge -->
+				<flex_pad name="spacer">
+					<bind_flag_if_eq subject="source.files.dialog_delete" flag="hidden" ref_value="0"/>
+				</flex_pad>
+				<ds_button name="cancel" translation_tag="tr.common.cancel">
+					<style name="dialog_button"/>
+					<action trigger="clicked" name="actions.dialog.close"/>
+				</ds_button>
+				<ds_button name="ok" translation_tag="tr.common.ok">
+					<style name="dialog_button"/>
+					<style name="action_btn"/>
+					<bind_state_if_not_eq subject="source.files.dialog_confirm" state="disabled" ref_value="2"/>
+					<action trigger="clicked" name="actions.files.confirm"/>
+				</ds_button>
+			</ds_dialog_footer>
+		</ds_dialog>
+	</view>
+</component>

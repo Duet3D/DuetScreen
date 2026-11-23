@@ -35,22 +35,22 @@ Use the workspace virtualenv from the repository root.
 
 ### Targeted tests
 ```bash
-python3 scripts/run_tests.py --test_filter='<FILTER>' --skip_configure --compare-mode cli
+scripts/run_tests.py --filter='<FILTER>' --skip-configure --compare-mode cli
 ```
 
 ### Configure and run filtered tests
 ```bash
-python3 scripts/run_tests.py --test_filter='<FILTER>' --compare-mode cli
+scripts/run_tests.py --filter='<FILTER>' --compare-mode cli
 ```
 
 ### Coverage
 ```bash
-python3 scripts/run_tests.py --test_filter='<FILTER>' --coverage --compare-mode cli
+scripts/run_tests.py --filter='<FILTER>' --coverage --compare-mode cli
 ```
 
 ### Full coverage
 ```bash
-python3 scripts/run_tests.py --coverage --compare-mode cli
+scripts/run_tests.py --coverage --compare-mode cli
 ```
 
 ## Completion Criteria

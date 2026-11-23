@@ -1,0 +1,30 @@
+{
+  "component": "gauge_bar",
+  "title_tag": "tr.widget.extrusion_bar",
+  "description_tag": "tr.widget.extrusion_gauge_desc",
+  "category_tag": "tr.widget.category_motion",
+  "icon": "extrude.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      272,
+      89
+    ],
+    "min": [
+      180,
+      89
+    ]
+  },
+  "props": {
+    "frame": "card",
+    "title": "tr.widget.status_extrusion",
+    "value": "source.move.extrusion_percent",
+    "text": "source.move.extrusion_percent",
+    "unit": "'%'",
+    "max": "200",
+    "tap_action": "actions.factors.extrusion"
+  },
+  "settings": []
+}

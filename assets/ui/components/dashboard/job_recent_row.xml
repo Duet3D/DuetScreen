@@ -1,0 +1,29 @@
+<!--
+  One of the jobs in the job widget's ready face (job_ready.xml), a line of a windowed list: its thumbnail, its name and
+  how long it takes and the filament it uses (or its date until the printer says), each cut short rather than wrapped.
+  Tap it to ask whether to start it (the dialog says why not while a job runs).
+
+  Fields:   a recent row: row.name, row.detail, row.thumbnail (src/UI/Xml/Data/FilesSource.h)
+  Actions:  actions.files.ask_start (src/UI/Presenters/FileBrowser/FilesActions.h)
+-->
+<component>
+	<view extends="lv_obj" height="content" flex_flow="row" scrollable="false" style_flex_cross_place="center"
+		  style_flex_track_place="center">
+		<style name="setting_row"/>
+		<style name="pressed" selector="pressed"/>
+		<action trigger="clicked" name="actions.files.ask_start"/>
+
+		<!-- No larger than 40 x 40; the room it keeps when there is no thumbnail lines the names up -->
+		<thumbnail_box name="picture" src="row.thumbnail" width="40" height="40"/>
+		<lv_obj name="about" width="1" height="content" flex_grow="1" flex_flow="column" scrollable="false"
+				clickable="false" style_pad_all="0">
+			<lv_label name="name" bind_text="row.name" width="100%" long_mode="dots">
+				<style name="setting_title"/>
+			</lv_label>
+			<lv_label name="detail" bind_text="row.detail" width="100%" long_mode="dots">
+				<style name="setting_hint"/>
+			</lv_label>
+		</lv_obj>
+		<chevron name="chevron"/>
+	</view>
+</component>

@@ -1,0 +1,23 @@
+<!--
+  A setting that is one of a list of values: a row (ds_setting) showing the value chosen, source.settings.<setting>,
+  of source.settings.<setting>_options. Tapping it opens the list, titled as the row is, and the value chosen is
+  stored with actions.settings.set. Its hint and badge are the row's.
+
+      <settings_choice name="theme" title_tag="tr.settings.theme" setting="theme"/>
+
+  Props:    title_tag  the translation key of the row's title, and the list's
+            setting    the setting's name in source.settings (src/UI/Xml/Data/SettingsSource.h)
+-->
+<component>
+	<api>
+		<prop name="title_tag" type="string"/>
+		<prop name="setting" type="string"/>
+	</api>
+	<view extends="ds_setting" title_tag="$title_tag">
+		<ds_choice name="choice" title_tag="$title_tag" bind_options="source.settings.${setting}_options"
+				   bind_selected="source.settings.${setting}">
+			<style name="setting_value"/>
+			<action trigger="value_confirmed" name="actions.settings.set" arg="$setting"/>
+		</ds_choice>
+	</view>
+</component>

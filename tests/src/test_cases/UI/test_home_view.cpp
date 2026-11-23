@@ -5,269 +5,752 @@
  *      Author: Andy Everitt
  */
 
+#include "Comm/Connection.h"
 #include "Debug.h"
-#include "ObjectModel/Job.h"
+#include "Hardware/Usb.h"
+#include "ObjectModel/Files.h"
 #include "ObjectModel/PrinterStatus.h"
+#include "ObjectModel/Tree/Tree.h"
 #include "Storage.h"
 #include "UI/Core/Navigation.h"
-#include "UI/Screens/File/FileView.h"
-#include "UI/Screens/Home/HomeView.h"
+#include "UI/Lvgl/LvTextarea.h"
+#include "UI/Presenters/Notifications/NotificationsPresenter.h"
+#include "UI/Styles/Theme.h"
+#include "UI/Widgets/Buttons/Button.h"
+#include "UI/Widgets/Display/DsGraph.h"
+#include "UI/Widgets/Inputs/Slider.h"
+#include "UI/Widgets/Layout/DsPages.h"
+#include "UI/Widgets/Layout/TabView.h"
+#include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Data/PrinterModel.h"
+#include "UI/Xml/Data/SettingsSource.h"
+#include "UI/Xml/Data/TemperatureSource.h"
+#include "UI/Xml/Layout/LayoutEditor.h"
+#include "UI/Xml/Runtime/Services.h"
+#include "UI/Xml/Runtime/XmlUi.h"
+#include "UI/Xml/View/Actions.h"
+#include "UI/Xml/View/XmlView.h"
+#include "helix_xml.h"
+#if DUET_SIMULATOR
+#  include "Simulator/Simulator.h"
+#endif
 #include "i18n/i18n.h"
+#include "test_utils/Dialogs.h"
 #include "test_utils/UiTestSuite.h"
 #include "utils/StorageHelper.h"
 #include "utils/UpgradeHelper.h"
+#include <algorithm>
+#include <chrono>
+#include <filesystem>
+#include <fmt/format.h>
+#include <fstream>
+#include <functional>
 #include <gtest/gtest.h>
+#include <thread>
+
+namespace
+{
+
+	/** Change setting `name` to `value` as the UI does, so every view shows it */
+	void setSetting(std::string_view name, int32_t value)
+	{
+		auto* settings = UI::Xml::DataSources::find<UI::Xml::SettingsSource>();
+		ASSERT_NE(settings, nullptr);
+		ASSERT_TRUE(settings->set(name, static_cast<float>(value))) << name;
+	}
+	/** How many of the object model array at `path` are there (not null) */
+	size_t countOf(std::string_view path)
+	{
+		const OM::Node& items = UI::Xml::PrinterModel::root().at(path);
+		size_t count = 0;
+		for (size_t i = 0; i < items.size(); i++)
+		{
+			count += items[i].exists() ? 1 : 0;
+		}
+		return count;
+	}
+
+	/** The M291 alert the object model's message box describes now, as the notifications presenter builds it */
+	OM::Alert alertInObjectModel()
+	{
+		MODEL_LOCK();
+		return OM::Alert::fromObjectModel(OM::Tree::get().root().at("state.messageBox"));
+	}
+} // namespace
 
 class TestHomeView : public UiTestSuite
 {
   protected:
+	/** The home screen, as the application shows it */
 	TestHomeView()
+		: home("home", lv_screen_active(), "home")
 	{
 		ZoneScoped;
-		// Override the singleton so code using HomeView::instance() uses our local view
-		UI::HomeView::setInstance(&view);
+		home.show();
 	}
 
-	virtual ~TestHomeView()
+	/** The view home.xml registers as `name`; fails the test if there is none */
+	template <typename T>
+	static T& page(std::string_view name)
 	{
-		// Reset override
-		UI::HomeView::setInstance(nullptr);
+		T* view = UI::findView<T>(name);
+		if (view == nullptr)
+		{
+			throw std::runtime_error(fmt::format("home has no {:s}", name));
+		}
+		return *view;
 	}
 
-	UI::HomeView view;
+	/** The pages of the dashboard's job widget (dashboard_job.xml): what is ready to start, and the job's status */
+	static UI::Xml::DsPages& dashboardJobPages()
+	{
+		lv_obj_t* pages = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "pages");
+		auto* stack = pages != nullptr ? dynamic_cast<UI::Xml::DsPages*>(UI::LvObj::fromPtr(pages)) : nullptr;
+		if (stack == nullptr)
+		{
+			throw std::runtime_error("the dashboard has no job widget");
+		}
+		return *stack;
+	}
+
+	/** Show the job's status on the dashboard, as a job starting does */
+	static void showJobStatus() { dashboardJobPages().open("status"); }
+
+	/** The dashboard's tool list: the widget the dashboard's layout places as `tools` */
+	static lv_obj_t* dashboardToolList()
+	{
+		lv_obj_t* tools = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "tools");
+		if (tools == nullptr)
+		{
+			throw std::runtime_error("the dashboard has no tool list");
+		}
+		return tools;
+	}
+
+	/** The dashboard's temperature graph, as dashboard.xml builds it */
+	static UI::Xml::DsGraph& temperatureGraph()
+	{
+		lv_obj_t* graph = lv_obj_find_by_name(page<UI::LvObj>("dashboard").getRootPtr(), "graph");
+		if (graph == nullptr)
+		{
+			throw std::runtime_error("the dashboard has no temperature_graph");
+		}
+		return static_cast<UI::Xml::DsGraph&>(*UI::LvObj::fromPtr(graph));
+	}
+
+	/** The Control page's tabs, as control.xml builds them */
+	static UI::TabView& controlPage()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("control").getRootPtr(), "tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the Control page has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
+
+	/** Open the Control page on tab `tab` (0 move, 1 temperature, 2 height map, 3 object cancel, 4 fans) */
+	static void openControlTab(size_t tab)
+	{
+		UI::openScreen(std::string_view("control"), false);
+		controlPage().setActiveTab(tab);
+	}
+	/** The widget called `name` on the console page */
+	static lv_obj_t* consolePart(const char* name)
+	{
+		return lv_obj_find_by_name(page<UI::LvObj>("console").getRootPtr(), name);
+	}
+
+	/** The Files page's tabs, as files.xml builds them */
+	static UI::TabView& filesPage()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("files").getRootPtr(), "tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the Files page has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
+
+	/** Open the Files page on tab `tab` (0 macros, 1 jobs, 2 USB drives) */
+	static void openFilesTab(size_t tab)
+	{
+		UI::openScreen(std::string_view("files"), false);
+		filesPage().setActiveTab(tab);
+	}
+
+	/**
+	 * Show `listing` (an rr_filelist reply) in the file browser registered as `browser`, as if the printer had
+	 * replied to its refresh button
+	 */
+	static lv_obj_t* showListing(const char* browser, const char* listing)
+	{
+		load_model_data_from_file("tests/object_model/test_bench/model_directories_v.json");
+		lv_obj_t* root = page<UI::LvObj>(browser).getRootPtr();
+		lv_obj_send_event(lv_obj_find_by_name(root, "refresh"), LV_EVENT_CLICKED, nullptr);
+		load_model_data_from_file(listing);
+		return root;
+	}
+
+	/** The item showing the file called `name` in a file browser, in whichever list (rows or tiles) is shown */
+	static lv_obj_t* fileItem(lv_obj_t* browser, std::string_view name)
+	{
+		for (const char* listName : {"rows", "tiles"})
+		{
+			lv_obj_t* list = lv_obj_find_by_name(browser, listName);
+			if (list == nullptr || lv_obj_has_flag(list, LV_OBJ_FLAG_HIDDEN))
+			{
+				continue;
+			}
+			for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+			{
+				lv_obj_t* item = lv_obj_get_child(list, static_cast<int32_t>(i));
+				lv_obj_t* label = lv_obj_find_by_name(item, "label");
+				if (label != nullptr && lv_label_get_text(label) == name)
+				{
+					return item;
+				}
+			}
+		}
+		throw std::runtime_error(fmt::format("no file item shows {:s}", name));
+	}
+
+	/** The Files page's USB drive browser, listed afresh, as opening its tab does; what is on the drives dated alike */
+	static lv_obj_t* openUsbBrowser()
+	{
+		for (const std::string& drive : USB::UsbMonitor::getInstance().getMountedDrives())
+		{
+			stampDates(drive);
+		}
+		deliverModelEvents(); // the drives that came or went
+		openFilesTab(2);
+		runTimers();
+		return page<UI::LvObj>("files_usb").getRootPtr();
+	}
+
+	/** Date everything on the drive `drive` 2025-03-18 18:21, so pictures of it don't change from day to day */
+	static void stampDates(const std::filesystem::path& drive)
+	{
+		using namespace std::chrono;
+		const auto when = clock_cast<file_clock>(sys_days{2025y / March / 18} + 18h + 21min);
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(drive))
+		{
+			std::filesystem::last_write_time(entry.path(), when);
+		}
+	}
+
+	/** The USB file dialog, if it is the step shown, or nullptr */
+	static lv_obj_t* openUsbDialog() { return TestDialogs::shownNamed("usb_dialog"); }
+
+	/** Run the UI's timers until `done`, for at most 10 s, while a thread of the screen's works (reading a file) */
+	static bool waitFor(const std::function<bool()>& done)
+	{
+		for (int i = 0; i < 1000 && !done(); i++)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			deliverModelEvents();
+			runTimers();
+		}
+		return done();
+	}
+
+	/** The shared file dialog, if it is the step shown, or nullptr */
+	static lv_obj_t* openFileDialog() { return TestDialogs::shownNamed("file_dialog"); }
+
+	static std::string_view labelText(lv_obj_t* parent, const char* name)
+	{
+		return lv_label_get_text(lv_obj_find_by_name(parent, name));
+	}
+
+	static bool isHidden(lv_obj_t* parent, const char* name)
+	{
+		return lv_obj_has_flag(lv_obj_find_by_name(parent, name), LV_OBJ_FLAG_HIDDEN);
+	}
+	/** The Settings page's categories, in the order settings.xml lists them */
+	static constexpr size_t SETTINGS_GENERAL = 0;
+	static constexpr size_t SETTINGS_DISPLAY = 1;
+	static constexpr size_t SETTINGS_NOTIFICATIONS = 2;
+	static constexpr size_t SETTINGS_CONNECTION = 3;
+	static constexpr size_t SETTINGS_SYSTEM = 4;
+	static constexpr size_t SETTINGS_DEVELOPER = 5;
+
+	/** The Settings page's categories (SETTINGS_*), as settings.xml builds them */
+	static UI::TabView& settingsPage()
+	{
+		lv_obj_t* tabs = lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "tabs");
+		if (tabs == nullptr)
+		{
+			throw std::runtime_error("the Settings page has no tabs");
+		}
+		return static_cast<UI::TabView&>(*UI::LvObj::fromPtr(tabs));
+	}
+	/** What notifications.xml shows responses, alerts and update prompts with */
+	static UI::NotificationsPresenter& notifications()
+	{
+		return static_cast<UI::NotificationsPresenter&>(*page<UI::Xml::XmlView>("notifications").getPresenter());
+	}
+
+	/** The widget called `name` in the notifications, or in the alert or update prompt the dialog surface shows */
+	static lv_obj_t* notificationPart(const char* name)
+	{
+		lv_obj_t* found = lv_obj_find_by_name(page<UI::LvObj>("notifications").getRootPtr(), name);
+		return found != nullptr ? found : TestDialogs::find(name);
+	}
+
+	/** Whether the dialog surface shows the notifications' dialog called `name` (the alert, the update prompt) */
+	static bool notificationShown(const char* name) { return TestDialogs::shownNamed(name) != nullptr; }
+
+	/** The update prompt's checks shared by the update result tests */
+	static void expectUpdateResult()
+	{
+		ASSERT_TRUE(notificationShown("update_prompt"));
+		EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("ok"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel"), LV_OBJ_FLAG_HIDDEN));
+		EXPECT_NE(TestDialogs::title(), "");
+		EXPECT_NE(TestDialogs::text("text"), "");
+	}
+
+	/** The M291 alert's text box, for text (S7) */
+	static UI::LvTextarea& alertInput()
+	{
+		lv_obj_t* input = notificationPart("input");
+		if (input == nullptr)
+		{
+			throw std::runtime_error("the alert has no input");
+		}
+		return static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(input));
+	}
+
+	UI::Xml::XmlView home;
 };
 
 TEST_F(TestHomeView, BlankView)
 {
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/blank.png")
 
-	view.showKeyboard(true);
+	lv_obj_t* keyboard = lv_obj_find_by_name(home.getRootPtr(), "keyboard");
+	ASSERT_NE(keyboard, nullptr);
+	lv_obj_remove_flag(keyboard, LV_OBJ_FLAG_HIDDEN);
+	lv_obj_move_foreground(keyboard);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/keyboard.png");
 }
 
 TEST_F(TestHomeView, BlankControlView)
 {
-	auto& control = view.getControlView();
+	auto& control = controlPage();
 
-	openScreen(&control);
+	// A machine that reports nothing has only moving: the other tabs are for parts it doesn't have
+	openControlTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
+	EXPECT_TRUE(control.isTabAvailable(0)) << "Move";
+	for (size_t tab = 1; tab < control.getTabCount(); tab++)
+	{
+		EXPECT_FALSE(control.isTabAvailable(tab)) << "tab " << tab;
+	}
+}
 
-	control.showTemperatureView();
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_blank.png");
+TEST_F(TestHomeView, ControlTabsFollowTheMachine)
+{
+	auto& control = controlPage();
+	openControlTab(0);
 
-	control.showHeightmapView();
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_blank.png");
+	// Each tab shows once the machine reports its part, and goes with it
+	load_model_data_from_file("tests/object_model/test_bench/model_tools_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_sensors_v.json");
+	load_model_data_from_file("tests/object_model/test_bench/model_fans_v.json");
+	deliverModelEvents();
+	EXPECT_TRUE(control.isTabAvailable(1)) << "Tools";
+	EXPECT_TRUE(control.isTabAvailable(2)) << "Bed mesh";
+	EXPECT_FALSE(control.isTabAvailable(3)) << "Objects: no job";
+	EXPECT_TRUE(control.isTabAvailable(4)) << "Fans";
 
-	control.showObjectCancelView();
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel_blank.png");
+	load_model_data_from_file("tests/object_model/job/model_job_objects.json");
+	deliverModelEvents();
+	EXPECT_TRUE(control.isTabAvailable(3)) << "Objects: a job with labelled objects";
 
-	control.showFanView();
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/fan_blank.png");
-
-	control.showMoveView();
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_blank.png");
+	// The tab shown goes when its part does: the next one available is shown
+	control.setActiveTab(3, false);
+	load_model_data(R"({"key":"","flags":"d99f","result":{"job":{"build":null}}})"
+					"\n");
+	deliverModelEvents();
+	EXPECT_FALSE(control.isTabAvailable(3));
+	EXPECT_EQ(control.getActiveTabIndex(), 4u);
 }
 
 TEST_F(TestHomeView, ObjectCancelCanvasTitleTracksCurrentObject)
 {
-	auto& control = view.getControlView();
-	openScreen(&control);
-	control.showObjectCancelView();
+	openControlTab(3);
 
-	auto& objectCancel = control.getObjectCancelView();
-
-	objectCancel.setCurrentObjectName("gear (Instance 5)");
+	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
+					R"json({"cancelled":false,"name":"gear (Instance 5)","x":[100,150],"y":[100,150]}]}}})json"
+					"\n");
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/set_object_name.png");
 
-	objectCancel.setCurrentObjectName("");
+	load_model_data(R"({"key":"","flags":"d99f","result":{"job":{"build":{"currentObject":-1}}}})"
+					"\n");
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/clear_object_name.png");
 }
 
-TEST_F(TestHomeView, ObjectCancelCurrentButtonRespectsConfirmationSetting)
+TEST_F(TestHomeView, ObjectsTabCancelsAndResumesTheChosenObject)
 {
-	auto& control = view.getControlView();
-	openScreen(&control);
-	control.showObjectCancelView();
-
-	auto& objectCancel = control.getObjectCancelView();
-	auto& modal = objectCancel.getConfirmModal();
-
-	OM::ClearJobObjects();
-	auto object = OM::GetOrCreateJobObject(0);
-	ASSERT_NE(object, nullptr);
-	object->index = 0;
-	object->name = "gear (Instance 1)";
-	OM::SetCurrentJobObject(0);
-
+	// The first is being printed, the second was cancelled
+	load_model_data(R"json({"key":"job","flags":"vn","result":{"build":{"currentObject":0,"objects":[)json"
+					R"json({"cancelled":false,"name":"gear (Instance 1)","x":[100,120],"y":[100,120]},)json"
+					R"json({"cancelled":true,"name":"gear (Instance 2)","x":[140,160],"y":[100,120]}]}}})json"
+					"\n");
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
-	objectCancel.getCancelCurrentButton().sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_TRUE(modal.isVisible());
-	EXPECT_EQ(std::string(modal.getTitle().getText()), _("object_cancel.confirm_cancel_current_title"));
-	EXPECT_NE(std::string(modal.getText().getText()).find("gear (Instance 1)"), std::string::npos);
-	modal.close();
+	openControlTab(3);
+	lv_obj_t* page = UI::findView("object_cancel")->getRootPtr();
+	lv_obj_t* cancel = lv_obj_find_by_name(page, "cancel");
+	lv_obj_t* resume = lv_obj_find_by_name(page, "resume");
+	ASSERT_NE(cancel, nullptr);
+	ASSERT_NE(resume, nullptr);
 
+	// Until one is chosen, the one being printed is: cancelling it asks first
+	EXPECT_FALSE(lv_obj_has_flag(cancel, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(resume, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(cancel, LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("object_cancel.confirm_cancel_title"));
+	EXPECT_NE(TestDialogs::text("text").find("gear (Instance 1)"), std::string::npos);
+	TestDialogs::tap("yes");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "M486 P0\n");
+
+	// Pressing the cancelled one on the bed chooses it, to resume
+	lv_obj_t* shapes = lv_obj_find_by_name(page, "objects");
+	ASSERT_NE(shapes, nullptr);
+	ASSERT_EQ(lv_obj_get_child_count(shapes), 2u);
+	lv_obj_send_event(lv_obj_get_child(shapes, 1), LV_EVENT_PRESSED, nullptr);
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "choosing doesn't ask anything";
+	EXPECT_TRUE(lv_obj_has_flag(cancel, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(resume, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel/chosen_cancelled.png");
+
+	// Without confirmations, it is resumed straight away
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, false);
-	objectCancel.getCancelCurrentButton().sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_FALSE(modal.isVisible());
+	lv_obj_send_event(resume, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(TestDialogs::shown(), nullptr) << "resumed without asking";
+	EXPECT_EQ(sent.back(), "M486 U1\n");
 
 	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
-	OM::SetCurrentJobObject(-1);
-	OM::ClearJobObjects();
+	UI::Xml::Services::setGcodeSender(nullptr);
 }
 
 TEST_F(TestHomeView, BlankConsoleView)
 {
-	openScreen(&view.getConsoleView(), false);
+	UI::openScreen(std::string_view("console"), false);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/blank.png")
 }
 
 TEST_F(TestHomeView, BlankMacroView)
 {
-	auto& files = view.getFileView();
-	openScreen(&files, false);
-	files.setActiveTab(0);
+	openFilesTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/macros_blank.png");
 }
 
 TEST_F(TestHomeView, BlankJobView)
 {
-	auto& files = view.getFileView();
-	openScreen(&files, false);
-	files.setActiveTab(1);
+	openFilesTab(1);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/jobs_blank.png");
 }
 
 TEST_F(TestHomeView, JobModalShowsDeleteButton)
 {
-	auto& files = view.getFileView();
-	openScreen(&files, false);
-	files.setActiveTab(1);
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
 
-	auto* tab = files.getTab(1);
-	ASSERT_NE(tab, nullptr);
-	auto& jobsView = static_cast<UI::FileView&>(*tab->getChild(0));
-
-	jobsView.confirmStartPrint("test.gcode", std::filesystem::path{});
-	auto& modal = jobsView.getConfirmModal();
-
-	EXPECT_TRUE(modal.isVisible());
-	auto* deleteBtn = modal.getChildByName("footer.delete");
-	ASSERT_NE(deleteBtn, nullptr);
-	EXPECT_TRUE(deleteBtn->isVisible());
+	lv_obj_t* dialog = openFileDialog();
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Start Print");
+	EXPECT_EQ(labelText(dialog, "text"), "File: test.gcode");
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("delete"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/start_print_modal.png");
 
-	modal.cancel();
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(openFileDialog(), nullptr);
+}
+
+TEST_F(TestHomeView, FoldersStandApartFromFiles)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_tiles.png");
+
+	lv_obj_send_event(lv_obj_find_by_name(browser, "list_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folders_and_files_rows.png");
+
+	// In the folder, the path above shows the folders to go back to
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/folder_path.png");
+}
+
+TEST_F(TestHomeView, TappingAFileAnywhereOnItOpensIt)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	const auto tapMiddle = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
+
+	// As a tile and as a row: the middle of a tile is its thumbnail's box
+	for (int layout = 0; layout < 2; layout++)
+	{
+		tapMiddle(fileItem(browser, "test.gcode"));
+		EXPECT_NE(openFileDialog(), nullptr) << (layout == 0 ? "a tile" : "a row");
+		UI::closeDialogs();
+		lv_obj_send_event(
+			lv_obj_find_by_name(browser, layout == 0 ? "list_mode" : "tiles_mode"), LV_EVENT_CLICKED, nullptr);
+		lv_obj_update_layout(lv_screen_active());
+		lv_timer_handler();
+	}
+	lv_test_mouse_release();
 }
 
 TEST_F(TestHomeView, MacroModalHidesDeleteButton)
 {
-	auto& files = view.getFileView();
-	openScreen(&files, false);
-	files.setActiveTab(0);
+	openFilesTab(0);
+	lv_obj_t* browser = showListing("files_macros", "tests/object_model/rr_filelist/macros.json");
+	lv_obj_send_event(fileItem(browser, "test.g"), LV_EVENT_CLICKED, nullptr); // "01_test.g", ordering prefix hidden
 
-	auto* tab = files.getTab(0);
-	ASSERT_NE(tab, nullptr);
-	auto& macrosView = static_cast<UI::FileView&>(*tab->getChild(0));
-
-	macrosView.confirmRunMacro("test.g");
-	auto& modal = macrosView.getConfirmModal();
-
-	EXPECT_TRUE(modal.isVisible());
-	auto* deleteBtn = modal.getChildByName("footer.delete");
-	ASSERT_NE(deleteBtn, nullptr);
-	EXPECT_FALSE(deleteBtn->isVisible());
+	lv_obj_t* dialog = openFileDialog();
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Run Macro");
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("delete"), LV_OBJ_FLAG_HIDDEN));
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/run_macro_modal.png");
 
-	modal.cancel();
+	UI::closeDialogs();
+	EXPECT_EQ(openFileDialog(), nullptr);
 }
 
 TEST_F(TestHomeView, DeleteButtonOpensDeleteConfirmationModal)
 {
-	auto& files = view.getFileView();
-	openScreen(&files, false);
-	files.setActiveTab(1);
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
 
-	auto* tab = files.getTab(1);
-	ASSERT_NE(tab, nullptr);
-	auto& jobsView = static_cast<UI::FileView&>(*tab->getChild(0));
+	lv_obj_t* dialog = openFileDialog();
+	ASSERT_NE(dialog, nullptr);
+	lv_obj_send_event(TestDialogs::find("delete"), LV_EVENT_CLICKED, nullptr);
 
-	jobsView.confirmStartPrint("test.gcode", std::filesystem::path{});
-	auto& modal = jobsView.getConfirmModal();
-
-	auto* deleteBtn = modal.getChildByName("footer.delete");
-	ASSERT_NE(deleteBtn, nullptr);
-	ASSERT_TRUE(deleteBtn->isVisible());
-
-	deleteBtn->sendEvent(LV_EVENT_CLICKED, nullptr);
-
-	EXPECT_EQ(std::string(modal.getTitle().getText()), "Delete File");
-	EXPECT_EQ(std::string(modal.getText().getText()), "Are you sure you want to delete test.gcode?");
-	EXPECT_FALSE(deleteBtn->isVisible());
+	// The question is the dialog's next step; going back returns to the job
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Delete File");
+	EXPECT_EQ(TestDialogs::text("text"), "Are you sure you want to delete test.gcode?");
+	EXPECT_EQ(TestDialogs::host().shownSteps(), 2u);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/confirm_delete_modal.png");
+	TestDialogs::tapHeader("back");
+	EXPECT_EQ(openFileDialog(), dialog);
 
-	modal.cancel();
+	UI::closeDialogs();
+}
+
+TEST_F(TestHomeView, FoldersOpenAndTheirPathLeadsBack)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_t* crumbs = lv_obj_find_by_name(browser, "path");
+	ASSERT_EQ(lv_obj_get_child_count(crumbs), 1u);
+
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(openFileDialog(), nullptr) << "a folder opens, it doesn't ask";
+	ASSERT_EQ(lv_obj_get_child_count(crumbs), 2u);
+	lv_obj_t* base = lv_obj_get_child(crumbs, 0);
+	lv_obj_t* folder = lv_obj_get_child(crumbs, 1);
+	EXPECT_FALSE(isHidden(base, "folder")) << "the base folder can be tapped";
+	EXPECT_EQ(labelText(lv_obj_find_by_name(base, "folder"), "label"), "Jobs") << "named for what it holds";
+	EXPECT_EQ(labelText(folder, "open_folder"), "Folder");
+	EXPECT_FALSE(isHidden(folder, "separator"));
+
+	lv_obj_send_event(lv_obj_find_by_name(base, "folder"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(crumbs), 1u);
+}
+
+TEST_F(TestHomeView, FileBrowserGoesUpSaysWhatAFileIsAndWhenAFolderIsEmpty)
+{
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_t* up = lv_obj_find_by_name(browser, "up");
+	lv_obj_t* empty = lv_obj_find_by_name(browser, "empty");
+	lv_obj_t* crumbs = lv_obj_find_by_name(browser, "path");
+	EXPECT_TRUE(lv_obj_has_state(up, LV_STATE_DISABLED)) << "nothing is above the jobs folder";
+	EXPECT_TRUE(lv_obj_has_flag(empty, LV_OBJ_FLAG_HIDDEN));
+
+	// A file the printer hasn't described yet: when it was changed, to the minute, and its size; a folder: when
+	lv_obj_send_event(lv_obj_find_by_name(browser, "list_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_update_layout(lv_screen_active());
+	lv_timer_handler();
+	EXPECT_EQ(labelText(fileItem(browser, "test.gcode"), "detail"), "2025-03-18 18:21 · 695.98 KB");
+	EXPECT_EQ(labelText(fileItem(browser, "Folder"), "detail"), "2024-09-18 14:48");
+
+	// In a folder with nothing in it, which says so, Up goes back
+	lv_obj_send_event(fileItem(browser, "Folder"), LV_EVENT_CLICKED, nullptr);
+	load_model_data(R"({"dir":"0:/gcodes/Folder/","first":0,"files":[],"next":0})"
+					"\n");
+	deliverModelEvents();
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_FALSE(lv_obj_has_state(up, LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_flag(empty, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/empty_folder.png");
+	lv_obj_send_event(up, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(crumbs), 1u);
+	EXPECT_TRUE(lv_obj_has_state(up, LV_STATE_DISABLED));
+}
+
+TEST_F(TestHomeView, SearchShowsOnlyTheFilesWhoseNamesHoldWhatIsTyped)
+{
+	// With an input group, as the screen has, so the search line takes the focus from the button that opens it
+	lv_group_t* group = lv_group_create();
+	lv_group_set_default(group);
+	lv_indev_t* pointer = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	lv_indev_set_group(pointer, group);
+	UI::Xml::reload();
+	const auto tap = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
+
+	openFilesTab(1);
+	lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+	lv_obj_send_event(lv_obj_find_by_name(browser, "list_mode"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_t* search = lv_obj_find_by_name(browser, "search");
+	lv_obj_t* input = lv_obj_find_by_name(browser, "search_input");
+	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
+	ASSERT_NE(keyboard, nullptr);
+	EXPECT_TRUE(isHidden(browser, "search_line")) << "closed until search is tapped";
+
+	// Opened, it is ready to type into
+	tap(search);
+	EXPECT_FALSE(isHidden(browser, "search_line"));
+	EXPECT_TRUE(lv_obj_has_state(search, LV_STATE_CHECKED));
+	EXPECT_TRUE(lv_obj_has_state(input, LV_STATE_FOCUSED));
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "the keyboard comes up at once";
+	EXPECT_EQ(lv_keyboard_get_textarea(keyboard), input);
+
+	// Only the names holding what is typed, whatever its case
+	lv_textarea_set_text(input, "TEST");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_NE(fileItem(browser, "test.gcode"), nullptr);
+	EXPECT_THROW(fileItem(browser, "Folder"), std::runtime_error);
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/search.png");
+
+	// Nothing found says so, not that the folder is empty
+	lv_textarea_set_text(input, "benchy");
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_FALSE(isHidden(browser, "no_match"));
+	EXPECT_TRUE(isHidden(browser, "empty"));
+	EXPECT_THROW(fileItem(browser, "test.gcode"), std::runtime_error);
+	lv_obj_send_event(input, LV_EVENT_READY, nullptr); // the keyboard's OK key puts it away
+	lv_obj_update_layout(lv_screen_active());
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/search_no_match.png");
+
+	// Emptied, everything shows again
+	tap(lv_obj_find_by_name(browser, "clear_search"));
+	EXPECT_STREQ(lv_textarea_get_text(input), "");
+	EXPECT_TRUE(isHidden(browser, "no_match"));
+	EXPECT_NE(fileItem(browser, "Folder"), nullptr);
+	EXPECT_NE(fileItem(browser, "test.gcode"), nullptr);
+
+	// A folder found opens unsearched
+	lv_textarea_set_text(input, "fold");
+	tap(fileItem(browser, "Folder"));
+	EXPECT_TRUE(isHidden(browser, "search_line"));
+	EXPECT_FALSE(lv_obj_has_state(search, LV_STATE_CHECKED));
+	EXPECT_STREQ(lv_textarea_get_text(input), "");
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// Search tapped again closes the line and shows everything
+	lv_obj_send_event(lv_obj_find_by_name(browser, "up"), LV_EVENT_CLICKED, nullptr);
+	tap(search);
+	lv_textarea_set_text(input, "fold");
+	EXPECT_THROW(fileItem(browser, "test.gcode"), std::runtime_error);
+	tap(search);
+	EXPECT_TRUE(isHidden(browser, "search_line"));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_NE(fileItem(browser, "test.gcode"), nullptr);
+
+	lv_test_mouse_release();
+	lv_indev_set_group(pointer, nullptr);
+	lv_group_set_default(nullptr);
+	lv_group_delete(group);
 }
 
 TEST_F(TestHomeView, BlankStatusView)
 {
-	view.getDashboard().showStatusTab();
+	showJobStatus();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/blank.png")
 }
 
-#if SIDE_BAR_APP_DRAWER
-TEST_F(TestHomeView, BlankMoveView)
+TEST_F(TestHomeView, SidebarOpensPagesAndShowsWhichIsOpen)
 {
-	openScreen(&view.getMoveView(), false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/blank.png");
-}
+	lv_obj_t* sidebar = UI::findView("sidebar")->getRootPtr();
+	// Each page's button, in the widget placed for the page
+	auto button = [sidebar](const char* name)
+	{ return lv_obj_find_by_name(lv_obj_find_by_name(sidebar, name), "button"); };
+	deliverModelEvents();
+	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
-TEST_F(TestHomeView, BlankTemperatureView)
-{
-	openScreen(&view.getTemperatureView(), false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/temperature_view/blank.png")
-}
+	// Each button raises nav.open with its page's name
+	lv_obj_send_event(button("control"), LV_EVENT_CLICKED, nullptr);
+	deliverModelEvents();
+	EXPECT_TRUE(UI::findView("control")->isVisible());
+	EXPECT_FALSE(UI::findView("dashboard")->isVisible());
+	EXPECT_TRUE(lv_obj_has_state(button("control"), LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 
-TEST_F(TestHomeView, BlankFanView)
-{
-	openScreen(&view.getFanView(), false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/fan_view/blank.png");
-}
+	lv_obj_send_event(button("settings"), LV_EVENT_CLICKED, nullptr);
+	deliverModelEvents();
+	EXPECT_TRUE(UI::findView("settings")->isVisible());
+	EXPECT_FALSE(UI::findView("control")->isVisible());
+	EXPECT_TRUE(lv_obj_has_state(button("settings"), LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(button("control"), LV_STATE_CHECKED));
 
-TEST_F(TestHomeView, BlankHeightmapView)
-{
-	openScreen(&view.getHeightmapView(), false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/heightmap_view/blank.png");
+	// nav.home closes them all
+	lv_obj_send_event(button("home"), LV_EVENT_CLICKED, nullptr);
+	deliverModelEvents();
+	EXPECT_TRUE(UI::findView("dashboard")->isVisible());
+	EXPECT_FALSE(UI::findView("settings")->isVisible());
+	EXPECT_TRUE(lv_obj_has_state(button("home"), LV_STATE_CHECKED));
 }
-
-TEST_F(TestHomeView, AppDrawer)
-{
-	view.show();
-	view.getSideBar().showAppDrawer(true, LV_ANIM_OFF);
-	EXPECT_EQUAL_SCREENSHOT("home_view/app_drawer.png");
-}
-#endif
 
 TEST_F(TestHomeView, Response)
 {
-	view.getPresenter()->newResponse(ResponseType::INFO, "This is a response message from the Duet");
+	notifications().newResponse(ResponseType::INFO, "This is a response message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response.png");
 }
 
 TEST_F(TestHomeView, SuccessResponse)
 {
-	view.getPresenter()->newResponse(ResponseType::SUCCESS, "This is a success message from the Duet");
+	notifications().newResponse(ResponseType::SUCCESS, "This is a success message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_success.png");
 }
 
 TEST_F(TestHomeView, WarningResponse)
 {
-	view.getPresenter()->newResponse(ResponseType::WARNING, "This is a warning message from the Duet");
+	notifications().newResponse(ResponseType::WARNING, "This is a warning message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_warning.png");
 }
 
 TEST_F(TestHomeView, ErrorResponse)
 {
-	view.getPresenter()->newResponse(ResponseType::ERROR, "This is an error message from the Duet");
+	notifications().newResponse(ResponseType::ERROR, "This is an error message from the Duet");
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/response_error.png");
 }
 
@@ -278,17 +761,12 @@ TEST_F(TestHomeView, HandleUpdateResultSuccess)
 									.currentBuildrootVersion = "v1.0.0",
 									.updateBuildrootVersion = "v1.0.0"};
 
-	view.getPresenter()->handleUpdateResult(info);
+	notifications().handleUpdateResult(info);
 
-	auto& prompt = view.getUpdatePrompt();
-	EXPECT_TRUE(prompt.isVisible());
-	EXPECT_TRUE(prompt.getOkBtn().isVisible());
-	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
-	EXPECT_NE(std::string(prompt.getTitle().getText()), "");
-	EXPECT_NE(std::string(prompt.getText().getText()), "");
+	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_success.png");
-	prompt.close();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
@@ -298,17 +776,12 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootError)
 									.currentBuildrootVersion = "v0.1.0",
 									.updateBuildrootVersion = "v1.0.0"};
 
-	view.getPresenter()->handleUpdateResult(info);
+	notifications().handleUpdateResult(info);
 
-	auto& prompt = view.getUpdatePrompt();
-	EXPECT_TRUE(prompt.isVisible());
-	EXPECT_TRUE(prompt.getOkBtn().isVisible());
-	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
-	EXPECT_NE(std::string(prompt.getTitle().getText()), "");
-	EXPECT_NE(std::string(prompt.getText().getText()), "");
+	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_failed.png");
-	prompt.close();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
@@ -318,158 +791,141 @@ TEST_F(TestHomeView, HandleUpdateResultBuildrootWarning)
 									.currentBuildrootVersion = "v1.0.0",
 									.updateBuildrootVersion = "v1.0.1"};
 
-	view.getPresenter()->handleUpdateResult(info);
+	notifications().handleUpdateResult(info);
 
-	auto& prompt = view.getUpdatePrompt();
-	EXPECT_TRUE(prompt.isVisible());
-	EXPECT_TRUE(prompt.getOkBtn().isVisible());
-	EXPECT_FALSE(prompt.getCancelBtn().isVisible());
-	EXPECT_NE(std::string(prompt.getTitle().getText()), "");
-	EXPECT_NE(std::string(prompt.getText().getText()), "");
+	expectUpdateResult();
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/update_warning.png");
-	prompt.close();
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, NewStatusDisablesAndEnablesJobsTab)
 {
-	auto& files = view.getFileView();
+	auto& files = filesPage();
 	ASSERT_NE(files.getTabButton(1), nullptr);
 
-	view.getPresenter()->newStatus(OM::PrinterStatus::processing);
-	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
+	Model::get().post<EventType::Status>(OM::PrinterStatus::paused);
+	deliverModelEvents();
+	EXPECT_TRUE(files.getTabButton(1)->hasState(LV_STATE_DISABLED)) << "a paused job can't be replaced either";
 
-	view.getPresenter()->newStatus(OM::PrinterStatus::idle);
+	Model::get().post<EventType::Status>(OM::PrinterStatus::idle);
+	deliverModelEvents();
 	EXPECT_FALSE(files.getTabButton(1)->hasState(LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeView, AlertS0)
 {
 	load_model_data_from_file("tests/object_model/m291/s0.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s0.png");
 }
 
 TEST_F(TestHomeView, AlertS1)
 {
 	load_model_data_from_file("tests/object_model/m291/s1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s1.png");
 }
 
 TEST_F(TestHomeView, AlertS2)
 {
 	load_model_data_from_file("tests/object_model/m291/s2.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s2.png");
 }
 
 TEST_F(TestHomeView, AlertS3)
 {
 	load_model_data_from_file("tests/object_model/m291/s3.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3.png");
 
 	load_model_data_from_file("tests/object_model/test_bench/model_move_vn.json");
 	load_model_data_from_file("tests/object_model/m291/s3_axis.json");
-	view.show();
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	home.show();
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s3_axis.png");
 }
 
 TEST_F(TestHomeView, AlertS4)
 {
 	load_model_data_from_file("tests/object_model/m291/s4.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4.png");
 
 	load_model_data_from_file("tests/object_model/m291/s4_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s4_j1.png");
 }
 
 TEST_F(TestHomeView, AlertS5)
 {
 	load_model_data_from_file("tests/object_model/m291/s5.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits.png");
 
-	auto input_obj = view.getChildByName("modal_bg.alert.body.input_cont.input");
-	ASSERT_NE(input_obj, nullptr);
-	input_obj->sendEvent(LV_EVENT_FOCUSED);
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_input.png");
-
-	auto& input = static_cast<UI::LvTextarea&>(*input_obj);
-	input.setText("-1");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_min.png");
-
-	input.setText("11");
+	// A whole number from 0 to 10, typed on the alert's own pad: no sign, no dot
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("sign"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("key_dot"), LV_STATE_DISABLED));
+	TestDialogs::typeOnPad("11");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_max.png");
 
-	input.setText("10");
+	TestDialogs::tap("backspace");
+	TestDialogs::typeOnPad("0");
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_ok.png");
-
-	input.setText("5.5");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s5_limits_float.png");
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, AlertS6)
 {
 	load_model_data_from_file("tests/object_model/m291/s6.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s6_limits.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits.png");
 
-	auto input_obj = view.getChildByName("modal_bg.alert.body.input_cont.input");
-	ASSERT_NE(input_obj, nullptr);
-	input_obj->sendEvent(LV_EVENT_FOCUSED);
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_input.png");
-
-	auto& input = static_cast<UI::LvTextarea&>(*input_obj);
-	input.setText("-0.1");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_min.png");
-
-	input.setText("10.1");
+	// A number from 0 to 10, with a fraction, typed on the alert's own pad
+	TestDialogs::typeOnPad("10.1");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_max.png");
 
-	input.setText("10");
-	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_ok.png");
-
-	input.setText("5.5");
+	TestDialogs::tap("clear");
+	TestDialogs::typeOnPad("5.5");
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("ok"), LV_STATE_DISABLED));
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s6_limits_float.png");
+	UI::closeDialogs();
 }
 
 TEST_F(TestHomeView, AlertS7)
 {
 	load_model_data_from_file("tests/object_model/m291/s7_j1.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_j1.png");
 
 	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
-	view.getPresenter()->newAlertData(OM::g_currentAlert);
+	notifications().newAlertData(alertInObjectModel());
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits.png");
 
-	auto input_obj = view.getChildByName("modal_bg.alert.body.input_cont.input");
-	ASSERT_NE(input_obj, nullptr);
-	input_obj->sendEvent(LV_EVENT_FOCUSED);
+	auto& input = alertInput();
+	input.sendEvent(LV_EVENT_FOCUSED);
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_input.png");
 
-	auto& input = static_cast<UI::LvTextarea&>(*input_obj);
 	input.setText("short");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_min.png");
 
@@ -478,6 +934,136 @@ TEST_F(TestHomeView, AlertS7)
 
 	input.setText("this is ok");
 	EXPECT_EQUAL_SCREENSHOT("home_view/m291/s7_limits_ok.png");
+
+	// The next alert starts with its own text, not what was typed into the last
+	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
+	notifications().newAlertData(alertInObjectModel());
+	EXPECT_STREQ(alertInput().getText().data(), "default....");
+
+	// The keyboard's OK key answers, once the text can be sent
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	input.setText("short");
+	input.sendEvent(LV_EVENT_READY);
+	EXPECT_TRUE(sent.empty()) << "too short to send";
+	EXPECT_TRUE(notificationShown("alert"));
+	input.setText("this is ok");
+	input.sendEvent(LV_EVENT_READY);
+	EXPECT_EQ(sent,
+			  (std::vector<std::string>{fmt::format("M292 R{{\"this is ok\"}} S{:d}\n", alertInObjectModel().seq)}));
+	EXPECT_FALSE(notificationShown("alert"));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeView, TheUsbTabSaysWhenNoDriveIsPluggedIn)
+{
+	lv_obj_t* browser = openUsbBrowser();
+	EXPECT_FALSE(isHidden(browser, "no_drive"));
+	EXPECT_TRUE(isHidden(browser, "empty")) << "one line says why there is nothing";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_no_drive.png");
+
+	// Plugged in, its files show at once
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << "G28\n";
+	browser = openUsbBrowser();
+	EXPECT_TRUE(isHidden(browser, "no_drive"));
+	EXPECT_NE(fileItem(browser, "benchy.gcode"), nullptr);
+
+	// Taken out, they go
+	takeOutUsbDrive();
+	browser = openUsbBrowser();
+	EXPECT_FALSE(isHidden(browser, "no_drive"));
+	EXPECT_THROW(fileItem(browser, "benchy.gcode"), std::runtime_error);
+}
+
+TEST_F(TestHomeView, AUsbDrivesFilesAndFoldersAreBrowsed)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << std::string(1500, 'g');
+	std::ofstream(drive / "Preheat PLA.g") << "M140 S60\n";
+	std::filesystem::create_directories(drive / "parts");
+	std::ofstream(drive / "parts" / "bracket.gcode") << "G28\n";
+	lv_obj_t* browser = openUsbBrowser();
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_files.png");
+
+	lv_obj_send_event(fileItem(browser, "parts"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_NE(fileItem(browser, "bracket.gcode"), nullptr);
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_folder.png");
+
+	// With a second drive, each is a folder at the top
+	const std::filesystem::path second = plugInUsbDrive(1);
+	std::ofstream(second / "other.gcode") << "G28\n";
+	browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "usb1"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_NE(fileItem(browser, "other.gcode"), nullptr);
+}
+
+TEST_F(TestHomeView, AUsbFileIsOfferedForUploadToTheFolderItsKindGoesIn)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << std::string(1500, 'g');
+	std::ofstream(drive / "Preheat PLA.g") << "M140 S60\n";
+	lv_obj_t* browser = openUsbBrowser();
+
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "benchy.gcode");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("jobs"), LV_STATE_CHECKED)) << "a job goes in the jobs";
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED)) << "no printer to send it to";
+	EXPECT_EQ(TestDialogs::text("upload_reason"), "The printer isn't connected");
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("install"), LV_OBJ_FLAG_HIDDEN)) << "it is no update";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_file_dialog.png");
+
+	TestDialogs::tap("firmware");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("firmware"), LV_STATE_CHECKED));
+	TestDialogs::tap("cancel");
+	EXPECT_EQ(openUsbDialog(), nullptr);
+
+	lv_obj_send_event(fileItem(browser, "Preheat PLA.g"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("macros"), LV_STATE_CHECKED)) << "a macro goes in the macros";
+
+	// Its drive taken out, there is nothing to upload
+	takeOutUsbDrive();
+	deliverModelEvents();
+	runTimers();
+	EXPECT_EQ(openUsbDialog(), nullptr);
+}
+
+TEST_F(TestHomeView, AScreenUpdateOnAUsbDriveIsCheckedAndInstalled)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	writeArchive(drive / "DuetScreen.tar.gz", {{"pre-update", "#!/bin/sh\n"}, {"post-update", "#!/bin/sh\n"}});
+	writeArchive(drive / "photos.tar.gz", {{"holiday.jpg", "jpeg"}});
+	lv_obj_t* browser = openUsbBrowser();
+
+	// Not an update: said so, and it can't be installed
+	lv_obj_send_event(fileItem(browser, "photos.tar.gz"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	ASSERT_TRUE(waitFor([] { return TestDialogs::text("update_text") != _("usb.checking"); }));
+	EXPECT_EQ(TestDialogs::text("update_text"), "Not an update for this screen.");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("install"), LV_STATE_DISABLED));
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_not_an_update.png");
+	TestDialogs::tap("cancel");
+
+	// An update: installed, holding the screen until it restarts (the simulation says it succeeded instead)
+	lv_obj_send_event(fileItem(browser, "DuetScreen.tar.gz"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	ASSERT_TRUE(waitFor([] { return !lv_obj_has_state(TestDialogs::find("install"), LV_STATE_DISABLED); }));
+	EXPECT_EQ(TestDialogs::text("update_text"), "An update for this screen: installing it restarts the screen.");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_update.png");
+
+	bool updated = false;
+	Model::get().addEventListener<EventType::UpdateResult>([&updated](const UpgradeHelper::UpgradeInfo&)
+														   { updated = true; });
+	TestDialogs::tap("install");
+	ASSERT_NE(TestDialogs::shownNamed("usb_install_dialog"), nullptr);
+	EXPECT_EQ(TestDialogs::find("close"), nullptr) << "nothing else until the screen restarts";
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_installing.png");
+	EXPECT_TRUE(waitFor([&updated] { return updated; }));
+	EXPECT_TRUE(std::filesystem::exists(drive / "upgraded")) << "left beside it, as when offered on plugging in";
 }
 
 class TestHomeViewWithData : public TestHomeView
@@ -501,42 +1087,437 @@ class TestHomeViewWithData : public TestHomeView
 		load_model_data_from_file("tests/object_model/test_bench/model_all_d99f.json");
 		load_model_data_from_file("tests/object_model/rr_filelist/example1.json");
 
-		view.show();
+		home.show();
 	}
 };
+
+#if DUET_SIMULATOR
+/** The home screen connected to the simulated Duet, polled as a Duet is: its whole object model, as a Duet sends it */
+class TestHomeViewWithSimulator : public TestHomeView
+{
+  protected:
+	TestHomeViewWithSimulator()
+	{
+		setSetting("connected_message", 0); // So nothing covers the screen
+		connectSimulator();
+		pollSimulator();
+		deliverModelEvents();
+		// What the views asked for once connected (the jobs, their information and thumbnails), before any job
+		// starts: while one runs, the file cache asks only now and then
+		pollSimulator();
+		deliverModelEvents();
+	}
+};
+
+TEST_F(TestHomeViewWithSimulator, ConnectingListsNoFilesBeforeTheFoldersAreKnown)
+{
+	// The board, which announces the printer, arrives before the folders: files asked for then would name no folder,
+	// which the printer refuses ("M20: expected a non-empty string")
+	auto replies = std::make_shared<std::vector<std::string>>();
+	Model::get().addEventListener<EventType::Response>([replies](ResponseType, const std::string& text)
+													   { replies->push_back(text); });
+	openFilesTab(1);	// a file browser open meanwhile
+	connectSimulator(); // connecting again forgets the folders
+	for (int round = 0; round < 40; round++)
+	{
+		pollSimulator(1);
+		deliverModelEvents(); // as the screen does, while the rest is still to come
+	}
+	for (const std::string& reply : *replies)
+	{
+		EXPECT_EQ(reply.find("M20"), std::string::npos) << reply;
+	}
+	// Once they are known, the files are listed, in the open browser too
+	EXPECT_FALSE(UI::Xml::PrinterModel::root().at("directories.gCodes").text().empty());
+	EXPECT_NE(OM::FileSystem::GetFileListRequest("0:/gcodes/"), nullptr);
+	runTimers();
+	EXPECT_NE(fileItem(page<UI::LvObj>("files_jobs").getRootPtr(), "benchy.gcode"), nullptr);
+}
+
+TEST_F(TestHomeViewWithSimulator, TheFirstTapOnAToolsFilamentOffersThePrintersFilaments)
+{
+	// The filaments are listed on connecting, with the jobs and macros, so the first tap already has them
+	openControlTab(1);
+	deliverModelEvents();
+	lv_obj_t* cards = lv_obj_find_by_name(page<UI::LvObj>("tools").getRootPtr(), "tools");
+	ASSERT_NE(cards, nullptr);
+	lv_obj_t* choose = lv_obj_find_by_name(lv_obj_find_by_name(lv_obj_get_child(cards, 0), "filament"), "choose");
+	ASSERT_NE(choose, nullptr);
+	lv_obj_send_event(choose, LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(TestDialogs::choiceCount(), 4u) << "ABS, PETG, PLA and TPU";
+	EXPECT_EQ(TestDialogs::chosenIndex(), 2) << "PLA is loaded";
+	UI::closeDialogs();
+}
+
+TEST_F(TestHomeViewWithSimulator, DashboardFollowsAJob)
+{
+	sendToSimulator("M32 \"benchy.gcode\"");
+	showJobStatus();
+	simulate(std::chrono::seconds(300)); // warm
+	simulate(std::chrono::seconds(600)); // printing
+	deliverModelEvents();
+	runTimers();
+	EXPECT_EQ(UI::Xml::PrinterModel::root().at("state.status").text(), "processing");
+	EXPECT_GT(UI::Xml::PrinterModel::root().at("job.layer").integer(), 1);
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/dashboard_printing.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, TheJobPanelLeadsBackToTheJob)
+{
+	sendToSimulator("M32 \"benchy.gcode\"");
+	simulate(std::chrono::seconds(300));
+	deliverModelEvents();
+	dashboardJobPages().open("ready"); // back to the jobs: the job running leads back to its status
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/job_panel.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, ToolInUseIsDeselectedAfterACancelledJob)
+{
+	sendToSimulator("M32 \"benchy.gcode\"");
+	simulate(std::chrono::seconds(300));
+	sendToSimulator("M25");
+	simulate(std::chrono::seconds(2));
+	sendToSimulator("M0"); // the heaters go off; the tool stays in use
+	simulate(std::chrono::seconds(2));
+	ASSERT_EQ(UI::Xml::PrinterModel::currentTool(), 0u);
+
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("dashboard").getRootPtr(), "actions.tool.toggle", "0");
+	simulate(std::chrono::seconds(1));
+	EXPECT_FALSE(UI::Xml::PrinterModel::currentTool().has_value());
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("dashboard").getRootPtr(), "actions.tool.toggle", "0");
+	simulate(std::chrono::seconds(1));
+	EXPECT_EQ(UI::Xml::PrinterModel::currentTool(), 0u);
+}
+
+TEST_F(TestHomeViewWithSimulator, FansTheFirmwareRunsAreNotSetByHand)
+{
+	openControlTab(4);
+	deliverModelEvents();
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/fans.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, MoveTabWithOneMoreAxis)
+{
+	connectSimulator(Sim::presets()[2].make()); // the tool changer: X, Y, Z and C
+	pollSimulator();
+	sendToSimulator("G28");
+	simulate(std::chrono::seconds(2));
+	openControlTab(0);
+	deliverModelEvents();
+	runTimers();
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(move, "choices"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(lv_obj_get_scroll_right(lv_obj_find_by_name(move, "jog")), 0) << "every column fits";
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/move_one_more_axis.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, BedMeshNotChosenAsksForOne)
+{
+	openControlTab(0);
+	openControlTab(2);
+	for (int i = 0; i < 3; i++) // the saved meshes, asked for as the tab opens
+	{
+		pollSimulator();
+		deliverModelEvents();
+	}
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/heightmap_none_chosen.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, BedMeshProbedIsShown)
+{
+	sendToSimulator("G28\nG29");
+	simulate(std::chrono::seconds(5));
+	deliverModelEvents();
+	openControlTab(0);
+	openControlTab(2);
+	// The tab asks for the saved meshes, then for the one in use's file: each answered as the screen polls
+	for (int i = 0; i < 5; i++)
+	{
+		pollSimulator();
+		deliverModelEvents();
+	}
+	runTimers();
+	lv_obj_t* page = UI::findView("heightmap")->getRootPtr();
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "detail")), "heightmap.csv");
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(page, "points"), "value")), "121");
+	EXPECT_EQUAL_SCREENSHOT("home_view/simulator/heightmap.png")
+}
+
+TEST_F(TestHomeViewWithSimulator, AFileOnAUsbDriveIsUploadedWithItsProgressShown)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::string contents;
+	for (int i = 0; contents.size() < 20 * 1024; i++)
+	{
+		contents += fmt::format("G1 X{:d} Y{:d}\n", i % 200, i % 150);
+	}
+	std::ofstream(drive / "benchy.gcode") << contents;
+	lv_obj_t* browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED))
+		<< TestDialogs::text("upload_reason");
+	TestDialogs::tap("upload");
+
+	// Read through for its size and CRC, then sent a piece at a time
+	ASSERT_TRUE(waitFor([] { return TestDialogs::text("upload_text") == "Uploading benchy.gcode to Jobs…"; }));
+	bool pictured = false;
+	for (int exchange = 0; exchange < 200 && TestDialogs::text("upload_text") != "benchy.gcode is now in Jobs";
+		 exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+		deliverModelEvents();
+		runTimers();
+		lv_obj_t* progress = TestDialogs::find("progress");
+		if (progress != nullptr && !lv_obj_check_type(progress, &lv_bar_class))
+		{
+			progress = lv_obj_find_by_name(progress, "progress");
+		}
+		ASSERT_NE(progress, nullptr);
+		const int32_t percent = lv_bar_get_value(progress);
+		if (!pictured && percent >= 40 && percent <= 60)
+		{
+			pictured = true;
+			EXPECT_FALSE(isHidden(page<UI::LvObj>("status_bar").getRootPtr(), "transfer")) << "the status bar too";
+			EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_uploading.png");
+		}
+	}
+	EXPECT_TRUE(pictured) << "its progress was shown as it went";
+	EXPECT_EQ(TestDialogs::text("upload_text"), "benchy.gcode is now in Jobs");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_uploaded.png");
+	EXPECT_EQ(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
+												{ return machine.writtenFile("0:/gcodes/benchy.gcode"); }),
+			  contents);
+	TestDialogs::tap("close");
+	EXPECT_EQ(openUsbDialog(), nullptr);
+	EXPECT_TRUE(isHidden(page<UI::LvObj>("status_bar").getRootPtr(), "transfer"));
+	EXPECT_FALSE(isHidden(page<UI::LvObj>("status_bar").getRootPtr(), "name")) << "the printer's name, again";
+}
+
+TEST_F(TestHomeViewWithSimulator, FilesAreUploadedOnlyWhileThePrinterIsIdle)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << "G28\n";
+	lv_obj_t* browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED)) << "idle";
+
+	// Busy: a long move
+	sendToSimulator("G28");
+	simulate(std::chrono::seconds(30));
+	sendToSimulator("G1 X200 F60");
+	pollSimulator();
+	deliverModelEvents();
+	runTimers();
+	ASSERT_EQ(UI::Xml::PrinterModel::root().at("state.status").text(), "busy");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED));
+	EXPECT_EQ(TestDialogs::text("upload_reason"), "The printer isn't idle (Busy): files can be uploaded once it is");
+
+	// Idle again, it can
+	simulate(std::chrono::seconds(300));
+	deliverModelEvents();
+	runTimers();
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED));
+
+	// A job
+	sendToSimulator("M32 \"benchy.gcode\"");
+	pollSimulator();
+	deliverModelEvents();
+	runTimers();
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED));
+	EXPECT_EQ(TestDialogs::text("upload_reason"), "A job is active: files can be uploaded once it has ended");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_job_active.png");
+}
+
+TEST_F(TestHomeViewWithSimulator, AnUploadOverASerialLinkCantBeCancelledOnceItIsSent)
+{
+	// The simulated Duet is reached as over USB: the printer takes the whole file once it has started (M559)
+	const std::filesystem::path drive = plugInUsbDrive();
+	const std::string contents(20 * 1024, 'g');
+	std::ofstream(drive / "benchy.gcode") << contents;
+	lv_obj_t* browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::tap("upload");
+	ASSERT_TRUE(waitFor([] { return TestDialogs::text("upload_text") == "Uploading benchy.gcode to Jobs…"; }));
+	for (int exchange = 0; exchange < 6; exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+	}
+	deliverModelEvents();
+	runTimers();
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("cancel_upload"), LV_OBJ_FLAG_HIDDEN));
+
+	// Closed, the status bar shows it, in place of the printer's name; tapped, the dialog shows it again
+	TestDialogs::tap("close");
+	lv_obj_t* statusBar = page<UI::LvObj>("status_bar").getRootPtr();
+	EXPECT_FALSE(isHidden(statusBar, "transfer"));
+	EXPECT_TRUE(isHidden(statusBar, "name"));
+	EXPECT_EQ(labelText(statusBar, "transfer_title"), "Uploading");
+	EXPECT_EQ(labelText(statusBar, "transfer_file"), "benchy.gcode");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_upload_in_status_bar.png");
+	lv_obj_send_event(lv_obj_find_by_name(statusBar, "transfer"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_EQ(TestDialogs::title(), "benchy.gcode");
+	EXPECT_EQ(TestDialogs::text("upload_text"), "Uploading benchy.gcode to Jobs…");
+	TestDialogs::tap("close");
+
+	// Asked anyway, it carries on
+	UI::Xml::Actions::dispatch(browser, "actions.usb.cancel_upload", "");
+	for (int exchange = 0; exchange < 200 && !isHidden(statusBar, "transfer"); exchange++)
+	{
+		Comm::Connection::get().process();
+		Sim::Simulator::get().process();
+		Comm::Connection::get().process();
+		deliverModelEvents();
+		runTimers();
+	}
+	EXPECT_EQ(Sim::Simulator::get().withMachine([](Sim::Machine& machine)
+												{ return machine.writtenFile("0:/gcodes/benchy.gcode"); }),
+			  contents);
+}
+#endif
 
 TEST_F(TestHomeViewWithData, Dashboard)
 {
 	ZoneScoped;
-	EXPECT_EQ(OM::Heat::GetHeaterCount(), 4);
-	EXPECT_EQ(OM::GetToolCount(), 4);
+	EXPECT_EQ(countOf("heat.heaters"), 4u);
+	EXPECT_EQ(countOf("tools"), 4u);
 
-	/* Populate graph with fake sensor data */
-	auto sensor = OM::GetAnalogSensorBySlot(0);
-	sensor->lastReading = 25.0f;
+	/* Populate graph with fake sensor data, as the model ticks would */
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
+
+	// Every heater with a sensor, each sensor once: heater 4 shares the Revo's, and heater 3 is shown although the last
+	// update listed fewer sensors than its sensor's number
+	temperatures->sample();
+	ASSERT_EQ(temperatureGraph().getSeriesCount(), 3u);
+	EXPECT_EQ(temperatureGraph().getSeries(0)->legendItem->getName(), "Bed");
+	EXPECT_EQ(temperatureGraph().getSeries(1)->legendItem->getName(), "Revo with long heater name");
+	EXPECT_EQ(temperatureGraph().getSeries(2)->legendItem->getName(), "Heater 3");
+
+	int32_t reading = 25;
 	for (size_t i = 0; i < 1000; i++)
 	{
-		view.getDashboard().getGraph().getPresenter()->tick();
-		sensor->lastReading = (int32_t)(sensor->lastReading + 1) % 300;
+		// The bed's temperature rises; the other heaters keep the test bench's
+		load_model_data(fmt::format(
+			R"json({{"key":"heat","flags":"f","result":{{"heaters":[{{"current":{}}},null,{{"current":22.32}},{{"current":22.32}},{{"current":22.32}}]}}}})json",
+			reading));
+		temperatures->sample();
+		reading = (reading + 1) % 300;
 	}
 
-	view.getDashboard().getGraph().showSeries(1, false);
+	// Hidden from the legend, the Revo's line is hidden for its key in the tool list too, which shows it hollow
+	lv_obj_send_event(temperatureGraph().getSeries(1)->legendItem->getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(temperatureGraph().isSeriesShown(1));
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/temperature_graph.png");
 
 	/* Open the tool list numberpad */
-	view.getDashboard().getToolList().getTool(0)->getHeater(0)->getChildByName("active")->sendEvent(LV_EVENT_CLICKED,
-																									nullptr);
+	// The first tool's first heater row, as dashboard_tools.xml builds it
+	lv_obj_t* toolList = dashboardToolList();
+	lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
+	lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tool_list_numberpad.png");
 
-	UI::closeAllModals();
+	UI::closeDialogs();
+}
 
-	/* Test all themes */
-	for (auto& [name, theme] : UI::Themes::getThemes())
-	{
-		theme->setThemeActive();
-		EXPECT_EQUAL_SCREENSHOT(fmt::format("home_view/dashboard/theme_{:s}.png", theme->getName()).c_str());
-	}
+TEST_F(TestHomeViewWithData, GraphKeyShowsAndHidesItsSeries)
+{
+	// Build the tool list's rows
+	deliverModelEvents();
+	auto* temperatures = UI::Xml::DataSources::find<UI::Xml::TemperatureSource>();
+	ASSERT_NE(temperatures, nullptr);
+	temperatures->sample();
+	ASSERT_EQ(temperatureGraph().getSeriesCount(), 3u);
+
+	// The first tool's heater is the Revo: the graph's second series, so its key has the second series colour
+	lv_obj_t* key = lv_obj_find_by_name(lv_obj_find_by_name(dashboardToolList(), "tools"), "graph_key");
+	ASSERT_NE(key, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(key, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_color_eq(lv_obj_get_style_bg_color(key, LV_PART_MAIN), UI::Themes::seriesColor(1)));
+	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
+
+	// Tapping the key hides the line, and the legend shows it hidden
+	lv_obj_send_event(key, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(temperatureGraph().isSeriesShown(1));
+	EXPECT_FALSE(lv_obj_has_state(key, LV_STATE_CHECKED));
+	EXPECT_TRUE(temperatureGraph().isSeriesShown(0));
+
+	// Tapping the legend shows it again, and the key follows
+	lv_obj_send_event(temperatureGraph().getSeries(1)->legendItem->getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(temperatureGraph().isSeriesShown(1));
+	EXPECT_TRUE(lv_obj_has_state(key, LV_STATE_CHECKED));
+}
+
+TEST_F(TestHomeViewWithData, ToolsWidgetShowsToolsInTheStyleChosen)
+{
+	deliverModelEvents();
+	const auto hidden = [](lv_obj_t* widget, const char* name)
+	{ return lv_obj_has_flag(lv_obj_find_by_name(widget, name), LV_OBJ_FLAG_HIDDEN); };
+
+	// Automatic: a tool here has a spindle, so one tool is shown, the rest summarised as tiles
+	lv_obj_t* widget = dashboardToolList();
+	EXPECT_TRUE(hidden(widget, "equal"));
+	EXPECT_FALSE(hidden(widget, "summary"));
+	lv_obj_t* tiles = lv_obj_find_by_name(widget, "tiles");
+	lv_obj_t* shown = lv_obj_find_by_name(widget, "shown");
+	ASSERT_EQ(lv_obj_get_child_count(tiles), 4u) << "a tile per tool";
+	ASSERT_EQ(lv_obj_get_child_count(shown), 1u) << "the tool in use, in detail";
+	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary.png");
+
+	// Tapping a tile shows that tool without selecting it; tapping the tool in use's follows the tool in use again
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	lv_obj_send_event(lv_obj_get_child(tiles, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(sent.empty()) << "looking isn't selecting";
+	ASSERT_EQ(lv_obj_get_child_count(shown), 1u);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Dual drive");
+	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/tools_summary_other.png");
+	lv_obj_send_event(lv_obj_get_child(tiles, 0), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(shown, 0), "name")), "Tool 0");
+	UI::Xml::Services::setGcodeSender(nullptr);
+
+	// All equally, the widget's setting: every tool's card
+	auto& editor = UI::Xml::LayoutEditor::get();
+	editor.begin();
+	editor.select("dashboard", "tools");
+	ASSERT_TRUE(editor.setSetting("style", 1));
+	widget = dashboardToolList();
+	EXPECT_FALSE(hidden(widget, "equal"));
+	EXPECT_TRUE(hidden(widget, "summary"));
+	editor.cancel();
+}
+
+TEST_F(TestHomeViewWithData, ToolListLocksHeatersWhilePrinting)
+{
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
+	deliverModelEvents();
+	lv_obj_t* toolList = dashboardToolList();
+	lv_obj_t* tools = lv_obj_find_by_name(toolList, "tools");
+	lv_obj_t* beds = lv_obj_find_by_name(toolList, "beds");
+	ASSERT_NE(lv_obj_find_by_name(tools, "state"), nullptr);
+	ASSERT_NE(lv_obj_find_by_name(beds, "state"), nullptr);
+
+	// Printing: nothing that would change the job can be pressed
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "deselect"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(tools, "state"), LV_STATE_DISABLED));
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(beds, "state"), LV_STATE_DISABLED));
+	// Temperatures can still be set
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "active"), LV_STATE_DISABLED));
+
+	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
+	deliverModelEvents();
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(tools, "state"), LV_STATE_DISABLED));
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_find_by_name(beds, "state"), LV_STATE_DISABLED));
 }
 
 TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
@@ -545,10 +1526,10 @@ TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
 	load_model_data_from_file("tests/object_model/5_axis/model_heat_v.json");
 	load_model_data_from_file("tests/object_model/5_axis/model_tools_v.json");
 
-	EXPECT_EQ(OM::Heat::GetHeaterCount(), 1);
-	EXPECT_EQ(OM::GetToolCount(), 1);
-	EXPECT_EQ(OM::GetBedCount(), 0);
-	EXPECT_EQ(OM::GetChamberCount(), 0);
+	EXPECT_EQ(countOf("heat.heaters"), 1u);
+	EXPECT_EQ(countOf("tools"), 1u);
+	EXPECT_TRUE(UI::Xml::PrinterModel::beds().empty());
+	EXPECT_TRUE(UI::Xml::PrinterModel::chambers().empty());
 
 	EXPECT_EQUAL_SCREENSHOT("home_view/dashboard/simple_printer.png");
 }
@@ -556,179 +1537,1334 @@ TEST_F(TestHomeViewWithData, SimplePrinterDashboard)
 TEST_F(TestHomeViewWithData, ConsoleView)
 {
 	ZoneScoped;
-	openScreen(&view.getConsoleView());
+	UI::openScreen(std::string_view("console"));
 
-	auto presenter = view.getConsoleView().getPresenter();
-	view.getConsoleView().addCommand("M115");
-	presenter->newResponse(ResponseType::INFO, "Testing response");
-	presenter->newResponse(ResponseType::INFO, "new multi-line response\nline 2");
-	presenter->newResponse(ResponseType::SUCCESS, "Success response");
-	presenter->newResponse(ResponseType::WARNING, "Warning response");
-	presenter->newResponse(ResponseType::ERROR, "Error response");
-
-	presenter->newLogMessage(Log::DebugLevel::Info, Log::log_time_t{}, "Testing log message");
-
+	// As the Duet and the logger would report them: each kind of line is marked its own way
+	Model::get().post<EventType::ConsoleCommand>(std::string("M115"));
+	Model::get().post<EventType::Response>(ResponseType::INFO, std::string("Testing response"));
+	Model::get().post<EventType::Response>(ResponseType::INFO, std::string("new multi-line response\nline 2"));
+	Model::get().post<EventType::Response>(ResponseType::SUCCESS, std::string("Success response"));
+	Model::get().post<EventType::Response>(ResponseType::WARNING, std::string("Warning response"));
+	Model::get().post<EventType::Response>(ResponseType::ERROR, std::string("Error response"));
+	Model::get().post<EventType::LogMessage>(
+		Log::DebugLevel::Info, Log::log_time_t{}, std::string("Testing log message"));
+	Model::get().post<EventType::LogMessage>(
+		Log::DebugLevel::Error, Log::log_time_t{}, std::string("Testing log error"));
+	deliverModelEvents();
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/duet_responses.png")
 
-	view.getConsoleView().showCommandList(true, false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list.png");
+	// The reference opens as a dialog
+	lv_obj_send_event(consolePart("reference"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("reference_dialog"), nullptr);
+	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/reference.png");
+	UI::closeDialogs();
 
-	view.getConsoleView().showCommandList(false, false);
-	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/command_list_hidden.png");
-
-	view.getConsoleView().showKeyboard(true);
+	lv_obj_send_event(consolePart("input"), LV_EVENT_FOCUSED, nullptr);
 	EXPECT_EQUAL_SCREENSHOT("home_view/console_view/keyboard.png");
+}
+
+TEST_F(TestHomeViewWithData, ConsoleReferenceSearchesAndPicks)
+{
+	UI::openScreen(std::string_view("console"));
+	lv_obj_t* list = consolePart("list");
+	auto& input = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("input")));
+	auto& search = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("search")));
+	const auto codes = [&]
+	{
+		std::vector<std::string> found;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(list); i++)
+		{
+			if (lv_obj_t* code = lv_obj_find_by_name(lv_obj_get_child(list, static_cast<int32_t>(i)), "gcode"))
+			{
+				found.emplace_back(lv_label_get_text(code));
+			}
+		}
+		return found;
+	};
+
+	// Opened, it searches for the first word typed
+	input.setText("m11 S1");
+	lv_obj_send_event(consolePart("reference"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("reference_dialog"), nullptr);
+	EXPECT_EQ(search.getText(), "m11");
+	lv_obj_update_layout(lv_screen_active());
+	auto found = codes();
+	ASSERT_FALSE(found.empty());
+	for (const auto& code : found)
+	{
+		EXPECT_TRUE(code.starts_with("M11")) << code << " for lower case m11";
+	}
+
+	// It finds a G-code by what it does, too
+	search.setText("home");
+	lv_obj_update_layout(lv_screen_active());
+	found = codes();
+	EXPECT_NE(std::find(found.begin(), found.end(), "G28"), found.end()) << "G28 homes";
+
+	// Picking one types it and closes the reference
+	lv_obj_t* first = nullptr;
+	for (uint32_t i = 0; i < lv_obj_get_child_count(list) && first == nullptr; i++)
+	{
+		first = lv_obj_find_by_name(lv_obj_get_child(list, static_cast<int32_t>(i)), "gcode");
+	}
+	ASSERT_NE(first, nullptr);
+	const std::string picked = lv_label_get_text(first);
+	lv_obj_send_event(lv_obj_get_parent(first), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(input.getText(), picked);
+	EXPECT_EQ(TestDialogs::shownNamed("reference_dialog"), nullptr);
+}
+
+TEST_F(TestHomeViewWithData, ConsoleListsScrollWhenDragged)
+{
+	UI::openScreen(std::string_view("console"));
+	lv_indev_t* mouse = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	const auto drag = [mouse](lv_obj_t* obj, int32_t dx, int32_t dy)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		const lv_point_t from{(area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2};
+		lv_test_mouse_move_to(from.x, from.y);
+		lv_test_mouse_press();
+		lv_indev_read(mouse);
+		for (int step = 1; step <= 10; step++)
+		{
+			lv_test_mouse_move_to(from.x + dx * step / 10, from.y + dy * step / 10);
+			lv_indev_read(mouse);
+		}
+		lv_test_mouse_release();
+		lv_indev_read(mouse);
+		lv_timer_handler();
+	};
+	const auto dragBy = [&](lv_obj_t* obj, int32_t dy) { drag(obj, 0, dy); };
+	const auto dragByX = [&](lv_obj_t* obj, int32_t dx) { drag(obj, dx, 0); };
+
+	// The reference: dragged up, it shows later G-codes
+	lv_obj_send_event(consolePart("reference"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("reference_dialog"), nullptr);
+	lv_obj_t* list = TestDialogs::find("list");
+	ASSERT_NE(list, nullptr);
+	dragBy(list, -150);
+	EXPECT_GT(lv_obj_get_scroll_y(list), 0) << "the reference";
+	UI::closeDialogs();
+
+	// The log: more than a screenful, dragged down, it shows earlier lines
+	for (int i = 0; i < 40; i++)
+	{
+		Model::get().post<EventType::Response>(ResponseType::INFO, fmt::format("response {:d}", i));
+	}
+	deliverModelEvents();
+	lv_obj_t* output = consolePart("output");
+	lv_obj_update_layout(lv_screen_active());
+	const int32_t before = lv_obj_get_scroll_y(output);
+	dragBy(output, 150);
+	EXPECT_LT(lv_obj_get_scroll_y(output), before) << "the log";
+
+	// The recent commands: more than fit, dragged left, they show the oldest
+	for (int i = 0; i < 6; i++)
+	{
+		Model::get().post<EventType::ConsoleCommand>(fmt::format("M98 P\"macros/a long macro name {:d}.g\"", i));
+	}
+	deliverModelEvents();
+	lv_obj_t* recent = consolePart("recent");
+	dragByX(recent, -300);
+	EXPECT_GT(lv_obj_get_scroll_x(recent), 0) << "the recent commands";
+}
+
+TEST_F(TestHomeViewWithData, ConsoleSendsAndRecallsRecentCommands)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	UI::openScreen(std::string_view("console"));
+	lv_obj_t* recent = consolePart("recent");
+	auto& input = static_cast<UI::LvTextarea&>(*UI::LvObj::fromPtr(consolePart("input")));
+	const auto send = [&](const char* command)
+	{
+		input.setText(command);
+		lv_obj_send_event(consolePart("enter"), LV_EVENT_CLICKED, nullptr);
+		deliverModelEvents();
+	};
+	const auto recentCommands = [&]
+	{
+		std::vector<std::string> commands;
+		for (uint32_t i = 0; i < lv_obj_get_child_count(recent); i++)
+		{
+			lv_obj_t* button = lv_obj_find_by_name(lv_obj_get_child(recent, static_cast<int32_t>(i)), "command");
+			commands.emplace_back(static_cast<UI::Button&>(*UI::LvObj::fromPtr(button)).getText());
+		}
+		return commands;
+	};
+
+	send("G28");
+	send("M114");
+	send("G28");
+	EXPECT_EQ(sent, (std::vector<std::string>{"G28\n", "M114\n", "G28\n"}));
+	EXPECT_EQ(recentCommands(), (std::vector<std::string>{"G28", "M114"})) << "newest first, each once";
+
+	// A recent command goes back in the text box, to send again
+	input.setText("");
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_get_child(recent, 1), "command"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(input.getText(), "M114");
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, ConsoleFollowsNewLines)
+{
+	UI::openScreen(std::string_view("console"));
+	lv_obj_t* output = consolePart("output");
+	ASSERT_NE(output, nullptr);
+
+	// More than a screenful, arriving one at a time, some wrapping
+	for (int i = 0; i < 40; i++)
+	{
+		Model::get().post<EventType::Response>(
+			ResponseType::INFO,
+			fmt::format("response {:d}{:s}", i, i % 3 == 0 ? std::string(150, 'x') : std::string("\nsecond line")));
+		deliverModelEvents();
+		lv_refr_now(nullptr);
+
+		lv_obj_t* last = lv_obj_get_child(output, -1);
+		lv_area_t lastArea;
+		lv_area_t outputArea;
+		lv_obj_get_coords(last, &lastArea);
+		lv_obj_get_content_coords(output, &outputArea);
+		EXPECT_GE(lv_obj_get_scroll_top(output), 0) << "line " << i;
+		EXPECT_LE(lv_obj_get_scroll_bottom(output), 0) << "line " << i;
+		EXPECT_LE(lastArea.y2, outputArea.y2) << "line " << i << ": the newest line is below the view";
+		EXPECT_GE(lastArea.y1, outputArea.y1) << "line " << i << ": the newest line is above the view";
+	}
+}
+
+TEST_F(TestHomeViewWithData, BedMeshListsSavedMeshesShowsOneAndColoursIt)
+{
+	setSetting("connected_message", 0); // So nothing covers the screen
+	ScriptedPrinter& printer = connectScriptedPrinter();
+	load_model_data_from_file("tests/object_model/test_bench/model_directories_v.json");
+	deliverModelEvents();
+	// Opening the tab asks for the saved meshes; the printer answers one listing at a time, so it is opened last
+	openControlTab(0);
+	openControlTab(2);
+	lv_obj_t* page = UI::findView("heightmap")->getRootPtr();
+	lv_obj_t* choice = lv_obj_find_by_name(page, "choice");
+	ASSERT_NE(choice, nullptr);
+
+	// The system folder's height maps (this printer's is 0:/sys/DuetScreen/) are the saved meshes: not other CSV
+	// files, such as the filaments'
+	EXPECT_TRUE(printer.answer(
+		"M20 S3 P\"0:/sys/DuetScreen/\"",
+		R"({"dir":"0:/sys/DuetScreen/","first":0,"files":[{"type":"f","name":"config.g","size":100,"date":"2025-01-01T10:00:00"},)"
+		R"({"type":"f","name":"filaments.csv","size":10,"date":"2025-01-01T10:00:00"},)"
+		R"({"type":"f","name":"heightmap.csv","size":400,"date":"2025-01-02T10:00:00"},)"
+		R"({"type":"f","name":"textured.csv","size":400,"date":"2025-01-03T10:00:00"}],"next":0})"));
+	deliverModelEvents();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(page, "no_maps"), LV_OBJ_FLAG_HIDDEN));
+
+	// The mesh shown is picked from those saved in a choice dialog; this printer's own is shown at first
+	lv_obj_send_event(choice, LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(TestDialogs::choiceCount(), 2u);
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_saved.png");
+	lv_obj_t* textured = lv_obj_find_by_name(lv_obj_get_child(TestDialogs::choiceList(), 1), "choice");
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(textured, "title")), "textured.csv");
+	lv_obj_send_event(textured, LV_EVENT_CLICKED, nullptr);
+
+	// The printer sends the file, and the mesh, its name and its statistics are shown
+	EXPECT_TRUE(printer.answer(
+		"M36.2 P\"0:/sys/DuetScreen/textured.csv\"",
+		R"({"fragment":{"fileName":"0:/sys/DuetScreen/textured.csv","offset":0,"data":")"
+		R"(RepRapFirmware height map file v2 generated at 2025-01-02 10:00, min error -0.100, max error )"
+		R"(0.150, mean 0.006, deviation 0.069\naxis0,axis1,min0,max0,min1,max1,radius,spacing0,spacing1,)"
+		R"(num0,num1\nX,Y,10.00,90.00,10.00,90.00,-1.00,40.00,40.00,3,3\n  0.000,  0.050,  0.100\n )"
+		R"(-0.050,  0.000,  0.050\n -0.100, -0.050,  0.150\n","next":0,"err":0}})"));
+	deliverModelEvents();
+	ASSERT_NE(lv_obj_find_by_name(page, "detail"), nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(page, "detail")), "textured.csv")
+		<< "the mesh shown is named above it";
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(page, "points"), "value")), "9");
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_fixed.png");
+
+	// Coloured by a fixed scale, or by the mesh's own range
+	lv_obj_t* fixed = lv_obj_find_by_name(page, "heightmap_fixed");
+	lv_obj_t* automatic = lv_obj_find_by_name(page, "heightmap_auto");
+	EXPECT_TRUE(lv_obj_has_state(fixed, LV_STATE_CHECKED));
+	lv_obj_send_event(automatic, LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_state(automatic, LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(fixed, LV_STATE_CHECKED));
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap_auto.png");
+	lv_obj_send_event(fixed, LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_state(fixed, LV_STATE_CHECKED));
+
+	// The printer uses another: Load; once it uses this one, Unload
+	auto& load = static_cast<UI::Button&>(*UI::LvObj::fromPtr(lv_obj_find_by_name(page, "load")));
+	EXPECT_EQ(load.getText(), _("heightmap.load"));
+	load_model_data(R"({"key":"move","flags":"vn","result":{"compensation":{"file":"0:/sys/DuetScreen/textured.csv"}}})"
+					"\n");
+	deliverModelEvents();
+	EXPECT_EQ(load.getText(), _("heightmap.unload"));
 }
 
 TEST_F(TestHomeViewWithData, ControlView)
 {
 	ZoneScoped;
-	auto& control = view.getControlView();
+	auto& control = controlPage();
 
-	openScreen(&control);
+	openControlTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move.png");
 
 	load_model_data_from_file("tests/object_model/test_bench/model_10_axes.json");
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
+	EXPECT_EQ(lv_obj_get_scroll_right(lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "jog")), 0)
+		<< "every column fits";
 	{
-		auto btn = control.getMoveView().getChildByName(
-			"central_row.babystep_cont.babystep.button_panel.value_list.list.value_btn_1");
-		ASSERT_NE(btn, nullptr);
-
-		btn->sendEvent(LV_EVENT_LONG_PRESSED);
+		// Hold the second babystep size to change it
+		lv_obj_t* steps = lv_obj_find_by_name(page<UI::LvObj>("move").getRootPtr(), "presets");
+		ASSERT_NE(steps, nullptr);
+		ASSERT_GE(lv_obj_get_child_count(steps), 2u);
+		lv_obj_send_event(lv_obj_get_child(steps, 1), LV_EVENT_LONG_PRESSED, nullptr);
 		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_babystep_long_press.png");
 	}
 
-	control.showTemperatureView();
-	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature.png");
-	{
-		auto& temperature = control.getTemperatureView();
-		auto input =
-			temperature.getChildByName("control_cont.extruder_control.controls.distance_selector.topRow.valueDisplay");
-		ASSERT_NE(input, nullptr);
-		input->sendEvent(LV_EVENT_CLICKED, nullptr);
-		EXPECT_EQUAL_SCREENSHOT("home_view/control_view/temperature_distance_input.png");
-	}
+	control.setActiveTab(1);
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools.png");
 
-	control.showHeightmapView();
+	control.setActiveTab(2);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heightmap.png");
 
-	control.showFanView();
+	control.setActiveTab(4);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/fan.png");
 
 	load_model_data_from_file("tests/object_model/job/model_job_objects.json");
-	{
-		auto x = OM::Move::GetAxisByLetter('X');
-		x->minPosition = -200.0f;
-		x->maxPosition = 100.0f;
-
-		auto y = OM::Move::GetAxisByLetter('Y');
-		y->minPosition = -100.0f;
-		y->maxPosition = 100.0f;
-	}
-	control.showObjectCancelView();
+	// The objects were recorded on a printer whose bed is centred: its X and Y limits, for the 10 axes there are
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"move":{"axes":[{"min":-200,"max":100},{"min":-100,"max":100},{},{},{},{},{},{},{},{}]}}})"
+		"\n");
+	control.setActiveTab(3);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/object_cancel.png");
 
-	control.showMoveView();
+	control.setActiveTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_10_axes.png");
+}
+
+TEST_F(TestHomeViewWithData, MoveTabSetsWorkZeroOnACnc)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+
+	// A printer has a Z offset; a CNC has work zero instead, and calls the speed factor the feed override
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(move, "z_offset"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(move, "work_zero"), LV_OBJ_FLAG_HIDDEN));
+	load_model_data(R"({"key":"","flags":"d99f","result":{"state":{"machineMode":"CNC"},"move":{"workplaceNumber":1}}})"
+					"\n");
+	deliverModelEvents();
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(move, "z_offset"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(move, "work_zero"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/move_cnc.png");
+
+	// The workplace in use is checked; another is chosen by its G-code
+	EXPECT_TRUE(lv_obj_has_state(lv_obj_find_by_name(move, "g55"), LV_STATE_CHECKED));
+	lv_obj_send_event(lv_obj_find_by_name(move, "g57"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "G57\n");
+
+	// Work zero for every axis, in the workplace in use (G55 is P2), once confirmed
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(move, "work_zero"), "all"), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::tap("yes");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_TRUE(sent.back().starts_with("G10 L20 P2 X0 Y0 Z0")) << sent.back();
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, TheScreenShowsItsOwnUnitsWhateverTheDuetUses)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"move":{"axes":[{"userPosition":25.4,"machinePosition":25.4,"babystep":0.254}]}}})"
+		"\n");
+	deliverModelEvents();
+	const auto firstTile = [&]
+	{
+		lv_obj_t* tiles = lv_obj_find_by_name(lv_obj_find_by_name(move, "positions"), "list");
+		return std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_get_child(tiles, 0), "position")));
+	};
+	EXPECT_EQ(firstTile(), "25.40");
+
+	// Shown in inches, while the Duet stays in millimetres (G21): positions and the jog step are in inches
+	auto* settings = UI::Xml::DataSources::find<UI::Xml::SettingsSource>();
+	ASSERT_NE(settings, nullptr);
+	ASSERT_TRUE(settings->set("units", 1.0f));
+	deliverModelEvents();
+	EXPECT_EQ(firstTile(), "1.00");
+	EXPECT_EQ(std::string(lv_label_get_text(lv_obj_find_by_name(lv_obj_find_by_name(move, "distance"), "hint"))),
+			  _("units.inches"))
+		<< "the step's unit is inches";
+
+	// The step is from the inch presets (0.5 in), not the millimetre ones read as inches; a jog goes to the Duet in its
+	// millimetres, at the 100 ipm chosen made mm/min
+	lv_obj_send_event(lv_obj_find_by_name(move, "x_increment"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_NE(sent.back().find("X12.7 F2540"), std::string::npos) << sent.back();
+
+	ASSERT_TRUE(settings->set("units", 0.0f));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, MoveTabChoosesWorkplaceOrMachineCoordinates)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"move":{"axes":[{"userPosition":5,"machinePosition":105,"homed":true}]}}})"
+		"\n");
+	deliverModelEvents();
+	const auto firstTile = [&]
+	{
+		lv_obj_t* tiles = lv_obj_find_by_name(lv_obj_find_by_name(move, "positions"), "list");
+		return lv_obj_get_child(tiles, 0);
+	};
+	const auto firstPosition = [&]
+	{ return std::string(lv_label_get_text(lv_obj_find_by_name(firstTile(), "position"))); };
+
+	// The workplace's coordinates at first: the position shown is the workplace's, and a move to one has no G53
+	lv_obj_t* coordinates = lv_obj_find_by_name(move, "coordinates");
+	ASSERT_NE(coordinates, nullptr);
+	lv_obj_t* workplace = lv_obj_find_by_name(coordinates, "workplace");
+	lv_obj_t* machine = lv_obj_find_by_name(coordinates, "machine");
+	EXPECT_TRUE(lv_obj_has_state(workplace, LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(machine, LV_STATE_CHECKED));
+	EXPECT_EQ(firstPosition(), "5.00");
+	lv_obj_send_event(firstTile(), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::enterOnPad("20");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back().find("G53"), std::string::npos) << sent.back();
+
+	// The machine's: chosen here and kept as a setting, the position shown is the machine's, and moves send G53
+	lv_obj_send_event(machine, LV_EVENT_CLICKED, nullptr);
+	deliverModelEvents();
+	EXPECT_TRUE(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+	EXPECT_TRUE(lv_obj_has_state(machine, LV_STATE_CHECKED));
+	EXPECT_FALSE(lv_obj_has_state(workplace, LV_STATE_CHECKED));
+	EXPECT_EQ(firstPosition(), "105.00");
+	lv_obj_send_event(firstTile(), LV_EVENT_CLICKED, nullptr);
+	TestDialogs::enterOnPad("20");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_NE(sent.back().find("G53 G1 X20"), std::string::npos) << sent.back();
+
+	lv_obj_send_event(workplace, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(StorageHelper::getData(ID_MOVE_MACHINE_POSITION_MODE));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, EveryIconFollowsTheIconSetChosen)
+{
+	// The Control page's Tools tab shows icons of every kind: the sidebar's, the tabs', drawn ones and buttons'
+	openControlTab(1);
+	const auto toolsTabIcon = []
+	{
+		UI::TabView::TabButton* button = controlPage().getTabButton(1);
+		const void* src = button != nullptr ? button->getIcon().getSrc() : nullptr;
+		return src != nullptr ? std::string(static_cast<const char*>(src)) : std::string();
+	};
+	for (const auto& set : UI::Themes::getIconSets())
+	{
+		UI::Themes::setIconFolder(set);
+		EXPECT_EQ(toolsTabIcon(), UI::Themes::getFixedIconPath(set, "tools.png"));
+		EXPECT_EQUAL_SCREENSHOT(fmt::format("home_view/icon_sets/{:s}.png", set).c_str());
+	}
+	UI::Themes::resetIconFolder();
+}
+
+TEST_F(TestHomeViewWithData, MoveTabDoesNotJogPastALimit)
+{
+	openControlTab(0);
+	lv_obj_t* move = page<UI::LvObj>("move").getRootPtr();
+	lv_obj_t* z = lv_obj_find_by_name(move, "z_control");
+	const auto disabled = [&](lv_obj_t* parent, const char* name)
+	{ return lv_obj_has_state(lv_obj_find_by_name(parent, name), LV_STATE_DISABLED); };
+	// X at its maximum and Z at its minimum (machine positions; the workplace's differ), both homed
+	const auto axes = [](const char* limitAxes, const char* homed)
+	{
+		load_model_data(fmt::format(R"({{"key":"","flags":"d99f","result":{{"move":{{"limitAxes":{},)"
+									R"("noMovesBeforeHoming":false,"axes":[)"
+									R"({{"homed":{},"min":0,"max":200,"machinePosition":200,"userPosition":150}},)"
+									R"({{"homed":true,"min":0,"max":200,"machinePosition":100,"userPosition":100}},)"
+									R"({{"homed":{},"min":0,"max":180,"machinePosition":0,"userPosition":5}}]}}}}}})",
+									limitAxes,
+									homed,
+									homed) +
+						"\n");
+		deliverModelEvents();
+	};
+
+	// Kept within the limits: X can't go further forwards, nor Z backwards; each can go the other way, as can Y
+	axes("true", "true");
+	EXPECT_TRUE(disabled(move, "x_increment"));
+	EXPECT_FALSE(disabled(move, "x_decrement"));
+	EXPECT_FALSE(disabled(move, "y_increment"));
+	EXPECT_FALSE(disabled(move, "y_decrement"));
+	EXPECT_FALSE(disabled(z, "increment"));
+	EXPECT_TRUE(disabled(z, "decrement"));
+
+	// Limits off (M564 S0): every way
+	axes("false", "true");
+	EXPECT_FALSE(disabled(move, "x_increment"));
+	EXPECT_FALSE(disabled(z, "decrement"));
+
+	// Limits apply only once an axis is homed
+	axes("true", "false");
+	EXPECT_FALSE(disabled(move, "x_increment"));
+	EXPECT_FALSE(disabled(z, "decrement"));
 }
 
 TEST_F(TestHomeViewWithData, MacroView)
 {
-	auto& files = view.getFileView();
-	openScreen(&files, false);
-	files.setActiveTab(0);
+	openFilesTab(0);
 	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/macros.png")
 }
 
 TEST_F(TestHomeViewWithData, SettingsView)
 {
-	auto& settings = view.getSettingsView();
-	openScreen(&settings);
+	// Scroll the settings page shown by the view registered as `view` to its end, so its last rows show too
+	auto scrollToEnd = [](const char* view)
+	{
+		lv_obj_t* root = UI::findView(view)->getRootPtr();
+		lv_obj_update_layout(root);
+		lv_obj_scroll_to_y(root, LV_COORD_MAX, LV_ANIM_OFF);
+	};
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	setSetting("advanced_settings", 1); // So Connection shows every row
+
+	UI::openScreen(std::string_view("settings"));
+	auto& settings = settingsPage();
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/initial.png")
 
-	settings.showGeneralSettings();
+	settings.setActiveTab(SETTINGS_GENERAL);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/general.png")
 
-	settings.showConnectionSettings();
-	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
-	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
-
-	settings.showDisplaySettings();
+	settings.setActiveTab(SETTINGS_DISPLAY);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display.png")
+	scrollToEnd("settings_display");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/display_end.png")
 
-	settings.showDeveloperSettings();
+	// The colours are a page of their own, opened from Display; the back key goes back to Display
+	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(display, "colours"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/colours.png")
+	UI::back();
+	runTimers();
+	EXPECT_TRUE(UI::findView("settings_display")->isShownOnScreen());
+
+	settings.setActiveTab(SETTINGS_NOTIFICATIONS);
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/notifications.png")
+
+	settings.setActiveTab(SETTINGS_CONNECTION);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for wifi networks to load
+	deliverModelEvents();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection.png")
+#if DUET_SIMULATOR
+	// The simulated Duet is a page of its own, opened from Connection (its row shows only while connected to it, but
+	// this screen's data comes from a recorded Duet, so the row is tapped hidden); the back key goes back to Connection
+	lv_obj_t* connection = UI::findView("settings_connection")->getRootPtr();
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(connection, "simulator"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/simulator.png")
+	UI::back();
+	runTimers();
+	EXPECT_TRUE(UI::findView("settings_connection")->isShownOnScreen());
+#endif
+	scrollToEnd("settings_connection");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/connection_end.png")
+
+	settings.setActiveTab(SETTINGS_SYSTEM);
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/system.png")
+	scrollToEnd("settings_system");
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/system_end.png")
+
+	settings.setActiveTab(SETTINGS_DEVELOPER);
 	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/developer.png")
+
+	setSetting("advanced_settings", advanced ? 1 : 0);
+}
+
+TEST_F(TestHomeViewWithData, WifiAsksForANewNetworksPassword)
+{
+	UI::openScreen(std::string_view("settings"));
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	lv_obj_t* wifi = UI::findView("settings_wifi")->getRootPtr();
+	lv_obj_t* networks = lv_obj_find_by_name(wifi, "list");
+	ASSERT_NE(networks, nullptr);
+	for (int i = 0; i < 50 && lv_obj_get_child_count(networks) == 0; i++) // Scanned on a thread of its own
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		deliverModelEvents();
+	}
+	ASSERT_GT(lv_obj_get_child_count(networks), 0u);
+
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_networks.png")
+
+	// The last network found is secured and isn't known: tapping it opens it, to join with its password
+	lv_obj_t* unknown = lv_obj_get_child(networks, -1);
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(unknown, "lock"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_t* dialog = lv_obj_find_by_name(lv_screen_active(), "network_dialog");
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(unknown, LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("forget"), LV_OBJ_FLAG_HIDDEN)) << "it can't be forgotten";
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("join"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("password"), LV_OBJ_FLAG_HIDDEN));
+
+	// Typing the password brings up the keyboard, and the dialog moves out of its way
+	lv_obj_t* input = lv_obj_find_by_name(dialog, "password_input");
+	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
+	lv_obj_t* keyboard = lv_obj_find_by_name(home.getRootPtr(), "keyboard");
+	ASSERT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_update_layout(lv_screen_active());
+	lv_area_t dialogArea;
+	lv_area_t keyboardArea;
+	lv_obj_get_coords(dialog, &dialogArea);
+	lv_obj_get_coords(keyboard, &keyboardArea);
+	EXPECT_LE(dialogArea.y2, keyboardArea.y1) << "the dialog is above the keyboard";
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_password_keyboard.png")
+
+	// The eye shows the password, and hides it again
+	lv_obj_t* eye = lv_obj_find_by_name(dialog, "show_password");
+	ASSERT_NE(eye, nullptr);
+	EXPECT_TRUE(lv_textarea_get_password_mode(input));
+	lv_obj_add_state(eye, LV_STATE_CHECKED);
+	lv_obj_send_event(eye, LV_EVENT_VALUE_CHANGED, nullptr);
+	EXPECT_FALSE(lv_textarea_get_password_mode(input));
+	lv_obj_remove_state(eye, LV_STATE_CHECKED);
+	lv_obj_send_event(eye, LV_EVENT_VALUE_CHANGED, nullptr);
+	EXPECT_TRUE(lv_textarea_get_password_mode(input));
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "the keyboard stays up";
+
+	// The keyboard's close key ends the edit: the keyboard goes, and the dialog moves back
+	lv_obj_send_event(keyboard, LV_EVENT_CANCEL, nullptr);
+	lv_obj_send_event(input, LV_EVENT_CANCEL, nullptr); // As the keyboard sends it on to its box
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_update_layout(lv_screen_active());
+	lv_area_t centred;
+	lv_obj_get_coords(dialog, &centred);
+	EXPECT_GT(centred.y1, dialogArea.y1) << "the dialog is back in the middle";
+	TestDialogs::tapHeader("close");
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+
+	// The keyboard's OK key joins, as Join does
+	lv_obj_send_event(unknown, LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(input, LV_EVENT_FOCUSED, nullptr);
+	lv_obj_send_event(input, LV_EVENT_READY, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN));
+
+	// The first network is the one the screen is on: it can be left or forgotten, not joined
+	lv_obj_send_event(lv_obj_get_child(networks, 0), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(lv_obj_has_flag(dialog, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("disconnect"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_FALSE(lv_obj_has_flag(TestDialogs::find("forget"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("connect"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("join"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(TestDialogs::find("password"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/settings_view/wifi_network.png")
+	TestDialogs::tapHeader("close");
 }
 
 TEST_F(TestHomeViewWithData, StatusView)
 {
-	view.getDashboard().showStatusTab();
+	// The job prints
+	load_model_data(R"({"key":"","flags":"d99f","result":{"state":{"status":"processing"}}})"
+					"\n");
+	deliverModelEvents();
+	showJobStatus();
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/printing.png")
 
-	auto& statusView = view.getDashboard().getStatusView();
+	lv_obj_t* status = page<UI::LvObj>("dashboard_job_status").getRootPtr();
+	auto click = [&](const char* name)
+	{
+		lv_obj_t* obj = lv_obj_find_by_name(status, name);
+		ASSERT_NE(obj, nullptr) << name;
+		lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
+	};
 
-	UI::LvObj* speed_factor = statusView.getChildByName("print_info.speed_cont.speed_multiplier");
-	ASSERT_NE(speed_factor, nullptr);
-	speed_factor->sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_numberpad.png")
+	click("speed_override");
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/speed_factor_dialog.png")
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 
-	UI::LvObj* extrusion_factor = statusView.getChildByName("print_info.flow_cont.flow_multiplier");
-	ASSERT_NE(extrusion_factor, nullptr);
-	extrusion_factor->sendEvent(LV_EVENT_CLICKED, nullptr);
-	OM::Move::SetExtruderFactor(0, 1.2f);
-	Model::get().post<EventType::ExtruderData>();
-	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
+	click("extrusion_override");
+	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"extruders":[{"factor":1.2},{}]}}})"
+					"\n");
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_dialog.png")
 
-	UI::closeAllModals();
+	UI::closeDialogs();
 
-	UI::LvObj* babystep = statusView.getChildByName("print_info.babystep_cont.babystep_button");
-	ASSERT_NE(babystep, nullptr);
-	babystep->sendEvent(LV_EVENT_CLICKED, nullptr);
+	click("z_offset_override");
 	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/babystep_modal.png")
 }
 
-#if SIDE_BAR_APP_DRAWER
-TEST_F(TestHomeViewWithData, MoveView)
+TEST_F(TestHomeViewWithData, ReloadKeepsEveryPageWorking)
 {
-	openScreen(&view.getMoveView());
-	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/move_view.png")
+	// Bundles are reloaded whatever is showing: every page, and an open dialog
+	const char* pages[] = {"control", "console", "settings", "files"};
+	for (int round = 0; round < 3; round++)
+	{
+		for (const char* name : pages)
+		{
+			UI::openScreen(std::string_view(name), false);
+			UI::Xml::reload();
+			ASSERT_NE(UI::findView(name), nullptr) << name << " is registered again after a reload";
+		}
 
-	load_model_data_from_file("tests/object_model/5_axis/model_move_vn.json");
-	view.getMoveView().activate();
-	EXPECT_EQUAL_SCREENSHOT("home_view/move_view/5_axis.png")
+		openFilesTab(1);
+		lv_obj_t* browser = showListing("files_jobs", "tests/object_model/rr_filelist/gcodes.json");
+		lv_obj_send_event(fileItem(browser, "test.gcode"), LV_EVENT_CLICKED, nullptr);
+		ASSERT_NE(openFileDialog(), nullptr);
+		UI::Xml::reload();
+		lv_timer_handler();
+		EXPECT_NE(openFileDialog(), nullptr) << "the shared dialog, still asking, opens again once rebuilt";
+		UI::closeDialogs();
+
+		UI::home();
+		showJobStatus();
+		deliverModelEvents();
+		UI::Xml::reload();
+		lv_refr_now(nullptr);
+	}
+
+	// Rebuilt from scratch, showing the printer as before
+	UI::home();
+	EXPECT_EQ(dashboardJobPages().shownPage(), "status");
+	// The list of every tool's card (tools_list.xml)
+	lv_obj_t* tools = lv_obj_find_by_name(dashboardToolList(), "tools");
+	ASSERT_NE(tools, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(tools), 5u) << "the test bench's four tools, and the gap where T1 isn't";
 }
 
-TEST_F(TestHomeViewWithData, TemperatureView)
+TEST_F(TestHomeView, ReloadKeepsTheOpenPageAndTabs)
 {
-	openScreen(&view.getTemperatureView());
-	EXPECT_EQUAL_SCREENSHOT("home_view/temperature_view/temperature_view.png")
+	// On the Control page's Temperature tab, having come from the Display settings, with the dashboard underneath
+	// showing the job's status
+	showJobStatus();
+	UI::openScreen(std::string_view("settings"));
+	settingsPage().setActiveTab(2);
+	UI::openScreen(std::string_view("control"));
+	controlPage().setActiveTab(1);
+
+	UI::Xml::reload();
+
+	EXPECT_EQ(UI::getCurrentScreenName(), "control");
+	EXPECT_TRUE(page<UI::LvObj>("control").isShownOnScreen());
+	EXPECT_FALSE(page<UI::LvObj>("dashboard").isVisible()) << "the home screen stays under the page";
+	EXPECT_EQ(controlPage().getActiveTabIndex(), 1u);
+	EXPECT_TRUE(page<UI::LvObj>("tools").isShownOnScreen());
+	EXPECT_FALSE(page<UI::LvObj>("move").isShownOnScreen());
+	EXPECT_EQ(settingsPage().getActiveTabIndex(), 2u) << "a page that isn't open keeps its tab too";
+
+	UI::back();
+	EXPECT_EQ(UI::getCurrentScreenName(), "settings") << "back returns where it did before the reload";
+	EXPECT_TRUE(page<UI::LvObj>("settings").isShownOnScreen());
+
+	UI::home();
+	EXPECT_EQ(dashboardJobPages().shownPage(), "status");
 }
 
-TEST_F(TestHomeViewWithData, FanView)
+TEST_F(TestHomeView, ReloadDoesNotMoveFocusThroughTheOldWidgets)
 {
-	openScreen(&view.getFanView());
-	EXPECT_EQUAL_SCREENSHOT("home_view/fan_view/fan_view.png")
+	// With an input group, as the simulator's keyboard and mouse wheel have, every button joins it
+	lv_group_t* group = lv_group_create();
+	lv_group_set_default(group);
+	static int focusChanges;
+	lv_group_set_focus_cb(group, [](lv_group_t*) { focusChanges++; });
+	UI::Xml::reload();
+	ASSERT_GT(lv_group_get_obj_count(group), 1u);
+
+	// Deleting the focused widget used to move focus to the next one to be deleted, and so on through the whole UI,
+	// laying out the half-deleted screen each time; a layout that never settled hung the reload
+	focusChanges = 0;
+	UI::Xml::reload();
+	EXPECT_EQ(focusChanges, 1) << "only the rebuilt UI's first widget is focused";
+
+	lv_group_set_default(nullptr);
+	lv_group_delete(group);
 }
 
-TEST_F(TestHomeViewWithData, HeightmapView)
+TEST_F(TestHomeViewWithData, AJobWidgetBuiltDuringAJobShowsItsStatus)
 {
-	openScreen(&view.getHeightmapView());
-	EXPECT_EQUAL_SCREENSHOT("home_view/heightmap_view/heightmap_view.png")
+	// Built while a job runs, the dashboard's job widget shows its status from the start
+	load_model_data_from_file("tests/object_model/job/model_state_printing.json");
+	deliverModelEvents();
+	UI::Xml::reload();
+
+	EXPECT_EQ(dashboardJobPages().shownPage(), "status") << "the page the job start opened, kept by the reload";
 }
 
-TEST_F(TestHomeViewWithData, FineTuneView)
+TEST_F(TestHomeView, ResponsesAreShownOneAtATime)
 {
-	UI::FineTune& fineTuneView = view.getFineTuneView();
-	openScreen(&fineTuneView);
-	EXPECT_EQUAL_SCREENSHOT("home_view/fine_tune_view/fine_tune_view.png")
+	lv_obj_t* response = notificationPart("response");
+	notifications().newResponse(ResponseType::INFO, "first");
+	notifications().newResponse(ResponseType::WARNING, "second");
+	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(response, "text")), "first");
 
-	UI::LvObj* input = fineTuneView.getChildByName("sliders.speed.slider_cont.slider_input");
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(response, "text")), "second");
+
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+
+	// The console shows responses itself
+	UI::openScreen(std::string_view("console"), false);
+	notifications().newResponse(ResponseType::INFO, "in the console");
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+}
+
+TEST_F(TestHomeView, AlertFollowsTheMessageBox)
+{
+	const auto deliver = [] { deliverModelEvents(); };
+	// A new message box opens the alert
+	load_model_data_from_file("tests/object_model/m291/s3.json");
+	deliver();
+	EXPECT_TRUE(notificationShown("alert"));
+
+	// Once answered, the same box sent again (the same sequence number) doesn't open it again
+	lv_obj_send_event(TestDialogs::find("cancel"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_FALSE(notificationShown("alert"));
+	load_model_data_from_file("tests/object_model/m291/s3.json");
+	deliver();
+	EXPECT_FALSE(notificationShown("alert"));
+
+	// Another box opens it, and the box going away closes it
+	load_model_data_from_file("tests/object_model/m291/s0.json");
+	deliver();
+	EXPECT_TRUE(notificationShown("alert"));
+	load_model_data(R"({"key":"state","flags":"vn","result":{"messageBox":null}})"
+					"\n");
+	deliver();
+	EXPECT_FALSE(notificationShown("alert"));
+}
+
+TEST_F(TestHomeView, TappingOutsideATextBoxPutsTheKeyboardAway)
+{
+	// With an input group, as the screen and simulator have, a tap on something outside the group (here the alert's
+	// text) leaves the box focused in its group, and only tells the box it was left
+	lv_group_t* group = lv_group_create();
+	lv_group_set_default(group);
+	lv_indev_t* pointer = lv_test_indev_get_indev(LV_INDEV_TYPE_POINTER);
+	lv_indev_set_group(pointer, group);
+	UI::Xml::reload();
+
+	load_model_data_from_file("tests/object_model/m291/s7_limits.json");
+	notifications().newAlertData(alertInObjectModel());
+	lv_obj_t* input = notificationPart("input");
+	lv_obj_t* keyboard = lv_obj_find_by_name(lv_screen_active(), "keyboard");
 	ASSERT_NE(input, nullptr);
+	ASSERT_NE(keyboard, nullptr);
+	auto tap = [](lv_obj_t* obj)
+	{
+		lv_obj_update_layout(lv_screen_active());
+		lv_area_t area;
+		lv_obj_get_coords(obj, &area);
+		lv_test_mouse_click_at((area.x1 + area.x2) / 2, (area.y1 + area.y2) / 2);
+	};
 
-	input->sendEvent(LV_EVENT_CLICKED, nullptr);
-	EXPECT_EQUAL_SCREENSHOT("home_view/fine_tune_view/keyboard.png")
+	tap(input);
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "tapping the box brings up the keyboard";
+
+	tap(notificationPart("text"));
+	EXPECT_TRUE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "tapping outside it puts the keyboard away";
+	EXPECT_FALSE(lv_obj_has_state(input, LV_STATE_FOCUSED)) << "and ends the edit";
+
+	tap(input);
+	EXPECT_FALSE(lv_obj_has_flag(keyboard, LV_OBJ_FLAG_HIDDEN)) << "tapping the box again brings the keyboard back";
+
+	lv_test_mouse_release();
+	lv_indev_set_group(pointer, nullptr);
+	lv_group_set_default(nullptr);
+	lv_group_delete(group);
 }
-#endif
+
+TEST_F(TestHomeView, AlertAnswersThePrinter)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	lv_obj_t* response = notificationPart("response");
+	auto alertPart = [](const char* name) { return TestDialogs::find(name); };
+	auto click = [&](const char* name) { lv_obj_send_event(alertPart(name), LV_EVENT_CLICKED, nullptr); };
+
+	// A response waits while an alert is open
+	load_model_data_from_file("tests/object_model/m291/s3.json");
+	notifications().newAlertData(alertInObjectModel());
+	notifications().newResponse(ResponseType::INFO, "waiting");
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+
+	// Cancel, offered by the printer, answers it
+	const uint32_t seq3 = alertInObjectModel().seq;
+	click("cancel");
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 P1 S{:d}\n", seq3)}));
+	EXPECT_FALSE(notificationShown("alert"));
+	EXPECT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN)) << "then the response shows";
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
+
+	// A choice answers with its index
+	sent.clear();
+	load_model_data_from_file("tests/object_model/m291/s4.json");
+	notifications().newAlertData(alertInObjectModel());
+	lv_obj_t* choices = notificationPart("choices");
+	ASSERT_EQ(lv_obj_get_child_count(choices), 3u);
+	lv_obj_send_event(lv_obj_get_child(choices, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{1}} S{:d}\n", alertInObjectModel().seq)}));
+
+	// A value can't be sent until it is within the limits
+	sent.clear();
+	load_model_data_from_file("tests/object_model/m291/s5_limits.json");
+	notifications().newAlertData(alertInObjectModel());
+	TestDialogs::typeOnPad("11");
+	EXPECT_TRUE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
+	TestDialogs::tap("clear");
+	TestDialogs::typeOnPad("7");
+	EXPECT_FALSE(lv_obj_has_state(alertPart("ok"), LV_STATE_DISABLED));
+	click("ok");
+	EXPECT_EQ(sent, (std::vector<std::string>{fmt::format("M292 R{{7}} S{:d}\n", alertInObjectModel().seq)}));
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+namespace
+{
+	/** Whether `obj` and every widget it is in are shown */
+	bool shownOnScreen(lv_obj_t* obj)
+	{
+		for (; obj != nullptr; obj = lv_obj_get_parent(obj))
+		{
+			if (lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** The number pad prompt if it is the step shown, else nullptr */
+	lv_obj_t* openNumberPad()
+	{
+		return TestDialogs::shownNamed("dialog_number");
+	}
+
+	/**
+	 * Tap the widget called `name` (in the widget called `within`, if given) in the view registered as `view`, and
+	 * say whether a number pad was shown. `sliderValue` taps the value of the slider called `name`.
+	 */
+	bool tapShowsNumberPad(const char* view, const char* within, const char* name, bool sliderValue = false)
+	{
+		UI::closeDialogs();
+		lv_obj_t* obj = UI::findView(view)->getRootPtr();
+		if (within != nullptr)
+		{
+			obj = lv_obj_find_by_name(obj, within);
+		}
+		obj = obj == nullptr ? nullptr : lv_obj_find_by_name(obj, name);
+		if (obj == nullptr)
+		{
+			ADD_FAILURE() << view << " has no " << name;
+			return false;
+		}
+		if (sliderValue)
+		{
+			obj = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(obj)).getInput().getRootPtr();
+		}
+		lv_obj_send_event(obj, LV_EVENT_CLICKED, nullptr);
+		return openNumberPad() != nullptr;
+	}
+} // namespace
+
+TEST_F(TestHomeViewWithData, AHeaterTargetOffersMaterials)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	// The first tool's heater is set to 215 °C
+	load_model_data(R"({"key":"","flags":"d99f","result":{"tools":[{"active":[215]}]}})"
+					"\n");
+	deliverModelEvents();
+	openControlTab(1);
+	ASSERT_TRUE(tapShowsNumberPad("tools", nullptr, "active")) << "a heater's active target";
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "215") << "starts at the target";
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/heater_target_presets.png");
+
+	// Off first, then the materials: tapping PLA types its nozzle temperature, which OK sets
+	lv_obj_t* presets = lv_obj_find_by_name(openNumberPad(), "presets");
+	ASSERT_NE(presets, nullptr);
+	ASSERT_GE(lv_obj_get_child_count(presets), 2u);
+	lv_obj_t* pla = lv_obj_get_child(presets, 1);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(pla, "title")), "PLA");
+	lv_obj_send_event(pla, LV_EVENT_CLICKED, nullptr);
+	EXPECT_TRUE(lv_obj_has_state(pla, LV_STATE_CHECKED));
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "210");
+
+	// − and + step it by 5 °C
+	lv_obj_send_event(lv_obj_find_by_name(openNumberPad(), "step_up"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "215");
+	EXPECT_FALSE(lv_obj_has_state(pla, LV_STATE_CHECKED));
+	lv_obj_send_event(lv_obj_find_by_name(openNumberPad(), "step_down"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "210");
+	TestDialogs::tap("ok");
+	ASSERT_FALSE(sent.empty());
+	EXPECT_NE(sent.back().find("S210"), std::string::npos) << sent.back();
+
+	// Presets tapped one after another, a key typed over one, then left without setting anything
+	ASSERT_TRUE(tapShowsNumberPad("tools", nullptr, "active"));
+	presets = lv_obj_find_by_name(openNumberPad(), "presets");
+	const uint32_t count = lv_obj_get_child_count(presets);
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		lv_obj_send_event(lv_obj_get_child(presets, static_cast<int32_t>(i)), LV_EVENT_PRESSED, nullptr);
+		lv_obj_send_event(lv_obj_get_child(presets, static_cast<int32_t>(i)), LV_EVENT_RELEASED, nullptr);
+		lv_obj_send_event(lv_obj_get_child(presets, static_cast<int32_t>(i)), LV_EVENT_CLICKED, nullptr);
+	}
+	TestDialogs::typeOnPad("1");
+	EXPECT_FALSE(lv_obj_has_state(lv_obj_get_child(presets, 1), LV_STATE_CHECKED));
+	TestDialogs::tap("cancel");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+	UI::closeDialogs();
+
+	// A bed's target, its own materials
+	ASSERT_TRUE(tapShowsNumberPad("tools", "bed_chamber", "active"));
+	presets = lv_obj_find_by_name(openNumberPad(), "presets");
+	lv_obj_send_event(lv_obj_get_child(presets, 1), LV_EVENT_CLICKED, nullptr);
+	EXPECT_STREQ(lv_label_get_text(lv_obj_find_by_name(openNumberPad(), "text")), "60");
+	UI::closeDialogs();
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, EveryNumberPadOpens)
+{
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	setSetting("advanced_settings", 1); // So the poll interval shows
+	deliverModelEvents();				// Fill the lists from the object model
+	{
+		lv_obj_t* toolList = dashboardToolList();
+		lv_obj_t* firstHeater = lv_obj_find_by_name(lv_obj_find_by_name(toolList, "tools"), "heaters");
+		lv_obj_send_event(lv_obj_find_by_name(firstHeater, "active"), LV_EVENT_CLICKED, nullptr);
+		EXPECT_NE(openNumberPad(), nullptr) << "dashboard heater";
+	}
+
+	openControlTab(0);
+	{
+		// A position tile: the third is Z's
+		UI::closeDialogs();
+		lv_obj_t* tiles =
+			lv_obj_find_by_name(lv_obj_find_by_name(UI::findView("move")->getRootPtr(), "positions"), "list");
+		ASSERT_NE(tiles, nullptr);
+		ASSERT_GE(lv_obj_get_child_count(tiles), 3u);
+		lv_obj_send_event(lv_obj_get_child(tiles, 2), LV_EVENT_CLICKED, nullptr);
+		EXPECT_NE(openNumberPad(), nullptr) << "move Z position";
+	}
+	openControlTab(1);
+	EXPECT_TRUE(tapShowsNumberPad("tools", nullptr, "active")) << "a heater's active target";
+	openControlTab(4);
+	EXPECT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true)) << "fan slider";
+	// The first slider found is fan 0's (its row is hidden: this machine has no fan 0)
+	EXPECT_EQ(TestDialogs::title(), _("fan.header", 0)) << "the fan's name heads its pad";
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(openNumberPad(), "step_up"), LV_OBJ_FLAG_HIDDEN))
+		<< "− and + step as the slider does";
+
+	UI::openScreen(std::string_view("settings"), false);
+	settingsPage().setActiveTab(SETTINGS_DISPLAY);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "brightness", "slider", true)) << "brightness";
+	EXPECT_TRUE(tapShowsNumberPad("settings", "screensaver_timeout", "slider", true)) << "screensaver";
+	settingsPage().setActiveTab(SETTINGS_NOTIFICATIONS);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "notification_timeout", "slider", true)) << "notification timeout";
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	EXPECT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true)) << "poll interval";
+	EXPECT_TRUE(tapShowsNumberPad("settings", "duet_ip_address", "field")) << "IP address";
+
+	// The colours, a page opened from Display
+	settingsPage().setActiveTab(SETTINGS_DISPLAY);
+	lv_obj_t* display = UI::findView("settings_display")->getRootPtr();
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(display, "colours"), "open"), LV_EVENT_CLICKED, nullptr);
+	runTimers();
+	EXPECT_TRUE(tapShowsNumberPad("settings", "chroma", "slider", true)) << "chroma";
+	UI::closeDialogs();
+	UI::back();
+	runTimers();
+	setSetting("advanced_settings", advanced ? 1 : 0);
+}
+
+TEST_F(TestHomeViewWithData, ToolsTabSelectsToolsAndTurnsAPrintersSpindle)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&](std::string_view gcode) { sent.emplace_back(gcode); });
+	deliverModelEvents();
+	openControlTab(1);
+	lv_obj_t* tools = page<UI::LvObj>("tools").getRootPtr();
+	lv_obj_t* cards = lv_obj_find_by_name(tools, "tools");
+	ASSERT_NE(cards, nullptr);
+	const auto card = [&](uint32_t number) { return lv_obj_get_child(cards, static_cast<int32_t>(number)); };
+
+	// Another tool is selected from its card
+	lv_obj_send_event(lv_obj_find_by_name(card(2), "select"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "T2\n");
+
+	// The tool in use is deselected from its card
+	lv_obj_t* deselect = lv_obj_find_by_name(card(0), "deselect");
+	ASSERT_NE(deselect, nullptr);
+	EXPECT_FALSE(lv_obj_has_flag(deselect, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_TRUE(lv_obj_has_flag(lv_obj_find_by_name(card(2), "deselect"), LV_OBJ_FLAG_HIDDEN));
+	lv_obj_send_event(deselect, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "T-1\n");
+
+	// An extruder's factor opens the shared dialog for the tool's extruders, which can show every extruder
+	lv_obj_t* factors = lv_obj_find_by_name(lv_obj_find_by_name(tools, "extrusion_factors"), "list");
+	ASSERT_NE(factors, nullptr);
+	ASSERT_EQ(lv_obj_get_child_count(factors), 1u) << "tool 0 uses one extruder";
+	lv_obj_send_event(lv_obj_get_child(factors, 0), LV_EVENT_CLICKED, nullptr);
+	lv_obj_t* dialog = TestDialogs::shownNamed("extrusion_dialog");
+	ASSERT_NE(dialog, nullptr);
+	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
+	EXPECT_EQ(lv_obj_get_child_count(rows), 1u);
+	EXPECT_FALSE(lv_obj_has_flag(lv_obj_find_by_name(dialog, "scope"), LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/extrusion_factor_dialog.png")
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(dialog, "scope"), "all"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(lv_obj_get_child_count(rows), 2u) << "every extruder";
+
+	// A quick value sets the factor
+	lv_obj_t* quick = lv_obj_find_by_name(lv_obj_get_child(rows, 0), "presets");
+	ASSERT_NE(quick, nullptr);
+	lv_obj_send_event(lv_obj_get_child(quick, 3), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M221 D0 S105\n") << "105%";
+	UI::closeDialogs();
+
+	// A printer's tool with a spindle (Hybrid, T4): its card sets the speed, and in use it can be turned
+	load_model_data(
+		R"({"key":"","flags":"d99f","result":{"state":{"currentTool":4},"tools":[{"state":"standby"},null,{},{},{"state":"active","spindleRpm":5000}]}})"
+		"\n");
+	// Its spindle reaches 24 000 rpm and can turn in reverse
+	load_model_data(
+		R"({"key":"spindles","flags":"v","result":[{"canReverse":true,"current":0,"max":24000,"state":"stopped"}]})"
+		"\n");
+	deliverModelEvents();
+	lv_obj_scroll_to_view_recursive(card(4), LV_ANIM_OFF);
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools_spindle.png");
+	lv_obj_send_event(lv_obj_find_by_name(lv_obj_find_by_name(card(4), "spindle"), "speed"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_NE(openNumberPad(), nullptr) << "the spindle's speed";
+	UI::closeDialogs();
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(card(4), "spindle"), "faster"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M568 P4 F6000\n") << "1000 rpm faster";
+
+	// The panel for the tool in use (a ds_scope builds it beside itself, so it is found from the page): Start turns
+	// it the way chosen
+	lv_obj_t* start = lv_obj_find_by_name(tools, "start");
+	ASSERT_NE(start, nullptr);
+	lv_obj_send_event(start, LV_EVENT_CLICKED, nullptr);
+	ASSERT_FALSE(sent.empty());
+	EXPECT_EQ(sent.back(), "M3 P0 S5000\n");
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(tools, "direction"), "reverse"), LV_EVENT_CLICKED, nullptr);
+	lv_obj_send_event(start, LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M4 P0 S5000\n") << "in reverse";
+
+	// Turning, it shows how fast, and Stop stops it
+	load_model_data(
+		R"({"key":"spindles","flags":"v","result":[{"canReverse":true,"current":-4980,"max":24000,"state":"reverse"}]})"
+		"\n");
+	deliverModelEvents();
+	lv_obj_scroll_to_view_recursive(lv_obj_find_by_name(tools, "stop"), LV_ANIM_OFF);
+	EXPECT_EQUAL_SCREENSHOT("home_view/control_view/tools_spindle_turning.png");
+	lv_obj_send_event(lv_obj_find_by_name(tools, "stop"), LV_EVENT_CLICKED, nullptr);
+	EXPECT_EQ(sent.back(), "M5 P0\n");
+
+	// Unloading filament asks first
+	StorageHelper::setData(ID_SHOW_CONFIRMATION_DIALOGS, true);
+	const size_t before = sent.size();
+	lv_obj_send_event(
+		lv_obj_find_by_name(lv_obj_find_by_name(card(4), "filament"), "unload"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("filament.confirm_unload_title", "test"));
+	EXPECT_EQ(sent.size(), before) << "nothing sent before agreeing";
+	TestDialogs::tap("yes");
+	EXPECT_EQ(sent.back(), "T4\nM702\n");
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeViewWithData, ViewsInsidePlainContainersComeAliveWithTheirPage)
+{
+	// The WiFi settings are inside the Connection settings' plain <lv_obj>, which has nothing to pass a show on
+	auto* wifi = UI::findView<UI::Xml::XmlView>("settings_wifi");
+	ASSERT_NE(wifi, nullptr);
+	ASSERT_NE(wifi->getPresenter(), nullptr);
+	EXPECT_FALSE(wifi->getPresenter()->isActive()) << "the Settings page isn't open yet";
+
+	UI::openScreen(std::string_view("settings"), false);
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	EXPECT_TRUE(wifi->getPresenter()->isActive());
+
+	UI::home();
+	EXPECT_FALSE(wifi->getPresenter()->isActive()) << "nothing listens while its page is closed";
+}
+
+TEST_F(TestHomeViewWithData, NumberPadAnswersTheSliderAndCloses)
+{
+	const bool advanced = StorageHelper::getData(ID_ENABLE_ADVANCED_SETTINGS);
+	setSetting("advanced_settings", 1); // So the poll interval shows
+	UI::openScreen(std::string_view("settings"), false);
+	settingsPage().setActiveTab(SETTINGS_CONNECTION);
+	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
+	lv_obj_t* dialog = openNumberPad();
+
+	// Typed on the keys, then OK
+	EXPECT_EQ(TestDialogs::text("range"), "100 ms or more") << "in the slider's unit";
+	TestDialogs::enterOnPad("1234");
+	EXPECT_EQ(openNumberPad(), nullptr) << "confirming closes it";
+	auto& slider = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(
+		lv_obj_find_by_name(lv_obj_find_by_name(page<UI::LvObj>("settings").getRootPtr(), "poll_interval"), "slider")));
+	EXPECT_EQ(slider.getValue(), 1234.0f);
+
+	// Out of range: OK does nothing
+	ASSERT_TRUE(tapShowsNumberPad("settings", "poll_interval", "slider", true));
+	dialog = openNumberPad();
+	TestDialogs::enterOnPad("5");
+	EXPECT_NE(openNumberPad(), nullptr) << "a value it can't take isn't confirmed";
+	EXPECT_EQ(slider.getValue(), 1234.0f);
+	UI::closeDialogs();
+	setSetting("advanced_settings", advanced ? 1 : 0);
+}
+
+TEST_F(TestHomeViewWithData, NumberPadQuestionGoesWithItsSlider)
+{
+	// The fans go while one's question is open, taking its slider: the question goes, and nothing answers the slider
+	deliverModelEvents();
+	openControlTab(4);
+	ASSERT_TRUE(tapShowsNumberPad("fans", nullptr, "slider", true));
+	load_model_data(R"({"key":"fans","flags":"v","result":[]})"
+					"\n");
+	deliverModelEvents();
+	EXPECT_EQ(openNumberPad(), nullptr);
+}
+
+TEST_F(TestHomeViewWithData, FactorDialogTypesTheTappedFactorOnItsNextStep)
+{
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
+	deliverModelEvents();
+	showJobStatus();
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "extrusion_override"),
+					  LV_EVENT_CLICKED,
+					  nullptr);
+	lv_obj_t* dialog = TestDialogs::shownNamed("extrusion_dialog");
+	ASSERT_NE(dialog, nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("fine_tune.extruder_header"));
+
+	// Tap the second extruder's value: a number pad for it, the dialog's next step
+	lv_obj_t* rows = lv_obj_find_by_name(dialog, "list");
+	ASSERT_EQ(lv_obj_get_child_count(rows), 2u);
+	auto& second =
+		static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_find_by_name(lv_obj_get_child(rows, 1), "slider")));
+	lv_obj_send_event(second.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	lv_obj_t* pad = TestDialogs::shownNamed("dialog_number");
+	ASSERT_NE(pad, nullptr);
+	EXPECT_EQ(TestDialogs::title(), "Extruder 1");
+	EXPECT_EQ(TestDialogs::text("range"), "1 % or more");
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/extrusion_factor_numberpad.png")
+
+	// Type 95 and confirm: sent, and back to the factors
+	TestDialogs::enterOnPad("95");
+	ASSERT_EQ(sent.size(), 1u);
+	EXPECT_EQ(sent[0], "M221 D1 S95\n");
+	EXPECT_EQ(TestDialogs::shown(), dialog);
+	UI::closeDialogs();
+	UI::Xml::Services::setGcodeSender(nullptr);
+}
+
+TEST_F(TestHomeView, EStopStopsOnlyWhenDraggedAllTheWay)
+{
+	lv_obj_t* estop =
+		lv_obj_find_by_name(lv_obj_find_by_name(page<UI::LvObj>("sidebar").getRootPtr(), "estop"), "button");
+	ASSERT_NE(estop, nullptr);
+	lv_obj_t* response = notificationPart("response");
+	auto letGo = [estop](float fraction)
+	{
+		lv_obj_send_event(estop, UI::Xml::Actions::valueConfirmedEvent(), &fraction);
+		deliverModelEvents();
+	};
+
+	letGo(0.7f); // Dragged most of the way, then let go: nothing
+	EXPECT_TRUE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+
+	letGo(0.1f); // A tap: says to drag it
+	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(std::string_view(lv_label_get_text(lv_obj_find_by_name(response, "text"))), _("estop.prompt"));
+	lv_obj_send_event(lv_obj_find_by_name(response, "close"), LV_EVENT_CLICKED, nullptr);
+
+	letGo(1.0f); // All the way: stopped
+	ASSERT_FALSE(lv_obj_has_flag(response, LV_OBJ_FLAG_HIDDEN));
+	EXPECT_EQ(std::string_view(lv_label_get_text(lv_obj_find_by_name(response, "text"))), _("estop.message"));
+}
+
+TEST_F(TestHomeViewWithData, CancellingAsksFirstWhereverItIsAsked)
+{
+	load_model_data_from_file("tests/object_model/job/model_state_paused.json");
+	deliverModelEvents();
+	showJobStatus();
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+
+	// The job panel's Cancel button asks the question
+	lv_obj_t* cancel = lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "cancel");
+	ASSERT_NE(cancel, nullptr);
+	EXPECT_FALSE(lv_obj_has_state(cancel, LV_STATE_DISABLED)) << "a paused job can be cancelled";
+	lv_obj_send_event(cancel, LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	EXPECT_EQ(TestDialogs::title(), _("status.print_cancel_title"));
+	EXPECT_EQUAL_SCREENSHOT("home_view/status_view/cancel_question.png")
+
+	// Answering no closes it
+	TestDialogs::tap("no");
+	EXPECT_EQ(TestDialogs::shown(), nullptr);
+
+	// Any view can ask it, e.g. a button placed in the sidebar
+	UI::Xml::Actions::dispatch(page<UI::LvObj>("sidebar").getRootPtr(), "actions.job.ask_cancel", "");
+	EXPECT_NE(TestDialogs::shownNamed("dialog_question"), nullptr);
+	UI::closeDialogs();
+}
+
+TEST_F(TestHomeViewWithData, SpeedFactorLimitsAreNotItsSlidersWindow)
+{
+	// At 200% the speed slider shows 150% to 250%, but the speed may be anything from 1% up
+	std::vector<std::string> sent;
+	UI::Xml::Services::setGcodeSender([&sent](std::string_view line) { sent.emplace_back(line); });
+	load_model_data(R"({"key":"","flags":"d99f","result":{"move":{"speedFactor":2}}})"
+					"\n");
+	deliverModelEvents();
+	showJobStatus();
+	lv_obj_send_event(lv_obj_find_by_name(page<UI::LvObj>("dashboard_job_status").getRootPtr(), "speed_override"),
+					  LV_EVENT_CLICKED,
+					  nullptr);
+	lv_obj_t* dialog = TestDialogs::shownNamed("speed_dialog");
+	ASSERT_NE(dialog, nullptr);
+	lv_obj_t* row = lv_obj_get_child(lv_obj_find_by_name(dialog, "list"), 0);
+	auto& speed = static_cast<UI::Slider&>(*UI::LvObj::fromPtr(lv_obj_find_by_name(row, "slider")));
+	ASSERT_EQ(speed.getValue(), 200.0f);
+	EXPECT_EQ(speed.getMin(), 150.0f);
+
+	// The number pad takes anything from 1%
+	lv_obj_send_event(speed.getInput().getRootPtr(), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(TestDialogs::shownNamed("dialog_number"), nullptr);
+	EXPECT_EQ(TestDialogs::text("range"), "1 % or more");
+	TestDialogs::tapHeader("back");
+
+	// The 100% quick value goes back to 100%, below the window
+	lv_obj_send_event(lv_obj_get_child(lv_obj_find_by_name(row, "presets"), 2), LV_EVENT_CLICKED, nullptr);
+	ASSERT_EQ(sent.size(), 1u);
+	EXPECT_EQ(sent[0], "M220 S100\n");
+	EXPECT_EQ(speed.getValue(), 100.0f);
+	EXPECT_EQ(speed.getMin(), 50.0f) << "the window follows";
+	UI::closeDialogs();
+	UI::Xml::Services::setGcodeSender(nullptr);
+}

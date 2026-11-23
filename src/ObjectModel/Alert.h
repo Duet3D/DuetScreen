@@ -19,6 +19,11 @@
 
 namespace OM
 {
+	class Node;
+}
+
+namespace OM
+{
 	struct Alert
 	{
 		enum class Mode
@@ -77,12 +82,15 @@ namespace OM
 
 		Alert() { Reset(); }
 
+		/**
+		 * The alert the object model's `state.messageBox` describes (the model lock held); one whose mode is None if
+		 * it is null or missing
+		 */
+		static Alert fromObjectModel(const Node& messageBox);
+
 		bool AllFlagsSet() const { return flags.GetRaw() == GotAll; }
 		void Reset();
 	};
-
-	extern Alert g_currentAlert;
-	extern uint32_t g_lastAlertSeq;
 } // namespace OM
 
 #endif /* JNI_UI_ALERT_H_ */

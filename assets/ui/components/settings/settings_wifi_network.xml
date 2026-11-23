@@ -1,0 +1,17 @@
+<!--
+  One network found, a row of the screen's WiFi (ds_setting): its name, whether the screen is on it or has joined it,
+  a lock if it is secured, its signal as bars, and the way into it. Tapping the row opens it in the dialog.
+
+  Fields:   a networks row (src/UI/Presenters/Settings/WifiPresenter.h)
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.ssid" bind_hint="row.state">
+		<ds_icon name="lock" icon="lock.png" width="24" height="24">
+			<bind_flag_if_eq subject="row.secured" flag="hidden" ref_value="0"/>
+		</ds_icon>
+		<ds_icon name="signal" bind_icon="row.signal_icon" width="28" height="28"/>
+		<chevron_button name="open">
+			<action trigger="clicked" name="presenter.wifi.open"/>
+		</chevron_button>
+	</view>
+</component>

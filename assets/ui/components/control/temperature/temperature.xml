@@ -1,0 +1,46 @@
+<!--
+  The Temperature tab: the tools, beds and chambers with their heaters on the left; the selected tool and the extruder
+  panel (temperature_extrusion.xml) on the right.
+
+  Fields and actions: src/UI/Presenters/Control/Temperature/TemperaturePresenter.h; the beds and chambers are the
+  object model's (om.heat.bedHeaters, om.heat.chamberHeaters).
+-->
+<component presenter="temperature">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="row">
+		<style name="bg_dark"/>
+
+		<lv_obj name="heaters" height="100%" flex_grow="2" flex_flow="column">
+			<style name="card"/>
+
+			<lv_obj name="tools" width="100%" height="content" flex_flow="column">
+				<list_header name="header" title="tr.temperature.tools"/>
+				<ds_list name="list" list="presenter.tools" item="temperature_tool" width="100%" height="content"
+						 flex_flow="column"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="beds" width="100%" height="content" flex_flow="column">
+				<list_header name="header" title="tr.temperature.beds"/>
+				<ds_list name="list" list="om.heat.bedHeaters" item="temperature_heater_card" item.label_tag="tr.temperature.bed_number" width="100%" height="content"
+						 flex_flow="column"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+
+			<lv_obj name="chambers" width="100%" height="content" flex_flow="column">
+				<list_header name="header" title="tr.temperature.chambers"/>
+				<ds_list name="list" list="om.heat.chamberHeaters" item="temperature_heater_card"
+						 item.label_tag="tr.temperature.chamber_number" width="100%" height="content"
+						 flex_flow="column"
+						 style_flex_main_place="start" style_flex_cross_place="start" style_flex_track_place="start"/>
+			</lv_obj>
+		</lv_obj>
+
+		<lv_obj name="extruder" height="100%" flex_grow="1" flex_flow="column" style_pad_all="0">
+			<lv_label name="selected_tool" bind_text="presenter.selected_tool" width="100%" height="content"
+					  style_text_align="center"/>
+			<ds_view name="extrusion" view="temperature_extrusion" shown="true" width="100%" flex_grow="1">
+				<style name="card"/>
+			</ds_view>
+		</lv_obj>
+	</view>
+</component>

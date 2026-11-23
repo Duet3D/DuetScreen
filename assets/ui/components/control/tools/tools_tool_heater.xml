@@ -1,0 +1,17 @@
+<!--
+  One of a tool's heaters, as a row (heater_row.xml), named for its sensor, else "Heater <number>", with the tool's own
+  targets for it.
+
+  Fields:   a row of a tool's om.tools[…].heaters: row.value (the heater number), row.index (its slot); the tool is the
+            row around it (parent.active, parent.standby)
+-->
+<component>
+	<api>
+		<!-- An expression: lower and less padded, where room is short (heater_row.xml) -->
+		<prop name="compact" type="string" default="0"/>
+	</api>
+	<view extends="heater_row" compact="$compact"
+		  label="om.sensors.analog[{om.heat.heaters[{row.value}].sensor}].name|default:tr.temperature.heater:{row.value}"
+		  active="parent.active[{row.index}]|format:tr.units.degrees"
+		  standby="parent.standby[{row.index}]|format:tr.units.degrees"/>
+</component>

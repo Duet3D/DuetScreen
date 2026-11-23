@@ -1,0 +1,35 @@
+/* The sidebar: a button per page, then the E-stop. Settings and the E-stop are locked, so they can always be
+   reached; the user's own layout (made on the screen) can only move them. See src/UI/Xml/Layout/Layout.h. */
+{
+  "format": 1,
+  "slot": "sidebar",
+  "kind": "strip",
+  "items": [
+    {
+      "id": "home",
+      "widget": "page_home"
+    },
+    {
+      "id": "control",
+      "widget": "page_control"
+    },
+    {
+      "id": "files",
+      "widget": "page_files"
+    },
+    {
+      "id": "console",
+      "widget": "page_console"
+    },
+    {
+      "id": "settings",
+      "widget": "page_settings",
+      "locked": true
+    },
+    {
+      "id": "estop",
+      "widget": "estop",
+      "locked": true
+    }
+  ]
+}

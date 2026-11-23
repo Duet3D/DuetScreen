@@ -1,0 +1,20 @@
+{
+  "component": "console_log",
+  "title_tag": "tr.widget.console_log",
+  "description_tag": "tr.widget.console_log_desc",
+  "category_tag": "tr.widget.category_console",
+  "icon": "console.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      458,
+      278
+    ],
+    "min": [
+      200,
+      136
+    ]
+  }
+}

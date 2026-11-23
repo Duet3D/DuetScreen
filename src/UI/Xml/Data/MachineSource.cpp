@@ -1,0 +1,74 @@
+/*
+ * MachineSource.cpp
+ */
+
+#include "MachineSource.h"
+#include "Comm/Connection.h"
+#include "ObjectModel/PrinterStatus.h"
+#include "UI/Core/Model.h"
+#include "i18n/i18n.h"
+#include <fmt/format.h>
+
+namespace UI::Xml
+{
+	MachineSource::MachineSource()
+		: DataSource("machine")
+	{
+	}
+
+	void MachineSource::fields(FieldVisitor& f)
+	{
+		f.field("connected", m_connected, "1 while the printer is connected, else 0");
+		f.field("status", m_status, "State key, e.g. idle, processing, paused; translated under state.*");
+		f.field("printing",
+				m_printing,
+				"1 while a job is running and not paused, else 0: controls that would change the job are disabled");
+		f.field("job_active",
+				m_jobActive,
+				"1 while there is a job (running, pausing, paused, resuming or simulating), else 0");
+		f.field("connection", m_connection, "How the screen is connected to the printer, e.g. \"USB\"");
+		f.field("state", m_state, "The printer's state, translated, e.g. \"Idle\"");
+		f.field("summary", m_summary, "The connection and the state, e.g. \"USB - Idle\"");
+	}
+
+	void MachineSource::onInit()
+	{
+		registerEventListener<EventType::Status>(this, &MachineSource::statusChanged);
+	}
+
+	void MachineSource::update()
+	{
+		statusChanged(OM::GetStatus());
+	}
+
+	void MachineSource::onConnect()
+	{
+		update();
+		if (OM::GetStatus() == OM::PrinterStatus::connecting)
+		{
+			showState("connected"); // until the printer says what it is doing
+		}
+	}
+
+	void MachineSource::clear()
+	{
+		statusChanged(OM::GetStatus());
+		showState("disconnected");
+	}
+
+	void MachineSource::statusChanged(const OM::PrinterStatus& status)
+	{
+		m_connected.set(OM::IsConnected() ? 1 : 0);
+		m_status.set(OM::GetStatusText());
+		m_printing.set(OM::IsPrintingStatus(status) && status != OM::PrinterStatus::paused ? 1 : 0);
+		m_jobActive.set(OM::IsPrintingStatus(status) ? 1 : 0);
+		showState(OM::GetStatusText());
+	}
+
+	void MachineSource::showState(std::string_view state)
+	{
+		m_connection.set(_(Comm::Connection::get().typeName()));
+		m_state.set(_(fmt::format("state.{:s}", state)));
+		m_summary.set(fmt::format("{:s} - {:s}", m_connection.get(), m_state.get()));
+	}
+} // namespace UI::Xml

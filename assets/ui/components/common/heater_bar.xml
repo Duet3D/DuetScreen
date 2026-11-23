@@ -1,0 +1,19 @@
+<!--
+  A heater's temperature as a thin bar, from 0 to the heater's maximum: its temperature over what it heats to, muted,
+  coloured by its state as a bar gauge is (gauge_track.xml). Under each heater on the Tools tab (heater_row.xml), on a
+  tool's tile (dashboard_tool_tile_heater.xml), and above the number pad when one of its targets is set
+  (dialog_number.xml).
+
+      <heater_bar heater="row.value"/>
+
+  Props:    heater  the name of the heater's number, e.g. `row.value`; its state and temperature are
+                    om.heat.heaters[{heater}]
+-->
+<component>
+	<api>
+		<prop name="heater" type="string" default="row.value"/>
+	</api>
+	<view extends="gauge_track" value="om.heat.heaters[{${heater}}].current|int"
+		  max="om.heat.heaters[{${heater}}].max|int" target="om.heat.heaters[{${heater}}]|heater_target"
+		  state="om.heat.heaters[{${heater}}].state" width="100%" height="4"/>
+</component>

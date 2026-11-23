@@ -1,0 +1,31 @@
+<!--
+  A value as a button: what it is, muted, over the value. Tap it to change it: give it the action. The job's overrides
+  (dashboard_job_status.xml) and a heater's targets (heater_row.xml) are value buttons. Give it a width.
+
+      <value_button name="speed_override" title_tag="tr.job.speed" value="source.move.speed_factor"
+                    value_style="text_emphasis" width="1" flex_grow="1">
+          <action trigger="clicked" name="actions.factors.speed"/>
+      </value_button>
+
+  Props:    title_tag    the translation key of what it is
+            value        the name of its value
+            value_style  the value's style (default `text`, as any text)
+-->
+<component>
+	<api>
+		<prop name="title_tag" type="string"/>
+		<prop name="value" type="string"/>
+		<prop name="value_style" type="string" default="text"/>
+	</api>
+	<view extends="lv_obj" height="content" flex_flow="column" scrollable="false" style_flex_cross_place="center"
+		  style_flex_track_place="center">
+		<style name="btn"/>
+		<style name="pressed" selector="pressed"/>
+		<lv_label name="title" translation_tag="$title_tag" clickable="false">
+			<style name="text_muted"/>
+		</lv_label>
+		<lv_label name="value" bind_text="$value" clickable="false">
+			<style name="$value_style"/>
+		</lv_label>
+	</view>
+</component>

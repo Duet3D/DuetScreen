@@ -1,0 +1,31 @@
+{
+  "component": "dashboard_fan",
+  "title_tag": "tr.widget.fan",
+  "description_tag": "tr.widget.fan_desc",
+  "category_tag": "tr.widget.category_fans",
+  "icon": "fan.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      458,
+      89
+    ],
+    "min": [
+      319,
+      89
+    ]
+  },
+  "settings": [
+    {
+      "name": "fan",
+      "kind": "row",
+      "list": "om.fans",
+      "key": "row.index",
+      "label": "row.name|default:tr.fine_tune.fan",
+      "default": 0,
+      "title_tag": "tr.widget.setting_fan"
+    }
+  ]
+}

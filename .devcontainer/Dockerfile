@@ -42,7 +42,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gdb-multiarch \
     libgtest-dev \
     imagemagick \
-    python3-tk \
     gcovr \
     libfreetype6 \
     libfreetype-dev \
@@ -83,7 +82,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get install -y --no-install-recommends gcc-15 g++-15 \
     && rm -rf /var/lib/apt/lists/*
 
-# Python tooling (pillow, astyle and the pinned CMake from requirements.txt) lives in a
+# Python tooling (pillow and the pinned astyle and CMake from requirements.txt) lives in a
 # venv at /opt/venv that is first on PATH, so `python3`, `cmake` and `astyle` resolve to
 # it without activating anything. A venv rather than the system interpreter because
 # Ubuntu 24.04 refuses system-wide pip installs (PEP 668). The build context is the

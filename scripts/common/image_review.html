@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screenshot review</title>
+<!--
+	The page scripts/image_review.py serves to review screenshot-test images.
+	It reads the items from api/items, records each decision with
+	api/items/<index>/decision, and applies them all with api/finish.
+-->
+<style>
+	:root {
+		color-scheme: light dark;
+		--bg: #f6f6f4;
+		--panel: #ffffff;
+		--line: #d9d9d4;
+		--text: #1d1d1b;
+		--muted: #6b6b66;
+		--accent: #2f6fdb;
+		--accept: #2b8a3e;
+		--reject: #c2410c;
+		--checker-a: #e8e8e4;
+		--checker-b: #fafaf8;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--bg: #161615;
+			--panel: #1f1f1d;
+			--line: #34342f;
+			--text: #ececea;
+			--muted: #9a9a93;
+			--accent: #6f9cf0;
+			--accept: #51b56a;
+			--reject: #f0814d;
+			--checker-a: #2a2a27;
+			--checker-b: #232321;
+		}
+	}
+	* { box-sizing: border-box; }
+	html, body { height: 100%; margin: 0; }
+	body {
+		background: var(--bg);
+		color: var(--text);
+		font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr);
+	}
+	button {
+		font: inherit;
+		color: inherit;
+		background: var(--panel);
+		border: 1px solid var(--line);
+		border-radius: 6px;
+		padding: 6px 12px;
+		cursor: pointer;
+	}
+	button:hover:not(:disabled) { border-color: var(--muted); }
+	button:disabled { opacity: 0.45; cursor: default; }
+	button.on { border-color: var(--accent); color: var(--accent); }
+	button.accept { border-color: var(--accept); color: var(--accept); }
+	button.reject { border-color: var(--reject); color: var(--reject); }
+	button.accept.chosen { background: var(--accept); color: var(--panel); }
+	button.reject.chosen { background: var(--reject); color: var(--panel); }
+	button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+	kbd {
+		font: 12px ui-monospace, monospace;
+		border: 1px solid var(--line);
+		border-radius: 4px;
+		padding: 0 4px;
+		color: var(--muted);
+	}
+
+	header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px 16px;
+		padding: 10px 16px;
+		border-bottom: 1px solid var(--line);
+		background: var(--panel);
+	}
+	header h1 { font-size: 15px; margin: 0; }
+	header .progress { color: var(--muted); }
+	header .spacer { flex: 1; }
+
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(200px, 280px) 1fr;
+		min-height: 0;
+	}
+	@media (max-width: 760px) {
+		.layout { grid-template-columns: 1fr; grid-template-rows: 30vh 1fr; }
+	}
+
+	nav {
+		overflow-y: auto;
+		border-right: 1px solid var(--line);
+		padding: 6px 0;
+	}
+	nav button {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		border: 0;
+		border-radius: 0;
+		background: none;
+		padding: 5px 12px;
+		text-align: left;
+	}
+	nav button.current { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+	nav .name { flex: 1; overflow-wrap: anywhere; font-size: 13px; }
+	.dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; }
+	.dot.accept { background: var(--accept); border-color: var(--accept); }
+	.dot.reject { background: var(--reject); border-color: var(--reject); }
+	.tag {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--muted);
+	}
+
+	main {
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr) auto;
+		min-height: 0;
+		min-width: 0;
+	}
+	.title { padding: 10px 16px 0; }
+	.title h2 { font-size: 15px; margin: 0; overflow-wrap: anywhere; }
+	.title .meta { color: var(--muted); font-size: 13px; }
+	.toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 16px; }
+
+	.views {
+		display: grid;
+		gap: 10px;
+		padding: 0 16px;
+		min-height: 0;
+		overflow: auto;
+	}
+	.views { grid-auto-rows: minmax(0, 1fr); }
+	.views.compare { grid-template-columns: 1fr 1fr; }
+	.views.single { grid-template-columns: 1fr; }
+	figure {
+		margin: 0;
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr);
+		min-height: 0;
+		min-width: 0;
+	}
+	figcaption { font-size: 12px; color: var(--muted); padding-bottom: 3px; }
+	.frame {
+		min-height: 0;
+		overflow: auto;
+		border: 1px solid var(--line);
+		background: repeating-conic-gradient(var(--checker-a) 0 25%, var(--checker-b) 0 50%) 0 0 / 16px 16px;
+	}
+	.frame img { display: block; image-rendering: pixelated; }
+	.fit .frame img { width: 100%; height: 100%; object-fit: contain; }
+	.missing { padding: 16px; color: var(--muted); }
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		align-items: center;
+		padding: 10px 16px;
+		border-top: 1px solid var(--line);
+		background: var(--panel);
+	}
+	.actions .hint { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+	.done { padding: 24px 16px; max-width: 760px; }
+	.done h2 { margin-top: 0; }
+	.done ul { padding-left: 20px; }
+	.error { color: var(--reject); }
+</style>
+</head>
+<body>
+<header>
+	<h1>Screenshot review</h1>
+	<span class="progress" id="progress"></span>
+	<span class="spacer"></span>
+	<button class="primary" id="finish" title="Apply every decision and end the review">Finish</button>
+</header>
+<div class="layout" id="layout">
+	<nav id="list" aria-label="Images"></nav>
+	<main>
+		<div class="title">
+			<h2 id="name"></h2>
+			<div class="meta" id="meta"></div>
+		</div>
+		<div class="views" id="views"></div>
+		<div>
+			<div class="toolbar">
+				<button id="prev" title="Previous image">← Previous</button>
+				<button id="next" title="Next image">Next →</button>
+				<button id="blink" title="Alternate between the reference and the new screenshot">Blink <kbd>B</kbd></button>
+				<button id="fit" title="Scale images to the window, or show them at their real size">Fit <kbd>Z</kbd></button>
+			</div>
+			<div class="actions">
+				<button class="accept" id="accept"></button>
+				<button class="reject" id="reject"></button>
+				<button id="clear" title="Leave this image as the test run wrote it">Undecided <kbd>U</kbd></button>
+				<button id="acceptRest" title="Accept every image that has no decision yet">Accept all undecided <kbd>A</kbd></button>
+				<span class="hint"><kbd>←</kbd> <kbd>→</kbd> move · nothing changes on disk until Finish</span>
+			</div>
+		</div>
+	</main>
+</div>
+
+<script>
+"use strict";
+
+/** Wording of each item kind's two decisions, and what each view is called. */
+const KINDS = {
+	diff: { tag: "changed", accept: "Update reference", reject: "Keep old reference" },
+	new: { tag: "new", accept: "Keep new reference", reject: "Delete new reference" },
+};
+const VIEW_TITLES = {
+	reference: "Reference",
+	new: "New screenshot",
+	diff: "Difference (contrast stretched)",
+	overlay: "New screenshot in grey, differences in red",
+};
+
+const state = {
+	items: [],        // Items as last reported by the server
+	index: 0,         // Index of the item on screen
+	blink: false,     // Alternate reference and new screenshot in one frame
+	fit: true,        // Scale images to the available space
+	finished: false,  // The decisions have been applied
+};
+let blinkTimer = null;  // Interval that flips the blink frame, while blinking
+
+const $ = (id) => document.getElementById(id);
+
+/** Send a request to the session's API and return the JSON reply. */
+async function api(path, body) {
+	const response = await fetch(path, body === undefined ? {} : {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	});
+	if (!response.ok) throw new Error(`${path}: ${response.status}`);
+	return response.json();
+}
+
+/** Whether any item has a decision, so leaving the page would lose work. */
+function hasDecisions() {
+	return state.items.some((item) => item.decision !== null);
+}
+
+/** Create an element with a class and text. */
+function el(tag, className, text) {
+	const node = document.createElement(tag);
+	if (className) node.className = className;
+	if (text !== undefined) node.textContent = text;
+	return node;
+}
+
+/** Build a captioned figure for one view of the current item. */
+function figure(view, caption) {
+	const fig = el("figure");
+	fig.append(el("figcaption", "", caption));
+	const frame = el("div", "frame");
+	const img = el("img");
+	img.alt = caption;
+	img.src = `img/${state.index}/${view}.png`;
+	frame.append(img);
+	fig.append(frame);
+	return fig;
+}
+
+/** Redraw the list, the current item and the buttons from the state. */
+function render() {
+	if (state.finished) return;
+	const { items, index } = state;
+	const decided = items.filter((item) => item.decision !== null).length;
+	$("progress").textContent = `${decided} of ${items.length} decided`;
+	$("finish").textContent = decided < items.length ? `Finish (${items.length - decided} left unchanged)` : "Finish";
+
+	const list = $("list");
+	list.replaceChildren(...items.map((item, i) => {
+		const row = el("button", i === index ? "current" : "");
+		row.append(el("span", `dot ${item.decision ?? ""}`), el("span", "name", item.label), el("span", "tag", KINDS[item.kind].tag));
+		row.addEventListener("click", () => select(i));
+		return row;
+	}));
+	list.children[index]?.scrollIntoView({ block: "nearest" });
+
+	const item = items[index];
+	const kind = KINDS[item.kind];
+	$("name").textContent = item.label;
+	$("meta").textContent = describe(item);
+
+	const canBlink = item.views.includes("reference");
+	if (!canBlink) state.blink = false;
+	$("blink").disabled = !canBlink;
+	$("blink").classList.toggle("on", state.blink);
+	$("fit").classList.toggle("on", state.fit);
+	$("prev").disabled = index === 0;
+	$("next").disabled = index === items.length - 1;
+
+	$("accept").innerHTML = "";
+	$("accept").append(kind.accept + " ", el("kbd", "", "Y"));
+	$("reject").innerHTML = "";
+	$("reject").append(kind.reject + " ", el("kbd", "", "N"));
+	$("accept").classList.toggle("chosen", item.decision === "accept");
+	$("reject").classList.toggle("chosen", item.decision === "reject");
+	$("acceptRest").disabled = decided === items.length;
+
+	renderViews(item);
+}
+
+/** One line about the current item: what it is and how much changed. */
+function describe(item) {
+	if (item.kind === "new") return "No reference existed, so the test saved this screenshot as the reference.";
+	if (!item.views.includes("reference")) return "The reference image is missing.";
+	const { stats } = item;
+	const parts = [];
+	if (stats.changedPixels !== undefined) parts.push(`${stats.changedPixels.toLocaleString()} pixels differ`);
+	if (stats.referenceSize && stats.referenceSize.join() !== stats.newSize.join()) {
+		parts.push(`size changed from ${stats.referenceSize.join("×")} to ${stats.newSize.join("×")}`);
+	}
+	return parts.join(" · ");
+}
+
+/** Fill the image area for `item` in the current view mode. */
+function renderViews(item) {
+	clearInterval(blinkTimer);
+	blinkTimer = null;
+	const views = $("views");
+
+	if (state.blink) {
+		views.className = `views single${state.fit ? " fit" : ""}`;
+		const fig = figure("reference", VIEW_TITLES.reference);
+		const caption = fig.querySelector("figcaption");
+		const img = fig.querySelector("img");
+		// Both images are fetched once and then swapped, so the flip is instant.
+		const sources = ["reference", "new"].map((view) => {
+			const preload = new Image();
+			preload.src = `img/${state.index}/${view}.png`;
+			return { view, src: preload.src };
+		});
+		let shown = 0;
+		blinkTimer = setInterval(() => {
+			shown = 1 - shown;
+			img.src = sources[shown].src;
+			caption.textContent = VIEW_TITLES[sources[shown].view];
+		}, 600);
+		views.replaceChildren(fig);
+		return;
+	}
+
+	const shown = item.kind === "new" ? ["new"] : item.views;
+	views.className = `views ${shown.length > 1 ? "compare" : "single"}${state.fit ? " fit" : ""}`;
+	const figures = shown.map((view) => figure(view, VIEW_TITLES[view]));
+	if (item.kind === "diff" && !item.views.includes("reference")) {
+		figures.push(el("p", "missing", "There is no reference image to compare against."));
+	}
+	views.replaceChildren(...figures);
+}
+
+/** Show item `i`. */
+function select(i) {
+	state.index = Math.max(0, Math.min(i, state.items.length - 1));
+	render();
+}
+
+/** Record a decision (or null) for the current item, then move to the next undecided one. */
+async function decide(decision) {
+	const reply = await api(`api/items/${state.index}/decision`, { decision });
+	state.items = reply.items;
+	if (decision !== null) {
+		const after = state.items.findIndex((item, i) => i > state.index && item.decision === null);
+		const before = state.items.findIndex((item) => item.decision === null);
+		if (after !== -1) state.index = after;
+		else if (before !== -1) state.index = before;
+	}
+	render();
+}
+
+/** Accept every item that has no decision yet. */
+async function acceptRest() {
+	for (let i = 0; i < state.items.length; i++) {
+		if (state.items[i].decision === null) {
+			state.items = (await api(`api/items/${i}/decision`, { decision: "accept" })).items;
+		}
+	}
+	render();
+}
+
+/** Apply the decisions and replace the page with what changed. */
+async function finish() {
+	$("finish").disabled = true;
+	try {
+		showSummary(await api("api/finish", {}));
+	} catch (e) {
+		$("finish").disabled = false;
+		$("progress").textContent = `Could not finish: ${e.message}. Is run_tests.py still running?`;
+	}
+}
+
+/** Replace the review with the list of changes the server made. */
+function showSummary(summary) {
+	state.finished = true;
+	clearInterval(blinkTimer);
+	$("finish").hidden = true;
+	$("progress").textContent = "Finished";
+	const groups = [
+		["Updated reference", summary.updated],
+		["Kept old reference", summary.keptOld],
+		["Kept new reference", summary.keptNew],
+		["Deleted new reference", summary.deletedNew],
+		["Left as the test run wrote them", summary.undecided],
+		["Failed", summary.failed],
+	];
+	const done = el("div", "done");
+	done.append(el("h2", "", "Review applied"), el("p", "", "You can close this tab."));
+	for (const [title, names] of groups) {
+		if (!names.length) continue;
+		done.append(el("h3", title === "Failed" ? "error" : "", `${title} (${names.length})`));
+		const list = el("ul");
+		list.append(...names.map((name) => el("li", "", name)));
+		done.append(list);
+	}
+	$("layout").replaceChildren(done);
+}
+
+$("prev").addEventListener("click", () => select(state.index - 1));
+$("next").addEventListener("click", () => select(state.index + 1));
+$("accept").addEventListener("click", () => decide("accept"));
+$("reject").addEventListener("click", () => decide("reject"));
+$("clear").addEventListener("click", () => decide(null));
+$("acceptRest").addEventListener("click", acceptRest);
+$("finish").addEventListener("click", finish);
+$("blink").addEventListener("click", () => { state.blink = !state.blink; render(); });
+$("fit").addEventListener("click", () => { state.fit = !state.fit; render(); });
+
+document.addEventListener("keydown", (event) => {
+	if (state.finished || event.ctrlKey || event.metaKey || event.altKey) return;
+	const actions = {
+		ArrowLeft: () => select(state.index - 1),
+		ArrowRight: () => select(state.index + 1),
+		y: () => decide("accept"),
+		n: () => decide("reject"),
+		u: () => decide(null),
+		a: acceptRest,
+		b: () => !$("blink").disabled && $("blink").click(),
+		z: () => $("fit").click(),
+	};
+	const action = actions[event.key.length === 1 ? event.key.toLowerCase() : event.key];
+	if (action) {
+		event.preventDefault();
+		action();
+	}
+});
+
+window.addEventListener("beforeunload", (event) => {
+	if (!state.finished && hasDecisions()) {
+		event.preventDefault();
+		event.returnValue = "";  // Older browsers only warn when this is set
+	}
+});
+
+api("api/items").then((reply) => {
+	state.items = reply.items;
+	if (reply.finished) showSummary(reply.finished);
+	else render();
+}).catch((e) => {
+	$("progress").textContent = `Could not load the review: ${e.message}`;
+});
+</script>
+</body>
+</html>

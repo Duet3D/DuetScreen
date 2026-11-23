@@ -1,0 +1,21 @@
+<!--
+  How far and how fast a jog goes: a row each, its title over its unit, then its presets, which scroll sideways if there
+  isn't room for them all. Tap one to use it; hold it to change it. The `jog_choices` widget
+  (widgets/motion/jog_choices.json) too.
+
+  Data:     the global source.jog.* (src/UI/Xml/Data/JogSource.h), shared by every view that jogs
+  Actions:  actions.selector.pick, actions.selector.edit_choice (in value_selector_choice.xml)
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="content">
+		<style name="setting_group"/>
+		<ds_setting name="distance" title_tag="tr.move.step" bind_hint="source.jog.distance.unit">
+			<value_selector_presets name="distances" choices="source.jog.distance.choices" style_max_width="100%"
+									scroll_dir="hor"/>
+		</ds_setting>
+		<ds_setting name="feedrate" title_tag="tr.move.speed" bind_hint="source.jog.feedrate.unit">
+			<value_selector_presets name="feedrates" choices="source.jog.feedrate.choices" style_max_width="100%"
+									scroll_dir="hor"/>
+		</ds_setting>
+	</view>
+</component>

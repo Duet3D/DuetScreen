@@ -1,0 +1,288 @@
+/*
+ * XmlUi.cpp
+ */
+
+#include "XmlUi.h"
+#include "Comm/Responses.h"
+#include "Debug.h"
+#include "GcodeActions.h"
+#include "HotReload.h"
+#include "NavigationActions.h"
+#include "ReloadState.h"
+#include "Services.h"
+#include "Translations.h"
+#include "UI/Core/Model.h"
+#include "UI/Styles/Styles.h"
+#include "UI/Styles/Theme.h"
+#include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Binding/Constants.h"
+#include "UI/Xml/Binding/Globals.h"
+#include "UI/Xml/Data/DataSources.h"
+#include "UI/Xml/Dialogs/DialogActions.h"
+#include "UI/Xml/Layout/LayoutEditor.h"
+#include "UI/Xml/Layout/LayoutLibrary.h"
+#include "UI/Xml/Layout/LayoutStore.h"
+#include "UI/Xml/Layout/PlacementScope.h"
+#include "UI/Xml/Layout/WidgetCatalogue.h"
+#include "UI/Xml/Theme/ThemeStyles.h"
+#include "UI/Xml/View/Actions.h"
+#include "UI/Xml/View/SelectorActions.h"
+#include "UI/Xml/View/XmlView.h"
+#include "helix_xml.h"
+#include "i18n/i18n.h"
+#include <algorithm>
+
+#ifndef ASSETS_FOLDER
+#  error "ASSETS_FOLDER must be defined (UI/Styles/Styles.h)"
+#endif
+
+namespace UI::Xml
+{
+	namespace
+	{
+		bool s_initialized = false;	   // Between init() and deinit()
+		Paths s_paths;				   // Where bundles are loaded from
+		Bundles::Result s_loaded;	   // What the last load produced
+		std::vector<XmlView*> s_views; // Live views, rebuilt on reload
+
+		/** Load every bundle, and report problems on screen */
+		void loadBundles()
+		{
+			ZoneScoped;
+			s_loaded = Bundles::loadAll(s_paths);
+			HotReload::watch(s_loaded.files);
+
+			// Themes can only be checked once all are loaded: a theme's parent may come from another bundle
+			std::vector<std::pair<std::filesystem::path, std::string>> themeProblems;
+			Themes::setThemeFiles(std::move(s_loaded.themes), &themeProblems);
+			for (auto& [file, message] : themeProblems)
+			{
+				s_loaded.issues.push_back({file, std::move(message)});
+			}
+
+			// Layouts are checked against the widgets, which may come from any bundle. In safe mode the changes made
+			// on the screen aren't loaded, so none are saved either: they would only be lost.
+			WidgetCatalogue::set(std::move(s_loaded.widgets));
+			const bool canSave = !s_paths.user.empty() && !Bundles::isSafeMode(s_paths);
+			Layouts::set(std::move(s_loaded.layouts),
+						 canSave ? s_paths.user / Layouts::LOCAL_BUNDLE : std::filesystem::path(),
+						 s_loaded.issues);
+			LayoutLibrary::setFolder(canSave ? s_paths.user / LayoutLibrary::SAVED_FOLDER : std::filesystem::path());
+
+			// Sources describe what the bundles bring too, e.g. the themes to choose from
+			DataSources::updateAll();
+
+			for (const auto& issue : s_loaded.issues)
+			{
+				Model::get().post<EventType::Response>(
+					ResponseType::WARNING,
+					fmt::format("UI: {:s}: {:s}", issue.file.filename().string(), issue.message));
+			}
+		}
+
+		/** After a language change: new translations for XML, and re-read data whose text is translated */
+		void onLanguageChanged()
+		{
+			UI_LOCK();
+			Translations::sync();
+			Constants::retranslate();
+			DataSources::updateAll();
+		}
+	} // namespace
+
+	Paths defaultPaths()
+	{
+#if T113
+		return Paths{.builtin = ASSETS_FOLDER "ui", .user = "/boot/ui"};
+#else
+		return Paths{.builtin = ASSETS_FOLDER "ui", .user = "var/ui"};
+#endif
+	}
+
+	void eraseUserLayouts()
+	{
+		const std::filesystem::path user = s_initialized ? s_paths.user : defaultPaths().user;
+		if (user.empty())
+		{
+			return;
+		}
+		for (const std::filesystem::path& dir : {user / Layouts::LOCAL_BUNDLE, user / LayoutLibrary::SAVED_FOLDER})
+		{
+			std::string error;
+			if (!Layouts::removeSafely(dir, error))
+			{
+				LOG_ERROR("Erasing the layouts: {:s}", error);
+			}
+		}
+	}
+
+	void init(const Paths& paths)
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (s_initialized)
+		{
+			LOG_WARN("XML UI already initialised");
+			return;
+		}
+
+		s_paths = paths;
+		lv_xml_init();
+		Translations::init();
+		Globals::init();
+		ThemeStyles::registerAll();
+		Translations::sync();
+		Actions::init();
+		Widgets::registerAll();
+		DialogActions::registerAll();
+		GcodeActions::registerAll();
+		NavigationActions::registerAll();
+		SelectorActions::registerAll();
+		DataSources::start();
+		i18n::setLanguageChangedCallback(onLanguageChanged);
+
+		s_initialized = true;
+		loadBundles();
+	}
+
+	void deinit()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (!s_initialized)
+		{
+			return;
+		}
+		if (!s_views.empty())
+		{
+			LOG_ERROR("XML UI stopped with {:d} live view(s)", s_views.size());
+		}
+
+		HotReload::setPeriod(0);
+		HotReload::watch({});
+		i18n::setLanguageChangedCallback(nullptr);
+		LayoutEditor::get().cancel();
+		DataSources::stop();
+		Layouts::clear();
+		LayoutLibrary::setFolder({});
+		WidgetCatalogue::set({});
+		PlacementScope::releasePage();
+		Themes::clearThemes();
+		Globals::clear();
+		Actions::deinit();
+		lv_xml_deinit();
+		Translations::reset();
+		Services::setGcodeSender(nullptr);
+
+		s_loaded = {};
+		s_initialized = false;
+	}
+
+	bool isInitialized()
+	{
+		return s_initialized;
+	}
+
+	namespace
+	{
+		/** Whether `view`'s widgets are inside another XmlView's */
+		bool isInsideAnotherView(const XmlView& view)
+		{
+			for (lv_obj_t* obj = lv_obj_get_parent(view.getRootPtr()); obj != nullptr; obj = lv_obj_get_parent(obj))
+			{
+				if (dynamic_cast<XmlView*>(LvObj::fromPtr(obj)) != nullptr)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	} // namespace
+
+	void reload()
+	{
+		ZoneScoped;
+		UI_LOCK();
+		if (!s_initialized)
+		{
+			return;
+		}
+		// Customising edits the layouts being replaced: it ends, and its changes are lost
+		LayoutEditor::get().cancel();
+
+		// Only the outermost views: taking one down deletes the views inside it (its <ds_view>s), and building it
+		// again builds them afresh
+		std::vector<XmlView*> outermost;
+		for (XmlView* view : s_views)
+		{
+			if (view->getRootPtr() != nullptr && !isInsideAnotherView(*view))
+			{
+				outermost.push_back(view);
+			}
+		}
+
+		// The rebuilt views start on the home screen with their first tabs: remember where the user was, to go back
+		std::vector<lv_obj_t*> roots;
+		for (XmlView* view : outermost)
+		{
+			roots.push_back(view->getRootPtr());
+		}
+		const ReloadState where = ReloadState::capture(roots);
+
+		// Every widget goes before the definitions are replaced: a component's styles are freed with its old
+		// definition, and loading the bundles restyles and refreshes everything still on screen
+		for (XmlView* view : outermost)
+		{
+			view->takeDown();
+		}
+		loadBundles();
+		for (XmlView* view : outermost)
+		{
+			view->buildAgain();
+		}
+		where.restore();
+		focusFirstShown();
+	}
+
+	void focusFirstShown()
+	{
+		lv_group_t* group = lv_group_get_default();
+		if (group == nullptr || lv_group_get_focused(group) != nullptr || lv_group_get_obj_count(group) == 0)
+		{
+			return;
+		}
+		// With nothing focused, the next is the first, skipping any hidden
+		lv_group_focus_next(group);
+	}
+
+	const std::vector<LoadIssue>& getIssues()
+	{
+		return s_loaded.issues;
+	}
+
+	const ComponentInfo* findComponent(std::string_view name)
+	{
+		auto it = s_loaded.components.find(name);
+		return it == s_loaded.components.end() ? nullptr : &it->second;
+	}
+
+	const std::map<std::string, ComponentInfo, std::less<>>& getComponents()
+	{
+		return s_loaded.components;
+	}
+
+	const std::vector<XmlView*>& getViews()
+	{
+		return s_views;
+	}
+
+	void addView(XmlView* view)
+	{
+		s_views.push_back(view);
+	}
+
+	void removeView(XmlView* view)
+	{
+		std::erase(s_views, view);
+	}
+} // namespace UI::Xml

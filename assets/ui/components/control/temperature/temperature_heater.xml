@@ -1,0 +1,60 @@
+<!--
+  One heater on the Temperature tab: its name, which cycles it through active, standby and off and is coloured by
+  its state as the gauges are, its state, and its temperature on a bar with the active target marked above and the
+  standby target below. Drag a target along the bar to change it, or tap it to type one in. The state can't be
+  changed while printing.
+
+  Props:    label, active, standby: the names of its name and its targets, which a tool's heater and a bed's differ
+            in (temperature_tool_heater.xml, temperature_heater_card.xml)
+  Fields:   a row whose row.value is the heater number: its state, temperature and range are
+            om.heat.heaters[{row.value}]
+  Actions:  actions.heater.toggle, actions.heater.set_active, actions.heater.set_standby (src/UI/Presenters/Control/Temperature/HeaterActions.h)
+-->
+<component>
+	<api>
+		<prop name="label" type="string"/>
+		<prop name="active" type="string"/>
+		<prop name="standby" type="string"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row" style_pad_all="0"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<lv_obj name="info" width="30%" height="100%" style_min_height="content" flex_flow="column"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="start">
+			<ds_button name="name" bind_text="$label" width="100%" height="content">
+				<style name="action_btn"/>
+				<bind_style_if_eq name="heater_standby" subject="om.heat.heaters[{row.value}].state" ref_value="standby"/>
+				<bind_style_if_eq name="heater_off" subject="om.heat.heaters[{row.value}].state" ref_value="off"/>
+				<bind_style_if_eq name="heater_fault" subject="om.heat.heaters[{row.value}].state" ref_value="fault"/>
+				<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+				<action trigger="clicked" name="actions.heater.toggle"/>
+			</ds_button>
+			<lv_label name="state" bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status" width="100%" height="content" style_text_align="center"/>
+		</lv_obj>
+
+		<lv_obj name="temperature" height="100%" style_min_height="100" flex_grow="1" scrollable="false">
+			<ds_bar name="bar" bind_value="om.heat.heaters[{row.value}].current|int" bind_min="om.heat.heaters[{row.value}].min|atleast:0" bind_max="om.heat.heaters[{row.value}].max|int"
+					width="100%" height="15" align="center">
+				<style name="temperature_bar" selector="indicator"/>
+			</ds_bar>
+			<ds_bar_marker name="active" bar="bar" bind_value="$active"
+						   bind_min="om.heat.heaters[{row.value}].min|atleast:0" bind_max="om.heat.heaters[{row.value}].max|int" label_format="{} °C" align="left_mid" y="-30">
+				<style name="pad_normal"/>
+				<style name="input"/>
+				<style name="temperature_bar_indic" selector="indicator"/>
+				<bind_state_if_eq subject="om.heat.heaters[{row.value}].state" state="checked" ref_value="active"/>
+				<action trigger="clicked" name="actions.heater.set_active"/>
+				<action trigger="value_confirmed" name="actions.heater.set_active"/>
+			</ds_bar_marker>
+			<ds_bar_marker name="standby" bar="bar" bind_value="$standby"
+						   bind_min="om.heat.heaters[{row.value}].min|atleast:0" bind_max="om.heat.heaters[{row.value}].max|int" label_format="{} °C" align="left_mid" y="31">
+				<style name="pad_normal"/>
+				<style name="input"/>
+				<style name="temperature_bar_indic" selector="indicator"/>
+				<bind_state_if_eq subject="om.heat.heaters[{row.value}].state" state="checked" ref_value="standby"/>
+				<action trigger="clicked" name="actions.heater.set_standby"/>
+				<action trigger="value_confirmed" name="actions.heater.set_standby"/>
+			</ds_bar_marker>
+		</lv_obj>
+	</view>
+</component>

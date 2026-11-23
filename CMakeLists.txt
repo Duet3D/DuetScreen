@@ -119,7 +119,6 @@ set(PROCESSOR "T113" CACHE STRING "Target processor, 'T113' or 'Simulation'")
 option(DUETSCREEN_DEBUG_BORDERS "Enable debug borders" OFF)
 option(DUETSCREEN_LOG_TIMESTAMPS "Enable timestamps in log messages" ON)
 option(DUETSCREEN_LOG_THREAD "Enable logging thread id in log messages" OFF)
-option(DUETSCREEN_ASYNC_RR_MODEL "Enable asynchronous rr_model requests" OFF)
 option(DUETSCREEN_HARDWARE_TEST "Enable hardware test" OFF)
 set(DUETSCREEN_HARDWARE_TEST_SERIAL_NUMBER "\"\"" CACHE STRING "Default serial number to use in hardware test mode")
 option(DUETSCREEN_BURNIN_TEST "Enable burnin test" OFF)
@@ -129,7 +128,6 @@ option(DUETSCREEN_ENABLE_PROFILING "Enable profiling using Tracy" OFF)
 option(DUETSCREEN_ENABLE_LV_PROFILING "Enable lvgl profiling" ${DUETSCREEN_ENABLE_PROFILING})
 option(DUETSCREEN_USE_FIXED_TEST_STRINGS "Use fixed strings for UI labels like build date/time for unit tests" OFF)
 option(DUETSCREEN_USE_LV_ANIMATION "Enable LVGL animations" ON)
-option(DUETSCREEN_CONSOLE_SIDE_PANEL "Show console in side panel next to main window" OFF)
 
 set(_dev_default OFF)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -141,15 +139,18 @@ if (DUETSCREEN_DEVELOPER_MODE)
   set(DUETSCREEN_ENABLE_CONSOLE_SHELL ON CACHE BOOL "Enable sending shell commands via the GUI console" FORCE)
 endif()
 
+# The simulated Duet (src/Simulator): a connection method that answers like a Duet, for development and the unit
+# tests. On by default in simulation and developer mode builds, never in a release build for the screen.
+set(_duet_simulator_default OFF)
+if(PROCESSOR STREQUAL "Simulation" OR DUETSCREEN_DEVELOPER_MODE OR BUILD_TESTING)
+  set(_duet_simulator_default ON)
+endif()
+option(DUETSCREEN_DUET_SIMULATOR "Build the simulated Duet connection method (development only)" ${_duet_simulator_default})
+
 # Hardware test requires developer mode to enable ADB
 if (DUETSCREEN_HARDWARE_TEST)
   set(DUETSCREEN_DEVELOPER_MODE ON CACHE BOOL "Enable developer mode features" FORCE)
 endif()
-
-# UI Options
-set(DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET "LvCheckbox" CACHE STRING "Widget type for settings toggles: 'LvCheckbox' or 'LvSwitch'")
-set_property(CACHE DUETSCREEN_UI_SETTINGS_TOGGLE_WIDGET PROPERTY STRINGS LvCheckbox LvSwitch) # constrain valid values
-option(DUETSCREEN_UI_MODAL_CLOSE_BUTTON "Enable close button on modals" OFF)
 
 if(NOT DEFINED PROCESSOR)
   message(
@@ -257,6 +258,9 @@ include(${LIBRARIES_DIR}/tracy.cmake)
 # LVGL
 include(${LIBRARIES_DIR}/lvgl.cmake)
 
+# XML UI engine
+include(${LIBRARIES_DIR}/helix-xml.cmake)
+
 # Include libusb headers
 target_include_directories(DuetScreen.lib SYSTEM PUBLIC ${LIBUSB_INCLUDE_DIRS})
 if(LIBUSB_LIBRARY_DIRS)
@@ -273,9 +277,10 @@ ${LIBRARIES_DIR}/Duet3D/**.cpp)
 target_sources(DuetScreen.lib PRIVATE ${DUET_LIB_SOURCES})
 
 # Update DuetScreen version.h
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_custom_target(
   update_version_h
-  COMMAND "${CMAKE_SOURCE_DIR}/scripts/update_version.sh"
+  COMMAND "${Python3_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/scripts/internal/update_version.py"
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMENT "Updating version.h"
 )
@@ -311,7 +316,6 @@ else()
                                               TRUE)
 endif()
 
-target_compile_definitions(DuetScreen.lib PUBLIC MULTITHREADED)
 
 if(PROCESSOR STREQUAL "T113")
   pkg_check_modules(XKBCOMMON xkbcommon)
@@ -470,6 +474,7 @@ target_compile_definitions(DuetScreen.lib PUBLIC LV_CONF_INCLUDE_SIMPLE)
 target_link_libraries(
   DuetScreen.lib
   PUBLIC lvgl
+          helix_xml
           ${SDL2_LIBRARIES}
           ${LIBUSB_LIBRARIES} # Link libusb library
           m
@@ -481,6 +486,10 @@ target_link_libraries(
           spdlog::spdlog
           fmt::fmt
           Tracy::TracyClient)
+
+# zlib reads the screen's update archives (UpgradeHelper checks one before installing it)
+find_package(ZLIB REQUIRED)
+target_link_libraries(DuetScreen.lib PRIVATE ZLIB::ZLIB)
 
 if(PROCESSOR STREQUAL "T113")
   target_link_libraries(DuetScreen.lib PRIVATE gpiod wpa_client)
@@ -504,21 +513,7 @@ if (ENABLE_COVERAGE)
 endif()
 
 # Link the executable with the DuetScreen core library.
-# Force-load only the themes archive so static theme registration objects are retained
-# without whole-archiving the full DuetScreen.lib. The force-load flag goes through
-# target_link_options on every platform rather than being threaded into the library
-# list: raw -Wl,--whole-archive entries in LINK_LIBRARIES are indistinguishable from
-# library names to anything that reads that property, and install(SBOM) records them
-# as bogus SPDX packages.
-target_link_libraries(DuetScreen PRIVATE DuetScreen.lib DuetScreen.themes)
-if(APPLE)
-  target_link_options(DuetScreen PRIVATE "-Wl,-force_load,$<TARGET_FILE:DuetScreen.themes>")
-elseif(MSVC)
-  target_link_options(DuetScreen PRIVATE "/WHOLEARCHIVE:$<TARGET_FILE:DuetScreen.themes>")
-else()
-  target_link_options(DuetScreen PRIVATE
-      "-Wl,--whole-archive,$<TARGET_FILE:DuetScreen.themes>,--no-whole-archive")
-endif()
+target_link_libraries(DuetScreen PRIVATE DuetScreen.lib)
 
 # Link Tracy client at the final executable level so its symbols are available
 # when resolving references from static archives like lvgl.

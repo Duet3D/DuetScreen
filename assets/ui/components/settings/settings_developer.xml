@@ -1,0 +1,58 @@
+<!--
+  The Developer settings page: logging, options for developers, the hardware test, and, last, what only some builds
+  have (debug borders, SSH, ADB, the system monitor, the setup), a group hidden in builds that have none of it. Each
+  setting is a row (ds_setting), applied as soon as it is changed.
+
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/DeveloperSettings.cpp)
+  Actions:  actions.settings.set
+            source.system.*_shown and developer_mode (src/UI/Xml/Data/SystemSource.h): what this build has
+  Actions:  actions.system.hardware_test, actions.system.buildroot_setup
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<style name="setting_page"/>
+
+		<ds_setting_group name="logging" title_tag="tr.settings.groups.logging">
+			<settings_choice name="debug_level" title_tag="tr.settings.debug_level" setting="debug_level"/>
+			<settings_toggle name="system_logging" title_tag="tr.settings.system_logging"
+							 hint_tag="tr.settings.hints.system_logging" setting="system_logging"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="options" title_tag="tr.settings.groups.options">
+			<settings_toggle name="enable_advanced_settings" title_tag="tr.settings.enable_advanced_settings"
+							 hint_tag="tr.settings.hints.advanced" setting="advanced_settings"/>
+			<settings_toggle name="enable_second_usb_channel" title_tag="tr.settings.enable_second_usb_channel"
+							 setting="second_usb_channel"/>
+		</ds_setting_group>
+
+		<ds_setting_group name="tools" title_tag="tr.settings.groups.tools">
+			<settings_button name="hardware_test" title_tag="tr.settings.hardware_test"
+							 hint_tag="tr.settings.hints.hardware_test" label_tag="tr.settings.start"
+							 action="actions.system.hardware_test"/>
+		</ds_setting_group>
+
+		<!-- In builds that have them -->
+		<ds_setting_group name="build_only" title_tag="tr.settings.groups.build_only">
+			<bind_flag_if_eq subject="source.system.build_tools_shown" flag="hidden" ref_value="0"/>
+			<settings_toggle name="debug_borders" title_tag="tr.settings.debug_borders" setting="debug_borders">
+				<bind_flag_if_eq subject="source.system.debug_borders_shown" flag="hidden" ref_value="0"/>
+			</settings_toggle>
+			<settings_toggle name="enable_ssh" title_tag="tr.settings.enable_ssh" setting="ssh">
+				<bind_flag_if_eq subject="source.system.developer_mode" flag="hidden" ref_value="0"/>
+			</settings_toggle>
+			<settings_toggle name="enable_adb" title_tag="tr.settings.enable_adb" setting="adb">
+				<bind_flag_if_eq subject="source.system.developer_mode" flag="hidden" ref_value="0"/>
+			</settings_toggle>
+			<settings_toggle name="enable_system_monitor" title_tag="tr.settings.enable_system_monitor"
+							 setting="system_monitor">
+				<bind_flag_if_eq subject="source.system.system_monitor_shown" flag="hidden" ref_value="0"/>
+			</settings_toggle>
+			<settings_button name="run_buildroot_setup" title_tag="tr.settings.run_buildroot_setup"
+							 label_tag="tr.settings.run" action="actions.system.buildroot_setup">
+				<bind_flag_if_eq subject="source.system.developer_mode" flag="hidden" ref_value="0"/>
+			</settings_button>
+		</ds_setting_group>
+	</view>
+</component>

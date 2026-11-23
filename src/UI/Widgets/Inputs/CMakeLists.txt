@@ -1,0 +1,12 @@
+target_sources(
+  DuetScreen.lib
+  PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsChoice.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsHueSlider.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsKeyboard.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsSlider.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsTextarea.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/DsToggle.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/KeyboardRoom.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Slider.cpp
+)

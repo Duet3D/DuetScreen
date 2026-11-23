@@ -1,0 +1,18 @@
+<!--
+  One tool, chosen by its number (`tool`), as the Control page's Tools tab shows it, compact (tools_tool.xml): the
+  `tool` widget (widgets/temperature/tool.json). It shows nothing while the printer has no such tool.
+
+  Props:    tool: the tool's number
+  Data:     the object model's om.tools
+-->
+<component>
+	<api>
+		<prop name="tool" type="int" default="0"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
+		<style name="card"/>
+		<ds_list name="list" list="om.tools" key="row.index" value="$tool" item="tools_tool" item.compact="1"
+				 width="100%" height="content" style_pad_all="0" scrollable="false"/>
+	</view>
+</component>

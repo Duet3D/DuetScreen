@@ -1,0 +1,95 @@
+<!--
+  The Bed mesh tab, and the `heightmap` widget. On the left, the mesh shown, named above it as the Objects tab names
+  the object being printed, with its colour scale. On the right, wide enough that nothing wraps: probing the bed (G29)
+  and levelling it (G32); the mesh shown, picked from those saved on the printer in a choice dialog, beside whether
+  the printer uses it (Load, Unload); how values are coloured, fixed or the mesh's own range; and the shown mesh's
+  statistics, in the displayed unit.
+
+  Fields and actions: src/UI/Presenters/Control/Heightmap/HeightmapPresenter.h
+-->
+<component presenter="heightmap">
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="row" scrollable="false">
+		<style name="bg_dark"/>
+		<ds_heatmap name="heightmap" bind_surface="presenter.surface" title_tag="tr.heightmap.mesh"
+					title_style="text_emphasis" bind_detail="presenter.file" height="100%" flex_grow="1">
+			<style name="card"/>
+		</ds_heatmap>
+
+		<lv_obj name="side" width="38%" height="100%" flex_flow="column" scroll_dir="ver" style_min_width="260">
+			<style name="card"/>
+			<style name="pad_gap"/>
+			<ds_setting_group name="probe" title_tag="tr.heightmap.probe_group" width="100%">
+				<ds_setting name="probe_bed" title_tag="tr.heightmap.probe_bed" hint_tag="tr.heightmap.probe_bed_hint">
+					<ds_button name="mesh_bed_level" translation_tag="tr.heightmap.probe">
+						<style name="action_btn"/>
+						<bind_state_if_eq subject="presenter.levelling_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="actions.gcode.send" arg="G29"/>
+					</ds_button>
+				</ds_setting>
+				<ds_setting name="level_bed" title_tag="tr.heightmap.level_bed" hint_tag="tr.heightmap.level_bed_hint">
+					<ds_button name="true_bed_level" translation_tag="tr.heightmap.level">
+						<bind_state_if_eq subject="presenter.levelling_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="actions.gcode.send" arg="G32"/>
+					</ds_button>
+				</ds_setting>
+			</ds_setting_group>
+
+			<ds_setting_group name="saved" title_tag="tr.heightmap.saved" width="100%">
+				<!-- The mesh shown (tap to pick another of those saved; until one is, a prompt to), and whether the
+					 printer uses it. The group's title says what it is -->
+				<lv_obj name="shown" height="content" flex_flow="row" scrollable="false"
+						style_flex_cross_place="center" style_flex_track_place="center">
+					<style name="setting_row"/>
+					<bind_flag_if_eq subject="presenter.has_maps" flag="hidden" ref_value="0"/>
+					<ds_choice name="choice" title_tag="tr.heightmap.saved" bind_options="presenter.map_options"
+							   bind_selected="presenter.shown_index" bind_text="presenter.choice_text" width="1"
+							   flex_grow="1">
+						<action trigger="value_confirmed" name="presenter.heightmap.show"/>
+					</ds_choice>
+					<ds_button name="load" bind_text="presenter.shown_load_text" height="content"
+							   style_min_width="content">
+						<style name="action_btn"/>
+						<bind_style name="btn_checked" subject="presenter.shown_loaded" ref_value="1"/>
+						<bind_flag_if_eq subject="presenter.shown_index" flag="hidden" ref_value="-1"/>
+						<bind_state_if_eq subject="presenter.levelling_usable" state="disabled" ref_value="0"/>
+						<action trigger="clicked" name="presenter.heightmap.toggle"/>
+					</ds_button>
+				</lv_obj>
+				<lv_obj name="no_maps" height="content" scrollable="false">
+					<style name="setting_row"/>
+					<bind_flag_if_eq subject="presenter.has_maps" flag="hidden" ref_value="1"/>
+					<lv_label name="text" translation_tag="tr.heightmap.no_maps" width="100%">
+						<style name="setting_hint"/>
+					</lv_label>
+				</lv_obj>
+			</ds_setting_group>
+
+			<ds_setting_group name="colours" title_tag="tr.heightmap.colours" width="100%">
+				<!-- Just the choice: the group's title says what it is -->
+				<lv_obj name="scale" height="content" scrollable="false">
+					<style name="setting_row"/>
+					<lv_obj name="options" width="100%">
+						<style name="setting_options"/>
+						<option_button name="heightmap_fixed" translation_tag="tr.heightmap.fixed" flex_grow="1"
+									   subject="presenter.mode" value="0" action="presenter.heightmap.mode" arg="fixed"/>
+						<option_button name="heightmap_auto" translation_tag="tr.heightmap.auto" flex_grow="1"
+									   subject="presenter.mode" value="1" action="presenter.heightmap.mode" arg="auto"/>
+					</lv_obj>
+				</lv_obj>
+			</ds_setting_group>
+
+			<!-- A label and its value a line each, so the statistics take little room -->
+			<ds_setting_group name="statistics" title_tag="tr.heightmap.last_probe" width="100%">
+				<lv_obj name="table" height="content" flex_flow="column" scrollable="false" style_pad_row="4">
+					<style name="setting_row"/>
+					<fact_row name="points" title_tag="tr.heightmap.points" value="presenter.stats.points"/>
+					<fact_row name="area" title_tag="tr.heightmap.area_title" value="presenter.stats.area"/>
+					<fact_row name="lowest" title_tag="tr.heightmap.lowest" value="presenter.stats.min"/>
+					<fact_row name="highest" title_tag="tr.heightmap.highest" value="presenter.stats.max"/>
+					<fact_row name="mean" title_tag="tr.heightmap.mean" value="presenter.stats.mean"/>
+					<fact_row name="rms" title_tag="tr.heightmap.rms" value="presenter.stats.rms"/>
+				</lv_obj>
+			</ds_setting_group>
+		</lv_obj>
+	</view>
+</component>

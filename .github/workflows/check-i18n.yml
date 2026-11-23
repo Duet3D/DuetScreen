@@ -13,6 +13,7 @@ on:
     paths:
       - 'assets/i18n/*.json'
       - 'scripts/manage_translations.py'
+      - 'scripts/common/**'
 
 jobs:
   image:
@@ -38,4 +39,4 @@ jobs:
 
       - name: Check translation files
         run: |
-          python scripts/manage_translations.py --show-keys
+          scripts/manage_translations.py --show-keys

@@ -1,0 +1,42 @@
+{
+  "component": "dashboard_tools",
+  "title_tag": "tr.widget.tools",
+  "description_tag": "tr.widget.tools_desc",
+  "category_tag": "tr.widget.category_temperature",
+  "icon": "tools.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      550,
+      278
+    ],
+    "min": [
+      240,
+      130
+    ]
+  },
+  "settings": [
+    {
+      "name": "style",
+      "kind": "choice",
+      "title_tag": "tr.widget.tools_style",
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "title_tag": "tr.widget.tools_style_auto"
+        },
+        {
+          "value": 1,
+          "title_tag": "tr.widget.tools_style_equal"
+        },
+        {
+          "value": 2,
+          "title_tag": "tr.widget.tools_style_summary"
+        }
+      ]
+    }
+  ]
+}

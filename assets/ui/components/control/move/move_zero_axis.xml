@@ -1,0 +1,13 @@
+<!--
+  Making the current position work zero for one axis: a button with its letter.
+
+  Fields:   a source.axes.all row: row.letter, row.jog_usable (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.zero (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<view extends="ds_button" bind_text="row.letter" height="content" flex_grow="1" style_min_width="56"
+		  style_min_height="40">
+		<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
+		<action trigger="clicked" name="actions.move.zero"/>
+	</view>
+</component>

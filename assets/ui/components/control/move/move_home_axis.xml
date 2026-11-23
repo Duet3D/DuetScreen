@@ -1,0 +1,15 @@
+<!--
+  Homing one axis: a button with its letter, in the unhomed colour until it is homed.
+
+  Fields:   a source.axes.all row: row.letter, row.homed, row.home_usable (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.home (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<view extends="ds_button" bind_text="row.letter" height="content" flex_grow="1" style_min_width="40"
+		  style_min_height="40">
+		<style name="unhomed" selector="checked"/>
+		<bind_state_if_eq subject="row.homed" state="checked" ref_value="0"/>
+		<bind_state_if_eq subject="row.home_usable" state="disabled" ref_value="0"/>
+		<action trigger="clicked" name="actions.move.home"/>
+	</view>
+</component>

@@ -1,0 +1,35 @@
+{
+  "component": "gauge_sensors",
+  "title_tag": "tr.widget.sensor_arc",
+  "description_tag": "tr.widget.sensor_gauge_desc",
+  "category_tag": "tr.widget.category_temperature",
+  "icon": "temperature.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      180,
+      184
+    ],
+    "min": [
+      134,
+      136
+    ]
+  },
+  "props": {
+    "key": "row.index",
+    "look": "arc"
+  },
+  "settings": [
+    {
+      "name": "match",
+      "kind": "row",
+      "title_tag": "tr.widget.setting_sensor",
+      "default": 0,
+      "list": "om.sensors.analog",
+      "key": "row.index",
+      "label": "row.name|default:tr.widget.gauge_sensor"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+<!--
+  The dashboard's tools widget (widgets/temperature/tools.json): the tools, beds and chambers, in the style its
+  setting picks:
+
+    - all equally (1): every tool's card, compact, then the beds' and chambers' heaters (tools_list.xml)
+    - one, with the rest summarised (2): a column of tiles, one per tool (dashboard_tool_tile.xml), beside the card of
+      the tool shown in detail, then the beds and chambers: the tool in use, until another's tile is tapped (tapping
+      the tool in use's goes back); each scrolls on its own
+    - automatic (0): all equally while every tool is a print head and they, the beds and the chambers have few heater
+      rows (EQUAL_ROWS, src/UI/Xml/Data/ToolSource.cpp), else one with the rest summarised (source.tool.summary_auto)
+
+  Tapping a tile shows a tool; Select, on its card, makes it the tool in use.
+
+  Props:    style: 0 automatic, 1 all equally, 2 one with the rest summarised
+  Data:     source.tool.* (src/UI/Xml/Data/ToolSource.h); om.tools
+  Actions:  actions.tool.show (src/UI/Presenters/Control/Temperature/ToolActions.h); the cards'
+-->
+<component>
+	<api>
+		<prop name="style" type="int" default="0"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column" scroll_dir="ver">
+		<style name="card"/>
+		<style name="pad_gap"/>
+
+		<tools_list name="equal" compact="1">
+			<bind_flag_if cond="${style} eq 2 or (${style} eq 0 and source.tool.summary_auto eq 1)" flag="hidden"/>
+		</tools_list>
+
+		<!-- The tiles in a column of their own, scrolling apart from the tool shown beside them; its scrollbar runs in
+			 the padding on its right, clear of the tiles -->
+		<lv_obj name="summary" width="100%" height="100%" flex_flow="row" scrollable="false">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<bind_flag_if cond="${style} eq 1 or (${style} eq 0 and source.tool.summary_auto eq 0)" flag="hidden"/>
+			<ds_list name="tiles" list="source.tool.tiles" item="dashboard_tool_tile" width="22%" height="100%"
+					 flex_flow="column" scroll_dir="ver" style_min_width="104" style_max_width="128" style_pad_all="0"
+					 style_pad_right="8" style_pad_row="8"/>
+			<!-- The tool shown, and beside it where there is room (else under it) the beds and chambers -->
+			<lv_obj name="detail" height="100%" flex_grow="1" flex_flow="row_wrap" scroll_dir="ver">
+				<style name="pad_zero"/>
+				<style name="pad_gap"/>
+				<ds_list name="shown" list="om.tools" key="row.index" bind_value="source.tool.shown" item="tools_tool"
+						 item.compact="1" width="1" flex_grow="1" height="content" style_min_width="300"
+						 style_pad_all="0" scrollable="false"/>
+				<tools_beds name="bed_chamber" compact="1" width="1" flex_grow="1" style_min_width="260"/>
+			</lv_obj>
+		</lv_obj>
+	</view>
+</component>

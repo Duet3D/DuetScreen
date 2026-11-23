@@ -1,0 +1,32 @@
+<!--
+  A line to type G-code into, with buttons to empty it and to send it. What is typed is shared by every console
+  input, the console page's and any placed as the `console_input` widget, and the G-code reference types into it.
+
+  Props:    keyboard  the keyboard to type with (default `keyboard`, the home screen's)
+  Data:     source.console.input (src/UI/Xml/Data/ConsoleSource.h)
+  Actions:  actions.console.* (src/UI/Presenters/Console/ConsoleActions.h)
+-->
+<component>
+	<api>
+		<prop name="keyboard" type="string" default="keyboard"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="content" flex_flow="row"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center"
+          scrollable="false">
+		<style name="no_border"/>
+		<ds_textarea name="input" one_line="true" placeholder_tag="tr.console.input_placeholder" height="100%"
+                     style_min_height="content"
+					 flex_grow="1" style_text_align="left" bind_text="source.console.input" keyboard="$keyboard"
+					 keyboard_mode="text_upper" hide_keyboard_on_ready="false">
+			<action trigger="value_changed" name="actions.console.input"/>
+			<action trigger="ready" name="actions.console.send"/>
+		</ds_textarea>
+		<ds_button name="clear" icon="clear.png" width="50" height="100%" style_min_height="content">
+			<action trigger="clicked" name="actions.console.clear"/>
+		</ds_button>
+		<ds_button name="enter" icon="send.png" width="50" height="100%" style_min_height="content">
+			<action trigger="clicked" name="actions.console.send"/>
+		</ds_button>
+	</view>
+</component>

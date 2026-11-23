@@ -1,0 +1,21 @@
+<!--
+  A list's title, on a strip of the header colour across it: the Temperature tab's tools, beds and chambers, and a
+  value selector's title.
+
+      <list_header name="header" title="tr.temperature.tools"/>
+
+  Props:    title  the name of the title, or a constant (a translation key, e.g. `tr.temperature.tools`)
+-->
+<component>
+	<api>
+		<prop name="title" type="string" default="''"/>
+	</api>
+	<view extends="lv_obj" width="100%" height="content" style_min_width="content" flex_flow="row"
+		  style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="bg_color_header"/>
+		<style name="list_header"/>
+		<lv_label name="title" bind_text="$title" width="content" height="content">
+			<style name="list_title"/>
+		</lv_label>
+	</view>
+</component>

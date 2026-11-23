@@ -1,0 +1,8 @@
+<!--
+  The dashboard, the home page: the widgets of the dashboard's layout (layouts/dashboard.json), which the user can
+  change. By default, the tools and temperature graph on the left, and the job on the right: what is ready to start,
+  or the job's status.
+-->
+<component>
+	<view extends="ds_layout" slot="dashboard" width="100%" height="100%" scrollable="false" style_pad_all="0"/>
+</component>

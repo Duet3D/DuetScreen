@@ -1,0 +1,44 @@
+<!--
+  The Notifications settings page: which of the Duet's messages show, and how long they stay. Each setting is a row
+  (ds_setting), stored as soon as it is changed.
+
+  Data:     source.settings.* (src/UI/Xml/Data/SettingsSource.h; these are declared in
+            src/UI/Presenters/Settings/NotificationSettings.cpp)
+  Actions:  actions.settings.set; numbers are typed on the shared number pad
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="card"/>
+		<style name="setting_page"/>
+
+		<ds_setting_group name="messages" title_tag="tr.settings.groups.messages">
+			<settings_toggle name="display_connected_message" title_tag="tr.settings.display_connected_message"
+							 setting="connected_message"/>
+			<!-- One of a few, in the order of `notification_levels`: the chosen one is checked -->
+			<ds_setting name="notification_level" title_tag="tr.settings.notification_level"
+						hint_tag="tr.settings.hints.notification_level">
+				<lv_obj name="options">
+					<style name="setting_options"/>
+					<settings_option name="info" translation_tag="tr.settings.severity.info"
+									 setting="notification_level" value="0"/>
+					<settings_option name="success" translation_tag="tr.settings.severity.success"
+									 setting="notification_level" value="1"/>
+					<settings_option name="warn" translation_tag="tr.settings.severity.warn"
+									 setting="notification_level" value="2"/>
+					<settings_option name="error" translation_tag="tr.settings.severity.error"
+									 setting="notification_level" value="3"/>
+				</lv_obj>
+			</ds_setting>
+			<ds_setting name="notification_timeout" title_tag="tr.settings.notification_timeout">
+				<ds_slider name="slider" label_tag="tr.settings.notification_timeout" label_shown="false"
+						   numberpad="true" min="0" max="10" increment="0.5" decimals="1" value_scale="1000" unit="s"
+						   out_of_range="upper" bind_value="source.settings.notification_timeout" width="55%"
+						   height="content">
+					<action trigger="value_confirmed" name="actions.settings.set" arg="notification_timeout"/>
+				</ds_slider>
+			</ds_setting>
+			<settings_toggle name="notification_auto_close_error"
+							 title_tag="tr.settings.notification_auto_close_error" setting="error_notifications_stay"/>
+		</ds_setting_group>
+	</view>
+</component>

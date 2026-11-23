@@ -1,0 +1,7 @@
+<!--
+  The main window: the area beside the sidebar and below the status bar, which shows one page at a time. home.xml
+  hosts it as `main_window`, places the pages in it, and places the dialog surface (<ds_dialog_host>) over it.
+-->
+<component>
+	<view extends="lv_obj"/>
+</component>

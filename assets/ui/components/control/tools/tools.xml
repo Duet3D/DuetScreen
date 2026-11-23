@@ -1,0 +1,24 @@
+<!--
+  The Tools tab. On the left: a card for every tool, then the beds' and chambers' heaters (tools_list.xml). On the
+  right: what can be done with the tool in use (tools_current.xml): extruding, turning its spindle. Spindles work on
+  a printer's tools too.
+
+  Data:     om.tools, om.heat.bedHeaters, om.heat.chamberHeaters, om.state.currentTool
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="row" scrollable="false">
+		<style name="bg_dark"/>
+
+		<lv_obj name="list_card" height="100%" flex_grow="1" flex_flow="column" scroll_dir="ver">
+			<style name="card"/>
+			<style name="pad_gap"/>
+			<tools_list name="list"/>
+		</lv_obj>
+
+		<lv_obj name="side" width="30%" height="100%" flex_flow="column" scroll_dir="ver">
+			<style name="card"/>
+			<ds_scope name="in_use" path="om.tools[{om.state.currentTool}]" item="tools_current" width="100%"
+					  height="content"/>
+		</lv_obj>
+	</view>
+</component>

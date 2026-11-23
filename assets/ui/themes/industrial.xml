@@ -1,0 +1,67 @@
+<!--
+  Industrial: an engineered control panel, light by default. Square corners, crisp dark edges on every control, no decoration;
+  actions are solid steel blue with white text, standby amber. Built to be read at a distance under workshop light.
+-->
+<theme name="industrial" extends="base">
+	<palette primary_hue="240" secondary_hue="70" chroma="0.012" dark="false">
+		<!-- Deep accents, filled behind white text (action_btn, and the standby and unhomed states shown on it) -->
+		<color name="primary" lightness="0.5" chroma="0.13"/>
+		<color name="secondary" lightness="0.52" chroma="0.12"/>
+		<color name="primary_muted" lightness="0.88" when="light"/>
+		<!-- Light: a grey panel, so white cards and controls stand off it -->
+		<color name="bg_dark" lightness="0.89" when="light"/>
+		<color name="bg" lightness="0.975" when="light"/>
+		<color name="border" lightness="0.6" when="light"/>
+		<!-- Dark: edges as crisp as in light mode -->
+		<color name="border" lightness="0.52" when="dark"/>
+	</palette>
+
+	<fonts>
+		<font name="header" size="18" weight="800" style="bold"/>
+		<font name="normal" size="14" weight="500" style="normal"/>
+		<font name="emphasis" size="14" weight="700" style="bold"/>
+		<font name="subdued" size="12" weight="500" style="normal"/>
+	</fonts>
+
+	<consts>
+		<const name="radius" value="2"/>
+	</consts>
+
+	<styles>
+		<!-- Every control edged in the strong border colour -->
+		<style name="card" border_color="#border"/>
+		<style name="tool_list_tool" border_color="#border"/>
+		<style name="btn" border_color="#border"/>
+		<style name="btnm_btn" border_color="#border"/>
+		<style name="keyboard_button" border_color="#border"/>
+		<style name="input" border_color="#border"/>
+
+		<!-- Actions: steel blue with white text and icons -->
+		<style name="action_btn" border_color="rgb_darken(#primary, 30)" text_color="0xffffff" recolor="0xffffff"/>
+		<style name="keyboard_button_checked_bg" text_color="0xffffff" recolor="0xffffff"/>
+		<style name="btnm_btn_checked" text_color="0xffffff"/>
+		<style name="tool_selected" outline_width="2"/>
+
+		<!-- Square marks -->
+		<style name="cb_marker" radius="0"/>
+		<style name="bg_switch" radius="2"/>
+		<style name="switch_knob" radius="2"/>
+		<style name="slider" radius="2"/>
+		<style name="slider_indic" radius="2"/>
+		<style name="slider_knob" radius="2"/>
+		<style name="bar" radius="0"/>
+		<style name="bar_indic" radius="0"/>
+		<style name="scrollbar" radius="0"/>
+		<style name="bar_label_bg" radius="0"/>
+		<style name="gauge_bar" radius="0"/>
+		<style name="gauge_bar_indic" radius="0"/>
+		<style name="gauge_arc" arc_rounded="false"/>
+		<style name="gauge_arc_indic" arc_rounded="false"/>
+		<style name="estop" radius="4"/>
+
+		<!-- Files and folders follow the restyled buttons -->
+		<style name="folder" copy="btn" border_color="#primary" border_width="#border_width" border_opa="100%"
+			   border_side="full"/>
+		<style name="file" merge="btn bg_light"/>
+	</styles>
+</theme>

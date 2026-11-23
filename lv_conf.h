@@ -35,8 +35,16 @@
 #define LV_ASSERT_HANDLER_INCLUDE "lv_assert_handler_include.h"
 #define LV_ASSERT_HANDLER abort();
 
-/* Enable object names which are useful for debugging and unit tests. Also allows the LvObj::getChildByName() API */
+/* Enable object names which are useful for debugging and unit tests. Also allows the LvObj::getChildByName() API.
+ * Also required by the XML UI engine, which addresses everything it builds by name. */
 #define LV_USE_OBJ_NAME 1
+
+/* XML UI (helix-xml, see libraries/helix-xml.cmake and src/UI/Xml). The translation module lets XML `translation_tag`s
+ * resolve through DuetScreen's i18n tables.
+ * LV_USE_FLOAT (float subjects) is deliberately off: it also turns lv_value_precise_t into float across all of LVGL's
+ * drawing code, which existing widgets are not written for. Bind integers (e.g. percent, tenths) or strings instead. */
+#define LV_USE_XML 1
+#define LV_USE_TRANSLATION 1
 
 /* Object style caching */
 #define LV_OBJ_STYLE_CACHE 1

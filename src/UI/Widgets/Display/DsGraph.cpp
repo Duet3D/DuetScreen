@@ -1,0 +1,309 @@
+/*
+ * DsGraph.cpp
+ */
+
+#include "DsGraph.h"
+#include "UI/Widgets/WidgetSupport.h"
+#include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Binding/Scope.h"
+#include "src/xml/parsers/lv_xml_obj_parser.h"
+#include <algorithm>
+
+namespace UI::Xml
+{
+	using namespace WidgetSupport;
+
+	DsGraph::DsGraph(const std::string& name, lv_obj_t* parent)
+		: Graph(name, parent)
+	{
+	}
+
+	DsGraph::~DsGraph()
+	{
+		forgetHistory();
+	}
+
+	void DsGraph::registerXml()
+	{
+		Widgets::add(
+			{.name = "ds_graph",
+			 .extends = "lv_obj",
+			 .description =
+				 "A line graph of a history, with a legend whose entries show each series' colour, name and latest "
+				 "value, and show and hide it when tapped. Series are coloured by position from the theme's series "
+				 "colours (#series_1, #series_2, …), which follow the theme. Whether a series is drawn is its history "
+				 "row's `shown`, so every graph of a history, and every `<ds_graph_key>` for it, agree. The graph "
+				 "starts with what was recorded before it was built, and follows series being added, removed and "
+				 "renamed.",
+			 .example =
+				 R"(<ds_graph history="source.temperature.temperatures" seconds="60" y_min="0" y_max="300"
+		  bind_y_max="source.temperature.limit" width="400" height="250"/>)",
+			 .attributes = {{"history",
+							 "The history shown (required), named like a list, e.g. `source.temperature.temperatures`",
+							 AttributeKind::List},
+							{"seconds",
+							 "The X axis shows the last this-many seconds, labelled -seconds to 0 (default 60)"},
+							{"y_min", "Bottom of the Y axis (default 0)"},
+							{"y_max", "Top of the Y axis (default 100)"},
+							{"bind_y_max",
+							 "Follow an int subject that raises the top of the Y axis above `y_max`, e.g. to fit a "
+							 "heater's limit",
+							 AttributeKind::Subject},
+							{"legend_format",
+							 "How the legend shows a series' latest value: a fmt format with one argument, e.g. "
+							 "`{}°C` (default: no value)"},
+							{"legend",
+							 "When the legend shows: `auto` (default) while the graph is at least `legend_min_width` "
+							 "wide, `shown` always, `hidden` never"},
+							{"legend_min_width",
+							 "With `legend` auto, show the legend only while the graph is at least this many pixels "
+							 "wide, so a narrow graph keeps its room for the plot (default 0: always shown)"}}},
+			xmlCreate,
+			xmlApply);
+	}
+
+	void DsGraph::showHistory(History& history, uint32_t seconds)
+	{
+		ZoneScoped;
+		forgetHistory();
+		m_points = static_cast<size_t>(seconds) * history.samplesPerSecond();
+		setXRange({.min = -static_cast<int32_t>(seconds), .max = 0});
+		setXCount(static_cast<int32_t>(m_points));
+
+		m_history = &history;
+		history.addListener(this);
+		history.addSampleListener(this);
+		addSeries(0, history.size());
+	}
+
+	void DsGraph::setYAxis(range_t range)
+	{
+		m_yAxis = range;
+		applyYAxis();
+	}
+
+	void* DsGraph::xmlCreate(lv_xml_parser_state_t* state, const char** attrs)
+	{
+		auto* graph = new DsGraph(attrOr(attrs, "name", "graph"), parentOf(state));
+		deleteWith(graph->getRootPtr(), graph);
+		return graph->getRootPtr();
+	}
+
+	void DsGraph::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
+	{
+		lv_xml_obj_apply(state, attrs);
+
+		lv_obj_t* root = itemOf(state);
+		auto& graph = static_cast<DsGraph&>(*LvObj::fromPtr(root));
+
+		const char* yMin = lv_xml_get_value_of(attrs, "y_min");
+		const char* yMax = lv_xml_get_value_of(attrs, "y_max");
+		if (yMin || yMax)
+		{
+			graph.setYAxis({.min = yMin ? lv_xml_atoi(yMin) : graph.m_yAxis.min,
+							.max = yMax ? lv_xml_atoi(yMax) : graph.m_yAxis.max});
+		}
+		if (lv_subject_t* subject = findSubject(state, attrs, "bind_y_max"))
+		{
+			lv_subject_add_observer_obj(subject, yMaxObserverCb, root, &graph);
+		}
+		if (const char* format = lv_xml_get_value_of(attrs, "legend_format"))
+		{
+			graph.setValueFormat(format);
+		}
+		if (const char* mode = lv_xml_get_value_of(attrs, "legend"))
+		{
+			const std::string_view value = mode;
+			if (value == "shown")
+			{
+				graph.m_legendMode = LegendMode::Shown;
+			}
+			else if (value == "hidden")
+			{
+				graph.m_legendMode = LegendMode::Hidden;
+			}
+			else
+			{
+				if (value != "auto")
+				{
+					LOG_WARN("<ds_graph legend=\"{:s}\">: not auto, shown or hidden; auto it is", value);
+				}
+				graph.m_legendMode = LegendMode::Auto;
+			}
+			graph.fitLegend();
+		}
+		if (const char* width = lv_xml_get_value_of(attrs, "legend_min_width"))
+		{
+			graph.m_legendMinWidth = std::max(0, lv_xml_atoi(width));
+			lv_obj_add_event_cb(root, sizeChangedCb, LV_EVENT_SIZE_CHANGED, &graph);
+			graph.fitLegend();
+		}
+
+		const char* historyName = lv_xml_get_value_of(attrs, "history");
+		if (historyName == nullptr)
+		{
+			return;
+		}
+		auto* history = dynamic_cast<History*>(Scope::findList(lv_xml_subject_ctx_get_active(), historyName));
+		if (history == nullptr)
+		{
+			LOG_WARN("<ds_graph history=\"{:s}\">: no such history", historyName);
+			return;
+		}
+		const int32_t seconds = lv_xml_atoi(attrOr(attrs, "seconds", "60"));
+		graph.showHistory(*history, static_cast<uint32_t>(std::max(seconds, 1)));
+	}
+
+	void DsGraph::sizeChangedCb(lv_event_t* e)
+	{
+		static_cast<DsGraph*>(lv_event_get_user_data(e))->fitLegend();
+	}
+
+	void DsGraph::fitLegend()
+	{
+		switch (m_legendMode)
+		{
+		case LegendMode::Shown:
+			showLegend(true);
+			break;
+		case LegendMode::Hidden:
+			showLegend(false);
+			break;
+		case LegendMode::Auto:
+		default:
+		{
+			// Before it is laid out it has no width: the legend shows until it has one
+			const int32_t width = lv_obj_get_width(getRootPtr());
+			showLegend(width == 0 || width >= m_legendMinWidth);
+			break;
+		}
+		}
+	}
+
+	std::optional<size_t> DsGraph::seriesOf(const lv_observer_t* observer) const
+	{
+		const auto it =
+			std::find_if(m_rows.begin(),
+						 m_rows.end(),
+						 [observer](const RowObservers& row) { return row.name == observer || row.shown == observer; });
+		return it == m_rows.end() ? std::nullopt : std::optional(static_cast<size_t>(it - m_rows.begin()));
+	}
+
+	void DsGraph::nameObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* graph = static_cast<DsGraph*>(lv_observer_get_user_data(observer));
+		// Not yet in the list while it is being added; addSeries sets the name itself
+		if (const auto index = graph->seriesOf(observer))
+		{
+			graph->updateSeriesName(*index, lv_subject_get_string(subject));
+		}
+	}
+
+	void DsGraph::shownObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* graph = static_cast<DsGraph*>(lv_observer_get_user_data(observer));
+		// Not yet in the list while it is being added; addSeries shows or hides it itself
+		if (const auto index = graph->seriesOf(observer))
+		{
+			graph->showSeries(*index, lv_subject_get_int(subject) != 0);
+		}
+	}
+
+	void DsGraph::yMaxObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* graph = static_cast<DsGraph*>(lv_observer_get_user_data(observer));
+		graph->m_yLimit = lv_subject_get_int(subject);
+		graph->applyYAxis();
+	}
+
+	void DsGraph::onListResized(size_t oldSize, size_t newSize)
+	{
+		if (newSize > oldSize)
+		{
+			addSeries(getSeriesCount(), newSize);
+		}
+		else
+		{
+			removeSeries(newSize);
+		}
+	}
+
+	void DsGraph::onListDestroyed()
+	{
+		// The history is going: only let go of the rows, don't call back into it
+		removeSeries(0);
+		m_history = nullptr;
+	}
+
+	void DsGraph::onSampled()
+	{
+		ZoneScoped;
+		for (size_t i = 0; i < m_history->size() && i < getSeriesCount(); i++)
+		{
+			const auto& values = m_history->row(i).values();
+			if (!values.empty())
+			{
+				addData(i, values.back());
+			}
+		}
+	}
+
+	void DsGraph::addSeries(size_t from, size_t to)
+	{
+		ZoneScoped;
+		for (size_t i = from; i < to; i++)
+		{
+			SeriesRow& row = m_history->row(i);
+			if (!createSeries(std::string(row.name.get())))
+			{
+				return;
+			}
+			const auto& values = row.values();
+			const size_t skip = values.size() > m_points ? values.size() - m_points : 0;
+			std::for_each(values.begin() + static_cast<std::ptrdiff_t>(skip),
+						  values.end(),
+						  [&](int32_t value) { addData(i, value); });
+			showSeries(i, row.shown.get() != 0);
+			m_rows.push_back({.name = lv_subject_add_observer(row.name.raw(), nameObserverCb, this),
+							  .shown = lv_subject_add_observer(row.shown.raw(), shownObserverCb, this)});
+		}
+	}
+
+	void DsGraph::removeSeries(size_t count)
+	{
+		while (m_rows.size() > count)
+		{
+			lv_observer_remove(m_rows.back().name);
+			lv_observer_remove(m_rows.back().shown);
+			m_rows.pop_back();
+		}
+		setSeriesCount(count);
+	}
+
+	void DsGraph::onLegendClicked(size_t index)
+	{
+		if (m_history == nullptr || index >= m_history->size())
+		{
+			return;
+		}
+		IntSubject& shown = m_history->row(index).shown;
+		shown.set(shown.get() != 0 ? 0 : 1);
+	}
+
+	void DsGraph::forgetHistory()
+	{
+		if (m_history == nullptr)
+		{
+			return;
+		}
+		removeSeries(0);
+		m_history->removeListener(this);
+		m_history->removeSampleListener(this);
+		m_history = nullptr;
+	}
+
+	void DsGraph::applyYAxis()
+	{
+		setYRange({.min = m_yAxis.min, .max = std::max(m_yAxis.max, m_yLimit)});
+	}
+} // namespace UI::Xml

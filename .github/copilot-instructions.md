@@ -17,14 +17,13 @@ These instructions guide Copilot (and AI agents) when proposing code or edits in
 - **Utils/Infrastructure**: `Debug.*` (logging), `DeadlockDetector.*`, `LockWrapper.*`, `BuildDate.*`. Avoid allocations in render/ISR paths.
 
 ## Developer Workflows (VS Code + CLI)
-- **Simulation Presets**: Configure with `cmake --preset Simulation` (or `Simulation-Release`); build with `cmake --build --preset Simulation`; run `./out/build/Simulation/DuetScreen`.
-- **VS Code Tasks**: Do not use the tasks to configure and build the project, use `cmake` directly in the terminal.
+- **Scripts**: Everything is done with the Python scripts in `scripts/` (each has `--help`); the VS Code tasks run them. `scripts/common/` is what they share, `scripts/internal/` what the build runs. They are checked with `pyright` (strict).
+- **Building**: `scripts/build.py` builds the simulator (`--debug` for Debug; run `./out/build/Simulation-Release/DuetScreen`, or `Simulation` for Debug), `--tests` the tests, `--screen` the screen's DuetScreen through `buildroot-duetscreen` (`--image` makes the SD card image). `--preset` names a CMake preset instead.
 - **Remote Deploy**: Requires `buildroot-duetscreen` and SSH.
-	- Build + push: `Push DuetScreen - SSH - Release` (or `Debug`).
-	- Start service: `Start DuetScreen on remote`; start gdb: `Start gdbserver on DuetScreen`.
-	- Assets: `Push Assets - SSH`; libraries: `Push Libraries - SSH`.
-	- Package update: `Create update.tar.gz`; print notes: `Print Release Notes`.
-- **Testing**: Run `python3 scripts/run_tests.py`. UI image tests under `tests/src/test_cases/UI/` compare against `tests/ref_imgs/` with `_err` diffs and a review GUI.
+	- Build + deploy: `scripts/build.py --deploy <ip> [--debug]` (task `Deploy DuetScreen - SSH`); only changed files are copied.
+	- `scripts/screen.py <ip> start|stop|gdbserver|push assets|push config`.
+	- Package update: `scripts/create_upgrade.py`; print notes: `scripts/release_notes.py`.
+- **Testing**: Run `scripts/run_tests.py`. UI image tests under `tests/src/test_cases/UI/` compare against `tests/ref_imgs/` with `_err` diffs and a review GUI.
 - **Logs**: Default log file `DuetScreen.log` (PC: CWD; device: `/var/log/`). Filter with `scripts/filter_logs.py`.
 
 ## Integration & Assets
@@ -79,7 +78,7 @@ These instructions guide Copilot (and AI agents) when proposing code or edits in
 - Adding new production code, new features, or new logic paths requires adding or updating unit tests in the same task.
 - Aim for greater than 80% coverage of the changed code when practical.
 - Do not finish a production code change without tests unless there is a specific technical blocker, and the final response must explicitly justify the gap and identify the remaining untested paths.
-- Run tests with the `python3 scripts/run_tests.py` command; get coverage via `python3 scripts/run_tests.py --coverage`.
+- Run tests with the `scripts/run_tests.py` command; get coverage via `scripts/run_tests.py --coverage`.
 - Keep tests deterministic and fast; avoid external dependencies in unit tests.
 
 ## File Hygiene

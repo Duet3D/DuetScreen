@@ -1,0 +1,34 @@
+<!--
+  One axis jogged in a column: forwards, its letter, backwards. Z has one, and so does the axis chosen from the others.
+
+      <move_axis letter="'Z'" axis="source.axes.z" plus="Z+" minus="Z-"/>
+
+  Props:    letter  its letter, a subject's or a constant ('Z')
+            axis    where its fields are, e.g. source.axes.z: each way is usable while <axis>.plus_usable or
+                    <axis>.minus_usable is 1 (src/UI/Xml/Data/AxesSource.h), so not at a limit the printer keeps to
+            plus, minus  the args of actions.move.jog that jog it each way, e.g. Z+ and Z-, or other+ and other-
+  Actions:  actions.move.jog (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<api>
+		<prop name="letter" type="string"/>
+		<prop name="axis" type="string"/>
+		<prop name="plus" type="string"/>
+		<prop name="minus" type="string"/>
+	</api>
+	<view extends="lv_obj" width="72" height="100%" flex_flow="column" scrollable="false"
+		  style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+		<style name="pad_zero"/>
+		<style name="pad_gap"/>
+		<move_jog_button name="increment" icon="arrow_up.png" text="+" usable="${axis}.plus_usable" jog="$plus"
+						 width="100%" flex_grow="1"/>
+		<lv_obj name="label" width="100%" flex_grow="1" flex_flow="column" scrollable="false"
+				style_flex_main_place="center" style_flex_cross_place="center" style_flex_track_place="center">
+			<lv_label name="letter" bind_text="$letter" width="100%" height="content" style_text_align="center">
+				<style name="reading"/>
+			</lv_label>
+		</lv_obj>
+		<move_jog_button name="decrement" icon="arrow_down.png" text="−" usable="${axis}.minus_usable" jog="$minus"
+						 width="100%" flex_grow="1"/>
+	</view>
+</component>

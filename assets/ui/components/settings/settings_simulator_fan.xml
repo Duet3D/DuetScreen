@@ -1,0 +1,27 @@
+<!--
+  A fan of the simulated Duet, a row (ds_setting) of its page: its name, whether it reports its rpm and whether it
+  follows the first tool's heater, and a button to remove it.
+
+  Fields:   a row of source.simulator.fans (src/UI/Xml/Data/SimulatorSource.h)
+  Actions:  actions.simulator.set, actions.simulator.remove
+-->
+<component>
+	<view extends="ds_setting" bind_title="row.title">
+		<lv_obj name="controls" clickable="false" scrollable="false">
+			<style name="setting_controls"/>
+			<ds_textarea name="name" bind_text="row.name" one_line="true" width="150" height="content">
+				<action trigger="ready" name="actions.simulator.set" arg="name"/>
+			</ds_textarea>
+			<lv_obj name="flags">
+				<style name="setting_options"/>
+				<option_button name="tacho" translation_tag="tr.simulator.fields.tacho" subject="row.tacho"
+							   action="actions.simulator.set" arg="tacho"/>
+				<option_button name="thermostatic" translation_tag="tr.simulator.fields.thermostatic"
+							   subject="row.thermostatic" action="actions.simulator.set" arg="thermostatic"/>
+			</lv_obj>
+			<ds_button name="remove" icon="delete.png" width="48" height="40">
+				<action trigger="clicked" name="actions.simulator.remove"/>
+			</ds_button>
+		</lv_obj>
+	</view>
+</component>

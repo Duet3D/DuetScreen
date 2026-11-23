@@ -1,0 +1,24 @@
+<!--
+  The dashboard's temperature graph: every heater over the last `seconds`. The axis reaches at least 300°C, or the
+  highest heater limit. The legend is the widget's setting: shown, hidden, or (`auto`) shown unless the graph is
+  narrower than 400 pixels, so the plot keeps its room. It is the `temperature_graph` widget
+  (widgets/temperature/temperature_graph.json), in a plain container because a placed widget's root can't be a
+  DuetScreen widget (see XmlView.h).
+-->
+<component>
+	<api>
+		<prop name="seconds" type="int" default="60"/>
+		<prop name="legend" type="string" default="auto"/>
+	</api>
+
+	<view extends="lv_obj" width="100%" height="100%" scrollable="false">
+		<style name="pad_zero"/>
+		<!-- Automatically, the legend goes where it would leave the plot too little room: below 400 pixels wide, the
+			 theme's widget_expanded_min -->
+		<ds_graph name="graph" history="source.temperature.temperatures" seconds="$seconds" y_min="0" y_max="300"
+				  bind_y_max="source.temperature.limit" legend_format="{}°C" legend="$legend" legend_min_width="400"
+				  width="100%" height="100%">
+			<style name="card"/>
+		</ds_graph>
+	</view>
+</component>

@@ -1,0 +1,27 @@
+<!--
+  An edge's handle on the selected widget of a free layout (customise_free_item.xml): a bar at the middle of the edge,
+  shown while the widget whose overlay it is in is selected. The theme draws it (customise_handle). It lies along
+  the top and bottom edges; on the sides, give it width="24" height="48" and a standing bar.
+
+      <customise_edge_handle name="handle_e" key="$key" edge="right_mid" width="24" height="48" bar_width="5"
+                             bar_height="32"/>
+
+  Props:    key   the overlay's key: the value source.customise.selected has while its widget is selected
+            edge  where it is: top_mid, bottom_mid, right_mid or left_mid
+            bar_width, bar_height  the bar's size (default 32 by 5, lying down)
+-->
+<component>
+	<api>
+		<prop name="key" type="string"/>
+		<prop name="edge" type="string" default="top_mid"/>
+		<prop name="bar_width" type="int" default="32"/>
+		<prop name="bar_height" type="int" default="5"/>
+	</api>
+	<view extends="lv_obj" align="$edge" width="48" height="24" clickable="false" scrollable="false">
+		<style name="pad_zero"/>
+		<bind_flag_if_not_eq subject="source.customise.selected" flag="hidden" ref_value="$key"/>
+		<lv_obj name="bar" align="$edge" width="$bar_width" height="$bar_height" clickable="false" scrollable="false">
+			<style name="customise_handle"/>
+		</lv_obj>
+	</view>
+</component>

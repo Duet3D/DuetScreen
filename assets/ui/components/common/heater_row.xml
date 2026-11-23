@@ -1,0 +1,73 @@
+<!--
+  One heater as a row: its colour key on the temperature graph (tap to show or hide its line), its name, its state
+  (tap to cycle active, standby and off; coloured as the gauges colour it; not while printing), its temperature, and
+  its active and standby targets (tap to set one). Under them, its temperature as a thin bar (heater_bar.xml). A row
+  whose heater doesn't exist isn't shown.
+
+      <heater_row label="…" active="…|format:tr.units.degrees" standby="…|format:tr.units.degrees"/>
+
+  Props:    label, active, standby: the names of its name and its two targets, which a tool's heater and a bed's
+            differ in (tools_tool_heater.xml, tools_slot_heater.xml); compact: an expression, lower and less padded
+  Fields:   a row whose row.value is the heater number: a row of a tool's heaters, or of om.heat.bedHeaters or
+            chamberHeaters; its state and temperature are om.heat.heaters[{row.value}]
+  Actions:  actions.heater.* (src/UI/Presenters/Control/Temperature/HeaterActions.h), from the row
+-->
+<component>
+	<api>
+		<prop name="label" type="string"/>
+		<prop name="active" type="string"/>
+		<prop name="standby" type="string"/>
+		<!-- An expression: lower and less padded, where room is short -->
+		<prop name="compact" type="string" default="0"/>
+	</api>
+	<view extends="lv_obj" height="content" flex_flow="column" scrollable="false" style_pad_row="8">
+		<style name="setting_row"/>
+		<bind_style_if name="setting_row_compact" cond="${compact}"/>
+		<bind_flag_if cond="row.value|int lt 0" flag="hidden"/>
+		<!-- Where there isn't room for the name beside the controls, they go on a line under it -->
+		<lv_obj name="line" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
+				style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
+				style_pad_column="10" style_pad_row="8">
+			<!-- The graph's series are its heaters' sensors (source.temperature.temperatures) -->
+			<ds_graph_key name="graph_key" history="source.temperature.temperatures"
+						  bind_key="om.heat.heaters[{row.value}].sensor|int"/>
+			<lv_label name="label" bind_text="$label" width="1" flex_grow="1" long_mode="dots" style_min_width="140">
+				<style name="setting_title"/>
+			</lv_label>
+			<!-- Its state and temperature, then its targets: beside the name where there is room, else under it, the
+				 targets under the state when narrower still -->
+			<lv_obj name="reading" width="content" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
+					style_pad_column="10">
+				<ds_button name="state" bind_text="om.heat.heaters[{row.value}].state|translate:tr.temperature.status"
+						   width="84" height="content" style_min_height="36">
+					<style name="action_btn"/>
+					<bind_style_if_eq name="heater_standby" subject="om.heat.heaters[{row.value}].state"
+									  ref_value="standby"/>
+					<bind_style_if_eq name="heater_off" subject="om.heat.heaters[{row.value}].state" ref_value="off"/>
+					<bind_style_if_eq name="heater_fault" subject="om.heat.heaters[{row.value}].state"
+									  ref_value="fault"/>
+					<bind_state_if_eq subject="source.machine.printing" state="disabled" ref_value="1"/>
+					<action trigger="clicked" name="actions.heater.toggle"/>
+				</ds_button>
+				<lv_label name="current" bind_text="om.heat.heaters[{row.value}].current|fixed:1" width="content"
+						  style_min_width="64" long_mode="clip"
+						  style_text_align="right">
+					<style name="reading"/>
+				</lv_label>
+			</lv_obj>
+			<lv_obj name="targets" width="content" height="content" flex_flow="row" scrollable="false"
+					style_flex_cross_place="center" style_flex_track_place="center" style_pad_all="0"
+					style_pad_column="10">
+				<!-- Each target: what it is over its value (value_button.xml), tap to set it -->
+				<value_button name="active" title_tag="tr.tools.active" value="$active" width="72">
+					<action trigger="clicked" name="actions.heater.set_active"/>
+				</value_button>
+				<value_button name="standby" title_tag="tr.tools.standby" value="$standby" width="72">
+					<action trigger="clicked" name="actions.heater.set_standby"/>
+				</value_button>
+			</lv_obj>
+		</lv_obj>
+		<heater_bar name="bar" heater="row.value"/>
+	</view>
+</component>

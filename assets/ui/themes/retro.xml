@@ -1,0 +1,72 @@
+<!--
+  Retro: a vintage control panel. Cream and dark brown, chunky dark outlines and hard drop shadows, burnt orange for
+  actions and olive for standby. A chosen button is pressed in: its shadow gone, it sits lower.
+-->
+<theme name="retro" extends="base">
+	<palette primary_hue="55" secondary_hue="115" chroma="0.035" dark="false">
+		<color name="bg_dark" lightness="0.9" when="light"/>
+		<!-- The hard shadows: dark brown in light mode, near black in dark mode -->
+		<color name="shadow" from="text" when="light"/>
+		<color name="primary_muted" chroma="0.06"/>
+	</palette>
+
+	<fonts>
+		<font name="header" size="20" weight="800" style="bold"/>
+		<font name="normal" size="14" weight="500" style="normal"/>
+		<font name="emphasis" size="15" weight="700" style="bold"/>
+		<font name="subdued" size="12" weight="500" style="normal"/>
+	</fonts>
+
+	<consts>
+		<const name="border_width" value="2"/>
+		<const name="radius" value="0"/>
+	</consts>
+
+	<styles>
+		<!-- Dark outlines and hard shadows -->
+		<style name="card" border_color="#text" shadow_width="0" shadow_offset_x="4" shadow_offset_y="4"
+			   shadow_color="#shadow" shadow_opa="100%"/>
+		<style name="dialog" shadow_width="0" shadow_spread="0" shadow_offset_x="6" shadow_offset_y="6"
+			   shadow_color="#shadow" shadow_opa="100%"/>
+		<style name="tool_list_tool" border_color="#border" shadow_width="0" shadow_offset_x="0" shadow_offset_y="0"
+			   shadow_opa="0"/>
+		<style name="btn" border_color="#text" shadow_width="0" shadow_offset_x="3" shadow_offset_y="3"
+			   shadow_color="#shadow" shadow_opa="100%"/>
+		<!-- Pressed in: no shadow, moved down onto where it was, and tinted; a tab stays in line with the others -->
+		<style name="btn_checked" outline_width="0" shadow_opa="0" translate_x="2" translate_y="2"/>
+		<style name="tab_btn" translate_x="0" translate_y="0"/>
+		<style name="action_btn" border_color="#text"/>
+		<style name="heater_standby" border_color="#text"/>
+		<style name="heater_off" border_color="#text"/>
+		<style name="heater_fault" border_color="#text"/>
+		<style name="unhomed" border_color="#text"/>
+		<style name="input" border_color="#text" border_width="2"/>
+		<style name="tool_selected" border_color="#text" outline_width="0" shadow_width="0" shadow_offset_x="4"
+			   shadow_offset_y="4" shadow_color="#primary" shadow_opa="100%"/>
+
+		<style name="btnm_btn" border_color="#text" border_width="2"/>
+		<style name="keyboard_button" border_color="#text" border_width="2"/>
+		<style name="scrollbar" radius="0" bg_color="#text" width="6"/>
+		<style name="bar" radius="0"/>
+		<style name="bar_indic" radius="0"/>
+		<style name="slider" radius="0" border_width="2" border_color="#text"/>
+		<style name="slider_indic" radius="0"/>
+		<style name="slider_knob" radius="0" border_color="#text"/>
+		<style name="cb_marker" radius="0" border_color="#text"/>
+		<style name="bg_switch" radius="0"/>
+		<style name="switch_knob" radius="0" border_color="#text"/>
+		<style name="bar_label_bg" radius="0"/>
+		<style name="gauge_bar" radius="0"/>
+		<style name="gauge_bar_indic" radius="0"/>
+		<style name="gauge_arc" arc_rounded="false"/>
+		<style name="gauge_arc_indic" arc_rounded="false"/>
+		<style name="list_btn" border_color="#border"/>
+		<style name="estop" radius="0" border_color="#text" border_width="2" shadow_width="0" shadow_offset_x="3"
+			   shadow_offset_y="3" shadow_color="#shadow" shadow_opa="100%"/>
+
+		<!-- Files and folders follow the restyled buttons -->
+		<style name="folder" copy="btn" border_color="#primary" border_width="#border_width" border_opa="100%"
+			   border_side="full"/>
+		<style name="file" merge="btn bg_light"/>
+	</styles>
+</theme>

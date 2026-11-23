@@ -1,7 +1,7 @@
 #include "Debug.h"
 
+#include "Comm/Connection.h"
 #include "DebugCommands.h"
-#include "Hardware/Duet.h"
 #include "Hardware/Usb.h"
 #include <map>
 
@@ -23,7 +23,7 @@ namespace Debug
 										 system("logcat -v threadtime -d *:V > /tmp/DuetScreen_log.txt");
 										 std::string logs;
 										 //  USB::ReadFileContents("/tmp/DuetScreen_log.txt", logs);
-										 Comm::DUET.UploadFile("/sys/DuetScreen_log.txt", logs);
+										 Comm::Connection::get().writeFile("/sys/DuetScreen_log.txt", logs);
 										 system("rm /tmp/DuetScreen_log.txt");
 									 });
 
@@ -34,7 +34,7 @@ namespace Debug
 									   system("logcat -v threadtime -d *:W > /tmp/DuetScreen_log.txt");
 									   std::string logs;
 									   USB::ReadFileContents("/tmp/DuetScreen_log.txt", logs);
-									   Comm::DUET.UploadFile("/sys/DuetScreen_error_log.txt", logs);
+									   Comm::Connection::get().writeFile("/sys/DuetScreen_error_log.txt", logs);
 									   system("rm /tmp/DuetScreen_log.txt");
 								   });
 #endif

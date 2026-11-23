@@ -1,0 +1,17 @@
+<!--
+  The shared speed and extrusion factor dialogs, hosted once by the home screen. Any view opens them with the global
+  actions `actions.factors.speed` and `actions.factors.extrusion` (the extruders of the tool numbered `arg`, else every
+  extruder).
+
+  Data:     source.factors.* (src/UI/Xml/Data/FactorsSource.h)
+-->
+<component>
+	<!-- Takes no room: its dialogs open on the dialog surface -->
+	<view extends="lv_obj" width="0" height="0" floating="true">
+		<factors_dialog name="speed_dialog" open="source.factors.speed.open"
+						title="source.factors.speed.title" factors="source.factors.speed.factors"/>
+		<factors_dialog name="extrusion_dialog" open="source.factors.extrusion.open"
+						title="source.factors.extrusion.title" factors="source.factors.extrusion.factors"
+						all="source.factors.extrusion_all" all_shown="source.factors.extrusion_all_shown"/>
+	</view>
+</component>

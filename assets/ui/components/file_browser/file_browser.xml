@@ -1,0 +1,103 @@
+<!--
+  Browse a folder of jobs or macros, or of the USB drives plugged into the screen. Along the top: Up, to the folder
+  above; the open folder's path, starting from the jobs or macros folder (or the USB drive), whose folders can be
+  tapped to go back to them; search (checked while searching); the order (by name, date or size: the one in use, tapped
+  again, reverses it); a list or tiles; and reading the folder again. Searching opens a line under it to type what to
+  look for, with the keyboard up, which shows only the files and folders whose names hold it; opening a folder, or
+  tapping search again, stops searching. Under it, the folder's files and folders as a list or as tiles, or a line
+  saying it is empty, that nothing matches the search, or that no USB drive is plugged in. Tapping a folder opens it; tapping a file asks whether to start it
+  (or run it, for a macro) in the shared file dialog (modals/file_dialog.xml), or, on a USB drive, what to do with it
+  in the USB dialog (modals/usb_dialog.xml).
+
+  Shown in several places, each with its own folder and settings, so it names no presenter: the placement gives one,
+  e.g. <ds_view view="file_browser" presenter="dashboard_jobs"/> (see src/UI/Presenters/Presenters.cpp).
+
+  Fields and actions: src/UI/Presenters/FileBrowser/FileBrowserPresenter.h
+-->
+<component>
+	<view extends="lv_obj" width="100%" height="100%" flex_flow="column">
+		<style name="bg_dark"/>
+		<style name="card"/>
+
+		<!-- Wraps where it is too narrow for everything, e.g. in a small widget -->
+		<lv_obj name="toolbar" width="100%" height="content" flex_flow="row_wrap" scrollable="false"
+				style_flex_main_place="start" style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<ds_button name="up" icon="folder_up.png" width="48" height="40">
+				<bind_state_if_eq subject="presenter.in_subfolder" state="disabled" ref_value="0"/>
+				<action trigger="clicked" name="presenter.files.up"/>
+			</ds_button>
+			<!-- The path takes what room the buttons leave, and wraps within it -->
+			<ds_list name="path" list="presenter.crumbs" item="file_browser_crumb" width="1" height="content"
+					 flex_grow="1" style_min_width="120" flex_flow="row_wrap" style_pad_all="0" style_pad_row="4"
+					 style_pad_column="4" style_flex_main_place="start" style_flex_cross_place="center"
+					 style_flex_track_place="center"/>
+			<ds_button name="search" icon="search.png" width="48" height="40">
+				<bind_state_if_eq subject="presenter.searching" state="checked" ref_value="1"/>
+				<action trigger="clicked" name="presenter.files.search"/>
+			</ds_button>
+			<lv_obj name="sort">
+				<style name="setting_options"/>
+				<option_button name="sort_name" bind_text="presenter.sort_name" subject="presenter.sort" value="0"
+							   action="presenter.files.sort" arg="name"/>
+				<option_button name="sort_date" bind_text="presenter.sort_date" subject="presenter.sort" value="1"
+							   action="presenter.files.sort" arg="date"/>
+				<option_button name="sort_size" bind_text="presenter.sort_size" subject="presenter.sort" value="2"
+							   action="presenter.files.sort" arg="size"/>
+			</lv_obj>
+			<lv_obj name="display_mode">
+				<style name="setting_options"/>
+				<option_button name="list_mode" icon="view_list.png" subject="presenter.tiles" value="0"
+							   action="presenter.files.mode" arg="list" style_min_width="48"/>
+				<option_button name="tiles_mode" icon="view_grid.png" subject="presenter.tiles" value="1"
+							   action="presenter.files.mode" arg="tiles" style_min_width="48"/>
+			</lv_obj>
+			<ds_button name="refresh" icon="refresh.png" width="48" height="40">
+				<action trigger="clicked" name="presenter.files.refresh"/>
+			</ds_button>
+		</lv_obj>
+
+		<!-- What to look for, typed as soon as it opens -->
+		<lv_obj name="search_line" width="100%" height="content" flex_flow="row" scrollable="false"
+				style_flex_cross_place="center">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<bind_flag_if_eq subject="presenter.searching" flag="hidden" ref_value="0"/>
+			<ds_textarea name="search_input" one_line="true" placeholder_tag="tr.file.search_placeholder" style_text_align="left"
+						 height="content" flex_grow="1" bind_text="presenter.search" bind_editing="presenter.searching">
+				<action trigger="value_changed" name="presenter.files.find"/>
+			</ds_textarea>
+			<ds_button name="clear_search" icon="clear.png" width="48" height="40">
+				<action trigger="clicked" name="presenter.files.clear_search"/>
+			</ds_button>
+		</lv_obj>
+
+		<lv_obj name="list" width="100%" flex_grow="1" flex_flow="column" scrollable="false">
+			<style name="pad_zero"/>
+			<lv_label name="empty" translation_tag="tr.file.empty" width="100%" style_text_align="center"
+					  style_pad_ver="32">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.empty" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<lv_label name="no_match" translation_tag="tr.file.no_match" width="100%" style_text_align="center"
+					  style_pad_ver="32">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.no_match" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<lv_label name="no_drive" translation_tag="tr.usb.no_drive" width="100%" style_text_align="center"
+					  style_pad_ver="32">
+				<style name="text_muted"/>
+				<bind_flag_if_eq subject="presenter.no_drive" flag="hidden" ref_value="0"/>
+			</lv_label>
+			<ds_list name="rows" list="presenter.files" item="file_browser_row" windowed="true" item_height="64"
+					 width="100%" height="100%" flex_grow="1" scroll_dir="ver" style_pad_row="6">
+				<bind_flag_if_eq subject="presenter.tiles" flag="hidden" ref_value="1"/>
+			</ds_list>
+			<ds_list name="tiles" list="presenter.files" item="file_browser_tile" windowed="true" item_width="150"
+					 item_height="170" flow="row_wrap" width="100%" height="100%" flex_grow="1" scroll_dir="ver">
+				<bind_flag_if_eq subject="presenter.tiles" flag="hidden" ref_value="0"/>
+			</ds_list>
+		</lv_obj>
+	</view>
+</component>

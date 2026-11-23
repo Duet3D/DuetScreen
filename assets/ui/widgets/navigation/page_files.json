@@ -1,0 +1,16 @@
+{
+  "component": "sidebar_page_button",
+  "title_tag": "tr.side_bar.files",
+  "description_tag": "tr.widget.page_files_desc",
+  "category_tag": "tr.widget.category_navigation",
+  "icon": "files.png",
+  "slots": [
+    "sidebar"
+  ],
+  "props": {
+    "page": "files",
+    "action": "actions.navigation.open",
+    "label_tag": "tr.side_bar.files",
+    "icon": "files.png"
+  }
+}

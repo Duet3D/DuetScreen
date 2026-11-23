@@ -1,0 +1,20 @@
+{
+  "component": "move_z_card",
+  "title_tag": "tr.widget.jog_z",
+  "description_tag": "tr.widget.jog_z_desc",
+  "category_tag": "tr.widget.category_motion",
+  "icon": "move.png",
+  "slots": [
+    "dashboard"
+  ],
+  "size": {
+    "default": [
+      134,
+      278
+    ],
+    "min": [
+      88,
+      184
+    ]
+  }
+}

@@ -11,7 +11,6 @@
 // Forward declarations for types used by event payloads to keep this header lightweight
 namespace OM
 {
-	struct Alert;
 	enum class PrinterStatus;
 } // namespace OM
 
@@ -21,6 +20,11 @@ namespace UpgradeHelper
 {
 	struct UpgradeInfo;
 } // namespace UpgradeHelper
+
+namespace NetworkHelper
+{
+	enum class ConnectResult;
+} // namespace NetworkHelper
 
 namespace Log
 {
@@ -33,6 +37,11 @@ namespace UI
 	class LvObj;
 } // namespace UI
 
+namespace Comm
+{
+	struct FileTransfer;
+} // namespace Comm
+
 // Central event registry. Add events here with optional payload types.
 #define EVENTS(XX)                                                                                                     \
 	XX(Tick)                                                                                                           \
@@ -41,52 +50,23 @@ namespace UI
 	XX(UpdateAvailable, std::string)                                                                                   \
 	XX(GithubUpdateAvailable, std::string)                                                                             \
 	XX(UpdateResult, UpgradeHelper::UpgradeInfo)                                                                       \
-	XX(FanData)                                                                                                        \
-	XX(BedHeaterData)                                                                                                  \
-	XX(ChamberHeaterData)                                                                                              \
-	XX(HeaterData)                                                                                                     \
-	XX(JobFileName, std::string)                                                                                       \
-	XX(JobLastFileName, std::string)                                                                                   \
-	XX(JobPrintTime)                                                                                                   \
-	XX(JobDuration)                                                                                                    \
-	XX(JobFileProgress)                                                                                                \
-	XX(JobTimeLeft)                                                                                                    \
-	XX(JobWarmupDuration)                                                                                              \
-	XX(JobHeight)                                                                                                      \
-	XX(JobBuild)                                                                                                       \
-	XX(JobCurrentObject)                                                                                               \
-	XX(JobObjectData)                                                                                                  \
+	XX(UsbDrive, std::string, bool)                                                                                    \
+	XX(ObjectModelChanged)                                                                                             \
 	XX(ThumbnailData, std::string)                                                                                     \
-	XX(AxesData)                                                                                                       \
-	XX(ExtruderData)                                                                                                   \
-	XX(KinematicsName, std::string)                                                                                    \
-	XX(SpeedFactor)                                                                                                    \
-	XX(WorkplaceNumber)                                                                                                \
-	XX(NoMoveBeforeHoming)                                                                                             \
-	XX(PrintingAcceleration, uint32_t)                                                                                 \
-	XX(CurrentMoveRequestedSpeed)                                                                                      \
-	XX(CurrentMoveTopSpeed)                                                                                            \
-	XX(CurrentMoveExtrusionSpeed)                                                                                      \
-	XX(CompensationFile)                                                                                               \
+	XX(FileInfo, std::string)                                                                                          \
+	XX(FileTransfer, Comm::FileTransfer)                                                                               \
 	XX(Response, ResponseType, std::string)                                                                            \
+	XX(ConsoleCommand, std::string)                                                                                    \
 	XX(LogMessage, Log::DebugLevel, Log::log_time_t, std::string)                                                      \
-	XX(AnalogSensorData)                                                                                               \
-	XX(EndstopData)                                                                                                    \
-	XX(SpindleData)                                                                                                    \
-	XX(NetworkName)                                                                                                    \
 	XX(PrinterUniqueId)                                                                                                \
-	XX(IpAddress, std::string)                                                                                         \
 	XX(Status, OM::PrinterStatus)                                                                                      \
-	XX(CurrentTool)                                                                                                    \
-	XX(Alert, OM::Alert)                                                                                               \
-	XX(Time)                                                                                                           \
-	XX(ToolData)                                                                                                       \
-	XX(ToolHeaterData, size_t)                                                                                         \
-	XX(Directories)                                                                                                    \
 	XX(NavigationHomeEnable, bool)                                                                                     \
 	XX(NavigationBackEnable, bool)                                                                                     \
 	XX(NavigationCurrentScreen, UI::LvObj*)                                                                            \
-	XX(Filaments, std::vector<std::string>)
+	XX(Filaments, std::vector<std::string>)                                                                            \
+	XX(ThemeChanged)                                                                                                   \
+	XX(WifiNetworks)                                                                                                   \
+	XX(WifiConnectResult, std::string, NetworkHelper::ConnectResult)
 
 enum class EventType
 {

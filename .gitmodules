@@ -4,3 +4,6 @@
 [submodule "libraries/tracy"]
 	path = libraries/tracy
 	url = https://github.com/wolfpld/tracy.git
+[submodule "libraries/helix-xml"]
+	path = libraries/helix-xml
+	url = https://github.com/AndyEveritt/helix-xml.git

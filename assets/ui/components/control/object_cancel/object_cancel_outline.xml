@@ -1,0 +1,19 @@
+<!--
+  One of the job's objects on the Objects tab's bed, at its bounds: still to print, filled with the accent while it is
+  being printed, or hollow and crossed out once cancelled. Outlined while chosen. Press it to choose it.
+
+  Fields and actions: an objects row (src/UI/Presenters/Control/ObjectCancel/ObjectCancelPresenter.h)
+-->
+<component>
+	<view extends="ds_plot_rect" bind_x1="row.x1" bind_y1="row.y1" bind_x2="row.x2" bind_y2="row.y2" style_pad_all="0">
+		<style name="object_shape"/>
+		<bind_style name="object_shape_now" subject="row.current" ref_value="1"/>
+		<bind_style name="object_shape_cancelled" subject="row.cancelled" ref_value="1"/>
+		<bind_style name="object_shape_chosen" subject="row.chosen" ref_value="1"/>
+		<action trigger="pressed" name="presenter.object_cancel.choose"/>
+		<ds_cross name="cross" width="100%" height="100%">
+			<style name="object_cross"/>
+			<bind_flag_if_eq subject="row.cancelled" flag="hidden" ref_value="0"/>
+		</ds_cross>
+	</view>
+</component>

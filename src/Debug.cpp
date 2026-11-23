@@ -171,7 +171,15 @@ namespace Log
 #endif
 
 	static DebugLevel s_debugLevel = DebugLevel::Info;
-	static shared_ptr<spdlog::logger> s_logger;
+	/**
+	 * DuetScreen's logger. Deliberately never deleted: static objects (e.g. the USB device) log from their
+	 * destructors, which can run after any other static, including spdlog's registry, has been destroyed.
+	 */
+	static shared_ptr<spdlog::logger>& loggerHolder()
+	{
+		static auto* s_holder = new shared_ptr<spdlog::logger>();
+		return *s_holder;
+	}
 	static shared_ptr<UiSink_mt> s_uiSink;
 
 	void Init()
@@ -198,9 +206,9 @@ namespace Log
 										  std::move(tracy_sink)
 #endif
 			};
-			s_logger = make_shared<spdlog::logger>("duetscreen", sinks);
-			s_logger->flush_on(spdlog::level::debug);
-			spdlog::set_default_logger(s_logger);
+			loggerHolder() = make_shared<spdlog::logger>("duetscreen", sinks);
+			loggerHolder()->flush_on(spdlog::level::debug);
+			spdlog::set_default_logger(loggerHolder());
 			LOG_INFO("\n\n\n----------------------------------------------------------------------------------\n"
 					 "Program started\n"
 					 "Version: " FIRMWARE_VERSION "\n"
@@ -236,40 +244,40 @@ namespace Log
 		s_debugLevel = level;
 		StorageHelper::setData(ID_DEBUG_LEVEL, level);
 
-		if (!s_logger)
+		if (!loggerHolder())
 			return;
 
 		switch (level)
 		{
 		case DebugLevel::Verbose:
-			s_logger->set_level(spdlog::level::trace);
+			loggerHolder()->set_level(spdlog::level::trace);
 			break;
 		case DebugLevel::Debug:
-			s_logger->set_level(spdlog::level::debug);
+			loggerHolder()->set_level(spdlog::level::debug);
 			break;
 		case DebugLevel::Info:
-			s_logger->set_level(spdlog::level::info);
+			loggerHolder()->set_level(spdlog::level::info);
 			break;
 		case DebugLevel::Warn:
-			s_logger->set_level(spdlog::level::warn);
+			loggerHolder()->set_level(spdlog::level::warn);
 			break;
 		case DebugLevel::Error:
-			s_logger->set_level(spdlog::level::err);
+			loggerHolder()->set_level(spdlog::level::err);
 			break;
 		case DebugLevel::Fatal:
-			s_logger->set_level(spdlog::level::critical);
+			loggerHolder()->set_level(spdlog::level::critical);
 			break;
 		default:
-			s_logger->set_level(spdlog::level::info);
+			loggerHolder()->set_level(spdlog::level::info);
 		}
 	}
 
 	void CloseDebugFile()
 	{
 		ZoneScoped;
-		if (s_logger)
+		if (loggerHolder())
 		{
-			s_logger->flush();
+			loggerHolder()->flush();
 		}
 	}
 
@@ -284,11 +292,11 @@ namespace Log
 			s_uiSink = make_shared<UiSink_mt>();
 			s_uiSink->set_pattern(LOG_UI_PATTERN);
 			s_uiSink->set_level(spdlog::level::info);
-			s_logger->sinks().push_back(s_uiSink);
+			loggerHolder()->sinks().push_back(s_uiSink);
 		}
 		else
 		{
-			auto& sinks = s_logger->sinks();
+			auto& sinks = loggerHolder()->sinks();
 			for (auto it = sinks.begin(); it != sinks.end(); ++it)
 			{
 				if (*it == s_uiSink)
@@ -319,10 +327,16 @@ namespace Log
 		return s_debugLevel;
 	}
 
+	spdlog::logger* Logger()
+	{
+		const auto& logger = loggerHolder();
+		return logger ? logger.get() : spdlog::default_logger_raw();
+	}
+
 	shared_ptr<spdlog::logger> GetLogger()
 	{
 		ZoneScoped;
-		return s_logger;
+		return loggerHolder();
 	}
 
 #if LV_USE_LOG

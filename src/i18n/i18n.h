@@ -7,8 +7,10 @@
 
 #pragma once
 
+#include "Debug.h"
 #include <cstdint>
 #include <fmt/format.h>
+#include <functional>
 #include <map>
 #include <string_view>
 #include <vector>
@@ -27,6 +29,16 @@ namespace i18n
 
 	const std::string& translate(std::string_view tag);
 
+	/** The translation of `tag` in the current language, or nullptr if there is none (unlike translate(), which
+	 * warns and gives the tag) */
+	const std::string* find(std::string_view tag);
+
+	/** Visit every key/value of the current language's translation table */
+	void forEachTranslation(const std::function<void(std::string_view key, std::string_view value)>& func);
+
+	/** Called after `setLanguage()` loads a new language. Only one listener is kept; pass `nullptr` to clear it. */
+	void setLanguageChangedCallback(std::function<void()> callback);
+
 	const std::vector<std::string>& getSupportedFonts();
 } // namespace i18n
 
@@ -44,7 +56,6 @@ template <typename... Args>
 	requires(sizeof...(Args) > 0)
 std::string _(std::string_view tag, Args&&... args)
 {
-	/* Requires `#include "Debug.h"` before `#include "i18n/i18n.h"` */
 	LOG_DBG("Formatting translation tag '{:s}' with {} arguments", tag, sizeof...(Args));
 	return fmt::format(fmt::runtime(i18n::translate(tag)), std::forward<Args>(args)...);
 }

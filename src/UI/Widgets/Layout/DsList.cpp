@@ -1,0 +1,682 @@
+/*
+ * DsList.cpp
+ */
+
+#include "DsList.h"
+#include "UI/Widgets/WidgetSupport.h"
+#include "UI/Widgets/Widgets.h"
+#include "UI/Xml/Binding/Fields.h"
+#include "UI/Xml/Binding/Names.h"
+#include "UI/Xml/View/Actions.h"
+#include "src/xml/parsers/lv_xml_obj_parser.h"
+#include <algorithm>
+
+namespace UI::Xml
+{
+	using namespace WidgetSupport;
+
+	DsList::DsList(lv_obj_t* container,
+				   ListBase& list,
+				   std::string item,
+				   lv_xml_subject_ctx_t* parentContext,
+				   ItemAttributes itemAttributes,
+				   std::optional<Window> window,
+				   bool followEnd,
+				   std::optional<Key> key,
+				   bool pages,
+				   std::optional<size_t> limit)
+		: m_container(container)
+		, m_list(&list)
+		, m_item(std::move(item))
+		, m_itemAttributes(std::move(itemAttributes))
+		, m_parentContext(lv_xml_subject_ctx_ref(parentContext))
+		, m_key(std::move(key))
+		, m_limit(limit)
+		, m_window(window)
+		, m_count(shownOf(list.size()))
+		, m_followEnd(followEnd)
+	{
+		m_list->addListener(this);
+		if (m_followEnd)
+		{
+			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_SCROLL_END, this);
+			lv_obj_add_event_cb(m_container, followEndEventCb, LV_EVENT_LAYOUT_CHANGED, this);
+			m_display = lv_obj_get_display(m_container);
+			lv_display_add_event_cb(m_display, layoutCompletedEventCb, LV_EVENT_UPDATE_LAYOUT_COMPLETED, this);
+		}
+		if (!m_window)
+		{
+			if (pages)
+			{
+				m_pages = std::make_unique<ListPages>(m_container);
+			}
+			build(0, shownOf(m_list->size()));
+			return;
+		}
+
+		// The list places the items itself
+		lv_obj_set_layout(m_container, LV_LAYOUT_NONE);
+		m_sizer = lv_obj_create(m_container);
+		lv_obj_remove_style_all(m_sizer);
+		lv_obj_remove_flag(m_sizer, LV_OBJ_FLAG_CLICKABLE);
+		lv_obj_set_size(m_sizer, 0, 0);
+		lv_obj_add_event_cb(m_container, windowEventCb, LV_EVENT_SCROLL, this);
+		lv_obj_add_event_cb(m_container, windowEventCb, LV_EVENT_SCROLL_END, this);
+		lv_obj_add_event_cb(m_container, windowEventCb, LV_EVENT_SIZE_CHANGED, this);
+		updateWindow();
+	}
+
+	DsList::~DsList()
+	{
+		// LVGL deletes the container's children only after this, its delete event, but a row's scope may keep
+		// subjects its widgets are bound to (see Scope::keep()). So the rows' widgets go first, while their scopes
+		// still exist, and nothing of ours runs while they go.
+		lv_obj_remove_event_cb_with_user_data(m_container, windowEventCb, this);
+		lv_obj_remove_event_cb_with_user_data(m_container, followEndEventCb, this);
+		for (auto& entry : m_entries)
+		{
+			deleteRow(entry);
+		}
+		for (auto& [index, entry] : m_shown)
+		{
+			deleteRow(entry);
+		}
+
+		if (m_list)
+		{
+			m_list->removeListener(this);
+			// The rows outlive the list's view, so stop watching their keys
+			for (auto& entry : m_entries)
+			{
+				if (entry.keyObserver)
+				{
+					lv_observer_remove(entry.keyObserver);
+				}
+			}
+		}
+		if (m_display)
+		{
+			lv_display_remove_event_cb_with_user_data(m_display, layoutCompletedEventCb, this);
+		}
+		m_entries.clear();
+		m_shown.clear();
+		lv_xml_subject_ctx_unref(m_parentContext);
+	}
+
+	void DsList::registerXml()
+	{
+		Widgets::add(
+			{.name = "ds_list",
+			 .extends = "lv_obj",
+			 .description =
+				 "A container with one component per row of a list. Each item is built in a scope of its own holding "
+				 "its row's fields, so names are found in the row first, then where the list is written. With "
+				 "`windowed`, only the rows on screen are built, so a folder of a thousand files costs a screenful of "
+				 "widgets; every item then has the same size, and the list places them itself (its own layout is "
+				 "ignored), with its style_pad_row and style_pad_column as the gaps. With `key` and `value`, only the "
+				 "rows whose `key` field is `value` are shown, e.g. one fan. Each item is given the list's `item.*` "
+				 "attributes.",
+			 .example =
+				 R"(<ds_list list="presenter.files" item="file_browser_row" windowed="true" item_height="64" flow="column"/>)",
+			 .attributes =
+				 {{"list",
+				   "The list shown (required), named like a subject: e.g. `presenter.files`, "
+				   "`source.jog.distance.choices`, "
+				   "`om.fans`, or in a tool's row, its `row.heaters`",
+				   AttributeKind::List},
+				  {"item", "The component built for each row (required)", AttributeKind::Component},
+				  {"windowed",
+				   "\"true\" to build only the rows on screen, building and deleting rows as the list scrolls (default "
+				   "false)"},
+				  {"item_height", "Windowed: each item's height in pixels (required when windowed)"},
+				  {"item_width",
+				   "Windowed: each item's width in pixels, or `content` for each item's own width (column flow only; "
+				   "the list scrolls sideways); the list's full width if not given"},
+				  {"flow",
+				   "How the items are placed: `column`, one per line; `row`, side by side; `row_wrap`, as many per "
+				   "line as fit; or `pages`, one at a time, each filling the list, swiped through sideways with a dot "
+				   "per item below (styled by the theme's list_pages, list_page_dot and list_page_dot_current). "
+				   "Without "
+				   "it, a list is laid out by its own flex attributes, and a windowed list in a column. A windowed "
+				   "list "
+				   "takes `column` or `row_wrap`."},
+				  {"limit",
+				   "Show only the first this many rows, e.g. a widget's setting: `limit=\"$count\"`; every row if not "
+				   "given or below 0"},
+				  {"follow_end",
+				   "\"true\" to keep a list that isn't windowed showing its last rows as rows are added, like a log, "
+				   "unless the user has scrolled back (default false)"},
+				  {"key",
+				   "A field of the rows, written `row.<field>`: only the rows whose `key` is `value` are shown, as the "
+				   "data changes. Not with `windowed`. Empty for every row, so a component can leave it to a prop."},
+				  {"value",
+				   "With `key`, the value shown rows have, as XML writes one: `2` for an int, the text for a text, "
+				   "e.g. `<ds_list list=\"om.fans\" key=\"row.index\" value=\"2\" item=\"…\"/>` shows fan 2"},
+				  {"bind_value",
+				   "With `key`, instead of `value`: follow a subject for the value shown rows have, e.g. "
+				   "`bind_value=\"om.state.currentTool\"` with `key=\"row.index\"` shows the tool in use",
+				   AttributeKind::Subject},
+				  {"item.<attribute>",
+				   "Given to every item as if written where it is used: a prop of the item component, e.g. "
+				   "`item.title=\"row.name\"`, or an attribute of its root, e.g. `item.flex_grow=\"1\"`. Its names are "
+				   "looked up in the item's row.",
+				   AttributeKind::Items}}},
+			xmlCreate,
+			xmlApply);
+	}
+
+	void DsList::onListResized(size_t /* oldSize */, size_t newSize)
+	{
+		if (m_window)
+		{
+			// Removed rows' widgets go now, before the rows do. The list still holds them until every listener has
+			// been told, so from here on only the first newSize rows are used.
+			m_count = shownOf(newSize);
+			for (auto it = m_shown.lower_bound(newSize); it != m_shown.end();)
+			{
+				deleteRow(it->second);
+				it = m_shown.erase(it);
+			}
+			updateWindow();
+		}
+		else if (shownOf(newSize) > m_entries.size())
+		{
+			build(m_entries.size(), shownOf(newSize));
+		}
+		else
+		{
+			truncate(shownOf(newSize));
+		}
+	}
+
+	size_t DsList::shownOf(size_t rows) const
+	{
+		return m_limit ? std::min(rows, *m_limit) : rows;
+	}
+
+	void DsList::onListDestroyed()
+	{
+		truncate(0);
+		for (auto& [index, entry] : m_shown)
+		{
+			deleteRow(entry);
+		}
+		m_shown.clear();
+		m_list = nullptr;
+	}
+
+	void* DsList::xmlCreate(lv_xml_parser_state_t* state, const char** /* attrs */)
+	{
+		return lv_obj_create(parentOf(state));
+	}
+
+	void DsList::xmlApply(lv_xml_parser_state_t* state, const char** attrs)
+	{
+		lv_xml_obj_apply(state, attrs);
+		// Already showing a list: a component's view that extends ds_list, whose instance attributes come next
+		if (ownerOf<DsList>(itemOf(state)) != nullptr)
+		{
+			return;
+		}
+
+		const char* listName = lv_xml_get_value_of(attrs, "list");
+		const char* item = lv_xml_get_value_of(attrs, "item");
+		if (listName == nullptr || item == nullptr)
+		{
+			LOG_WARN("<ds_list> needs both list= and item=");
+			return;
+		}
+
+		lv_xml_subject_ctx_t* context = lv_xml_subject_ctx_get_active();
+		ListBase* list = Scope::findList(context, listName);
+		if (list == nullptr)
+		{
+			LOG_WARN("<ds_list list=\"{:s}\">: no such list", listName);
+			return;
+		}
+
+		std::optional<Window> window;
+		if (lv_xml_to_bool(attrOr(attrs, "windowed", "false")))
+		{
+			window = Window{.itemWidth = std::nullopt,
+							.itemHeight = lv_xml_atoi(attrOr(attrs, "item_height", "0")),
+							.wrap = lv_streq(attrOr(attrs, "flow", "column"), "row_wrap")};
+			if (const char* width = lv_xml_get_value_of(attrs, "item_width"))
+			{
+				if (lv_streq(width, "content"))
+				{
+					window->contentWidth = true;
+				}
+				else
+				{
+					window->itemWidth = lv_xml_atoi(width);
+				}
+			}
+			if (window->itemHeight <= 0)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\" windowed=\"true\"> needs item_height=", listName);
+				return;
+			}
+		}
+
+		std::optional<Key> key;
+		const char* keyField = lv_xml_get_value_of(attrs, "key");
+		const char* keyValue = lv_xml_get_value_of(attrs, "value");
+		// The value may follow a subject instead
+		lv_subject_t* valueSubject = findSubject(state, attrs, "bind_value");
+		const std::string boundValue = valueSubject != nullptr ? valueText(valueSubject) : std::string();
+		if (valueSubject != nullptr && keyValue == nullptr)
+		{
+			keyValue = boundValue.c_str();
+		}
+		// An empty key, which a prop may give, shows every row
+		if (keyField != nullptr && keyField[0] == '\0')
+		{
+			keyField = nullptr;
+			keyValue = nullptr;
+		}
+		if ((keyField == nullptr) != (keyValue == nullptr))
+		{
+			LOG_WARN("<ds_list list=\"{:s}\">: key= and value= go together", listName);
+			return;
+		}
+		if (keyField != nullptr)
+		{
+			if (window)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\">: a keyed list can't be windowed", listName);
+				return;
+			}
+			// A field of the rows, written `row.<field>`
+			const auto field = Names::after(keyField, Names::ROW);
+			if (!field)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\" key=\"{:s}\">: a key is a field of the rows, written {:s}<field>",
+						 listName,
+						 keyField,
+						 Names::ROW);
+				return;
+			}
+			// Checked on the list's example row, so even an empty list reports a bad key. Only whether the field
+			// was found is used: the example row is gone once rowFields() returns.
+			FieldFinder finder(*field);
+			list->rowFields(finder);
+			if (finder.foundSubject == nullptr)
+			{
+				LOG_WARN("<ds_list list=\"{:s}\" key=\"{:s}\">: the rows have no such field", listName, keyField);
+				return;
+			}
+			key = Key{.field = std::string(*field), .value = keyValue};
+		}
+
+		lv_obj_t* container = itemOf(state);
+		const auto pages = applyFlow(container, attrOr(attrs, "flow", ""), window.has_value());
+		if (!pages)
+		{
+			LOG_WARN("<ds_list list=\"{:s}\" flow=\"{:s}\">: no such flow{:s}",
+					 listName,
+					 attrOr(attrs, "flow", ""),
+					 window ? " for a windowed list (column or row_wrap)" : " (column, row, row_wrap or pages)");
+			return;
+		}
+		const bool followEnd = lv_xml_to_bool(attrOr(attrs, "follow_end", "false"));
+		const bool keyed = key.has_value();
+		// A negative limit, or none, shows every row
+		std::optional<size_t> limit;
+		if (const char* text = lv_xml_get_value_of(attrs, "limit"); text != nullptr && lv_xml_atoi(text) >= 0)
+		{
+			limit = static_cast<size_t>(lv_xml_atoi(text));
+		}
+		auto* built = new DsList(container,
+								 *list,
+								 item,
+								 context,
+								 ItemAttributes::from(attrs),
+								 window,
+								 followEnd,
+								 std::move(key),
+								 *pages,
+								 limit);
+		deleteWith(container, built);
+		if (keyed && valueSubject != nullptr)
+		{
+			lv_subject_add_observer_obj(valueSubject, valueObserverCb, container, built);
+		}
+	}
+
+	std::string DsList::valueText(lv_subject_t* subject)
+	{
+		if (subject->type == LV_SUBJECT_TYPE_INT)
+		{
+			return std::to_string(lv_subject_get_int(subject));
+		}
+		const char* text = lv_subject_get_string(subject);
+		return text != nullptr ? std::string(text) : std::string();
+	}
+
+	void DsList::valueObserverCb(lv_observer_t* observer, lv_subject_t* subject)
+	{
+		auto* list = static_cast<DsList*>(lv_observer_get_user_data(observer));
+		if (!list->m_key)
+		{
+			return;
+		}
+		list->m_key->value = valueText(subject);
+		for (size_t i = 0; i < list->m_entries.size(); ++i)
+		{
+			if (list->m_entries[i].key != nullptr)
+			{
+				list->showIfMatches(i);
+			}
+		}
+	}
+
+	std::optional<bool> DsList::applyFlow(lv_obj_t* container, std::string_view flow, bool windowed)
+	{
+		// A windowed list places its items itself (see Window), and reads `flow` there
+		if (windowed)
+		{
+			return flow.empty() || flow == "column" || flow == "row_wrap" ? std::optional(false) : std::nullopt;
+		}
+		if (flow.empty())
+		{
+			return false;
+		}
+		if (flow == "pages")
+		{
+			return true;
+		}
+		static constexpr std::pair<std::string_view, lv_flex_flow_t> FLOWS[] = {
+			{"column", LV_FLEX_FLOW_COLUMN}, {"row", LV_FLEX_FLOW_ROW}, {"row_wrap", LV_FLEX_FLOW_ROW_WRAP}};
+		for (const auto& [name, flex] : FLOWS)
+		{
+			if (flow == name)
+			{
+				lv_obj_set_layout(container, LV_LAYOUT_FLEX);
+				lv_obj_set_flex_flow(container, flex);
+				return false;
+			}
+		}
+		return std::nullopt;
+	}
+
+	Subject* DsList::keyOf(Row& row, std::string_view name)
+	{
+		FieldFinder finder(name);
+		row.allFields(finder);
+		return finder.foundSubject;
+	}
+
+	void DsList::keyObserverCb(lv_observer_t* observer, lv_subject_t* /* subject */)
+	{
+		auto* list = static_cast<DsList*>(lv_observer_get_user_data(observer));
+		const auto& entries = list->m_entries;
+		const auto it = std::find_if(
+			entries.begin(), entries.end(), [observer](const Entry& entry) { return entry.keyObserver == observer; });
+		// Not found while the observer is being added, which calls it at once: build() then checks the row itself
+		if (it != entries.end())
+		{
+			list->showIfMatches(static_cast<size_t>(it - entries.begin()));
+		}
+	}
+
+	void DsList::windowEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (list->m_list == nullptr)
+		{
+			return;
+		}
+		// While scrolling, only add items: deleting the one under the finger would stop the scroll. Items that left
+		// the screen are deleted once scrolling ends.
+		if (lv_event_get_code(e) == LV_EVENT_SCROLL)
+		{
+			list->addVisibleRows(list->itemsPerLine());
+			return;
+		}
+		list->updateWindow();
+	}
+
+	DsList::Entry DsList::buildRow(size_t index)
+	{
+		ZoneScoped;
+		Row& row = m_list->row(index);
+		auto scope = std::make_unique<Scope>(m_parentContext, Scope::Kind::row);
+		ScopeBinder binder(*scope, Names::ROW);
+		row.allFields(binder);
+
+		const std::string name = std::to_string(index);
+		const auto attrs = m_itemAttributes.attrsFor(name);
+		auto* obj = static_cast<lv_obj_t*>(lv_xml_create_with_ctx(
+			m_container, m_item.c_str(), const_cast<const char**>(attrs.data()), scope->context()));
+		if (obj == nullptr)
+		{
+			LOG_ERROR("<ds_list>: couldn't create item component '{:s}'", m_item);
+			return {nullptr, std::move(scope)};
+		}
+
+		Actions::setRow(obj, &row);
+		if (m_window)
+		{
+			placeItem(obj, index, itemsPerLine());
+		}
+		return {obj, std::move(scope)};
+	}
+
+	void DsList::placeItem(lv_obj_t* obj, size_t index, int32_t perLine) const
+	{
+		const lv_area_t area = itemArea(index, perLine);
+		lv_obj_set_pos(obj, area.x1, area.y1);
+		lv_obj_set_height(obj, lv_area_get_height(&area));
+		if (!m_window->contentWidth)
+		{
+			lv_obj_set_width(obj, lv_area_get_width(&area));
+		}
+	}
+
+	void DsList::followEndEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (lv_event_get_code(e) == LV_EVENT_SCROLL_END)
+		{
+			list->m_atEnd = lv_obj_get_scroll_bottom(list->m_container) <= 0;
+		}
+		else
+		{
+			list->m_laidOut = true;
+		}
+	}
+
+	void DsList::layoutCompletedEventCb(lv_event_t* e)
+	{
+		auto* list = static_cast<DsList*>(lv_event_get_user_data(e));
+		if (!list->m_laidOut)
+		{
+			return;
+		}
+		list->m_laidOut = false;
+		// Also brings back a list left past its end, e.g. by rows that became shorter: the scroll is bounded
+		if (list->m_atEnd && lv_obj_get_scroll_bottom(list->m_container) != 0)
+		{
+			lv_obj_scroll_to_y(list->m_container, LV_COORD_MAX, LV_ANIM_OFF);
+		}
+	}
+
+	void DsList::deleteRow(Entry& entry)
+	{
+		if (entry.obj)
+		{
+			lv_obj_delete(entry.obj);
+			entry.obj = nullptr;
+		}
+	}
+
+	void DsList::itemsChanged()
+	{
+		if (m_pages)
+		{
+			m_pages->refresh();
+		}
+	}
+
+	void DsList::build(size_t from, size_t to)
+	{
+		for (size_t i = from; i < to; i++)
+		{
+			if (!m_key)
+			{
+				m_entries.push_back(buildRow(i));
+				continue;
+			}
+
+			Entry& entry = m_entries.emplace_back();
+			entry.key = keyOf(m_list->row(i), m_key->field);
+			if (entry.key == nullptr)
+			{
+				// Every row of a list has the same fields, and xmlApply() checked them
+				LOG_ERROR("<ds_list>: row {:d} has no key field '{:s}'", i, m_key->field);
+				continue;
+			}
+			entry.keyObserver = lv_subject_add_observer(entry.key->raw(), keyObserverCb, this);
+			showIfMatches(i);
+		}
+		itemsChanged();
+	}
+
+	void DsList::truncate(size_t count)
+	{
+		while (m_entries.size() > count)
+		{
+			Entry& entry = m_entries.back();
+			if (entry.keyObserver)
+			{
+				lv_observer_remove(entry.keyObserver);
+			}
+			deleteRow(entry);
+			m_entries.pop_back();
+		}
+		itemsChanged();
+	}
+
+	void DsList::showIfMatches(size_t index)
+	{
+		Entry& entry = m_entries[index];
+		const bool matches = entry.key->equals(m_key->value);
+		if (matches && entry.obj == nullptr)
+		{
+			Entry built = buildRow(index);
+			entry.obj = built.obj;
+			entry.scope = std::move(built.scope);
+			if (entry.obj)
+			{
+				// Items keep the rows' order, whichever row matched first
+				lv_obj_move_to_index(entry.obj, static_cast<int32_t>(itemsBefore(index)));
+			}
+		}
+		else if (!matches && entry.obj != nullptr)
+		{
+			deleteRow(entry);
+			entry.scope.reset();
+		}
+		else
+		{
+			return;
+		}
+		itemsChanged();
+	}
+
+	uint32_t DsList::itemsBefore(size_t index) const
+	{
+		return static_cast<uint32_t>(std::count_if(m_entries.begin(),
+												   m_entries.begin() + static_cast<std::ptrdiff_t>(index),
+												   [](const Entry& entry) { return entry.obj != nullptr; }));
+	}
+
+	int32_t DsList::itemsPerLine() const
+	{
+		if (!m_window->wrap)
+		{
+			return 1;
+		}
+		const int32_t width = lv_obj_get_content_width(m_container);
+		const int32_t gap = lv_obj_get_style_pad_column(m_container, LV_PART_MAIN);
+		const int32_t itemWidth = m_window->itemWidth.value_or(width);
+		return std::max<int32_t>(1, (width + gap) / std::max<int32_t>(1, itemWidth + gap));
+	}
+
+	lv_area_t DsList::itemArea(size_t index, int32_t perLine) const
+	{
+		const int32_t width = m_window->itemWidth.value_or(lv_obj_get_content_width(m_container));
+		const int32_t height = m_window->itemHeight;
+		const auto line = static_cast<int32_t>(index / static_cast<size_t>(perLine));
+		const auto column = static_cast<int32_t>(index % static_cast<size_t>(perLine));
+		const int32_t x = column * (width + lv_obj_get_style_pad_column(m_container, LV_PART_MAIN));
+		const int32_t y = line * (height + lv_obj_get_style_pad_row(m_container, LV_PART_MAIN));
+		return {x, y, x + width - 1, y + height - 1};
+	}
+
+	void DsList::updateWindow()
+	{
+		ZoneScoped;
+		if (m_list == nullptr)
+		{
+			return;
+		}
+
+		// The scrollable area holds every row
+		const size_t count = m_count;
+		const int32_t perLine = itemsPerLine();
+		if (count == 0)
+		{
+			lv_obj_set_size(m_sizer, 0, 0);
+		}
+		else
+		{
+			const lv_area_t lastItem = itemArea(count - 1, perLine);
+			lv_obj_set_size(m_sizer, 1, lastItem.y2 + 1);
+		}
+		// A shorter list may have left the view scrolled past its end
+		lv_obj_update_layout(m_container);
+		lv_obj_readjust_scroll(m_container, LV_ANIM_OFF);
+
+		// Delete the rows that left the screen; the others may need moving if the width changed
+		const auto [first, last] = visibleRows(perLine);
+		for (auto it = m_shown.begin(); it != m_shown.end();)
+		{
+			if (it->first < first || it->first >= last)
+			{
+				deleteRow(it->second);
+				it = m_shown.erase(it);
+				continue;
+			}
+			if (it->second.obj != nullptr)
+			{
+				placeItem(it->second.obj, it->first, perLine);
+			}
+			++it;
+		}
+		addVisibleRows(perLine);
+	}
+
+	std::pair<size_t, size_t> DsList::visibleRows(int32_t perLine) const
+	{
+		const size_t count = m_count;
+		const int32_t top = std::max(0, lv_obj_get_scroll_top(m_container));
+		const int32_t bottom = top + lv_obj_get_content_height(m_container);
+		const int32_t lineHeight = m_window->itemHeight + lv_obj_get_style_pad_row(m_container, LV_PART_MAIN);
+		const auto line = [&](int32_t y) { return static_cast<size_t>(y / lineHeight) * static_cast<size_t>(perLine); };
+		return {std::min(count, line(top)), std::min(count, line(bottom) + static_cast<size_t>(perLine))};
+	}
+
+	void DsList::addVisibleRows(int32_t perLine)
+	{
+		const auto [first, last] = visibleRows(perLine);
+		for (size_t i = first; i < last; i++)
+		{
+			if (!m_shown.contains(i))
+			{
+				m_shown.emplace(i, buildRow(i));
+			}
+		}
+	}
+} // namespace UI::Xml

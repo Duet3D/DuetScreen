@@ -1,0 +1,23 @@
+<!--
+  A gauge for each heater (om.heat.heaters), or with `key`, the heaters whose key is `match` (one heater): its
+  temperature, named for its sensor (else "Heater <n>"), heading for its target. Tap it to set the target.
+
+  Props:    key, match, look, flow, grow, portrait  as gauge_list.xml
+  Fields:   rows of om.heat.heaters      Actions: actions.heater.set_target
+-->
+<component>
+	<api>
+		<prop name="key" type="string" default=""/>
+		<prop name="match" type="string" default=""/>
+		<prop name="look" type="string" default="bar"/>
+		<prop name="flow" type="string" default="column"/>
+		<prop name="grow" type="string" default="1"/>
+		<prop name="portrait" type="string" default="widget.portrait"/>
+	</api>
+
+	<view extends="gauge_list" list="om.heat.heaters" key="$key" match="$match" look="$look" flow="$flow" grow="$grow" portrait="$portrait"
+		  shown="row.exists" title="om.sensors.analog[{row.sensor}].name|default:tr.temperature.heater:{row.index}"
+		  value="row.current|int" text="row.current|fixed:1" unit="'°C'" min="row.min|atleast:0" max="row.max|int"
+		  target="row.value|heater_target" detail="row.value|heater_detail" state="row.state"
+		  tap_action="actions.heater.set_target"/>
+</component>

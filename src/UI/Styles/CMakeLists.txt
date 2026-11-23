@@ -3,7 +3,8 @@ target_sources(
   PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/Color.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Font.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Palette.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Styles.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Theme.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ThemeFile.cpp
 )
-
-add_subdirectory(Themes)

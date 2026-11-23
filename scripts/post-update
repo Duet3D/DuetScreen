@@ -1,5 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-/etc/init.d/S21DuetScreenMonitor start

@@ -1,0 +1,32 @@
+<!--
+  One axis' position, as a tile: its letter, "Not homed" until it is, and where it is. Tap it to move to a position.
+
+  Fields:   a source.axes.all row: row.letter, row.position, row.homed, row.jog_usable (src/UI/Xml/Data/AxesSource.h)
+  Actions:  actions.move.set_position (src/UI/Presenters/Control/Move/MoveActions.h)
+-->
+<component>
+	<view extends="lv_obj" height="content" flex_grow="1" style_min_width="content" flex_flow="column"
+		  scrollable="false">
+		<style name="axis_tile"/>
+		<style name="pressed" selector="pressed"/>
+		<bind_style name="axis_tile_unhomed" subject="row.homed" ref_value="0"/>
+		<bind_state_if_eq subject="row.jog_usable" state="disabled" ref_value="0"/>
+		<action trigger="clicked" name="actions.move.set_position"/>
+
+		<lv_obj name="top" width="content" height="content" flex_flow="row" scrollable="false" clickable="false"
+				style_flex_cross_place="center" style_flex_track_place="center">
+			<style name="pad_zero"/>
+			<style name="pad_gap"/>
+			<lv_label name="letter" bind_text="row.letter" clickable="false">
+				<style name="axis_tile_letter"/>
+			</lv_label>
+			<lv_label name="not_homed" translation_tag="tr.move.not_homed" clickable="false">
+				<style name="axis_tile_not_homed"/>
+				<bind_flag_if_eq subject="row.homed" flag="hidden" ref_value="1"/>
+			</lv_label>
+		</lv_obj>
+		<lv_label name="position" bind_text="row.position" clickable="false">
+			<style name="reading"/>
+		</lv_label>
+	</view>
+</component>
