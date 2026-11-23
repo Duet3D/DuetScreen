@@ -37,14 +37,16 @@
 			<style name="pad_zero"/>
 			<bind_flag_if_eq subject="source.files.transferring" flag="hidden" ref_value="0"/>
 			<action trigger="clicked" name="actions.usb.show_upload"/>
-			<lv_label name="transfer_title" translation_tag="tr.file.uploading" clickable="false">
+			<lv_label name="transfer_title" translation_tag="tr.file.uploading" style_margin_right="#pad_large"
+					  clickable="false">
 				<style name="text_muted"/>
 			</lv_label>
 			<lv_label name="transfer_file" bind_text="source.files.transfer_file" width="1" flex_grow="1"
 					  long_mode="dots" clickable="false"/>
 			<gauge_track name="transfer_bar" value="source.files.transfer_progress" max="100" width="25%" height="4"/>
+			<!-- Room for "100%", right-aligned: the bar keeps its place as the number grows -->
 			<lv_label name="transfer_percent" bind_text="source.files.transfer_progress" bind_text-fmt="%d%%"
-					  clickable="false"/>
+					  style_min_width="48" style_text_align="right" clickable="false"/>
 		</lv_obj>
 
 		<lv_obj name="right" align="right_mid" width="content" height="content" style_max_width="30%"
