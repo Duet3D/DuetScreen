@@ -2590,9 +2590,11 @@
 			<xs:enumeration value="tr.usb.failed"/>
 			<xs:enumeration value="tr.usb.firmware"/>
 			<xs:enumeration value="tr.usb.installing"/>
+			<xs:enumeration value="tr.usb.job_active"/>
 			<xs:enumeration value="tr.usb.no_drive"/>
 			<xs:enumeration value="tr.usb.no_folder"/>
 			<xs:enumeration value="tr.usb.not_connected"/>
+			<xs:enumeration value="tr.usb.not_idle"/>
 			<xs:enumeration value="tr.usb.not_update"/>
 			<xs:enumeration value="tr.usb.reading"/>
 			<xs:enumeration value="tr.usb.sending"/>

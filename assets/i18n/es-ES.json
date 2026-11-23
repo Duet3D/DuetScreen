@@ -128,6 +128,8 @@
       "not_connected": "La impresora no está conectada",
       "no_folder": "La impresora aún no ha indicado dónde está esa carpeta",
       "another_upload": "Se está subiendo otro archivo",
+      "job_active": "Hay un trabajo activo: los archivos se pueden subir cuando haya terminado",
+      "not_idle": "La impresora no está inactiva ({:s}): los archivos se pueden subir cuando lo esté",
       "reading": "Leyendo {:s}…",
       "sending": "Subiendo {:s} a {:s}…",
       "done": "{:s} ya está en {:s}",

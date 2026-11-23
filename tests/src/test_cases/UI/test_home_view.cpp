@@ -1217,6 +1217,42 @@ TEST_F(TestHomeViewWithSimulator, AFileOnAUsbDriveIsUploadedWithItsProgressShown
 	EXPECT_TRUE(isHidden(browser, "transfer"));
 }
 
+TEST_F(TestHomeViewWithSimulator, FilesAreUploadedOnlyWhileThePrinterIsIdle)
+{
+	const std::filesystem::path drive = plugInUsbDrive();
+	std::ofstream(drive / "benchy.gcode") << "G28\n";
+	lv_obj_t* browser = openUsbBrowser();
+	lv_obj_send_event(fileItem(browser, "benchy.gcode"), LV_EVENT_CLICKED, nullptr);
+	ASSERT_NE(openUsbDialog(), nullptr);
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED)) << "idle";
+
+	// Busy: a long move
+	sendToSimulator("G28");
+	simulate(std::chrono::seconds(30));
+	sendToSimulator("G1 X200 F60");
+	pollSimulator();
+	deliverModelEvents();
+	runTimers();
+	ASSERT_EQ(UI::Xml::PrinterModel::root().at("state.status").text(), "busy");
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED));
+	EXPECT_EQ(TestDialogs::text("upload_reason"), "The printer isn't idle (Busy): files can be uploaded once it is");
+
+	// Idle again, it can
+	simulate(std::chrono::seconds(300));
+	deliverModelEvents();
+	runTimers();
+	EXPECT_FALSE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED));
+
+	// A job
+	sendToSimulator("M32 \"benchy.gcode\"");
+	pollSimulator();
+	deliverModelEvents();
+	runTimers();
+	EXPECT_TRUE(lv_obj_has_state(TestDialogs::find("upload"), LV_STATE_DISABLED));
+	EXPECT_EQ(TestDialogs::text("upload_reason"), "A job is active: files can be uploaded once it has ended");
+	EXPECT_EQUAL_SCREENSHOT("home_view/files_view/usb_job_active.png");
+}
+
 TEST_F(TestHomeViewWithSimulator, AnUploadOverASerialLinkCantBeCancelledOnceItIsSent)
 {
 	// The simulated Duet is reached as over USB: the printer takes the whole file once it has started (M559)

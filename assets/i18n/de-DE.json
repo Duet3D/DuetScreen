@@ -128,6 +128,8 @@
       "not_connected": "Der Drucker ist nicht verbunden",
       "no_folder": "Der Drucker hat diesen Ordner noch nicht genannt",
       "another_upload": "Eine andere Datei wird gerade hochgeladen",
+      "job_active": "Ein Auftrag ist aktiv: Dateien können hochgeladen werden, sobald er beendet ist",
+      "not_idle": "Der Drucker ist nicht im Leerlauf ({:s}): Dateien können hochgeladen werden, sobald er es ist",
       "reading": "{:s} wird gelesen…",
       "sending": "{:s} wird nach {:s} hochgeladen…",
       "done": "{:s} ist jetzt in {:s}",

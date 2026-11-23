@@ -128,6 +128,8 @@
       "not_connected": "A impressora não está ligada",
       "no_folder": "A impressora ainda não indicou onde está essa pasta",
       "another_upload": "Outro ficheiro está a ser enviado",
+      "job_active": "Há um trabalho ativo: os ficheiros podem ser enviados quando terminar",
+      "not_idle": "A impressora não está inativa ({:s}): os ficheiros podem ser enviados quando estiver",
       "reading": "A ler {:s}…",
       "sending": "A enviar {:s} para {:s}…",
       "done": "{:s} está agora em {:s}",

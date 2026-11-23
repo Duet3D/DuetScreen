@@ -738,7 +738,7 @@ From [UsbSource.cpp](../src/UI/Xml/Data/UsbSource.cpp).
 | `source.usb.file_size` | text | The file's size, e.g. "1.2 MB" |
 | `source.usb.file_date` | text | When the file was last changed, e.g. "2025-03-18 18:21" |
 | `source.usb.destination` | int | The printer's folder it is uploaded to: 0 jobs, 1 macros, 2 system, 3 firmware; its kind picks one at first (actions.usb.destination) |
-| `source.usb.upload` | int | Uploading it (actions.usb.upload): 1 disabled (see `upload_reason`), 2 usable |
+| `source.usb.upload` | int | Uploading it (actions.usb.upload): 1 disabled (see `upload_reason`: not connected, another file is being uploaded, or over USB or UART a job is active or the printer isn't idle), 2 usable |
 | `source.usb.upload_reason` | text | Why it can't be uploaded now, e.g. "The printer isn't connected"; empty if it can |
 | `source.usb.upload_state` | int | How its upload is going: 0 reading it, 1 sending it (source.files.transfer_progress), 2 done, 3 failed, 4 cancelling, 5 cancelled |
 | `source.usb.cancellable` | int | 1 while the upload from a USB drive going can be cancelled (actions.usb.cancel_upload): while it is read, and while it is sent over the network; over USB and UART the printer takes the whole file once it has started. Else 0 |

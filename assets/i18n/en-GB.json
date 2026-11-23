@@ -129,6 +129,8 @@
       "not_connected": "The printer isn't connected",
       "no_folder": "The printer hasn't said where that folder is yet",
       "another_upload": "Another file is being uploaded",
+      "job_active": "A job is active: files can be uploaded once it has ended",
+      "not_idle": "The printer isn't idle ({:s}): files can be uploaded once it is",
       "reading": "Reading {:s}…",
       "sending": "Uploading {:s} to {:s}…",
       "done": "{:s} is now in {:s}",

@@ -85,10 +85,12 @@ namespace Comm
 		CommunicationType type() const { return m_type.load(); }
 
 		/**
-		 * Whether a file being written can be cancelled (FileContents::cancel()) the way the printer is reached: over
-		 * the network. Over USB and UART the printer takes the whole file once it has started (M559), so it can't be.
+		 * Whether files are written alongside everything else the way the printer is reached: over the network. Then
+		 * a file can be written whatever the printer is doing, and cancelled (FileContents::cancel()). Over USB and
+		 * UART a file takes over the printer's channel until it is whole (M559): nothing else is sent meanwhile, and
+		 * once it has started it can't be stopped.
 		 */
-		bool cancelsWrites() const { return type() == CommunicationType::network; }
+		bool writesFilesAlongside() const { return type() == CommunicationType::network; }
 
 		/** The translation key of how the screen reaches the printer */
 		std::string_view typeName() const;

@@ -128,6 +128,8 @@
       "not_connected": "De printer is niet verbonden",
       "no_folder": "De printer heeft nog niet gezegd waar die map is",
       "another_upload": "Er wordt al een ander bestand geüpload",
+      "job_active": "Er is een taak actief: bestanden kunnen worden geüpload zodra die klaar is",
+      "not_idle": "De printer is niet inactief ({:s}): bestanden kunnen worden geüpload zodra hij dat is",
       "reading": "{:s} wordt gelezen…",
       "sending": "{:s} wordt geüpload naar {:s}…",
       "done": "{:s} staat nu in {:s}",

@@ -128,6 +128,8 @@
       "not_connected": "La stampante non è connessa",
       "no_folder": "La stampante non ha ancora indicato dove si trova quella cartella",
       "another_upload": "È in corso il caricamento di un altro file",
+      "job_active": "Un lavoro è attivo: i file possono essere caricati quando sarà terminato",
+      "not_idle": "La stampante non è inattiva ({:s}): i file possono essere caricati quando lo sarà",
       "reading": "Lettura di {:s}…",
       "sending": "Caricamento di {:s} in {:s}…",
       "done": "{:s} ora è in {:s}",

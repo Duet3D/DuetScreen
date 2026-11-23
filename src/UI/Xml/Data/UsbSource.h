@@ -5,14 +5,16 @@
  * opens for a file tapped (assets/ui/components/modals/usb_dialog.xml, hosted by the home screen). The dialog offers to:
  *
  *   - upload the file to the printer, into the folder chosen (jobs, macros, system or firmware; the file's kind picks
- *     one at first), showing its progress (source.files.transfer_*) as it is sent;
+ *     one at first), showing its progress (source.files.transfer_*) as it is sent. Over USB and UART only while the
+ *     printer is idle (no job), as the file takes over its channel until it is whole; over the network, whenever;
  *   - update the screen with it, when it is an update archive (*.tar.gz) the screen's update service would install:
  *     it is checked as the dialog opens, and the dialog says why not if it can't be.
  *
  * Uploading carries on if the dialog is closed; one file at a time. It can be cancelled (cancelUpload()), from the
  * dialog or the file browser, while it is read, and while it is sent over the network (what was written of it is
- * deleted); over USB and UART the printer takes the whole file once it has started (Connection::cancelsWrites()). Installing an update holds the screen in a dialog
- * of its own until the update service restarts it, or says why it couldn't.
+ * deleted); over USB and UART the printer takes the whole file once it has started (Connection::writesFilesAlongside()).
+ * Installing an update holds the screen in a dialog of its own until the update service restarts it, or says why it
+ * couldn't.
  *
  * The global actions that answer the dialog are in Presenters/FileBrowser/UsbActions.h. The names it publishes are
  * declared in fields(), and listed in the UI API reference (docs/XML_UI_API.md).
@@ -103,8 +105,8 @@ namespace UI::Xml
 		/** A drive came or went: count them, and close the dialog if its file's drive went */
 		void driveChanged();
 
-		/** Show what the dialog allows: uploading needs the printer, its folder, room on the link, and no other
-		 * upload; updating, an archive found installable */
+		/** Show what the dialog allows: uploading needs the printer connected (and idle, over USB or UART), its folder,
+		 * and no other upload; updating, an archive found installable */
 		void showAllowed();
 
 		/** The archive check of the dialog's file `generation` ended with `check` */

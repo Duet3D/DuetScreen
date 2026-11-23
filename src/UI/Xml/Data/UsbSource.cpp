@@ -8,6 +8,7 @@
 #include "Debug.h"
 #include "FilesSource.h"
 #include "Hardware/Usb.h"
+#include "ObjectModel/PrinterStatus.h"
 #include "UI/Core/Model.h"
 #include "i18n/i18n.h"
 #include "utils/UnitSystem.h"
@@ -81,7 +82,11 @@ namespace UI::Xml
 				m_destination,
 				"The printer's folder it is uploaded to: 0 jobs, 1 macros, 2 system, 3 firmware; its kind picks one at "
 				"first (actions.usb.destination)");
-		f.field("upload", m_upload, "Uploading it (actions.usb.upload): 1 disabled (see `upload_reason`), 2 usable");
+		f.field(
+			"upload",
+			m_upload,
+			"Uploading it (actions.usb.upload): 1 disabled (see `upload_reason`: not connected, another file is being "
+			"uploaded, or over USB or UART a job is active or the printer isn't idle), 2 usable");
 		f.field("upload_reason",
 				m_uploadReason,
 				"Why it can't be uploaded now, e.g. \"The printer isn't connected\"; empty if it can");
@@ -114,6 +119,8 @@ namespace UI::Xml
 	void UsbSource::onInit()
 	{
 		registerEventListener<EventType::UsbDrive>([this](const std::string&, bool) { driveChanged(); });
+		// Over USB and UART, files are uploaded only while the printer is idle
+		registerEventListener<EventType::Status>([this](OM::PrinterStatus) { showAllowed(); });
 		// The printer's folders, where files go, can arrive after the dialog opens
 		watchObjectModel({"directories"});
 		update();
@@ -241,6 +248,9 @@ namespace UI::Xml
 
 	void UsbSource::showAllowed()
 	{
+		// Over USB and UART a file takes over the printer's channel until it is whole: only while the printer is idle
+		const bool needsIdle = !Comm::Connection::get().writesFilesAlongside();
+		const OM::PrinterStatus status = OM::GetStatus();
 		std::string reason;
 		if (m_uploading)
 		{
@@ -249,6 +259,14 @@ namespace UI::Xml
 		else if (!Comm::Connection::get().isConnected())
 		{
 			reason = _("usb.not_connected");
+		}
+		else if (needsIdle && OM::IsPrintingStatus(status))
+		{
+			reason = _("usb.job_active");
+		}
+		else if (needsIdle && status != OM::PrinterStatus::idle)
+		{
+			reason = _("usb.not_idle", _(fmt::format("state.{:s}", OM::GetStatusText())));
 		}
 		else if (folderOf(static_cast<Destination>(m_destination.get())).empty())
 		{
@@ -330,7 +348,7 @@ namespace UI::Xml
 		{
 			return; // still cancelling
 		}
-		setUploading(true, Comm::Connection::get().cancelsWrites());
+		setUploading(true, Comm::Connection::get().writesFilesAlongside());
 		const std::string name(m_dialogTitle.get());
 		m_uploadState.set(static_cast<int32_t>(UploadState::Sending));
 		m_uploadText.set(_("usb.sending", name, destinationName(static_cast<Destination>(m_destination.get()))));
