@@ -148,9 +148,9 @@ namespace Comm
 
 		/**
 		 * Write `contents` to `file`, replacing it. The UI is told how it goes (EventType::FileTransfer): when it
-		 * starts, as it is sent (USB, UART), and when it ends. Over USB and UART nothing else is sent meanwhile.
+		 * starts, as it is sent, and when it ends. Over USB and UART nothing else is sent meanwhile.
 		 */
-		void writeFile(std::string file, std::string contents, Handler<void> handler = nullptr);
+		void writeFile(std::string file, FileContents contents, Handler<void> handler = nullptr);
 
 		/** Delete `file` */
 		void deleteFile(std::string file, Handler<void> handler = nullptr);

@@ -703,8 +703,9 @@ TEST_F(TestSimulator, AFileIsWrittenAndReadBack)
 		contents += fmt::format("M118 S\"line {:d}\"\n", i);
 	}
 	std::optional<std::expected<void, Comm::ReplyError>> written;
-	Comm::Connection::get().writeFile(
-		"0:/sys/backup.json", contents, [&written](std::expected<void, Comm::ReplyError> result) { written = result; });
+	Comm::Connection::get().writeFile("0:/sys/backup.json",
+									  Comm::FileContents::bytes(contents),
+									  [&written](std::expected<void, Comm::ReplyError> result) { written = result; });
 	Comm::Connection::get().sendGcode("M117 \"after\"");
 	for (int exchange = 0; exchange < 20 && !written; exchange++)
 	{

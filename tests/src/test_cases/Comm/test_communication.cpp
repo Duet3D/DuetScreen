@@ -9,10 +9,13 @@
 #include "Comm/Links/SerialLink.h"
 #include "Duet3D/General/CRC32.h"
 #include "ObjectModel/Tree/Json.h"
+#include <filesystem>
 #include <fmt/format.h>
+#include <fstream>
 #include <gtest/gtest.h>
 #include <optional>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 using Comm::SerialLink;
@@ -69,6 +72,17 @@ namespace
 		return crc.Get();
 	}
 
+	/** A file named `name` holding `contents`, in a folder of this test process's own */
+	std::filesystem::path scratchFile(std::string_view name, std::string_view contents)
+	{
+		const std::filesystem::path folder =
+			std::filesystem::temp_directory_path() / fmt::format("duetscreen_test_communication_{:d}", getpid());
+		std::filesystem::create_directories(folder);
+		const std::filesystem::path path = folder / name;
+		std::ofstream(path, std::ios::binary) << contents;
+		return path;
+	}
+
 	/** The lines written to `port`, without their endings */
 	std::vector<std::string> lines(const FakePort& port)
 	{
@@ -95,7 +109,7 @@ class TestSerialLink : public ::testing::Test
 	 * Write `contents` to `file`, keeping its progress in `progress` and its result in `written`; the printer says
 	 * the channel is free and that it waits for the file (the replies to the first two lines written from now)
 	 */
-	void startWriting(FakePort& port, std::string_view file, std::string contents)
+	void startWriting(FakePort& port, std::string_view file, Comm::FileContents contents)
 	{
 		const size_t first = port.written.size();
 		link->writeFile(
@@ -266,7 +280,7 @@ TEST_F(TestSerialLink, AFileIsWrittenWithM559OnceTheChannelIsFree)
 	open(port);
 	const std::string contents = "M118 S\"it's\"\nG4 S1\n";
 	link->writeFile("0:/sys/a \"b\".g",
-					contents,
+					Comm::FileContents::bytes(contents),
 					nullptr,
 					[this](std::expected<void, Comm::ReplyError> result) { written = result; });
 	EXPECT_EQ(lines(port), (std::vector<std::string>{R"(N0 M409 K"state.status" F"v")"}))
@@ -303,7 +317,7 @@ TEST_F(TestSerialLink, AFileIsSentInPiecesWithItsProgressTold)
 	FakePort port;
 	open(port);
 	const std::string contents(2 * SerialLink::filePieceSize + 100, 'x');
-	startWriting(port, "0:/gcodes/big.gcode", contents);
+	startWriting(port, "0:/gcodes/big.gcode", Comm::FileContents::bytes(contents));
 	for (int piece = 0; piece < 3; piece++)
 	{
 		link->tick(SerialLink::Clock::now());
@@ -316,11 +330,64 @@ TEST_F(TestSerialLink, AFileIsSentInPiecesWithItsProgressTold)
 	EXPECT_EQ(port.written.size(), 6u) << "nothing more to send";
 }
 
+TEST_F(TestSerialLink, AFileOnTheScreenIsReadAPieceAtATimeAsItIsSent)
+{
+	const std::string contents = std::string(SerialLink::filePieceSize, 'a') + std::string(100, 'b');
+	const std::filesystem::path path = scratchFile("upload.gcode", contents);
+	auto file = Comm::FileContents::file(path);
+	ASSERT_TRUE(file) << file.error().message;
+	FakePort port;
+	open(port);
+	startWriting(port, "0:/gcodes/upload.gcode", *file);
+	EXPECT_EQ(lines(port)[1],
+			  fmt::format(R"(N1 M559 P"0:/gcodes/upload.gcode" S{:d} C{:d})", contents.size(), crc32(contents)))
+		<< "its size and CRC are known before a byte is sent";
+	link->tick(SerialLink::Clock::now());
+	link->tick(SerialLink::Clock::now());
+	ASSERT_EQ(port.written.size(), 5u) << "two lines, two pieces, the acknowledgement";
+	EXPECT_EQ(port.written[2].bytes + port.written[3].bytes, contents);
+}
+
+TEST_F(TestSerialLink, AFileThatCantBeReadAnyMoreMeansConnectingAgain)
+{
+	const std::filesystem::path path = scratchFile("pulled.gcode", std::string(2 * SerialLink::filePieceSize, 'x'));
+	auto file = Comm::FileContents::file(path);
+	ASSERT_TRUE(file) << file.error().message;
+	FakePort port;
+	open(port);
+	startWriting(port, "0:/gcodes/pulled.gcode", *file);
+	link->tick(SerialLink::Clock::now());
+	std::filesystem::resize_file(path, 10); // as good as its drive taken out
+	link->tick(SerialLink::Clock::now());
+	ASSERT_TRUE(written);
+	EXPECT_FALSE(*written);
+	EXPECT_TRUE(link->failed()) << "the printer still waits for the rest, and would take whatever is sent next as it";
+}
+
+TEST(TestFileContents, BytesAndAFileAreReadAlike)
+{
+	const std::string text = "G28\nG1 X10\n";
+	const std::filesystem::path path = scratchFile("contents.g", text);
+	const Comm::FileContents bytes = Comm::FileContents::bytes(text);
+	const auto file = Comm::FileContents::file(path);
+	ASSERT_TRUE(file);
+	for (const Comm::FileContents* contents : {&bytes, &*file})
+	{
+		EXPECT_EQ(contents->size(), text.size());
+		EXPECT_EQ(contents->crc32(), crc32(text));
+		EXPECT_EQ(contents->read(0, 4), "G28\n");
+		EXPECT_EQ(contents->read(4, 100), "G1 X10\n") << "fewer at the end";
+		EXPECT_EQ(contents->read(text.size(), 4), "") << "nothing after it";
+	}
+	EXPECT_FALSE(Comm::FileContents::file(path.parent_path() / "missing.g"));
+}
+
 TEST_F(TestSerialLink, NothingElseIsSentWhileAFileIs)
 {
 	FakePort port;
 	open(port);
-	link->writeFile("0:/sys/f.g", std::string(SerialLink::filePieceSize + 1, 'x'), nullptr, [](auto) {});
+	link->writeFile(
+		"0:/sys/f.g", Comm::FileContents::bytes(std::string(SerialLink::filePieceSize + 1, 'x')), nullptr, [](auto) {});
 	std::optional<bool> answered;
 	link->requestModel("heat", "v", [&answered](auto reply) { answered = reply.has_value(); });
 	link->sendGcode("G28");
@@ -349,7 +416,7 @@ TEST_F(TestSerialLink, AnEmergencyStopGoesAtOnceWhileTheChannelIsWaitedFor)
 {
 	FakePort port;
 	open(port);
-	link->writeFile("0:/sys/f.g", "x", nullptr, [](auto) {});
+	link->writeFile("0:/sys/f.g", Comm::FileContents::bytes("x"), nullptr, [](auto) {});
 	link->emergencyStop();
 	EXPECT_EQ(lines(port), (std::vector<std::string>{R"(N0 M409 K"state.status" F"v")", "N1 M112 M999"}))
 		<< "before M559 is sent, nothing can be taken as part of the file";
@@ -359,7 +426,7 @@ TEST_F(TestSerialLink, ASecondChannelTakesTheEmergencyStopWhileAFileIsSent)
 {
 	FakePort port(2);
 	open(port);
-	startWriting(port, "0:/sys/f.g", std::string(SerialLink::filePieceSize + 1, 'x'));
+	startWriting(port, "0:/sys/f.g", Comm::FileContents::bytes(std::string(SerialLink::filePieceSize + 1, 'x')));
 	link->tick(SerialLink::Clock::now());
 	ASSERT_EQ(port.written.size(), 3u);
 	link->emergencyStop();
@@ -374,7 +441,7 @@ TEST_F(TestSerialLink, AFileThePrinterFindsWrongFails)
 {
 	FakePort port;
 	open(port);
-	startWriting(port, "0:/sys/f.g", "abc");
+	startWriting(port, "0:/sys/f.g", Comm::FileContents::bytes("abc"));
 	link->tick(SerialLink::Clock::now());
 	link->receive(0, R"({"seq":2,"resp":"Error: CRC32 checksum doesn't match\n","line":1})");
 	EXPECT_EQ(unasked.size(), 1u) << "the error is shown too";
@@ -389,8 +456,10 @@ TEST_F(TestSerialLink, AFileThePrinterCantOpenFails)
 {
 	FakePort port;
 	open(port);
-	link->writeFile(
-		"0:/nowhere/f.g", "abc", nullptr, [this](std::expected<void, Comm::ReplyError> result) { written = result; });
+	link->writeFile("0:/nowhere/f.g",
+					Comm::FileContents::bytes("abc"),
+					nullptr,
+					[this](std::expected<void, Comm::ReplyError> result) { written = result; });
 	link->sendGcode("M115");
 	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":0})");
 	link->receive(0, R"({"resp":"Error: M559: Can't open file 0:/nowhere/f.g for writing\n","line":1})");
@@ -405,8 +474,10 @@ TEST_F(TestSerialLink, ABusyChannelFailsTheFileBeforeItStarts)
 	FakePort port;
 	port.timeout = std::chrono::milliseconds(100);
 	open(port);
-	link->writeFile(
-		"0:/sys/f.g", "abc", nullptr, [this](std::expected<void, Comm::ReplyError> result) { written = result; });
+	link->writeFile("0:/sys/f.g",
+					Comm::FileContents::bytes("abc"),
+					nullptr,
+					[this](std::expected<void, Comm::ReplyError> result) { written = result; });
 	link->tick(*link->nextDue() + std::chrono::milliseconds(1));
 	ASSERT_TRUE(written);
 	EXPECT_FALSE(*written);
@@ -419,8 +490,10 @@ TEST_F(TestSerialLink, NoReplyToM559MeansConnectingAgain)
 	FakePort port;
 	port.timeout = std::chrono::milliseconds(100);
 	open(port);
-	link->writeFile(
-		"0:/sys/f.g", "abc", nullptr, [this](std::expected<void, Comm::ReplyError> result) { written = result; });
+	link->writeFile("0:/sys/f.g",
+					Comm::FileContents::bytes("abc"),
+					nullptr,
+					[this](std::expected<void, Comm::ReplyError> result) { written = result; });
 	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":0})");
 	link->tick(*link->nextDue() + std::chrono::milliseconds(1));
 	ASSERT_TRUE(written);
@@ -432,7 +505,7 @@ TEST_F(TestSerialLink, AnEmptyFileEndsWithTheEndOfFileMarker)
 {
 	FakePort port;
 	open(port);
-	link->writeFile("0:/sys/empty.g", "", nullptr, [](auto) {});
+	link->writeFile("0:/sys/empty.g", Comm::FileContents::bytes(""), nullptr, [](auto) {});
 	link->receive(0, R"({"key":"state.status","flags":"v","result":"idle","line":0})");
 	EXPECT_EQ(lines(port).back(), R"(N1 M559 P"0:/sys/empty.g")") << "S0 would mean no size given";
 	link->receive(0, R"({"resp":"Writing to file: 0:/sys/empty.g\n","line":1})");
@@ -446,13 +519,16 @@ TEST_F(TestSerialLink, AFileTooLargeOrNamedTooLongIsntSent)
 	FakePort port;
 	port.maxUpload = 64;
 	open(port);
-	link->writeFile("0:/sys/big.g", std::string(65, 'x'), nullptr, [this](auto result) { written = result; });
+	link->writeFile("0:/sys/big.g",
+					Comm::FileContents::bytes(std::string(65, 'x')),
+					nullptr,
+					[this](auto result) { written = result; });
 	ASSERT_TRUE(written);
 	EXPECT_FALSE(*written);
 
 	written.reset();
 	link->writeFile("0:/sys/" + std::string(SerialLink::maxLineLength, 'x'),
-					"x",
+					Comm::FileContents::bytes("x"),
 					nullptr,
 					[this](auto result) { written = result; });
 	ASSERT_TRUE(written);
@@ -465,7 +541,7 @@ TEST_F(TestSerialLink, AFileBeingSentAndWhatWaitsForItAreToldWhenTheLinkCloses)
 {
 	FakePort port;
 	open(port);
-	startWriting(port, "0:/sys/f.g", std::string(SerialLink::filePieceSize + 1, 'x'));
+	startWriting(port, "0:/sys/f.g", Comm::FileContents::bytes(std::string(SerialLink::filePieceSize + 1, 'x')));
 	link->tick(SerialLink::Clock::now());
 	std::optional<bool> listed;
 	link->listFiles("0:/gcodes", 0, [&listed](auto reply) { listed = reply.has_value(); });

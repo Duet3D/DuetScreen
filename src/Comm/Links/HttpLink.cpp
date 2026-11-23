@@ -218,7 +218,7 @@ namespace Comm
 					});
 	}
 
-	void HttpLink::writeFile(std::string_view file, std::string contents, Progress, Handler<void> handler)
+	void HttpLink::writeFile(std::string_view file, FileContents contents, Progress progress, Handler<void> handler)
 	{
 		ZoneScoped;
 		hv::QueryParams query;
@@ -228,7 +228,8 @@ namespace Comm
 					 .query = std::move(query),
 					 .timeout = fileTransferTimeout,
 					 .lane = HttpRequester::Lane::slow,
-					 .body = std::move(contents)},
+					 .upload = std::move(contents),
+					 .progress = std::move(progress)},
 					[handler = firmwareSucceeded(std::move(handler))](const HttpRequester::Response& response)
 					{
 						ZoneScopedN("writeFile_cb");

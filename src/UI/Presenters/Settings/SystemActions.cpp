@@ -75,7 +75,7 @@ namespace UI::SystemActions
 		{
 			Comm::Connection::get().writeFile(
 				fmt::format("{:s}/duetscreen.json", OM::Directories::GetSystemDirectory()),
-				StorageHelper::dump(),
+				Comm::FileContents::bytes(StorageHelper::dump()),
 				[](std::expected<void, Comm::ReplyError> saved)
 				{
 					Model::get().post<EventType::Response>(saved ? ResponseType::SUCCESS : ResponseType::ERROR,

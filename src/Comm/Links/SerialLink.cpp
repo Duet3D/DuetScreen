@@ -7,7 +7,6 @@
 #include "Comm/Lines.h"
 #include "Debug.h"
 #include "Duet3D/General/CRC16.h"
-#include "Duet3D/General/CRC32.h"
 #include "ObjectModel/Tree/Json.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
@@ -191,7 +190,7 @@ namespace Comm
 				});
 	}
 
-	void SerialLink::writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler)
+	void SerialLink::writeFile(std::string_view file, FileContents contents, Progress progress, Handler<void> handler)
 	{
 		ZoneScoped;
 		if (holding())
@@ -229,7 +228,7 @@ namespace Comm
 		const size_t size = contents.size();
 		m_upload = Upload{.stage = Upload::Stage::waitingForChannel,
 						  .file = std::string(file),
-						  .bytes = size == 0 ? std::string(endOfFile) : std::move(contents),
+						  .bytes = size == 0 ? FileContents::bytes(std::string(endOfFile)) : std::move(contents),
 						  .size = size,
 						  .written = 0,
 						  .line = 0,
@@ -262,9 +261,8 @@ namespace Comm
 		}
 		else
 		{
-			CRC32 crc;
-			crc.Update(upload.bytes.data(), upload.bytes.size());
-			command = fmt::format("M559 P{:s} S{:d} C{:d}", Comm::quoted(upload.file), upload.size, crc.Get());
+			command =
+				fmt::format("M559 P{:s} S{:d} C{:d}", Comm::quoted(upload.file), upload.size, upload.bytes.crc32());
 		}
 		upload.line = m_nextLine;
 		requestNow(command, [this](std::expected<OM::Node, ReplyError> reply) { uploadOpened(reply); }, fileChannel);
@@ -300,9 +298,18 @@ namespace Comm
 	{
 		ZoneScoped;
 		Upload& upload = *m_upload;
-		const size_t length = std::min(filePieceSize, upload.bytes.size() - upload.written);
+		const std::expected<std::string, ReplyError> piece = upload.bytes.read(upload.written, filePieceSize);
+		if (!piece)
+		{
+			// The printer takes the next bytes as the file, whatever they are: only connecting again is safe
+			LOG_ERROR("Couldn't read the next piece of {:s}: {:s}", upload.file, piece.error().message);
+			m_failed = true;
+			uploadFailed(piece.error());
+			return;
+		}
+		const size_t length = piece->size();
 		ZoneValue(length);
-		if (!m_port.write(fileChannel, std::string_view(upload.bytes).substr(upload.written, length)))
+		if (!m_port.write(fileChannel, *piece))
 		{
 			LOG_WARN("Couldn't send a piece of {:s}", upload.file);
 			m_failed = true;

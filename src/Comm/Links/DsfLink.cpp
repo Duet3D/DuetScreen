@@ -341,14 +341,15 @@ namespace Comm
 					});
 	}
 
-	void DsfLink::writeFile(std::string_view file, std::string contents, Progress, Handler<void> handler)
+	void DsfLink::writeFile(std::string_view file, FileContents contents, Progress progress, Handler<void> handler)
 	{
 		ZoneScoped;
 		m_http.send({.method = HTTP_PUT,
 					 .path = filePath("/machine/file/", file),
 					 .timeout = fileTransferTimeout,
 					 .lane = HttpRequester::Lane::slow,
-					 .body = std::move(contents)},
+					 .upload = std::move(contents),
+					 .progress = std::move(progress)},
 					httpSucceeded(std::move(handler)));
 	}
 

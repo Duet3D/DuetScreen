@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "Comm/FileContents.h"
 #include "Comm/ModelSync.h"
 #include "Comm/Replies.h"
 #include <chrono>
@@ -25,9 +26,6 @@ namespace Comm
 	/** Receives an answer: `T`, or why there is none */
 	template <typename T>
 	using Handler = std::function<void(std::expected<T, ReplyError>)>;
-
-	/** Told how much of a file has been sent: `sent` of `total` bytes */
-	using Progress = std::function<void(size_t sent, size_t total)>;
 
 	class Link : public ModelLink
 	{
@@ -54,12 +52,11 @@ namespace Comm
 		virtual void readFile(std::string_view file, Handler<std::string> handler) = 0;
 
 		/**
-		 * Write `contents` to `file`, replacing it
-		 * @param progress Told as pieces of it are sent, where the link sends it in pieces (a serial link); perhaps
-		 * never
+		 * Write `contents` to `file`, replacing it. It is sent in pieces, read as they are sent.
+		 * @param progress Told as pieces of it are sent
 		 * @param handler Told once the printer has the file, or why it hasn't
 		 */
-		virtual void writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler) = 0;
+		virtual void writeFile(std::string_view file, FileContents contents, Progress progress, Handler<void> handler) = 0;
 
 		/** Delete `file` */
 		virtual void deleteFile(std::string_view file, Handler<void> handler) = 0;

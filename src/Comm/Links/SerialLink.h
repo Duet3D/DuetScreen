@@ -20,6 +20,7 @@
  *      busy with an earlier command would only take the file later, and take what was sent meanwhile as part of it);
  *   2. `M559 P"<file>" S<size> C<CRC-32>`, whose reply ("Writing to file") says the printer is waiting for the bytes;
  *   3. the bytes, a piece each tick() (so the connection's thread carries on between pieces), progress told after each;
+ *      each piece is read as it is sent, so a file on a USB drive is never held whole;
  *   4. a final request, as for M30: the printer reports a wrong CRC as an error naming M559's line.
  *
  * From the first request until the last byte is written, nothing else is sent: whatever is asked meanwhile is held,
@@ -86,7 +87,7 @@ namespace Comm
 		void fileInfo(std::string_view file, Handler<FileInfo> handler) override;
 		void thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler) override;
 		void readFile(std::string_view file, Handler<std::string> handler) override;
-		void writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler) override;
+		void writeFile(std::string_view file, FileContents contents, Progress progress, Handler<void> handler) override;
 		void deleteFile(std::string_view file, Handler<void> handler) override;
 		void tick(Clock::time_point now) override;
 		std::optional<Clock::time_point> nextDue() const override;
@@ -128,7 +129,7 @@ namespace Comm
 
 			Stage stage = Stage::waitingForChannel; // How far it has got
 			std::string file;						// Where it is written
-			std::string bytes;	   // What is sent after M559: the file, or for an empty file the end-of-file marker
+			FileContents bytes;	   // What is sent after M559: the file, or for an empty file the end-of-file marker
 			size_t size = 0;	   // The file's size
 			size_t written = 0;	   // How much of `bytes` has been written
 			uint32_t line = 0;	   // M559's line number, which an error the printer finds with the file names

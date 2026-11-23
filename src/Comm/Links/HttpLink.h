@@ -62,7 +62,7 @@ namespace Comm
 		void fileInfo(std::string_view file, Handler<FileInfo> handler) override;
 		void thumbnail(std::string_view file, uint32_t offset, Handler<FileChunk> handler) override;
 		void readFile(std::string_view file, Handler<std::string> handler) override;
-		void writeFile(std::string_view file, std::string contents, Progress progress, Handler<void> handler) override;
+		void writeFile(std::string_view file, FileContents contents, Progress progress, Handler<void> handler) override;
 		void deleteFile(std::string_view file, Handler<void> handler) override;
 		void tick(std::chrono::steady_clock::time_point) override {}
 		std::optional<std::chrono::steady_clock::time_point> nextDue() const override { return std::nullopt; }

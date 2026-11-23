@@ -337,7 +337,7 @@ namespace Comm
 			{ link.readFile(file, std::move(answer)); });
 	}
 
-	void Connection::writeFile(std::string file, std::string contents, Handler<void> handler)
+	void Connection::writeFile(std::string file, FileContents contents, Handler<void> handler)
 	{
 		ZoneScoped;
 		if (!handler)

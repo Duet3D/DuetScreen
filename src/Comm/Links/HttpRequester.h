@@ -9,6 +9,10 @@
  *   - slow:   one at a time, in a lane of their own (files coming or going, DSF's G-code, which answers only once it
  *             has run), so they never hold up the normal lane, and the printer is still heard from meanwhile
  *
+ * A file written is sent as it is read, a piece at a time, with progress told after each: libhv's asynchronous client
+ * takes a body only whole, so it goes from a thread of its own, through a client of its own. close() stops it after
+ * the piece being sent.
+ *
  * Answers arrive on libhv's thread and are posted to the connection's thread before anything is done with them. Every
  * request's handler is called once: with the response, or with why there is none (no response, or the requester was
  * closed). After close(), or once the requester has gone, nothing more is sent or answered.
@@ -16,8 +20,10 @@
 
 #pragma once
 
+#include "Comm/FileContents.h"
 #include "Comm/Replies.h"
 #include "ObjectModel/Tree/Node.h"
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <deque>
@@ -26,6 +32,7 @@
 #include <hv/HttpClient.h>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace Comm
@@ -62,6 +69,8 @@ namespace Comm
 			uint16_t timeout = 5;		   // How long its response may take, seconds
 			Lane lane = Lane::normal;	   // Which lane it goes in
 			std::string body = {};		   // What is sent with it
+			std::optional<FileContents> upload = {}; // Sent instead of `body`, a piece at a time (a file written)
+			Progress progress = {};					 // Told as the pieces of `upload` are sent
 		};
 
 		/**
@@ -115,9 +124,12 @@ namespace Comm
 		/** A request with its handler, waiting its turn or in flight */
 		struct Pending
 		{
-			HttpRequestPtr request;	 // The request
-			Lane lane;				 // Its lane
-			ResponseHandler handler; // Given its response
+			HttpRequestPtr request;					 // The request
+			Lane lane;								 // Its lane
+			ResponseHandler handler;				 // Given its response
+			std::optional<FileContents> upload;		 // Its body, sent a piece at a time, if it is a file written
+			Progress progress;						 // Told as the pieces of `upload` are sent
+			std::shared_ptr<std::atomic_bool> stop;	 // Set to stop sending `upload` (close())
 		};
 
 		/** The request `request` describes, with the headers and the URL */
@@ -132,8 +144,11 @@ namespace Comm
 		/** Send `pending` now */
 		void dispatch(Pending pending);
 
-		/** The response to the request in flight as `id` arrived (or didn't) */
-		void finished(uint64_t id, const HttpResponsePtr& response);
+		/** Send `pending`, in flight as `id`, from a thread of its own, its upload a piece at a time */
+		void stream(uint64_t id, const Pending& pending);
+
+		/** The response to the request in flight as `id` arrived, or why it didn't */
+		void finished(uint64_t id, const Response& response);
 
 		std::string m_host;								   // The printer's address
 		Post m_post;									   // Runs a task on the connection's thread

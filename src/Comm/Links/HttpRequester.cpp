@@ -9,6 +9,7 @@
 #include "tracy/Tracy.hpp"
 #include <fmt/format.h>
 #include <hv/requests.h>
+#include <thread>
 #include <vector>
 
 namespace Comm
@@ -20,6 +21,15 @@ namespace Comm
 		{
 			return ReplyError{.message = "the connection closed"};
 		}
+
+		/** Why a request has no response, for want of one */
+		ReplyError noResponse()
+		{
+			return ReplyError{.message = "no response from the printer"};
+		}
+
+		/** How much of a file is read and sent at a time */
+		constexpr size_t uploadPieceSize = 32 * 1024;
 	} // namespace
 
 	HttpRequester::HttpRequester(std::string host, Post post, size_t maxNormal)
@@ -45,7 +55,12 @@ namespace Comm
 			handler(std::unexpected(closedError()));
 			return;
 		}
-		Pending pending{.request = build(request), .lane = request.lane, .handler = std::move(handler)};
+		Pending pending{.request = build(request),
+						.lane = request.lane,
+						.handler = std::move(handler),
+						.upload = std::move(request.upload),
+						.progress = std::move(request.progress),
+						.stop = std::make_shared<std::atomic_bool>(false)};
 		if (request.lane == Lane::urgent)
 		{
 			dispatch(std::move(pending)); // ahead of everything, whatever is in flight
@@ -87,6 +102,7 @@ namespace Comm
 		}
 		for (auto& [id, pending] : m_inFlight)
 		{
+			pending.stop->store(true);						// a file being sent stops after the piece being sent
 			handlers.push_back(std::move(pending.handler)); // its answer, if one comes, finds nothing to give it to
 		}
 		m_queue.clear();
@@ -177,8 +193,13 @@ namespace Comm
 		const uint64_t id = m_nextId++;
 		const HttpRequestPtr request = pending.request;
 		LOG_DBG("HTTP {:s} {:s}", http_method_str(request->method), request->path);
-		m_inFlight.emplace(id, std::move(pending));
+		const auto& [it, added] = m_inFlight.emplace(id, std::move(pending));
 		TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight.size()));
+		if (it->second.upload)
+		{
+			stream(id, it->second);
+			return;
+		}
 		m_client.sendAsync(
 			request,
 			[this, id, alive = std::weak_ptr<bool>(m_alive), post = m_post](const HttpResponsePtr& response)
@@ -190,13 +211,89 @@ namespace Comm
 						ZoneScopedN("httpResponse_cb");
 						if (alive.lock())
 						{
-							finished(id, response);
+							finished(id, response ? Response(response) : std::unexpected(noResponse()));
 						}
 					});
 			});
 	}
 
-	void HttpRequester::finished(uint64_t id, const HttpResponsePtr& response)
+	void HttpRequester::stream(uint64_t id, const Pending& pending)
+	{
+		ZoneScoped;
+		const HttpRequestPtr request = pending.request;
+		const FileContents contents = *pending.upload;
+		request->SetHeader("Content-Length", std::to_string(contents.size()));
+		// Only what is posted to the connection's thread touches the requester, and only while it is still here
+		std::thread(
+			[this,
+			 id,
+			 request,
+			 contents,
+			 progress = pending.progress,
+			 stop = pending.stop,
+			 alive = std::weak_ptr<bool>(m_alive),
+			 post = m_post]
+			{
+				tracy::SetThreadName("HTTP upload");
+				const auto answer = [&](Response response)
+				{
+					post(
+						[this, id, alive, response = std::move(response)]
+						{
+							if (alive.lock())
+							{
+								finished(id, response);
+							}
+						});
+				};
+
+				hv::HttpClient client;
+				if (client.sendHeader(request.get()) != 0)
+				{
+					answer(std::unexpected(noResponse()));
+					return;
+				}
+				size_t sent = 0;
+				while (sent < contents.size())
+				{
+					if (stop->load())
+					{
+						return; // given up: its handler has been told
+					}
+					const std::expected<std::string, ReplyError> piece = contents.read(sent, uploadPieceSize);
+					if (!piece)
+					{
+						answer(std::unexpected(piece.error()));
+						return;
+					}
+					if (client.sendData(piece->data(), static_cast<int>(piece->size())) !=
+						static_cast<int>(piece->size()))
+					{
+						answer(std::unexpected(ReplyError{.message = "the file couldn't be sent"}));
+						return;
+					}
+					sent += piece->size();
+					post(
+						[progress, alive, stop, sent, total = contents.size()]
+						{
+							if (alive.lock() && !stop->load() && progress)
+							{
+								progress(sent, total);
+							}
+						});
+				}
+				auto response = std::make_shared<HttpResponse>();
+				if (client.recvResponse(response.get()) != 0)
+				{
+					answer(std::unexpected(noResponse()));
+					return;
+				}
+				answer(response);
+			})
+			.detach();
+	}
+
+	void HttpRequester::finished(uint64_t id, const Response& response)
 	{
 		ZoneScoped;
 		const auto it = m_inFlight.find(id);
@@ -210,12 +307,12 @@ namespace Comm
 		TracyPlot("HTTP requests in flight", static_cast<int64_t>(m_inFlight.size()));
 		if (!response)
 		{
-			handler(std::unexpected(ReplyError{.message = "no response from the printer"}));
+			handler(response);
 		}
 		else
 		{
 			m_lastHeard = std::chrono::steady_clock::now();
-			if (response->status_code == HTTP_STATUS_UNAUTHORIZED)
+			if ((*response)->status_code == HTTP_STATUS_UNAUTHORIZED)
 			{
 				LOG_WARN("The printer no longer knows the session");
 				m_unauthorised = true;
