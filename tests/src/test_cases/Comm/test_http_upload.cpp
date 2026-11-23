@@ -6,6 +6,7 @@
  */
 
 #include "Comm/Links/HttpRequester.h"
+#include <arpa/inet.h>
 #include <chrono>
 #include <deque>
 #include <fmt/format.h>
@@ -13,20 +14,38 @@
 #include <gtest/gtest.h>
 #include <hv/HttpServer.h>
 #include <mutex>
+#include <netinet/in.h>
 #include <optional>
 #include <string>
+#include <sys/socket.h>
 #include <thread>
 #include <unistd.h>
 #include <vector>
 
 namespace
 {
+	/** A local TCP port nothing listens on now, as the system picks one */
+	int freePort()
+	{
+		const int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+		sockaddr_in address{};
+		address.sin_family = AF_INET;
+		address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+		address.sin_port = 0;
+		::bind(fd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+		socklen_t length = sizeof(address);
+		::getsockname(fd, reinterpret_cast<sockaddr*>(&address), &length);
+		::close(fd);
+		return ntohs(address.sin_port);
+	}
+
 	/** A printer that takes uploads, keeping what it was sent */
 	class UploadServer
 	{
 	  public:
-		/** Listen on a port of this test process's own */
+		/** Listen on a free port */
 		UploadServer()
+			: m_port(freePort())
 		{
 			m_service.POST("/rr_upload",
 						   [this](HttpRequest* request, HttpResponse* response)
@@ -37,7 +56,7 @@ namespace
 							   return response->String(R"({"err":0})");
 						   });
 			m_server.registerHttpService(&m_service);
-			m_server.setPort(port());
+			m_server.setPort(m_port);
 			m_server.setThreadNum(1);
 			m_server.start();
 		}
@@ -46,7 +65,7 @@ namespace
 		~UploadServer() { m_server.stop(); }
 
 		/** The port it listens on */
-		static int port() { return 20000 + static_cast<int>(getpid() % 10000); }
+		int port() const { return m_port; }
 
 		/** What the last upload sent */
 		std::string received()
@@ -63,6 +82,7 @@ namespace
 		}
 
 	  private:
+		int m_port;					 // The port it listens on
 		hv::HttpService m_service;	 // Answers /rr_upload
 		hv::HttpServer m_server;	 // Serves it
 		std::mutex m_mutex;			 // Guards what was received: the server answers on a thread of its own
@@ -111,7 +131,7 @@ TEST(TestHttpUpload, AFileIsSentInPiecesWithItsProgressTold)
 	UploadServer server;
 	Tasks tasks;
 	Comm::HttpRequester requester(
-		fmt::format("127.0.0.1:{:d}", UploadServer::port()),
+		fmt::format("127.0.0.1:{:d}", server.port()),
 		[&tasks](std::function<void()> task) { tasks.post(std::move(task)); },
 		2);
 
@@ -148,7 +168,7 @@ TEST(TestHttpUpload, AFileThatCantBeSentFails)
 	Tasks tasks;
 	// Nothing listens there
 	Comm::HttpRequester requester(
-		fmt::format("127.0.0.1:{:d}", UploadServer::port() + 1),
+		fmt::format("127.0.0.1:{:d}", freePort()),
 		[&tasks](std::function<void()> task) { tasks.post(std::move(task)); },
 		2);
 	std::optional<Comm::HttpRequester::Response> response;
@@ -169,7 +189,7 @@ TEST(TestHttpUpload, AFileCancelledIsNotSent)
 	UploadServer server;
 	Tasks tasks;
 	Comm::HttpRequester requester(
-		fmt::format("127.0.0.1:{:d}", UploadServer::port()),
+		fmt::format("127.0.0.1:{:d}", server.port()),
 		[&tasks](std::function<void()> task) { tasks.post(std::move(task)); },
 		2);
 	const Comm::FileContents contents = Comm::FileContents::bytes(std::string(100 * 1000, 'x'));
